@@ -1,30 +1,30 @@
-package banhangrong.su25.model;
+package banhangrong.su25.Entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "shopping_cart")
-public class ShoppingCart {
+@Table(name = "orders")
+public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_id")
-    private Long cartId;
+    @Column(name = "order_id")
+    private Long orderId;
     @Column(name = "user_id")
     private Long userId;
-    @Column(name = "product_id")
-    private Long productId;
-    private Integer quantity;
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Long getCartId() {
-        return cartId;
+    public Long getOrderId() {
+        return orderId;
     }
-    public void setCartId(Long cartId) {
-        this.cartId = cartId;
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
     public Long getUserId() {
         return userId;
@@ -32,17 +32,11 @@ public class ShoppingCart {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-    public Long getProductId() {
-        return productId;
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
     }
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-    public Integer getQuantity() {
-        return quantity;
-    }
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;
