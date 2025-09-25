@@ -1,6 +1,6 @@
-package banhangrong.su25.repository;
+package banhangrong.su25.Repository;
 
-import banhangrong.su25.model.Users;
+import banhangrong.su25.Entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UsersRepository extends JpaRepository<Users, Long> {
