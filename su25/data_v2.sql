@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS WAP;
-USE WAP;
+CREATE DATABASE IF NOT EXISTS wap;
+USE wap;
 
 -- Users
 CREATE TABLE IF NOT EXISTS users (
@@ -193,3 +193,110 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_payments_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =============================
+-- SAMPLE DATA (safe to re-run)
+-- =============================
+
+-- Users (3 users: seller, alice, bob)
+INSERT IGNORE INTO users (username, email, password, user_type, phone_number, gender, balance, is_email_verified, is_active, last_login)
+VALUES
+    ('seller', 'seller@example.com', '$2a$10$hashseller', 'SELLER', '0900000000', 'other', 1000.00, TRUE, TRUE, NOW()),
+    ('alice', 'alice@example.com', '$2a$10$hashalice', 'CUSTOMER', '0911111111', 'female', 50.00, TRUE, TRUE, NOW()),
+    ('bob', 'bob@example.com', '$2a$10$hashbob', 'CUSTOMER', '0922222222', 'male', 25.00, FALSE, TRUE, NOW());
+
+-- Social auth for seller and alice
+INSERT IGNORE INTO user_social_auth (user_id, provider, provider_user_id)
+VALUES
+    ((SELECT user_id FROM users WHERE username='seller'), 'google', 'google-uid-seller'),
+    ((SELECT user_id FROM users WHERE username='alice'), 'facebook', 'fb-uid-alice');
+
+-- Password reset tokens (unused)
+INSERT IGNORE INTO password_reset_tokens (user_id, token, expires_at, is_used)
+VALUES
+    ((SELECT user_id FROM users WHERE username='bob'), 'reset-bob-001', DATE_ADD(NOW(), INTERVAL 1 DAY), FALSE);
+
+-- Email verification tokens (unused)
+INSERT IGNORE INTO email_verification_tokens (user_id, token, expires_at, is_used)
+VALUES
+    ((SELECT user_id FROM users WHERE username='bob'), 'verify-bob-001', DATE_ADD(NOW(), INTERVAL 1 DAY), FALSE);
+
+-- Categories
+INSERT IGNORE INTO categories (name, description)
+VALUES
+    ('E-Books', 'Sách điện tử nhiều chủ đề'),
+    ('Music', 'Gói âm nhạc, loop, sample'),
+    ('Software', 'Phần mềm, tiện ích, tool');
+
+-- Products by seller
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, is_active)
+VALUES
+    ((SELECT user_id FROM users WHERE username='seller'), 'E-Book X', 'Cuốn sách hướng dẫn nâng cao', 19.99, 14.99, 100, 'https://cdn.example.com/ebooks/x.pdf', 10, 4.5, TRUE),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Music Pack Vol.1', 'Bộ sample âm nhạc đa thể loại', 9.99, NULL, 200, 'https://cdn.example.com/music/v1.zip', 25, 4.2, TRUE),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Software Pro', 'Tiện ích chuyên nghiệp cho công việc', 49.00, 39.00, 50, 'https://cdn.example.com/software/pro.exe', 5, 4.8, TRUE);
+
+-- Map Categories <-> Products
+INSERT IGNORE INTO categories_products (category_id, product_id)
+VALUES
+    ((SELECT category_id FROM categories WHERE name='E-Books'), (SELECT product_id FROM products WHERE name='E-Book X')),
+    ((SELECT category_id FROM categories WHERE name='Music'), (SELECT product_id FROM products WHERE name='Music Pack Vol.1')),
+    ((SELECT category_id FROM categories WHERE name='Software'), (SELECT product_id FROM products WHERE name='Software Pro'));
+
+-- Product Images
+INSERT IGNORE INTO product_images (product_id, image_url, is_primary)
+VALUES
+    ((SELECT product_id FROM products WHERE name='E-Book X'), 'https://cdn.example.com/images/ebookx-cover.jpg', TRUE),
+    ((SELECT product_id FROM products WHERE name='Music Pack Vol.1'), 'https://cdn.example.com/images/musicpack-v1.jpg', TRUE),
+    ((SELECT product_id FROM products WHERE name='Software Pro'), 'https://cdn.example.com/images/software-pro.jpg', TRUE);
+
+-- Shopping Cart (alice, bob)
+INSERT IGNORE INTO shopping_cart (user_id, product_id, quantity)
+VALUES
+    ((SELECT user_id FROM users WHERE username='alice'), (SELECT product_id FROM products WHERE name='Software Pro'), 1),
+    ((SELECT user_id FROM users WHERE username='bob'), (SELECT product_id FROM products WHERE name='E-Book X'), 1),
+    ((SELECT user_id FROM users WHERE username='bob'), (SELECT product_id FROM products WHERE name='Music Pack Vol.1'), 2);
+
+-- Orders (bob buys 3 items total)
+INSERT IGNORE INTO orders (user_id, total_amount)
+VALUES
+    ((SELECT user_id FROM users WHERE username='bob'), 39.97);
+
+-- Order Items for bob's latest order
+INSERT IGNORE INTO order_items (order_id, product_id, quantity, price_at_time)
+VALUES
+    ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='bob' ORDER BY o.order_id DESC LIMIT 1), (SELECT product_id FROM products WHERE name='E-Book X'), 1, 19.99),
+    ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='bob' ORDER BY o.order_id DESC LIMIT 1), (SELECT product_id FROM products WHERE name='Music Pack Vol.1'), 2, 9.99);
+
+-- Product Reviews (alice + bob)
+INSERT IGNORE INTO product_reviews (product_id, user_id, rating, comment)
+VALUES
+    ((SELECT product_id FROM products WHERE name='E-Book X'), (SELECT user_id FROM users WHERE username='alice'), 5, 'Rất hữu ích!'),
+    ((SELECT product_id FROM products WHERE name='Music Pack Vol.1'), (SELECT user_id FROM users WHERE username='bob'), 4, 'Âm thanh ổn, giá tốt');
+
+-- Product Licenses (license for E-Book X order item)
+INSERT IGNORE INTO product_licenses (order_item_id, user_id, license_key, is_active, activation_date)
+VALUES
+    (
+        (SELECT oi.order_item_id
+         FROM order_items oi
+         JOIN orders o ON oi.order_id = o.order_id
+         JOIN users u ON o.user_id = u.user_id
+         JOIN products p ON oi.product_id = p.product_id
+         WHERE u.username='bob' AND p.name='E-Book X'
+         ORDER BY oi.order_item_id DESC LIMIT 1),
+        (SELECT user_id FROM users WHERE username='bob'),
+        'LIC-EBKX-0001', TRUE, NOW()
+    );
+
+-- User Sessions
+INSERT IGNORE INTO user_sessions (user_id, device_identifier, last_activity, is_active)
+VALUES
+    ((SELECT user_id FROM users WHERE username='seller'), 'seller-device-01', NOW(), TRUE),
+    ((SELECT user_id FROM users WHERE username='alice'), 'alice-phone-01', NOW(), TRUE),
+    ((SELECT user_id FROM users WHERE username='bob'), 'bob-laptop-01', NOW(), TRUE);
+
+-- Payment Transactions for bob's order
+INSERT IGNORE INTO payment_transactions (order_id, payment_provider, provider_transaction_id, amount, status, payment_data)
+VALUES
+    ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='bob' ORDER BY o.order_id DESC LIMIT 1),
+     'VNPay', 'VNP-2025-0001', 39.97, 'PAID', JSON_OBJECT('method','card','card_last4','4242'));
