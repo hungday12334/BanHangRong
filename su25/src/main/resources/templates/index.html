@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Bán Hàng Rong - Danh sách Users mẫu</title>
+	<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+	<div class="container">
+		<h1>Danh sách Users</h1>
+		<div class="search-box">
+			<input type="text" id="searchInput" placeholder="Tìm kiếm username/email...">
+		</div>
+		<table id="usersTable">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Username</th>
+					<th>Email</th>
+					<th>Phone</th>
+					<th>Gender</th>
+				</tr>
+			</thead>
+			<tbody id="usersBody">
+				<tr th:each="user : ${userList}">
+					<td th:text="${user.userId}"></td>
+					<td th:text="${user.username}"></td>
+					<td th:text="${user.email}"></td>
+					<td th:text="${user.phoneNumber}"></td>
+					<td th:text="${user.gender}"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<script src="/js/home.js"></script>
+</body>
+</html>
