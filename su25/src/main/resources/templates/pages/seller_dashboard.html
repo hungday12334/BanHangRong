@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Bảng điều khiển người bán</title>
+	<link rel="stylesheet" href="/css/seller-dashboard.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<meta name="theme-color" content="#0b1020" />
+	<style>
+		/* Fallback if static file not served in dev */
+	</style>
+</head>
+<body>
+<div class="page">
+	<aside class="sidebar">
+		<div class="brand">Bán Hàng Rong</div>
+		<nav class="menu">
+				<a href="/" class="item" title="Trang chủ" aria-label="Trang chủ"><i class="ti ti-home"></i><span class="lbl">Trang chủ</span></a>
+				<a href="/seller/dashboard" class="item active" title="Quản lý" aria-label="Quản lý"><i class="ti ti-dashboard"></i><span class="lbl">Quản lý</span></a>
+				<a href="#profile" class="item" title="Trang cá nhân" aria-label="Trang cá nhân"><i class="ti ti-user"></i><span class="lbl">Trang cá nhân</span></a>
+				<a href="#orders" class="item" title="Quản lý đơn hàng" aria-label="Quản lý đơn hàng"><i class="ti ti-receipt"></i><span class="lbl">Quản lý đơn hàng</span></a>
+				<a href="#keys" class="item" title="Quản lý key" aria-label="Quản lý key"><i class="ti ti-key"></i><span class="lbl">Quản lý key</span></a>
+				<a href="#profile-settings" class="item" title="Quản lý profile" aria-label="Quản lý profile"><i class="ti ti-settings"></i><span class="lbl">Quản lý profile</span></a>
+		</nav>
+		<div class="sidebar-footer">
+			<a href="/logout" class="logout-btn" title="Đăng xuất" aria-label="Đăng xuất"><i class="ti ti-logout"></i><span>Đăng xuất</span></a>
+		</div>
+	</aside>
+
+	<main>
+<div class="container">
+	<div class="title">
+		<span class="accent"></span>
+		<h1>Seller Dashboard</h1>
+		<span class="chip">Seller ID: <b th:text="${sellerId}"></b></span>
+	</div>
+
+	<div class="grid kpi">
+		<div class="card">
+			<div class="label">Tổng doanh thu</div>
+			<div class="value">$<span data-count th:attr="data-count=${totalRevenue}" th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
+			<div class="delta pill good">Hôm nay: $<span th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+			<div class="orb one"></div><div class="orb two"></div>
+		</div>
+		<div class="card">
+			<div class="label">Đơn hàng</div>
+			<div class="value"><span data-count th:attr="data-count=${totalOrders}" th:text="${totalOrders}">0</span></div>
+			<div class="delta badge">Tháng này: $<span th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+		</div>
+		<div class="card">
+			<div class="label">Sản phẩm đang bán</div>
+			<div class="value"><span data-count th:attr="data-count=${activeProducts}" th:text="${activeProducts}">0</span></div>
+			<div class="delta chip">Đánh giá TB: <b th:text="${#numbers.formatDecimal(avgRating,1,'COMMA',1,'POINT')}">0</b>/5</div>
+		</div>
+		<div class="card">
+			<div class="label">Số key đã bán</div>
+			<div class="value"><span data-count th:attr="data-count=${totalUnits}" th:text="${totalUnits}">0</span></div>
+			<div class="progress"><span th:style="'width:' + (${totalUnits} % 100) + '%' "></span></div>
+		</div>
+	</div>
+
+	<div class="grid two" style="margin-top:16px">
+		<div class="card">
+			<div class="header">
+				<div style="display:flex;align-items:center;gap:10px">
+					<span class="avatar"></span>
+					<div>
+						<div style="font-weight:700">Doanh thu 15 ngày gần nhất</div>
+						<div class="footer-note">Theo ngày (USD)</div>
+					</div>
+				</div>
+				<div class="chip hide-md">Dải: 15 ngày</div>
+			</div>
+			<div class="body">
+				<canvas id="revenueChart" class="sparkline" th:attr="data-labels=${dailyRevenueLabels},data-data=${dailyRevenueData}"></canvas>
+			</div>
+		</div>
+
+		<div class="card">
+			<div class="header">
+				<div style="font-weight:700">Sắp hết hàng</div>
+				<div class="chip" th:text="${#lists.size(lowStock)} + ' sản phẩm'">0 sản phẩm</div>
+			</div>
+			<div class="body">
+				<table class="table">
+					<thead>
+					<tr>
+						<th>Sản phẩm</th>
+						<th class="hide-md">Còn lại</th>
+						<th>Trạng thái</th>
+					</tr>
+					</thead>
+					<tbody id="tbLowStock">
+					<tr th:each="p: ${lowStock}">
+						<td th:text="${p.name}">Tên sản phẩm</td>
+						<td class="hide-md" th:text="${p.quantity}">3</td>
+						<td>
+							<span th:classappend="${p.quantity} &lt;= 2 ? 'pill warn' : 'pill good'" th:text="${p.quantity} &lt;= 2 ? 'Cần nhập' : 'Ổn'">Ổn</span>
+						</td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(lowStock)}">
+						<td colspan="3" class="footer-note">Không có sản phẩm sắp hết hàng.</td>
+					</tr>
+					</tbody>
+				</table>
+				<div class="pagination" id="pgLowStock"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="grid two" style="margin-top:16px">
+		<div class="card">
+			<div class="header"><div style="font-weight:700">Top sản phẩm</div></div>
+			<div class="body">
+				<table class="table">
+					<thead>
+					<tr>
+						<th>#</th>
+						<th>Tên</th>
+						<th>Đã bán</th>
+						<th class="hide-md">Đánh giá</th>
+						<th>Doanh thu</th>
+					</tr>
+					</thead>
+					<tbody id="tbTopProducts">
+					<tr th:each="p, iStat : ${topProducts}">
+						<td th:text="${iStat.index + 1}">1</td>
+						<td th:text="${p.name}">Tên</td>
+						<td th:text="${p.units}">0</td>
+						<td class="hide-md" th:text="${#numbers.formatDecimal(p.rating,1,'COMMA',1,'POINT')}">0</td>
+						<td>$<span th:text="${#numbers.formatDecimal(p.revenue,1,'COMMA',2,'POINT')}">0</span></td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(topProducts)}">
+						<td colspan="5" class="footer-note">Chưa có sản phẩm nào được bán.</td>
+					</tr>
+					</tbody>
+				</table>
+				<div class="pagination" id="pgTopProducts"></div>
+			</div>
+		</div>
+
+		<div class="card">
+			<div class="header"><div style="font-weight:700">Đơn hàng gần đây</div></div>
+			<div class="body">
+				<table class="table">
+					<thead>
+					<tr>
+						<th>Mã</th>
+						<th>Ngày</th>
+						<th class="hide-md">Số lượng</th>
+						<th>Thành tiền</th>
+					</tr>
+					</thead>
+					<tbody id="tbRecentOrders">
+					<tr th:each="o: ${recentOrders}">
+						<td th:text="${o.orderId}">1001</td>
+						<td th:text="${o.createdAtStr}">27/09/2025</td>
+						<td class="hide-md" th:text="${o.items}">0</td>
+						<td>$<span th:text="${#numbers.formatDecimal(o.amount,1,'COMMA',2,'POINT')}">0</span></td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(recentOrders)}">
+						<td colspan="4" class="footer-note">Chưa có đơn hàng.</td>
+					</tr>
+					</tbody>
+				</table>
+				<div class="pagination" id="pgRecentOrders"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="footer-note" style="margin-top:16px">
+		Mẹo: Nhấn Ctrl+D để bookmark trang dashboard. Cần đăng nhập người bán để lấy sellerId tự động.
+	</div>
+	</div>
+	</main>
+</div>
+
+<script src="/js/seller-dashboard.js"></script>
+</body>
+</html>

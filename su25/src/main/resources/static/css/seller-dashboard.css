@@ -1,0 +1,215 @@
+:root{--bg:#0b1020;--panel:#111831;--muted:#7b86a6;--accent:#6c8cff;--accent-2:#22d3ee;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#1a2350 0%,transparent 60%),linear-gradient(180deg,#090e1a,#0b1020);color:#e6e9f4;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6}
+.container{max-width:1200px;margin:36px auto;padding:0 20px}
+.grid{display:grid;gap:20px}
+.grid.kpi{grid-template-columns:repeat(4,minmax(0,1fr))}
+/* Prevent KPI cards from stretching to tall equal heights */
+.grid.kpi{align-items:start}
+.grid.kpi > .card{height:auto}
+.grid.kpi > .card{height:auto;align-self:start}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:16px;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.card .header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
+.card .body{padding:20px}
+.kpi{counter-reset:stat}
+
+.kpi .card{
+	padding:14px;display:grid;grid-template-rows:auto 1fr auto;row-gap:8px;
+	/* keep layering context for pseudo-cloud visuals; hide overflow so clouds don't enlarge layout */
+	position:relative;overflow:hidden;
+	transition:transform .28s cubic-bezier(.2,.9,.3,1),box-shadow .28s ease,filter .28s ease;
+	/* subtle inner shadows for depth */
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.25), 0 10px 30px rgba(0,0,0,.28);
+	/* subtle idle bobbing to give a "floating cloud" feel */
+	animation: kpi-float 7s ease-in-out infinite;
+}
+
+/* Cloud-like blurred glow behind KPI cards */
+.kpi .card::before,
+.kpi .card::after{
+	content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;z-index:0;transition:opacity .28s ease,transform .45s ease,filter .28s ease;
+}
+.kpi .card::before{
+	/* layered soft radial glows packed inside the card */
+	left:-6%;right:-6%;top:-12%;bottom:-4%;
+	background:
+		radial-gradient(60% 40% at 28% 22%, rgba(108,140,255,0.14), rgba(34,211,238,0.04) 36%, transparent 55%),
+		radial-gradient(42% 32% at 72% 70%, rgba(255,255,255,0.06), transparent 58%);
+	filter:blur(16px);opacity:.44;transform:translateY(0) scale(1);
+	animation: kpi-cloud 10s ease-in-out infinite;
+}
+.kpi .card::after{
+	/* sheen sweep overlay on hover */
+	left:-2px;right:-2px;top:-2px;bottom:-2px;
+	background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.08) 45%, rgba(255,255,255,0) 60%);
+	transform: translateX(-130%);
+	transition: transform .6s ease, opacity .3s ease;
+	opacity: 0; mix-blend-mode: screen;
+}
+
+/* Ensure card content sits above the decorative clouds */
+.kpi .card > *{position:relative;z-index:1}
+
+/* Hover: lift, enlarge and intensify cloud */
+.kpi .card:hover{transform:translateY(-10px) scale(1.02) rotate(-0.25deg);box-shadow:0 36px 70px rgba(0,0,0,.52), 0 0 0 1px rgba(108,140,255,.35), 0 0 26px rgba(108,140,255,.22), 0 0 56px rgba(34,211,238,.14);filter:brightness(1.05)}
+.kpi .card:hover::before{opacity:.72;transform:translateY(-6px) scale(1.03)}
+.kpi .card:hover::after{opacity:.85;transform:translateX(130%)}
+/* Slight numeric glow on hover for emphasis */
+.kpi .card:hover .value{transform:translateY(-1px) scale(1.02);text-shadow:0 0 12px rgba(108,140,255,.35)}
+.kpi .value{transition:transform .25s ease,text-shadow .25s ease}
+
+/* Idle float animation - very subtle vertical movement */
+@keyframes kpi-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes kpi-cloud{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.01)}}
+
+/* Make each KPI card slightly unique: different cloud positions, hue, timing */
+.grid.kpi > .card:nth-child(1)::before{animation-duration: 9s; animation-delay: .1s; filter: blur(16px) hue-rotate(0deg)}
+.grid.kpi > .card:nth-child(2)::before{animation-duration: 11s; animation-delay: .5s; filter: blur(15px) hue-rotate(10deg); left:-4%; right:-6%; top:-10%; bottom:-6%; background:
+	radial-gradient(62% 42% at 24% 28%, rgba(108,140,255,0.14), rgba(34,211,238,0.04) 36%, transparent 55%),
+	radial-gradient(40% 30% at 68% 66%, rgba(255,255,255,0.06), transparent 58%);
+}
+.grid.kpi > .card:nth-child(3)::before{animation-duration: 10s; animation-delay: .8s; filter: blur(17px) hue-rotate(-8deg); left:-7%; right:-5%; top:-14%; bottom:-3%; background:
+	radial-gradient(58% 38% at 36% 18%, rgba(108,140,255,0.14), rgba(34,211,238,0.04) 36%, transparent 55%),
+	radial-gradient(38% 28% at 74% 74%, rgba(255,255,255,0.06), transparent 58%);
+}
+.grid.kpi > .card:nth-child(4)::before{animation-duration: 12s; animation-delay: .3s; filter: blur(15px) hue-rotate(18deg); left:-5%; right:-7%; top:-9%; bottom:-7%; background:
+	radial-gradient(60% 40% at 30% 24%, rgba(108,140,255,0.14), rgba(34,211,238,0.04) 36%, transparent 55%),
+	radial-gradient(44% 34% at 70% 72%, rgba(255,255,255,0.06), transparent 58%);
+}
+
+/* Compact, fixed KPI heights so tiles don't look too tall */
+@media(min-width:1000px){
+	.grid.kpi .card{height:160px}
+}
+@media(max-width:999px){
+	.grid.kpi .card{height:125px}
+}
+
+/* Accessibility: reduce motion for users who prefer fewer animations */
+@media (prefers-reduced-motion: reduce){
+	.kpi .card{animation:none !important}
+	.kpi .card::before,.kpi .card::after{animation:none !important}
+	.kpi .card, .kpi .card:hover{transform:none !important}
+}
+.kpi .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi .label::after{content:"";display:block;width:22px;height:2px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));opacity:.25;margin-top:6px}
+.kpi .value{font-size:24px;font-weight:700}
+.kpi .value{font-size:24px;font-weight:700;line-height:1.1}
+.kpi .delta{font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:13px;color:var(--muted)}
+.pill{padding:3px 10px;border-radius:999px;font-size:13px}
+.pill.good{background:color-mix(in srgb,var(--good) 15%, transparent);color:#8ef0b8;border:1px solid color-mix(in srgb,var(--good) 50%, transparent)}
+.pill.warn{background:color-mix(in srgb,var(--warn) 15%, transparent);color:#ffd18b;border:1px solid color-mix(in srgb,var(--warn) 50%, transparent)}
+.table{width:100%;border-collapse:separate;border-spacing:0 10px}
+.table th{color:var(--muted);font-weight:600;text-align:left;font-size:14px;padding:0 12px}
+.table td{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);padding:14px 12px;font-size:15px}
+.table tr td:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
+.table tr td:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+.title{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.title h1{margin:0;font-size:26px}
+.title .accent{height:12px;width:12px;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--accent),var(--accent-2))}
+.sparkline{height:100%;min-height:200px}
+.footer-note{color:var(--muted);font-size:14px;margin-top:6px}
+.badge{font-size:13px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:inline-block}
+.progress{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+@media(max-width:1000px){.grid.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.two{grid-template-columns:1fr}.hide-md{display:none}}
+@media(min-width:1000px){
+	/* Use fixed column widths so the two cards keep stable widths regardless of content */
+	/* Choose values that fit inside .container (max-width:1200px) alongside gap */
+	.grid.two{grid-template-columns:720px 420px}
+    
+	/* Prevent table rows or long content from stretching the card; allow internal scrolling if content overflows */
+	.grid.two > .card .body{overflow:auto}
+    
+	/* Make tables respect card widths and truncate long text */
+	.grid.two .table{table-layout:fixed;width:100%}
+	.grid.two .table th,.grid.two .table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* Fixed card heights for two-column rows to prevent jumps when table rows vary. */
+/* Desktop: taller cards to comfortably hold tables and chart. Mobile: shorter to avoid excessive vertical space. */
+@media(min-width:1000px){
+	.grid.two > .card{min-height:360px}
+	.grid.two > .card .body{min-height:240px}
+}
+@media(max-width:999px){
+	.grid.two > .card{min-height:260px}
+	.grid.two > .card .body{min-height:160px}
+}
+
+/* Keep KPI cards compact but consistent */
+.grid.kpi .card{min-height:96px}
+
+/* KPI: hide large decorative orbs inside cards to keep style consistent */
+.grid.kpi .card .orb{display:none}
+
+/* subtle animated background orbs */
+.orb{position:absolute;filter:blur(40px);opacity:.35;animation:float 12s ease-in-out infinite}
+.orb.one{top:-40px;left:-40px;width:160px;height:160px;background:radial-gradient(circle at 30% 30%,var(--accent),transparent 60%)}
+.orb.two{bottom:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle at 70% 70%,var(--accent-2),transparent 60%);animation-delay:2s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* Parallax layers behind content */
+.page{position:relative}
+.page::before,.page::after{content:"";position:fixed;inset:auto;pointer-events:none;z-index:0;filter:blur(60px);opacity:.32;transition:transform .2s ease}
+.page::before{left:-10vw;top:-10vh;width:60vw;height:60vh;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--accent) 85%, transparent), transparent 60%);transform:translate3d(0,var(--parallaxY1,0px),0)}
+.page::after{right:-8vw;bottom:-12vh;width:50vw;height:50vh;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--accent-2) 85%, transparent), transparent 60%);transform:translate3d(0,var(--parallaxY2,0px),0)}
+
+/* Layout additions: sidebar + page */
+.page{display:flex;min-height:100vh}
+.page > .sidebar, .page > main{position:relative;z-index:1}
+.sidebar{width:84px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border-right:1px solid rgba(255,255,255,.08);padding:16px;position:relative;top:auto;height:auto;min-height:100vh;backdrop-filter:blur(10px);transition:width .25s ease}
+.sidebar:hover{width:260px}
+.sidebar .brand{font-weight:800;margin-bottom:12px}
+.sidebar:not(:hover) .brand{opacity:0;height:0;margin:0;padding:0;overflow:hidden}
+/* Touch devices: keep sidebar expanded since hover isn't available */
+@media (hover:none){
+	.sidebar{width:260px}
+}
+.menu{display:flex;flex-direction:column;gap:8px}
+/* Base menu item styles */
+.menu .item{display:flex;align-items:center;gap:12px;color:#d6dbf5;text-decoration:none;padding:12px 14px;border-radius:10px;border:1px solid transparent;position:relative;overflow:hidden;transition:background .25s ease, border-color .25s ease, color .2s ease}
+.menu .item i{font-size:22px;line-height:1;width:24px;flex:0 0 24px;color:#bfc7ee}
+.menu .item .lbl{white-space:nowrap}
+/* Sheen sweep */
+.menu .item::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.12) 50%,rgba(255,255,255,0) 70%);transform:translateX(-150%);transition:transform .6s ease;opacity:.0}
+.menu .item:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08);box-shadow:inset 3px 0 0 var(--accent)}
+.menu .item:hover::after{transform:translateX(150%);opacity:.15}
+.menu .item.active{background:linear-gradient(180deg,rgba(108,140,255,.18),rgba(108,140,255,.06));border-color:rgba(108,140,255,.35);box-shadow:inset 3px 0 0 var(--accent)}
+/* Collapse behavior: when sidebar not hovered, hide labels and center icons */
+.sidebar:not(:hover) .menu .item{justify-content:center}
+.sidebar:not(:hover) .menu .item .lbl{display:none}
+.sidebar:hover .menu .item .lbl{display:inline}
+.sidebar-footer{position:absolute;bottom:16px;left:16px;right:16px}
+.logout-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.35);color:#fecaca;text-decoration:none;position:relative}
+.logout-btn:hover{background:rgba(239,68,68,.25)}
+.sidebar:not(:hover) .logout-btn span{display:none}
+main{flex:1}
+
+/* Pagination controls */
+.pagination{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
+.pagination button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#d6dbf5;padding:8px 12px;border-radius:8px;cursor:pointer}
+.pagination button:hover{background:rgba(255,255,255,.1)}
+.pagination .page-info{color:var(--muted);font-size:13px;margin-right:auto}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .6s ease, transform .6s ease}
+.reveal-visible{opacity:1;transform:none}
+
+/* Page transition overlay */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(180deg,#0b1020,#090e1a);opacity:0;transition:opacity .18s ease;z-index:999}
+body.page-leave::after{opacity:.6}
+
+/* Subtle animated gradient on title dot */
+.title .accent{animation:accent-shift 8s ease-in-out infinite}
+@keyframes accent-shift{0%,100%{filter:hue-rotate(0)}50%{filter:hue-rotate(18deg)}}
+
+
+/* Equal-height cards only for two-column sections; KPI row should not stretch */
+.grid.two > .card{display:flex;flex-direction:column;height:100%}
+.grid.two .card .body{flex:1;display:flex;flex-direction:column}
+
+/* Invisible filler rows to preserve table height without scrollbars */
+.table tr.filler td{visibility:hidden;padding:14px 12px;background:transparent;border:1px solid transparent}
