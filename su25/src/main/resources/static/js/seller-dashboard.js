@@ -67,6 +67,23 @@
     });
   }
 
+  // Toast utility
+  function showToast(message, type = 'info', opts = {}){
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
+    toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><div class="act"><button class="close" aria-label="Đóng">✕</button></div>`;
+    container.appendChild(toast);
+    // Force reflow to play animation
+    void toast.offsetWidth; toast.classList.add('show');
+    const close = () => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 200); };
+    toast.querySelector('.close').addEventListener('click', close);
+    const delay = opts.duration ?? (type === 'error' ? 5000 : 3000);
+    if (delay !== 0) setTimeout(close, delay);
+  }
+
   function paginateTable(tbody, pager, pageSize){
     const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => !tr.querySelector('td.footer-note'));
     if (rows.length <= pageSize) { pager.innerHTML = ''; return; }
@@ -133,15 +150,15 @@
     // Tables pagination (progressive enhancement)
     const lowStockTbody = document.getElementById('tbLowStock');
     const lowStockPager = document.getElementById('pgLowStock');
-    if (lowStockTbody && lowStockPager) paginateTable(lowStockTbody, lowStockPager, 5);
+  if (lowStockTbody && lowStockPager) paginateTable(lowStockTbody, lowStockPager, 4);
 
     const topProductsTbody = document.getElementById('tbTopProducts');
     const topProductsPager = document.getElementById('pgTopProducts');
-    if (topProductsTbody && topProductsPager) paginateTable(topProductsTbody, topProductsPager, 5);
+  if (topProductsTbody && topProductsPager) paginateTable(topProductsTbody, topProductsPager, 5);
 
     const recentOrdersTbody = document.getElementById('tbRecentOrders');
     const recentOrdersPager = document.getElementById('pgRecentOrders');
-    if (recentOrdersTbody && recentOrdersPager) paginateTable(recentOrdersTbody, recentOrdersPager, 8);
+  if (recentOrdersTbody && recentOrdersPager) paginateTable(recentOrdersTbody, recentOrdersPager, 5);
 
     // Theme toggle with system default
     const userPref = localStorage.getItem('theme');
@@ -155,21 +172,133 @@
         const next = isLight ? 'dark' : 'light';
         localStorage.setItem('theme', next);
         applyTheme(next);
+        if (typeof showToast === 'function') {
+          showToast(next === 'light' ? 'Đã chuyển sang giao diện sáng' : 'Đã chuyển sang giao diện tối', 'info', { duration: 1500 });
+        }
       });
     }
 
     // ===== Modals & CRUD =====
     const overlay = document.getElementById('modalOverlay');
-    function openModal(dlg){ if (overlay) overlay.hidden = false; dlg.showModal(); }
-    function closeModal(dlg){ dlg.close(); if (overlay) overlay.hidden = true; }
-    overlay?.addEventListener('click', () => {
-      document.querySelectorAll('dialog[open]').forEach(d => d.close());
-      overlay.hidden = true;
+
+    // Scroll lock helpers to avoid jump-to-top when opening dialogs
+    function lockScroll(){
+      if (document.body.style.position === 'fixed') return; // already locked
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      document.documentElement.setAttribute('data-scroll-y', String(y));
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${y}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+    }
+    function unlockScroll(){
+      const yStr = document.documentElement.getAttribute('data-scroll-y');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.documentElement.removeAttribute('data-scroll-y');
+      if (yStr) {
+        const y = parseInt(yStr, 10);
+        if (!Number.isNaN(y)) window.scrollTo(0, y);
+      }
+    }
+    function openModal(dlg){
+      if (!dlg) return;
+  if (overlay) { overlay.hidden = false; overlay.classList.add('visible'); }
+  // lock background scroll without changing scroll position
+  lockScroll();
+      // prefer native dialog but still animate via class
+      if (typeof dlg.showModal === 'function') {
+        try { dlg.showModal(); } catch(e) { dlg.setAttribute('open',''); }
+      } else {
+        dlg.setAttribute('open',''); dlg.style.display = 'block';
+      }
+      // ensure animation class toggles
+      requestAnimationFrame(() => dlg.classList.add('is-open'));
+    }
+
+    function closeModal(dlg){
+      if (!dlg) return;
+      // play closing animation
+      dlg.classList.remove('is-open');
+      const finishClose = () => {
+        // ensure native close/remove open attribute
+        if (typeof dlg.close === 'function') {
+          try { dlg.close(); } catch(e) { dlg.removeAttribute('open'); dlg.style.display = 'none'; }
+        } else {
+          dlg.removeAttribute('open'); dlg.style.display = 'none';
+        }
+
+        // Only clear overlay and scroll-lock when no other dialogs remain open
+        const remaining = Array.from(document.querySelectorAll('dialog.modal[open]'));
+        if (!remaining.length) {
+          if (overlay) { overlay.classList.remove('visible'); overlay.hidden = true; }
+          // restore scroll position after releasing lock
+          unlockScroll();
+        }
+
+        dlg.removeEventListener('transitionend', finishClose);
+      };
+      // if transition exists, wait for it; otherwise close immediately
+      const cs = window.getComputedStyle(dlg);
+      const hasTransition = cs.transitionDuration && cs.transitionDuration !== '0s';
+      if (hasTransition) {
+        dlg.addEventListener('transitionend', finishClose);
+      } else {
+        finishClose();
+      }
+    }
+    // click on overlay closes any open dialog
+    overlay?.addEventListener('click', (ev) => {
+      const openDialogs = Array.from(document.querySelectorAll('dialog.modal[open]'));
+      openDialogs.forEach(d => closeModal(d));
+    });
+
+    // Close dialogs on ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        e.preventDefault();
+        const openDialogs = Array.from(document.querySelectorAll('dialog.modal[open]'));
+        if (openDialogs.length) {
+          openDialogs.forEach(d => closeModal(d));
+        }
+      }
+    });
+
+    // Page load fade-in
+    document.body.classList.remove('page-leaving');
+    requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+
+    // Intercept internal link clicks for smooth leave transition
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || a.target === '_blank' || href.startsWith('mailto:')) return;
+      // allow same-origin navigation only
+      const url = new URL(href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+      e.preventDefault();
+      document.body.classList.remove('page-loaded');
+      document.body.classList.add('page-leaving');
+      setTimeout(() => { window.location.href = url.href; }, 260);
     });
 
     // Product modal handlers
     const productModal = document.getElementById('productModal');
     if (productModal){
+      // ensure any native cancel/close events clear locks
+      productModal.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(productModal); });
+      productModal.addEventListener('close', () => {
+        const remaining = Array.from(document.querySelectorAll('dialog.modal[open]'));
+        if (!remaining.length) {
+          if (overlay) { overlay.classList.remove('visible'); overlay.hidden = true; }
+          unlockScroll();
+        }
+      });
       productModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(productModal)));
 
       const sellerIdEl = document.getElementById('sellerId');
@@ -177,7 +306,7 @@
 
       async function loadProduct(id){
         const res = await fetch(`/api/products/${id}`);
-        if (!res.ok) return;
+        if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; }
         const p = await res.json();
         document.getElementById('pm_productId').value = p.productId ?? '';
         document.getElementById('pm_name').value = p.name ?? '';
@@ -227,7 +356,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        if (res.ok){ closeModal(productModal); location.reload(); }
+  if (res.ok){ closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
+  else { showToast('Lưu sản phẩm thất bại', 'error'); }
       });
 
       // Publish/unpublish via admin approval
@@ -236,41 +366,54 @@
         if (!id) return;
         const isPublic = document.getElementById('pm_status').textContent === 'Public';
         const res = await fetch(`/api/products/${id}/approval?publish=${!isPublic}`, { method: 'POST' });
-        if (res.ok){ closeModal(productModal); location.reload(); }
+  if (res.ok){ closeModal(productModal); showToast(!isPublic ? 'Đã publish sản phẩm' : 'Đã chuyển sang ẩn', 'success'); setTimeout(() => location.reload(), 350); }
+  else { showToast('Thao tác duyệt/publish thất bại', 'error'); }
       });
 
       // Delete product
       document.getElementById('pm_delete')?.addEventListener('click', async () => {
         const id = document.getElementById('pm_productId').value;
         if (!id) { closeModal(productModal); return; }
-        if (!confirm('Xóa sản phẩm này?')) return;
+  if (!confirm('Xóa sản phẩm này?')) return;
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-        if (res.ok){ closeModal(productModal); location.reload(); }
+  if (res.ok){ closeModal(productModal); showToast('Đã xóa sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
+  else { showToast('Xóa sản phẩm thất bại', 'error'); }
       });
     }
 
     // Order modal handlers (view-only)
     const orderModal = document.getElementById('orderModal');
     if (orderModal){
+      orderModal.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(orderModal); });
+      orderModal.addEventListener('close', () => {
+        const remaining = Array.from(document.querySelectorAll('dialog.modal[open]'));
+        if (!remaining.length) {
+          if (overlay) { overlay.classList.remove('visible'); overlay.hidden = true; }
+          unlockScroll();
+        }
+      });
       orderModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(orderModal)));
 
       async function loadOrder(id){
         const res = await fetch(`/api/orders/${id}`);
-        if (!res.ok) return;
+  if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
         const data = await res.json();
-        const o = data.order;
+  const o = data.order;
+  const user = data.user || {};
         document.getElementById('om_orderId').textContent = o.orderId;
-        document.getElementById('om_userId').textContent = o.userId ?? '';
-        // Total Amount should reflect database value directly
-        const amt = (o.totalAmount ?? '').toLocaleString ? o.totalAmount.toLocaleString('en-US') : (o.totalAmount ?? '');
-        document.getElementById('om_totalAmount').textContent = amt;
+  document.getElementById('om_userId').textContent = user.username || (`User #${o.userId ?? ''}`);
+  // Total Amount should reflect database value directly with safe formatting
+  const amtVal = o.totalAmount;
+  const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('om_totalAmount').textContent = amt;
         document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
         const items = data.items || [];
         const tb = document.getElementById('om_items');
         tb.innerHTML = '';
         for (const it of items){
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${it.productId}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`;
+          const name = it.productName || `#${it.productId}`;
+          tr.innerHTML = `<td>${name}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`;
           tb.appendChild(tr);
         }
       }
@@ -287,8 +430,8 @@
       const sellerIdEl = document.getElementById('sellerId');
       const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
       if (!sellerId) return; // require seller
-      const res = await fetch(`/api/products?sellerId=${sellerId}`);
-      if (!res.ok) return;
+  const res = await fetch(`/api/products?sellerId=${sellerId}`);
+  if (!res.ok) { showToast('Không tải được danh sách sản phẩm của bạn', 'error'); return; }
       const list = await res.json();
       const tbody = document.getElementById('tbMyProducts');
       const counter = document.getElementById('myProductsCount');
@@ -307,7 +450,7 @@
       // rebind row click to open product modal
       document.querySelectorAll('#tbMyProducts [data-product-id]').forEach(row => {
         row.addEventListener('click', () => { const id = row.getAttribute('data-product-id');
-          (async()=>{ const res = await fetch(`/api/products/${id}`); if(!res.ok) return; const p = await res.json();
+          (async()=>{ const res = await fetch(`/api/products/${id}`); if(!res.ok){ showToast('Không tải được chi tiết sản phẩm', 'error'); return; } const p = await res.json();
             document.getElementById('pm_productId').value = p.productId ?? '';
             document.getElementById('pm_name').value = p.name ?? '';
             document.getElementById('pm_price').value = p.price ?? '';
@@ -322,8 +465,9 @@
           })();
         });
       });
-      const pager = document.getElementById('pgMyProducts');
-      if (pager) paginateTable(tbody, pager, 10);
+  const pager = document.getElementById('pgMyProducts');
+  if (pager) paginateTable(tbody, pager, 5);
+  showToast(`Tải ${list.length} sản phẩm của bạn`, 'info', { duration: 2000 });
     })();
   });
 })();
