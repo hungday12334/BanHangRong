@@ -157,5 +157,173 @@
         applyTheme(next);
       });
     }
+
+    // ===== Modals & CRUD =====
+    const overlay = document.getElementById('modalOverlay');
+    function openModal(dlg){ if (overlay) overlay.hidden = false; dlg.showModal(); }
+    function closeModal(dlg){ dlg.close(); if (overlay) overlay.hidden = true; }
+    overlay?.addEventListener('click', () => {
+      document.querySelectorAll('dialog[open]').forEach(d => d.close());
+      overlay.hidden = true;
+    });
+
+    // Product modal handlers
+    const productModal = document.getElementById('productModal');
+    if (productModal){
+      productModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(productModal)));
+
+      const sellerIdEl = document.getElementById('sellerId');
+      const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+
+      async function loadProduct(id){
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) return;
+        const p = await res.json();
+        document.getElementById('pm_productId').value = p.productId ?? '';
+        document.getElementById('pm_name').value = p.name ?? '';
+        document.getElementById('pm_price').value = p.price ?? '';
+        document.getElementById('pm_salePrice').value = p.salePrice ?? '';
+        document.getElementById('pm_quantity').value = p.quantity ?? 0;
+        document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
+        document.getElementById('pm_description').value = p.description ?? '';
+        const st = document.getElementById('pm_status');
+        st.textContent = p.isActive ? 'Public' : 'Hidden';
+        st.className = `badge ${p.isActive ? 'pill good' : ''}`;
+      }
+
+      // Row clicks open modal
+      document.querySelectorAll('[data-product-id]').forEach(row => {
+        row.addEventListener('click', () => { const id = row.getAttribute('data-product-id'); loadProduct(id).then(() => openModal(productModal)); });
+      });
+
+      // Add product
+      document.getElementById('btnAddProduct')?.addEventListener('click', () => {
+        document.getElementById('pm_productId').value = '';
+        document.getElementById('pm_name').value = '';
+        document.getElementById('pm_price').value = '';
+        document.getElementById('pm_salePrice').value = '';
+        document.getElementById('pm_quantity').value = 0;
+        document.getElementById('pm_downloadUrl').value = '';
+        document.getElementById('pm_description').value = '';
+        const st = document.getElementById('pm_status'); st.textContent = 'Hidden'; st.className = 'badge';
+        openModal(productModal);
+      });
+
+      // Save product (create/update)
+      document.getElementById('productForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('pm_productId').value;
+        const payload = {
+          sellerId: sellerId,
+          name: document.getElementById('pm_name').value,
+          price: document.getElementById('pm_price').value ? Number(document.getElementById('pm_price').value) : null,
+          salePrice: document.getElementById('pm_salePrice').value ? Number(document.getElementById('pm_salePrice').value) : null,
+          quantity: document.getElementById('pm_quantity').value ? Number(document.getElementById('pm_quantity').value) : 0,
+          downloadUrl: document.getElementById('pm_downloadUrl').value || null,
+          description: document.getElementById('pm_description').value || null
+        };
+        const res = await fetch(id ? `/api/products/${id}` : '/api/products', {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok){ closeModal(productModal); location.reload(); }
+      });
+
+      // Publish/unpublish via admin approval
+      document.getElementById('pm_publish')?.addEventListener('click', async () => {
+        const id = document.getElementById('pm_productId').value;
+        if (!id) return;
+        const isPublic = document.getElementById('pm_status').textContent === 'Public';
+        const res = await fetch(`/api/products/${id}/approval?publish=${!isPublic}`, { method: 'POST' });
+        if (res.ok){ closeModal(productModal); location.reload(); }
+      });
+
+      // Delete product
+      document.getElementById('pm_delete')?.addEventListener('click', async () => {
+        const id = document.getElementById('pm_productId').value;
+        if (!id) { closeModal(productModal); return; }
+        if (!confirm('Xóa sản phẩm này?')) return;
+        const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+        if (res.ok){ closeModal(productModal); location.reload(); }
+      });
+    }
+
+    // Order modal handlers (view-only)
+    const orderModal = document.getElementById('orderModal');
+    if (orderModal){
+      orderModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(orderModal)));
+
+      async function loadOrder(id){
+        const res = await fetch(`/api/orders/${id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const o = data.order;
+        document.getElementById('om_orderId').textContent = o.orderId;
+        document.getElementById('om_userId').textContent = o.userId ?? '';
+        // Total Amount should reflect database value directly
+        const amt = (o.totalAmount ?? '').toLocaleString ? o.totalAmount.toLocaleString('en-US') : (o.totalAmount ?? '');
+        document.getElementById('om_totalAmount').textContent = amt;
+        document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
+        const items = data.items || [];
+        const tb = document.getElementById('om_items');
+        tb.innerHTML = '';
+        for (const it of items){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${it.productId}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`;
+          tb.appendChild(tr);
+        }
+      }
+
+      document.querySelectorAll('[data-order-id]').forEach(row => {
+        row.addEventListener('click', () => { const id = row.getAttribute('data-order-id'); loadOrder(id).then(() => openModal(orderModal)); });
+      });
+
+      // View-only: no save/delete handlers for orders
+    }
+
+    // Load "My Products" list
+    (async function loadMyProducts(){
+      const sellerIdEl = document.getElementById('sellerId');
+      const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+      if (!sellerId) return; // require seller
+      const res = await fetch(`/api/products?sellerId=${sellerId}`);
+      if (!res.ok) return;
+      const list = await res.json();
+      const tbody = document.getElementById('tbMyProducts');
+      const counter = document.getElementById('myProductsCount');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      list.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'clickable';
+        tr.setAttribute('data-product-id', p.productId);
+        const status = p.isActive ? '<span class="pill good">Public</span>' : '<span class="badge">Hidden</span>';
+        const price = (p.price ?? 0).toLocaleString('en-US');
+        tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${status}</td>`;
+        tbody.appendChild(tr);
+      });
+      if (counter) counter.textContent = list.length;
+      // rebind row click to open product modal
+      document.querySelectorAll('#tbMyProducts [data-product-id]').forEach(row => {
+        row.addEventListener('click', () => { const id = row.getAttribute('data-product-id');
+          (async()=>{ const res = await fetch(`/api/products/${id}`); if(!res.ok) return; const p = await res.json();
+            document.getElementById('pm_productId').value = p.productId ?? '';
+            document.getElementById('pm_name').value = p.name ?? '';
+            document.getElementById('pm_price').value = p.price ?? '';
+            document.getElementById('pm_salePrice').value = p.salePrice ?? '';
+            document.getElementById('pm_quantity').value = p.quantity ?? 0;
+            document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
+            document.getElementById('pm_description').value = p.description ?? '';
+            const st = document.getElementById('pm_status');
+            st.textContent = p.isActive ? 'Public' : 'Hidden';
+            st.className = `badge ${p.isActive ? 'pill good' : ''}`;
+            openModal(productModal);
+          })();
+        });
+      });
+      const pager = document.getElementById('pgMyProducts');
+      if (pager) paginateTable(tbody, pager, 10);
+    })();
   });
 })();
