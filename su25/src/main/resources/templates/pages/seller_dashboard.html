@@ -14,7 +14,7 @@
 	</style>
 </head>
 
-<body>
+<body th:attr="data-user-type=${userType}">
 	<div class="page">
 		<aside class="sidebar">
 			<div class="brand-bar">
@@ -317,6 +317,12 @@
 	<!-- Toasts -->
 	<div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
+	<script>
+		// Expose current user type for client-side hints (SELLER/ADMIN)
+		window.currentUserType = document.body.getAttribute('data-user-type') || 'SELLER';
+		// Optional: you can also toggle button label if not admin
+		try { const btn = document.getElementById('pm_publish'); if (btn && window.currentUserType !== 'ADMIN') { btn.title = 'Chỉ Admin mới được publish'; } } catch (e) {}
+	</script>
 	<script src="/js/seller-dashboard.js"></script>
 </body>
 

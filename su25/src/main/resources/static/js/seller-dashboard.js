@@ -424,9 +424,19 @@
         const id = document.getElementById('pm_productId').value;
         if (!id) return;
         const isPublic = document.getElementById('pm_status').textContent === 'Public';
-        const res = await fetch(`/api/products/${id}/approval?publish=${!isPublic}`, { method: 'POST' });
-  if (res.ok){ closeModal(productModal); showToast(!isPublic ? 'Đã publish sản phẩm' : 'Đã chuyển sang ẩn', 'success'); setTimeout(() => location.reload(), 350); }
-  else { showToast('Thao tác duyệt/publish thất bại', 'error'); }
+        const res = await fetch(`/api/products/${id}/approval?publish=${!isPublic}`, {
+          method: 'POST',
+          headers: { 'X-User-Type': window.currentUserType || 'SELLER' }
+        });
+        if (res.ok){
+          closeModal(productModal);
+          showToast(!isPublic ? 'Đã publish sản phẩm' : 'Đã chuyển sang ẩn', 'success');
+          setTimeout(() => location.reload(), 350);
+        } else if (res.status === 403) {
+          showToast('Bạn không có quyền thực hiện thao tác này (chỉ Admin).', 'error');
+        } else {
+          showToast('Thao tác duyệt/publish thất bại', 'error');
+        }
       });
 
       // Delete product
