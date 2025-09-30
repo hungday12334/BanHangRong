@@ -85,34 +85,93 @@
   }
 
   function paginateTable(tbody, pager, pageSize){
-    const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => !tr.querySelector('td.footer-note'));
-    if (rows.length <= pageSize) { pager.innerHTML = ''; return; }
-    const total = Math.ceil(rows.length / pageSize);
+    // Mark container for CSS fallback (keep pager pinned)
+    pager?.closest('.body')?.classList.add('has-pager');
+    // Always start from a clean state: remove previous filler rows
+    tbody.querySelectorAll('tr.filler-row').forEach(fr => fr.remove());
+    let rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => !tr.classList.contains('filler-row') && !tr.querySelector('td.footer-note'));
+    let rowCount = rows.length;
+    let totalPages = Math.max(1, Math.ceil(rowCount / pageSize));
     let current = 1;
 
+    let stableHeightSet = false;
+    function setStableMinHeight(){
+      if (stableHeightSet) return;
+      const bodyEl = pager.closest('.body');
+      const table = tbody.closest('table');
+      const thead = table ? table.querySelector('thead') : null;
+      // Measure tallest visible row in current page to avoid clipping when text wraps
+      const start = (current - 1) * pageSize;
+      const end = Math.min(start + pageSize, rows.length);
+      let maxRowH = 0;
+      for (let i = start; i < end; i++) {
+        const h = rows[i]?.getBoundingClientRect().height || 0;
+        if (h > maxRowH) maxRowH = h;
+      }
+      const rowH = maxRowH || 44;
+      const hdrH = (thead?.getBoundingClientRect().height) || 32;
+      const pagerH = (pager.getBoundingClientRect().height) || 36;
+      const padding = 24; // breathing space
+      const minH = Math.ceil(hdrH + rowH * pageSize + pagerH + padding);
+      if (bodyEl) bodyEl.style.minHeight = `${minH}px`;
+      stableHeightSet = true;
+    }
+
     function render(){
+      // Refresh rows and counters in case DOM changed externally
+      rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => !tr.classList.contains('filler-row') && !tr.querySelector('td.footer-note'));
+      rowCount = rows.length;
+      totalPages = Math.max(1, Math.ceil(rowCount / pageSize));
+      if (current > totalPages) current = totalPages;
+
+      const start = (current - 1) * pageSize;
+      const end = Math.min(start + pageSize, rowCount);
       rows.forEach((tr, idx) => {
-        const p = Math.floor(idx / pageSize) + 1;
-        tr.style.display = (p === current) ? '' : 'none';
+        tr.style.display = (idx >= start && idx < end) ? '' : 'none';
       });
+      // Pad with invisible filler rows so the table keeps constant height per page
+      tbody.querySelectorAll('tr.filler-row').forEach(fr => fr.remove());
+      const visibleCount = Math.max(0, end - start);
+      const need = Math.max(0, pageSize - visibleCount);
+      if (need > 0) {
+        const colCount = (tbody.closest('table')?.querySelectorAll('thead th').length) || (rows[0]?.children.length) || 1;
+        const footerNoteRow = tbody.querySelector('tr td.footer-note')?.parentElement || null;
+        for (let i = 0; i < need; i++) {
+          const tr = document.createElement('tr');
+          tr.className = 'filler-row';
+          const td = document.createElement('td');
+          td.colSpan = colCount;
+          td.innerHTML = '&nbsp;';
+          tr.appendChild(td);
+          if (footerNoteRow) tbody.insertBefore(tr, footerNoteRow);
+          else tbody.appendChild(tr);
+        }
+      }
       // Build controls
       pager.innerHTML = '';
-      const mkBtn = (label, page, disabled, ariaCurrent) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'btn';
-        b.textContent = label;
-        if (ariaCurrent) b.setAttribute('aria-current', 'page');
-        b.disabled = !!disabled;
-        b.setAttribute('aria-label', `Trang ${page}`);
-        b.addEventListener('click', () => { current = page; render(); pager.scrollIntoView({behavior:'smooth', block:'nearest'}); });
-        return b;
-      };
-      pager.appendChild(mkBtn('«', Math.max(1, current - 1), current === 1, false));
-      for (let i = 1; i <= total; i++) {
-        pager.appendChild(mkBtn(String(i), i, false, i === current));
+      if (totalPages > 1) {
+        const mkBtn = (label, page, disabled, ariaCurrent) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'btn';
+          b.textContent = label;
+          if (ariaCurrent) b.setAttribute('aria-current', 'page');
+          b.disabled = !!disabled;
+          b.setAttribute('aria-label', `Trang ${page}`);
+          b.addEventListener('click', () => { current = page; render(); /* keep pager fixed: avoid scrollIntoView */ });
+          return b;
+        };
+        pager.appendChild(mkBtn('«', Math.max(1, current - 1), current === 1, false));
+        for (let i = 1; i <= totalPages; i++) {
+          pager.appendChild(mkBtn(String(i), i, false, i === current));
+        }
+        pager.appendChild(mkBtn('»', Math.min(totalPages, current + 1), current === totalPages, false));
+      } else {
+        // When a single page, ensure pager is cleared and keep rows visible with fillers if needed
+        pager.innerHTML = '';
       }
-      pager.appendChild(mkBtn('»', Math.min(total, current + 1), current === total, false));
+      // After DOM updates, fix a stable min-height once (applies to both single/multi page)
+      requestAnimationFrame(setStableMinHeight);
     }
     render();
   }
@@ -150,7 +209,7 @@
     // Tables pagination (progressive enhancement)
     const lowStockTbody = document.getElementById('tbLowStock');
     const lowStockPager = document.getElementById('pgLowStock');
-  if (lowStockTbody && lowStockPager) paginateTable(lowStockTbody, lowStockPager, 4);
+  if (lowStockTbody && lowStockPager) paginateTable(lowStockTbody, lowStockPager, 5);
 
     const topProductsTbody = document.getElementById('tbTopProducts');
     const topProductsPager = document.getElementById('pgTopProducts');
