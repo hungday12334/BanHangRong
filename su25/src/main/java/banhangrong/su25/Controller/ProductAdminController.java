@@ -76,7 +76,14 @@ public class ProductAdminController {
 
     // Admin approves or unpublishes product
     @PostMapping("/{id}/approval")
-    public ResponseEntity<?> approve(@PathVariable Long id, @RequestParam("publish") boolean publish) {
+    public ResponseEntity<?> approve(
+            @PathVariable Long id,
+            @RequestParam("publish") boolean publish,
+            @RequestHeader(value = "X-User-Type", required = false) String userType) {
+        // Simple role gate: only ADMIN can approve/publish
+        if (userType == null || !"ADMIN".equalsIgnoreCase(userType)) {
+            return ResponseEntity.status(403).body("Forbidden: admin only");
+        }
         Optional<Products> opt = productsRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         Products p = opt.get();
