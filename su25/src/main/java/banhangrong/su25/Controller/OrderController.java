@@ -25,9 +25,9 @@ public class OrderController {
     private final ProductsRepository productsRepository;
 
     public OrderController(OrdersRepository ordersRepository,
-                           OrderItemsRepository orderItemsRepository,
-                           UsersRepository usersRepository,
-                           ProductsRepository productsRepository) {
+            OrderItemsRepository orderItemsRepository,
+            UsersRepository usersRepository,
+            ProductsRepository productsRepository) {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.usersRepository = usersRepository;
@@ -35,12 +35,15 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Orders> list() { return ordersRepository.findAll(); }
+    public List<Orders> list() {
+        return ordersRepository.findAll();
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
         Optional<Orders> opt = ordersRepository.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        if (opt.isEmpty())
+            return ResponseEntity.notFound().build();
         Orders o = opt.get();
 
         // Fetch items and enrich with product names (batch to avoid N+1)
@@ -80,7 +83,8 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Orders req) {
         // Minimal validation
-        if (req.getUserId() == null) return ResponseEntity.badRequest().body("userId is required");
+        if (req.getUserId() == null)
+            return ResponseEntity.badRequest().body("userId is required");
         req.setCreatedAt(LocalDateTime.now());
         req.setUpdatedAt(LocalDateTime.now());
         Orders saved = ordersRepository.save(req);
@@ -90,10 +94,13 @@ public class OrderController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Orders req) {
         Optional<Orders> opt = ordersRepository.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        if (opt.isEmpty())
+            return ResponseEntity.notFound().build();
         Orders o = opt.get();
-        if (req.getUserId() != null) o.setUserId(req.getUserId());
-        if (req.getTotalAmount() != null) o.setTotalAmount(req.getTotalAmount());
+        if (req.getUserId() != null)
+            o.setUserId(req.getUserId());
+        if (req.getTotalAmount() != null)
+            o.setTotalAmount(req.getTotalAmount());
         o.setUpdatedAt(LocalDateTime.now());
         Orders saved = ordersRepository.save(o);
         return ResponseEntity.ok(saved);
@@ -101,7 +108,8 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        if (!ordersRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if (!ordersRepository.existsById(id))
+            return ResponseEntity.notFound().build();
         ordersRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
