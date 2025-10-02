@@ -26,11 +26,11 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "WHERE p.seller_id = :sellerId", nativeQuery = true)
     Long totalUnitsSoldBySeller(@Param("sellerId") Long sellerId);
 
-    @Query(value = "SELECT DATE(oi.created_at) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
+    @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
             "WHERE p.seller_id = :sellerId AND oi.created_at >= :fromDate\n" +
-            "GROUP BY DATE(oi.created_at)\n" +
-            "ORDER BY DATE(oi.created_at)", nativeQuery = true)
+            "GROUP BY CAST(oi.created_at AS DATE)\n" +
+            "ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
     List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDateTime fromDate);
 
     @Query(value = "SELECT COUNT(DISTINCT oi.order_id)\n" +
@@ -67,7 +67,7 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
-            "WHERE p.seller_id = :sellerId AND DATE(oi.created_at) = CURRENT_DATE", nativeQuery = true)
+            "WHERE p.seller_id = :sellerId AND CAST(oi.created_at AS DATE) = CURRENT_DATE", nativeQuery = true)
     BigDecimal todayRevenue(@Param("sellerId") Long sellerId);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
