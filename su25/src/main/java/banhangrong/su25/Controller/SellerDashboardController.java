@@ -1,6 +1,8 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Entity.Users;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +18,11 @@ import java.util.*;
 public class SellerDashboardController {
 
     private final ProductsRepository productsRepository;
+    private final UsersRepository usersRepository;
 
-    public SellerDashboardController(ProductsRepository productsRepository) {
+    public SellerDashboardController(ProductsRepository productsRepository, UsersRepository usersRepository) {
         this.productsRepository = productsRepository;
+        this.usersRepository = usersRepository;
     }
 
     // Temporary: sellerId is read from query or default to 1L until auth in place
@@ -93,7 +97,7 @@ public class SellerDashboardController {
         var lowStock = productsRepository.findTop10BySellerIdAndIsActiveTrueAndQuantityLessThanEqualOrderByQuantityAsc(sellerId, 5);
         long activeProducts = productsRepository.countBySellerIdAndIsActiveTrue(sellerId);
 
-        model.addAttribute("sellerId", sellerId);
+    model.addAttribute("sellerId", sellerId);
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("totalUnits", totalUnits);
         model.addAttribute("totalOrders", totalOrders);
@@ -104,8 +108,15 @@ public class SellerDashboardController {
         model.addAttribute("dailyRevenueData", String.join(",", series.values().stream().map(BigDecimal::toPlainString).toList()));
     model.addAttribute("topProducts", topProducts);
         model.addAttribute("recentOrders", recentOrders);
-    model.addAttribute("lowStock", lowStock);
-    model.addAttribute("activeProducts", activeProducts);
+        model.addAttribute("lowStock", lowStock);
+        model.addAttribute("activeProducts", activeProducts);
+
+        // Load user profile (assume sellerId == userId for now)
+        Users user = usersRepository.findById(sellerId).orElse(null);
+        model.addAttribute("user", user);
+        if (user != null) {
+            model.addAttribute("userType", user.getUserType());
+        }
 
         return "pages/seller_dashboard";
     }

@@ -44,217 +44,318 @@
 
 		<main>
 			<div class="container">
-				<div class="title">
-					<span class="accent"></span>
-					<h1>Seller Dashboard</h1>
-					<span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
-					<button id="btnAddProduct" class="btn primary" type="button" title="Thêm sản phẩm">+ Thêm sản
-						phẩm</button>
+				<div id="dashboardContent">
+					<div class="title">
+						<span class="accent"></span>
+						<h1>Seller Dashboard</h1>
+						<span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
+						<button id="btnAddProduct" class="btn primary" type="button" title="Thêm sản phẩm">+ Thêm sản
+							phẩm</button>
+					</div>
+
+					<div class="grid kpi">
+						<div class="card">
+							<div class="label">Tổng doanh thu</div>
+							<div class="value">$<span data-count th:attr="data-count=${totalRevenue}"
+									th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
+							<div class="delta pill good">Hôm nay: $<span
+									th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+							<div class="orb one"></div>
+							<div class="orb two"></div>
+						</div>
+						<div class="card">
+							<div class="label">Đơn hàng</div>
+							<div class="value"><span data-count th:attr="data-count=${totalOrders}"
+									th:text="${totalOrders}">0</span></div>
+							<div class="delta badge">Tháng này: $<span
+									th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+						</div>
+						<div class="card">
+							<div class="label">Sản phẩm đang bán</div>
+							<div class="value"><span data-count th:attr="data-count=${activeProducts}"
+									th:text="${activeProducts}">0</span></div>
+							<div class="delta chip">Đánh giá TB: <b
+									th:text="${#numbers.formatDecimal(avgRating,1,'COMMA',1,'POINT')}">0</b>/5</div>
+						</div>
+						<div class="card">
+							<div class="label">Số key đã bán</div>
+							<div class="value"><span data-count th:attr="data-count=${totalUnits}"
+									th:text="${totalUnits}">0</span></div>
+							<div class="progress"><span th:style="'width:' + (${totalUnits} % 100) + '%' "></span></div>
+						</div>
+					</div>
+
+					<div class="grid two" style="margin-top:16px">
+						<div class="card">
+							<div class="header">
+								<div style="display:flex;align-items:center;gap:10px">
+									<span class="avatar">
+										<img th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg"
+											alt="Seller Avatar"
+											style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+									</span>
+									<div>
+										<div style="font-weight:700">Doanh thu 15 ngày gần nhất</div>
+										<div class="footer-note">Theo ngày (USD)</div>
+									</div>
+								</div>
+								<div class="chip hide-md">Dải: 15 ngày</div>
+							</div>
+							<div class="body">
+								<canvas id="revenueChart" class="sparkline"
+									th:attr="data-labels=${dailyRevenueLabels},data-data=${dailyRevenueData}"></canvas>
+							</div>
+						</div>
+
+						<div class="card">
+							<div class="header">
+								<div style="font-weight:700">Sắp hết hàng</div>
+								<div class="chip" th:text="${#lists.size(lowStock)} + ' sản phẩm'">0 sản phẩm</div>
+							</div>
+							<div class="body paged">
+								<div class="table-wrap">
+									<table class="table">
+										<thead>
+											<tr>
+												<th>Sản phẩm</th>
+												<th class="hide-md">Còn lại</th>
+												<th>Trạng thái</th>
+											</tr>
+										</thead>
+										<tbody id="tbLowStock">
+											<tr th:each="p: ${lowStock}" th:attr="data-product-id=${p.productId}"
+												class="clickable">
+												<td th:text="${p.name}">Tên sản phẩm</td>
+												<td class="hide-md" th:text="${p.quantity}">3</td>
+												<td>
+													<span
+														th:classappend="${p.quantity} &lt;= 2 ? 'pill warn' : 'pill good'"
+														th:text="${p.quantity} &lt;= 2 ? 'Cần nhập' : 'Ổn'">Ổn</span>
+												</td>
+											</tr>
+											<tr th:if="${#lists.isEmpty(lowStock)}">
+												<td colspan="3" class="footer-note">Không có sản phẩm sắp hết hàng.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="pagination" id="pgLowStock"></div>
+							</div>
+						</div>
+					</div>
+
+					<!-- My Products Section -->
+					<div class="grid one" style="margin-top:16px">
+						<div class="card">
+							<div class="header">
+								<div style="font-weight:700">Sản phẩm của tôi</div>
+								<div class="chip" id="myProductsCount">0</div>
+							</div>
+							<div class="body paged">
+								<div class="table-wrap">
+									<table class="table">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>Tên</th>
+												<th>Giá</th>
+												<th class="hide-md">SL</th>
+												<th>Trạng thái</th>
+											</tr>
+										</thead>
+										<tbody id="tbMyProducts">
+											<tr class="footer-note">
+												<td colspan="5">Đang tải...</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="pagination" id="pgMyProducts"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="grid two" style="margin-top:16px">
+						<div class="card">
+							<div class="header">
+								<div style="font-weight:700">Top sản phẩm</div>
+							</div>
+							<div class="body paged">
+								<div class="table-wrap">
+									<table class="table">
+										<thead>
+											<tr>
+												<th>#</th>
+												<th>Tên</th>
+												<th>Đã bán</th>
+												<th class="hide-md">Đánh giá</th>
+												<th>Doanh thu</th>
+											</tr>
+										</thead>
+										<tbody id="tbTopProducts">
+											<tr th:each="p, iStat : ${topProducts}"
+												th:attr="data-product-id=${p.productId}" class="clickable">
+												<td th:text="${iStat.index + 1}">1</td>
+												<td th:text="${p.name}">Tên</td>
+												<td th:text="${p.units}">0</td>
+												<td class="hide-md"
+													th:text="${#numbers.formatDecimal(p.rating,1,'COMMA',1,'POINT')}">0
+												</td>
+												<td>$<span
+														th:text="${#numbers.formatDecimal(p.revenue,1,'COMMA',2,'POINT')}">0</span>
+												</td>
+											</tr>
+											<tr th:if="${#lists.isEmpty(topProducts)}">
+												<td colspan="5" class="footer-note">Chưa có sản phẩm nào được bán.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="pagination" id="pgTopProducts"></div>
+							</div>
+						</div>
+
+						<div class="card">
+							<div class="header">
+								<div style="font-weight:700">Đơn hàng gần đây</div>
+							</div>
+							<div class="body paged">
+								<div class="table-wrap">
+									<table class="table">
+										<thead>
+											<tr>
+												<th>Mã</th>
+												<th>Ngày</th>
+												<th class="hide-md">Số lượng</th>
+												<th>Thành tiền</th>
+											</tr>
+										</thead>
+										<tbody id="tbRecentOrders">
+											<tr th:each="o: ${recentOrders}" th:attr="data-order-id=${o.orderId}"
+												class="clickable">
+												<td th:text="${o.orderId}">1001</td>
+												<td th:text="${o.createdAtStr}">27/09/2025</td>
+												<td class="hide-md" th:text="${o.items}">0</td>
+												<td>$<span
+														th:text="${#numbers.formatDecimal(o.amount,1,'COMMA',2,'POINT')}">0</span>
+												</td>
+											</tr>
+											<tr th:if="${#lists.isEmpty(recentOrders)}">
+												<td colspan="4" class="footer-note">Chưa có đơn hàng.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="pagination" id="pgRecentOrders"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="footer-note" style="margin-top:16px">
+						Mẹo: Nhấn Ctrl+D để bookmark trang dashboard. Cần đăng nhập người bán để lấy sellerId tự động.
+					</div>
 				</div>
 
-				<div class="grid kpi">
-					<div class="card">
-						<div class="label">Tổng doanh thu</div>
-						<div class="value">$<span data-count th:attr="data-count=${totalRevenue}"
-								th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
-						<div class="delta pill good">Hôm nay: $<span
-								th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',2,'POINT')}">0</span></div>
-						<div class="orb one"></div>
-						<div class="orb two"></div>
+				<!-- Profile panel: hidden by default; shown in-place when clicking "Trang cá nhân" -->
+				<div id="profilePanel" class="card profile-card" hidden>
+					<div class="header profile-header">
+						<div class="profile-id">
+							<span class="avatar lg">
+								<img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}"
+									th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar"
+									onerror="this.onerror=null;this.src='/img/avatar_default.jpg';">
+								<img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}"
+									th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar">
+							</span>
+							<div class="profile-titles">
+								<h2>Trang cá nhân</h2>
+								<div class="footer-note">Seller ID: <b id="profileSellerId" th:text="${sellerId}">-</b>
+									• <span class="chip"
+										th:text="${user != null ? user.userType : 'SELLER'}">SELLER</span></div>
+							</div>
+						</div>
 					</div>
-					<div class="card">
-						<div class="label">Đơn hàng</div>
-						<div class="value"><span data-count th:attr="data-count=${totalOrders}"
-								th:text="${totalOrders}">0</span></div>
-						<div class="delta badge">Tháng này: $<span
-								th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',2,'POINT')}">0</span></div>
-					</div>
-					<div class="card">
-						<div class="label">Sản phẩm đang bán</div>
-						<div class="value"><span data-count th:attr="data-count=${activeProducts}"
-								th:text="${activeProducts}">0</span></div>
-						<div class="delta chip">Đánh giá TB: <b
-								th:text="${#numbers.formatDecimal(avgRating,1,'COMMA',1,'POINT')}">0</b>/5</div>
-					</div>
-					<div class="card">
-						<div class="label">Số key đã bán</div>
-						<div class="value"><span data-count th:attr="data-count=${totalUnits}"
-								th:text="${totalUnits}">0</span></div>
-						<div class="progress"><span th:style="'width:' + (${totalUnits} % 100) + '%' "></span></div>
-					</div>
-				</div>
-
-				<div class="grid two" style="margin-top:16px">
-					<div class="card">
-						<div class="header">
-							<div style="display:flex;align-items:center;gap:10px">
-								<span class="avatar">
-									<img th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Seller Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
-								</span>
-								<div>
-									<div style="font-weight:700">Doanh thu 15 ngày gần nhất</div>
-									<div class="footer-note">Theo ngày (USD)</div>
+					<div class="body profile-body">
+						<div class="profile-grid">
+							<div class="profile-col">
+								<label class="label">Tên</label>
+								<div id="profile_username" class="value" th:text="${user?.username}">-</div>
+								<label class="label">Email</label>
+								<div id="profile_email" class="value" th:text="${user?.email}">-</div>
+								<label class="label">Điện thoại</label>
+								<div id="profile_phone" class="value" th:text="${user?.phoneNumber}">-</div>
+							</div>
+							<div class="profile-col">
+								<label class="label">Mô tả</label>
+								<div id="profile_bio" class="value" th:text="${user != null} ? 'Chưa cập nhật' : '-'">-
 								</div>
 							</div>
-							<div class="chip hide-md">Dải: 15 ngày</div>
-						</div>
-						<div class="body">
-							<canvas id="revenueChart" class="sparkline"
-								th:attr="data-labels=${dailyRevenueLabels},data-data=${dailyRevenueData}"></canvas>
 						</div>
 					</div>
-
-					<div class="card">
-						<div class="header">
-							<div style="font-weight:700">Sắp hết hàng</div>
-							<div class="chip" th:text="${#lists.size(lowStock)} + ' sản phẩm'">0 sản phẩm</div>
-						</div>
-						<div class="body paged">
-							<div class="table-wrap">
-								<table class="table">
-									<thead>
-										<tr>
-											<th>Sản phẩm</th>
-											<th class="hide-md">Còn lại</th>
-											<th>Trạng thái</th>
-										</tr>
-									</thead>
-									<tbody id="tbLowStock">
-										<tr th:each="p: ${lowStock}" th:attr="data-product-id=${p.productId}"
-											class="clickable">
-											<td th:text="${p.name}">Tên sản phẩm</td>
-											<td class="hide-md" th:text="${p.quantity}">3</td>
-											<td>
-												<span th:classappend="${p.quantity} &lt;= 2 ? 'pill warn' : 'pill good'"
-													th:text="${p.quantity} &lt;= 2 ? 'Cần nhập' : 'Ổn'">Ổn</span>
-											</td>
-										</tr>
-										<tr th:if="${#lists.isEmpty(lowStock)}">
-											<td colspan="3" class="footer-note">Không có sản phẩm sắp hết hàng.</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-							<div class="pagination" id="pgLowStock"></div>
-						</div>
+					<div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:flex-end;">
+						<button id="btnBackToDashboard" type="button" class="btn">Quay lại bảng điều khiển</button>
+						<button id="btnOpenEditProfile" type="button" class="btn primary">Chỉnh sửa trang cá
+							nhân</button>
 					</div>
 				</div>
 
-				<!-- My Products Section -->
-				<div class="grid one" style="margin-top:16px">
-					<div class="card">
-						<div class="header">
-							<div style="font-weight:700">Sản phẩm của tôi</div>
-							<div class="chip" id="myProductsCount">0</div>
-						</div>
-						<div class="body paged">
-							<div class="table-wrap">
-								<table class="table">
-									<thead>
-										<tr>
-											<th>ID</th>
-											<th>Tên</th>
-											<th>Giá</th>
-											<th class="hide-md">SL</th>
-											<th>Trạng thái</th>
-										</tr>
-									</thead>
-									<tbody id="tbMyProducts">
-										<tr class="footer-note">
-											<td colspan="5">Đang tải...</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-							<div class="pagination" id="pgMyProducts"></div>
-						</div>
+				<!-- Orders panel (in-place) -->
+				<div id="ordersPanel" class="card section-card" hidden>
+					<div class="header">
+						<div style="font-weight:700">Quản lý đơn hàng</div>
+					</div>
+					<div class="body">
+						<div class="footer-note">Tính năng đang phát triển. Bạn có thể xem "Đơn hàng gần đây" ở
+							dashboard hoặc tích hợp API để tải danh sách đầy đủ tại đây.</div>
 					</div>
 				</div>
 
-				<div class="grid two" style="margin-top:16px">
-					<div class="card">
-						<div class="header">
-							<div style="font-weight:700">Top sản phẩm</div>
-						</div>
-						<div class="body paged">
-							<div class="table-wrap">
-								<table class="table">
-									<thead>
-										<tr>
-											<th>#</th>
-											<th>Tên</th>
-											<th>Đã bán</th>
-											<th class="hide-md">Đánh giá</th>
-											<th>Doanh thu</th>
-										</tr>
-									</thead>
-									<tbody id="tbTopProducts">
-										<tr th:each="p, iStat : ${topProducts}" th:attr="data-product-id=${p.productId}"
-											class="clickable">
-											<td th:text="${iStat.index + 1}">1</td>
-											<td th:text="${p.name}">Tên</td>
-											<td th:text="${p.units}">0</td>
-											<td class="hide-md"
-												th:text="${#numbers.formatDecimal(p.rating,1,'COMMA',1,'POINT')}">0</td>
-											<td>$<span
-													th:text="${#numbers.formatDecimal(p.revenue,1,'COMMA',2,'POINT')}">0</span>
-											</td>
-										</tr>
-										<tr th:if="${#lists.isEmpty(topProducts)}">
-											<td colspan="5" class="footer-note">Chưa có sản phẩm nào được bán.</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-							<div class="pagination" id="pgTopProducts"></div>
-						</div>
+				<!-- Keys panel (in-place) -->
+				<div id="keysPanel" class="card section-card" hidden>
+					<div class="header">
+						<div style="font-weight:700">Quản lý key</div>
 					</div>
-
-					<div class="card">
-						<div class="header">
-							<div style="font-weight:700">Đơn hàng gần đây</div>
-						</div>
-						<div class="body paged">
-							<div class="table-wrap">
-								<table class="table">
-									<thead>
-										<tr>
-											<th>Mã</th>
-											<th>Ngày</th>
-											<th class="hide-md">Số lượng</th>
-											<th>Thành tiền</th>
-										</tr>
-									</thead>
-									<tbody id="tbRecentOrders">
-										<tr th:each="o: ${recentOrders}" th:attr="data-order-id=${o.orderId}"
-											class="clickable">
-											<td th:text="${o.orderId}">1001</td>
-											<td th:text="${o.createdAtStr}">27/09/2025</td>
-											<td class="hide-md" th:text="${o.items}">0</td>
-											<td>$<span
-													th:text="${#numbers.formatDecimal(o.amount,1,'COMMA',2,'POINT')}">0</span>
-											</td>
-										</tr>
-										<tr th:if="${#lists.isEmpty(recentOrders)}">
-											<td colspan="4" class="footer-note">Chưa có đơn hàng.</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-							<div class="pagination" id="pgRecentOrders"></div>
-						</div>
+					<div class="body">
+						<div class="footer-note">Tính năng đang phát triển. Dự kiến quản lý key sản phẩm tại đây.</div>
 					</div>
 				</div>
 
-				<div class="footer-note" style="margin-top:16px">
-					Mẹo: Nhấn Ctrl+D để bookmark trang dashboard. Cần đăng nhập người bán để lấy sellerId tự động.
+				<!-- Profile Settings panel (in-place) -->
+				<div id="profileSettingsPanel" class="card section-card" hidden>
+					<div class="header">
+						<div style="font-weight:700">Cài đặt profile</div>
+					</div>
+					<div class="body">
+						<div class="footer-note">Bạn có thể sử dụng nút "Chỉnh sửa trang cá nhân" trong panel Trang cá
+							nhân. Phần Cài đặt profile sẽ gom các tuỳ chọn nâng cao (2FA, bảo mật, v.v.).</div>
+					</div>
 				</div>
-			</div>
 		</main>
 	</div>
 
 	<!-- Modals -->
 	<div id="modalOverlay" class="modal-overlay" hidden></div>
+
+	<!-- Edit Profile Modal -->
+	<dialog id="profileModal" class="modal" aria-label="Chỉnh sửa trang cá nhân">
+		<form method="dialog" class="modal-body" id="profileForm">
+			<div class="modal-header">
+				<h3>Chỉnh sửa trang cá nhân</h3>
+				<button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+			</div>
+			<input type="hidden" id="pf_userId" />
+			<div class="form-grid">
+				<label>Tên hiển thị<input id="pf_username" required /></label>
+				<label>Email<input id="pf_email" type="email" required /></label>
+				<label class="span-2">Điện thoại<input id="pf_phone" /></label>
+				<label class="span-2">Ảnh đại diện (URL)<input id="pf_avatarUrl" /></label>
+			</div>
+			<div class="modal-actions">
+				<button type="submit" class="btn primary">Lưu</button>
+			</div>
+		</form>
+		<form method="dialog"><button value="close" hidden>Close</button></form>
+	</dialog>
 
 	<dialog id="productModal" class="modal" aria-label="Chi tiết sản phẩm">
 		<form method="dialog" class="modal-body" id="productForm">
@@ -321,7 +422,7 @@
 		// Expose current user type for client-side hints (SELLER/ADMIN)
 		window.currentUserType = document.body.getAttribute('data-user-type') || 'SELLER';
 		// Optional: you can also toggle button label if not admin
-		try { const btn = document.getElementById('pm_publish'); if (btn && window.currentUserType !== 'ADMIN') { btn.title = 'Chỉ Admin mới được publish'; } } catch (e) {}
+		try { const btn = document.getElementById('pm_publish'); if (btn && window.currentUserType !== 'ADMIN') { btn.title = 'Chỉ Admin mới được publish'; } } catch (e) { }
 	</script>
 	<script src="/js/seller-dashboard.js"></script>
 </body>
