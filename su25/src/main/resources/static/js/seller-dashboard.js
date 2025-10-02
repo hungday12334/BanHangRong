@@ -541,6 +541,23 @@
       showToast(`Tải ${list.length} sản phẩm của bạn`, 'info', { duration: 2000 });
     })();
 
+    // === Avatar edit button hover ===
+    const avatarWrap = document.querySelector('.avatar-edit-wrap');
+    const editAvatarBtn = document.getElementById('btnEditAvatar');
+    if (avatarWrap && editAvatarBtn) {
+      avatarWrap.addEventListener('mouseenter', () => { editAvatarBtn.style.display = 'block'; });
+      avatarWrap.addEventListener('mouseleave', () => { editAvatarBtn.style.display = 'none'; });
+      editAvatarBtn.addEventListener('click', () => {
+        // Mở modal chỉnh sửa profile (tập trung vào input avatar)
+        const btnOpen = document.getElementById('btnOpenEditProfile');
+        if (btnOpen) btnOpen.click();
+        setTimeout(() => {
+          const input = document.getElementById('pf_avatarUrl');
+          if (input) input.focus();
+        }, 300);
+      });
+    }
+
     // === Profile panel toggle (show profile in-place without navigation) ===
     const dashboardContent = document.getElementById('dashboardContent');
     const profilePanel = document.getElementById('profilePanel');

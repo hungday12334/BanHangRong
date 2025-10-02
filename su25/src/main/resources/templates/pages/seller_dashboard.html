@@ -258,17 +258,25 @@
 
 				<!-- Profile panel: hidden by default; shown in-place when clicking "Trang cá nhân" -->
 				<div id="profilePanel" class="card profile-card" hidden>
-					<div class="header profile-header">
-						<div class="profile-id">
-							<span class="avatar lg">
-								<img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}"
-									th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar"
-									onerror="this.onerror=null;this.src='/img/avatar_default.jpg';">
-								<img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}"
-									th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar">
-							</span>
-							<div class="profile-titles">
-								<h2>Trang cá nhân</h2>
+					<div class="header profile-header" style="flex-direction:column;align-items:center;gap:0;">
+						<div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;">
+							<div class="avatar-edit-wrap">
+								<span class="avatar lg profile-avatar-center"
+									style="position:relative;display:flex;justify-content:center;align-items:center;">
+									<img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}"
+										th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar"
+										onerror="this.onerror=null;this.src='/img/avatar_default.jpg';">
+									<img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}"
+										th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar">
+									<button id="btnEditAvatar" class="avatar-edit-btn" title="Đổi ảnh đại diện"
+										type="button"
+										style="display:none;position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;padding:6px;cursor:pointer;">
+										<i class="ti ti-camera" style="color:#fff;font-size:18px;"></i>
+									</button>
+								</span>
+							</div>
+							<div class="profile-titles" style="text-align:center;">
+								<h2 style="margin-bottom:2px;">Trang cá nhân</h2>
 								<div class="footer-note">Seller ID: <b id="profileSellerId" th:text="${sellerId}">-</b>
 									• <span class="chip"
 										th:text="${user != null ? user.userType : 'SELLER'}">SELLER</span></div>
@@ -276,26 +284,33 @@
 						</div>
 					</div>
 					<div class="body profile-body">
-						<div class="profile-grid">
+						<div class="profile-grid" style="gap:10px;">
 							<div class="profile-col">
-								<label class="label">Tên</label>
-								<div id="profile_username" class="value" th:text="${user?.username}">-</div>
-								<label class="label">Email</label>
-								<div id="profile_email" class="value" th:text="${user?.email}">-</div>
-								<label class="label">Điện thoại</label>
-								<div id="profile_phone" class="value" th:text="${user?.phoneNumber}">-</div>
+								<div class="label">Tên</div>
+								<div id="profile_username" class="value" style="font-weight:400;"
+									th:text="${user?.username}">-</div>
+								<div class="label">Email</div>
+								<div id="profile_email" class="value" style="font-weight:400;" th:text="${user?.email}">
+									-</div>
 							</div>
 							<div class="profile-col">
-								<label class="label">Mô tả</label>
-								<div id="profile_bio" class="value" th:text="${user != null} ? 'Chưa cập nhật' : '-'">-
-								</div>
+								<div class="label">Số điện thoại</div>
+								<div id="profile_phone" class="value" style="font-weight:400;"
+									th:text="${user?.phoneNumber}">-</div>
+								<div class="label">Giới tính</div>
+								<div id="profile_gender" class="value" style="font-weight:400;"
+									th:text="${user != null and user.gender != null} ? user.gender : '-'">-</div>
+								<div class="label">Ngày sinh</div>
+								<div id="profile_dob" class="value" style="font-weight:400;"
+									th:text="${(user != null and user.birthDate != null) ? #temporals.format(user.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
 							</div>
 						</div>
 					</div>
-					<div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:flex-end;">
-						<button id="btnBackToDashboard" type="button" class="btn">Quay lại bảng điều khiển</button>
-						<button id="btnOpenEditProfile" type="button" class="btn primary">Chỉnh sửa trang cá
-							nhân</button>
+					<div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:center;">
+						<button id="btnBackToDashboard" type="button" class="btn"><i class="ti ti-arrow-left"
+								style="margin-right:6px;"></i>Quay lại</button>
+						<button id="btnOpenEditProfile" type="button" class="btn primary"><i class="ti ti-edit"
+								style="margin-right:6px;"></i>Chỉnh sửa</button>
 					</div>
 				</div>
 
