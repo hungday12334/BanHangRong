@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Email - BanHangRong</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .test-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-form {
+            margin-bottom: 20px;
+        }
+        .test-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Email Configuration</h1>
+        <p>Kiểm tra xem cấu hình email có hoạt động không</p>
+        
+        <div class="test-form">
+            <h3>Test 1: Gửi email test</h3>
+            <input type="email" id="testEmail" placeholder="Nhập email để test" value="nguyenhung14012k5@gmail.com">
+            <button class="test-btn" onclick="testEmail()">Gửi Email Test</button>
+        </div>
+        
+        <div class="test-form">
+            <h3>Test 2: Quên mật khẩu</h3>
+            <input type="email" id="forgotEmail" placeholder="Nhập email để test quên mật khẩu" value="nguyenhung14012k5@gmail.com">
+            <button class="test-btn" onclick="testForgotPassword()">Test Quên Mật Khẩu</button>
+        </div>
+        
+        <div id="result"></div>
+        
+        <div style="margin-top: 30px;">
+            <h3>📋 Hướng dẫn:</h3>
+            <ol>
+                <li>Nhập email của bạn vào các ô trên</li>
+                <li>Click "Gửi Email Test" để kiểm tra cấu hình</li>
+                <li>Click "Test Quên Mật Khẩu" để test tính năng quên mật khẩu</li>
+                <li>Kiểm tra hộp thư email của bạn</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function testEmail() {
+            const email = document.getElementById('testEmail').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!email) {
+                showResult('Vui lòng nhập email!', 'error');
+                return;
+            }
+            
+            try {
+                showResult('Đang gửi email test...', 'info');
+                
+                const response = await fetch('/api/auth/test-email?email=' + encodeURIComponent(email), {
+                    method: 'POST'
+                });
+                
+                let result;
+                try {
+                    result = await response.json();
+                } catch (e) {
+                    result = await response.text();
+                }
+                
+                if (response.ok) {
+                    const message = result?.message || 'Email test đã được gửi thành công!';
+                    showResult('✅ ' + message + ' Kiểm tra hộp thư của bạn.', 'success');
+                } else {
+                    const errorMessage = result?.error || result || 'Không thể gửi email';
+                    showResult('❌ Lỗi: ' + errorMessage, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Lỗi kết nối: ' + error.message, 'error');
+            }
+        }
+        
+        async function testForgotPassword() {
+            const email = document.getElementById('forgotEmail').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!email) {
+                showResult('Vui lòng nhập email!', 'error');
+                return;
+            }
+            
+            try {
+                showResult('Đang gửi email quên mật khẩu...', 'info');
+                
+                const response = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'email=' + encodeURIComponent(email)
+                });
+                
+                let result;
+                try {
+                    result = await response.json();
+                } catch (e) {
+                    result = await response.text();
+                }
+                
+                if (response.ok) {
+                    const message = result?.message || 'Email quên mật khẩu đã được gửi thành công!';
+                    showResult('✅ ' + message + ' Kiểm tra hộp thư của bạn.', 'success');
+                } else {
+                    const errorMessage = result?.error || result || 'Không thể gửi email';
+                    showResult('❌ Lỗi: ' + errorMessage, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Lỗi kết nối: ' + error.message, 'error');
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result ' + type + '">' + message + '</div>';
+        }
+    </script>
+</body>
+</html>
