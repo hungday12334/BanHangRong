@@ -1,0 +1,54 @@
+<!-- Alternate Panels Fragment -->
+<section th:fragment="panels">
+  <section id="profilePanel" class="card profile-card" hidden data-panel="profile">
+    <div class="header profile-header" style="flex-direction:column;align-items:center;gap:0;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;">
+        <div class="avatar-edit-wrap">
+          <span class="avatar lg profile-avatar-center" style="position:relative;display:flex;justify-content:center;align-items:center;">
+            <img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" />
+            <img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar" />
+            <button id="btnEditAvatar" class="avatar-edit-btn" title="Đổi ảnh đại diện" type="button" style="display:none;position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;padding:6px;cursor:pointer;"><i class="ti ti-camera" style="color:#fff;font-size:18px;"></i></button>
+          </span>
+        </div>
+        <div class="profile-titles" style="text-align:center;">
+          <h2 style="margin-bottom:2px;">Trang cá nhân</h2>
+          <div class="footer-note">Seller ID: <b id="profileSellerId" th:text="${sellerId}">-</b> • <span class="chip" th:text="${user != null ? user.userType : 'SELLER'}">SELLER</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="body profile-body">
+      <div class="profile-grid" style="gap:10px;">
+        <div class="profile-col">
+          <div class="label">Tên</div>
+          <div id="profile_username" class="value" style="font-weight:400;" th:text="${user != null and user.username != null ? user.username : '-'}">-</div>
+          <div class="label">Email</div>
+          <div id="profile_email" class="value" style="font-weight:400;" th:text="${user != null and user.email != null ? user.email : '-'}">-</div>
+        </div>
+        <div class="profile-col">
+          <div class="label">Số điện thoại</div>
+          <div id="profile_phone" class="value" style="font-weight:400;" th:text="${user != null and user.phoneNumber != null ? user.phoneNumber : '-'}">-</div>
+          <div class="label">Giới tính</div>
+          <div id="profile_gender" class="value" style="font-weight:400;" th:text="${user != null and user.gender != null ? user.gender : '-'}">-</div>
+          <div class="label">Ngày sinh</div>
+          <div id="profile_dob" class="value" style="font-weight:400;" th:text="${(user != null and user.birthDate != null) ? #temporals.format(user.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:center;">
+      <button id="btnBackToDashboard" type="button" class="btn"><i class="ti ti-arrow-left" style="margin-right:6px;"></i>Quay lại</button>
+      <button id="btnOpenEditProfile" type="button" class="btn primary"><i class="ti ti-edit" style="margin-right:6px;"></i>Chỉnh sửa</button>
+    </div>
+  </section>
+  <section id="ordersPanel" class="card section-card" hidden data-panel="orders">
+    <div class="header"><div style="font-weight:700">Quản lý đơn hàng</div></div>
+    <div class="body"><div class="footer-note">Tính năng đang phát triển. Bạn có thể xem "Đơn hàng gần đây" ở dashboard hoặc tích hợp API để tải danh sách đầy đủ tại đây.</div></div>
+  </section>
+  <section id="keysPanel" class="card section-card" hidden data-panel="keys">
+    <div class="header"><div style="font-weight:700">Quản lý key</div></div>
+    <div class="body"><div class="footer-note">Tính năng đang phát triển. Dự kiến quản lý key sản phẩm tại đây.</div></div>
+  </section>
+  <section id="profileSettingsPanel" class="card section-card" hidden data-panel="profile-settings">
+    <div class="header"><div style="font-weight:700">Cài đặt profile</div></div>
+    <div class="body"><div class="footer-note">Bạn có thể sử dụng nút "Chỉnh sửa trang cá nhân" trong panel Trang cá nhân. Phần Cài đặt profile sẽ gom các tuỳ chọn nâng cao (2FA, bảo mật, v.v.).</div></div>
+  </section>
+</section>
