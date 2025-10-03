@@ -9,6 +9,7 @@ import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import banhangrong.su25.WebSocket.OrderWebSocketHandler;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -23,14 +24,18 @@ public class OrderController {
     private final UsersRepository usersRepository;
     private final ProductsRepository productsRepository;
 
+    private final OrderWebSocketHandler orderWebSocketHandler;
+
     public OrderController(OrdersRepository ordersRepository,
             OrderItemsRepository orderItemsRepository,
             UsersRepository usersRepository,
-            ProductsRepository productsRepository) {
+            ProductsRepository productsRepository,
+            OrderWebSocketHandler orderWebSocketHandler) {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.usersRepository = usersRepository;
         this.productsRepository = productsRepository;
+        this.orderWebSocketHandler = orderWebSocketHandler;
     }
 
     @GetMapping
@@ -87,6 +92,13 @@ public class OrderController {
         req.setCreatedAt(LocalDateTime.now());
         req.setUpdatedAt(LocalDateTime.now());
         Orders saved = ordersRepository.save(req);
+        // Broadcast realtime event (non-blocking best-effort)
+        try {
+            Double amt = saved.getTotalAmount() != null ? saved.getTotalAmount().doubleValue() : null;
+            orderWebSocketHandler.broadcastNewOrder(saved.getOrderId(), amt);
+        } catch (Exception e) {
+            // swallow to avoid failing API if websocket broadcast fails
+        }
         return ResponseEntity.created(URI.create("/api/orders/" + saved.getOrderId())).body(saved);
     }
 

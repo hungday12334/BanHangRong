@@ -709,5 +709,46 @@
         showToast('Đã cập nhật trang cá nhân', 'success');
       });
     }
+
+    // === WebSocket realtime order notifications ===
+    (function initOrderSocket() {
+      const proto = (location.protocol === 'https:') ? 'wss:' : 'ws:';
+      const url = proto + '//' + location.host + '/ws/orders';
+      let ws;
+      let retry = 0;
+      const maxRetry = 6;
+      function connect() {
+        ws = new WebSocket(url);
+        ws.onopen = () => { retry = 0; showToast('Kết nối realtime đơn hàng', 'info', { duration: 1500 }); };
+        ws.onmessage = (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            if (data && data.type === 'new-order' && data.data) {
+              const id = data.data.orderId;
+              const amt = data.data.totalAmount;
+              const formatted = (amt == null) ? '' : ('$' + Number(amt).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+              showToast(`Đơn hàng mới #${id} ${formatted}`, 'success');
+              // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
+              // Could implement incremental prepend instead of reload; keep simple first.
+              setTimeout(() => { try { location.reload(); } catch (e) { } }, 1200);
+            }
+          } catch (_) { /* ignore parse errors */ }
+        };
+        ws.onclose = () => {
+          if (retry < maxRetry) {
+            const delay = Math.min(1000 * Math.pow(2, retry), 10000);
+            retry++;
+            setTimeout(connect, delay);
+          } else {
+            showToast('Mất kết nối realtime', 'error', { duration: 4000 });
+          }
+        };
+        ws.onerror = () => { try { ws.close(); } catch (_) { } };
+      }
+      // Only init on dashboard main view (avoid duplicate when showing profile panels)
+      if (document.getElementById('dashboardContent')) {
+        connect();
+      }
+    })();
   });
 })();
