@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.lang.NonNull;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -24,27 +25,27 @@ public class OrderWebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         sessions.add(session);
         log.debug("WebSocket connected: {}", session.getId());
         // Send a hello ping
-        sendJson(session, new Payload("welcome", "Kết nối realtime thành công", null));
+        sendJson(session, new Payload("welcome", "Hệ thống sẵn sàng", null));
     }
 
     @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage message) throws Exception {
         // Echo minimal or ignore (protocol is server -> client only now)
         log.debug("Ignored client message from {}: {}", session.getId(), message.getPayload());
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
         sessions.remove(session);
         log.debug("WebSocket closed: {} ({} {})", session.getId(), status.getCode(), status.getReason());
     }
 
     @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+    public void handleTransportError(@NonNull WebSocketSession session, @NonNull Throwable exception) throws Exception {
         log.warn("Transport error for session {}", session.getId(), exception);
     }
 
