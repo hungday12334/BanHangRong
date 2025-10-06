@@ -514,6 +514,55 @@
 
     // Product modal handlers
     const productModal = document.getElementById('productModal');
+
+    // === Product snapshot & helpers (đưa ra ngoài để dùng chung) ===
+    let __originalProduct = null; // snapshot sản phẩm đang edit
+    function normalizeProductObj(p) {
+      return {
+        name: (p.name ?? '').trim(),
+        price: p.price != null ? Number(p.price) : null,
+        salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+        quantity: p.quantity != null ? Number(p.quantity) : 0,
+        downloadUrl: (p.downloadUrl ?? '').trim(),
+        description: (p.description ?? '').trim(),
+        isActive: p.isActive === true
+      };
+    }
+    function collectFormProduct() {
+      return normalizeProductObj({
+        name: document.getElementById('pm_name')?.value,
+        price: document.getElementById('pm_price')?.value ? Number(document.getElementById('pm_price').value) : null,
+        salePrice: document.getElementById('pm_salePrice')?.value ? Number(document.getElementById('pm_salePrice').value) : null,
+        quantity: document.getElementById('pm_quantity')?.value ? Number(document.getElementById('pm_quantity').value) : 0,
+        downloadUrl: document.getElementById('pm_downloadUrl')?.value || '',
+        description: document.getElementById('pm_description')?.value || '',
+        isActive: (document.getElementById('pm_status')?.textContent || '').trim() === 'Public'
+      });
+    }
+    function productChanged() {
+      if (!__originalProduct) return true; // new product coi như có thay đổi
+      const now = collectFormProduct();
+      return Object.keys(__originalProduct).some(k => __originalProduct[k] !== now[k]);
+    }
+    async function loadProduct(id) {
+      const res = await fetch(`/api/products/${id}`);
+      if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; }
+      const p = await res.json();
+      document.getElementById('pm_productId').value = p.productId ?? '';
+      document.getElementById('pm_name').value = p.name ?? '';
+      document.getElementById('pm_price').value = p.price ?? '';
+      document.getElementById('pm_salePrice').value = p.salePrice ?? '';
+      document.getElementById('pm_quantity').value = p.quantity ?? 0;
+      document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
+      document.getElementById('pm_description').value = p.description ?? '';
+      const st = document.getElementById('pm_status');
+      if (st) {
+        st.textContent = p.isActive ? 'Public' : 'Hidden';
+        st.className = `badge ${p.isActive ? 'pill good' : ''}`;
+      }
+      __originalProduct = normalizeProductObj(p);
+    }
+
     if (productModal) {
       // ensure any native cancel/close events clear locks
       productModal.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(productModal); });
@@ -529,21 +578,7 @@
       const sellerIdEl = document.getElementById('sellerId');
       const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
 
-      async function loadProduct(id) {
-        const res = await fetch(`/api/products/${id}`);
-        if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; }
-        const p = await res.json();
-        document.getElementById('pm_productId').value = p.productId ?? '';
-        document.getElementById('pm_name').value = p.name ?? '';
-        document.getElementById('pm_price').value = p.price ?? '';
-        document.getElementById('pm_salePrice').value = p.salePrice ?? '';
-        document.getElementById('pm_quantity').value = p.quantity ?? 0;
-        document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
-        document.getElementById('pm_description').value = p.description ?? '';
-        const st = document.getElementById('pm_status');
-        st.textContent = p.isActive ? 'Public' : 'Hidden';
-        st.className = `badge ${p.isActive ? 'pill good' : ''}`;
-      }
+      // (định nghĩa đã đưa ra ngoài khối if)
 
       // Row clicks open modal
       document.querySelectorAll('[data-product-id]').forEach(row => {
@@ -552,6 +587,7 @@
 
       // Add product
       document.getElementById('btnAddProduct')?.addEventListener('click', () => {
+        // Clear form for new product
         document.getElementById('pm_productId').value = '';
         document.getElementById('pm_name').value = '';
         document.getElementById('pm_price').value = '';
@@ -559,7 +595,11 @@
         document.getElementById('pm_quantity').value = 0;
         document.getElementById('pm_downloadUrl').value = '';
         document.getElementById('pm_description').value = '';
-        const st = document.getElementById('pm_status'); st.textContent = 'Hidden'; st.className = 'badge';
+        // Default: Public (không tự động ẩn nếu user chưa chỉnh gì)
+        const st = document.getElementById('pm_status');
+        st.textContent = 'Public';
+        st.className = 'badge pill good';
+  __originalProduct = null; // sản phẩm mới -> luôn xử lý create
         openModal(productModal);
       });
 
@@ -567,6 +607,12 @@
       document.getElementById('productForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('pm_productId').value;
+        // Nếu đang edit & không có thay đổi thì bỏ qua gọi API để tránh backend chuyển Hidden
+        if (id && !productChanged()) {
+          showToast('Không có thay đổi nào để lưu', 'info');
+          closeModal(productModal);
+          return;
+        }
         const payload = {
           sellerId: sellerId,
           name: document.getElementById('pm_name').value,
@@ -574,7 +620,8 @@
           salePrice: document.getElementById('pm_salePrice').value ? Number(document.getElementById('pm_salePrice').value) : null,
           quantity: document.getElementById('pm_quantity').value ? Number(document.getElementById('pm_quantity').value) : 0,
           downloadUrl: document.getElementById('pm_downloadUrl').value || null,
-          description: document.getElementById('pm_description').value || null
+          description: document.getElementById('pm_description').value || null,
+          isActive: document.getElementById('pm_status').textContent === 'Public'
         };
         const res = await fetch(id ? `/api/products/${id}` : '/api/products', {
           method: id ? 'PUT' : 'POST',
@@ -686,20 +733,7 @@
       document.querySelectorAll('#tbMyProducts [data-product-id]').forEach(row => {
         row.addEventListener('click', () => {
           const id = row.getAttribute('data-product-id');
-          (async () => {
-            const res = await fetch(`/api/products/${id}`); if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; } const p = await res.json();
-            document.getElementById('pm_productId').value = p.productId ?? '';
-            document.getElementById('pm_name').value = p.name ?? '';
-            document.getElementById('pm_price').value = p.price ?? '';
-            document.getElementById('pm_salePrice').value = p.salePrice ?? '';
-            document.getElementById('pm_quantity').value = p.quantity ?? 0;
-            document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
-            document.getElementById('pm_description').value = p.description ?? '';
-            const st = document.getElementById('pm_status');
-            st.textContent = p.isActive ? 'Public' : 'Hidden';
-            st.className = `badge ${p.isActive ? 'pill good' : ''}`;
-            openModal(productModal);
-          })();
+          loadProduct(id).then(() => openModal(productModal));
         });
       });
       const pager = document.getElementById('pgMyProducts');

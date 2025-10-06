@@ -1,7 +1,11 @@
 CREATE DATABASE IF NOT EXISTS wap;
 USE wap;
 
+-- Tắt FK để drop tự do
+SET FOREIGN_KEY_CHECKS=0;
+
 -- Users
+DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
@@ -23,6 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Social Authentication
+DROP TABLE IF EXISTS user_social_auth;
 CREATE TABLE IF NOT EXISTS user_social_auth (
     auth_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -34,6 +39,7 @@ CREATE TABLE IF NOT EXISTS user_social_auth (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Password Reset Tokens
+DROP TABLE IF EXISTS password_reset_tokens;
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
     token_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -45,6 +51,7 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Email Verification Tokens
+DROP TABLE IF EXISTS email_verification_tokens;
 CREATE TABLE IF NOT EXISTS email_verification_tokens (
     token_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -56,6 +63,7 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Categories
+DROP TABLE IF EXISTS categories;
 CREATE TABLE IF NOT EXISTS categories (
     category_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -66,6 +74,7 @@ CREATE TABLE IF NOT EXISTS categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Products (no category_id here; many-to-many via categories_products)
+DROP TABLE IF EXISTS products;
 CREATE TABLE IF NOT EXISTS products (
     product_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     seller_id BIGINT NOT NULL,
@@ -84,6 +93,7 @@ CREATE TABLE IF NOT EXISTS products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Categories <-> Products (many-to-many)
+DROP TABLE IF EXISTS categories_products;
 CREATE TABLE IF NOT EXISTS categories_products (
     category_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
@@ -94,6 +104,7 @@ CREATE TABLE IF NOT EXISTS categories_products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Images
+DROP TABLE IF EXISTS product_images;
 CREATE TABLE IF NOT EXISTS product_images (
     image_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
@@ -104,6 +115,7 @@ CREATE TABLE IF NOT EXISTS product_images (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Shopping Cart
+DROP TABLE IF EXISTS shopping_cart;
 CREATE TABLE IF NOT EXISTS shopping_cart (
     cart_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -117,6 +129,7 @@ CREATE TABLE IF NOT EXISTS shopping_cart (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Orders (payment fields removed; see payment_transactions)
+DROP TABLE IF EXISTS orders;
 CREATE TABLE IF NOT EXISTS orders (
     order_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -127,6 +140,7 @@ CREATE TABLE IF NOT EXISTS orders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Order Items (license_key removed)
+DROP TABLE IF EXISTS order_items;
 CREATE TABLE IF NOT EXISTS order_items (
     order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT NOT NULL,
@@ -139,6 +153,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Reviews
+DROP TABLE IF EXISTS product_reviews;
 CREATE TABLE IF NOT EXISTS product_reviews (
     review_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
@@ -153,6 +168,7 @@ CREATE TABLE IF NOT EXISTS product_reviews (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Licenses (license_key centralized here)
+DROP TABLE IF EXISTS product_licenses;
 CREATE TABLE IF NOT EXISTS product_licenses (
     license_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_item_id BIGINT NOT NULL,
@@ -169,6 +185,7 @@ CREATE TABLE IF NOT EXISTS product_licenses (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- User Sessions (for device tracking)
+DROP TABLE IF EXISTS user_sessions;
 CREATE TABLE IF NOT EXISTS user_sessions (
     session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -181,6 +198,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Payment Transactions (holds payment provider/status/transaction)
+DROP TABLE IF EXISTS payment_transactions;
 CREATE TABLE IF NOT EXISTS payment_transactions (
     transaction_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT NOT NULL,
@@ -193,6 +211,9 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_payments_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Bật lại FK
+SET FOREIGN_KEY_CHECKS=1;
 
 -- =============================
 -- SAMPLE DATA (safe to re-run)
