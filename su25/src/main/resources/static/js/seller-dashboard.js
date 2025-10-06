@@ -194,17 +194,93 @@
   }
 
   onReady(function () {
-    // Animate KPI counters
-    document.querySelectorAll('[data-count]').forEach(animateCount);
+    const loadStarted = performance.now();
+    const MIN_LOAD = 1200; // ms
+    const appLoader = document.getElementById('appLoader');
+    function finishGlobalLoad() {
+      const elapsed = performance.now() - loadStarted;
+      const remain = Math.max(0, MIN_LOAD - elapsed);
+      setTimeout(() => {
+        document.body.classList.remove('loading');
+        document.body.classList.add('ready');
+        if (appLoader) { appLoader.style.opacity = '0'; setTimeout(()=> appLoader.remove(), 400); }
+        // Start animations AFTER loader removed
+        document.querySelectorAll('[data-count]').forEach(animateCount);
+        initChart();
+        document.querySelectorAll('.progress span').forEach(span => {
+          const w = span.getAttribute('data-target-width') || span.style.width || '0%';
+          span.style.width = '0%'; requestAnimationFrame(()=> span.style.width = w);
+        });
+      }, remain);
+    }
 
-    // Progress bar width already set by Thymeleaf inline style; ensure transition applies after a frame
+    // Delay KPI + chart start until finishGlobalLoad
+    // Replace initial progress width capture
     document.querySelectorAll('.progress span').forEach(span => {
-      const w = span.style.width;
+      span.setAttribute('data-target-width', span.style.width || '0%');
       span.style.width = '0%';
-      requestAnimationFrame(() => { span.style.width = w || '0%'; });
     });
 
-    initChart();
+    // Expose for debugging
+    window.__finishGlobalLoad = finishGlobalLoad;
+
+    // Panel loading helper
+    function withPanelLoading(panelEl, task, fallbackMsg) {
+      if (!panelEl) return;
+      let overlay = panelEl.querySelector(':scope > .panel-loading-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'panel-loading-overlay';
+        overlay.innerHTML = '<div class="mini-spinner"></div><div>Đang tải...</div>';
+        panelEl.appendChild(overlay);
+      }
+      overlay.hidden = false;
+      overlay.style.opacity = '1';
+      const MIN_PANEL = 500;
+      const started = performance.now();
+      Promise.resolve().then(task).catch(err => {
+        console.error(err);
+        if (fallbackMsg) panelEl.querySelectorAll('tbody').forEach(tb => tb.innerHTML = `<tr><td colspan="10" class="empty-state">${fallbackMsg}</td></tr>`);
+      }).finally(() => {
+        const elapsed = performance.now() - started;
+        const wait = Math.max(0, MIN_PANEL - elapsed);
+        setTimeout(() => {
+          overlay.style.opacity = '0';
+          setTimeout(()=> { overlay.hidden = true; }, 320);
+        }, wait);
+      });
+    }
+
+    // Sidebar panel navigation (#profile, #orders, #keys, etc.)
+    function handleHashPanel() {
+      const hash = window.location.hash.replace('#','');
+      const map = {
+        'profile':'profilePanel',
+        'orders':'ordersPanel',
+        'keys':'keysPanel',
+        'profile-settings':'profileSettingsPanel'
+      };
+      let any = false;
+      Object.values(map).forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
+      if (hash && map[hash]) {
+        const target = document.getElementById(map[hash]);
+        if (target) {
+          target.hidden = false; any = true;
+          // Trigger specific async loads
+          if (hash === 'orders') withPanelLoading(target, () => loadSellerOrders(true), 'Không tải được đơn hàng');
+          if (hash === 'keys') withPanelLoading(target, () => loadSellerKeys(true), 'Không tải được key');
+        }
+      }
+      // If none matched, show dashboard core
+      const dash = document.getElementById('dashboardContent');
+      if (dash) dash.hidden = !!any;
+    }
+    window.addEventListener('hashchange', handleHashPanel);
+    handleHashPanel();
+
+    // Defer finish until next frame to allow initial layout
+    requestAnimationFrame(finishGlobalLoad);
+    // (Animations moved to finishGlobalLoad)
 
     // Tables pagination (progressive enhancement)
     const lowStockTbody = document.getElementById('tbLowStock');
