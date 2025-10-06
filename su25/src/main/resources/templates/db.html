@@ -6,69 +6,19 @@
     <title>Database Inspector</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        .db-header {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .db-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 16px;
-        }
-
-        .card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 12px;
-            background: #fff;
-        }
-
-        .card h3 {
-            margin: 0 0 8px;
-            font-size: 1.1rem;
-        }
-
-        .muted {
-            color: #666;
-            font-size: .9rem;
-        }
-
-        .scroll-x {
-            overflow-x: auto;
-        }
-
-        table.preview {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: .9rem;
-        }
-
-        table.preview th, table.preview td {
-            border: 1px solid #eee;
-            padding: 6px 8px;
-            white-space: nowrap;
-        }
-
-        table.preview th {
-            background: #f9f9f9;
-            position: sticky;
-            top: 0;
-        }
-
-        .columns {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: .85rem;
-        }
+        .db-header { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .db-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fff; }
+        .card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+        .muted { color: #666; font-size: .9rem; }
+        .scroll-x { overflow-x: auto; }
+        table.preview { width: 100%; border-collapse: collapse; font-size: .9rem; }
+        table.preview th, table.preview td { border: 1px solid #eee; padding: 6px 8px; white-space: nowrap; }
+        table.preview th { background: #f9f9f9; position: sticky; top: 0; }
+        .columns { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; }
     </style>
     <script>
-        function changeLimit(sel) {
-            const params = new URLSearchParams(location.search);
-            params.set('limit', sel.value);
-            location.search = params.toString();
-        }
+        function changeLimit(sel) { const params = new URLSearchParams(location.search); params.set('limit', sel.value); location.search = params.toString(); }
     </script>
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -100,8 +50,7 @@
                 <span th:text="${t.name}"></span>
                 <span class="muted" th:text="'(' + ${t.count} + ' rows)'" style="font-weight: normal"></span>
             </h3>
-            <div class="columns muted">Cột: <span th:text="${#strings.arrayJoin(t.columns.toArray(), ', ')}"></span>
-            </div>
+            <div class="columns muted">Cột: <span th:text="${#strings.arrayJoin(t.columns.toArray(), ', ')}"></span></div>
             <div class="scroll-x" style="margin-top:8px" th:if="${t.rows} != null and ${!t.rows.isEmpty()}">
                 <table class="preview">
                     <thead>
@@ -116,9 +65,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="muted" th:if="${t.rows} == null or ${t.rows.isEmpty()}">Không thể xem trước dữ liệu (có thể
-                thiếu quyền SELECT).
-            </div>
+            <div class="muted" th:if="${t.rows} == null or ${t.rows.isEmpty()}">Không thể xem trước dữ liệu (có thể thiếu quyền SELECT).</div>
         </div>
     </div>
 </div>
