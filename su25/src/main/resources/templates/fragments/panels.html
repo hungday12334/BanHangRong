@@ -5,8 +5,8 @@
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;">
         <div class="avatar-edit-wrap">
           <span class="avatar lg profile-avatar-center" style="position:relative;display:flex;justify-content:center;align-items:center;">
-            <img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" />
-            <img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar" />
+            <img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" width="120" height="120" fetchpriority="high" decoding="async" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
+            <img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar" width="120" height="120" loading="lazy" decoding="async" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
             <button id="btnEditAvatar" class="avatar-edit-btn" title="Đổi ảnh đại diện" type="button" style="display:none;position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;padding:6px;cursor:pointer;"><i class="ti ti-camera" style="color:#fff;font-size:18px;"></i></button>
           </span>
         </div>

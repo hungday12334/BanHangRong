@@ -6,9 +6,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bảng điều khiển người bán</title>
+  <!-- Preload critical dashboard stylesheet to improve LCP -->
+  <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
   <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+  <!-- Icon font (can be loaded with lower priority if needed) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Defer non-critical chart library to avoid blocking rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <meta name="theme-color" content="#0b1020" />
   <style>/* fallback dev */</style>
   <!-- HEAD END -->
