@@ -9,6 +9,10 @@
   <!-- Preload critical dashboard stylesheet to improve LCP -->
   <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
   <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+  <!-- Preload and set favicon / logo -->
+  <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
+  <link rel="icon" type="image/png" href="/img/kua654ms.png" />
+  <link rel="shortcut icon" href="/img/kua654ms.png" />
   <!-- Icon font (can be loaded with lower priority if needed) -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
@@ -22,8 +26,24 @@
 <body class="loading" th:attr="data-user-type=${userType}" data-app-root>
   <!-- GLOBAL APP LOADER -->
   <div id="appLoader" class="app-loader" role="status" aria-live="polite">
-    <div class="spinner" aria-hidden="true"></div>
-    <div class="load-text">Đang tải dữ liệu...</div>
+    <div class="loader-core">
+      <div class="orbital" aria-hidden="true">
+        <div class="nucleus"></div>
+        <div class="orbit orbit-a"><span></span></div>
+        <div class="orbit orbit-b"><span></span></div>
+        <div class="orbit orbit-c"><span></span></div>
+        <div class="rings">
+          <div class="ring r1"></div>
+          <div class="ring r2"></div>
+          <div class="ring r3"></div>
+        </div>
+      </div>
+      <div class="progress-wrap" aria-hidden="true">
+        <div class="progress-bar" data-loader-progress></div>
+      </div>
+      <div class="load-text" data-loader-text>Đang khởi tạo...</div>
+      <div class="load-tip" data-loader-tip></div>
+    </div>
   </div>
   <!-- APP WRAPPER START -->
   <div class="page">

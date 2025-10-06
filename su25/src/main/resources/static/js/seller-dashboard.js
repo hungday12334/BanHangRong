@@ -176,6 +176,44 @@
     render();
   }
 
+  // Logo fallback: nếu ảnh không load hoặc trong suốt hoàn toàn -> hiển thị chữ thay thế
+  function initLogoFallback() {
+    const fig = document.querySelector('.app-logo');
+    if (!fig) return;
+    const img = fig.querySelector('img');
+    if (!img) return;
+    let done = false;
+    function toFallback(reason) {
+      if (done) return; done = true;
+      fig.classList.add('fallback');
+      fig.innerHTML = '<span>BR</span>'; // viết tắt Bán Rong
+      if (reason) console.warn('Logo fallback:', reason);
+    }
+    img.addEventListener('error', () => toFallback('error'));
+    // Detect blank (all white) or fully transparent by sampling once it loads
+    img.addEventListener('load', () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const w = canvas.width = img.naturalWidth;
+        const h = canvas.height = img.naturalHeight;
+        if (!w || !h) { toFallback('zero-size'); return; }
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const data = ctx.getImageData(0,0,w,h).data;
+        let sum = 0, opaque = 0;
+        for (let i=0;i<data.length;i+=4){
+          const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+            if (a>12) opaque++;
+            sum += r+g+b;
+        }
+        const avg = sum / ( (data.length/4) * 3 );
+        if (opaque < (data.length/4)*0.05 || avg > 250) {
+          toFallback('blank/transparent');
+        }
+      } catch(e){ console.debug('Logo analysis skipped', e); }
+    }, { once:true });
+  }
+
   function applyTheme(theme) {
     const root = document.documentElement;
     root.classList.remove('theme-dark', 'theme-light');
@@ -191,19 +229,74 @@
       btn.setAttribute('aria-label', 'Chuyển giao diện');
       btn.title = 'Chuyển giao diện';
     }
+    // swap logo variant
+    const logoImg = document.querySelector('.app-logo-img');
+    if (logoImg) {
+      const lightSrc = logoImg.getAttribute('data-logo-light');
+      const darkSrc = logoImg.getAttribute('data-logo-dark');
+      if (theme === 'dark' && darkSrc) {
+        logoImg.src = darkSrc;
+      } else if (lightSrc) {
+        logoImg.src = lightSrc;
+      }
+    }
   }
 
   onReady(function () {
+    initLogoFallback();
     const loadStarted = performance.now();
-    const MIN_LOAD = 1200; // ms
+    const MIN_LOAD = 1400; // ms (slightly longer to showcase enhanced animation)
     const appLoader = document.getElementById('appLoader');
+    const progressBar = appLoader?.querySelector('[data-loader-progress]');
+    const loadTextEl = appLoader?.querySelector('[data-loader-text]');
+    const tipEl = appLoader?.querySelector('[data-loader-tip]');
+    const TIPS = [
+      'Mẹo: Bạn có thể chuyển nhanh panel bằng #hash trên URL.',
+      'Gợi ý: Nhấn biểu tượng mặt trời / mặt trăng để đổi giao diện.',
+      'Mẹo: Sử dụng bộ lọc để thu hẹp kết quả đơn hàng.',
+      'Thông tin: Các số liệu sẽ được cập nhật tự động định kỳ.',
+      'Mẹo: Kéo xuống dưới cùng để nạp thêm dữ liệu (nếu có).'
+    ];
+    let tipIndex = 0;
+    function cycleTip() {
+      if (!tipEl) return;
+      tipEl.textContent = TIPS[tipIndex % TIPS.length];
+      tipIndex++;
+    }
+    cycleTip();
+    const tipTimer = setInterval(cycleTip, 6500);
+
+    let simulated = 0;
+    let done = false;
+    function tickProgress() {
+      if (done) return;
+      // accelerate slower after 70%
+      const inc = simulated < 70 ? (4 + Math.random()*6) : (1 + Math.random()*3);
+      simulated = Math.min(simulated + inc, 94); // stop at 94% until finish
+      if (progressBar) progressBar.style.width = simulated + '%';
+      if (loadTextEl) {
+        if (simulated < 30) loadTextEl.textContent = 'Đang khởi tạo...';
+        else if (simulated < 55) loadTextEl.textContent = 'Đang tải dữ liệu...';
+        else if (simulated < 80) loadTextEl.textContent = 'Xử lý thống kê...';
+        else loadTextEl.textContent = 'Chuẩn bị hiển thị...';
+      }
+      setTimeout(tickProgress, 260 + Math.random()*240);
+    }
+    tickProgress();
+
     function finishGlobalLoad() {
       const elapsed = performance.now() - loadStarted;
       const remain = Math.max(0, MIN_LOAD - elapsed);
       setTimeout(() => {
+        done = true;
+        if (progressBar) progressBar.style.width = '100%';
+        if (loadTextEl) loadTextEl.textContent = 'Hoàn tất!';
         document.body.classList.remove('loading');
         document.body.classList.add('ready');
-        if (appLoader) { appLoader.style.opacity = '0'; setTimeout(()=> appLoader.remove(), 400); }
+        if (appLoader) {
+          appLoader.style.opacity = '0';
+          setTimeout(()=> { clearInterval(tipTimer); appLoader.remove(); }, 600);
+        }
         // Start animations AFTER loader removed
         document.querySelectorAll('[data-count]').forEach(animateCount);
         initChart();
@@ -251,32 +344,7 @@
       });
     }
 
-    // Sidebar panel navigation (#profile, #orders, #keys, etc.)
-    function handleHashPanel() {
-      const hash = window.location.hash.replace('#','');
-      const map = {
-        'profile':'profilePanel',
-        'orders':'ordersPanel',
-        'keys':'keysPanel',
-        'profile-settings':'profileSettingsPanel'
-      };
-      let any = false;
-      Object.values(map).forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
-      if (hash && map[hash]) {
-        const target = document.getElementById(map[hash]);
-        if (target) {
-          target.hidden = false; any = true;
-          // Trigger specific async loads
-          if (hash === 'orders') withPanelLoading(target, () => loadSellerOrders(true), 'Không tải được đơn hàng');
-          if (hash === 'keys') withPanelLoading(target, () => loadSellerKeys(true), 'Không tải được key');
-        }
-      }
-      // If none matched, show dashboard core
-      const dash = document.getElementById('dashboardContent');
-      if (dash) dash.hidden = !!any;
-    }
-    window.addEventListener('hashchange', handleHashPanel);
-    handleHashPanel();
+    // Remove old hash handler (merged into showPanelByHash later)
 
     // Defer finish until next frame to allow initial layout
     requestAnimationFrame(finishGlobalLoad);
@@ -661,6 +729,11 @@
       profilePanel.hidden = true;
       profilePanel.style.display = 'none';
       dashboardContent.style.display = '';
+      // ALSO hide other sidebar panels (orders, keys, profile-settings) to prevent residual content
+      ['ordersPanel','keysPanel','profileSettingsPanel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.hidden = true; el.style.display = 'none'; }
+      });
       // restore active class to dashboard link
       document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
       const dash = Array.from(document.querySelectorAll('.menu a')).find(a => a.getAttribute('href') === '/seller/dashboard');
@@ -730,6 +803,7 @@
     document.querySelectorAll('.menu a[href^="#"]').forEach(a => {
       a.addEventListener('click', (e) => { e.preventDefault(); const h = a.getAttribute('href'); showPanelByHash(h); /* load handled inside showPanelByHash */ });
     });
+    window.addEventListener('hashchange', () => showPanelByHash(window.location.hash));
     // If hash is one of our panels (other than #profile handled earlier), show it on load
     if (window.location.hash && panelMap[window.location.hash] && window.location.hash !== '#profile') {
       setTimeout(() => showPanelByHash(window.location.hash), 50);

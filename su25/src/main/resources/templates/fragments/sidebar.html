@@ -1,7 +1,12 @@
 <!-- Sidebar Fragment -->
 <section th:fragment="sidebar" data-section="sidebar" class="sidebar">
   <div class="brand-bar">
-    <div class="brand">Bán Hàng Rong</div>
+    <div class="brand brand-with-logo">
+      <figure class="app-logo" role="img" aria-label="Logo">
+        <img src="/img/kua654ms.png" alt="Logo" decoding="async" loading="eager" data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" class="app-logo-img" />
+      </figure>
+      <span class="brand-text">Bán Hàng Rong</span>
+    </div>
     <button id="themeToggle" class="theme-toggle" aria-label="Chuyển giao diện" title="Chuyển giao diện" type="button"><i class="ti ti-sun"></i></button>
   </div>
   <nav class="menu" data-block="nav">
