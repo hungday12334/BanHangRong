@@ -216,6 +216,10 @@
 
   function applyTheme(theme) {
     const root = document.documentElement;
+    // Add temporary transition class for smoother theme swap
+    root.classList.add('theme-transition');
+    // Prepare radial wipe overlay (capture current background color before class change)
+    let oldBg = getComputedStyle(root).getPropertyValue('--bg').trim();
     root.classList.remove('theme-dark', 'theme-light');
     if (theme === 'dark') root.classList.add('theme-dark');
     else if (theme === 'light') root.classList.add('theme-light');
@@ -228,6 +232,7 @@
       btn.innerHTML = theme === 'light' ? '<i class="ti ti-moon"></i>' : '<i class="ti ti-sun"></i>';
       btn.setAttribute('aria-label', 'Chuyển giao diện');
       btn.title = 'Chuyển giao diện';
+      btn.dataset.mode = theme;
     }
     // swap logo variant
     const logoImg = document.querySelector('.app-logo-img');
@@ -240,6 +245,23 @@
         logoImg.src = lightSrc;
       }
     }
+    // loader nucleus logo swap
+    const loaderLogo = document.querySelector('#appLoader .loader-logo');
+    if (loaderLogo) {
+      const lightSrc = loaderLogo.getAttribute('data-logo-light');
+      const darkSrc = loaderLogo.getAttribute('data-logo-dark');
+      if (theme === 'dark' && darkSrc) loaderLogo.src = darkSrc; else if (lightSrc) loaderLogo.src = lightSrc;
+    }
+    // Create cross-fade overlay + subtle body pop
+    try {
+      const layer = document.createElement('div');
+      layer.className = 'theme-switch-layer';
+      document.body.appendChild(layer);
+      document.body.classList.add('theme-switching');
+      setTimeout(()=> { layer.remove(); document.body.classList.remove('theme-switching'); }, 620);
+    } catch(_) {}
+    // Remove transition class after a short delay
+    setTimeout(() => root.classList.remove('theme-transition'), 600);
   }
 
   onReady(function () {
