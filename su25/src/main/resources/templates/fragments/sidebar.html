@@ -1,0 +1,18 @@
+<!-- Sidebar Fragment -->
+<section th:fragment="sidebar" data-section="sidebar" class="sidebar">
+  <div class="brand-bar">
+    <div class="brand">Bán Hàng Rong</div>
+    <button id="themeToggle" class="theme-toggle" aria-label="Chuyển giao diện" title="Chuyển giao diện" type="button"><i class="ti ti-sun"></i></button>
+  </div>
+  <nav class="menu" data-block="nav">
+    <a href="/" class="item" data-nav="home" title="Trang chủ" aria-label="Trang chủ"><i class="ti ti-home"></i><span class="lbl">Trang chủ</span></a>
+    <a href="/seller/dashboard" class="item active" data-nav="dashboard" title="Quản lý" aria-label="Quản lý"><i class="ti ti-dashboard"></i><span class="lbl">Quản lý</span></a>
+    <a href="#profile" class="item" data-nav="profile" title="Trang cá nhân" aria-label="Trang cá nhân"><i class="ti ti-user"></i><span class="lbl">Trang cá nhân</span></a>
+    <a href="#orders" class="item" data-nav="orders" title="Quản lý đơn hàng" aria-label="Quản lý đơn hàng"><i class="ti ti-receipt"></i><span class="lbl">Quản lý đơn hàng</span></a>
+    <a href="#keys" class="item" data-nav="keys" title="Quản lý key" aria-label="Quản lý key"><i class="ti ti-key"></i><span class="lbl">Quản lý key</span></a>
+    <a href="#profile-settings" class="item" data-nav="profile-settings" title="Quản lý profile" aria-label="Quản lý profile"><i class="ti ti-settings"></i><span class="lbl">Quản lý profile</span></a>
+  </nav>
+  <div class="sidebar-footer" data-block="logout">
+    <a href="/logout" class="logout-btn" title="Đăng xuất" aria-label="Đăng xuất"><i class="ti ti-logout"></i><span>Đăng xuất</span></a>
+  </div>
+</section>

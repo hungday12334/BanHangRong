@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <!-- HEAD START -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bảng điều khiển người bán</title>
+  <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="theme-color" content="#0b1020" />
+  <style>/* fallback dev */</style>
+  <!-- HEAD END -->
+</head>
+
+<body th:attr="data-user-type=${userType}" data-app-root>
+  <!-- APP WRAPPER START -->
+  <div class="page">
+
+    <!-- SIDEBAR START -->
+    <aside th:replace="fragments/sidebar :: sidebar"></aside>
+    <!-- SIDEBAR END -->
+
+    <!-- MAIN START -->
+    <main data-section="main">
+      <div class="container">
+
+        <!-- DASHBOARD CORE START -->
+        <section th:replace="fragments/dashboard :: dashboard"></section>
+        <!-- DASHBOARD CORE END -->
+
+        <!-- PANELS ALT START -->
+        <section th:replace="fragments/panels :: panels"></section>
+        <!-- PANELS ALT END -->
+
+      </div>
+    </main>
+    <!-- MAIN END -->
+  </div>
+  <!-- APP WRAPPER END -->
+
+  <!-- MODAL LAYER START -->
+  <div id="modalOverlay" class="modal-overlay" hidden data-modal-overlay></div>
+
+  <section th:replace="fragments/modals :: modals"></section>
+  <!-- MODAL LAYER END -->
+
+  <!-- TOAST CONTAINER START -->
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true" data-block="toast-root"></div>
+  <!-- TOAST CONTAINER END -->
+
+  <!-- SCRIPTS START -->
+  <section th:replace="fragments/scripts :: scripts"></section>
+  <!-- SCRIPTS END -->
+</body>
+</html>
