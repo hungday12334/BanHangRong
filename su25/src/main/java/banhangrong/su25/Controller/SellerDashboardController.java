@@ -29,7 +29,7 @@ public class SellerDashboardController {
     @GetMapping("/seller/dashboard")
     public String dashboard(@RequestParam(name = "sellerId", required = false) Long sellerId,
                             Model model) {
-        if (sellerId == null) sellerId = 1L; // assumption: demo seller
+        if (sellerId == null) sellerId = 2L; // assumption: demo seller
 
         // KPIs
         BigDecimal totalRevenue = Optional.ofNullable(productsRepository.totalRevenueBySeller(sellerId))

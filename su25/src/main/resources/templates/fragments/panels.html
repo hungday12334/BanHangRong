@@ -40,12 +40,62 @@
     </div>
   </section>
   <section id="ordersPanel" class="card section-card" hidden data-panel="orders">
-    <div class="header"><div style="font-weight:700">Quản lý đơn hàng</div></div>
-    <div class="body"><div class="footer-note">Tính năng đang phát triển. Bạn có thể xem "Đơn hàng gần đây" ở dashboard hoặc tích hợp API để tải danh sách đầy đủ tại đây.</div></div>
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:180px;">Quản lý đơn hàng</div>
+      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <input id="ord_search" type="text" placeholder="Tìm (#ID / username)" class="input" style="min-width:160px;" />
+        <input id="ord_from" type="datetime-local" class="input" />
+        <input id="ord_to" type="datetime-local" class="input" />
+        <button id="ord_btnFilter" type="button" class="btn">Lọc</button>
+        <button id="ord_btnReset" type="button" class="btn" title="Xóa bộ lọc"><i class="ti ti-restore"></i></button>
+        <button id="ord_btnExport" type="button" class="btn" title="Xuất CSV"><i class="ti ti-download"></i></button>
+      </div>
+    </div>
+    <div class="body" style="overflow:auto;">
+      <table class="table slim" style="width:100%;min-width:720px;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ngày tạo</th>
+            <th>User</th>
+            <th>Số lượng (của bạn)</th>
+            <th>Doanh thu (của bạn)</th>
+          </tr>
+        </thead>
+        <tbody id="tbSellerOrders"></tbody>
+      </table>
+      <div id="pgSellerOrders" class="pager" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
+    </div>
   </section>
   <section id="keysPanel" class="card section-card" hidden data-panel="keys">
-    <div class="header"><div style="font-weight:700">Quản lý key</div></div>
-    <div class="body"><div class="footer-note">Tính năng đang phát triển. Dự kiến quản lý key sản phẩm tại đây.</div></div>
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:140px;">Quản lý key</div>
+      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <select id="key_product" class="input" style="min-width:140px;"><option value="">Sản phẩm</option></select>
+        <select id="key_active" class="input"><option value="">Trạng thái</option><option value="true">Active</option><option value="false">Inactive</option></select>
+        <input id="key_search" class="input" type="text" placeholder="Tìm key" style="min-width:120px;" />
+        <button id="key_btnFilter" class="btn" type="button">Lọc</button>
+        <button id="key_btnReset" class="btn" type="button" title="Xóa bộ lọc"><i class="ti ti-restore"></i></button>
+      </div>
+    </div>
+    <div class="body" style="overflow:auto;">
+      <table class="table slim" style="width:100%;min-width:780px;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Key</th>
+            <th>Sản phẩm</th>
+            <th>Đơn hàng</th>
+            <th>Active</th>
+            <th>Kích hoạt</th>
+            <th>Thiết bị</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbSellerKeys"></tbody>
+      </table>
+      <div id="pgSellerKeys" class="pager" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
+    </div>
   </section>
   <section id="profileSettingsPanel" class="card section-card" hidden data-panel="profile-settings">
     <div class="header"><div style="font-weight:700">Cài đặt profile</div></div>

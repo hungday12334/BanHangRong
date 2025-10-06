@@ -641,10 +641,18 @@
       const target = document.getElementById(panelMap[hash]);
       if (target) { target.hidden = false; target.style.display = ''; target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
       try { history.replaceState({}, '', hash); } catch (e) {}
+      // NEW: tự động load dữ liệu khi chuyển panel
+      try {
+        if (hash === '#orders' && typeof loadSellerOrders === 'function') {
+          loadSellerOrders(true);
+        } else if (hash === '#keys' && typeof loadSellerKeys === 'function') {
+          loadSellerKeys(true);
+        }
+      } catch (_) { /* ignore */ }
     }
     // Intercept sidebar anchor clicks
     document.querySelectorAll('.menu a[href^="#"]').forEach(a => {
-      a.addEventListener('click', (e) => { e.preventDefault(); const h = a.getAttribute('href'); showPanelByHash(h); });
+      a.addEventListener('click', (e) => { e.preventDefault(); const h = a.getAttribute('href'); showPanelByHash(h); /* load handled inside showPanelByHash */ });
     });
     // If hash is one of our panels (other than #profile handled earlier), show it on load
     if (window.location.hash && panelMap[window.location.hash] && window.location.hash !== '#profile') {
@@ -750,5 +758,176 @@
         connect();
       }
     })();
+
+    // ================= Seller Orders Panel (dynamic load) =================
+    const sellerIdEl = document.getElementById('sellerId');
+    const sellerIdVal = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+    const ordersTbody = document.getElementById('tbSellerOrders');
+    const ordersPager = document.getElementById('pgSellerOrders');
+    let ordersPageState = { page: 0, size: 10, totalPages: 0 };
+
+    async function loadSellerOrders(resetPage = false) {
+      if (!sellerIdVal || !ordersTbody) return;
+      if (resetPage) ordersPageState.page = 0;
+      const params = new URLSearchParams();
+      params.set('page', ordersPageState.page);
+      params.set('size', ordersPageState.size);
+      const s = document.getElementById('ord_search')?.value.trim();
+      const from = document.getElementById('ord_from')?.value;
+      const to = document.getElementById('ord_to')?.value;
+      if (s) params.set('search', s);
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const res = await fetch(`/api/seller/${sellerIdVal}/orders?` + params.toString());
+      if (!res.ok) { showToast('Không tải được đơn hàng', 'error'); return; }
+      const data = await res.json();
+      ordersPageState.totalPages = data.totalPages;
+      ordersTbody.innerHTML = '';
+      data.content.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${o.orderId}</td>` +
+          `<td>${o.createdAt ? o.createdAt.replace('T',' ') : ''}</td>` +
+          `<td>${o.username ? o.username : (o.userId ? ('User #' + o.userId) : '')}</td>` +
+          `<td>${o.sellerItems ?? 0}</td>` +
+          `<td>$${(o.sellerAmount ?? 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
+        tr.className = 'clickable';
+        tr.addEventListener('click', () => { // reuse existing order modal if available
+          const existing = document.querySelector(`[data-order-id='${o.orderId}']`);
+          if (existing) existing.click();
+          else if (document.getElementById('orderModal')) {
+            // fallback: open modal via fetch
+            const id = o.orderId;
+            const orderModal = document.getElementById('orderModal');
+            if (orderModal) {
+              (async () => {
+                const res = await fetch(`/api/orders/${id}`); if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
+                const data = await res.json();
+                const ord = data.order;
+                document.getElementById('om_orderId').textContent = ord.orderId;
+                document.getElementById('om_userId').textContent = (data.user && data.user.username) ? data.user.username : ('User #' + (ord.userId ?? ''));
+                const amtVal = ord.totalAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+                document.getElementById('om_totalAmount').textContent = amt;
+                document.getElementById('om_createdAt').textContent = ord.createdAt ?? '';
+                const items = data.items || []; const tb = document.getElementById('om_items'); tb.innerHTML='';
+                for (const it of items) { const r=document.createElement('tr'); r.innerHTML=`<td>${it.productName||('#'+it.productId)}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`; tb.appendChild(r); }
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay) { overlay.hidden=false; overlay.classList.add('visible'); }
+                if (typeof orderModal.showModal === 'function') { try { orderModal.showModal(); } catch (_) { orderModal.setAttribute('open',''); } }
+                requestAnimationFrame(()=> orderModal.classList.add('is-open'));
+              })();
+            }
+          }
+        });
+        ordersTbody.appendChild(tr);
+      });
+      paginateTable(ordersTbody, ordersPager, ordersPageState.size); // reuse for pager skeleton
+      // Override pager to hook page changes via API (not just client slicing)
+      if (ordersPager) {
+        ordersPager.innerHTML='';
+        const total = ordersPageState.totalPages;
+        if (total > 1) {
+          const mk = (label, page, disabled, current) => {
+            const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if (current) b.setAttribute('aria-current','page');
+            b.addEventListener('click', () => { ordersPageState.page = page; loadSellerOrders(false); }); return b; };
+          ordersPager.appendChild(mk('«', Math.max(0, ordersPageState.page-1), ordersPageState.page===0,false));
+          for (let i=0;i<total;i++) ordersPager.appendChild(mk(String(i+1), i, false, i===ordersPageState.page));
+          ordersPager.appendChild(mk('»', Math.min(total-1, ordersPageState.page+1), ordersPageState.page===total-1,false));
+        }
+      }
+    }
+
+    document.getElementById('ord_btnFilter')?.addEventListener('click', () => loadSellerOrders(true));
+    document.getElementById('ord_btnReset')?.addEventListener('click', () => {
+      const f = document.getElementById('ord_from'); if (f) f.value='';
+      const t = document.getElementById('ord_to'); if (t) t.value='';
+      const s = document.getElementById('ord_search'); if (s) s.value='';
+      loadSellerOrders(true);
+    });
+    document.getElementById('ord_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadSellerOrders(true);} });
+    document.getElementById('ord_btnExport')?.addEventListener('click', () => {
+      if (!ordersTbody) return; const rows = [['OrderId','CreatedAt','User','SellerItems','SellerAmount']];
+      ordersTbody.querySelectorAll('tr').forEach(tr => { const cols=[...tr.children].map(td=> td.textContent.replace(/\s+/g,' ').trim()); if (cols.length>=5) rows.push(cols.slice(0,5)); });
+      const csv = rows.map(r=> r.map(c => '"'+c.replace(/"/g,'""')+'"').join(',')).join('\r\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='seller_orders.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500);
+    });
+
+    // Auto load when panel hash activated
+    if (window.location.hash === '#orders') setTimeout(() => loadSellerOrders(true), 120);
+    window.addEventListener('hashchange', () => { if (window.location.hash === '#orders') loadSellerOrders(false); });
+
+    // ================= License Keys Panel =================
+    const keysTbody = document.getElementById('tbSellerKeys');
+    const keysPager = document.getElementById('pgSellerKeys');
+    let keysPageState = { page:0, size:10, totalPages:0 };
+
+    async function loadSellerKeys(resetPage=false) {
+      if (!sellerIdVal || !keysTbody) return;
+      if (resetPage) keysPageState.page = 0;
+      const params = new URLSearchParams();
+      params.set('page', keysPageState.page); params.set('size', keysPageState.size);
+      const prod = document.getElementById('key_product')?.value; if (prod) params.set('productId', prod);
+      const act = document.getElementById('key_active')?.value; if (act) params.set('active', act);
+      const s = document.getElementById('key_search')?.value.trim(); if (s) params.set('search', s);
+      const res = await fetch(`/api/seller/${sellerIdVal}/licenses?` + params.toString());
+      if (!res.ok) { showToast('Không tải được key', 'error'); return; }
+      const data = await res.json(); keysPageState.totalPages = data.totalPages;
+      keysTbody.innerHTML='';
+      data.content.forEach(l => {
+        const tr = document.createElement('tr');
+        const activeBadge = l.isActive ? '<span class="pill good">ON</span>' : '<span class="badge">OFF</span>';
+        const actDate = l.activationDate ? l.activationDate.replace('T',' ') : '';
+        tr.innerHTML = `<td>${l.licenseId}</td><td style="font-family:monospace;">${l.licenseKey}</td><td>${l.productName||('#'+l.productId)}</td><td>${l.orderId||''}</td><td>${activeBadge}</td><td>${actDate}</td><td>${l.deviceIdentifier||''}</td><td><button class="btn xs" data-toggle-lic="${l.licenseId}">${l.isActive?'Tắt':'Bật'}</button></td>`;
+        keysTbody.appendChild(tr);
+      });
+        if (data.content.length === 0) {
+          const tr = document.createElement('tr');
+          const colSpan = 8;
+          tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">Không có key nào cho seller hiện tại hoặc sellerId chưa đúng.</td>`;
+          keysTbody.appendChild(tr);
+        }
+      paginateTable(keysTbody, keysPager, keysPageState.size);
+      if (keysPager) {
+        keysPager.innerHTML=''; const total = keysPageState.totalPages;
+        if (total>1) {
+          const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ keysPageState.page=page; loadSellerKeys(false); }); return b; };
+          keysPager.appendChild(mk('«', Math.max(0, keysPageState.page-1), keysPageState.page===0,false));
+          for (let i=0;i<total;i++) keysPager.appendChild(mk(String(i+1), i, false, i===keysPageState.page));
+          keysPager.appendChild(mk('»', Math.min(total-1, keysPageState.page+1), keysPageState.page===total-1,false));
+        }
+      }
+    }
+
+    document.getElementById('key_btnFilter')?.addEventListener('click', () => loadSellerKeys(true));
+    document.getElementById('key_btnReset')?.addEventListener('click', () => {
+      const p=document.getElementById('key_product'); if (p) p.value='';
+      const a=document.getElementById('key_active'); if (a) a.value='';
+      const s=document.getElementById('key_search'); if (s) s.value='';
+      loadSellerKeys(true);
+    });
+    document.getElementById('key_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadSellerKeys(true); } });
+
+    // Toggle active
+    keysTbody?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-toggle-lic]'); if (!btn) return;
+      const id = btn.getAttribute('data-toggle-lic');
+      // Derive target state by reading cell
+      const row = btn.closest('tr');
+      const isActiveNow = row && row.querySelector('td:nth-child(5) .pill');
+      const next = !(!!isActiveNow);
+      const res = await fetch(`/api/licenses/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ isActive: next }) });
+      if (res.ok) { showToast(next? 'Đã bật key':'Đã tắt key','success'); loadSellerKeys(false); }
+      else showToast('Cập nhật key thất bại','error');
+    });
+
+    // Populate product filter select (reuse my products API)
+    (async function populateProductsForKeys(){
+      if (!sellerIdVal) return; const sel = document.getElementById('key_product'); if (!sel) return;
+      try { const res = await fetch(`/api/products?sellerId=${sellerIdVal}`); if (!res.ok) return; const list = await res.json();
+        list.forEach(p => { const o=document.createElement('option'); o.value=p.productId; o.textContent=p.name || ('#'+p.productId); sel.appendChild(o); });
+      } catch (_) {}
+    })();
+
+    if (window.location.hash === '#keys') setTimeout(() => loadSellerKeys(true), 120);
+    window.addEventListener('hashchange', () => { if (window.location.hash === '#keys') loadSellerKeys(false); });
   });
 })();
