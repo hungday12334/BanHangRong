@@ -3,6 +3,8 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import org.springframework.stereotype.Controller;
@@ -21,11 +23,13 @@ public class CustomerDashboardController {
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
     private final ShoppingCartRepository shoppingCartRepository;
+    private final UsersRepository usersRepository;
 
-    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository) {
+    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository, UsersRepository usersRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.shoppingCartRepository = shoppingCartRepository;
+        this.usersRepository = usersRepository;
     }
 
     @GetMapping("/customer/dashboard")
@@ -64,6 +68,12 @@ public class CustomerDashboardController {
         model.addAttribute("primaryImageByProduct", primaryImageByProduct);
         // demo userId=2, show cart count in topbar
         try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(2L)); } catch (Exception ignored) {}
+        try {
+            Users currentUser = usersRepository.findAll().stream()
+                    .sorted((a,b)-> Long.compare(a.getUserId(), b.getUserId()))
+                    .findFirst().orElse(null);
+            model.addAttribute("user", currentUser);
+        } catch (Exception ignored) {}
         return "pages/customer_dashboard";
     }
 }
