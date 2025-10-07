@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductsRepository extends JpaRepository<Products, Long> {
     List<Products> findBySellerId(Long sellerId);
@@ -18,6 +20,9 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     // Customer homepage featured list: top by sales among active products
     List<Products> findTop12ByIsActiveTrueOrderByTotalSalesDesc();
+
+    // Paginated active products (sorted by sales/created at handled by Pageable Sort)
+    Page<Products> findByIsActiveTrue(Pageable pageable);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +

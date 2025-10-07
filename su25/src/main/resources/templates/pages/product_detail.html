@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<style>
+		.container{max-width:1100px;margin:20px auto;padding:0 10px}
+		.breadcrumb{font-size:14px;color:#6b7280;margin-bottom:10px}
+		.detail{display:grid;grid-template-columns:1.2fr 1.8fr;gap:20px}
+		.gallery{background:#fff;border:1px solid #eaeef4;border-radius:12px;display:grid;place-items:center;min-height:360px}
+		.gallery img{max-width:100%;max-height:100%;object-fit:cover;border-radius:10px}
+		.info{background:#fff;border:1px solid #eaeef4;border-radius:12px;padding:16px}
+		.title{font-size:22px;font-weight:700;margin:0 0 6px}
+		.price{font-size:24px;color:#0ea5e9;font-weight:800}
+		.price-old{margin-left:8px;color:#9ca3af;text-decoration:line-through}
+		.btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none}
+		.btn.primary{background:#0ea5e9;color:#fff}
+		.section{margin-top:18px}
+		.review{border-top:1px solid #eaeef4;padding:12px 0}
+	</style>
+</head>
+<body>
+    <div class="container">
+		<div class="breadcrumb"><a href="/customer/dashboard">← Quay lại danh sách</a></div>
+		<div class="detail">
+			<div class="gallery">
+				<img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images.get(0).imageUrl}" alt="Image" onerror="this.onerror=null;this.src='/img/avatar_default.jpg'">
+				<img th:unless="${images != null and !#lists.isEmpty(images)}" src="/img/avatar_default.jpg" alt="Image">
+			</div>
+			<div class="info">
+				<div class="title" th:text="${product.name}">Tên sản phẩm</div>
+				<div style="color:#6b7280">Đã bán: <b th:text="${product.totalSales}">0</b> • ⭐ <b th:text="${#numbers.formatDecimal(product.averageRating,1,'COMMA',1,'POINT')}">0</b></div>
+				<div class="section">
+					<span class="price" th:if="${product.salePrice != null}" th:text="${#numbers.formatDecimal(product.salePrice,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
+					<span class="price-old" th:if="${product.salePrice != null}" th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
+					<span class="price" th:if="${product.salePrice == null}" th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
+				</div>
+				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Mô tả...</div>
+				<div class="section">
+                <form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center">
+						<input type="hidden" name="productId" th:value="${product.productId}" />
+						<input type="number" name="quantity" min="1" value="1" style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
+                    <button class="btn primary" type="submit">Thêm vào giỏ</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+        <div class="section" style="margin-top:24px">
+			<h3 style="margin:0 0 8px">Đánh giá từ khách hàng</h3>
+			<div th:if="${reviews != null and !#lists.isEmpty(reviews)}">
+				<div class="review" th:each="rv : ${reviews}">
+					<div style="font-weight:600">⭐ <span th:text="${rv.rating}">5</span> • <span style="color:#6b7280" th:text="${#temporals.format(rv.createdAt,'dd/MM/yyyy HH:mm')}">-</span></div>
+					<div th:text="${rv.comment}">Nội dung bình luận...</div>
+				</div>
+			</div>
+			<div class="review" th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280">Chưa có đánh giá nào.</div>
+        </div>
+	</div>
+</body>
+</html>
+
+
