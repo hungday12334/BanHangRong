@@ -32,6 +32,9 @@ public class Products {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private java.util.List<ProductImages> images;
+
     public Long getProductId() {
         return productId;
     }
@@ -109,5 +112,11 @@ public class Products {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    public java.util.List<ProductImages> getImages() {
+        return images;
+    }
+    public void setImages(java.util.List<ProductImages> images) {
+        this.images = images;
     }
 }
