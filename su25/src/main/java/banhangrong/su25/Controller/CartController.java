@@ -56,6 +56,7 @@ public class CartController {
             m.put("image", img);
             m.put("unitPrice", unit);
             m.put("lineTotal", line);
+            m.put("stock", p.getQuantity() != null ? p.getQuantity() : 0);
             viewItems.add(m);
         }
         model.addAttribute("items", viewItems);
@@ -67,32 +68,74 @@ public class CartController {
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam("productId") Long productId,
                             @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity) {
-        ShoppingCart item = new ShoppingCart();
-        item.setUserId(getCurrentUserId());
-        item.setProductId(productId);
-        item.setQuantity(quantity != null && quantity > 0 ? quantity : 1);
-        cartRepository.save(item);
-        return "redirect:/cart";
-    }
-
-    @PostMapping("/cart/update")
-    public String updateQty(@RequestParam("productId") Long productId,
-                            @RequestParam("quantity") Integer quantity) {
-        // naive update: remove and re-add
-        cartRepository.deleteByUserIdAndProductId(getCurrentUserId(), productId);
-        if (quantity != null && quantity > 0) {
+        int qty = (quantity != null && quantity > 0) ? quantity : 1;
+        // clamp with stock
+        int stock = productsRepository.findById(productId)
+                .map(p -> p.getQuantity() != null ? p.getQuantity() : 0).orElse(0);
+        // merge quantity if item already exists
+        var existing = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+        if (existing.isPresent()) {
+            ShoppingCart it = existing.get();
+            int current = it.getQuantity() == null ? 0 : it.getQuantity();
+            int applied = Math.min(current + qty, stock);
+            it.setQuantity(applied);
+            cartRepository.save(it);
+        } else {
             ShoppingCart item = new ShoppingCart();
             item.setUserId(getCurrentUserId());
             item.setProductId(productId);
-            item.setQuantity(quantity);
+            int applied = Math.min(qty, stock);
+            item.setQuantity(applied);
             cartRepository.save(item);
         }
         return "redirect:/cart";
     }
 
+    // Ajax update for quantity with stock validation
+    @PostMapping("/cart/update")
+    @ResponseBody
+    public Map<String, Object> updateQty(@RequestParam("productId") Long productId,
+                                         @RequestParam("quantity") Integer quantity) {
+        Map<String, Object> res = new HashMap<>();
+        int requested = quantity != null && quantity > 0 ? quantity : 1;
+        // get product stock
+        int stock = productsRepository.findById(productId)
+                .map(p -> p.getQuantity() != null ? p.getQuantity() : 0).orElse(0);
+        int applied = Math.min(requested, stock);
+        var existing = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+        if (existing.isPresent()) {
+            ShoppingCart it = existing.get();
+            it.setQuantity(applied);
+            cartRepository.save(it);
+        }
+        res.put("ok", true);
+        res.put("appliedQty", applied);
+        res.put("stock", stock);
+        res.put("over", requested > stock);
+        return res;
+    }
+
     @PostMapping("/cart/remove")
-    public String removeFromCart(@RequestParam("productId") Long productId) {
-        cartRepository.deleteByUserIdAndProductId(getCurrentUserId(), productId);
+    @ResponseBody
+    public Map<String, Object> removeFromCart(@RequestParam("productId") Long productId) {
+        Map<String,Object> res = new HashMap<>();
+        try {
+            var ex = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+            ex.ifPresent(cartRepository::delete);
+            res.put("ok", true);
+        } catch (Exception e) {
+            res.put("ok", false);
+            res.put("error", e.getMessage());
+        }
+        return res;
+    }
+
+    @GetMapping("/cart/remove")
+    public String removeFromCartGet(@RequestParam("productId") Long productId) {
+        try {
+            var ex = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+            ex.ifPresent(cartRepository::delete);
+        } catch (Exception ignored) {}
         return "redirect:/cart";
     }
 }

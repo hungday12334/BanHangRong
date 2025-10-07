@@ -17,10 +17,14 @@
         .thumb{width:56px;height:56px;border-radius:8px;overflow:hidden;background:#f3f4f6;display:grid;place-items:center}
         .thumb img{width:100%;height:100%;object-fit:cover}
         .name{font-weight:600;color:#111827}
+        .name-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .qty-pill{background:#f3f4f6;border:1px solid #e5e7eb;color:#111827;padding:2px 8px;border-radius:999px;font-size:12px;white-space:nowrap}
         .muted{color:#6b7280;font-size:12px}
         .qty{display:flex;gap:6px;justify-content:center;align-items:center}
         .qty input{width:58px;padding:6px;border:1px solid #e5e7eb;border-radius:8px;text-align:center}
+        .errmsg{color:#ef4444;font-size:12px;margin-top:4px}
         .btn{padding:8px 12px;border-radius:8px;border:1px solid #eaeef4;background:#fff;cursor:pointer}
+        .btn.danger{border-color:#fecaca;background:#fee2e2;color:#b91c1c}
         .btn.primary{background:#0ea5e9;color:#fff;border:none}
         .summary{display:flex;justify-content:flex-end;gap:12px;align-items:center;padding:12px}
         .total{font-size:18px;font-weight:800;color:#111827}
@@ -43,30 +47,69 @@
                 <div class="col">
                     <div class="prod">
                         <div class="thumb"><img th:if="${it.image != null}" th:src="${it.image}" onerror="this.onerror=null;this.src='/img/avatar_default.jpg'" alt=""></div>
-                        <div>
-                            <div class="name" th:text="${it.product.name}">Tên</div>
+                        <div style="width:100%">
+                            <div class="name-row">
+                                <div class="name" th:text="${it.product.name}">Tên</div>
+                                <span class="qty-pill" th:text="${'x' + it.quantity}">x1</span>
+                            </div>
+                            <div class="muted">Còn lại trong kho: <b th:text="${it.stock}">0</b></div>
                             <div class="muted">Mã: <span th:text="${it.product.productId}">1</span></div>
                         </div>
                     </div>
                 </div>
                 <div class="col center"><span th:text="${#numbers.formatDecimal(it.unitPrice,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <div class="col center">
-                    <form method="post" action="/cart/update" class="qty">
-                        <input type="hidden" name="productId" th:value="${it.product.productId}">
-                        <input type="number" name="quantity" min="1" th:value="${it.quantity}">
-                        <button class="btn" type="submit">Cập nhật</button>
-                    </form>
+                    <div class="qty">
+                        <input type="number" min="1" th:value="${it.quantity}"
+                               th:attr="data-product-id=${it.product.productId}" class="qty-input">
+                    </div>
+                    <div class="errmsg" th:attr="id=${'err-' + it.product.productId}"></div>
                 </div>
                 <div class="col right"><span th:text="${#numbers.formatDecimal(it.lineTotal,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <div class="col center">
-                    <form method="post" action="/cart/remove">
-                        <input type="hidden" name="productId" th:value="${it.product.productId}">
-                        <button class="btn" type="submit">Xóa</button>
-                    </form>
+                    <a class="btn danger remove-btn" th:href="@{'/cart/remove'(productId=${it.product.productId})}" th:attr="data-product-id=${it.product.productId}">Xóa</a>
                 </div>
             </div>
             <div th:if="${items == null or #lists.isEmpty(items)}" class="col" style="color:#6b7280;text-align:center">Giỏ hàng trống.</div>
         </div>
+        <script>
+        (function(){
+            function fmt(n){try{return new Intl.NumberFormat('vi-VN').format(n)}catch(e){return n}}
+            const inputs = document.querySelectorAll('.qty-input');
+            inputs.forEach(inp=>{
+                inp.addEventListener('change', ()=>{
+                    const pid = inp.getAttribute('data-product-id');
+                    let val = parseInt(inp.value||'1',10); if(!val||val<1) val=1;
+                    fetch('/cart/update',{
+                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        body:`productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
+                    }).then(r=>r.json()).then(d=>{
+                        const err = document.getElementById('err-'+pid);
+                        if(d.over){ err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
+                        else { err.textContent=''; }
+                        inp.value = d.appliedQty;
+                        // reload to reflect totals quickly (simple way)
+                        location.reload();
+                    }).catch(()=>{});
+                });
+            });
+
+            // remove buttons
+            document.querySelectorAll('.remove-btn').forEach(a=>{
+                a.addEventListener('click', (e)=>{
+                    e.preventDefault();
+                    const pid = a.getAttribute('data-product-id');
+                    const href = a.getAttribute('href') || ('/cart/remove?productId=' + encodeURIComponent(pid));
+                    fetch('/cart/remove',{
+                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        body:`productId=${encodeURIComponent(pid)}`
+                    }).then(r=>{ if(!r.ok) throw new Error('bad'); return r.json(); })
+                    .then(()=> location.reload())
+                    .catch(()=>{ window.location.href = href; });
+                });
+            });
+        })();
+        </script>
         <div class="summary">
             <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
             <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
