@@ -110,11 +110,11 @@
             });
         })();
         </script>
-        <div class="summary">
+        <form class="summary" method="post" action="/cart/checkout-demo">
             <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
             <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
-            <button class="btn primary" disabled>Mua hàng (demo)</button>
-        </div>
+            <button class="btn primary" type="submit">Mua hàng (demo)</button>
+        </form>
     </div>
 </body>
 </html>

@@ -8,6 +8,7 @@ import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -136,6 +137,32 @@ public class CartController {
             var ex = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
             ex.ifPresent(cartRepository::delete);
         } catch (Exception ignored) {}
+        return "redirect:/cart";
+    }
+
+    // Demo checkout: subtract stock and clear cart
+    @PostMapping("/cart/checkout-demo")
+    @Transactional
+    public String checkoutDemo() {
+        Long uid = getCurrentUserId();
+        List<ShoppingCart> items = cartRepository.findByUserId(uid);
+        for (ShoppingCart it : items) {
+            productsRepository.findById(it.getProductId()).ifPresent(p -> {
+                int stock = p.getQuantity() != null ? p.getQuantity() : 0;
+                int want = it.getQuantity() != null ? it.getQuantity() : 0;
+                int buy = Math.min(stock, want);
+                if (buy > 0) {
+                    p.setQuantity(stock - buy);
+                    Integer sold = p.getTotalSales();
+                    p.setTotalSales((sold != null ? sold : 0) + buy);
+                    productsRepository.save(p);
+                }
+            });
+        }
+        // clear cart after demo checkout
+        for (ShoppingCart it : items) {
+            try { cartRepository.delete(it); } catch (Exception ignored) {}
+        }
         return "redirect:/cart";
     }
 }

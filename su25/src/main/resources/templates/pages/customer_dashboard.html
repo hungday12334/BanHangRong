@@ -45,7 +45,9 @@
 		.sales { color:#6b7280; }
 		.price { margin-top:auto; font-weight:700; font-size:18px; color:#0ea5e9; }
 		.price-original { text-decoration:line-through; color:#9ca3af; font-weight:500; font-size:14px; margin-left:6px; }
-		.badge-sale { position:absolute; top:8px; right:8px; background:#ef4444; color:#fff; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; z-index:1; }
+        .badge-sale { position:absolute; top:8px; right:8px; background:#ef4444; color:#fff; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; z-index:2; }
+        .badge-out { position:absolute; top:8px; left:8px; background:#6b7280; color:#fff; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; z-index:2; }
+        .card.disabled { opacity:.65; }
 	</style>
 </head>
 <body>
@@ -77,7 +79,7 @@
 
 		<div class="section-title">Feature License</div>
 		<section class="grid" id="productGrid">
-			<a class="card clickable" th:each="p : ${featuredProducts}" th:unless="${#lists.isEmpty(featuredProducts)}" th:href="@{'/product/' + ${p.productId}}"
+            <a class="card clickable" th:each="p : ${featuredProducts}" th:unless="${#lists.isEmpty(featuredProducts)}" th:href="@{'/product/' + ${p.productId}}" th:classappend="${p.quantity != null and p.quantity <= 0} ? ' disabled' : ''"
 				th:attr="data-product-id=${p.productId},
 						data-name=${p.name},
 						data-description=${p.description},
@@ -88,6 +90,7 @@
 						data-average-rating=${p.averageRating}"
 			>
 				<div class="thumb">
+                    <span th:if="${p.quantity != null and p.quantity <= 0}" class="badge-out">Hết hàng</span>
 					<span th:if="${p.salePrice != null}" class="badge-sale">SALE</span>
 					<img th:if="${primaryImageByProduct != null and primaryImageByProduct[p.productId] != null}"
 						th:src="${primaryImageByProduct[p.productId]}"
