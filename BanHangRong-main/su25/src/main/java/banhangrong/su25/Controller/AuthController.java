@@ -46,7 +46,11 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         try {
             authService.forgotPassword(email);
-            return ResponseEntity.ok(Map.of("message", "Email đặt lại mật khẩu đã được gửi đến " + email));
+            return ResponseEntity.ok(Map.of(
+                "message", "Email đặt lại mật khẩu đã được gửi thành công!",
+                "email", email,
+                "instruction", "Vui lòng kiểm tra hộp thư và click vào link để đặt lại mật khẩu."
+            ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

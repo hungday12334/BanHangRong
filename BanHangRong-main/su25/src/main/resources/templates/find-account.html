@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream:BanHangRong-main/su25/src/main/resources/templates/find-account.html
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -162,3 +163,285 @@
     </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find your account - BanHangRong</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .find-account-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 50px auto;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .find-account-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .find-account-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+        
+        .find-account-content {
+            padding: 30px;
+        }
+        
+        .find-account-instruction {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        
+        .email-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+        
+        .cancel-btn {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1rem;
+        }
+        
+        .cancel-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .search-btn {
+            background: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .search-btn:hover {
+            background: #0056b3;
+        }
+        
+        .search-btn:disabled {
+            background: #ccc;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* Thông báo */
+        #successMessage, #errorMessage {
+            animation: slideDown 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        #successMessage i {
+            color: #28a745;
+        }
+        
+        #errorMessage i {
+            color: #dc3545;
+        }
+        
+        #resendBtn {
+            transition: all 0.3s ease;
+        }
+        
+        #resendBtn:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        #resendBtn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="brand-section">
+            <h1 class="app-title">BanHangRong</h1>
+        </div>
+        
+        <div class="find-account-container">
+            <div class="find-account-header">
+                <h2 class="find-account-title">Find your account</h2>
+            </div>
+            
+            <div class="find-account-content">
+                <p class="find-account-instruction">Please enter your email to finding your account :</p>
+                
+                <form id="findAccountForm">
+                    <input type="email" id="email" name="email" class="email-input" placeholder="Enter your email address" required>
+                    
+                    <!-- Thông báo ngay dưới thanh nhập email -->
+                    <div id="successMessage" style="display: none; background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 20px;">
+                        <i class="fas fa-check-circle"></i> <span id="successText"></span>
+                    </div>
+                    
+                    <div id="errorMessage" style="display: none; background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+                    </div>
+                    
+                    <!-- Nút gửi lại email -->
+                    <div id="resendContainer" style="display: none; margin-bottom: 20px; text-align: center;">
+                        <button type="button" id="resendBtn" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                            <i class="fas fa-paper-plane"></i> Gửi lại email
+                        </button>
+                    </div>
+                    
+                    <div class="button-group">
+                        <a href="/login" class="cancel-btn">Cancel</a>
+                        <button type="submit" class="search-btn" id="searchBtn">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/auth.js}"></script>
+    <script>
+        document.getElementById('findAccountForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (!email) {
+                alert('Vui lòng nhập email!');
+                return;
+            }
+            
+            try {
+                searchBtn.disabled = true;
+                searchBtn.textContent = 'Searching...';
+                
+                const response = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'email=' + encodeURIComponent(email)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    const message = result?.message || 'Email đặt lại mật khẩu đã được gửi thành công!';
+                    const instruction = result?.instruction || 'Vui lòng kiểm tra hộp thư và click vào link để đặt lại mật khẩu.';
+                    showMessage(message + ' ' + instruction, 'success');
+                    // Không chuyển trang, giữ nguyên trang nhập email
+                } else {
+                    const result = await response.text();
+                    showMessage('Lỗi: ' + result, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Có lỗi xảy ra! Vui lòng thử lại.', 'error');
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search';
+            }
+        });
+        
+        // Hàm hiển thị thông báo
+        function showMessage(message, type) {
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const successText = document.getElementById('successText');
+            const errorText = document.getElementById('errorText');
+            const resendContainer = document.getElementById('resendContainer');
+            
+            // Ẩn tất cả thông báo trước đó
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            resendContainer.style.display = 'none';
+            
+            if (type === 'success') {
+                successText.textContent = message;
+                successMessage.style.display = 'block';
+                resendContainer.style.display = 'block'; // Hiển thị nút gửi lại
+            } else if (type === 'error') {
+                errorText.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+            
+            // Cuộn đến thông báo
+            if (type === 'success') {
+                successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else if (type === 'error') {
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+        
+        // Xử lý nút gửi lại email
+        document.getElementById('resendBtn').addEventListener('click', function() {
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value.trim();
+            const resendBtn = document.getElementById('resendBtn');
+            
+            if (!email) {
+                showMessage('Vui lòng nhập email trước khi gửi lại!', 'error');
+                return;
+            }
+            
+            // Hiển thị loading
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+            
+            // Gửi lại email
+            document.getElementById('findAccountForm').dispatchEvent(new Event('submit'));
+            
+            // Reset nút sau 3 giây
+            setTimeout(() => {
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi lại email';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
+>>>>>>> Stashed changes:su25/src/main/resources/templates/find-account.html
