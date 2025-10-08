@@ -191,7 +191,22 @@
         </div>
 
         <div class="table-responsive">
-            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <!-- Thông báo lỗi -->
+            <div th:if="${error}"
+                 class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Thông báo thành công -->
+            <div th:if="${success}"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <table class="table table-bordered text-center align-middle shadow-sm">
                 <thead>
                 <tr>
@@ -217,10 +232,13 @@
                         <a th:href="@{'/admin/user/update?id=' + ${u.userId}}" class="btn btn-warning btn-sm">
                             <i class="bi bi-pencil-square"></i>
                         </a>
-                        <a th:href="@{'/admin/user/delete?id=' + ${u.userId}}" class="btn btn-danger btn-sm"
-                           onclick="return confirm('Are you sure you want to delete this user?');">
-                            <i class="bi bi-trash"></i>
-                        </a>
+                        <form th:action="@{'/admin/user/delete'}" method="post" style="display:inline;">
+                            <input type="hidden" name="id" th:value="${u.userId}">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Are you sure you want to delete this user?');">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
                     </td>
                     <td th:text="${u.userId}"></td>
                     <td th:text="${u.username}"></td>
@@ -268,6 +286,8 @@
 <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
 <script src="../assets/js/dashboard.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>

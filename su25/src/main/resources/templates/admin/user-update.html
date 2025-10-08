@@ -19,15 +19,6 @@
             min-height: 100vh;
         }
 
-        /* Làm đẹp phần header tìm kiếm */
-        .user-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
 
         .user-header form {
             display: flex;
@@ -58,19 +49,7 @@
             background-color: #e5e8ff;
         }
 
-        .btn-create {
-            background-color: #6c8cff;
-            color: white;
-            font-weight: 500;
-            border-radius: 6px;
-            padding: 8px 16px;
-            border: none;
-            transition: background 0.2s;
-        }
 
-        .btn-create:hover {
-            background-color: #5b77e6;
-        }
 
         a {
             text-decoration: none;
@@ -86,14 +65,6 @@
             padding: 30px;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 25px 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
 
         h2 {
             text-align: center;
@@ -137,12 +108,78 @@
             background-color: #28a745;
             color: #fff;
         }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
 
-        .form-actions button.reset {
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            background-color: #fff;
+        }
+
+        /* Màu cho ô readonly */
+        input[readonly],
+        select[readonly] {
+            background-color: #e9ecef;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .submit {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .update-btn {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .cancel-btn {
             background-color: #dc3545;
             color: #fff;
-            margin-left: 10px;
         }
+
     </style>
 </head>
 
@@ -243,29 +280,44 @@
 
     <!-- ListUser Section -->
     <div class="content-wrapper">
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        <div th:if="${errorExist}" class="alert alert-danger" th:text="${errorExist}"></div>
-        <h2>Create New User</h2>
-        <form id="userForm" action="/admin/user/create" method="post" enctype="multipart/form-data">
+        <div th:if="${error}"
+             class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
+        <!-- Thông báo thành công -->
+        <div th:if="${success}"
+             class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <h2>Update</h2>
+        <form id="userForm" action="/admin/user/update" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Id:</label>
+                <input readonly type="text" name="id" th:value="${user!=null ? user.userId : ''}">
+            </div>
             <div class="form-group">
                 <label>Username:</label>
-                <input type="text" name="username" th:value="${user!=null ? user.username : ''}">
+                <input readonly type="text" name="username" th:value="${user!=null ? user.username : ''}">
             </div>
 
             <div class="form-group">
                 <label>Email:</label>
-                <input type="email" name="email" th:value="${user!=null ? user.email : ''}">
+                <input readonly type="email" name="email" th:value="${user!=null ? user.email : ''}">
             </div>
 
             <div class="form-group">
                 <label>Password:</label>
-                <input type="text" name="password" th:value="${user!=null ? user.password : ''}">
+                <input readonly type="text" name="password" th:value="${user!=null ? user.password : ''}">
             </div>
 
             <div class="form-group">
                 <label>User Type (Role):</label>
-                <select name="userType">
+                <select readonly name="userType">
                     <option value="CUSTOMER"
                             th:selected="${user != null and user.userType == 'CUSTOMER'}">CUSTOMER
                     </option>
@@ -280,17 +332,17 @@
 
             <div class="form-group">
                 <label>Avatar:</label>
-                <input type="file" name="avatarUrl">
+                <input readonly type="file" name="avatarUrl">
             </div>
 
             <div class="form-group">
                 <label>Phone Number:</label>
-                <input type="text" name="phoneNumber" th:value="${user!=null ? user.phoneNumber : ''}">
+                <input readonly type="text" name="phoneNumber" th:value="${user!=null ? user.phoneNumber : ''}">
             </div>
 
             <div class="form-group">
                 <label>Gender:</label>
-                <select name="gender" class="form-control">
+                <select readonly name="gender" class="form-control">
                     <option value="MALE" th:selected="${user != null and user.gender == 'MALE'}">Male</option>
                     <option value="FEMALE" th:selected="${user != null and user.gender == 'FEMALE'}">Female</option>
                     <option value="OTHER" th:selected="${user != null and user.gender == 'OTHER'}">Other</option>
@@ -299,45 +351,52 @@
 
             <div class="form-group">
                 <label>Birth Date:</label>
-                <input type="date" name="birthDate" th:value="${user != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : ''}"></div>
+                <input readonly type="date" name="birthDate" th:value="${user != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : ''}"></div>
 
             <div class="form-group">
                 <label>Balance:</label>
-                <input type="number" step="0.01" name="balance" th:value="${user!=null ? user.balance : ''}">
+                <input readonly type="number" step="0.01" name="balance" th:value="${user!=null ? user.balance : ''}">
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="submit">Create User</button>
-                <button type="reset" class="reset">Reset</button>
+                <button type="button" id="updateBtn" class="update-btn">Update</button>
+                <button type="submit" id="saveBtn" class="submit d-none">Save</button>
+                <button type="button" id="cancelBtn" class="cancel-btn d-none">Cancel</button>
             </div>
 
         </form>
     </div>
 </div>
 <script>
-    document.getElementById("userForm").addEventListener("submit", function (event) {
-        const username = document.querySelector("[name='username']").value.trim();
-        const email = document.querySelector("[name='email']").value.trim();
-        const password = document.querySelector("[name='password']").value.trim();
-        const userType = document.querySelector("[name='userType']").value.trim();
+    const updateBtn = document.getElementById('updateBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const inputs = document.querySelectorAll('#userForm input, #userForm select');
 
-        let errors = [];
+    // Khi bấm Update
+    updateBtn.addEventListener('click', () => {
+        inputs.forEach(input => {
+            if (!['id', 'email', 'username'].includes(input.name)) {
+                input.removeAttribute('readonly');
+                input.style.backgroundColor = "#fff";
+                input.style.fontWeight = "normal";
+            }
+        });
+        updateBtn.classList.add('d-none');
+        saveBtn.classList.remove('d-none');
+        cancelBtn.classList.remove('d-none');
+    });
 
-        if (!username) errors.push("Username is required");
-        if (!email) errors.push("Email is required");
-        if (!password) errors.push("Password is required");
-        if (!userType) errors.push("User type (role) is required");
-
-        // basic email pattern
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (email && !emailPattern.test(email)) {
-            errors.push("Email format is invalid");
-        }
-
-        if (errors.length > 0) {
-            event.preventDefault(); // stop form submission
-            alert("Please fix the following errors:\n- " + errors.join("\n- "));
-        }
+    // Khi bấm Cancel
+    cancelBtn.addEventListener('click', () => {
+        inputs.forEach(input => {
+            input.setAttribute('readonly', true);
+            input.style.backgroundColor = "#e9ecef";
+            input.style.fontWeight = "bold";
+        });
+        saveBtn.classList.add('d-none');
+        cancelBtn.classList.add('d-none');
+        updateBtn.classList.remove('d-none');
     });
 </script>
 <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
@@ -346,6 +405,8 @@
 <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
 <script src="../assets/js/dashboard.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>
