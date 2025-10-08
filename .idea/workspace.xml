@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="Admin UserManagement Create">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="Admin User Update&amp;Delete">
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/check.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/UserManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/UserManagement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" afterDir="false" />
@@ -105,7 +106,9 @@
       <updated>1759415528443</updated>
       <workItem from="1759415529847" duration="973000" />
       <workItem from="1759854439361" duration="7629000" />
-      <workItem from="1759887937257" duration="9559000" />
+      <workItem from="1759887937257" duration="14526000" />
+      <workItem from="1759915487604" duration="32000" />
+      <workItem from="1759915643459" duration="4057000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -123,7 +126,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759892863475</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Admin User Update&amp;Delete">
+      <option name="closed" value="true" />
+      <created>1759911171115</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1759911171115</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -134,7 +145,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/hungnt" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -143,6 +166,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="AdminIndex_Final1" />
     <MESSAGE value="Admin UserManagement Create" />
-    <option name="LAST_COMMIT_MESSAGE" value="Admin UserManagement Create" />
+    <MESSAGE value="Admin User Update&amp;Delete" />
+    <option name="LAST_COMMIT_MESSAGE" value="Admin User Update&amp;Delete" />
   </component>
 </project>
