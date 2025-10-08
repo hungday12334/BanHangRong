@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void update(Users user) {
-
+        usersRepository.save(user);
     }
 
     @Override

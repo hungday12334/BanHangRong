@@ -12,9 +12,9 @@ import java.util.List;
 public interface ProductsRepository extends JpaRepository<Products, Long> {
     List<Products> findBySellerId(Long sellerId);
 
-    List<Products> findTop10BySellerIdAndIsActiveTrueAndQuantityLessThanEqualOrderByQuantityAsc(Long sellerId, Integer threshold);
+    List<Products> findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(Long sellerId, String status, Integer threshold);
 
-    long countBySellerIdAndIsActiveTrue(Long sellerId);
+    long countBySellerIdAndStatus(Long sellerId, String status);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +

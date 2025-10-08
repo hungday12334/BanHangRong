@@ -37,7 +37,7 @@ public class ProductAdminController {
         if (req.getSellerId() == null || req.getName() == null || req.getPrice() == null) {
             return ResponseEntity.badRequest().body("sellerId, name, price are required");
         }
-        req.setIsActive(false); // pending approval
+        req.setIsActive("Hidden"); // pending approval
         req.setCreatedAt(LocalDateTime.now());
         req.setUpdatedAt(LocalDateTime.now());
         Products saved = productsRepository.save(req);
@@ -60,7 +60,7 @@ public class ProductAdminController {
         p.setUpdatedAt(LocalDateTime.now());
         // If currently active/public -> hide until admin re-approves
         if (Boolean.TRUE.equals(p.getIsActive())) {
-            p.setIsActive(false);
+            p.setIsActive("Hidden");
         }
         Products saved = productsRepository.save(p);
         return ResponseEntity.ok(saved);
@@ -78,7 +78,7 @@ public class ProductAdminController {
     @PostMapping("/{id}/approval")
     public ResponseEntity<?> approve(
             @PathVariable Long id,
-            @RequestParam("publish") boolean publish,
+            @RequestParam("publish") String publish,
             @RequestHeader(value = "X-User-Type", required = false) String userType) {
         // Simple role gate: only ADMIN can approve/publish
         if (userType == null || !"ADMIN".equalsIgnoreCase(userType)) {
