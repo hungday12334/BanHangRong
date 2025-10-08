@@ -72,7 +72,7 @@
 						<td class="sale" th:text="${p.salePrice != null ? #numbers.formatDecimal(p.salePrice,1,'COMMA',2,'POINT') : ''}"></td>
 						<td class="rating" th:text="${p.averageRating != null ? #numbers.formatDecimal(p.averageRating,1,'COMMA',1,'POINT') : '0.0'}"></td>
 						<td th:text="${p.quantity}"></td>
-						<td><span th:classappend="${p.isActive} ? 'tag on' : 'tag off'" th:text="${p.isActive} ? 'Public' : 'Hidden'"></span></td>
+						<td><span th:with="st=${#strings.toLowerCase(p.status)}" th:classappend="${st}=='public' ? 'tag on' : (${st}=='hidden' ? 'tag off' : 'tag pending')" th:text="${st}=='public' ? 'Public' : (${st}=='hidden' ? 'Hidden' : 'Pending')"></span></td>
 						<td th:text="${p.description}" style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></td>
 						<td class="nowrap" th:text="${p.createdAt != null ? #temporals.format(p.createdAt, 'dd/MM/yyyy') : ''}"></td>
 					</tr>

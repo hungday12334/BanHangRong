@@ -525,7 +525,7 @@
         quantity: p.quantity != null ? Number(p.quantity) : 0,
         downloadUrl: (p.downloadUrl ?? '').trim(),
         description: (p.description ?? '').trim(),
-        isActive: p.isActive === true
+        status: (typeof p.status === 'string' && p.status) ? p.status : 'pending'
       };
     }
     function collectFormProduct() {
@@ -536,7 +536,7 @@
         quantity: document.getElementById('pm_quantity')?.value ? Number(document.getElementById('pm_quantity').value) : 0,
         downloadUrl: document.getElementById('pm_downloadUrl')?.value || '',
         description: document.getElementById('pm_description')?.value || '',
-        isActive: (document.getElementById('pm_status')?.textContent || '').trim() === 'Public'
+  status: (document.getElementById('pm_status')?.dataset.status || '').trim()
       });
     }
     function productChanged() {
@@ -557,8 +557,14 @@
       document.getElementById('pm_description').value = p.description ?? '';
       const st = document.getElementById('pm_status');
       if (st) {
-        st.textContent = p.isActive ? 'Public' : 'Hidden';
-        st.className = `badge ${p.isActive ? 'pill good' : ''}`;
+        const stVal = (p.status || '').toString().toLowerCase();
+        let statusText = 'Pending';
+        let badgeClass = 'badge';
+        if (stVal === 'public') { statusText = 'Public'; badgeClass = 'badge pill good'; }
+        else if (stVal === 'hidden') { statusText = 'Hidden'; badgeClass = 'badge'; }
+        st.textContent = statusText;
+        st.className = badgeClass;
+        st.dataset.status = stVal;
       }
       __originalProduct = normalizeProductObj(p);
     }
@@ -596,9 +602,10 @@
         document.getElementById('pm_downloadUrl').value = '';
         document.getElementById('pm_description').value = '';
         // Default: Public (không tự động ẩn nếu user chưa chỉnh gì)
-        const st = document.getElementById('pm_status');
-        st.textContent = 'Public';
-        st.className = 'badge pill good';
+  const st = document.getElementById('pm_status');
+  st.textContent = 'Pending';
+  st.className = 'badge';
+  st.dataset.status = 'pending';
   __originalProduct = null; // sản phẩm mới -> luôn xử lý create
         openModal(productModal);
       });
@@ -621,30 +628,43 @@
           quantity: document.getElementById('pm_quantity').value ? Number(document.getElementById('pm_quantity').value) : 0,
           downloadUrl: document.getElementById('pm_downloadUrl').value || null,
           description: document.getElementById('pm_description').value || null,
-          isActive: document.getElementById('pm_status').textContent === 'Public'
+          status: document.getElementById('pm_status').dataset.status
         };
         const res = await fetch(id ? `/api/products/${id}` : '/api/products', {
           method: id ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        if (res.ok) { closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
+  if (res.ok) { closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => refreshMyProducts(), 350); }
         else { showToast('Lưu sản phẩm thất bại', 'error'); }
       });
 
-      // Publish/unpublish via admin approval
+      // Publish / gửi duyệt: Seller bấm -> chuyển về pending; Admin bấm -> public/hidden tùy publish param
       document.getElementById('pm_publish')?.addEventListener('click', async () => {
         const id = document.getElementById('pm_productId').value;
         if (!id) return;
-        const isPublic = document.getElementById('pm_status').textContent === 'Public';
-        const res = await fetch(`/api/products/${id}/approval?publish=${!isPublic}`, {
+        const statusText = document.getElementById('pm_status').textContent;
+        const isAdmin = (window.currentUserType || 'SELLER').toUpperCase() === 'ADMIN';
+        // Yêu cầu mới: Nếu sản phẩm đang ở trạng thái Public và không có thay đổi nào -> bấm duyệt sẽ KHÔNG thay đổi trạng thái
+        if ((isAdmin || (!isAdmin)) && statusText === 'Public' && !productChanged()) {
+          // Cả Admin (đã xử lý) và Seller: nếu sản phẩm đang Public và không thay đổi gì -> không làm gì cả
+          showToast('Sản phẩm đã ở trạng thái Public (không có thay đổi)', 'info');
+          closeModal(productModal);
+          return; // No-op cho cả hai vai trò
+        }
+        // Với seller: flag publish chỉ có ý nghĩa đối với admin; ta cứ gửi publish=false để tránh tự public
+        const res = await fetch(`/api/products/${id}/approval?publish=${statusText !== 'Public'}`, {
           method: 'POST',
           headers: { 'X-User-Type': window.currentUserType || 'SELLER' }
         });
         if (res.ok) {
           closeModal(productModal);
-          showToast(!isPublic ? 'Đã publish sản phẩm' : 'Đã chuyển sang ẩn', 'success');
-          setTimeout(() => location.reload(), 350);
+          if (isAdmin) {
+            showToast(statusText !== 'Public' ? 'Đã publish sản phẩm' : 'Đã chuyển sang ẩn', 'success');
+          } else {
+            showToast('Đã gửi phê duyệt (status = pending)', 'success');
+          }
+          setTimeout(() => refreshMyProducts(), 350);
         } else if (res.status === 403) {
           showToast('Bạn không có quyền thực hiện thao tác này (chỉ Admin).', 'error');
         } else {
@@ -658,7 +678,7 @@
         if (!id) { closeModal(productModal); return; }
         if (!confirm('Xóa sản phẩm này?')) return;
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-        if (res.ok) { closeModal(productModal); showToast('Đã xóa sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
+  if (res.ok) { closeModal(productModal); showToast('Đã xóa sản phẩm', 'success'); setTimeout(() => refreshMyProducts(), 350); }
         else { showToast('Xóa sản phẩm thất bại', 'error'); }
       });
     }
@@ -707,8 +727,8 @@
       // View-only: no save/delete handlers for orders
     }
 
-    // Load "My Products" list
-    (async function loadMyProducts() {
+    // Load "My Products" list (reusable for refresh after CRUD)
+    async function refreshMyProducts(showToastMsg = true) {
       const sellerIdEl = document.getElementById('sellerId');
       const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
       if (!sellerId) return; // require seller
@@ -723,9 +743,12 @@
         const tr = document.createElement('tr');
         tr.className = 'clickable';
         tr.setAttribute('data-product-id', p.productId);
-        const status = p.isActive ? '<span class="pill good">Public</span>' : '<span class="badge">Hidden</span>';
-        const price = (p.price ?? 0).toLocaleString('en-US');
-        tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${status}</td>`;
+  const stVal = (p.status || '').toString().toLowerCase();
+  let statusHtml = '<span class="badge">Pending</span>';
+  if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
+  else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
+  const price = (p.price ?? 0).toLocaleString('en-US');
+  tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
         tbody.appendChild(tr);
       });
       if (counter) counter.textContent = list.length;
@@ -738,8 +761,11 @@
       });
       const pager = document.getElementById('pgMyProducts');
       if (pager) paginateTable(tbody, pager, 5);
-      showToast(`Tải ${list.length} sản phẩm của bạn`, 'info', { duration: 2000 });
-    })();
+      if (showToastMsg) showToast(`Tải ${list.length} sản phẩm của bạn`, 'info', { duration: 2000 });
+    }
+
+    // initial load
+    refreshMyProducts(false);
 
     // === Avatar edit button hover ===
     const avatarWrap = document.querySelector('.avatar-edit-wrap');
@@ -944,7 +970,7 @@
               showToast(`Đơn hàng mới #${id} ${formatted}`, 'success');
               // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
               // Could implement incremental prepend instead of reload; keep simple first.
-              setTimeout(() => { try { location.reload(); } catch (e) { } }, 1200);
+              setTimeout(() => { try { refreshMyProducts(); } catch (e) { } }, 1200);
             }
           } catch (_) { /* ignore parse errors */ }
         };

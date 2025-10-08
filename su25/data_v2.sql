@@ -1,11 +1,7 @@
 CREATE DATABASE IF NOT EXISTS wap;
 USE wap;
 
--- Tắt FK để drop tự do
-SET FOREIGN_KEY_CHECKS=0;
-
 -- Users
-DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
@@ -27,7 +23,6 @@ CREATE TABLE IF NOT EXISTS users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Social Authentication
-DROP TABLE IF EXISTS user_social_auth;
 CREATE TABLE IF NOT EXISTS user_social_auth (
     auth_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -39,7 +34,6 @@ CREATE TABLE IF NOT EXISTS user_social_auth (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Password Reset Tokens
-DROP TABLE IF EXISTS password_reset_tokens;
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
     token_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -51,7 +45,6 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Email Verification Tokens
-DROP TABLE IF EXISTS email_verification_tokens;
 CREATE TABLE IF NOT EXISTS email_verification_tokens (
     token_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -63,7 +56,6 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Categories
-DROP TABLE IF EXISTS categories;
 CREATE TABLE IF NOT EXISTS categories (
     category_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -74,7 +66,6 @@ CREATE TABLE IF NOT EXISTS categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Products (no category_id here; many-to-many via categories_products)
-DROP TABLE IF EXISTS products;
 CREATE TABLE IF NOT EXISTS products (
     product_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     seller_id BIGINT NOT NULL,
@@ -86,14 +77,13 @@ CREATE TABLE IF NOT EXISTS products (
     download_url VARCHAR(255) NOT NULL,
     total_sales INT DEFAULT 0,
     average_rating DECIMAL(3,2) DEFAULT 0.00,
-    is_active BOOLEAN DEFAULT TRUE,
+    status VARCHAR(15) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_products_seller FOREIGN KEY (seller_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Categories <-> Products (many-to-many)
-DROP TABLE IF EXISTS categories_products;
 CREATE TABLE IF NOT EXISTS categories_products (
     category_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
@@ -104,7 +94,6 @@ CREATE TABLE IF NOT EXISTS categories_products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Images
-DROP TABLE IF EXISTS product_images;
 CREATE TABLE IF NOT EXISTS product_images (
     image_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
@@ -115,7 +104,6 @@ CREATE TABLE IF NOT EXISTS product_images (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Shopping Cart
-DROP TABLE IF EXISTS shopping_cart;
 CREATE TABLE IF NOT EXISTS shopping_cart (
     cart_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -129,7 +117,6 @@ CREATE TABLE IF NOT EXISTS shopping_cart (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Orders (payment fields removed; see payment_transactions)
-DROP TABLE IF EXISTS orders;
 CREATE TABLE IF NOT EXISTS orders (
     order_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -140,7 +127,6 @@ CREATE TABLE IF NOT EXISTS orders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Order Items (license_key removed)
-DROP TABLE IF EXISTS order_items;
 CREATE TABLE IF NOT EXISTS order_items (
     order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT NOT NULL,
@@ -153,7 +139,6 @@ CREATE TABLE IF NOT EXISTS order_items (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Reviews
-DROP TABLE IF EXISTS product_reviews;
 CREATE TABLE IF NOT EXISTS product_reviews (
     review_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
@@ -168,7 +153,6 @@ CREATE TABLE IF NOT EXISTS product_reviews (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Licenses (license_key centralized here)
-DROP TABLE IF EXISTS product_licenses;
 CREATE TABLE IF NOT EXISTS product_licenses (
     license_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_item_id BIGINT NOT NULL,
@@ -185,7 +169,6 @@ CREATE TABLE IF NOT EXISTS product_licenses (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- User Sessions (for device tracking)
-DROP TABLE IF EXISTS user_sessions;
 CREATE TABLE IF NOT EXISTS user_sessions (
     session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -198,7 +181,6 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Payment Transactions (holds payment provider/status/transaction)
-DROP TABLE IF EXISTS payment_transactions;
 CREATE TABLE IF NOT EXISTS payment_transactions (
     transaction_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT NOT NULL,
@@ -211,9 +193,6 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_payments_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Bật lại FK
-SET FOREIGN_KEY_CHECKS=1;
 
 -- =============================
 -- SAMPLE DATA (safe to re-run)
@@ -250,11 +229,11 @@ VALUES
     ('Software', 'Phần mềm, tiện ích, tool');
 
 -- Products by seller
-INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, is_active)
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
 VALUES
-    ((SELECT user_id FROM users WHERE username='seller'), 'E-Book X', 'Cuốn sách hướng dẫn nâng cao', 19.99, 14.99, 100, 'https://cdn.example.com/ebooks/x.pdf', 10, 4.5, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Music Pack Vol.1', 'Bộ sample âm nhạc đa thể loại', 9.99, NULL, 200, 'https://cdn.example.com/music/v1.zip', 25, 4.2, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Software Pro', 'Tiện ích chuyên nghiệp cho công việc', 49.00, 39.00, 50, 'https://cdn.example.com/software/pro.exe', 5, 4.8, TRUE);
+    ((SELECT user_id FROM users WHERE username='seller'), 'E-Book X', 'Cuốn sách hướng dẫn nâng cao', 19.99, 14.99, 100, 'https://cdn.example.com/ebooks/x.pdf', 10, 4.5, 'Public'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Music Pack Vol.1', 'Bộ sample âm nhạc đa thể loại', 9.99, NULL, 200, 'https://cdn.example.com/music/v1.zip', 25, 4.2, 'Pending'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Software Pro', 'Tiện ích chuyên nghiệp cho công việc', 49.00, 39.00, 50, 'https://cdn.example.com/software/pro.exe', 5, 4.8, 'Hidden');
 
 -- Map Categories <-> Products
 INSERT IGNORE INTO categories_products (category_id, product_id)
@@ -333,13 +312,13 @@ VALUES
     ('dave', 'dave@example.com', '$2a$10$hashdave', 'CUSTOMER', '0944444444', 'male', 75.00, TRUE, TRUE, NOW());
 
 -- More products (by 'seller')
-INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, is_active)
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
 VALUES
-    ((SELECT user_id FROM users WHERE username='seller'), 'Antivirus Pro Plus', 'Bảo vệ máy tính toàn diện', 59.00, 44.90, 80, 'https://cdn.example.com/software/antivirus-pro.exe', 18, 4.6, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'VPN Secure Unlimited', 'VPN tốc độ cao không giới hạn', 11.99, NULL, 300, 'https://cdn.example.com/software/vpn-secure.exe', 40, 4.3, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Password Manager X', 'Quản lý mật khẩu an toàn', 29.00, 19.00, 120, 'https://cdn.example.com/software/pwm-x.exe', 22, 4.7, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Dev Toolkit Ultimate', 'Bộ công cụ cho developer', 79.00, 59.00, 40, 'https://cdn.example.com/software/dev-toolkit.exe', 8, 4.9, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Software Lite', 'Bản rút gọn tiết kiệm', 19.00, NULL, 150, 'https://cdn.example.com/software/lite.exe', 12, 4.1, TRUE);
+    ((SELECT user_id FROM users WHERE username='seller'), 'Antivirus Pro Plus', 'Bảo vệ máy tính toàn diện', 59.00, 44.90, 80, 'https://cdn.example.com/software/antivirus-pro.exe', 18, 4.6, 'Hidden'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'VPN Secure Unlimited', 'VPN tốc độ cao không giới hạn', 11.99, NULL, 300, 'https://cdn.example.com/software/vpn-secure.exe', 40, 4.3, 'Public'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Password Manager X', 'Quản lý mật khẩu an toàn', 29.00, 19.00, 120, 'https://cdn.example.com/software/pwm-x.exe', 22, 4.7, 'Pending'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Dev Toolkit Ultimate', 'Bộ công cụ cho developer', 79.00, 59.00, 40, 'https://cdn.example.com/software/dev-toolkit.exe', 8, 4.9, 'Public'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Software Lite', 'Bản rút gọn tiết kiệm', 19.00, NULL, 150, 'https://cdn.example.com/software/lite.exe', 12, 4.1, 'Pending');
 
 -- Map new products to Software category
 INSERT IGNORE INTO categories_products (category_id, product_id)
