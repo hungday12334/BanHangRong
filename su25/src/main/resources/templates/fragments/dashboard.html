@@ -77,6 +77,54 @@
       </div>
     </div>
   </section>
+  <!-- Seller Ranking Section (compact left panel + list) -->
+  <section class="rank-grid" style="margin-top:16px" id="sectionSellerRank" data-block="seller-rank">
+    <div class="card" data-block="my-rank">
+      <div class="header"><div style="font-weight:700">Xếp hạng của tôi</div></div>
+      <div class="body">
+  <p style="margin:4px 0 10px">Hạng hiện tại: <span class="pill" th:text="${myRank > 0 ? '#' + myRank : 'N/A'}"></span> / <b th:text="${totalSellers}">0</b> seller</p>
+        <div style="margin-top:8px">
+          <div class="footer-note" style="margin-bottom:4px">Percentile: <span th:text="${#numbers.formatDecimal(rankPercentile,1,'COMMA',1,'POINT') + '%'}">0%</span></div>
+          <div class="progress" style="height:14px; background:rgba(255,255,255,0.08); border-radius:20px; overflow:hidden">
+            <span th:style="${'width:' + rankPercentile + '%'}" style="display:block; height:100%; background:linear-gradient(90deg,#fbbf24,#f59e0b,#ef4444); transition:width .8s ease"></span>
+          </div>
+        </div>
+        <div class="footer-note" style="margin-top:10px">Dựa trên tổng doanh thu tích lũy.</div>
+      </div>
+    </div>
+    <div class="card" data-block="top-sellers">
+      <div class="header"><div style="font-weight:700">Top Sellers</div><div class="chip" th:text="${#lists.size(topSellers)} + ' hiển thị'">0 hiển thị</div></div>
+      <div class="body paged">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Hạng</th><th>Seller</th><th>Doanh thu</th><th class="hide-md">Đã bán</th></tr></thead>
+            <tbody>
+              <tr th:each="s,iter : ${topSellers}" th:class="${'rank-row rank-' + (iter.index + 1) + (s.sellerId == sellerId ? ' active' : '')}">
+                <td class="rank-cell">
+                  <div th:class="${'rank-badge ' + (iter.index==0? 'gold' : (iter.index==1? 'silver' : (iter.index==2? 'bronze' : '')))}" th:attr="data-rank=${iter.index+1}">
+                    <span th:text="${'#' + (iter.index + 1)}">#1</span>
+                    <i class="flare" th:if="${iter.index < 2}"></i>
+                    <i class="glow" th:if="${iter.index == 0}"></i>
+                  </div>
+                </td>
+                <td>
+                  <div class="seller-cell">
+                    <span class="seller-name" th:text="${s.username}">seller01</span>
+                    <span th:if="${s.sellerId == sellerId}" class="chip you">Bạn</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="revenue" th:text="${#numbers.formatDecimal(s.revenue,0,'COMMA',2,'POINT')}">0.00</span>
+                </td>
+                <td class="hide-md"><span th:text="${s.units}">0</span></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(topSellers)}"><td colspan="4" class="footer-note">Chưa có dữ liệu xếp hạng.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
   <section class="grid two" style="margin-top:16px" id="sectionTopAndRecent" data-block="top-and-recent">
     <div class="card" data-block="top-products">
       <div class="header"><div style="font-weight:700">Top sản phẩm</div></div>
