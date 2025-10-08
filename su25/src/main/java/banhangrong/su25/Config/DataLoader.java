@@ -45,25 +45,29 @@ public class DataLoader implements CommandLineRunner {
     }
     
     private void createTestUser(String username, String email, String password, String phone, String gender, String userType) {
-        if (usersRepository.findByUsername(username).isEmpty()) {
-            Users testUser = new Users();
-            testUser.setUsername(username);
-            testUser.setEmail(email);
-            testUser.setPassword(passwordEncoder.encode(password));
-            testUser.setPhoneNumber(phone);
-            testUser.setGender(gender);
-            testUser.setUserType(userType);
-            testUser.setAvatarUrl("https://via.placeholder.com/150/007bff/ffffff?text=" + username.substring(0, 1).toUpperCase());
-            testUser.setIsEmailVerified(true);
-            testUser.setIsActive(true);
-            testUser.setBalance(BigDecimal.ZERO);
-            testUser.setCreatedAt(LocalDateTime.now());
-            testUser.setUpdatedAt(LocalDateTime.now());
-            
-            usersRepository.save(testUser);
-            System.out.println("✓ Đã tạo user test: " + username + " với mật khẩu: " + password + " (" + userType + ")");
-        } else {
-            System.out.println("✓ User " + username + " đã tồn tại");
+        try {
+            if (usersRepository.findByUsername(username).isEmpty()) {
+                Users testUser = new Users();
+                testUser.setUsername(username);
+                testUser.setEmail(email);
+                testUser.setPassword(passwordEncoder.encode(password));
+                testUser.setPhoneNumber(phone);
+                testUser.setGender(gender);
+                testUser.setUserType(userType);
+                testUser.setAvatarUrl("https://via.placeholder.com/150/007bff/ffffff?text=" + username.substring(0, 1).toUpperCase());
+                testUser.setIsEmailVerified(true);
+                testUser.setIsActive(true);
+                testUser.setBalance(BigDecimal.ZERO);
+                testUser.setCreatedAt(LocalDateTime.now());
+                testUser.setUpdatedAt(LocalDateTime.now());
+                
+                usersRepository.save(testUser);
+                System.out.println("✓ Đã tạo user test: " + username + " với mật khẩu: " + password + " (" + userType + ")");
+            } else {
+                System.out.println("✓ User " + username + " đã tồn tại");
+            }
+        } catch (Exception e) {
+            System.out.println("⚠ Warning: Could not check/create user " + username + " - " + e.getMessage());
         }
     }
 }

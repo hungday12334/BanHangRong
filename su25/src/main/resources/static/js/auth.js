@@ -1,4 +1,16 @@
 // Auth JavaScript
+
+// Helper function để parse response và xử lý lỗi
+async function parseResponse(response) {
+    try {
+        return await response.json();
+    } catch (e) {
+        console.error('JSON parse error:', e);
+        showMessage('Có lỗi xảy ra khi xử lý phản hồi từ server!', 'error');
+        return null;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle password visibility
     const togglePassword = document.getElementById('togglePassword');
@@ -92,14 +104,8 @@ async function handleLogin(e) {
             body: JSON.stringify(loginData)
         });
         
-        let result;
-        try {
-            result = await response.json();
-        } catch (e) {
-            console.error('JSON parse error:', e);
-            showMessage('Có lỗi xảy ra khi xử lý phản hồi từ server!', 'error');
-            return;
-        }
+        const result = await parseResponse(response);
+        if (!result) return;
         
         if (response.ok) {
             // Lưu token vào localStorage
@@ -187,24 +193,22 @@ async function handleRegister(e) {
             body: JSON.stringify(registerData)
         });
         
-        let result;
-        try {
-            result = await response.json();
-        } catch (e) {
-            console.error('JSON parse error:', e);
-            showMessage('Có lỗi xảy ra khi xử lý phản hồi từ server!', 'error');
-            return;
-        }
+        const result = await parseResponse(response);
+        if (!result) return;
         
         console.log('Register response:', response.status, result);
         
         if (response.ok) {
-            showMessage('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
+            // Hiển thị thông báo email xác nhận ngay dưới ô email
+            showEmailVerificationMessage();
             
-            // Chuyển hướng về trang đăng nhập sau 2 giây
+            // Hiển thị thông báo chung
+            showMessage('Đăng ký thành công! Email xác nhận đã được gửi đến địa chỉ email của bạn.', 'success');
+            
+            // Chuyển hướng về trang đăng nhập sau 5 giây (tăng thời gian để người dùng đọc thông báo)
             setTimeout(() => {
                 window.location.href = '/login';
-            }, 2000);
+            }, 5000);
         } else {
             console.error('Register error:', result);
             const errorMessage = result?.error || result || 'Đăng ký thất bại!';
@@ -225,29 +229,8 @@ async function handleRegister(e) {
 async function handleForgotPassword(e) {
     e.preventDefault();
     
-    const email = prompt('Nhập email của bạn:');
-    if (!email) return;
-    
-    try {
-        const response = await fetch('/api/auth/forgot-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `email=${encodeURIComponent(email)}`
-        });
-        
-        const result = await response.text();
-        
-        if (response.ok) {
-            alert('Email đặt lại mật khẩu đã được gửi!');
-        } else {
-            alert(result || 'Có lỗi xảy ra!');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra!');
-    }
+    // Redirect to forgot password page instead of using prompt
+    window.location.href = '/forgot-password';
 }
 
 async function handleForgotPasswordForm(e) {
@@ -306,6 +289,14 @@ function showMessage(message, type) {
 function clearMessages() {
     const existingMessages = document.querySelectorAll('.error-message, .success-message');
     existingMessages.forEach(msg => msg.remove());
+}
+
+function showEmailVerificationMessage() {
+    const emailMessage = document.getElementById('emailVerificationMessage');
+    if (emailMessage) {
+        emailMessage.style.display = 'flex';
+        emailMessage.style.animation = 'slideDown 0.3s ease-out';
+    }
 }
 
 // Kiểm tra đăng nhập khi load trang

@@ -3,7 +3,6 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.DTO.AuthResponse;
 import banhangrong.su25.DTO.LoginRequest;
 import banhangrong.su25.DTO.RegisterRequest;
-import banhangrong.su25.email.EmailService;
 import banhangrong.su25.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +18,6 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @Autowired
-    private EmailService emailService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -58,7 +55,6 @@ public class AuthController {
             String token = request.get("token");
             String newPassword = request.get("newPassword");
             String confirmPassword = request.get("confirmPassword");
-
             authService.resetPassword(token, newPassword, confirmPassword);
             return ResponseEntity.ok("Đặt lại mật khẩu thành công");
         } catch (RuntimeException e) {
@@ -66,21 +62,10 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/test-email")
-    public ResponseEntity<?> testEmail(@RequestParam String email) {
-        try {
-            emailService.sendPasswordResetEmail(email, "test-token-123");
-            return ResponseEntity.ok(Map.of("message", "Email test đã được gửi thành công!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Lỗi gửi email: " + e.getMessage()));
-        }
-    }
-
     @GetMapping("/user-info")
     public ResponseEntity<?> getUserInfo(@RequestParam String token) {
         try {
-            Map<String, Object> userInfo = authService.getUserInfoFromToken(token);
-            return ResponseEntity.ok(userInfo);
+            return ResponseEntity.ok(authService.getUserInfoFromToken(token));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

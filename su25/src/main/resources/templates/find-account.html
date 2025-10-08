@@ -96,6 +96,9 @@
 <body>
     <div class="login-container">
         <div class="brand-section">
+            <div class="logo-container">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+            </div>
             <h1 class="app-title">BanHangRong</h1>
         </div>
         
@@ -110,6 +113,18 @@
                 <form id="findAccountForm">
                     <input type="email" id="email" name="email" class="email-input" placeholder="Enter your email address" required>
                     
+                    <!-- Thông báo thành công -->
+                    <div id="successMessage" class="success-message" style="display: none;">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư và click vào link để đặt lại mật khẩu. Bạn có thể nhập email khác nếu cần.</span>
+                    </div>
+                    
+                    <!-- Thông báo lỗi -->
+                    <div id="errorMessage" class="error-message" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="errorText"></span>
+                    </div>
+                    
                     <div class="button-group">
                         <a href="/login" class="cancel-btn">Cancel</a>
                         <button type="submit" class="search-btn" id="searchBtn">Search</button>
@@ -121,6 +136,30 @@
 
     <script th:src="@{/js/auth.js}"></script>
     <script>
+        // Hàm hiển thị thông báo thành công
+        function showSuccessMessage() {
+            hideAllMessages();
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'flex';
+            successMsg.style.animation = 'slideDown 0.3s ease-out';
+        }
+        
+        // Hàm hiển thị thông báo lỗi
+        function showErrorMessage(message) {
+            hideAllMessages();
+            const errorMsg = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMsg.style.display = 'flex';
+            errorMsg.style.animation = 'slideDown 0.3s ease-out';
+        }
+        
+        // Hàm ẩn tất cả thông báo
+        function hideAllMessages() {
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
         document.getElementById('findAccountForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -128,13 +167,14 @@
             const searchBtn = document.getElementById('searchBtn');
             
             if (!email) {
-                alert('Vui lòng nhập email!');
+                showErrorMessage('Vui lòng nhập email!');
                 return;
             }
             
             try {
                 searchBtn.disabled = true;
                 searchBtn.textContent = 'Searching...';
+                hideAllMessages();
                 
                 const response = await fetch('/api/auth/forgot-password', {
                     method: 'POST',
@@ -145,15 +185,16 @@
                 });
                 
                 if (response.ok) {
-                    alert('Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.');
-                    window.location.href = '/login';
+                    showSuccessMessage();
+                    // Không chuyển hướng, để người dùng ở lại trang này
+                    // Người dùng có thể nhập email khác hoặc đợi nhận email
                 } else {
                     const result = await response.text();
-                    alert('Lỗi: ' + result);
+                    showErrorMessage('Lỗi: ' + result);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra! Vui lòng thử lại.');
+                showErrorMessage('Có lỗi xảy ra! Vui lòng thử lại.');
             } finally {
                 searchBtn.disabled = false;
                 searchBtn.textContent = 'Search';

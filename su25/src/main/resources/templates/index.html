@@ -4,34 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BanHangRong - Trang chủ</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>BanHangRong</h1>
-            <div class="user-info" id="userInfo" style="display: none;">
-                <span id="userName"></span>
-                <button onclick="logout()" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                </button>
+    <div class="home-container">
+            <!-- Navigation -->
+            <nav class="navbar">
+                <img th:src="@{/img/logo.jpg}" alt="BanHangRong Logo" class="logo">
+                <div class="nav-links" id="navLinks">
+                <a href="/" class="active">Home</a>
+                <a href="/seller/dashboard">Seller</a>
+                <a href="/admin/index">Admin</a>
+                <div class="user-info" id="userInfo" style="display: none;">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+                <div class="login-link" id="loginLink">
+                    <a href="/login" class="login-btn">Login</a>
+                </div>
             </div>
-            <div class="login-link" id="loginLink">
-                <a href="/login" class="btn-login">Đăng nhập</a>
-            </div>
-        </div>
+        </nav>
         
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1>Welcome to BanHangRong</h1>
+            <p>Reputable license trading platform for digital products and software licenses. Buy and sell with confidence.</p>
+            <div class="cta-buttons">
+                <a href="/register" class="cta-btn primary">Get Started</a>
+                <a href="/login" class="cta-btn secondary">Sign In</a>
+            </div>
+        </section>
+        
+        <!-- Welcome Section (for logged in users) -->
         <div class="welcome-section" id="welcomeSection" style="display: none;">
-            <h2>Chào mừng bạn đến với BanHangRong!</h2>
-            <p>Hệ thống quản lý bán hàng trực tuyến</p>
+            <h2>Welcome back!</h2>
+            <p>Manage your digital products and licenses</p>
         </div>
         
-        <div class="database-section">
-            <h2>Quản lý cơ sở dữ liệu</h2>
-            <p><a href="/db">Xem toàn bộ database (tất cả bảng)</a></p>
+        <!-- Database Section (Admin only) -->
+        <div class="database-section" id="databaseSection" style="display: none;">
+            <h2>Database Management</h2>
+            <p><a href="/db">View full database (all tables)</a></p>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Tìm kiếm username/email...">
+                <input type="text" id="searchInput" placeholder="Search username/email...">
             </div>
             <table id="usersTable">
                 <thead>

@@ -13,6 +13,7 @@ import banhangrong.su25.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -78,10 +79,15 @@ public class AuthService {
         newUser.setUsername(registerRequest.getUsername());
         newUser.setEmail(registerRequest.getEmail());
         newUser.setPassword(registerRequest.getPassword()); // TODO: mã hoá password bằng BCrypt
+        newUser.setPhoneNumber(registerRequest.getPhoneNumber());
+        newUser.setGender(registerRequest.getGender());
+        newUser.setBirthDate(registerRequest.getBirthDate());
         newUser.setUserType("USER");
+        newUser.setBalance(new BigDecimal("0.00")); // Khởi tạo balance = 0
         newUser.setIsActive(true);
         newUser.setIsEmailVerified(false);
         newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setUpdatedAt(LocalDateTime.now());
 
         usersRepository.save(newUser);
 
@@ -126,7 +132,7 @@ public class AuthService {
         Email mail = new Email(
                 user.getEmail(),
                 "Yêu cầu đặt lại mật khẩu",
-                "Click vào link sau để đặt lại mật khẩu: http://localhost:8080/api/auth/reset-password?token=" + token
+                "Click vào link sau để đặt lại mật khẩu: http://localhost:8080/reset-password?token=" + token
         );
         emailService.sendEmail(mail);
     }

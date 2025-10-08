@@ -25,8 +25,10 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-                .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/test-email").permitAll()
+                .requestMatchers("/api/database/**").permitAll()
+                .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/test-email", "/seller/**", "/admin/**").permitAll()
                 .anyRequest().authenticated()
             );
 
