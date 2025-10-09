@@ -1521,7 +1521,7 @@ body.enhanced-dashboard {
 [data-block="kpi"] .card .orb.one { width:44px;height:44px; right:-8px; top:-8px; background:color-mix(in oklab,var(--accent) 60%, transparent); animation-delay:.3s; }
 [data-block="kpi"] .card .orb.two { width:60px;height:60px; left:-12px; bottom:-12px; background:color-mix(in oklab,var(--accent-2) 55%, transparent); animation-delay:1.1s; }
 @keyframes floatPulse { 0%,100% { transform:translate(0,0) scale(1);} 45% { transform:translate(6px,-6px) scale(1.25);} 70% { transform:translate(-4px,8px) scale(.85);} }
-table.table tbody tr { --enter-delay:0ms; opacity:0; transform:translateY(8px); animation:rowIn .6s cubic-bezier(.33,.02,.18,1) forwards; }
+table.table tbody tr { --enter-delay:0ms; opacity:1 !important; transform:none !important; animation:none !important; }
 table.table tbody tr:nth-child(1) { --enter-delay:40ms; }
 table.table tbody tr:nth-child(2) { --enter-delay:80ms; }
 table.table tbody tr:nth-child(3) { --enter-delay:120ms; }
