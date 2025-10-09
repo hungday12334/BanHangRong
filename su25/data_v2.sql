@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS products (
     download_url VARCHAR(255) NOT NULL,
     total_sales INT DEFAULT 0,
     average_rating DECIMAL(3,2) DEFAULT 0.00,
-    status VARCHAR(20) DEFAULT 'DRAFT',
+    status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_products_seller FOREIGN KEY (seller_id) REFERENCES users(user_id)

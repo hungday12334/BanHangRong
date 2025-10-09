@@ -7,7 +7,7 @@
 USE wap;
 
 -- Thêm cột status mới
-ALTER TABLE products ADD COLUMN status VARCHAR(20) DEFAULT 'DRAFT';
+ALTER TABLE products ADD COLUMN status VARCHAR(20) DEFAULT 'pending';
 
 -- Migrate data từ is_active sang status
 UPDATE products SET status = 'public' WHERE is_active = TRUE;
