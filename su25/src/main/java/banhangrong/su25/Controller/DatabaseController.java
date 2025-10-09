@@ -1,126 +1,78 @@
 package banhangrong.su25.Controller;
 
-import org.springframework.jdbc.core.ColumnMapRowMapper;
+import banhangrong.su25.Repository.UsersRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/api/database")
 public class DatabaseController {
 
-    private final JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-    public DatabaseController(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    @Autowired
+    private UsersRepository usersRepository;
+
+    @PostMapping("/cleanup-duplicate-users")
+    public ResponseEntity<?> cleanupDuplicateUsers() {
+        try {
+            // Đếm số lượng users trước khi xóa
+            long countBefore = usersRepository.count();
+            
+            // SQL để xóa duplicate, giữ lại record có user_id nhỏ nhất
+            String deleteSql = """
+                DELETE u1 FROM users u1
+                INNER JOIN users u2 
+                WHERE u1.user_id > u2.user_id 
+                AND u1.username = u2.username
+                """;
+            
+            int deleted = jdbcTemplate.update(deleteSql);
+            long countAfter = usersRepository.count();
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("message", "Đã xóa thành công duplicate users");
+            result.put("usersBeforeCleanup", countBefore);
+            result.put("duplicatesDeleted", deleted);
+            result.put("usersAfterCleanup", countAfter);
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Lỗi khi xóa duplicate: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
     }
 
-    public record TableData(
-            String name,
-            long count,
-            List<String> columns,
-            List<Map<String, Object>> rows
-    ) {}
-
-    @GetMapping("/db")
-    public String inspectDatabase(@RequestParam(name = "limit", defaultValue = "10") int limit,
-                                  Model model) {
-        int safeLimit = Math.min(Math.max(limit, 1), 100);
-
-        // Get current schema/database name
-        String schema = jdbcTemplate.queryForObject("SELECT DATABASE()", String.class);
-
-        // Fetch all base tables in the current schema
-        List<String> tables = jdbcTemplate.queryForList(
-                "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE' ORDER BY table_name",
-                String.class,
-                schema
-        );
-
-        List<TableData> tableDataList = new ArrayList<>();
-
-        for (String table : tables) {
-            // Get ordered columns for consistent display
-            List<String> columns = jdbcTemplate.queryForList(
-                    "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION",
-                    String.class,
-                    schema,
-                    table
-            );
-
-            long count = 0L;
-            try {
-                Long c = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + table + "`", Long.class);
-                count = c != null ? c : 0L;
-            } catch (Exception ignored) {
-                // Some tables may not be readable by the current user
-            }
-
-            List<Map<String, Object>> rows = List.of();
-            try {
-                rows = jdbcTemplate.query("SELECT * FROM `" + table + "` LIMIT " + safeLimit, new ColumnMapRowMapper());
-            } catch (Exception ignored) {
-                // Skip preview if cannot select
-            }
-
-            tableDataList.add(new TableData(table, count, columns, rows));
+    @GetMapping("/check-duplicate-users")
+    public ResponseEntity<?> checkDuplicateUsers() {
+        try {
+            String checkSql = """
+                SELECT username, COUNT(*) as count 
+                FROM users 
+                GROUP BY username 
+                HAVING count > 1
+                """;
+            
+            List<Map<String, Object>> duplicates = jdbcTemplate.queryForList(checkSql);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("totalUsers", usersRepository.count());
+            result.put("duplicateUsernames", duplicates);
+            result.put("hasDuplicates", !duplicates.isEmpty());
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Lỗi khi kiểm tra duplicate: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
-
-        model.addAttribute("schema", schema);
-        model.addAttribute("tableCount", tables.size());
-        model.addAttribute("limit", safeLimit);
-        model.addAttribute("tables", tableDataList);
-
-        return "db";
-    }
-
-    @GetMapping("/api/db")
-    @ResponseBody
-    public Map<String, Object> inspectDatabaseJson(@RequestParam(name = "limit", defaultValue = "10") int limit) {
-        int safeLimit = Math.min(Math.max(limit, 1), 100);
-
-        String schema = jdbcTemplate.queryForObject("SELECT DATABASE()", String.class);
-
-        List<String> tables = jdbcTemplate.queryForList(
-                "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE' ORDER BY table_name",
-                String.class,
-                schema
-        );
-
-        List<TableData> tableDataList = new ArrayList<>();
-        for (String table : tables) {
-            List<String> columns = jdbcTemplate.queryForList(
-                    "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION",
-                    String.class,
-                    schema,
-                    table
-            );
-
-            long count = 0L;
-            try {
-                Long c = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + table + "`", Long.class);
-                count = c != null ? c : 0L;
-            } catch (Exception ignored) {}
-
-            List<Map<String, Object>> rows = List.of();
-            try {
-                rows = jdbcTemplate.query("SELECT * FROM `" + table + "` LIMIT " + safeLimit, new ColumnMapRowMapper());
-            } catch (Exception ignored) {}
-
-            tableDataList.add(new TableData(table, count, columns, rows));
-        }
-
-        return Map.of(
-                "schema", schema,
-                "tableCount", tables.size(),
-                "limit", safeLimit,
-                "tables", tableDataList
-        );
     }
 }
