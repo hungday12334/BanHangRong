@@ -35,4 +35,9 @@ public class PageController {
     public String findAccount() {
         return "login/find-account";
     }
+
+    @GetMapping("/verify-email-required")
+    public String verifyEmailRequired() {
+        return "login/verify-email-required";
+    }
 }

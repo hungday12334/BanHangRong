@@ -7,6 +7,8 @@ import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Repository.ShoppingCartRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +38,18 @@ public class CustomerDashboardController {
     public String customerDashboard(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
                                     @RequestParam(name = "size", required = false, defaultValue = "15") int size,
                                     Model model) {
+        // Kiểm tra email verified cho CUSTOMER
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            String username = auth.getName();
+            Users currentUser = usersRepository.findByUsername(username).orElse(null);
+            if (currentUser != null && "CUSTOMER".equals(currentUser.getUserType())) {
+                if (!Boolean.TRUE.equals(currentUser.getIsEmailVerified())) {
+                    return "redirect:/verify-email-required";
+                }
+            }
+        }
+        
         // ORM: paginated PUBLIC products ordered by total sales desc then created_at desc
         PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),
                 Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));

@@ -59,7 +59,12 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         } else if (user.getUserType().equals("SELLER")) {
             response.sendRedirect("/seller/dashboard");
         } else if (user.getUserType().equals("CUSTOMER")) {
-            response.sendRedirect("/customer/dashboard");
+            // Customer phải verify email mới vào được dashboard
+            if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
+                response.sendRedirect("/customer/dashboard");
+            } else {
+                response.sendRedirect("/verify-email-required");
+            }
         } else {
             response.sendRedirect("/customer/dashboard");
         }
