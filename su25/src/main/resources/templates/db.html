@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Inspector</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .db-header {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .db-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            background: #fff;
+        }
+
+        .card h3 {
+            margin: 0 0 8px;
+            font-size: 1.1rem;
+        }
+
+        .muted {
+            color: #666;
+            font-size: .9rem;
+        }
+
+        .scroll-x {
+            overflow-x: auto;
+        }
+
+        table.preview {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .9rem;
+        }
+
+        table.preview th, table.preview td {
+            border: 1px solid #eee;
+            padding: 6px 8px;
+            white-space: nowrap;
+        }
+
+        table.preview th {
+            background: #f9f9f9;
+            position: sticky;
+            top: 0;
+        }
+
+        .columns {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: .85rem;
+        }
+    </style>
+    <script>
+        function changeLimit(sel) {
+            const params = new URLSearchParams(location.search);
+            params.set('limit', sel.value);
+            location.search = params.toString();
+        }
+    </script>
+    <link rel="icon" href="data:,">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="db-header">
+        <h1 style="margin: 0">Schema: <span th:text="${schema}"></span></h1>
+        <div class="muted" th:text="${tableCount} + ' tables'"></div>
+        <label>Rows/preview:
+            <select onchange="changeLimit(this)">
+                <option th:selected="${limit == 5}">5</option>
+                <option th:selected="${limit == 10}">10</option>
+                <option th:selected="${limit == 25}">25</option>
+                <option th:selected="${limit == 50}">50</option>
+                <option th:selected="${limit == 100}">100</option>
+            </select>
+        </label>
+        <a href="/" style="margin-left:auto">← Về trang chính</a>
+    </div>
+
+    <p class="muted">Xem nhanh số lượng record và vài dòng dữ liệu của tất cả bảng.</p>
+
+    <div class="db-grid">
+        <div class="card" th:each="t : ${tables}">
+            <h3>
+                <span th:text="${t.name}"></span>
+                <span class="muted" th:text="'(' + ${t.count} + ' rows)'" style="font-weight: normal"></span>
+            </h3>
+            <div class="columns muted">Cột: <span th:text="${#strings.arrayJoin(t.columns.toArray(), ', ')}"></span>
+            </div>
+            <div class="scroll-x" style="margin-top:8px" th:if="${t.rows} != null and ${!t.rows.isEmpty()}">
+                <table class="preview">
+                    <thead>
+                    <tr>
+                        <th th:each="c : ${t.columns}" th:text="${c}"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${t.rows}">
+                        <td th:each="c : ${t.columns}" th:text="${r.get(c)}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="muted" th:if="${t.rows} == null or ${t.rows.isEmpty()}">Không thể xem trước dữ liệu (có thể
+                thiếu quyền SELECT).
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

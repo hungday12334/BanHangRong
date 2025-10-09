@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách sản phẩm</title>
+    <style>
+        body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 0; background:#f5f7fb; color:#222; }
+        header { background:#1e293b; color:#fff; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+        header h1 { margin:0; font-size:20px; }
+        .actions a { display:inline-block; margin-left:8px; padding:8px 14px; background:#3b82f6; color:#fff; text-decoration:none; border-radius:6px; font-size:14px; }
+        .actions a.logout { background:#ef4444; }
+        main { max-width:1200px; margin:14px auto 40px; padding:0 16px; }
+        table { width:100%; border-collapse:collapse; margin-top:10px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+        th, td { padding:10px 12px; border:1px solid #e2e8f0; font-size:14px; text-align:left; }
+        th { background:#f1f5f9; font-weight:600; }
+        tbody tr:nth-child(even) { background:#f8fafc; }
+        .price { font-weight:600; color:#111827; }
+        .sale { color:#dc2626; font-weight:600; }
+        .muted { color:#64748b; font-size:12px; }
+        .rating { color:#f59e0b; font-weight:600; }
+        .tag { display:inline-block; padding:2px 8px; font-size:11px; background:#e2e8f0; border-radius:12px; margin-right:4px; }
+        .tag.on { background:#d1fae5; color:#065f46; }
+        .tag.off { background:#fee2e2; color:#991b1b; }
+        .empty { padding:28px 10px; text-align:center; font-size:14px; color:#64748b; }
+        footer { text-align:center; padding:30px 0 40px; font-size:12px; color:#64748b; }
+        .search-bar { margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; }
+        .search-bar input { padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; }
+        .search-bar button { padding:8px 14px; border:none; background:#3b82f6; color:#fff; border-radius:6px; cursor:pointer; }
+        .nowrap { white-space:nowrap; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Tất cả sản phẩm</h1>
+    <div class="actions">
+        <a href="/login" id="btnLogin">Login</a>
+        <a href="/logout" class="logout" id="btnLogout">Logout</a>
+        <a href="/seller/dashboard">Seller Dashboard</a>
+        <a href="/admin/index">Admin</a>
+    </div>
+</header>
+<main>
+    <section>
+        <div class="search-bar">
+            <input type="text" id="q" placeholder="Tìm tên sản phẩm..." />
+            <button type="button" onclick="filterProducts()">Lọc</button>
+            <span id="count" class="muted"></span>
+        </div>
+        <table id="tblProducts">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên</th>
+                <th>Giá</th>
+                <th>Giá giảm</th>
+                <th>Rating</th>
+                <th>SL</th>
+                <th>Trạng thái</th>
+                <th>Mô tả</th>
+                <th>Ngày tạo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(products)}"><td colspan="9" class="empty">Chưa có sản phẩm nào.</td></tr>
+            <tr th:each="p : ${products}" data-row
+                th:attr="data-name=${p.name}" >
+                <td th:text="${p.productId}"></td>
+                <td th:text="${p.name}"></td>
+                <td class="price" th:text="${p.price != null ? #numbers.formatDecimal(p.price,1,'COMMA',2,'POINT') : '-'}"></td>
+                <td class="sale" th:text="${p.salePrice != null ? #numbers.formatDecimal(p.salePrice,1,'COMMA',2,'POINT') : ''}"></td>
+                <td class="rating" th:text="${p.averageRating != null ? #numbers.formatDecimal(p.averageRating,1,'COMMA',1,'POINT') : '0.0'}"></td>
+                <td th:text="${p.quantity}"></td>
+                <td><span th:classappend="${p.isActive} ? 'tag on' : 'tag off'" th:text="${p.isActive} ? 'Public' : 'Hidden'"></span></td>
+                <td th:text="${p.description}" style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></td>
+                <td class="nowrap" th:text="${p.createdAt != null ? #temporals.format(p.createdAt, 'dd/MM/yyyy') : ''}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+<footer>
+    &copy; <span th:text="${#dates.year(#dates.createNow())}"></span> BanHangRong – Demo product catalog
+</footer>
+<script>
+    function filterProducts(){
+        const q = document.getElementById('q').value.trim().toLowerCase();
+        let visible = 0;
+        document.querySelectorAll('#tblProducts tbody tr[data-row]').forEach(tr => {
+            const name = tr.getAttribute('data-name')?.toLowerCase() || '';
+            const show = !q || name.includes(q);
+            tr.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        const c = document.getElementById('count');
+        if (c) c.textContent = visible + ' sản phẩm hiển thị';
+    }
+</script>
+</body>
+</html>

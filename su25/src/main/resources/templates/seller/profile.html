@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bán Hàng Rong - Trang cá nhân</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        /* CSS từ seller-dashboard.css đã được tích hợp */
+        :root {
+            --bg: #0b1020;
+            --bg-soft: #111735;
+            --bg-elev: #141b3f;
+            --card: #18214d;
+            --text: #e7eaf6;
+            --muted: #a8b0d3;
+            --accent: #3b82f6;
+            --accent-2: #06b6d4;
+            --good: #22c55e;
+            --warn: #f59e0b;
+            --bad: #ef4444;
+            --border: rgba(255, 255, 255, 0.12);
+            --shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+            --radius: 14px;
+        }
+
+        /* Light theme variables */
+        :root.theme-light {
+            --bg: #f6f7fb;
+            --bg-soft: #ffffff;
+            --bg-elev: #ffffff;
+            --card: #ffffff;
+            --text: #101426;
+            --muted: #57607a;
+            --accent: #2563eb;
+            --accent-2: #0891b2;
+            --good: #15803d;
+            --warn: #b45309;
+            --bad: #b91c1c;
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: 0 8px 28px rgba(16, 20, 38, 0.08);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root:not(.theme-dark):not(.theme-light) {
+                --bg: #f6f7fb;
+                --bg-soft: #ffffff;
+                --bg-elev: #ffffff;
+                --card: #ffffff;
+                --text: #101426;
+                --muted: #57607a;
+                --accent: #2563eb;
+                --accent-2: #0891b2;
+                --good: #15803d;
+                --warn: #b45309;
+                --bad: #b91c1c;
+                --border: rgba(0, 0, 0, 0.08);
+                --shadow: 0 8px 28px rgba(16, 20, 38, 0.08);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            color: var(--text);
+            background:
+                    radial-gradient(1200px 800px at 15% -10%, color-mix(in oklab, var(--accent) 24%, transparent) 0%, transparent 50%),
+                    radial-gradient(1000px 700px at 120% 10%, color-mix(in oklab, var(--accent-2) 18%, transparent) 0%, transparent 60%),
+                    var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles - Điều chỉnh chữ lớn hơn nữa */
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            background: linear-gradient(180deg,
+            color-mix(in oklab, var(--bg-soft) 96%, transparent) 0%,
+            color-mix(in oklab, var(--bg) 96%, transparent) 100%);
+            border-right: 1px solid var(--border);
+            padding: 18px 14px 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .brand-with-logo {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 10px 4px 20px 4px;
+            position: relative;
+            overflow: visible;
+            flex-direction: column;
+            background: transparent;
+            border: none;
+        }
+
+        .app-logo {
+            margin: 0;
+            padding: 0;
+            width: 108px; /* Tăng từ 105px lên 108px */
+            height: 108px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 26px;
+            position: relative;
+            background: linear-gradient(160deg, color-mix(in oklab, var(--bg-soft) 96%, #fff 0%) 0%, color-mix(in oklab, var(--bg-elev) 92%, #000 0%) 100%);
+            box-shadow: 0 6px 26px -6px rgba(0, 0, 0, .65), 0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent);
+            overflow: hidden;
+        }
+
+        .app-logo-img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            position: relative;
+            white-space: nowrap;
+            font-size: 20px; /* Tăng từ 19px lên 20px */
+            font-weight: 800;
+            letter-spacing: .8px; /* Tăng letter-spacing */
+            line-height: 1.05;
+            color: var(--text);
+            text-shadow: 0 2px 4px rgba(0,0,0,.25), 0 4px 18px rgba(0,0,0,.28);
+        }
+
+        .theme-light .brand-text {
+            color: #121824;
+            text-shadow: 0 2px 4px rgba(0,0,0,.15), 0 6px 16px rgba(0,0,0,.07);
+        }
+
+        .menu {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .menu .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px; /* Tăng từ 9px lên 10px */
+            border-radius: 10px;
+            color: var(--muted);
+            text-decoration: none;
+            transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+        }
+
+        .menu .item .ti {
+            font-size: 18px; /* Tăng từ 17px lên 18px */
+            width: 20px; /* Tăng từ 19px lên 20px */
+            text-align: center;
+            color: color-mix(in oklab, var(--accent) 70%, #9fb1ff);
+        }
+
+        .menu .item .lbl {
+            font-size: 15px; /* Tăng từ 14px lên 15px */
+            font-weight: 500;
+        }
+
+        .menu .item:hover {
+            background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev));
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .menu .item.active {
+            background: color-mix(in oklab, var(--accent) 20%, var(--bg-elev));
+            color: var(--text);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 18px;
+        }
+
+        .footer-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .theme-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 54px; /* Tăng từ 52px lên 54px */
+            padding: 0;
+            border-radius: 18px;
+            border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+            background: linear-gradient(155deg, color-mix(in oklab, var(--bg-elev) 85%, #fff 0%) 0%, color-mix(in oklab, var(--bg-soft) 90%, #000 0%) 100%);
+            box-shadow: 0 4px 18px -6px rgba(0,0,0,.6), 0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent), 0 0 22px -6px color-mix(in oklab, var(--accent) 60%, transparent) inset;
+            cursor: pointer;
+            transition: background .5s ease, box-shadow .4s ease, transform .35s ease;
+            color: var(--text);
+        }
+
+        .theme-toggle .ti {
+            font-size: 24px; /* Tăng từ 23px lên 24px */
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 3px 8px rgba(0,0,0,.55));
+            transition: transform .6s cubic-bezier(.68,-0.4,.32,1.4);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            padding: 12px 12px; /* Tăng từ 11px lên 12px */
+            background: linear-gradient(135deg,color-mix(in oklab,var(--bad) 18%,transparent),color-mix(in oklab,var(--bad) 8%,transparent));
+            border: 1px solid color-mix(in oklab,var(--bad) 35%, transparent);
+            color: #ffd9d9;
+            font-weight: 600;
+            border-radius: 14px;
+            text-decoration: none;
+            transition: .35s ease background, .35s ease transform, .35s ease box-shadow;
+            font-size: 15px; /* Tăng từ 14px lên 15px */
+        }
+
+        .theme-light .logout-btn {
+            color: #7a1212;
+            background: color-mix(in oklab, var(--bad) 8%, transparent);
+        }
+
+        .logout-btn .ti {
+            font-size: 18px; /* Tăng từ 17px lên 18px */
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+        }
+
+        .profile-section {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .seller-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .seller-id {
+            background-color: color-mix(in oklab, var(--accent) 12%, transparent);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: color-mix(in oklab, var(--accent) 80%, #1d4ed8);
+            border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+        }
+
+        .seller-role {
+            background-color: color-mix(in oklab, var(--good) 12%, transparent);
+            color: color-mix(in oklab, var(--good) 65%, #a7f3d0);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid color-mix(in oklab, var(--good) 35%, transparent);
+        }
+
+        .profile-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.15s ease-in-out;
+            background-color: color-mix(in oklab, var(--bg) 94%, transparent);
+            color: var(--text);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent);
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        .form-group input:read-only, .form-group select:disabled {
+            background-color: color-mix(in oklab, var(--bg) 96%, transparent);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.25rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: color-mix(in oklab, var(--bg-elev) 90%, transparent);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev));
+        }
+
+        /* Avatar Styles */
+        .avatar-edit-wrap {
+            position: relative;
+            display: inline-flex;
+            margin-bottom: 1.5rem;
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--bg-soft);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-edit-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .avatar-edit-btn:hover {
+            background: var(--accent-2);
+            transform: scale(1.1);
+        }
+
+        /* Toast Styles - Góc dưới phải */
+        .toast-container {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            min-width: 280px;
+            max-width: 350px;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast .icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast .msg {
+            flex: 1;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .toast .close {
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            transition: color 0.2s ease;
+        }
+
+        .toast .close:hover {
+            color: var(--text);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--good);
+        }
+
+        .toast.success .icon {
+            color: var(--good);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--bad);
+        }
+
+        .toast.error .icon {
+            color: var(--bad);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--accent);
+        }
+
+        .toast.info .icon {
+            color: var(--accent);
+        }
+
+        /* Loader Styles */
+        #appLoader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            background:
+                    radial-gradient(900px 620px at 30% 35%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%),
+                    radial-gradient(1000px 700px at 80% 75%, color-mix(in oklab, var(--accent-2) 18%, transparent), transparent 75%),
+                    linear-gradient(140deg, color-mix(in oklab, var(--bg) 92%, #000 0%) 0%, var(--bg) 60%);
+            overflow: hidden;
+            transition: opacity .5s cubic-bezier(.4, .0, .2, 1);
+            opacity: 0;
+            pointer-events: none;
+            backdrop-filter: blur(2px) brightness(1.02);
+        }
+
+        #appLoader:before,
+        #appLoader:after {
+            content: "";
+            position: absolute;
+            width: 900px;
+            height: 900px;
+            background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 25%, transparent), transparent 70%);
+            opacity: .18;
+            animation: orbFloat 11s linear infinite;
+            filter: blur(40px);
+        }
+
+        #appLoader:after {
+            animation-direction: reverse;
+            animation-duration: 15s;
+            background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent-2) 22%, transparent), transparent 70%);
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate(-18%, -12%) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(12%, 6%) rotate(180deg);
+            }
+
+            100% {
+                transform: translate(-18%, -12%) rotate(360deg);
+            }
+        }
+
+        #appLoader .loader-core {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+            padding: 42px 54px 46px;
+            border-radius: 34px;
+            background: linear-gradient(160deg, color-mix(in oklab, var(--bg-elev) 82%, #ffffff 0%) 0%, color-mix(in oklab, var(--bg-soft) 84%, #000 0%) 100%);
+            box-shadow: 0 12px 42px -8px rgba(0, 0, 0, .45), 0 2px 4px -1px rgba(0, 0, 0, .35);
+            border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+            min-width: 310px;
+        }
+
+        /* Orbital nucleus */
+        #appLoader .orbital {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 4px 18px rgba(0, 0, 0, .55));
+        }
+
+        #appLoader .orbital .nucleus {
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(145deg, color-mix(in oklab, var(--accent) 60%, #ffffff 0%) 0%, color-mix(in oklab, var(--accent-2) 55%, #000 0%) 100%);
+            border-radius: 20px;
+            box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 25%, transparent), 0 0 22px -4px color-mix(in oklab, var(--accent-2) 70%, transparent), 0 0 34px -2px color-mix(in oklab, var(--accent) 60%, transparent);
+            animation: nucleusPulse 2.6s ease-in-out infinite;
+            position: absolute;
+            top: 31px;
+            left: 31px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #appLoader .orbital .nucleus:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .5), transparent 70%);
+            mix-blend-mode: overlay;
+            opacity: .85;
+        }
+
+        #appLoader .orbital .nucleus .loader-logo {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            z-index: 2;
+            filter: none;
+            mix-blend-mode: normal;
+            animation: logoFloat 3.5s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes nucleusPulse {
+
+            0%,
+            100% {
+                transform: scale(0.94);
+            }
+
+            50% {
+                transform: scale(1.07);
+            }
+        }
+
+        /* Orbits */
+        #appLoader .orbit {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        #appLoader .orbit span {
+            display: block;
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 40%, transparent), 0 0 12px 2px color-mix(in oklab, var(--accent) 70%, transparent);
+        }
+
+        #appLoader .orbit.orbit-a {
+            animation: orbitA 5.2s linear infinite;
+        }
+
+        #appLoader .orbit.orbit-b {
+            animation: orbitB 6.4s linear infinite;
+        }
+
+        #appLoader .orbit.orbit-c {
+            animation: orbitC 7.8s linear infinite;
+        }
+
+        @keyframes orbitA {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes orbitB {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        @keyframes orbitC {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Progress bar */
+        #appLoader .progress-wrap {
+            position: relative;
+            width: 240px;
+            height: 6px;
+            background: color-mix(in oklab, var(--accent) 18%, transparent);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent);
+        }
+
+        #appLoader .progress-bar {
+            position: absolute;
+            inset: 0;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            border-radius: inherit;
+            box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent), 0 0 14px -2px color-mix(in oklab, var(--accent-2) 70%, transparent);
+            animation: progressPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes progressPulse {
+            0% {
+                filter: brightness(.95);
+            }
+
+            100% {
+                filter: brightness(1.15);
+            }
+        }
+
+        #appLoader .load-text {
+            font-size: 15px;
+            letter-spacing: .35px;
+            color: color-mix(in oklab, var(--muted) 90%, #fff);
+            font-weight: 600;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+        }
+
+        /* Responsive */
+        @media (max-width: 820px) {
+            .page {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .profile-form {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 0.625rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .toast {
+                min-width: 250px;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="loading">
+<!-- Global Loader -->
+<div id="appLoader">
+    <div class="loader-core">
+        <div class="orbital">
+            <div class="orbit orbit-a"><span></span></div>
+            <div class="orbit orbit-b"><span></span></div>
+            <div class="orbit orbit-c"><span></span></div>
+            <div class="nucleus">
+                <img src="/img/kua654ms.png" alt="Logo" class="loader-logo" data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png">
+            </div>
+        </div>
+        <div class="progress-wrap">
+            <div class="progress-bar" data-loader-progress></div>
+        </div>
+        <div class="load-text" data-loader-text>Đang khởi tạo...</div>
+    </div>
+</div>
+
+<div class="page">
+    <!-- Sidebar -->
+    <section class="sidebar">
+        <div class="brand-bar">
+            <div class="brand brand-with-logo">
+                <figure class="app-logo" role="img" aria-label="Logo">
+                    <img src="/img/kua654ms.png" alt="Logo" decoding="async" loading="eager"
+                         data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" class="app-logo-img" />
+                </figure>
+                <span class="brand-text" data-text="Bán Hàng Rong">Bán Hàng Rong</span>
+            </div>
+        </div>
+        <nav class="menu" data-block="nav">
+            <a href="/" class="item" data-nav="home" title="Trang chủ" aria-label="Trang chủ">
+                <i class="ti ti-home"></i><span class="lbl">Trang chủ</span>
+            </a>
+            <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Quản lý" aria-label="Quản lý">
+                <i class="ti ti-dashboard"></i><span class="lbl">Quản lý</span>
+            </a>
+            <a href="/seller/profile" class="item active" title="Trang cá nhân">
+                <i class="ti ti-user"></i>
+                <span class="lbl">Trang cá nhân</span>
+            </a>
+            <a href="#orders" class="item" data-nav="orders" title="Quản lý đơn hàng" aria-label="Quản lý đơn hàng">
+                <i class="ti ti-receipt"></i><span class="lbl">Quản lý đơn hàng</span>
+            </a>
+            <a href="#keys" class="item" data-nav="keys" title="Quản lý key" aria-label="Quản lý key">
+                <i class="ti ti-key"></i><span class="lbl">Quản lý key</span>
+            </a>
+            <a href="#profile-settings" class="item" data-nav="profile-settings" title="Quản lý profile" aria-label="Quản lý profile">
+                <i class="ti ti-settings"></i><span class="lbl">Quản lý profile</span>
+            </a>
+            <a href="/seller/chat" class="item" data-nav="chat" title="Chat với khách hàng" aria-label="Chat với khách hàng">
+                <i class="ti ti-messages"></i>
+                <span class="lbl">Chat hỗ trợ</span>
+                <span class="badge bg-danger" id="unreadChatCount" style="display: none;">0</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer" data-block="logout">
+            <div class="footer-actions">
+                <button id="themeToggle" class="theme-toggle" aria-label="Chuyển giao diện" title="Chuyển giao diện" type="button">
+                    <i class="ti ti-sun"></i>
+                </button>
+                <a href="/logout" class="logout-btn" title="Đăng xuất" aria-label="Đăng xuất">
+                    <i class="ti ti-logout"></i><span>Đăng xuất</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <section class="profile-section">
+                <h2 class="section-title">Trang cá nhân</h2>
+
+                <!-- Avatar Section -->
+                <div class="avatar-edit-wrap">
+                    <div class="avatar">
+                        <img src="/img/avatar_default.jpg" alt="Avatar" id="profileAvatar">
+                    </div>
+                    <button class="avatar-edit-btn" id="btnEditAvatar" title="Đổi avatar">
+                        <i class="ti ti-camera"></i>
+                    </button>
+                </div>
+
+                <div class="seller-info">
+                    <div class="seller-id">Seller ID: <span id="sellerId">1</span></div>
+                    <div class="seller-role">• SELLER</div>
+                </div>
+
+                <form class="profile-form" id="profileForm">
+                    <div class="form-group">
+                        <label for="name">Tên:</label>
+                        <input type="text" id="name" value="Minh" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" value="seller@example.com" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại:</label>
+                        <input type="tel" id="phone" value="0900000000" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Giới tính:</label>
+                        <select id="gender" disabled>
+                            <option value="other" selected>other</option>
+                            <option value="male">Nam</option>
+                            <option value="female">Nữ</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthday">Ngày sinh:</label>
+                        <input type="date" id="birthday" value="" readonly>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="aboutUsBtn">
+                            <i class="ti ti-info-circle"></i>Chúng tôi
+                        </button>
+                        <button type="button" class="btn btn-primary" id="editBtn">
+                            <i class="ti ti-edit"></i>Chính sửa
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script>
+    // Theme management
+    function applyTheme(theme) {
+        const root = document.documentElement;
+        root.classList.remove('theme-dark', 'theme-light');
+
+        if (theme === 'dark') {
+            root.classList.add('theme-dark');
+        } else if (theme === 'light') {
+            root.classList.add('theme-light');
+        }
+
+        // Update theme toggle icon
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.innerHTML = theme === 'light' ? '<i class="ti ti-moon"></i>' : '<i class="ti ti-sun"></i>';
+        }
+
+        // Update logo based on theme
+        const logoImg = document.querySelector('.app-logo-img');
+        const loaderLogo = document.querySelector('.loader-logo');
+
+        if (logoImg) {
+            const lightSrc = logoImg.getAttribute('data-logo-light');
+            const darkSrc = logoImg.getAttribute('data-logo-dark');
+            if (theme === 'dark' && darkSrc) {
+                logoImg.src = darkSrc;
+            } else if (lightSrc) {
+                logoImg.src = lightSrc;
+            }
+        }
+
+        if (loaderLogo) {
+            const lightSrc = loaderLogo.getAttribute('data-logo-light');
+            const darkSrc = loaderLogo.getAttribute('data-logo-dark');
+            if (theme === 'dark' && darkSrc) {
+                loaderLogo.src = darkSrc;
+            } else if (lightSrc) {
+                loaderLogo.src = lightSrc;
+            }
+        }
+
+        // Save to localStorage
+        localStorage.setItem('theme', theme);
+    }
+
+    // Initialize theme
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(systemPrefersDark ? 'dark' : 'light');
+        }
+    }
+
+    // Toast function
+    function showToast(message, type = 'info', opts = {}) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
+        toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><button class="close" aria-label="Đóng">✕</button>`;
+        container.appendChild(toast);
+
+        void toast.offsetWidth;
+        toast.classList.add('show');
+
+        const close = () => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        };
+
+        toast.querySelector('.close').addEventListener('click', close);
+        const delay = opts.duration ?? (type === 'error' ? 5000 : 3000);
+        if (delay !== 0) setTimeout(close, delay);
+    }
+
+    // Finish loading function
+    function finishGlobalLoad() {
+        document.body.classList.remove('loading');
+        document.body.classList.add('ready');
+        const appLoader = document.getElementById('appLoader');
+        if (appLoader) {
+            appLoader.style.opacity = '0';
+            setTimeout(() => appLoader.remove(), 600);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const editBtn = document.getElementById('editBtn');
+        const aboutUsBtn = document.getElementById('aboutUsBtn');
+        const formInputs = document.querySelectorAll('#profileForm input, #profileForm select');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Initialize theme
+        initTheme();
+
+        // Theme toggle event
+        themeToggle.addEventListener('click', function() {
+            const isLight = document.documentElement.classList.contains('theme-light');
+            const nextTheme = isLight ? 'dark' : 'light';
+            applyTheme(nextTheme);
+
+            showToast(`Đã chuyển sang giao diện ${nextTheme === 'light' ? 'sáng' : 'tối'}`, 'info', { duration: 1500 });
+        });
+
+        // Edit button event
+        editBtn.addEventListener('click', function() {
+            const isReadOnly = formInputs[0].readOnly;
+
+            if (isReadOnly) {
+                // Switch to edit mode
+                formInputs.forEach(input => {
+                    input.readOnly = false;
+                    input.disabled = false;
+                });
+                editBtn.innerHTML = '<i class="ti ti-check"></i>Lưu thay đổi';
+            } else {
+                // Save changes and switch back to view mode
+                formInputs.forEach(input => {
+                    input.readOnly = true;
+                    if (input.id === 'gender') {
+                        input.disabled = true;
+                    }
+                });
+                editBtn.innerHTML = '<i class="ti ti-edit"></i>Chính sửa';
+
+                // Show toast notification
+                showToast('Thông tin đã được cập nhật!', 'success');
+            }
+        });
+
+        // About us button event
+        aboutUsBtn.addEventListener('click', function() {
+            showToast('Thông tin về chúng tôi sẽ được hiển thị tại đây.', 'info');
+        });
+
+        // Avatar edit button
+        const avatarWrap = document.querySelector('.avatar-edit-wrap');
+        const editAvatarBtn = document.getElementById('btnEditAvatar');
+        if (avatarWrap && editAvatarBtn) {
+            editAvatarBtn.addEventListener('click', function() {
+                showToast('Tính năng đổi avatar sẽ sớm có mặt!', 'info');
+            });
+        }
+
+        // Finish loading after delay
+        setTimeout(() => {
+            finishGlobalLoad();
+        }, 1500);
+    });
+</script>
+</body>
+</html>

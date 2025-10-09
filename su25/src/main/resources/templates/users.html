@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Danh sách Users</title>
+    <style>
+        body { font-family: system-ui, Arial, sans-serif; background:#f5f7fb; margin:0; padding:20px; }
+        h1 { margin-top:0; }
+        table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+        th, td { padding:8px 10px; border:1px solid #e2e8f0; font-size:14px; }
+        th { background:#f1f5f9; text-align:left; }
+        tbody tr:nth-child(even) { background:#f8fafc; }
+        .muted { color:#64748b; font-size:12px; }
+        a { color:#2563eb; text-decoration:none; }
+        a:hover { text-decoration:underline; }
+        .nav { margin-bottom:14px; }
+        .nav a { margin-right:10px; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/">Trang sản phẩm</a>
+    <a href="/seller/dashboard">Seller Dashboard</a>
+</div>
+<h1>Danh sách Users</h1>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Gender</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(userList)}"><td colspan="5" class="muted">Chưa có user.</td></tr>
+    <tr th:each="u : ${userList}">
+        <td th:text="${u.userId}"></td>
+        <td th:text="${u.username}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.phoneNumber}"></td>
+        <td th:text="${u.gender}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
