@@ -48,6 +48,7 @@ public class SecurityConfig {
                     // Public endpoints
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/database/**").permitAll()
+                    .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()

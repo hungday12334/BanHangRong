@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/su25/create_seller_account.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/su25/data_v2.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/su25/product_samples.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/su25/quick_setup.sql" dialect="MySQL" />
   </component>
 </project>
