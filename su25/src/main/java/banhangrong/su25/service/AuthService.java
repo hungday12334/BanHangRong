@@ -11,9 +11,11 @@ import banhangrong.su25.Util.JwtUtil;
 import banhangrong.su25.email.Email;
 import banhangrong.su25.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,18 +37,21 @@ public class AuthService {
     @Autowired
     private CaptchaService captchaService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     // ✅ Login
     public AuthResponse login(LoginRequest loginRequest) {
         // Validate CAPTCHA first
         if (loginRequest.getCaptchaResponse() == null || !captchaService.verifyCaptcha(loginRequest.getCaptchaResponse())) {
-            throw new RuntimeException("Xác thực CAPTCHA thất bại. Vui lòng thử lại!");
+            throw new RuntimeException("CAPTCHA verification failed. Please try again!");
         }
 
         Users user = usersRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy username"));
+                .orElseThrow(() -> new RuntimeException("Username not found"));
 
-        if (!user.getPassword().equals(loginRequest.getPassword())) {
-            throw new RuntimeException("Sai mật khẩu!");
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Incorrect password!");
         }
 
         // Sinh JWT bằng JwtUtil
@@ -65,20 +70,30 @@ public class AuthService {
     public AuthResponse register(RegisterRequest registerRequest) {
         // Validate CAPTCHA first
         if (registerRequest.getCaptchaResponse() == null || !captchaService.verifyCaptcha(registerRequest.getCaptchaResponse())) {
-            throw new RuntimeException("Xác thực CAPTCHA thất bại. Vui lòng thử lại!");
+            throw new RuntimeException("CAPTCHA verification failed. Please try again!");
+        }
+
+        // Validate phone number
+        if (!isValidPhone(registerRequest.getPhoneNumber())) {
+            throw new RuntimeException("Invalid phone number");
+        }
+
+        // Validate birth date
+        if (registerRequest.getBirthDate() != null && !isValidBirthDate(registerRequest.getBirthDate())) {
+            throw new RuntimeException("Invalid birth date");
         }
 
         if (usersRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
+            throw new RuntimeException("Email already exists");
         }
         if (usersRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("Username đã tồn tại");
+            throw new RuntimeException("Username already exists");
         }
 
         Users newUser = new Users();
         newUser.setUsername(registerRequest.getUsername());
         newUser.setEmail(registerRequest.getEmail());
-        newUser.setPassword(registerRequest.getPassword()); // TODO: mã hoá password bằng BCrypt
+        newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         newUser.setPhoneNumber(registerRequest.getPhoneNumber());
         newUser.setGender(registerRequest.getGender());
         newUser.setBirthDate(registerRequest.getBirthDate());
@@ -91,11 +106,11 @@ public class AuthService {
 
         usersRepository.save(newUser);
 
-        // Gửi email chào mừng
+        // Send welcome email
         Email mail = new Email(
                 newUser.getEmail(),
-                "Chào mừng đến hệ thống",
-                "Xin chào " + newUser.getUsername() + ",\nCảm ơn bạn đã đăng ký tài khoản!"
+                "Welcome to BanHangRong",
+                "Hello " + newUser.getUsername() + ",\nThank you for registering an account!"
         );
         emailService.sendEmail(mail);
 
@@ -111,7 +126,7 @@ public class AuthService {
     // ✅ Forgot password
     public void forgotPassword(String email) {
         Users user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Email not found"));
 
         // Xoá token cũ chưa dùng (nếu có)
         passwordResetTokenRepository.findByUserIdAndIsUsedFalse(user.getUserId())
@@ -128,11 +143,11 @@ public class AuthService {
 
         passwordResetTokenRepository.save(resetToken);
 
-        // Gửi email
+        // Send email
         Email mail = new Email(
                 user.getEmail(),
-                "Yêu cầu đặt lại mật khẩu",
-                "Click vào link sau để đặt lại mật khẩu: http://localhost:8080/reset-password?token=" + token
+                "Password Reset Request",
+                "Click the following link to reset your password: http://localhost:8080/reset-password?token=" + token
         );
         emailService.sendEmail(mail);
     }
@@ -140,20 +155,20 @@ public class AuthService {
     // ✅ Reset password
     public void resetPassword(String token, String newPassword, String confirmPassword) {
         if (!newPassword.equals(confirmPassword)) {
-            throw new RuntimeException("Mật khẩu nhập lại không khớp!");
+            throw new RuntimeException("Passwords do not match!");
         }
 
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token không hợp lệ"));
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
 
         if (resetToken.getIsUsed() || resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token đã hết hạn hoặc đã sử dụng");
+            throw new RuntimeException("Token has expired or already used");
         }
 
         Users user = usersRepository.findById(resetToken.getUserId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setPassword(newPassword); // TODO: mã hoá bằng BCrypt
+        user.setPassword(passwordEncoder.encode(newPassword));
         usersRepository.save(user);
 
         resetToken.setIsUsed(true);
@@ -166,5 +181,28 @@ public class AuthService {
         userInfo.put("token", token);
         userInfo.put("username", "testUser"); // TODO: giải mã JWT để lấy user thật
         return userInfo;
+    }
+
+    // ✅ Phone number validation for Vietnamese numbers
+    public boolean isValidPhone(String phone) {
+        String regex = "^(03|05|07|08|09)\\d{8}$";
+        return phone != null && phone.matches(regex);
+    }
+
+    // ✅ Birth date validation
+    public boolean isValidBirthDate(LocalDate birthDate) {
+        if (birthDate == null) {
+            return true; // Birth date is optional
+        }
+        
+        try {
+            LocalDate today = LocalDate.now();
+            LocalDate minDate = today.minusYears(100); // Maximum 100 years old
+            LocalDate maxDate = today.minusYears(13); // Minimum 13 years old
+            
+            return !birthDate.isAfter(today) && !birthDate.isBefore(minDate) && !birthDate.isAfter(maxDate);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

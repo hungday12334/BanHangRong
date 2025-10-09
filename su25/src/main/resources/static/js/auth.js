@@ -1,12 +1,12 @@
 // Auth JavaScript
 
-// Helper function để parse response và xử lý lỗi
+// Helper function to parse response and handle errors
 async function parseResponse(response) {
     try {
         return await response.json();
     } catch (e) {
         console.error('JSON parse error:', e);
-        showMessage('Có lỗi xảy ra khi xử lý phản hồi từ server!', 'error');
+        showMessage('An error occurred while processing server response!', 'error');
         return null;
     }
 }
@@ -117,22 +117,22 @@ async function handleLogin(e) {
                 userType: result.userType
             }));
             
-            showMessage('Đăng nhập thành công!', 'success');
+            showMessage('Login successful!', 'success');
             
-            // Chuyển hướng sau 1 giây
+            // Redirect to menu after 1 second
             setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/menu';
             }, 1000);
         } else {
             console.error('Login error:', result);
-            const errorMessage = result?.error || result || 'Đăng nhập thất bại!';
+            const errorMessage = result?.error || result || 'Login failed!';
             showMessage(errorMessage, 'error');
             // Reset CAPTCHA on error
             grecaptcha.reset();
         }
     } catch (error) {
         console.error('Error:', error);
-        showMessage('Có lỗi xảy ra khi đăng nhập!', 'error');
+        showMessage('An error occurred during login!', 'error');
         // Reset CAPTCHA on error
         grecaptcha.reset();
     } finally {
@@ -146,26 +146,40 @@ async function handleRegister(e) {
     const form = e.target;
     const formData = new FormData(form);
     
-    // Kiểm tra mật khẩu xác nhận
+    // Check password confirmation
     const password = formData.get('password');
     const confirmPassword = formData.get('confirmPassword');
     
     if (password !== confirmPassword) {
-        showMessage('Mật khẩu xác nhận không khớp!', 'error');
+        showMessage('Passwords do not match!', 'error');
         return;
     }
     
-    // Kiểm tra Terms of Service
+    // Check Terms of Service
     const termsAccepted = formData.get('termsAccepted');
     if (!termsAccepted) {
-        showMessage('Vui lòng đồng ý với Terms of Service và Privacy Policy!', 'error');
+        showMessage('Please agree to Terms of Service and Privacy Policy!', 'error');
+        return;
+    }
+    
+    // Validate phone number
+    const phoneNumber = formData.get('phoneNumber');
+    if (!isValidPhone(phoneNumber)) {
+        showFieldError('phoneNumber', 'Invalid phone number');
+        return;
+    }
+    
+    // Validate birth date
+    const birthDate = formData.get('birthDate');
+    if (birthDate && !isValidBirthDate(birthDate)) {
+        showFieldError('birthDate', 'Invalid birth date');
         return;
     }
     
     // Get CAPTCHA response
     const captchaResponse = grecaptcha.getResponse();
     if (!captchaResponse) {
-        showMessage('Vui lòng xác thực CAPTCHA!', 'error');
+        showMessage('Please verify CAPTCHA!', 'error');
         return;
     }
     
@@ -199,26 +213,26 @@ async function handleRegister(e) {
         console.log('Register response:', response.status, result);
         
         if (response.ok) {
-            // Hiển thị thông báo email xác nhận ngay dưới ô email
+            // Show email verification message below email field
             showEmailVerificationMessage();
             
-            // Hiển thị thông báo chung
-            showMessage('Đăng ký thành công! Email xác nhận đã được gửi đến địa chỉ email của bạn.', 'success');
+            // Show general message
+            showMessage('Registration successful! Verification email has been sent to your email address.', 'success');
             
-            // Chuyển hướng về trang đăng nhập sau 5 giây (tăng thời gian để người dùng đọc thông báo)
+            // Redirect to login page after 5 seconds
             setTimeout(() => {
                 window.location.href = '/login';
             }, 5000);
         } else {
             console.error('Register error:', result);
-            const errorMessage = result?.error || result || 'Đăng ký thất bại!';
+            const errorMessage = result?.error || result || 'Registration failed!';
             showMessage(errorMessage, 'error');
             // Reset CAPTCHA on error
             grecaptcha.reset();
         }
     } catch (error) {
         console.error('Error:', error);
-        showMessage('Có lỗi xảy ra khi đăng ký!', 'error');
+        showMessage('An error occurred during registration!', 'error');
         // Reset CAPTCHA on error
         grecaptcha.reset();
     } finally {
@@ -255,13 +269,13 @@ async function handleForgotPasswordForm(e) {
         const result = await response.text();
         
         if (response.ok) {
-            showMessage('Email đặt lại mật khẩu đã được gửi!', 'success');
+            showMessage('Password reset email has been sent!', 'success');
         } else {
-            showMessage(result || 'Có lỗi xảy ra!', 'error');
+            showMessage(result || 'An error occurred!', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showMessage('Có lỗi xảy ra!', 'error');
+        showMessage('An error occurred!', 'error');
     } finally {
         showLoading(form, false);
     }
@@ -299,13 +313,133 @@ function showEmailVerificationMessage() {
     }
 }
 
-// Kiểm tra đăng nhập khi load trang
+// Check authentication on page load
 function checkAuth() {
     const token = localStorage.getItem('token');
     if (token && window.location.pathname === '/login') {
-        window.location.href = '/';
+        window.location.href = '/menu';
+    }
+}
+
+// ✅ Show field error - ngắn gọn dưới input
+function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    // Remove existing error
+    const existingError = field.parentNode.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Add new error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error';
+    errorDiv.textContent = message;
+    errorDiv.style.color = '#dc3545';
+    errorDiv.style.fontSize = '13px';
+    errorDiv.style.marginTop = '5px';
+    errorDiv.style.fontWeight = '500';
+    errorDiv.style.display = 'block';
+    errorDiv.style.animation = 'fadeIn 0.3s ease-in';
+    
+    field.parentNode.appendChild(errorDiv);
+    
+    // Focus on the field
+    field.focus();
+    field.style.borderColor = '#dc3545';
+    
+    // Remove error on input
+    field.addEventListener('input', function() {
+        const error = this.parentNode.querySelector('.field-error');
+        if (error) {
+            error.remove();
+        }
+        this.style.borderColor = '';
+    }, { once: true });
+}
+
+// ✅ Phone number validation for Vietnamese numbers
+function isValidPhone(phone) {
+    const regex = /^(03|05|07|08|09)\d{8}$/;
+    return phone != null && phone.trim() !== '' && regex.test(phone);
+}
+
+// ✅ Birth date validation
+function isValidBirthDate(birthDate) {
+    if (!birthDate || birthDate.trim() === '') {
+        return true; // Birth date is optional
+    }
+    
+    try {
+        const date = new Date(birthDate);
+        const today = new Date();
+        const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()); // Maximum 100 years old
+        const maxDate = new Date(today.getFullYear() - 13, today.getMonth(), today.getDate()); // Minimum 13 years old
+        
+        return date <= today && date >= minDate && date <= maxDate;
+    } catch (e) {
+        return false;
+    }
+}
+
+// ✅ Real-time phone validation
+function validatePhoneInput() {
+    const phoneInput = document.getElementById('phoneNumber');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            const phone = this.value.trim();
+            const small = this.nextElementSibling;
+            
+                    if (phone === '') {
+                        small.style.color = '#999';
+                        small.textContent = '10 digits, start with: 03, 05, 07, 08, 09';
+                    } else if (isValidPhone(phone)) {
+                        small.style.color = '#28a745';
+                        small.textContent = '✓ Valid';
+                    } else {
+                        small.style.color = '#dc3545';
+                        small.textContent = '✗ Invalid';
+                    }
+        });
+    }
+}
+
+// ✅ Real-time birth date validation
+function validateBirthDateInput() {
+    const birthDateInput = document.getElementById('birthDate');
+    if (birthDateInput) {
+        birthDateInput.addEventListener('change', function() {
+            const birthDate = this.value;
+            const small = this.nextElementSibling;
+            
+            if (!small) {
+                // Create small element if it doesn't exist
+                const smallElement = document.createElement('small');
+                smallElement.style.color = '#999';
+                smallElement.style.fontSize = '12px';
+                smallElement.style.marginTop = '5px';
+                smallElement.style.display = 'block';
+                this.parentNode.appendChild(smallElement);
+            }
+            
+            const smallElement = this.nextElementSibling;
+            
+                    if (!birthDate) {
+                        smallElement.style.color = '#999';
+                        smallElement.textContent = 'Optional - Minimum age: 13';
+                    } else if (isValidBirthDate(birthDate)) {
+                        smallElement.style.color = '#28a745';
+                        smallElement.textContent = '✓ Valid';
+                    } else {
+                        smallElement.style.color = '#dc3545';
+                        smallElement.textContent = '✗ Invalid (minimum age 13)';
+                    }
+        });
     }
 }
 
 // Gọi checkAuth khi load trang
 checkAuth();
+validatePhoneInput();
+validateBirthDateInput();

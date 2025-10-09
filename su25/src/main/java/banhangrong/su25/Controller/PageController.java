@@ -13,31 +13,31 @@ public class PageController {
 
     @GetMapping("/login")
     public String login() {
-        return "login";
+        return "login/login";
     }
 
     @GetMapping("/register")
     public String register() {
-        return "register";
+        return "login/register";
     }
 
     @GetMapping("/forgot-password")
     public String forgotPassword() {
-        return "forgot-password";
+        return "login/forgot-password";
     }
 
     @GetMapping("/reset-password")
     public String resetPassword() {
-        return "reset-password";
-    }
-
-    @GetMapping("/test-email")
-    public String testEmail() {
-        return "test-email";
+        return "login/reset-password";
     }
 
     @GetMapping("/find-account")
     public String findAccount() {
-        return "find-account";
+        return "login/find-account";
+    }
+
+    @GetMapping("/menu")
+    public String menu() {
+        return "menu";
     }
 }
