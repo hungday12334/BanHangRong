@@ -10,8 +10,8 @@ USE wap;
 ALTER TABLE products ADD COLUMN status VARCHAR(20) DEFAULT 'DRAFT';
 
 -- Migrate data từ is_active sang status
-UPDATE products SET status = 'PUBLIC' WHERE is_active = TRUE;
-UPDATE products SET status = 'DRAFT' WHERE is_active = FALSE OR is_active IS NULL;
+UPDATE products SET status = 'public' WHERE is_active = TRUE;
+UPDATE products SET status = 'pending' WHERE is_active = FALSE OR is_active IS NULL;
 
 -- Xóa cột is_active cũ
 ALTER TABLE products DROP COLUMN is_active;

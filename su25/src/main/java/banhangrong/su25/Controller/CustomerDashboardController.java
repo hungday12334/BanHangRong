@@ -50,10 +50,10 @@ public class CustomerDashboardController {
             }
         }
         
-        // ORM: paginated PUBLIC products ordered by total sales desc then created_at desc
+        // ORM: paginated public products ordered by total sales desc then created_at desc
         PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),
                 Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));
-        Page<Products> featuredPage = productsRepository.findByStatus("PUBLIC", pageable);
+        Page<Products> featuredPage = productsRepository.findByStatus("public", pageable);
         List<Products> featured = featuredPage.getContent();
         // Derive primary image directly from entity relations
         java.util.Map<Long, String> primaryImageByProduct = new java.util.HashMap<>();

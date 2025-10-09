@@ -93,9 +93,23 @@ public class SellerDashboardController {
             recentOrders.add(m);
         }
 
-        // Low stock products (<= 5) with PUBLIC status
-        var lowStock = productsRepository.findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerId, "PUBLIC", 5);
-        long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "PUBLIC");
+        // Low stock products (<= 5)
+    var lowStock = productsRepository.findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerId, "public", 5);
+    long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "public");
+
+        // Seller ranking (revenue-based)
+        Integer myRank = productsRepository.sellerRevenueRank(sellerId);
+        Long totalSellers = Optional.ofNullable(productsRepository.totalSellers()).orElse(0L);
+        double percentile = (myRank != null && totalSellers > 0) ? (100.0 * (totalSellers - myRank + 1) / totalSellers) : 0.0;
+        List<Map<String,Object>> topSellers = new ArrayList<>();
+        for (Object[] row : productsRepository.topSellers()) {
+            Map<String,Object> m = new HashMap<>();
+            m.put("sellerId", row[0]);
+            m.put("username", row[1]);
+            m.put("revenue", row[2]);
+            m.put("units", row[3]);
+            topSellers.add(m);
+        }
 
     model.addAttribute("sellerId", sellerId);
         model.addAttribute("totalRevenue", totalRevenue);
@@ -110,6 +124,10 @@ public class SellerDashboardController {
         model.addAttribute("recentOrders", recentOrders);
         model.addAttribute("lowStock", lowStock);
         model.addAttribute("activeProducts", activeProducts);
+    model.addAttribute("myRank", myRank == null ? 0 : myRank);
+    model.addAttribute("totalSellers", totalSellers);
+    model.addAttribute("rankPercentile", percentile);
+    model.addAttribute("topSellers", topSellers);
 
         // Load user profile (assume sellerId == userId for now)
         Users user = usersRepository.findById(sellerId).orElse(null);
@@ -118,6 +136,6 @@ public class SellerDashboardController {
             model.addAttribute("userType", user.getUserType());
         }
 
-        return "pages/seller_dashboard";
+        return "pages/seller/seller_dashboard";
     }
 }
