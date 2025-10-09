@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS products (
     download_url VARCHAR(255) NOT NULL,
     total_sales INT DEFAULT 0,
     average_rating DECIMAL(3,2) DEFAULT 0.00,
-    is_active BOOLEAN DEFAULT TRUE,
+    status VARCHAR(15) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_products_seller FOREIGN KEY (seller_id) REFERENCES users(user_id)
@@ -229,11 +229,11 @@ VALUES
     ('Software', 'Phần mềm, tiện ích, tool');
 
 -- Products by seller
-INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, is_active)
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
 VALUES
-    ((SELECT user_id FROM users WHERE username='seller'), 'E-Book X', 'Cuốn sách hướng dẫn nâng cao', 19.99, 14.99, 100, 'https://cdn.example.com/ebooks/x.pdf', 10, 4.5, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Music Pack Vol.1', 'Bộ sample âm nhạc đa thể loại', 9.99, NULL, 200, 'https://cdn.example.com/music/v1.zip', 25, 4.2, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Software Pro', 'Tiện ích chuyên nghiệp cho công việc', 49.00, 39.00, 50, 'https://cdn.example.com/software/pro.exe', 5, 4.8, TRUE);
+    ((SELECT user_id FROM users WHERE username='seller'), 'E-Book X', 'Cuốn sách hướng dẫn nâng cao', 19.99, 14.99, 100, 'https://cdn.example.com/ebooks/x.pdf', 10, 4.5, 'Public'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Music Pack Vol.1', 'Bộ sample âm nhạc đa thể loại', 9.99, NULL, 200, 'https://cdn.example.com/music/v1.zip', 25, 4.2, 'Pending'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Software Pro', 'Tiện ích chuyên nghiệp cho công việc', 49.00, 39.00, 50, 'https://cdn.example.com/software/pro.exe', 5, 4.8, 'Hidden');
 
 -- Map Categories <-> Products
 INSERT IGNORE INTO categories_products (category_id, product_id)
@@ -312,13 +312,13 @@ VALUES
     ('dave', 'dave@example.com', '$2a$10$hashdave', 'CUSTOMER', '0944444444', 'male', 75.00, TRUE, TRUE, NOW());
 
 -- More products (by 'seller')
-INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, is_active)
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
 VALUES
-    ((SELECT user_id FROM users WHERE username='seller'), 'Antivirus Pro Plus', 'Bảo vệ máy tính toàn diện', 59.00, 44.90, 80, 'https://cdn.example.com/software/antivirus-pro.exe', 18, 4.6, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'VPN Secure Unlimited', 'VPN tốc độ cao không giới hạn', 11.99, NULL, 300, 'https://cdn.example.com/software/vpn-secure.exe', 40, 4.3, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Password Manager X', 'Quản lý mật khẩu an toàn', 29.00, 19.00, 120, 'https://cdn.example.com/software/pwm-x.exe', 22, 4.7, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Dev Toolkit Ultimate', 'Bộ công cụ cho developer', 79.00, 59.00, 40, 'https://cdn.example.com/software/dev-toolkit.exe', 8, 4.9, TRUE),
-    ((SELECT user_id FROM users WHERE username='seller'), 'Software Lite', 'Bản rút gọn tiết kiệm', 19.00, NULL, 150, 'https://cdn.example.com/software/lite.exe', 12, 4.1, TRUE);
+    ((SELECT user_id FROM users WHERE username='seller'), 'Antivirus Pro Plus', 'Bảo vệ máy tính toàn diện', 59.00, 44.90, 80, 'https://cdn.example.com/software/antivirus-pro.exe', 18, 4.6, 'Hidden'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'VPN Secure Unlimited', 'VPN tốc độ cao không giới hạn', 11.99, NULL, 300, 'https://cdn.example.com/software/vpn-secure.exe', 40, 4.3, 'Public'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Password Manager X', 'Quản lý mật khẩu an toàn', 29.00, 19.00, 120, 'https://cdn.example.com/software/pwm-x.exe', 22, 4.7, 'Pending'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Dev Toolkit Ultimate', 'Bộ công cụ cho developer', 79.00, 59.00, 40, 'https://cdn.example.com/software/dev-toolkit.exe', 8, 4.9, 'Public'),
+    ((SELECT user_id FROM users WHERE username='seller'), 'Software Lite', 'Bản rút gọn tiết kiệm', 19.00, NULL, 150, 'https://cdn.example.com/software/lite.exe', 12, 4.1, 'Pending');
 
 -- Map new products to Software category
 INSERT IGNORE INTO categories_products (category_id, product_id)
@@ -473,3 +473,136 @@ JOIN orders o ON oi.order_id=o.order_id
 JOIN users u ON o.user_id=u.user_id
 JOIN products p ON oi.product_id=p.product_id
 WHERE p.name='Password Manager X';
+
+-- =============================================================
+-- EXTRA SELLER SAMPLE DATA (Approx 10 sellers for ranking tests)
+-- Each seller gets 2 products + a couple of orders from existing customers
+-- =============================================================
+
+-- Create additional sellers (user_type=SELLER)
+INSERT IGNORE INTO users (username, email, password, user_type, phone_number, gender, balance, is_email_verified, is_active, last_login)
+VALUES
+ ('seller01','seller01@example.com','$2a$10$hashseller01','SELLER','0901000001','other',0,TRUE,TRUE,NOW()),
+ ('seller02','seller02@example.com','$2a$10$hashseller02','SELLER','0901000002','other',0,TRUE,TRUE,NOW()),
+ ('seller03','seller03@example.com','$2a$10$hashseller03','SELLER','0901000003','other',0,TRUE,TRUE,NOW()),
+ ('seller04','seller04@example.com','$2a$10$hashseller04','SELLER','0901000004','other',0,TRUE,TRUE,NOW()),
+ ('seller05','seller05@example.com','$2a$10$hashseller05','SELLER','0901000005','other',0,TRUE,TRUE,NOW()),
+ ('seller06','seller06@example.com','$2a$10$hashseller06','SELLER','0901000006','other',0,TRUE,TRUE,NOW()),
+ ('seller07','seller07@example.com','$2a$10$hashseller07','SELLER','0901000007','other',0,TRUE,TRUE,NOW()),
+ ('seller08','seller08@example.com','$2a$10$hashseller08','SELLER','0901000008','other',0,TRUE,TRUE,NOW()),
+ ('seller09','seller09@example.com','$2a$10$hashseller09','SELLER','0901000009','other',0,TRUE,TRUE,NOW()),
+ ('seller10','seller10@example.com','$2a$10$hashseller10','SELLER','0901000010','other',0,TRUE,TRUE,NOW());
+
+-- Products for each new seller (two each with varied status)
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
+SELECT u.user_id, CONCAT(u.username,' Product A'), 'Gói nội dung A', 15.00, 9.99, 120, CONCAT('https://cdn.example.com/',u.username,'/a.bin'), 0, 0.0,
+ CASE WHEN MOD(u.user_id,3)=0 THEN 'Hidden' WHEN MOD(u.user_id,3)=1 THEN 'Public' ELSE 'Pending' END
+FROM users u WHERE u.username LIKE 'seller0%';
+
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
+SELECT u.user_id, CONCAT(u.username,' Product B'), 'Gói nội dung B', 29.00, 19.00, 80, CONCAT('https://cdn.example.com/',u.username,'/b.bin'), 0, 0.0,
+ CASE WHEN MOD(u.user_id,2)=0 THEN 'Public' ELSE 'Pending' END
+FROM users u WHERE u.username LIKE 'seller0%';
+
+-- Create simple orders (buyers alternate among existing customers: alice, bob, charlie, dave)
+-- Deterministic, MySQL‑safe (no window functions in expressions) data generation
+-- Strategy: build temporary mapping tables with per-product synthetic sequence using modulus
+-- Then insert orders with unique timestamps (day offset + seconds offset) so we can match order_items reliably.
+
+-- Clean up leftover temp tables if script re-run
+DROP TEMPORARY TABLE IF EXISTS tmp_seller_prod_a;
+DROP TEMPORARY TABLE IF EXISTS tmp_seller_prod_b;
+
+-- Product A mapping
+CREATE TEMPORARY TABLE tmp_seller_prod_a AS
+SELECT p.product_id,
+       CASE MOD(p.product_id,4)
+            WHEN 0 THEN (SELECT user_id FROM users WHERE username='alice')
+            WHEN 1 THEN (SELECT user_id FROM users WHERE username='bob')
+            WHEN 2 THEN (SELECT user_id FROM users WHERE username='charlie')
+            ELSE (SELECT user_id FROM users WHERE username='dave') END AS buyer_id,
+       MOD(p.product_id, 15) AS day_offset,
+       (MOD(p.product_id,3)+1) AS qty,
+       p.price,
+       -- Unique second offset for join safety
+       (p.product_id % 50) AS sec_offset
+FROM products p
+JOIN users s ON p.seller_id = s.user_id
+WHERE s.username LIKE 'seller0%' AND p.name LIKE '%Product A%';
+
+-- Insert orders for Product A
+INSERT IGNORE INTO orders (user_id, total_amount, created_at)
+SELECT buyer_id, 0.00, DATE_SUB(NOW(), INTERVAL day_offset DAY) + INTERVAL sec_offset SECOND
+FROM tmp_seller_prod_a;
+
+-- Insert order items for Product A
+INSERT IGNORE INTO order_items (order_id, product_id, quantity, price_at_time, created_at)
+SELECT o.order_id, t.product_id, t.qty, t.price, o.created_at
+FROM tmp_seller_prod_a t
+JOIN orders o ON o.user_id = t.buyer_id
+  AND o.created_at = DATE_SUB(NOW(), INTERVAL t.day_offset DAY) + INTERVAL t.sec_offset SECOND;
+
+-- Update total_amount for orders just created (Product A)
+UPDATE orders o
+JOIN (
+    SELECT oi.order_id, SUM(oi.quantity * oi.price_at_time) AS amt
+    FROM order_items oi
+    JOIN tmp_seller_prod_a ta ON ta.product_id = oi.product_id
+    GROUP BY oi.order_id
+) x ON x.order_id = o.order_id
+SET o.total_amount = x.amt
+WHERE o.created_at >= DATE_SUB(NOW(), INTERVAL 20 DAY);
+
+-- Product B mapping (shift day offset by +5 to differentiate)
+CREATE TEMPORARY TABLE tmp_seller_prod_b AS
+SELECT p.product_id,
+       CASE MOD(p.product_id,4)
+            WHEN 0 THEN (SELECT user_id FROM users WHERE username='dave')
+            WHEN 1 THEN (SELECT user_id FROM users WHERE username='alice')
+            WHEN 2 THEN (SELECT user_id FROM users WHERE username='bob')
+            ELSE (SELECT user_id FROM users WHERE username='charlie') END AS buyer_id,
+       MOD(p.product_id, 15) + 5 AS day_offset,
+       (MOD(p.product_id+1,3)+1) AS qty,
+       p.price,
+       (p.product_id % 45) AS sec_offset
+FROM products p
+JOIN users s ON p.seller_id = s.user_id
+WHERE s.username LIKE 'seller0%' AND p.name LIKE '%Product B%';
+
+-- Insert orders for Product B
+INSERT IGNORE INTO orders (user_id, total_amount, created_at)
+SELECT buyer_id, 0.00, DATE_SUB(NOW(), INTERVAL day_offset DAY) + INTERVAL sec_offset SECOND
+FROM tmp_seller_prod_b;
+
+-- Insert order items for Product B
+INSERT IGNORE INTO order_items (order_id, product_id, quantity, price_at_time, created_at)
+SELECT o.order_id, t.product_id, t.qty, t.price, o.created_at
+FROM tmp_seller_prod_b t
+JOIN orders o ON o.user_id = t.buyer_id
+  AND o.created_at = DATE_SUB(NOW(), INTERVAL t.day_offset DAY) + INTERVAL t.sec_offset SECOND;
+
+-- Update total_amount for orders just created (Product B)
+UPDATE orders o
+JOIN (
+    SELECT oi.order_id, SUM(oi.quantity * oi.price_at_time) AS amt
+    FROM order_items oi
+    JOIN tmp_seller_prod_b tb ON tb.product_id = oi.product_id
+    GROUP BY oi.order_id
+) x ON x.order_id = o.order_id
+SET o.total_amount = x.amt
+WHERE o.created_at >= DATE_SUB(NOW(), INTERVAL 25 DAY);
+
+-- Drop temp tables (optional)
+DROP TEMPORARY TABLE IF EXISTS tmp_seller_prod_a;
+DROP TEMPORARY TABLE IF EXISTS tmp_seller_prod_b;
+
+-- Simple ratings for some products (only Product A lines)
+INSERT IGNORE INTO product_reviews (product_id, user_id, rating, comment)
+SELECT p.product_id, (SELECT user_id FROM users WHERE username='alice'), 5, 'Tuyệt vời (sample)'
+FROM products p JOIN users s ON p.seller_id = s.user_id WHERE s.username LIKE 'seller0%' AND p.name LIKE '%Product A' LIMIT 5;
+
+INSERT IGNORE INTO product_reviews (product_id, user_id, rating, comment)
+SELECT p.product_id, (SELECT user_id FROM users WHERE username='bob'), 4, 'Ổn định (sample)'
+FROM products p JOIN users s ON p.seller_id = s.user_id WHERE s.username LIKE 'seller0%' AND p.name LIKE '%Product A' LIMIT 5 OFFSET 5;
+
+-- End extra seller sample block
