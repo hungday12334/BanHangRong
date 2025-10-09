@@ -248,7 +248,7 @@
             <h1 class="app-title">BanHangRong</h1>
         </div>
         
-        <form id="loginForm" class="form">
+        <form id="loginForm" class="form" action="/perform-login" method="post">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
@@ -260,11 +260,6 @@
                     <input type="password" id="password" name="password" required>
                     <i class="fas fa-eye password-toggle" id="togglePassword"></i>
                 </div>
-            </div>
-            
-            <!-- CAPTCHA -->
-            <div class="captcha-container">
-                <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
             </div>
             
             <div class="form-actions">
@@ -290,7 +285,6 @@
         </div>
     </div>
 
-    <script th:src="@{/js/auth.js}"></script>
     <script>
         // Toggle password visibility
         document.getElementById('togglePassword').addEventListener('click', function() {
@@ -308,28 +302,17 @@
             }
         });
 
-        // Form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Let auth.js handle the form submission
-            handleLogin(e);
-        });
-
-        function showMessage(message, type) {
-            clearMessages();
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `${type}-message`;
-            messageDiv.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i><span>${message}</span>`;
-            
-            document.querySelector('.login-container').appendChild(messageDiv);
-            messageDiv.style.display = 'flex';
+        // Show error message if present in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error')) {
+            const errorDiv = document.getElementById('errorMessage');
+            document.getElementById('errorText').textContent = 'Invalid username or password!';
+            errorDiv.style.display = 'flex';
         }
-
-        function clearMessages() {
-            const existingMessages = document.querySelectorAll('.error-message, .success-message');
-            existingMessages.forEach(msg => msg.remove());
+        if (urlParams.get('logout')) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.querySelector('span').textContent = 'Logged out successfully!';
+            successDiv.style.display = 'flex';
         }
     </script>
 </body>

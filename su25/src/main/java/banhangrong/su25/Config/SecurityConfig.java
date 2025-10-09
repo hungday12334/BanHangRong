@@ -65,7 +65,7 @@ public class SecurityConfig {
             // Cấu hình form login
             .formLogin(form -> form
                 .loginPage("/login")
-                .loginProcessingUrl("/login")
+                .loginProcessingUrl("/perform-login")
                 .successHandler(successHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
