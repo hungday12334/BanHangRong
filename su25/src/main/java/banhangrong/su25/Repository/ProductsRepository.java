@@ -14,15 +14,15 @@ import org.springframework.data.domain.Pageable;
 public interface ProductsRepository extends JpaRepository<Products, Long> {
     List<Products> findBySellerId(Long sellerId);
 
-    List<Products> findTop10BySellerIdAndIsActiveTrueAndQuantityLessThanEqualOrderByQuantityAsc(Long sellerId, Integer threshold);
+    List<Products> findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(Long sellerId, String status, Integer threshold);
 
-    long countBySellerIdAndIsActiveTrue(Long sellerId);
+    long countBySellerIdAndStatus(Long sellerId, String status);
 
-    // Customer homepage featured list: top by sales among active products
-    List<Products> findTop12ByIsActiveTrueOrderByTotalSalesDesc();
+    // Customer homepage featured list: top by sales among public products
+    List<Products> findTop12ByStatusOrderByTotalSalesDesc(String status);
 
-    // Paginated active products (sorted by sales/created at handled by Pageable Sort)
-    Page<Products> findByIsActiveTrue(Pageable pageable);
+    // Paginated public products (sorted by sales/created at handled by Pageable Sort)
+    Page<Products> findByStatus(String status, Pageable pageable);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +

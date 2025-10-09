@@ -93,9 +93,9 @@ public class SellerDashboardController {
             recentOrders.add(m);
         }
 
-        // Low stock products (<= 5)
-        var lowStock = productsRepository.findTop10BySellerIdAndIsActiveTrueAndQuantityLessThanEqualOrderByQuantityAsc(sellerId, 5);
-        long activeProducts = productsRepository.countBySellerIdAndIsActiveTrue(sellerId);
+        // Low stock products (<= 5) with PUBLIC status
+        var lowStock = productsRepository.findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerId, "PUBLIC", 5);
+        long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "PUBLIC");
 
     model.addAttribute("sellerId", sellerId);
         model.addAttribute("totalRevenue", totalRevenue);

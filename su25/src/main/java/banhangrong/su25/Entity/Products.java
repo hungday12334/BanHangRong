@@ -25,8 +25,7 @@ public class Products {
     private Integer totalSales;
     @Column(name = "average_rating")
     private BigDecimal averageRating;
-    @Column(name = "is_active")
-    private Boolean isActive;
+    private String status;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -95,11 +94,11 @@ public class Products {
     public void setAverageRating(BigDecimal averageRating) {
         this.averageRating = averageRating;
     }
-    public Boolean getIsActive() {
-        return isActive;
+    public String getStatus() {
+        return status;
     }
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void setStatus(String status) {
+        this.status = status;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;

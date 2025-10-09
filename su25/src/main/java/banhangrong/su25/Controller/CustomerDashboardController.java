@@ -36,10 +36,10 @@ public class CustomerDashboardController {
     public String customerDashboard(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
                                     @RequestParam(name = "size", required = false, defaultValue = "15") int size,
                                     Model model) {
-        // ORM: paginated active products ordered by total sales desc then created_at desc
+        // ORM: paginated PUBLIC products ordered by total sales desc then created_at desc
         PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),
                 Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));
-        Page<Products> featuredPage = productsRepository.findByIsActiveTrue(pageable);
+        Page<Products> featuredPage = productsRepository.findByStatus("PUBLIC", pageable);
         List<Products> featured = featuredPage.getContent();
         // Derive primary image directly from entity relations
         java.util.Map<Long, String> primaryImageByProduct = new java.util.HashMap<>();
