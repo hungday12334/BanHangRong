@@ -2,14 +2,18 @@ package banhangrong.su25.Repository;
 
 import banhangrong.su25.Entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface UsersRepository extends JpaRepository<Users, Long> {
-    Optional<Users> findByUsername(String username);
     Optional<Users> findByEmail(String email);
-    boolean existsByUsername(String username);
-    boolean existsByEmail(String email);
+
+    List<Users> findByUserType(String userType);
+
+    @Query("SELECT u FROM Users u WHERE u.userType = 'SELLER' AND u.isActive = true")
+    List<Users> findAllActiveSellers();
+
+    boolean existsByEmailAndUserType(String email, String userType);
 }

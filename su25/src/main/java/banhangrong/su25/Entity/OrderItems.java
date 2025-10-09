@@ -1,7 +1,6 @@
 package banhangrong.su25.Entity;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

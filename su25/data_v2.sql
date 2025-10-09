@@ -1,7 +1,10 @@
 CREATE DATABASE IF NOT EXISTS wap;
 USE wap;
+-- Tắt FK để drop tự do
+SET FOREIGN_KEY_CHECKS=0;
 
 -- Users
+DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
@@ -23,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Social Authentication
+DROP TABLE IF EXISTS user_social_auth;
 CREATE TABLE IF NOT EXISTS user_social_auth (
     auth_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -34,6 +38,7 @@ CREATE TABLE IF NOT EXISTS user_social_auth (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Password Reset Tokens
+DROP TABLE IF EXISTS password_reset_tokens;
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
     token_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -45,6 +50,7 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Email Verification Tokens
+DROP TABLE IF EXISTS email_verification_tokens;
 CREATE TABLE IF NOT EXISTS email_verification_tokens (
     token_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -56,6 +62,7 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Categories
+DROP TABLE IF EXISTS categories;
 CREATE TABLE IF NOT EXISTS categories (
     category_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -66,6 +73,7 @@ CREATE TABLE IF NOT EXISTS categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Products (no category_id here; many-to-many via categories_products)
+DROP TABLE IF EXISTS products;
 CREATE TABLE IF NOT EXISTS products (
     product_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     seller_id BIGINT NOT NULL,
@@ -84,6 +92,7 @@ CREATE TABLE IF NOT EXISTS products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Categories <-> Products (many-to-many)
+DROP TABLE IF EXISTS categories_products;
 CREATE TABLE IF NOT EXISTS categories_products (
     category_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
@@ -94,6 +103,7 @@ CREATE TABLE IF NOT EXISTS categories_products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Images
+DROP TABLE IF EXISTS product_images;
 CREATE TABLE IF NOT EXISTS product_images (
     image_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
@@ -104,6 +114,7 @@ CREATE TABLE IF NOT EXISTS product_images (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Shopping Cart
+DROP TABLE IF EXISTS shopping_cart;
 CREATE TABLE IF NOT EXISTS shopping_cart (
     cart_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -117,6 +128,7 @@ CREATE TABLE IF NOT EXISTS shopping_cart (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Orders (payment fields removed; see payment_transactions)
+DROP TABLE IF EXISTS orders;
 CREATE TABLE IF NOT EXISTS orders (
     order_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -127,6 +139,7 @@ CREATE TABLE IF NOT EXISTS orders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Order Items (license_key removed)
+DROP TABLE IF EXISTS order_items;
 CREATE TABLE IF NOT EXISTS order_items (
     order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT NOT NULL,
@@ -139,6 +152,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Reviews
+DROP TABLE IF EXISTS product_reviews;
 CREATE TABLE IF NOT EXISTS product_reviews (
     review_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
@@ -153,6 +167,7 @@ CREATE TABLE IF NOT EXISTS product_reviews (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Licenses (license_key centralized here)
+DROP TABLE IF EXISTS product_licenses;
 CREATE TABLE IF NOT EXISTS product_licenses (
     license_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_item_id BIGINT NOT NULL,
@@ -169,6 +184,7 @@ CREATE TABLE IF NOT EXISTS product_licenses (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- User Sessions (for device tracking)
+DROP TABLE IF EXISTS user_sessions;
 CREATE TABLE IF NOT EXISTS user_sessions (
     session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -181,6 +197,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Payment Transactions (holds payment provider/status/transaction)
+DROP TABLE IF EXISTS payment_transactions;
 CREATE TABLE IF NOT EXISTS payment_transactions (
     transaction_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT NOT NULL,
@@ -193,6 +210,80 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_payments_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Thêm vào file database migration của bạn
+-- Chat Rooms
+CREATE TABLE IF NOT EXISTS chat_rooms (
+                                          room_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                          seller_id BIGINT NOT NULL,
+                                          customer_id BIGINT NOT NULL,
+                                          product_id BIGINT,
+                                          is_active BOOLEAN DEFAULT TRUE,
+                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                          CONSTRAINT fk_chat_rooms_seller FOREIGN KEY (seller_id) REFERENCES users(user_id),
+                                          CONSTRAINT fk_chat_rooms_customer FOREIGN KEY (customer_id) REFERENCES users(user_id),
+                                          CONSTRAINT fk_chat_rooms_product FOREIGN KEY (product_id) REFERENCES products(product_id),
+                                          CONSTRAINT ux_chat_rooms_seller_customer UNIQUE (seller_id, customer_id, product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Chat Messages
+CREATE TABLE IF NOT EXISTS chat_messages (
+                                             message_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                             room_id BIGINT NOT NULL,
+                                             sender_id BIGINT NOT NULL,
+                                             message_type VARCHAR(20) DEFAULT 'TEXT',
+                                             content TEXT,
+                                             file_url VARCHAR(255),
+                                             is_read BOOLEAN DEFAULT FALSE,
+                                             read_at TIMESTAMP NULL,
+                                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                             CONSTRAINT fk_chat_messages_room FOREIGN KEY (room_id) REFERENCES chat_rooms(room_id),
+                                             CONSTRAINT fk_chat_messages_sender FOREIGN KEY (sender_id) REFERENCES users(user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Thêm cột seller_response vào bảng product_reviews
+ALTER TABLE product_reviews
+    ADD COLUMN seller_response TEXT NULL AFTER comment,
+    ADD COLUMN seller_response_at TIMESTAMP NULL AFTER seller_response;
+-- Indexes for performance
+CREATE INDEX idx_chat_messages_room_created ON chat_messages(room_id, created_at);
+CREATE INDEX idx_chat_messages_sender ON chat_messages(sender_id);
+CREATE INDEX idx_chat_messages_read ON chat_messages(is_read, room_id);
+CREATE INDEX idx_chat_rooms_seller ON chat_rooms(seller_id);
+CREATE INDEX idx_chat_rooms_customer ON chat_rooms(customer_id);
+CREATE INDEX idx_chat_rooms_updated ON chat_rooms(updated_at DESC);
+
+-- Insert sample chat data for testing
+INSERT IGNORE INTO chat_rooms (seller_id, customer_id, product_id, created_at, updated_at)
+VALUES
+    ((SELECT user_id FROM users WHERE username='seller'),
+     (SELECT user_id FROM users WHERE username='alice'),
+     (SELECT product_id FROM products WHERE name='Software Pro'),
+     NOW(), NOW()),
+
+    ((SELECT user_id FROM users WHERE username='seller'),
+     (SELECT user_id FROM users WHERE username='bob'),
+     (SELECT product_id FROM products WHERE name='E-Book X'),
+     NOW(), NOW());
+
+INSERT IGNORE INTO chat_messages (room_id, sender_id, content, message_type, created_at)
+VALUES
+    (1, (SELECT user_id FROM users WHERE username='alice'),
+     'Xin chào, tôi có thắc mắc về sản phẩm Software Pro', 'TEXT',
+     DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+
+    (1, (SELECT user_id FROM users WHERE username='seller'),
+     'Chào bạn! Tôi có thể giúp gì cho bạn?', 'TEXT',
+     DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+
+    (2, (SELECT user_id FROM users WHERE username='bob'),
+     'E-Book X có hỗ trợ đọc trên mobile không?', 'TEXT',
+     DATE_SUB(NOW(), INTERVAL 30 MINUTE));
+-- Bật lại FK
+SET FOREIGN_KEY_CHECKS=1;
 
 -- =============================
 -- SAMPLE DATA (safe to re-run)
@@ -473,3 +564,5 @@ JOIN orders o ON oi.order_id=o.order_id
 JOIN users u ON o.user_id=u.user_id
 JOIN products p ON oi.product_id=p.product_id
 WHERE p.name='Password Manager X';
+
+

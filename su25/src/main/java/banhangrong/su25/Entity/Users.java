@@ -1,7 +1,6 @@
 package banhangrong.su25.Entity;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -157,5 +156,24 @@ public class Users {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (isActive == null) isActive = true;
+        if (isEmailVerified == null) isEmailVerified = false;
+        if (balance == null) balance = BigDecimal.ZERO;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // Helper method để kiểm tra user có phải seller không
+    public boolean isSeller() {
+        return "SELLER".equals(userType);
     }
 }

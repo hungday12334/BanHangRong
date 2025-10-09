@@ -12,15 +12,22 @@ import org.springframework.lang.NonNull;
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final OrderWebSocketHandler orderWebSocketHandler;
+    private final ChatWebSocketHandler chatWebSocketHandler;
 
-    public WebSocketConfig(OrderWebSocketHandler orderWebSocketHandler) {
+    public WebSocketConfig(OrderWebSocketHandler orderWebSocketHandler,
+                           ChatWebSocketHandler chatWebSocketHandler) {
         this.orderWebSocketHandler = orderWebSocketHandler;
+        this.chatWebSocketHandler = chatWebSocketHandler;
     }
 
     @Override
     public void registerWebSocketHandlers(@NonNull WebSocketHandlerRegistry registry) {
         registry.addHandler(orderWebSocketHandler, "/ws/orders")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
-                .setAllowedOrigins("*"); // Adjust for production: restrict origins
+                .setAllowedOrigins("*");
+
+        registry.addHandler(chatWebSocketHandler, "/ws/chat")
+                .addInterceptors(new HttpSessionHandshakeInterceptor())
+                .setAllowedOrigins("*");
     }
 }

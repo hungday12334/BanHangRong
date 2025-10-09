@@ -6,7 +6,10 @@ import banhangrong.su25.Entity.Users;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,7 +32,7 @@ public class SellerDashboardController {
     @GetMapping("/seller/dashboard")
     public String dashboard(@RequestParam(name = "sellerId", required = false) Long sellerId,
                             Model model) {
-        if (sellerId == null) sellerId = 2L; // assumption: demo seller
+        if (sellerId == null) sellerId = 1L; // assumption: demo seller
 
         // KPIs
         BigDecimal totalRevenue = Optional.ofNullable(productsRepository.totalRevenueBySeller(sellerId))
@@ -114,10 +117,73 @@ public class SellerDashboardController {
         // Load user profile (assume sellerId == userId for now)
         Users user = usersRepository.findById(sellerId).orElse(null);
         model.addAttribute("user", user);
+        model.addAttribute("sellerId", sellerId);
         if (user != null) {
             model.addAttribute("userType", user.getUserType());
         }
 
         return "pages/seller_dashboard";
     }
+
+    // API riêng cho profile panel
+    @GetMapping("/dashboard/profile-panel")
+    public String getProfilePanel(@RequestParam(name = "sellerId", required = false) Long sellerId,
+                                  Model model) {
+        if (sellerId == null) sellerId = 1L;
+
+        Users user = usersRepository.findById(sellerId).orElse(null);
+        model.addAttribute("user", user);
+        model.addAttribute("sellerId", sellerId);
+
+        return "fragments/panels :: #profilePanel";
+    }
+
+    // Chỉnh sửa profile
+    @GetMapping("/dashboard/profile/edit")
+    public String editProfileForm(@RequestParam(name = "sellerId", required = false) Long sellerId,
+                                  Model model) {
+        if (sellerId == null) sellerId = 1L;
+
+        Users user = usersRepository.findById(sellerId).orElse(null);
+        model.addAttribute("user", user);
+        model.addAttribute("sellerId", sellerId);
+
+        return "seller/profile-edit";
+    }
+
+    // Cập nhật profile
+    @PostMapping("/dashboard/profile/update")
+    public String updateProfile(@RequestParam(name = "sellerId", required = false) Long sellerId,
+                                @ModelAttribute Users updatedUser,
+                                RedirectAttributes redirectAttributes) {
+        if (sellerId == null) sellerId = 1L;
+
+        try {
+            Users existingUser = usersRepository.findById(sellerId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Cập nhật các field được phép
+            if (updatedUser.getUsername() != null) {
+                existingUser.setUsername(updatedUser.getUsername());
+            }
+            if (updatedUser.getPhoneNumber() != null) {
+                existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
+            }
+            if (updatedUser.getGender() != null) {
+                existingUser.setGender(updatedUser.getGender());
+            }
+            if (updatedUser.getBirthDate() != null) {
+                existingUser.setBirthDate(updatedUser.getBirthDate());
+            }
+
+            usersRepository.save(existingUser);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+
+        return "redirect:/seller/dashboard?sellerId=" + sellerId;
+    }
+
+
 }
