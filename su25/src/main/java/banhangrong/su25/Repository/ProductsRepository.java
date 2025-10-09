@@ -82,4 +82,26 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
             "WHERE p.seller_id = :sellerId AND YEAR(oi.created_at) = YEAR(CURRENT_DATE) AND MONTH(oi.created_at) = MONTH(CURRENT_DATE)", nativeQuery = true)
     BigDecimal thisMonthRevenue(@Param("sellerId") Long sellerId);
+
+    // Seller ranking queries
+    @Query(value = "SELECT r.rank FROM (\n" +
+            "  SELECT p.seller_id, ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(oi.price_at_time * oi.quantity),0) DESC) AS rank\n" +
+            "  FROM products p\n" +
+            "  LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
+            "  GROUP BY p.seller_id\n" +
+            ") r WHERE r.seller_id = :sellerId", nativeQuery = true)
+    Integer sellerRevenueRank(@Param("sellerId") Long sellerId);
+
+    @Query(value = "SELECT COUNT(DISTINCT seller_id) FROM products", nativeQuery = true)
+    Long totalSellers();
+
+    @Query(value = "SELECT p.seller_id, u.username, COALESCE(SUM(oi.price_at_time * oi.quantity),0) AS revenue,\n" +
+            "       COALESCE(SUM(oi.quantity),0) AS units\n" +
+            "FROM products p\n" +
+            "LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
+            "LEFT JOIN users u ON u.user_id = p.seller_id\n" +
+            "GROUP BY p.seller_id, u.username\n" +
+            "ORDER BY revenue DESC\n" +
+            "LIMIT 10", nativeQuery = true)
+    List<Object[]> topSellers();
 }
