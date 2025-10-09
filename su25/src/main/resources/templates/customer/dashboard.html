@@ -77,8 +77,10 @@
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                         <a class="item" href="/profile" role="menuitem">Tài khoản của tôi</a>
                         <a class="item" href="#" role="menuitem">Đơn mua</a>
-                        <a class="item" href="#" role="menuitem">Đăng xuất</a>
+                        <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
                     </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
                 </div>
 				<div class="search"><input type="search" placeholder="search" aria-label="Search"></div>
 				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
