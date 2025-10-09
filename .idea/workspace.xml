@@ -4,16 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="Admin User Update&amp;Delete">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="Admin Product Approve||Cancel">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminProductManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminProductManagement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +135,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759911171115</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Admin Product Approve||Cancel">
+      <option name="closed" value="true" />
+      <created>1760004702614</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1760004702615</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -170,6 +176,7 @@
     <MESSAGE value="AdminIndex_Final1" />
     <MESSAGE value="Admin UserManagement Create" />
     <MESSAGE value="Admin User Update&amp;Delete" />
-    <option name="LAST_COMMIT_MESSAGE" value="Admin User Update&amp;Delete" />
+    <MESSAGE value="Admin Product Approve||Cancel" />
+    <option name="LAST_COMMIT_MESSAGE" value="Admin Product Approve||Cancel" />
   </component>
 </project>
