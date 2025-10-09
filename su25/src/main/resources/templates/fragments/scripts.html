@@ -11,5 +11,25 @@
       }
     } catch (e) {}
   </script>
+  <!-- Live clock updater for seller dashboard header -->
+  <script>
+    (function () {
+      function pad(n) { return n < 10 ? '0' + n : n; }
+      function updateClock() {
+        const el = document.getElementById('sellerClock');
+        if (!el) return;
+        const now = new Date();
+        const hours = pad(now.getHours());
+        const mins = pad(now.getMinutes());
+        const secs = pad(now.getSeconds());
+        el.textContent = hours + ':' + mins + ':' + secs;
+      }
+      // update immediately and then every second
+      document.addEventListener('DOMContentLoaded', function () {
+        updateClock();
+        setInterval(updateClock, 1000);
+      });
+    })();
+  </script>
   <script src="/js/seller-dashboard.js"></script>
 </section>

@@ -4,6 +4,8 @@
     <span class="accent"></span>
     <h1>Seller Dashboard</h1>
     <span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
+    <!-- Live clock for sellers -->
+    <div id="sellerClock" class="chip" aria-live="polite" title="Thời gian hiện tại">--:--:--</div>
     <button id="btnAddProduct" class="btn primary" type="button" title="Thêm sản phẩm">+ Thêm sản phẩm</button>
   </header>
   <section class="grid kpi" data-block="kpi">
