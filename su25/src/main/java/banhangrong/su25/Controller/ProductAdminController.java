@@ -31,20 +31,20 @@ public class ProductAdminController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Seller creates product: default not public (isActive = false) waiting for admin approval
+    // Seller creates product: default DRAFT status waiting for admin approval
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Products req) {
         if (req.getSellerId() == null || req.getName() == null || req.getPrice() == null) {
             return ResponseEntity.badRequest().body("sellerId, name, price are required");
         }
-        req.setIsActive(false); // pending approval
+        req.setStatus("DRAFT"); // pending approval
         req.setCreatedAt(LocalDateTime.now());
         req.setUpdatedAt(LocalDateTime.now());
         Products saved = productsRepository.save(req);
         return ResponseEntity.created(URI.create("/api/products/" + saved.getProductId())).body(saved);
     }
 
-    // Seller updates product: if currently public, auto set to hidden (isActive=false)
+    // Seller updates product: if currently PUBLIC, auto set to DRAFT until admin re-approves
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Products req) {
         Optional<Products> opt = productsRepository.findById(id);
@@ -58,9 +58,9 @@ public class ProductAdminController {
         if (req.getQuantity() != null) p.setQuantity(req.getQuantity());
         if (req.getDownloadUrl() != null) p.setDownloadUrl(req.getDownloadUrl());
         p.setUpdatedAt(LocalDateTime.now());
-        // If currently active/public -> hide until admin re-approves
-        if (Boolean.TRUE.equals(p.getIsActive())) {
-            p.setIsActive(false);
+        // If currently PUBLIC -> set to DRAFT until admin re-approves
+        if ("PUBLIC".equals(p.getStatus())) {
+            p.setStatus("DRAFT");
         }
         Products saved = productsRepository.save(p);
         return ResponseEntity.ok(saved);
@@ -87,7 +87,7 @@ public class ProductAdminController {
         Optional<Products> opt = productsRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         Products p = opt.get();
-        p.setIsActive(publish);
+        p.setStatus(publish ? "PUBLIC" : "DRAFT");
         p.setUpdatedAt(LocalDateTime.now());
         Products saved = productsRepository.save(p);
         return ResponseEntity.ok(saved);
