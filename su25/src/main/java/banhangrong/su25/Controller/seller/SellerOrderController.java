@@ -1,6 +1,10 @@
 package banhangrong.su25.Controller.seller;
 
 import banhangrong.su25.Repository.SellerOrderRepository;
+import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Entity.OrderItems;
+import banhangrong.su25.Entity.Products;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +26,15 @@ import java.util.Map;
 public class SellerOrderController {
 
     private final SellerOrderRepository sellerOrderRepository;
+    private final OrderItemsRepository orderItemsRepository;
+    private final ProductsRepository productsRepository;
 
-    public SellerOrderController(SellerOrderRepository sellerOrderRepository) {
+    public SellerOrderController(SellerOrderRepository sellerOrderRepository,
+                                 OrderItemsRepository orderItemsRepository,
+                                 ProductsRepository productsRepository) {
         this.sellerOrderRepository = sellerOrderRepository;
+        this.orderItemsRepository = orderItemsRepository;
+        this.productsRepository = productsRepository;
     }
 
     @GetMapping
@@ -51,5 +61,41 @@ public class SellerOrderController {
     private LocalDateTime parseNullable(String s) {
         if (s == null || s.isBlank()) return null;
         try { return LocalDateTime.parse(s); } catch (DateTimeParseException e) { return null; }
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> getOne(@PathVariable Long sellerId, @PathVariable Long orderId) {
+        var summary = sellerOrderRepository.findSellerOrder(sellerId, orderId);
+        if (summary == null) return ResponseEntity.notFound().build();
+        // Filter items of this order to only items belonging to this seller
+        var allItems = orderItemsRepository.findByOrderId(orderId);
+        var involvedProductIds = allItems.stream().map(OrderItems::getProductId).filter(java.util.Objects::nonNull).distinct().toList();
+        var productList = productsRepository.findAllById(involvedProductIds);
+        var productNameMap = productList.stream().collect(java.util.stream.Collectors.toMap(Products::getProductId, Products::getName));
+        var sellerProductIdSet = productList.stream().filter(p -> sellerId.equals(p.getSellerId())).map(Products::getProductId).collect(java.util.stream.Collectors.toSet());
+        var sellerItems = new java.util.ArrayList<java.util.Map<String,Object>>();
+        for (OrderItems it : allItems) {
+            var pid = it.getProductId();
+            if (pid == null || !sellerProductIdSet.contains(pid)) continue;
+            var m = new java.util.LinkedHashMap<String,Object>();
+            m.put("productId", pid);
+            m.put("productName", productNameMap.get(pid));
+            m.put("quantity", it.getQuantity());
+            m.put("priceAtTime", it.getPriceAtTime());
+            sellerItems.add(m);
+        }
+        var body = new java.util.LinkedHashMap<String,Object>();
+        body.put("order", java.util.Map.of(
+                "orderId", summary.getOrderId(),
+                "createdAt", summary.getCreatedAt(),
+                "sellerAmount", summary.getSellerAmount(),
+                "sellerItems", summary.getSellerItems()
+        ));
+    body.put("user", java.util.Map.of(
+        "userId", summary.getBuyerUserId(),
+        "username", summary.getBuyerUsername()
+        ));
+        body.put("items", sellerItems);
+        return ResponseEntity.ok(body);
     }
 }

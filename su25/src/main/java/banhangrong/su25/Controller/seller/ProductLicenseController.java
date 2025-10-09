@@ -2,6 +2,9 @@ package banhangrong.su25.Controller.seller;
 
 import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.Entity.ProductLicenses;
+import banhangrong.su25.Entity.OrderItems;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,11 +20,14 @@ public class ProductLicenseController {
 
     private final ProductLicensesRepository licensesRepository;
     private final ProductsRepository productsRepository;
+    private final OrderItemsRepository orderItemsRepository;
 
     public ProductLicenseController(ProductLicensesRepository licensesRepository,
-                                    ProductsRepository productsRepository) {
+                                    ProductsRepository productsRepository,
+                                    OrderItemsRepository orderItemsRepository) {
         this.licensesRepository = licensesRepository;
         this.productsRepository = productsRepository;
+        this.orderItemsRepository = orderItemsRepository;
     }
 
     @GetMapping("/api/seller/{sellerId}/licenses")
@@ -53,7 +59,7 @@ public class ProductLicenseController {
     /** Toggle active / update device identifier */
     @PatchMapping("/api/licenses/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
-        Optional<banhangrong.su25.Entity.ProductLicenses> opt = licensesRepository.findById(id);
+        Optional<ProductLicenses> opt = licensesRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         var lic = opt.get();
         if (payload.containsKey("isActive")) {
@@ -65,6 +71,36 @@ public class ProductLicenseController {
             lic.setDeviceIdentifier(v != null ? v.toString() : null);
         }
         // We intentionally do NOT change order_item_id, user_id, license_key here for integrity.
+        licensesRepository.save(lic);
+        return ResponseEntity.ok(lic);
+    }
+
+    /** Seller-scoped: only allow toggling licenses that belong to the seller's products */
+    @PatchMapping("/api/seller/{sellerId}/licenses/{id}")
+    public ResponseEntity<?> updateForSeller(@PathVariable Long sellerId,
+                                             @PathVariable Long id,
+                                             @RequestBody Map<String, Object> payload) {
+        Optional<ProductLicenses> opt = licensesRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        var lic = opt.get();
+        Long orderItemId = lic.getOrderItemId();
+        if (orderItemId == null) return ResponseEntity.badRequest().body("license không gắn với order_item");
+        Optional<OrderItems> oiOpt = orderItemsRepository.findById(orderItemId);
+        if (oiOpt.isEmpty()) return ResponseEntity.badRequest().body("order item không tồn tại");
+        Long productId = oiOpt.get().getProductId();
+        var prod = productsRepository.findById(productId).orElse(null);
+        if (prod == null || prod.getSellerId() == null || !prod.getSellerId().equals(sellerId)) {
+            return ResponseEntity.status(403).body("Không có quyền cập nhật license này");
+        }
+        // Perform updates
+        if (payload.containsKey("isActive")) {
+            Object v = payload.get("isActive");
+            if (v instanceof Boolean b) lic.setIsActive(b);
+        }
+        if (payload.containsKey("deviceIdentifier")) {
+            Object v = payload.get("deviceIdentifier");
+            lic.setDeviceIdentifier(v != null ? v.toString() : null);
+        }
         licensesRepository.save(lic);
         return ResponseEntity.ok(lic);
     }

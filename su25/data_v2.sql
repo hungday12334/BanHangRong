@@ -1,6 +1,19 @@
 CREATE DATABASE IF NOT EXISTS wap;
 USE wap;
 
+-- Đảm bảo tất cả các bảng/cột text dùng collation utf8mb4_unicode_ci
+ALTER TABLE categories CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE categories_products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE product_reviews CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE product_images CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE payment_transactions CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE shopping_cart CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE order_items CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE product_licenses CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE user_sessions CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- Users
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -606,3 +619,193 @@ SELECT p.product_id, (SELECT user_id FROM users WHERE username='bob'), 4, 'Ổn 
 FROM products p JOIN users s ON p.seller_id = s.user_id WHERE s.username LIKE 'seller0%' AND p.name LIKE '%Product A' LIMIT 5 OFFSET 5;
 
 -- End extra seller sample block
+
+-- =============================================================
+-- BULK SYNTHETIC DATA SEEDER (Realistic-ish, configurable)
+-- Notes:
+--  - This creates many customers, sellers, products, orders, payments, reviews and licenses.
+--  - Safe to re-run: user inserts use INSERT IGNORE on unique username/email.
+--  - Re-running will create additional orders for existing bulk customers (by design).
+--  - Run this block from MySQL CLI or Workbench (DELIMITER directive required).
+--  - Adjust the CALL parameters at the end to control volume.
+-- =============================================================
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS seed_bulk_data$$
+CREATE PROCEDURE seed_bulk_data(
+    IN p_customers INT,
+    IN p_sellers INT,
+    IN p_days INT,
+    IN p_maxOrders INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE j INT DEFAULT 1;
+    DECLARE k INT DEFAULT 1;
+    DECLARE m INT DEFAULT 1;
+
+    -- Create bulk sellers: sellerx0001 ... sellerxNNNN
+    SET i = 1;
+    WHILE i <= p_sellers DO
+        SET @seller_username = CONCAT('sellerx', LPAD(i, 4, '0'));
+        INSERT IGNORE INTO users (username, email, password, user_type, phone_number, gender, balance, is_email_verified, is_active, last_login)
+        VALUES (@seller_username, CONCAT(@seller_username, '@example.com'), '$2a$10$randhashsellerx', 'SELLER', CONCAT('09', LPAD(i,8,'0')), 'other', 0.00, TRUE, TRUE, NOW());
+
+        SET @seller_id = (SELECT user_id FROM users WHERE username=@seller_username);
+        -- Each seller gets 3..7 products across categories
+        SET @prod_count = 3 + FLOOR(RAND()*5);
+        SET j = 1;
+        WHILE j <= @prod_count DO
+            -- Random category name among existing ones
+            SET @cat_name = ELT(1+FLOOR(RAND()*3), 'E-Books','Music','Software');
+            -- Random price and optional sale price
+            SET @price = ROUND(5 + RAND()*95, 2);
+            SET @sale_price = IF(RAND() < 0.45, ROUND(@price * (0.65 + RAND()*0.25), 2), NULL);
+            SET @status = ELT(1+FLOOR(RAND()*3), 'Public','Pending','Hidden');
+
+            SET @pname = CONCAT(@cat_name, ' ', LPAD(j,2,'0'), ' by ', @seller_username);
+            INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
+            VALUES (@seller_id, @pname, CONCAT('Gói ', @cat_name, ' chất lượng cao, bản ', LPAD(j,2,'0')),
+                    @price, @sale_price, 50 + FLOOR(RAND()*300),
+                    CONCAT('https://cdn.example.com/', @seller_username, '/prod-', LPAD(j,2,'0'), '.bin'),
+                    0, ROUND(3 + RAND()*2, 2), @status);
+
+            SET @prod_id = LAST_INSERT_ID();
+            IF @prod_id = 0 THEN
+                -- Product already existed; pick the most recent product by this seller with that name
+                SET @prod_id = (SELECT p.product_id FROM products p WHERE p.seller_id=@seller_id AND p.name=@pname ORDER BY p.product_id DESC LIMIT 1);
+            END IF;
+
+            -- Map category and add an image (ép collation khi so sánh)
+            INSERT IGNORE INTO categories_products (category_id, product_id)
+            VALUES ((SELECT category_id FROM categories WHERE name COLLATE utf8mb4_unicode_ci=@cat_name), @prod_id);
+            INSERT IGNORE INTO product_images (product_id, image_url, is_primary)
+            VALUES (@prod_id, CONCAT('https://picsum.photos/seed/', @prod_id, '/600/400'), TRUE);
+
+            SET j = j + 1;
+        END WHILE;
+
+        SET i = i + 1;
+    END WHILE;
+
+    -- Create bulk customers: cust0001 ... custNNNN
+    SET i = 1;
+    WHILE i <= p_customers DO
+        SET @cust_username = CONCAT('cust', LPAD(i, 4, '0'));
+        INSERT IGNORE INTO users (username, email, password, user_type, phone_number, gender, balance, is_email_verified, is_active, last_login)
+        VALUES (@cust_username, CONCAT(@cust_username, '@example.com'), '$2a$10$randhashcust', 'CUSTOMER', CONCAT('098', LPAD(i,7,'0')),
+                ELT(1+FLOOR(RAND()*3),'male','female','other'), ROUND(RAND()*500,2), TRUE, TRUE, NOW());
+        SET i = i + 1;
+    END WHILE;
+
+    -- Generate orders for each bulk customer
+    SET i = 1;
+    WHILE i <= p_customers DO
+        SET @cust_username = CONCAT('cust', LPAD(i, 4, '0'));
+        SET @cust_id = (SELECT user_id FROM users WHERE username=@cust_username);
+        IF @cust_id IS NOT NULL THEN
+            SET @order_count = 1 + FLOOR(RAND() * p_maxOrders);
+            SET k = 1;
+            WHILE k <= @order_count DO
+                SET @day_off = FLOOR(RAND() * p_days);
+                SET @sec_off = FLOOR(RAND() * 86400); -- within the day
+                SET @created_at = DATE_SUB(NOW(), INTERVAL @day_off DAY) + INTERVAL @sec_off SECOND;
+
+                INSERT INTO orders (user_id, total_amount, created_at)
+                VALUES (@cust_id, 0.00, @created_at);
+                SET @order_id = LAST_INSERT_ID();
+
+                -- Items: 1..5 products
+                SET @items = 1 + FLOOR(RAND()*5);
+                SET m = 1;
+                SET @order_total = 0.00;
+                WHILE m <= @items DO
+                    -- Pick a random product
+                    SELECT p.product_id, IFNULL(p.sale_price, p.price) AS eff_price
+                    INTO @p_id, @eff_price
+                    FROM products p
+                    ORDER BY RAND()
+                    LIMIT 1;
+
+                    SET @qty = 1 + FLOOR(RAND()*3);
+                    INSERT INTO order_items (order_id, product_id, quantity, price_at_time, created_at)
+                    VALUES (@order_id, @p_id, @qty, @eff_price, @created_at);
+                    SET @order_total = @order_total + (@qty * @eff_price);
+
+                    -- Create license nếu là sản phẩm Software (ép collation)
+                    SET @is_soft = (
+                        SELECT COUNT(*) FROM categories_products cp
+                        JOIN categories c ON cp.category_id=c.category_id
+                        WHERE cp.product_id=@p_id AND c.name COLLATE utf8mb4_unicode_ci='Software'
+                    );
+                    IF @is_soft > 0 THEN
+                        INSERT IGNORE INTO product_licenses (order_item_id, user_id, license_key, is_active, activation_date)
+                        VALUES (
+                            (SELECT oi.order_item_id FROM order_items oi WHERE oi.order_id=@order_id AND oi.product_id=@p_id ORDER BY oi.order_item_id DESC LIMIT 1),
+                            @cust_id,
+                            CONCAT('LIC-', LPAD(@order_id, 6, '0'), '-', LPAD(@p_id, 6, '0'), '-', LPAD(m,2,'0')),
+                            TRUE,
+                            @created_at
+                        );
+                    END IF;
+
+                    SET m = m + 1;
+                END WHILE;
+
+                -- Update order total
+                UPDATE orders SET total_amount = @order_total WHERE order_id=@order_id;
+
+                -- Payment transaction
+                SET @provider = ELT(1+FLOOR(RAND()*3), 'VNPay','MoMo','ZaloPay');
+                -- heavier weight to PAID
+                SET @status = ELT(1+FLOOR(RAND()*10), 'PAID','PAID','PAID','PAID','PAID','PAID','PAID','PENDING','FAILED','REFUNDED');
+                INSERT INTO payment_transactions (order_id, payment_provider, provider_transaction_id, amount, status, payment_data, created_at)
+                VALUES (@order_id, @provider, CONCAT('TX-', @provider, '-', LPAD(@order_id, 8, '0')), @order_total, @status,
+                        JSON_OBJECT('method', ELT(1+FLOOR(RAND()*3),'card','wallet','bank')),
+                        @created_at);
+
+                -- Optional review for one item
+                IF RAND() < 0.4 THEN
+                    SELECT oi.product_id INTO @rev_pid FROM order_items oi WHERE oi.order_id=@order_id ORDER BY RAND() LIMIT 1;
+                    INSERT IGNORE INTO product_reviews (product_id, user_id, rating, comment, created_at)
+                    VALUES (
+                        @rev_pid,
+                        @cust_id,
+                        3 + FLOOR(RAND()*3),
+                        ELT(1+FLOOR(RAND()*8),
+                            'Tốt', 'Hài lòng', 'Ổn định', 'Cần cải thiện',
+                            'Xuất sắc', 'Giá hợp lý', 'Chất lượng ok', 'Sẽ mua lại'),
+                        @created_at + INTERVAL 1 DAY
+                    );
+                END IF;
+
+                SET k = k + 1;
+            END WHILE;
+        END IF;
+        SET i = i + 1;
+    END WHILE;
+
+    -- Lightweight user sessions for activity stats (subset of users)
+    SET i = 1;
+    WHILE i <= LEAST(p_customers, 200) DO
+        SET @cust_username = CONCAT('cust', LPAD(i, 4, '0'));
+        SET @cust_id = (SELECT user_id FROM users WHERE username=@cust_username);
+        IF @cust_id IS NOT NULL THEN
+            INSERT IGNORE INTO user_sessions (user_id, device_identifier, last_activity, is_active)
+            VALUES (@cust_id, CONCAT(@cust_username,'-device-01'), NOW() - INTERVAL FLOOR(RAND()*15) DAY, ELT(1+FLOOR(RAND()*2), TRUE, FALSE));
+        END IF;
+        SET i = i + 1;
+    END WHILE;
+
+END$$
+
+DELIMITER ;
+
+-- Invoke the seeder: adjust numbers as needed
+-- Parameters: (customers, sellers, daysBack, maxOrdersPerCustomer)
+CALL seed_bulk_data(300, 40, 120, 6);
+
+-- Optional: drop the procedure after use to keep schema clean
+-- DROP PROCEDURE IF EXISTS seed_bulk_data;
+

@@ -19,15 +19,15 @@ public interface SellerOrderRepository extends Repository<banhangrong.su25.Entit
         LocalDateTime getCreatedAt();
         BigDecimal getSellerAmount();
         Long getSellerItems();
-        Long getUserId();
-        String getUsername();
+    Long getBuyerUserId();
+    String getBuyerUsername();
     }
 
     @Query(value = """
-            SELECT o.order_id       AS orderId,
-                   o.created_at     AS createdAt,
-                   u.user_id        AS userId,
-                   u.username       AS username,
+       SELECT o.order_id       AS orderId,
+         o.created_at     AS createdAt,
+         u.user_id        AS buyerUserId,
+         u.username       AS buyerUsername,
                    SUM(CASE WHEN p.seller_id = :sellerId THEN (oi.quantity * oi.price_at_time) ELSE 0 END) AS sellerAmount,
                    SUM(CASE WHEN p.seller_id = :sellerId THEN oi.quantity ELSE 0 END)                    AS sellerItems
             FROM orders o
@@ -70,4 +70,23 @@ public interface SellerOrderRepository extends Repository<banhangrong.su25.Entit
                                               @Param("toTs") LocalDateTime toTs,
                                               @Param("search") String search,
                                               Pageable pageable);
+
+    @Query(value = """
+       SELECT o.order_id       AS orderId,
+         o.created_at     AS createdAt,
+         u.user_id        AS buyerUserId,
+         u.username       AS buyerUsername,
+       SUM(CASE WHEN p.seller_id = :sellerId THEN (oi.quantity * oi.price_at_time) ELSE 0 END) AS sellerAmount,
+       SUM(CASE WHEN p.seller_id = :sellerId THEN oi.quantity ELSE 0 END)                    AS sellerItems
+      FROM orders o
+      JOIN order_items oi ON o.order_id = oi.order_id
+      JOIN products p ON oi.product_id = p.product_id
+      LEFT JOIN users u ON o.user_id = u.user_id
+      WHERE o.order_id = :orderId AND p.seller_id = :sellerId
+       GROUP BY o.order_id, o.created_at, u.user_id, u.username
+      HAVING SUM(CASE WHEN p.seller_id = :sellerId THEN oi.quantity ELSE 0 END) > 0
+      """,
+      nativeQuery = true)
+    SellerOrderSummary findSellerOrder(@Param("sellerId") Long sellerId,
+               @Param("orderId") Long orderId);
 }

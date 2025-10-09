@@ -678,7 +678,7 @@
 
     // Order modal handlers (view-only)
     const orderModal = document.getElementById('orderModal');
-    if (orderModal) {
+  if (orderModal) {
       orderModal.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(orderModal); });
       orderModal.addEventListener('close', () => {
         const remaining = Array.from(document.querySelectorAll('dialog.modal[open]'));
@@ -690,19 +690,23 @@
       orderModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(orderModal)));
 
       async function loadOrder(id) {
-        const res = await fetch(`/api/orders/${id}`);
+        // Prefer seller-scoped endpoint when sellerId is available to avoid leaking other sellers' items
+        const sidEl = document.getElementById('sellerId');
+        const sid = sidEl ? Number(sidEl.textContent.trim()) : null;
+        const url = sid ? `/api/seller/${sid}/orders/${id}` : `/api/orders/${id}`;
+        const res = await fetch(url);
         if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
         const data = await res.json();
-        const o = data.order;
+        const o = data.order || {};
         const user = data.user || {};
         document.getElementById('om_orderId').textContent = o.orderId;
-        document.getElementById('om_userId').textContent = user.username || (`User #${o.userId ?? ''}`);
-        // Total Amount should reflect database value directly with safe formatting
-        const amtVal = o.totalAmount;
+        document.getElementById('om_userId').textContent = user.username || (user.userId ? `User #${user.userId}` : '');
+        // In seller view, show sellerAmount if present; fallback to totalAmount
+        const amtVal = (o.sellerAmount != null ? o.sellerAmount : o.totalAmount);
         const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('om_totalAmount').textContent = amt;
         document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
-        const items = data.items || [];
+        const items = Array.isArray(data.items) ? data.items : (data.items && data.items.content ? data.items.content : []);
         const tb = document.getElementById('om_items');
         tb.innerHTML = '';
         for (const it of items) {
@@ -1012,36 +1016,33 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${o.orderId}</td>` +
           `<td>${o.createdAt ? o.createdAt.replace('T',' ') : ''}</td>` +
-          `<td>${o.username ? o.username : (o.userId ? ('User #' + o.userId) : '')}</td>` +
+          `<td>${o.buyerUsername ? o.buyerUsername : (o.buyerUserId ? ('User #' + o.buyerUserId) : '')}</td>` +
           `<td>${o.sellerItems ?? 0}</td>` +
           `<td>$${(o.sellerAmount ?? 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
         tr.className = 'clickable';
-        tr.addEventListener('click', () => { // reuse existing order modal if available
-          const existing = document.querySelector(`[data-order-id='${o.orderId}']`);
-          if (existing) existing.click();
-          else if (document.getElementById('orderModal')) {
-            // fallback: open modal via fetch
-            const id = o.orderId;
-            const orderModal = document.getElementById('orderModal');
-            if (orderModal) {
-              (async () => {
-                const res = await fetch(`/api/orders/${id}`); if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
-                const data = await res.json();
-                const ord = data.order;
-                document.getElementById('om_orderId').textContent = ord.orderId;
-                document.getElementById('om_userId').textContent = (data.user && data.user.username) ? data.user.username : ('User #' + (ord.userId ?? ''));
-                const amtVal = ord.totalAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-                document.getElementById('om_totalAmount').textContent = amt;
-                document.getElementById('om_createdAt').textContent = ord.createdAt ?? '';
-                const items = data.items || []; const tb = document.getElementById('om_items'); tb.innerHTML='';
-                for (const it of items) { const r=document.createElement('tr'); r.innerHTML=`<td>${it.productName||('#'+it.productId)}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`; tb.appendChild(r); }
-                const overlay = document.getElementById('modalOverlay');
-                if (overlay) { overlay.hidden=false; overlay.classList.add('visible'); }
-                if (typeof orderModal.showModal === 'function') { try { orderModal.showModal(); } catch (_) { orderModal.setAttribute('open',''); } }
-                requestAnimationFrame(()=> orderModal.classList.add('is-open'));
-              })();
-            }
-          }
+        tr.addEventListener('click', () => { // open seller-scoped order detail
+          const id = o.orderId;
+          const orderModal = document.getElementById('orderModal');
+          if (!orderModal) return;
+          (async () => {
+            const res = await fetch(`/api/seller/${sellerIdVal}/orders/${id}`);
+            if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
+            const data = await res.json();
+            const ord = data.order || {};
+            const user = data.user || {};
+            document.getElementById('om_orderId').textContent = ord.orderId;
+            document.getElementById('om_userId').textContent = user.username || (user.userId ? ('User #' + user.userId) : '');
+            // Use sellerAmount for seller view total
+            const amtVal = ord.sellerAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+            document.getElementById('om_totalAmount').textContent = amt;
+            document.getElementById('om_createdAt').textContent = ord.createdAt ?? '';
+            const items = data.items || []; const tb = document.getElementById('om_items'); tb.innerHTML='';
+            for (const it of items) { const r=document.createElement('tr'); r.innerHTML=`<td>${it.productName||('#'+it.productId)}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`; tb.appendChild(r); }
+            const overlay = document.getElementById('modalOverlay');
+            if (overlay) { overlay.hidden=false; overlay.classList.add('visible'); }
+            if (typeof orderModal.showModal === 'function') { try { orderModal.showModal(); } catch (_) { orderModal.setAttribute('open',''); } }
+            requestAnimationFrame(()=> orderModal.classList.add('is-open'));
+          })();
         });
         ordersTbody.appendChild(tr);
       });
@@ -1139,7 +1140,7 @@
       const row = btn.closest('tr');
       const isActiveNow = row && row.querySelector('td:nth-child(5) .pill');
       const next = !(!!isActiveNow);
-      const res = await fetch(`/api/licenses/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ isActive: next }) });
+  const res = await fetch(`/api/seller/${sellerIdVal}/licenses/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ isActive: next }) });
       if (res.ok) { showToast(next? 'Đã bật key':'Đã tắt key','success'); loadSellerKeys(false); }
       else showToast('Cập nhật key thất bại','error');
     });

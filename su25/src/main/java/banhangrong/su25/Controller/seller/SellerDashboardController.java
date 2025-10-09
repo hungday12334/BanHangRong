@@ -1,6 +1,7 @@
 package banhangrong.su25.Controller.seller;
 
 import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.SellerOrderRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Entity.Users;
 import org.springframework.stereotype.Controller;
@@ -19,17 +20,21 @@ public class SellerDashboardController {
 
     private final ProductsRepository productsRepository;
     private final UsersRepository usersRepository;
+    private final SellerOrderRepository sellerOrderRepository;
 
-    public SellerDashboardController(ProductsRepository productsRepository, UsersRepository usersRepository) {
+    public SellerDashboardController(ProductsRepository productsRepository,
+                                     UsersRepository usersRepository,
+                                     SellerOrderRepository sellerOrderRepository) {
         this.productsRepository = productsRepository;
         this.usersRepository = usersRepository;
+        this.sellerOrderRepository = sellerOrderRepository;
     }
 
     // Temporary: sellerId is read from query or default to 1L until auth in place
     @GetMapping("/seller/dashboard")
     public String dashboard(@RequestParam(name = "sellerId", required = false) Long sellerId,
                             Model model) {
-        if (sellerId == null) sellerId = 1L; // assumption: demo seller
+        if (sellerId == null) sellerId = 56L; // assumption: demo seller
 
         // KPIs
         BigDecimal totalRevenue = Optional.ofNullable(productsRepository.totalRevenueBySeller(sellerId))
@@ -74,22 +79,22 @@ public class SellerDashboardController {
             topProducts.add(m);
         }
 
-        // Recent orders
+        // Recent orders (strictly scoped to this seller)
         List<Map<String, Object>> recentOrders = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        for (Object[] row : productsRepository.recentOrders(sellerId)) {
+        var pageableRecent = org.springframework.data.domain.PageRequest.of(0, 8, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        var pageRecent = sellerOrderRepository.findSellerOrders(sellerId, null, null, null, pageableRecent);
+        for (SellerOrderRepository.SellerOrderSummary s : pageRecent.getContent()) {
             Map<String, Object> m = new HashMap<>();
-            m.put("orderId", row[0]);
-            Object ts = row[1];
-            String createdAtStr;
-            if (ts instanceof LocalDateTime ldt) {
-                createdAtStr = ldt.format(fmt);
-            } else {
-                createdAtStr = Objects.toString(ts);
-            }
+            m.put("orderId", s.getOrderId());
+            LocalDateTime ldt = s.getCreatedAt();
+            String createdAtStr = ldt != null ? ldt.format(fmt) : "";
             m.put("createdAtStr", createdAtStr);
-            m.put("amount", row[2]);
-            m.put("items", row[3]);
+            m.put("amount", s.getSellerAmount());
+            m.put("items", s.getSellerItems());
+            // Optional: could include buyer info if needed for UI in future
+            // m.put("buyerUsername", s.getBuyerUsername());
+            // m.put("buyerUserId", s.getBuyerUserId());
             recentOrders.add(m);
         }
 
