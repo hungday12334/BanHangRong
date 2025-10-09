@@ -5,7 +5,6 @@ import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Entity.Users;
-import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -53,7 +52,7 @@ public class CustomerDashboardController {
         // ORM: paginated public products ordered by total sales desc then created_at desc
         PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),
                 Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));
-        Page<Products> featuredPage = productsRepository.findByStatus("public", pageable);
+        Page<Products> featuredPage = productsRepository.findByStatus("Public", pageable);
         List<Products> featured = featuredPage.getContent();
         // Derive primary image directly from entity relations
         java.util.Map<Long, String> primaryImageByProduct = new java.util.HashMap<>();

@@ -27,6 +27,7 @@ public class Products {
     private BigDecimal averageRating;
     @Column(name = "is_active")
     private Boolean isActive;
+    private String status;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -100,6 +101,12 @@ public class Products {
     }
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;

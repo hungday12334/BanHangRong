@@ -1,14 +1,74 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
+import java.util.List;
 
 @Controller
 public class PageController {
 
+    private final ProductsRepository productsRepository;
+    private final ProductImagesRepository productImagesRepository;
+
+    public PageController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository) {
+        this.productsRepository = productsRepository;
+        this.productImagesRepository = productImagesRepository;
+    }
+
     @GetMapping("/")
-    public String home() {
-        return "index";
+    public String home(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                       @RequestParam(name = "size", required = false, defaultValue = "15") int size,
+                       Model model) {
+        
+        // Lấy sản phẩm có status = "Public" với phân trang
+        PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),
+                Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));
+        Page<Products> featuredPage = productsRepository.findByStatus("Public", pageable);
+        List<Products> featured = featuredPage.getContent();
+        
+        // Lấy ảnh chính cho từng sản phẩm
+        java.util.Map<Long, String> primaryImageByProduct = new java.util.HashMap<>();
+        for (Products p : featured) {
+            String url = null;
+            var imgs = p.getImages();
+            if (imgs != null && !imgs.isEmpty()) {
+                for (var im : imgs) { 
+                    if (Boolean.TRUE.equals(im.getIsPrimary())) { 
+                        url = im.getImageUrl(); 
+                        break; 
+                    } 
+                }
+                if (url == null) url = imgs.get(0).getImageUrl();
+            }
+            
+            // Fallback: tìm ảnh từ repository nếu relation không có
+            if (url == null || url.isBlank()) {
+                var primary = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
+                if (primary != null && !primary.isEmpty()) url = primary.get(0).getImageUrl();
+                if (url == null || url.isBlank()) {
+                    var any = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(p.getProductId());
+                    if (any != null && !any.isEmpty()) url = any.get(0).getImageUrl();
+                }
+            }
+            if (url != null && !url.isBlank()) primaryImageByProduct.put(p.getProductId(), url);
+        }
+        
+        model.addAttribute("featuredProducts", featured);
+        model.addAttribute("page", featuredPage.getNumber());
+        model.addAttribute("totalPages", featuredPage.getTotalPages());
+        model.addAttribute("size", featuredPage.getSize());
+        model.addAttribute("primaryImageByProduct", primaryImageByProduct);
+        
+        return "homepage";
     }
 
     @GetMapping("/login")

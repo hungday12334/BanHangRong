@@ -23,6 +23,9 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     // Paginated active products (sorted by sales/created at handled by Pageable Sort)
     Page<Products> findByIsActiveTrue(Pageable pageable);
+    
+    // Find by status with pagination
+    Page<Products> findByStatus(String status, Pageable pageable);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
