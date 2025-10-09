@@ -231,7 +231,6 @@
                 <input type="text" id="searchInput" class="form-control" placeholder="Search users">
                 <button type="button" class="btn btn-outline-primary">Search</button>
             </form>
-            <a th:href="@{/admin/product/create}" class="btn-create">Create Product</a>
         </div>
 
         <div class="table-responsive">
@@ -273,12 +272,6 @@
                             <a th:href="@{'/admin/product/update?id=' + ${p.productId}}">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <form th:action="@{'/admin/product/delete'}" method="post">
-                                <input type="hidden" name="id" th:value="${p.productId}">
-                                <button type="submit" onclick="return confirm('Are you sure?');">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
                         </div>
                     </td>
                     <td th:text="${p.productId}"></td>

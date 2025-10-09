@@ -32,7 +32,7 @@ public class AdminIndex {
     }
     @GetMapping("/product")
     public String manageProduct(Model model){
-        List<Products> productsList = adminProductService.findAll();
+        List<Products> productsList = adminProductService.findByStatus("Pending");
         model.addAttribute("productsList", productsList);
         return "admin/product-management";
     }

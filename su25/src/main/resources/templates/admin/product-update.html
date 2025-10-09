@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Product Update</title>
+    <title>Product Detail</title>
     <link rel="shortcut icon" th:href="@{/assets/images/logos/favicon.png}"/>
     <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -81,6 +81,7 @@
         }
 
         .form-group input,
+        .form-group textarea,
         .form-group select {
             padding: 8px;
             border-radius: 4px;
@@ -88,23 +89,6 @@
             font-size: 14px;
         }
 
-        .form-actions {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .form-actions button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .form-actions button.submit {
-            background-color: #28a745;
-            color: #fff;
-        }
 
         h2 {
             text-align: center;
@@ -123,6 +107,7 @@
         }
 
         .form-group input,
+        .form-group textarea,
         .form-group select {
             width: 100%;
             padding: 8px;
@@ -133,42 +118,58 @@
         }
 
         /* Màu cho ô readonly */
-        input[readonly],textarea[readonly]
+        input[readonly],textarea[readonly],
         select[readonly] {
             background-color: #e9ecef;
             font-weight: bold;
             color: #555;
         }
 
-        .form-actions {
-            text-align: center;
+        /* Cả hai nút chung */
+        .submit-btn,
+        .cancel-btn {
+            padding: 12px 28px; /* to hơn */
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background-color: #fff;
+            min-width: 130px; /* cho 2 nút đều nhau */
+        }
+
+        /* Approve button (xanh lá) */
+        .submit-btn {
+            color: #28a745;
+            border: 2px solid #1e7e34;
+        }
+        .submit-btn:hover {
+            color: #fff;
+            background-color: #28a745;
+            border-color: #1e7e34;
+            transform: scale(1.05); /* phóng nhẹ khi hover */
+            box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Cancel button (đỏ) */
+        .cancel-btn {
+            color: #d9534f;
+            border: 2px solid #b52b27;
+        }
+        .cancel-btn:hover {
+            color: #fff;
+            background-color: #d9534f;
+            border-color: #b52b27;
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(217, 83, 79, 0.4);
+        }
+        .form-container {
+            display: flex;
+            justify-content: center; /* căn giữa ngang */
+            align-items: center;
+            gap: 35px; /* khoảng cách giữa hai form */
             margin-top: 20px;
         }
-
-        .form-actions button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 0 5px;
-        }
-
-        .submit {
-            background-color: #28a745;
-            color: #fff;
-        }
-
-        .update-btn {
-            background-color: #0d6efd;
-            color: #fff;
-        }
-
-        .cancel-btn {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
     </style>
 </head>
 
@@ -284,7 +285,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <h2>Update</h2>
-        <form id="productForm" action="/admin/product/update" method="post" enctype="multipart/form-data">
+
 
             <div class="form-group">
                 <label>Product ID:</label>
@@ -338,7 +339,7 @@
 
             <div class="form-group">
                 <label>Status:</label>
-                <select name="status" class="form-control">
+                <select readonly name="status" class="form-control">
                     <option value="Public" th:selected="${product != null and product.isActive == 'Public'}">Public</option>
                     <option value="Pending" th:selected="${product != null and product.isActive == 'Pending'}">Pending</option>
                     <option value="hidden" th:selected="${product != null and product.isActive == 'Hidden'}">Hidden</option>
@@ -357,13 +358,20 @@
                 <input readonly type="text" name="updatedAt"
                        th:value="${product != null ? #temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm') : ''}">
             </div>
+        <div class="form-container">
+            <form  action="/admin/product/update" method="post" enctype="multipart/form-data">
+                <div class="form-actions">
+                    <button type="submit"  class="submit-btn" onclick="return confirm('Do you really want to approve this product?')">Approve</button>
+                </div>
 
-            <div class="form-actions">
-                <button type="submit" id="saveBtn" class="submit d-none">Save</button>
-                <button type="button" id="cancelBtn" class="cancel-btn d-none">Cancel</button>
-            </div>
-
-        </form>
+            </form>
+            <form action="/admin/product/cancel" method="post" style="text-align:center;">
+                <input type="hidden" name="productId" th:value="${product.productId}">
+                <div class="form-actions">
+                    <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>

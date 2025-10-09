@@ -9,4 +9,5 @@ public interface AdminProductService {
     public void update(Products product);
     public Products findById(Long id);
     public List<Products> findAll();
+    public List<Products> findByStatus(String status);
 }

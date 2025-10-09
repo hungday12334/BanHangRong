@@ -35,4 +35,10 @@ public class AdminProductServiceImpl implements AdminProductService {
     public List<Products> findAll() {
         return adminProductsRepository.findAll();
     }
+
+    @Override
+    public List<Products> findByStatus(String status) {
+        return adminProductsRepository.findByStatus(status);
+    }
+
 }
