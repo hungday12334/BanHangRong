@@ -1,45 +1,81 @@
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Bán Hàng Rong - Danh sách Users mẫu</title>
-	<link rel="stylesheet" href="/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BanHangRong - Trang chủ</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-	<div class="container">
-        <p><a th:href="@{/admin/index}">Check admin</a></p>
-		<h1>Danh sách Users</h1>
-		<p><a href="/db">Xem toàn bộ database (tất cả bảng)</a></p>
-		<p>
-			<a href="/seller/dashboard" style="display:inline-block;padding:10px 20px;background:#6c8cff;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(108,140,255,.15);transition:background .2s;">Đến Seller Dashboard</a>
-			<a href="/customer/dashboard" style="display:inline-block;margin-left:8px;padding:10px 20px;background:#10b981;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(16,185,129,.15);transition:background .2s;">Đến User Dashboard</a>
-		</p>
-		<div class="search-box">
-			<input type="text" id="searchInput" placeholder="Tìm kiếm username/email...">
-		</div>
-		<table id="usersTable">
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Username</th>
-					<th>Email</th>
-					<th>Phone</th>
-					<th>Gender</th>
-				</tr>
-			</thead>
-			<tbody id="usersBody">
-				<tr th:each="user : ${userList}">
-					<td th:text="${user.userId}"></td>
-					<td th:text="${user.username}"></td>
-					<td th:text="${user.email}"></td>
-					<td th:text="${user.phoneNumber}"></td>
-					<td th:text="${user.gender}"></td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-	<script src="/js/home.js"></script>
+    <div class="home-container">
+            <!-- Navigation -->
+            <nav class="navbar">
+                <img th:src="@{/img/logo.jpg}" alt="BanHangRong Logo" class="logo">
+                <div class="nav-links" id="navLinks">
+                <a href="/" class="active">Home</a>
+                <a href="/seller/dashboard">Seller</a>
+                <a href="/admin/index">Admin</a>
+                <div class="user-info" id="userInfo" style="display: none;">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+                <div class="login-link" id="loginLink">
+                    <a href="/login" class="login-btn">Login</a>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1>Welcome to BanHangRong</h1>
+            <p>Reputable license trading platform for digital products and software licenses. Buy and sell with confidence.</p>
+            <div class="cta-buttons">
+                <a href="/register" class="cta-btn primary">Get Started</a>
+                <a href="/login" class="cta-btn secondary">Sign In</a>
+            </div>
+        </section>
+        
+        <!-- Welcome Section (for logged in users) -->
+        <div class="welcome-section" id="welcomeSection" style="display: none;">
+            <h2>Welcome back!</h2>
+            <p>Manage your digital products and licenses</p>
+        </div>
+        
+        <!-- Database Section (Admin only) -->
+        <div class="database-section" id="databaseSection" style="display: none;">
+            <h2>Database Management</h2>
+            <p><a href="/db">View full database (all tables)</a></p>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search username/email...">
+            </div>
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Gender</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                    <tr th:each="user : ${userList}">
+                        <td th:text="${user.userId}"></td>
+                        <td th:text="${user.username}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.phoneNumber}"></td>
+                        <td th:text="${user.gender}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script th:src="@{/js/home.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
 </body>
 </html>
