@@ -84,8 +84,8 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     BigDecimal thisMonthRevenue(@Param("sellerId") Long sellerId);
 
     // Seller ranking queries
-    @Query(value = "SELECT r.rank FROM (\n" +
-            "  SELECT p.seller_id, ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(oi.price_at_time * oi.quantity),0) DESC) AS rank\n" +
+    @Query(value = "SELECT r.seller_rank FROM (\n" +
+            "  SELECT p.seller_id, ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(oi.price_at_time * oi.quantity),0) DESC) AS seller_rank\n" +
             "  FROM products p\n" +
             "  LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
             "  GROUP BY p.seller_id\n" +
