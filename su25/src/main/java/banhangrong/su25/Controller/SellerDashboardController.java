@@ -3,6 +3,8 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Entity.Users;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,11 +27,25 @@ public class SellerDashboardController {
         this.usersRepository = usersRepository;
     }
 
-    // Temporary: sellerId is read from query or default to 1L until auth in place
+    // Get sellerId from authenticated user
     @GetMapping("/seller/dashboard")
     public String dashboard(@RequestParam(name = "sellerId", required = false) Long sellerId,
                             Model model) {
-        if (sellerId == null) sellerId = 1L; // assumption: demo seller
+        // Lấy sellerId từ user đã login
+        if (sellerId == null) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated()) {
+                String username = auth.getName();
+                Users currentUser = usersRepository.findByUsername(username).orElse(null);
+                if (currentUser != null) {
+                    sellerId = currentUser.getUserId();
+                } else {
+                    sellerId = 1L; // fallback
+                }
+            } else {
+                sellerId = 1L; // fallback
+            }
+        }
 
         // KPIs
         BigDecimal totalRevenue = Optional.ofNullable(productsRepository.totalRevenueBySeller(sellerId))
