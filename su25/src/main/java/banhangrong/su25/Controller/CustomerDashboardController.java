@@ -74,7 +74,7 @@ public class CustomerDashboardController {
                     .findFirst().orElse(null);
             model.addAttribute("user", currentUser);
         } catch (Exception ignored) {}
-        return "pages/customer_dashboard";
+        return "customer/dashboard";
     }
 }
 

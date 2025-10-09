@@ -63,7 +63,7 @@ public class CartController {
         model.addAttribute("items", viewItems);
         model.addAttribute("total", total);
         model.addAttribute("cartCount", items.size());
-        return "pages/cart";
+        return "customer/cart";
     }
 
     @PostMapping("/cart/add")

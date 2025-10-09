@@ -31,7 +31,7 @@ public class ProductDetailController {
         model.addAttribute("product", p);
         model.addAttribute("images", productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id));
         model.addAttribute("reviews", productReviewsRepository.findByProductIdOrderByCreatedAtDesc(id));
-        return "pages/product_detail";
+        return "customer/product_detail";
     }
 }
 
