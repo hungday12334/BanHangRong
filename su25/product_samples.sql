@@ -55,36 +55,36 @@ VALUES
 -- =============================
 -- PRODUCTS (20 samples)
 -- =============================
-INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, is_active)
+INSERT IGNORE INTO products (seller_id, name, description, price, sale_price, quantity, download_url, total_sales, average_rating, status)
 VALUES
     -- Software & Licenses
-    (1, 'Microsoft Office 2021 Pro Plus', 'Bộ Office đầy đủ: Word, Excel, PowerPoint, Outlook. License vĩnh viễn cho 1 máy tính.', 1250000.00, 1100000.00, 150, 'https://download.example.com/office-2021-pro.iso', 520, 4.50, TRUE),
-    (1, 'Adobe Creative Cloud All Apps', 'Trọn bộ ứng dụng Adobe: Photoshop, Illustrator, Premiere Pro, After Effects. 12 tháng subscription.', 850000.00, NULL, 80, 'https://download.example.com/adobe-cc-all.zip', 450, 4.50, TRUE),
-    (1, 'Norton 360 Deluxe 2023', 'Bảo vệ toàn diện: Antivirus, VPN, Password Manager. 5 devices, 12 tháng.', 650000.00, 550000.00, 200, 'https://download.example.com/norton360-deluxe.exe', 410, 4.50, TRUE),
-    (1, 'Windows 11 Pro OEM', 'Windows 11 Professional OEM license key. Kích hoạt trực tuyến, hỗ trợ 24/7.', 900000.00, NULL, 300, 'https://download.example.com/win11-pro-iso.zip', 380, 4.50, TRUE),
-    (1, 'Malwarebytes Premium', 'Anti-malware chuyên nghiệp. 1 năm, 3 devices. Bảo vệ real-time.', 450000.00, 390000.00, 100, 'https://download.example.com/malwarebytes.exe', 350, 4.50, TRUE),
-    
+    (1, 'Microsoft Office 2021 Pro Plus', 'Bộ Office đầy đủ: Word, Excel, PowerPoint, Outlook. License vĩnh viễn cho 1 máy tính.', 1250000.00, 1100000.00, 150, 'https://download.example.com/office-2021-pro.iso', 520, 4.50, 'Public'),
+    (1, 'Adobe Creative Cloud All Apps', 'Trọn bộ ứng dụng Adobe: Photoshop, Illustrator, Premiere Pro, After Effects. 12 tháng subscription.', 850000.00, NULL, 80, 'https://download.example.com/adobe-cc-all.zip', 450, 4.50, 'Public'),
+    (1, 'Norton 360 Deluxe 2023', 'Bảo vệ toàn diện: Antivirus, VPN, Password Manager. 5 devices, 12 tháng.', 650000.00, 550000.00, 200, 'https://download.example.com/norton360-deluxe.exe', 410, 4.50, 'Public'),
+    (1, 'Windows 11 Pro OEM', 'Windows 11 Professional OEM license key. Kích hoạt trực tuyến, hỗ trợ 24/7.', 900000.00, NULL, 300, 'https://download.example.com/win11-pro-iso.zip', 380, 4.50, 'Public'),
+    (1, 'Malwarebytes Premium', 'Anti-malware chuyên nghiệp. 1 năm, 3 devices. Bảo vệ real-time.', 450000.00, 390000.00, 100, 'https://download.example.com/malwarebytes.exe', 350, 4.50, 'Public'),
+
     -- Game Keys
-    (1, 'FIFA 23 - Steam Key', 'FIFA 23 Standard Edition Steam Global Key. Kích hoạt ngay lập tức.', 1100000.00, NULL, 50, 'https://download.example.com/fifa23-steam-key.txt', 280, 4.50, TRUE),
-    (1, 'Minecraft Java Edition', 'Minecraft Java Edition chính hãng. Lifetime access. Full version PC/Mac/Linux.', 650000.00, 580000.00, 120, 'https://download.example.com/minecraft-java.txt', 350, 4.50, TRUE),
-    (1, 'Grand Theft Auto V - Epic', 'GTA V Epic Games Store Key. Hỗ trợ online mode.', 480000.00, 450000.00, 75, 'https://download.example.com/gta5-epic-key.txt', 240, 4.50, TRUE),
-    (1, 'Cyberpunk 2077 GOG Key', 'Cyberpunk 2077 GOG Global Key. DRM-free. Kèm soundtrack.', 950000.00, NULL, 40, 'https://download.example.com/cyberpunk2077-gog.txt', 180, 4.50, TRUE),
-    (1, 'Valorant Points 2000 VP', 'Valorant 2000 VP gift card. Dùng tất cả server. Giao nhanh trong 5 phút.', 420000.00, 380000.00, 200, 'https://download.example.com/valorant-2000vp.txt', 420, 4.50, TRUE),
-    
+    (1, 'FIFA 23 - Steam Key', 'FIFA 23 Standard Edition Steam Global Key. Kích hoạt ngay lập tức.', 1100000.00, NULL, 50, 'https://download.example.com/fifa23-steam-key.txt', 280, 4.50, 'Public'),
+    (1, 'Minecraft Java Edition', 'Minecraft Java Edition chính hãng. Lifetime access. Full version PC/Mac/Linux.', 650000.00, 580000.00, 120, 'https://download.example.com/minecraft-java.txt', 350, 4.50, 'Public'),
+    (1, 'Grand Theft Auto V - Epic', 'GTA V Epic Games Store Key. Hỗ trợ online mode.', 480000.00, 450000.00, 75, 'https://download.example.com/gta5-epic-key.txt', 240, 4.50, 'Public'),
+    (1, 'Cyberpunk 2077 GOG Key', 'Cyberpunk 2077 GOG Global Key. DRM-free. Kèm soundtrack.', 950000.00, NULL, 40, 'https://download.example.com/cyberpunk2077-gog.txt', 180, 4.50, 'Public'),
+    (1, 'Valorant Points 2000 VP', 'Valorant 2000 VP gift card. Dùng tất cả server. Giao nhanh trong 5 phút.', 420000.00, 380000.00, 200, 'https://download.example.com/valorant-2000vp.txt', 420, 4.50, 'Public'),
+
     -- E-Books & Music
-    (1, 'Web Development Bootcamp 2025', 'E-Book 850 trang học lập trình web từ cơ bản đến nâng cao. HTML, CSS, JS, React, Node.', 199000.00, 149000.00, 500, 'https://download.example.com/web-dev-bootcamp.pdf', 330, 4.50, TRUE),
-    (1, 'Royalty Free Music Pack 1000', 'Bộ 1000 bản nhạc không bản quyền cho video, stream. MP3 320kbps.', 550000.00, NULL, 90, 'https://download.example.com/music-pack-1000.zip', 220, 4.50, TRUE),
-    
+    (1, 'Web Development Bootcamp 2025', 'E-Book 850 trang học lập trình web từ cơ bản đến nâng cao. HTML, CSS, JS, React, Node.', 199000.00, 149000.00, 500, 'https://download.example.com/web-dev-bootcamp.pdf', 330, 4.50, 'Public'),
+    (1, 'Royalty Free Music Pack 1000', 'Bộ 1000 bản nhạc không bản quyền cho video, stream. MP3 320kbps.', 550000.00, NULL, 90, 'https://download.example.com/music-pack-1000.zip', 220, 4.50, 'Public'),
+
     -- Graphics & Vouchers
-    (1, 'Canva Pro 12 Months', 'Canva Pro subscription 12 tháng. Full features: templates, background remover, brand kit.', 380000.00, 320000.00, 150, 'https://download.example.com/canva-pro-12m.txt', 290, 4.50, TRUE),
-    (1, 'Spotify Premium 12 Months', '12 tháng Spotify Premium subscription. Ad-free, offline download, unlimited skips.', 750000.00, 680000.00, 100, 'https://download.example.com/spotify-12m.txt', 450, 4.50, TRUE),
-    (1, 'Netflix Premium 1 Month', 'Netflix Premium 1 tháng. 4K UHD, 4 screens. Hỗ trợ tất cả thiết bị.', 260000.00, NULL, 300, 'https://download.example.com/netflix-1m.txt', 440, 4.50, TRUE),
+    (1, 'Canva Pro 12 Months', 'Canva Pro subscription 12 tháng. Full features: templates, background remover, brand kit.', 380000.00, 320000.00, 150, 'https://download.example.com/canva-pro-12m.txt', 290, 4.50, 'Public'),
+    (1, 'Spotify Premium 12 Months', '12 tháng Spotify Premium subscription. Ad-free, offline download, unlimited skips.', 750000.00, 680000.00, 100, 'https://download.example.com/spotify-12m.txt', 450, 4.50, 'Pending'),
+    (1, 'Netflix Premium 1 Month', 'Netflix Premium 1 tháng. 4K UHD, 4 screens. Hỗ trợ tất cả thiết bị.', 260000.00, NULL, 300, 'https://download.example.com/netflix-1m.txt', 440, 4.50, 'Pending'),
     -- Extra vouchers / licenses / gaming
-    (1, 'Discord Nitro 1 Year', 'Discord Nitro 12 tháng. Boost server, HD streaming.', 799000.00, 699000.00, 80, 'https://download.example.com/discord-nitro-1y.txt', 410, 4.50, TRUE),
-    (1, 'Steam Gift Card 500K', 'Steam Wallet code 500,000 VND. Nạp trực tiếp.', 500000.00, NULL, 200, 'https://download.example.com/steam-gift-500k.txt', 500, 4.60, TRUE),
-    (1, 'PlayStation Plus 12 Months', 'PS Plus Essential 12 tháng cho tài khoản Việt Nam.', 890000.00, 830000.00, 120, 'https://download.example.com/ps-plus-12m.txt', 360, 4.40, TRUE),
-    (1, 'Office 365 Family 12 Months', 'Tối đa 6 người dùng, 1TB OneDrive mỗi người.', 1290000.00, 990000.00, 60, 'https://download.example.com/office365-family.txt', 250, 4.60, TRUE),
-    (1, 'YouTube Premium 3 Months', 'YouTube Premium 3 tháng. Không quảng cáo, phát nền.', 150000.00, NULL, 400, 'https://download.example.com/youtube-premium-3m.txt', 470, 4.50, TRUE);
+    (1, 'Discord Nitro 1 Year', 'Discord Nitro 12 tháng. Boost server, HD streaming.', 799000.00, 699000.00, 80, 'https://download.example.com/discord-nitro-1y.txt', 410, 4.50, 'Pending'),
+    (1, 'Steam Gift Card 500K', 'Steam Wallet code 500,000 VND. Nạp trực tiếp.', 500000.00, NULL, 200, 'https://download.example.com/steam-gift-500k.txt', 500, 4.60, 'Pending'),
+    (1, 'PlayStation Plus 12 Months', 'PS Plus Essential 12 tháng cho tài khoản Việt Nam.', 890000.00, 830000.00, 120, 'https://download.example.com/ps-plus-12m.txt', 360, 4.40, 'Pending'),
+    (1, 'Office 365 Family 12 Months', 'Tối đa 6 người dùng, 1TB OneDrive mỗi người.', 1290000.00, 990000.00, 60, 'https://download.example.com/office365-family.txt', 250, 4.60, 'Cancelled'),
+    (1, 'YouTube Premium 3 Months', 'YouTube Premium 3 tháng. Không quảng cáo, phát nền.', 150000.00, NULL, 400, 'https://download.example.com/youtube-premium-3m.txt', 470, 4.50, 'Hidden');
 
 -- =============================
 -- CATEGORIES <-> PRODUCTS
