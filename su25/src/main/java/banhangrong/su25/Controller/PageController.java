@@ -35,9 +35,4 @@ public class PageController {
     public String findAccount() {
         return "login/find-account";
     }
-
-    @GetMapping("/menu")
-    public String menu() {
-        return "menu";
-    }
 }

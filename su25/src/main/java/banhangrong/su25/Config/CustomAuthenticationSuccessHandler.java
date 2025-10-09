@@ -58,8 +58,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             response.sendRedirect("/admin/dashboard");
         } else if (user.getUserType().equals("SELLER")) {
             response.sendRedirect("/seller/dashboard");
+        } else if (user.getUserType().equals("CUSTOMER")) {
+            response.sendRedirect("/customer/dashboard");
         } else {
-            response.sendRedirect("/");
+            response.sendRedirect("/customer/dashboard");
         }
     }
 }

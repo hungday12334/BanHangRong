@@ -43,11 +43,13 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/database/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
-                    .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/menu").permitAll()
+                    .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password").permitAll()
                 
                 // Role-based access
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers("/customer/**").hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers("/product/**", "/cart/**").permitAll()
                 .requestMatchers("/api/user/**").hasAnyRole("USER", "SELLER", "ADMIN")
                 
                 // Default: require authentication
