@@ -9,16 +9,12 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-/**
- * Controller xử lý CRUD sản phẩm cho Seller và luồng duyệt/publish cho Admin.
- * (Tên cũ: ProductAdminController – đổi thành ProductController vì lớp này phục vụ cả seller lẫn admin.)
- */
 @RestController
 @RequestMapping("/api/products")
-public class ProductController {
+public class ProductAdminController {
     private final ProductsRepository productsRepository;
 
-    public ProductController(ProductsRepository productsRepository) {
+    public ProductAdminController(ProductsRepository productsRepository) {
         this.productsRepository = productsRepository;
     }
 
@@ -35,43 +31,42 @@ public class ProductController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Seller creates product: default status = pending (requires admin approval to become public)
+    // Seller creates product: default not public (isActive = false) waiting for admin approval
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Products req) {
         if (req.getSellerId() == null || req.getName() == null || req.getPrice() == null) {
             return ResponseEntity.badRequest().body("sellerId, name, price are required");
         }
-        req.setStatus("pending"); // pending approval
+        req.setIsActive(false); // pending approval
         req.setCreatedAt(LocalDateTime.now());
         req.setUpdatedAt(LocalDateTime.now());
         Products saved = productsRepository.save(req);
         return ResponseEntity.created(URI.create("/api/products/" + saved.getProductId())).body(saved);
     }
 
-    // Seller updates product: nếu có thay đổi ở các trường cơ bản -> chuyển hidden (để chờ duyệt lại)
+    // Seller updates product: if currently public, auto set to hidden (isActive=false)
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Products req) {
         Optional<Products> opt = productsRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         Products p = opt.get();
-        boolean changed = false;
-        if (req.getName() != null && !req.getName().equals(p.getName())) { p.setName(req.getName()); changed = true; }
-        if (req.getDescription() != null && !req.getDescription().equals(p.getDescription())) { p.setDescription(req.getDescription()); changed = true; }
-        if (req.getPrice() != null && (p.getPrice()==null || req.getPrice().compareTo(p.getPrice())!=0)) { p.setPrice(req.getPrice()); changed = true; }
-        if (req.getSalePrice() != null && (p.getSalePrice()==null || req.getSalePrice().compareTo(p.getSalePrice())!=0)) { p.setSalePrice(req.getSalePrice()); changed = true; }
-        if (req.getQuantity() != null && !req.getQuantity().equals(p.getQuantity())) { p.setQuantity(req.getQuantity()); changed = true; }
-        if (req.getDownloadUrl() != null && !req.getDownloadUrl().equals(p.getDownloadUrl())) { p.setDownloadUrl(req.getDownloadUrl()); changed = true; }
-
-        if (changed && !"hidden".equals(p.getStatus())) {
-            p.setStatus("hidden");
-        }
-        if (changed) {
-            p.setUpdatedAt(LocalDateTime.now());
+        // Basic fields update
+        if (req.getName() != null) p.setName(req.getName());
+        if (req.getDescription() != null) p.setDescription(req.getDescription());
+        if (req.getPrice() != null) p.setPrice(req.getPrice());
+        if (req.getSalePrice() != null) p.setSalePrice(req.getSalePrice());
+        if (req.getQuantity() != null) p.setQuantity(req.getQuantity());
+        if (req.getDownloadUrl() != null) p.setDownloadUrl(req.getDownloadUrl());
+        p.setUpdatedAt(LocalDateTime.now());
+        // If currently active/public -> hide until admin re-approves
+        if (Boolean.TRUE.equals(p.getIsActive())) {
+            p.setIsActive(false);
         }
         Products saved = productsRepository.save(p);
         return ResponseEntity.ok(saved);
     }
 
+    // Seller deletes product freely
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         if (!productsRepository.existsById(id)) return ResponseEntity.notFound().build();
@@ -79,32 +74,20 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    // Admin phê duyệt / huỷ publish; Seller bấm publish để gửi duyệt -> pending
+    // Admin approves or unpublishes product
     @PostMapping("/{id}/approval")
     public ResponseEntity<?> approve(
             @PathVariable Long id,
             @RequestParam("publish") boolean publish,
             @RequestHeader(value = "X-User-Type", required = false) String userType) {
+        // Simple role gate: only ADMIN can approve/publish
+        if (userType == null || !"ADMIN".equalsIgnoreCase(userType)) {
+            return ResponseEntity.status(403).body("Forbidden: admin only");
+        }
         Optional<Products> opt = productsRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         Products p = opt.get();
-        if (userType != null && "ADMIN".equalsIgnoreCase(userType)) {
-            if (publish) {
-                if ("public".equals(p.getStatus())) {
-                    return ResponseEntity.ok(p); // no-op
-                }
-                p.setStatus("public");
-            } else {
-                p.setStatus("hidden");
-            }
-        } else { // Seller flow
-            if ("public".equals(p.getStatus())) {
-                // Seller không chỉnh sửa gì nhưng bấm publish -> giữ nguyên public, no-op
-                return ResponseEntity.ok(p);
-            }
-            // Các trạng thái khác (hidden / pending) khi seller bấm publish -> gửi lại duyệt (pending)
-            p.setStatus("pending");
-        }
+        p.setIsActive(publish);
         p.setUpdatedAt(LocalDateTime.now());
         Products saved = productsRepository.save(p);
         return ResponseEntity.ok(saved);

@@ -14,11 +14,10 @@ public class TestController {
     @Autowired
     private UsersRepository usersRepository;
 
-    // Đổi sang /users để tránh trùng với trang catalog sản phẩm ở /
-    @GetMapping("/users")
-    public String users(Model model) {
+    @GetMapping("/")
+    public String index(Model model) {
         List<Users> userList = usersRepository.findAll();
         model.addAttribute("userList", userList);
-        return "users"; // templates/users.html
+        return "index";
     }
 }
