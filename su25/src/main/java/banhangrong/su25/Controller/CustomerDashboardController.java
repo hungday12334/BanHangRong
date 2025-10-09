@@ -36,6 +36,7 @@ public class CustomerDashboardController {
     @GetMapping("/customer/dashboard")
     public String customerDashboard(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
                                     @RequestParam(name = "size", required = false, defaultValue = "15") int size,
+                                    @RequestParam(name = "search", required = false) String search,
                                     Model model) {
         // Kiểm tra email verified cho CUSTOMER
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -52,7 +53,16 @@ public class CustomerDashboardController {
         // ORM: paginated public products ordered by total sales desc then created_at desc
         PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),
                 Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));
-        Page<Products> featuredPage = productsRepository.findByStatus("Public", pageable);
+        
+        Page<Products> featuredPage;
+        if (search != null && !search.trim().isEmpty()) {
+            // Search mode
+            featuredPage = productsRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndStatus(
+                search.trim(), search.trim(), "Public", pageable);
+        } else {
+            // Normal mode
+            featuredPage = productsRepository.findByStatus("Public", pageable);
+        }
         List<Products> featured = featuredPage.getContent();
         // Derive primary image directly from entity relations
         java.util.Map<Long, String> primaryImageByProduct = new java.util.HashMap<>();
@@ -79,6 +89,7 @@ public class CustomerDashboardController {
         model.addAttribute("totalPages", featuredPage.getTotalPages());
         model.addAttribute("size", featuredPage.getSize());
         model.addAttribute("primaryImageByProduct", primaryImageByProduct);
+        model.addAttribute("search", search);
         // demo userId=2, show cart count in topbar
         try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(2L)); } catch (Exception ignored) {}
         try {

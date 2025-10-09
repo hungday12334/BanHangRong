@@ -26,6 +26,10 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     
     // Find by status with pagination
     Page<Products> findByStatus(String status, Pageable pageable);
+    
+    // Search products by name or description (case insensitive)
+    Page<Products> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndStatus(
+        String name, String description, String status, Pageable pageable);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +

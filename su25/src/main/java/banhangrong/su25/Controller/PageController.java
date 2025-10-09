@@ -27,12 +27,22 @@ public class PageController {
     @GetMapping("/")
     public String home(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
                        @RequestParam(name = "size", required = false, defaultValue = "15") int size,
+                       @RequestParam(name = "search", required = false) String search,
                        Model model) {
         
-        // Lấy sản phẩm có status = "Public" với phân trang
+        // Lấy sản phẩm có status = "Public" với phân trang và search
         PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),
                 Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));
-        Page<Products> featuredPage = productsRepository.findByStatus("Public", pageable);
+        
+        Page<Products> featuredPage;
+        if (search != null && !search.trim().isEmpty()) {
+            // Search mode
+            featuredPage = productsRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndStatus(
+                search.trim(), search.trim(), "Public", pageable);
+        } else {
+            // Normal mode
+            featuredPage = productsRepository.findByStatus("Public", pageable);
+        }
         List<Products> featured = featuredPage.getContent();
         
         // Lấy ảnh chính cho từng sản phẩm
@@ -67,6 +77,7 @@ public class PageController {
         model.addAttribute("totalPages", featuredPage.getTotalPages());
         model.addAttribute("size", featuredPage.getSize());
         model.addAttribute("primaryImageByProduct", primaryImageByProduct);
+        model.addAttribute("search", search);
         
         return "homepage";
     }
