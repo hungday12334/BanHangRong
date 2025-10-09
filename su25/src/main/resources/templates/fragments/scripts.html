@@ -1,11 +1,13 @@
 <!-- Scripts Fragment -->
 <section th:fragment="scripts">
   <script>
-    window.currentUserType = document.body.getAttribute('data-user-type') || 'SELLER';
+    // Seller-only app: default role set to SELLER for any client logic relying on it
+    window.currentUserType = 'SELLER';
     try {
       const btn = document.getElementById('pm_publish');
-      if (btn && window.currentUserType !== 'ADMIN') {
-        btn.title = 'Chỉ Admin mới được publish';
+      if (btn) {
+        // Clear any admin-specific tooltip text
+        btn.removeAttribute('title');
       }
     } catch (e) {}
   </script>

@@ -639,34 +639,27 @@
         else { showToast('Lưu sản phẩm thất bại', 'error'); }
       });
 
-      // Publish / gửi duyệt: Seller bấm -> chuyển về pending; Admin bấm -> public/hidden tùy publish param
+      // Publish / gửi duyệt: Seller-only app -> luôn gửi duyệt (pending nếu không phải public)
       document.getElementById('pm_publish')?.addEventListener('click', async () => {
         const id = document.getElementById('pm_productId').value;
         if (!id) return;
         const statusText = document.getElementById('pm_status').textContent;
-        const isAdmin = (window.currentUserType || 'SELLER').toUpperCase() === 'ADMIN';
-        // Yêu cầu mới: Nếu sản phẩm đang ở trạng thái Public và không có thay đổi nào -> bấm duyệt sẽ KHÔNG thay đổi trạng thái
-        if ((isAdmin || (!isAdmin)) && statusText === 'Public' && !productChanged()) {
-          // Cả Admin (đã xử lý) và Seller: nếu sản phẩm đang Public và không thay đổi gì -> không làm gì cả
+        // Nếu sản phẩm đang ở trạng thái Public và không có thay đổi nào -> bấm duyệt sẽ KHÔNG thay đổi trạng thái
+        if (statusText === 'Public' && !productChanged()) {
+          // Seller: nếu sản phẩm đang Public và không thay đổi gì -> không làm gì cả
           showToast('Sản phẩm đã ở trạng thái Public (không có thay đổi)', 'info');
           closeModal(productModal);
-          return; // No-op cho cả hai vai trò
+          return; // No-op
         }
-        // Với seller: flag publish chỉ có ý nghĩa đối với admin; ta cứ gửi publish=false để tránh tự public
+        // Seller-only: gửi publish=false để tránh tự public
         const res = await fetch(`/api/products/${id}/approval?publish=${statusText !== 'Public'}`, {
           method: 'POST',
-          headers: { 'X-User-Type': window.currentUserType || 'SELLER' }
+          headers: { 'X-User-Type': 'SELLER' }
         });
         if (res.ok) {
           closeModal(productModal);
-          if (isAdmin) {
-            showToast(statusText !== 'Public' ? 'Đã publish sản phẩm' : 'Đã chuyển sang ẩn', 'success');
-          } else {
-            showToast('Đã gửi phê duyệt (status = pending)', 'success');
-          }
+          showToast('Đã gửi phê duyệt (status = pending)', 'success');
           setTimeout(() => refreshMyProducts(), 350);
-        } else if (res.status === 403) {
-          showToast('Bạn không có quyền thực hiện thao tác này (chỉ Admin).', 'error');
         } else {
           showToast('Thao tác duyệt/publish thất bại', 'error');
         }
