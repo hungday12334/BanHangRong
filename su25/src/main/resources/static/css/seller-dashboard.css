@@ -454,8 +454,10 @@ main {
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  /* Use a fluid, clamped container width to avoid large empty side gutters on wide screens */
+  /* Leaves a safe responsive inset on small screens while expanding up to a roomy but not too-wide max */
+  width: min(1480px, 100% - clamp(24px, 5vw, 64px));
+  margin-inline: auto;
 }
 
 .title {
@@ -485,7 +487,24 @@ main {
 }
 
 .grid.kpi {
+  /* Let KPI cards flow to fill available width neatly */
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* On very wide screens, allow the layout to breathe more and reduce side blanks */
+@media (min-width: 1440px) {
+  main { padding: 20px; }
+  .container {
+    width: min(1600px, 100% - clamp(28px, 6vw, 80px));
+  }
+}
+
+/* Improve grid utilization for sections that can expand; auto-fit guarantees balance when card counts vary */
+@media (min-width: 1280px) {
+  .grid.two { grid-template-columns: 1.35fr 1fr; }
+  .grid.auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
 }
 
 .grid.two {
