@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>BanHangRong - Trusted platform for buying and selling licenses</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<style>
+		:root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --chip:#e5e7eb; --line:#eaeef4; }
+		* { box-sizing:border-box; }
+		html,body { height:100%; }
+		body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+		.wrapper { min-height:100%; display:flex; flex-direction:column; }
+		.topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
+		.brand { font-weight:800; letter-spacing:.2px; }
+        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
+		.lang { font-size:14px; color:var(--muted); }
+		.auth-buttons { display:flex; gap:8px; align-items:center; }
+		.btn-auth { padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:500; font-size:14px; transition:all 0.2s; }
+		.btn-login { background:transparent; color:#111827; border:1px solid var(--line); }
+		.btn-login:hover { background:#f3f4f6; }
+		.btn-register { background:var(--brand); color:#fff; border:1px solid var(--brand); }
+		.btn-register:hover { background:#0284c7; }
+		.search { position:relative; }
+		.search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
+		.cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
+		.cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+		.nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
+		.nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
+		.nav a:hover { background:#f3f4f6; }
+		.hero { margin:18px auto 12px; max-width:1200px; background:linear-gradient(180deg,#f8fbff, #eef6ff); border:1px solid var(--line); border-radius:14px; padding:24px; }
+		.hero h1 { margin:0 0 8px; font-size:26px; }
+		.hero p { margin:0 0 16px; color:var(--muted); max-width:720px; }
+		.btn { display:inline-block; padding:10px 16px; background:var(--brand); color:#fff; border:none; border-radius:10px; text-decoration:none; font-weight:600; box-shadow:0 6px 18px rgba(14,165,233,.25); }
+		.btn:hover { filter:brightness(.98); }
+		.section-title { max-width:1200px; margin:10px auto; color:#6b7280; font-weight:600; text-align:center; }
+		.grid { max-width:1200px; margin:0 auto 40px; display:grid; grid-template-columns: repeat(5, 1fr); gap:14px; padding:0 10px; }
+		@media (max-width: 1100px) { .grid { grid-template-columns: repeat(4,1fr);} }
+		@media (max-width: 900px) { .grid { grid-template-columns: repeat(3,1fr);} .search input{ width:180px; } }
+		@media (max-width: 680px) { .grid { grid-template-columns: repeat(2,1fr);} }
+		.card { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+		.thumb { height:160px; background:#eef2f7; display:grid; place-items:center; color:#94a3b8; font-size:12px; position:relative; overflow:hidden; }
+		.thumb img { width:100%; height:100%; object-fit:cover; }
+		.card .body { padding:12px; display:flex; flex-direction:column; gap:8px; flex:1; }
+		.title { font-size:15px; font-weight:600; line-height:1.4; min-height:42px; color:#1f2937; }
+		.meta { font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+		.rating { display:inline-flex; align-items:center; gap:4px; color:#f59e0b; font-weight:500; }
+		.sales { color:#6b7280; }
+		.price { margin-top:auto; font-weight:700; font-size:18px; color:#0ea5e9; }
+		.price-original { text-decoration:line-through; color:#9ca3af; font-weight:500; font-size:14px; margin-left:6px; }
+        .badge-sale { position:absolute; top:8px; right:8px; background:#ef4444; color:#fff; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; z-index:2; }
+        .badge-out { position:absolute; top:8px; left:8px; background:#6b7280; color:#fff; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; z-index:2; }
+        .card.disabled { opacity:.65; }
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<div class="topbar">
+			<div class="brand">BanHangRong</div>
+			<nav class="nav" aria-label="Main">
+				<a href="/">Home</a>
+				<a href="#">Category</a>
+				<a href="#">License Software</a>
+				<a href="#">Game Keys</a>
+				<a href="#">Voucher</a>
+				<a href="#">Support</a>
+			</nav>
+			<div class="top-actions">
+                <div class="lang">English</div>
+                <div class="auth-buttons">
+					<a href="/login" class="btn-auth btn-login">Login</a>
+					<a href="/register" class="btn-auth btn-register">Register</a>
+				</div>
+				<div class="search">
+					<form method="GET" action="/" style="display:flex;gap:4px;">
+						<input type="search" name="search" placeholder="search" aria-label="Search" 
+							   th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+						<button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+						<a th:if="${search != null and !search.trim().isEmpty()}" 
+						   th:href="@{/}" 
+						   style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+					</form>
+				</div>
+				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+			</div>
+		</div>
+
+		<section class="hero">
+			<h1>Trusted platform for buying and selling licenses</h1>
+			<p>Buy game keys, software licenses, and vouchers from trusted sellers. Explore featured deals and start shopping now.</p>
+			<a href="#products" class="btn">Explore</a>
+		</section>
+
+		<div class="section-title">Feature License</div>
+		<section class="grid" id="products">
+            <a class="card clickable" th:each="p : ${featuredProducts}" th:unless="${#lists.isEmpty(featuredProducts)}" th:href="@{'/product/' + ${p.productId}}" th:classappend="${p.quantity != null and p.quantity <= 0} ? ' disabled' : ''"
+				th:attr="data-product-id=${p.productId},
+						data-name=${p.name},
+						data-description=${p.description},
+						data-price=${p.price},
+						data-sale-price=${p.salePrice},
+						data-quantity=${p.quantity},
+						data-total-sales=${p.totalSales},
+						data-average-rating=${p.averageRating}"
+			>
+				<div class="thumb">
+                    <span th:if="${p.quantity != null and p.quantity <= 0}" class="badge-out">Hết hàng</span>
+					<span th:if="${p.salePrice != null}" class="badge-sale">SALE</span>
+					<img th:if="${primaryImageByProduct != null and primaryImageByProduct[p.productId] != null}"
+						th:src="${primaryImageByProduct[p.productId]}"
+						th:alt="${p.name}"
+						onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
+						loading="lazy">
+					<img th:unless="${primaryImageByProduct != null and primaryImageByProduct[p.productId] != null}"
+						src="/img/avatar_default.jpg" 
+						th:alt="${p.name}">
+				</div>
+				<div class="body">
+					<div class="title" th:text="${p.name}">Product Title</div>
+					<div class="meta">
+						<span class="rating">⭐ <span th:text="${#numbers.formatDecimal(p.averageRating,1,'COMMA',1,'POINT')}">4.5</span></span>
+						<span class="sales">•</span>
+						<span class="sales">Đã bán: <span th:text="${p.totalSales}">0</span></span>
+					</div>
+					<div class="price">
+						<span th:if="${p.salePrice != null}">
+							<span th:text="${#numbers.formatDecimal(p.salePrice,0,'COMMA',0,'POINT')}">0</span>₫
+							<span class="price-original"><span th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}">0</span>₫</span>
+						</span>
+						<span th:if="${p.salePrice == null}">
+							<span th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}">0</span>₫
+						</span>
+					</div>
+				</div>
+			</a>
+
+			<!-- Fallback products if no data -->
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#0078D4; color:white; font-weight:bold;">Office 2021</div>
+				<div class="body">
+					<div class="title">Microsoft Office 2021 Pro Plus</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 520</span></div>
+					<div class="price">1,100,000₫ <span class="price-original">1,250,000₫</span></div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#FF0000; color:white; font-weight:bold;">Adobe CC</div>
+				<div class="body">
+					<div class="title">Adobe Creative Cloud All Apps</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 450</span></div>
+					<div class="price">850,000₫</div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#FFC107; color:black; font-weight:bold;">Norton 360</div>
+				<div class="body">
+					<div class="title">Norton 360 Deluxe 2023</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 410</span></div>
+					<div class="price">550,000₫ <span class="price-original">650,000₫</span></div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#FF6D00; color:white; font-weight:bold;">Malwarebytes</div>
+				<div class="body">
+					<div class="title">Malwarebytes Premium</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 350</span></div>
+					<div class="price">390,000₫ <span class="price-original">450,000₫</span></div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#8B4513; color:white; font-weight:bold;">Minecraft</div>
+				<div class="body">
+					<div class="title">Minecraft Java Edition</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 350</span></div>
+					<div class="price">580,000₫ <span class="price-original">650,000₫</span></div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#6200EA; color:white; font-weight:bold;">Web Dev</div>
+				<div class="body">
+					<div class="title">Web Development Bootcamp 2025</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 330</span></div>
+					<div class="price">149,000₫ <span class="price-original">199,000₫</span></div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#00C4CC; color:white; font-weight:bold;">Canva Pro</div>
+				<div class="body">
+					<div class="title">Canva Pro 12 Months</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 290</span></div>
+					<div class="price">320,000₫ <span class="price-original">380,000₫</span></div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#00A86B; color:white; font-weight:bold;">FIFA 23</div>
+				<div class="body">
+					<div class="title">FIFA 23 - Steam Key</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 280</span></div>
+					<div class="price">1,100,000₫</div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#0078D4; color:white; font-weight:bold;">Windows 11</div>
+				<div class="body">
+					<div class="title">Windows 11 Pro OEM</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 380</span></div>
+					<div class="price">900,000₫</div>
+				</div>
+			</div>
+			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+				<div class="thumb" style="background:#FF4655; color:white; font-weight:bold;">Valorant VP</div>
+				<div class="body">
+					<div class="title">Valorant Points 2000 VP</div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 420</span></div>
+					<div class="price">380,000₫ <span class="price-original">420,000₫</span></div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Pagination -->
+		<div style="max-width:1200px;margin:16px auto 32px;display:flex;justify-content:center;gap:6px;align-items:center;">
+			<a th:if="${totalPages > 1 and page > 0}"
+			   th:href="@{'/'(page=${page - 1}, size=${size}, search=${search})}"
+			   style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">« Trước</a>
+			<span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+				<a th:href="@{'/'(page=${i}, size=${size}, search=${search})}"
+				   th:text="${i + 1}"
+				   th:classappend="${i} == ${page} ? ' active' : ''"
+				   style="margin:0 2px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827"></a>
+			</span>
+			<a th:if="${totalPages > 1 and page < totalPages - 1}"
+			   th:href="@{'/'(page=${page + 1}, size=${size}, search=${search})}"
+			   style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">Sau »</a>
+		</div>
+	</div>
+
+	<script>
+		// Smooth scroll to products section
+		document.querySelector('.btn[href="#products"]').addEventListener('click', function(e) {
+			e.preventDefault();
+			document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+		});
+	</script>
+</body>
+</html>
