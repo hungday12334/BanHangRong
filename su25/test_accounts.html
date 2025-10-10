@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login Accounts</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .account { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .account h3 { margin-top: 0; color: #333; }
+        .credentials { background: #f5f5f5; padding: 10px; border-radius: 3px; margin: 10px 0; }
+        .test-btn { background: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; }
+        .test-btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Test Login Accounts</h1>
+    
+    <div class="account">
+        <h3>Test Admin Account</h3>
+        <div class="credentials">
+            <strong>Username:</strong> testadmin<br>
+            <strong>Password:</strong> 123456<br>
+            <strong>Role:</strong> ADMIN
+        </div>
+        <form action="/perform-login" method="post" style="display: inline;">
+            <input type="hidden" name="username" value="testadmin">
+            <input type="hidden" name="password" value="123456">
+            <button type="submit" class="test-btn">Test Login</button>
+        </form>
+    </div>
+    
+    <div class="account">
+        <h3>Test Seller Account</h3>
+        <div class="credentials">
+            <strong>Username:</strong> testseller<br>
+            <strong>Password:</strong> 123456<br>
+            <strong>Role:</strong> SELLER
+        </div>
+        <form action="/perform-login" method="post" style="display: inline;">
+            <input type="hidden" name="username" value="testseller">
+            <input type="hidden" name="password" value="123456">
+            <button type="submit" class="test-btn">Test Login</button>
+        </form>
+    </div>
+    
+    <div class="account">
+        <h3>Regular Admin Account</h3>
+        <div class="credentials">
+            <strong>Username:</strong> admin<br>
+            <strong>Password:</strong> 123456<br>
+            <strong>Role:</strong> ADMIN
+        </div>
+        <form action="/perform-login" method="post" style="display: inline;">
+            <input type="hidden" name="username" value="admin">
+            <input type="hidden" name="password" value="123456">
+            <button type="submit" class="test-btn">Test Login</button>
+        </form>
+    </div>
+    
+    <div class="account">
+        <h3>Regular Seller Account</h3>
+        <div class="credentials">
+            <strong>Username:</strong> seller<br>
+            <strong>Password:</strong> 123456<br>
+            <strong>Role:</strong> SELLER
+        </div>
+        <form action="/perform-login" method="post" style="display: inline;">
+            <input type="hidden" name="username" value="seller">
+            <input type="hidden" name="password" value="123456">
+            <button type="submit" class="test-btn">Test Login</button>
+        </form>
+    </div>
+    
+    <h2>Debug Endpoints:</h2>
+    <ul>
+        <li><a href="/api/debug/test-db" target="_blank">Test Database</a></li>
+        <li><a href="/api/debug/users" target="_blank">All Users</a></li>
+        <li><a href="/api/debug/user?username=testadmin" target="_blank">Testadmin User</a></li>
+        <li><a href="/api/debug/user?username=testseller" target="_blank">Testseller User</a></li>
+    </ul>
+</body>
+</html>
