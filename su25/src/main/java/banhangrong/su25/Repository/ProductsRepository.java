@@ -19,12 +19,9 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     long countBySellerIdAndStatus(Long sellerId, String status);
 
     // Customer homepage featured list: top by sales among active products
-    List<Products> findTop12ByIsActiveTrueOrderByTotalSalesDesc();
+    List<Products> findTop12ByStatusOrderByTotalSalesDesc(String status);
 
-    // Paginated active products (sorted by sales/created at handled by Pageable Sort)
-    Page<Products> findByIsActiveTrue(Pageable pageable);
-    
-    // Paginated products by status
+    // Paginated products by status (sorted by sales/created at handled by Pageable Sort)
     Page<Products> findByStatus(String status, Pageable pageable);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
