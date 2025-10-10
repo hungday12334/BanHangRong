@@ -118,6 +118,6 @@ public class SellerDashboardController {
             model.addAttribute("userType", user.getUserType());
         }
 
-        return "pages/seller_dashboard";
+        return "pages/seller/seller_dashboard";
     }
 }

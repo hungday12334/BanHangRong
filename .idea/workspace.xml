@@ -5,21 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: fix error approve Products.">
-      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/static/img/favicon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/UsersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/UsersRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/fragments/dashboard.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/fragments/modals.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/fragments/panels.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/fragments/scripts.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/fragments/sidebar.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/pages/seller/seller_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/static/css/seller-dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/static/css/seller-dashboard.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,12 +43,12 @@
     &quot;assignee&quot;: &quot;hungday12334&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
-    &quot;accountId&quot;: &quot;377a994b-6d50-4ce9-9d43-6106e26632f3&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/hungday12334/BanHangRong.git",
+    "accountId": "43a70439-d014-4c57-b4ae-bf792be7baff"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -79,7 +73,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "Spring Boot.Su25Application.executor": "Run",
-    "git-widget-placeholder": "hungnt",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
     "node.js.detected.package.eslint": "true",
