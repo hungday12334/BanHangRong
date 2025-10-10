@@ -51,6 +51,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/api/debug/**").permitAll()
                     .requestMatchers("/api/test-auth/**").permitAll()
+                    .requestMatchers("/api/password-test/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()

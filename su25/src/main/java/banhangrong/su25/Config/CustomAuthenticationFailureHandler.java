@@ -20,8 +20,11 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         // Log authentication failure
         System.out.println("=== Authentication Failure ===");
         System.out.println("Username: " + request.getParameter("username"));
+        System.out.println("Password: " + request.getParameter("password"));
         System.out.println("Remote Address: " + request.getRemoteAddr());
-        System.out.println("Exception: " + exception.getMessage());
+        System.out.println("Exception Type: " + exception.getClass().getSimpleName());
+        System.out.println("Exception Message: " + exception.getMessage());
+        System.out.println("Exception Cause: " + (exception.getCause() != null ? exception.getCause().getMessage() : "None"));
         System.out.println("================================");
         
         // Redirect back to login with error

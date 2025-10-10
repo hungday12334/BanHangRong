@@ -31,9 +31,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                 });
         
         System.out.println("=== DEBUG: User found: " + user.getUsername() + ", Type: " + user.getUserType() + ", Active: " + user.getIsActive() + " ===");
+        System.out.println("=== DEBUG: Password hash: " + user.getPassword() + " ===");
 
         // Kiểm tra user có active không
         if (!user.getIsActive()) {
+            System.out.println("=== DEBUG: User is not active: " + username + " ===");
             throw new UsernameNotFoundException("User is not active: " + username);
         }
 
