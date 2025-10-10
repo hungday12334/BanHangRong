@@ -71,6 +71,8 @@ public class SecurityConfig {
                 .loginProcessingUrl("/perform-login")
                 .successHandler(successHandler)
                 .failureUrl("/login?error=true")
+                .usernameParameter("username")
+                .passwordParameter("password")
                 .permitAll()
             )
             

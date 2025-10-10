@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>Test Login Form</h1>
+    
+    <form action="/perform-login" method="post">
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" value="testadmin" required>
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password" value="123456" required>
+        </div>
+        <div>
+            <button type="submit">Login</button>
+        </div>
+    </form>
+    
+    <h2>Debug Endpoints:</h2>
+    <ul>
+        <li><a href="/api/debug/test-db" target="_blank">Test Database</a></li>
+        <li><a href="/api/debug/users" target="_blank">All Users</a></li>
+        <li><a href="/api/debug/user?username=testadmin" target="_blank">Testadmin User</a></li>
+        <li><a href="/api/test-auth/current-user" target="_blank">Current User</a></li>
+        <li><a href="/api/test-auth/auth-details" target="_blank">Auth Details</a></li>
+    </ul>
+</body>
+</html>
