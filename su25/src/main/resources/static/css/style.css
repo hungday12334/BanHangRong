@@ -1,0 +1,311 @@
+/* --- Tổng thể trang --- */
+body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* --- Container tổng --- */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Khu thương hiệu (logo + tên app) --- */
+.brand-section {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo {
+    height: 70px;
+    width: auto;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.app-title {
+    font-size: 1.8rem;
+    color: #333;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+/* --- Khung tạo mật khẩu / quên mật khẩu --- */
+.create-password-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    border: 1px solid #e1e5e9;
+    overflow: hidden;
+    animation: fadeInUp 0.5s ease;
+}
+
+/* --- Header --- */
+.create-password-header {
+    background: #f8f9fa;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e1e5e9;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.create-password-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* --- Avatar --- */
+.user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #666;
+    font-weight: 600;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* --- Nội dung chính --- */
+.create-password-content {
+    padding: 30px;
+}
+
+/* --- Field --- */
+.password-field {
+    margin-bottom: 22px;
+}
+
+.password-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* --- Input và icon --- */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.password-input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+}
+
+.password-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.password-toggle {
+    background: #f8f9fa !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    padding: 8px 10px !important;
+    cursor: pointer !important;
+    color: #666 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.password-toggle:hover {
+    background: #e9ecef !important;
+    color: #007bff !important;
+}
+
+.validation-icon {
+    background: #fff !important;
+    border: none !important;
+    padding: 4px !important;
+    font-size: 1rem !important;
+}
+
+.validation-icon.valid {
+    color: #28a745;
+}
+
+.validation-icon.invalid {
+    color: #dc3545;
+}
+
+.password-hint {
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 5px;
+}
+
+/* --- Thông báo ngay dưới ô input --- */
+.message-box {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    display: none;
+    align-items: center;
+    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    animation: fadeIn 0.3s ease;
+}
+
+.message-box i {
+    margin-right: 8px;
+    font-size: 1rem;
+}
+
+.message-box.success {
+    background: #e6f4ea;
+    color: #1e7e34;
+    border-color: #c3e6cb;
+}
+
+.message-box.error {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+/* --- Nút confirm --- */
+.confirm-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 13px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 25px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.confirm-btn:hover {
+    background: #0056b3;
+}
+
+.confirm-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* --- Thông báo lỗi cũ (vẫn giữ để không lỗi các trang khác) --- */
+.error-message {
+    margin-top: 15px;
+    background: #fff3f3;
+    color: #c82333;
+    padding: 10px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #f5c6cb;
+    font-size: 0.9rem;
+}
+
+/* --- Thông báo thành công chung (khi reset hoàn tất) --- */
+#successMessage {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 480px;
+    margin: 30px auto;
+    border: 1px solid #e1e5e9;
+    padding: 30px;
+    text-align: center;
+    animation: fadeInUp 0.4s ease;
+}
+
+#successMessage i {
+    font-size: 2.5rem;
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+.success-content span {
+    font-weight: 600;
+    font-size: 17px;
+}
+
+.success-content p {
+    font-size: 14px;
+    margin: 8px 0 15px;
+    color: #555;
+}
+
+/* --- Nút đăng nhập --- */
+.login-btn {
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.login-btn:hover {
+    background: #0056b3;
+}
+
+/* --- Hiệu ứng xuất hiện --- */
+@keyframes fadeInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
