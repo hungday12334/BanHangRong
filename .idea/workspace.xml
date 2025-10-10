@@ -4,13 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="Admin Product Approve||Cancel">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: fix error approve Products.">
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/static/img/favicon.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminProductManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminProductManagement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Entity/Products.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Entity/Products.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/UsersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/UsersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,29 +66,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
-    &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;hungnt&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "Spring Boot.Su25Application.executor": "Run",
+    "git-widget-placeholder": "hungnt",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="su25" />
@@ -142,7 +157,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760004702615</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="fix: fix error approve Products.">
+      <option name="closed" value="true" />
+      <created>1760059391483</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1760059391483</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -176,6 +199,7 @@
     <MESSAGE value="Admin UserManagement Create" />
     <MESSAGE value="Admin User Update&amp;Delete" />
     <MESSAGE value="Admin Product Approve||Cancel" />
-    <option name="LAST_COMMIT_MESSAGE" value="Admin Product Approve||Cancel" />
+    <MESSAGE value="fix: fix error approve Products." />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: fix error approve Products." />
   </component>
 </project>

@@ -41,4 +41,14 @@ public class AdminProductServiceImpl implements AdminProductService {
         return adminProductsRepository.findByStatus(status);
     }
 
+    @Override
+    public Long count() {
+        return adminProductsRepository.count();
+    }
+
+    @Override
+    public Long countByStatus(String status) {
+        return adminProductsRepository.countByStatus(status);
+    }
+
 }

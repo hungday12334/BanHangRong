@@ -44,4 +44,14 @@ public class UserServiceImpl implements UserService{
     public boolean existsByEmail(String email) {
         return usersRepository.existsByEmail(email);
     }
+
+    @Override
+    public Long count() {
+        return usersRepository.count();
+    }
+
+    @Override
+    public Long countByUserType(String userType) {
+        return usersRepository.countByUserType(userType);
+    }
 }

@@ -19,8 +19,27 @@ public class AdminIndex {
     UserService userService;
     @Autowired
     AdminProductService adminProductService;
+
     @GetMapping("/index")
-    public String showAdminIndex() {
+    public String showAdminIndex(Model model) {
+        long totalUsers = userService.count();
+        long customerCount = userService.countByUserType("CUSTOMER");
+        long sellerCount = userService.countByUserType("SELLER");
+        long adminCount = userService.countByUserType("ADMIN");
+        long totalProducts = adminProductService.count();
+        long publicCount = adminProductService.countByStatus("Public");
+        long pendingCount = adminProductService.countByStatus("Pending");
+        long cancelledCount = adminProductService.countByStatus("Cancelled");
+
+        model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("customerCount", customerCount);
+        model.addAttribute("sellerCount", sellerCount);
+        model.addAttribute("adminCount", adminCount);
+
+        model.addAttribute("totalProducts", totalProducts);
+        model.addAttribute("publicCount", publicCount);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("cancelledCount", cancelledCount);
         return "admin/index";
     }
 
@@ -30,10 +49,17 @@ public class AdminIndex {
         model.addAttribute("userList", userList);
         return "admin/user-management"; // trả về file admin/user-management.html
     }
+
     @GetMapping("/product")
-    public String manageProduct(Model model){
-        List<Products> productsList = adminProductService.findByStatus("Pending");
+    public String manageProduct(Model model) {
+        List<Products> productsList = adminProductService.findAll();
+        List<Products> productsListPening = adminProductService.findByStatus("Pending");
+        List<Products> productsListPublic = adminProductService.findByStatus("Public");
+        List<Products> productsListCancelled = adminProductService.findByStatus("Cancelled");
         model.addAttribute("productsList", productsList);
+        model.addAttribute("productsListPublic", productsListPublic);
+        model.addAttribute("productsListCancelled", productsListCancelled);
+        model.addAttribute("productsListPending", productsListPening);
         return "admin/product-management";
     }
 }

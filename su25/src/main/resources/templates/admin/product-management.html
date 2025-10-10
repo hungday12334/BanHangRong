@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Product Manage</title>
-    <link rel="shortcut icon" th:href="@{/assets/images/logos/favicon.png}" />
-    <link rel="stylesheet" th:href="@{/css/styles.min.css}" />
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -70,6 +70,7 @@
         .btn-create:hover {
             background-color: #5b77e6;
         }
+
         a {
             text-decoration: none;
         }
@@ -77,9 +78,11 @@
         a:hover {
             text-decoration: none;
         }
+
         .sidebar-link .hide-menu {
             margin-left: -8px; /* giảm khoảng cách chữ */
         }
+
         /* Nút hành động tự custom */
         .action-btns {
             display: flex;
@@ -128,6 +131,42 @@
             transform: scale(1.1);
             filter: brightness(1.1);
         }
+
+        .status {
+            text-align: center;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 6px 10px;
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Public - xanh lá */
+        .status-public {
+            background-color: #28a745;
+            color: white;
+        }
+
+        /* Pending - vàng */
+        .status-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        /* Cancelled - đỏ */
+        .status-cancelled {
+            background-color: #dc3545;
+            color: white;
+        }
+
     </style>
 </head>
 
@@ -136,11 +175,13 @@
     <!-- Sidebar Start -->
     <aside class="left-sidebar">
         <div>
-            <div class="brand-logo d-flex align-items-center justify-content-between">
-                <a href="./index.html" class="text-nowrap logo-img">
-                    <img src="../assets/images/logos/logo.svg" alt="" />
+            <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
+                <a th:href="@{/admin/index}" class="text-center">
+                    <img th:src="@{/img/favicon.png}" alt="LOGO"
+                         style="width: 80px; height: auto; display: block; margin: 0 auto;">
+                    <span style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
                 </a>
-                <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+                <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
                     <i class="ti ti-x fs-6"></i>
                 </div>
             </div>
@@ -151,7 +192,7 @@
                         <span class="hide-menu">Lists</span>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  th:href="@{/admin/index}" aria-expanded="false">
+                        <a class="sidebar-link justify-content-between" th:href="@{/admin/index}" aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
                                 <span class="hide-menu">DASHBOARD</span>
@@ -165,7 +206,8 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  th:href="@{/admin/product}" aria-expanded="false">
+                        <a class="sidebar-link justify-content-between" th:href="@{/admin/product}"
+                           aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="d-flex"><i class="bi bi-key-fill"></i></span>
                                 <span class="hide-menu">PRODUCT MANAGEMENT</span>
@@ -173,7 +215,8 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+                        <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                           aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="d-flex"><i class="bi bi-patch-question-fill"></i></span>
                                 <span class="hide-menu">HELP</span>
@@ -181,7 +224,7 @@
                         </a>
                         <ul aria-expanded="false" class="collapse first-level">
                             <li class="sidebar-item">
-                                <a class="sidebar-link justify-content-between"  href="#">
+                                <a class="sidebar-link justify-content-between" href="#">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="round-16 d-flex align-items-center justify-content-center">
                                             <i class="ti ti-circle"></i>
@@ -191,7 +234,7 @@
                                 </a>
                             </li>
                             <li class="sidebar-item">
-                                <a class="sidebar-link justify-content-between"  href="#">
+                                <a class="sidebar-link justify-content-between" href="#">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="round-16 d-flex align-items-center justify-content-center">
                                             <i class="ti ti-circle"></i>
@@ -203,7 +246,7 @@
                         </ul>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  href="#" aria-expanded="false">
+                        <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
                                 <span class="hide-menu">SETTING</span>
@@ -211,7 +254,7 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  href="#" aria-expanded="false">
+                        <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
                                 <span class="hide-menu">LOGOUT</span>
@@ -266,7 +309,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="p : ${productsList}">
+                <tr th:each="p : ${productsListPending}">
                     <td>
                         <div class="action-btns">
                             <a th:href="@{'/admin/product/update?id=' + ${p.productId}}">
@@ -282,7 +325,14 @@
                     <td th:text="${p.quantity}"></td>
                     <td th:text="${p.totalSales}"></td>
                     <td th:text="${p.averageRating}"></td>
-                    <td th:text="${p.status}"></td>
+                    <td>
+                        <span th:text="${p.status}"
+                              th:class="'status-badge ' +
+                                  (${p.status} == 'Public' ? 'status-public' :
+                                  (${p.status} == 'Pending' ? 'status-pending' :
+                                  (${p.status} == 'Cancelled' ? 'status-cancelled' : '')))">
+                        </span>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -290,7 +340,7 @@
     </div>
 </div>
 <script>
-    document.getElementById("searchInput").addEventListener("keyup", function() {
+    document.getElementById("searchInput").addEventListener("keyup", function () {
         const filter = this.value.toLowerCase();
         const rows = document.querySelectorAll("table tbody tr");
 
@@ -299,7 +349,7 @@
             let match = false;
 
             // duyệt qua tất cả các cột trừ 3 cột thời gian cuối
-            for (let i = 0; i < cells.length ; i++) {
+            for (let i = 0; i < cells.length; i++) {
                 if (cells[i].innerText.toLowerCase().includes(filter)) {
                     match = true;
                     break;

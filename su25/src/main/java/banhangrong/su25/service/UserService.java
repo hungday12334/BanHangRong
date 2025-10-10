@@ -12,4 +12,6 @@ public interface UserService {
     public void update(Users user);
     public boolean existsByUsername(String username);
     public boolean existsByEmail(String email);
+    public Long count();
+    public Long countByUserType(String userType);
 }

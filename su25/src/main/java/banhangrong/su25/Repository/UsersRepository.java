@@ -8,4 +8,5 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 
     boolean existsByUsername(String userName);
     boolean existsByEmail(String email);
+    Long countByUserType(String userType);
 }

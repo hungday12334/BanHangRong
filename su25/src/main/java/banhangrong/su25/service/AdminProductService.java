@@ -10,4 +10,6 @@ public interface AdminProductService {
     public Products findById(Long id);
     public List<Products> findAll();
     public List<Products> findByStatus(String status);
+    public Long count();
+    public Long countByStatus(String status);
 }

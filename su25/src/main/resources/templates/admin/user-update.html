@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>User Update</title>
-    <link rel="shortcut icon" th:href="@{/assets/images/logos/favicon.png}"/>
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
     <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <style>
@@ -177,11 +177,12 @@
     <!-- Sidebar Start -->
     <aside class="left-sidebar">
         <div>
-            <div class="brand-logo d-flex align-items-center justify-content-between">
-                <a href="./index.html" class="text-nowrap logo-img">
-                    <img src="../assets/images/logos/logo.svg" alt=""/>
+            <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
+                <a th:href="@{/admin/index}" class="text-center">
+                    <img th:src="@{/img/favicon.png}" alt="LOGO" style="width: 80px; height: auto; display: block; margin: 0 auto;">
+                    <span style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
                 </a>
-                <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+                <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
                     <i class="ti ti-x fs-6"></i>
                 </div>
             </div>

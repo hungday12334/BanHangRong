@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface AdminProductsRepository extends JpaRepository<Products, Long> {
     public List<Products> findByStatus(String status);
+    public Long countByStatus(String status);
 }
