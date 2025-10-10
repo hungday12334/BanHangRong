@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <!-- HEAD START -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bảng điều khiển người bán</title>
+  <!-- Preload critical dashboard stylesheet to improve LCP -->
+  <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
+  <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+  <!-- Preload and set favicon / logo -->
+  <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
+  <link rel="icon" type="image/png" href="/img/kua654ms.png" />
+  <link rel="shortcut icon" href="/img/kua654ms.png" />
+  <!-- Icon font (can be loaded with lower priority if needed) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <!-- Defer non-critical chart library to avoid blocking rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <meta name="theme-color" content="#0b1020" />
+  <style>/* fallback dev */</style>
+  <!-- HEAD END -->
+</head>
+
+<body class="loading enhanced-dashboard" th:attr="data-user-type=${userType}" data-app-root>
+  <!-- GLOBAL APP LOADER -->
+  <div id="appLoader" class="app-loader" role="status" aria-live="polite">
+    <div class="loader-core">
+      <div class="orbital" aria-hidden="true">
+        <div class="nucleus">
+          <img class="loader-logo" src="/img/kua654ms.png" alt="Logo" decoding="async" loading="eager" data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" />
+        </div>
+        <div class="orbit orbit-a"><span></span></div>
+        <div class="orbit orbit-b"><span></span></div>
+        <div class="orbit orbit-c"><span></span></div>
+        <div class="rings">
+          <div class="ring r1"></div>
+          <div class="ring r2"></div>
+          <div class="ring r3"></div>
+        </div>
+      </div>
+      <div class="progress-wrap" aria-hidden="true">
+        <div class="progress-bar" data-loader-progress></div>
+      </div>
+      <div class="load-text" data-loader-text>Đang khởi tạo...</div>
+      <div class="load-tip" data-loader-tip></div>
+    </div>
+  </div>
+  <!-- APP WRAPPER START -->
+  <div class="page">
+
+    <!-- SIDEBAR START -->
+    <aside th:replace="fragments/sidebar :: sidebar"></aside>
+    <!-- SIDEBAR END -->
+
+    <!-- MAIN START -->
+    <main data-section="main">
+      <div class="container">
+
+        <!-- DASHBOARD CORE START -->
+        <section th:replace="fragments/dashboard :: dashboard"></section>
+        <!-- DASHBOARD CORE END -->
+
+        <!-- PANELS ALT START -->
+        <section th:replace="fragments/panels :: panels"></section>
+        <!-- PANELS ALT END -->
+
+      </div>
+    </main>
+    <!-- MAIN END -->
+  </div>
+  <!-- APP WRAPPER END -->
+
+  <!-- MODAL LAYER START -->
+  <div id="modalOverlay" class="modal-overlay" hidden data-modal-overlay></div>
+
+  <section th:replace="fragments/modals :: modals"></section>
+  <!-- MODAL LAYER END -->
+
+  <!-- TOAST CONTAINER START -->
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true" data-block="toast-root"></div>
+  <!-- TOAST CONTAINER END -->
+
+  <!-- SCRIPTS START -->
+  <section th:replace="fragments/scripts :: scripts"></section>
+  <!-- SCRIPTS END -->
+</body>
+</html>
