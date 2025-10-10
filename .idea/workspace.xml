@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: fix error approve Products.">
+      <change afterPath="$PROJECT_DIR$/su25/src/main/resources/static/img/favicon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Controller/AdminIndex.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/AdminProductsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/UsersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/Repository/UsersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/AdminProductServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/java/banhangrong/su25/service/UserServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/product-update.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/su25/src/main/resources/templates/admin/user-update.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Hungnv" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;hungday12334&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
+    &quot;accountId&quot;: &quot;377a994b-6d50-4ce9-9d43-6106e26632f3&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="33VwQF5xNjK8G25Up2AO92hyo8L" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "Spring Boot.Su25Application.executor": "Run",
+    "git-widget-placeholder": "hungnt",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="su25" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="" />
+      <created>1759415528443</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759415528443</updated>
+      <workItem from="1759415529847" duration="973000" />
+      <workItem from="1759854439361" duration="7629000" />
+      <workItem from="1759887937257" duration="14526000" />
+      <workItem from="1759915487604" duration="32000" />
+      <workItem from="1759915643459" duration="4057000" />
+    </task>
+    <task id="LOCAL-00001" summary="AdminIndex_Final1">
+      <option name="closed" value="true" />
+      <created>1759416475096</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1759416475096</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Admin UserManagement Create">
+      <option name="closed" value="true" />
+      <created>1759892863475</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1759892863475</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Admin User Update&amp;Delete">
+      <option name="closed" value="true" />
+      <created>1759911171115</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1759911171115</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Admin Product Approve||Cancel">
+      <option name="closed" value="true" />
+      <created>1760004702614</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1760004702615</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix: fix error approve Products.">
+      <option name="closed" value="true" />
+      <created>1760059391483</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1760059391483</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/hungnt" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="AdminIndex_Final1" />
+    <MESSAGE value="Admin UserManagement Create" />
+    <MESSAGE value="Admin User Update&amp;Delete" />
+    <MESSAGE value="Admin Product Approve||Cancel" />
+    <MESSAGE value="fix: fix error approve Products." />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: fix error approve Products." />
+  </component>
+</project>

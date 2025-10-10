@@ -14,9 +14,9 @@ import org.springframework.data.domain.Pageable;
 public interface ProductsRepository extends JpaRepository<Products, Long> {
     List<Products> findBySellerId(Long sellerId);
 
-    List<Products> findTop10BySellerIdAndIsActiveTrueAndQuantityLessThanEqualOrderByQuantityAsc(Long sellerId, Integer threshold);
+    List<Products> findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(Long sellerId, String status, Integer threshold);
 
-    long countBySellerIdAndIsActiveTrue(Long sellerId);
+    long countBySellerIdAndStatus(Long sellerId, String status);
 
     // Customer homepage featured list: top by sales among active products
     List<Products> findTop12ByIsActiveTrueOrderByTotalSalesDesc();
