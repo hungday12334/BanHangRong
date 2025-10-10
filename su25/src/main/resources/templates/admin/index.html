@@ -121,14 +121,16 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between" th:href="@{/logout}" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="bi bi-box-arrow-right"></i>
-                  </span>
-                                <span class="hide-menu">LOGOUT</span>
-                            </div>
-                        </a>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="sidebar-link justify-content-between" style="background: none; border: none; width: 100%; text-align: left; padding: 0;">
+                                <div class="d-flex align-items-center gap-3">
+                      <span class="d-flex">
+                        <i class="bi bi-box-arrow-right"></i>
+                      </span>
+                                    <span class="hide-menu">LOGOUT</span>
+                                </div>
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </nav>

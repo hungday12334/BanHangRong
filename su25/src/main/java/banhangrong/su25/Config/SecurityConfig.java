@@ -57,6 +57,7 @@ public class SecurityConfig {
                     .requestMatchers("/db", "/api/database/**").permitAll()
                     .requestMatchers("/test_login.html").permitAll()
                     .requestMatchers("/test_accounts.html").permitAll()
+                    .requestMatchers("/test-logout/**").permitAll()
                 
                 // Customer pages - cho phép tất cả authenticated users
                 .requestMatchers("/customer/**", "/product/**", "/cart/**").authenticated()
