@@ -14,7 +14,7 @@ public class TestController {
     @Autowired
     private UsersRepository usersRepository;
 
-    @GetMapping("/")
+    @GetMapping("/test")
     public String index(Model model) {
         List<Users> userList = usersRepository.findAll();
         model.addAttribute("userList", userList);
