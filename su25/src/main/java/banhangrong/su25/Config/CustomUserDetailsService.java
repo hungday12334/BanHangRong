@@ -22,8 +22,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("=== DEBUG: Loading user by username: " + username + " ===");
+        
         Users user = usersRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> {
+                    System.out.println("=== DEBUG: User not found in database: " + username + " ===");
+                    return new UsernameNotFoundException("User not found: " + username);
+                });
+        
+        System.out.println("=== DEBUG: User found: " + user.getUsername() + ", Type: " + user.getUserType() + ", Active: " + user.getIsActive() + " ===");
 
         // Kiểm tra user có active không
         if (!user.getIsActive()) {

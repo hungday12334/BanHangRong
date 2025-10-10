@@ -12,7 +12,7 @@ USE wap;
 
 UPDATE users 
 SET password = '$2a$10$e0MYzXyjpJS7Pd0RVvHwHeFtVpVKxKBCl7Cn6FGa.Ll8xKKqqfLq2'
-WHERE username = 'seller';
+WHERE username = 'admin';
 
 -- ========================================
 -- THÔNG TIN LOGIN
@@ -25,7 +25,7 @@ WHERE username = 'seller';
 -- Kiểm tra tài khoản
 SELECT user_id, username, email, user_type, is_email_verified, is_active 
 FROM users 
-WHERE username = 'seller';
+WHERE username = 'admin';
 
 -- ========================================
 -- CÁCH 2: TẠO TÀI KHOẢN MỚI (NẾU CẦN)

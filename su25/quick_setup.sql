@@ -6,7 +6,7 @@ USE wap;
 
 -- Update password cho TẤT CẢ tài khoản test (password đều là: 123456)
 UPDATE users SET password = '$2a$10$e0MYzXyjpJS7Pd0RVvHwHeFtVpVKxKBCl7Cn6FGa.Ll8xKKqqfLq2' WHERE username = 'seller';
-UPDATE users SET password = '$2a$10$e0MYzXyjpJS7Pd0RVvHwHeFtVpVKxKBCl7Cn6FGa.Ll8xKKqqfLq2' WHERE username = 'alice';
+UPDATE users SET password = '$2a$10$e0MYzXyjpJS7Pd0RVvHwHeFtVpVKxKBCl7Cn6FGa.Ll8xKKqqfLq2' WHERE username = 'admin';
 UPDATE users SET password = '$2a$10$e0MYzXyjpJS7Pd0RVvHwHeFtVpVKxKBCl7Cn6FGa.Ll8xKKqqfLq2' WHERE username = 'bob';
 UPDATE users SET password = '$2a$10$e0MYzXyjpJS7Pd0RVvHwHeFtVpVKxKBCl7Cn6FGa.Ll8xKKqqfLq2' WHERE username = 'charlie';
 UPDATE users SET password = '$2a$10$e0MYzXyjpJS7Pd0RVvHwHeFtVpVKxKBCl7Cn6FGa.Ll8xKKqqfLq2' WHERE username = 'dave';
