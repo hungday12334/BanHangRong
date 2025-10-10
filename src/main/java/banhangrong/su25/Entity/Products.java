@@ -27,7 +27,8 @@ public class Products {
     private BigDecimal averageRating;
     @Column(name = "is_active")
     private Boolean isActive;
-    private String status;
+    @Column(name = "status")
+    private String status; // "pending", "public", "hidden"
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -125,5 +126,16 @@ public class Products {
     }
     public void setImages(java.util.List<ProductImages> images) {
         this.images = images;
+    }
+
+    @PrePersist
+    public void _prePersistNormalizeStatus() {
+        if (status == null || status.isBlank()) status = "pending";
+        status = status.toLowerCase();
+    }
+
+    @PreUpdate
+    public void _preUpdateNormalizeStatus() {
+        if (status != null) status = status.toLowerCase();
     }
 }
