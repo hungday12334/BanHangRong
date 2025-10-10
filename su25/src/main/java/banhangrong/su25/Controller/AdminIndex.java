@@ -12,15 +12,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/admin")
+// @Controller
+// @RequestMapping("/admin")
 public class AdminIndex {
     @Autowired
     UserService userService;
     @Autowired
     AdminProductService adminProductService;
 
-    @GetMapping("/index")
+    @GetMapping({"/", "/dashboard", "/index"})
     public String showAdminIndex(Model model) {
         long totalUsers = userService.count();
         long customerCount = userService.countByUserType("CUSTOMER");
