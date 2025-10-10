@@ -92,10 +92,10 @@ public class Products {
     public void setAverageRating(BigDecimal averageRating) {
         this.averageRating = averageRating;
     }
-    public String getIsActive() {
+    public String getStatus() {
         return status;
     }
-    public void setIsActive(String isActive) {
+    public void setStatus(String isActive) {
         this.status = isActive;
     }
     public LocalDateTime getCreatedAt() {

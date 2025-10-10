@@ -50,11 +50,11 @@ public class AdminProductManagement {
         }
         Long id = Long.parseLong(sId);
         Products product = adminProductService.findById(id);
-        if (product == null||!"Pending".equals(product.getIsActive())) {
+        if (product == null||!"Pending".equals(product.getStatus())) {
             redirectAttributes.addFlashAttribute("error", "Product not found");
             return "redirect:/admin/product";
         }
-        product.setIsActive("Public");
+        product.setStatus("Public");
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Product updated successfully");
         return "redirect:/admin/product";
@@ -70,11 +70,11 @@ public class AdminProductManagement {
         }
         Long id = Long.parseLong(sId);
         Products product = adminProductService.findById(id);
-        if (product == null||!"Pending".equals(product.getIsActive())) {
+        if (product == null||!"Pending".equals(product.getStatus())) {
             redirectAttributes.addFlashAttribute("error", "Product not found");
             return "redirect:/admin/product";
         }
-        product.setIsActive("Cancelled");
+        product.setStatus("Cancelled");
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Cancelled successfully");
         return "redirect:/admin/product";

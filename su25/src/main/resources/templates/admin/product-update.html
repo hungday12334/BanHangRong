@@ -340,9 +340,9 @@
             <div class="form-group">
                 <label>Status:</label>
                 <select readonly name="status" class="form-control">
-                    <option value="Public" th:selected="${product != null and product.isActive == 'Public'}">Public</option>
-                    <option value="Pending" th:selected="${product != null and product.isActive == 'Pending'}">Pending</option>
-                    <option value="hidden" th:selected="${product != null and product.isActive == 'Hidden'}">Hidden</option>
+                    <option value="Public" th:selected="${product != null and product.status == 'Public'}">Public</option>
+                    <option value="Pending" th:selected="${product != null and product.status == 'Pending'}">Pending</option>
+                    <option value="hidden" th:selected="${product != null and product.status == 'Hidden'}">Hidden</option>
                 </select>
 
             </div>
@@ -360,7 +360,9 @@
             </div>
         <div class="form-container">
             <form  action="/admin/product/update" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="productId" th:value="${product.productId}">
                 <div class="form-actions">
+
                     <button type="submit"  class="submit-btn" onclick="return confirm('Do you really want to approve this product?')">Approve</button>
                 </div>
 
