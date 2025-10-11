@@ -341,9 +341,9 @@
             <div class="form-group">
                 <label>Status:</label>
                 <select readonly name="status" class="form-control">
-                    <option value="Public" th:selected="${product != null and product.status == 'Public'}">Public</option>
-                    <option value="Pending" th:selected="${product != null and product.status == 'Pending'}">Pending</option>
-                    <option value="hidden" th:selected="${product != null and product.status == 'Hidden'}">Hidden</option>
+                    <option value="public" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'public')}">Public</option>
+                    <option value="pending" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'pending')}">Pending</option>
+                    <option value="hidden" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'hidden')}">Hidden</option>
                 </select>
 
             </div>

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,15 +21,7 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
         @Query("SELECT COUNT(p) FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status)")
         long countBySellerIdAndStatus(@Param("sellerId") Long sellerId, @Param("status") String status);
 
-        List<Products> findTop10BySellerIdAndIsActiveTrueAndQuantityLessThanEqualOrderByQuantityAsc(Long sellerId, Integer threshold);
-
-        long countBySellerIdAndIsActiveTrue(Long sellerId);
-
-        // Customer homepage featured list: top by sales among active products
-        List<Products> findTop12ByIsActiveTrueOrderByTotalSalesDesc();
-
-        // Paginated active products (sorted by sales/created at handled by Pageable Sort)
-        Page<Products> findByIsActiveTrue(Pageable pageable);
+        // Removed isActive-based methods; use status instead
 
         // Find by status with pagination
         Page<Products> findByStatus(String status, Pageable pageable);
@@ -48,12 +40,12 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "WHERE p.seller_id = :sellerId", nativeQuery = true)
     Long totalUnitsSoldBySeller(@Param("sellerId") Long sellerId);
 
-    @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
+    @Query(value = "SELECT DATE(oi.created_at) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
-            "WHERE p.seller_id = :sellerId AND oi.created_at >= :fromDate\n" +
-            "GROUP BY CAST(oi.created_at AS DATE)\n" +
-            "ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
-    List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDateTime fromDate);
+            "WHERE p.seller_id = :sellerId AND DATE(oi.created_at) >= :fromDate\n" +
+            "GROUP BY DATE(oi.created_at)\n" +
+            "ORDER BY DATE(oi.created_at)", nativeQuery = true)
+    List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDate fromDate);
 
     @Query(value = "SELECT COUNT(DISTINCT oi.order_id)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +

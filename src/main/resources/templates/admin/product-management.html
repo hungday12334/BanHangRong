@@ -328,9 +328,9 @@
                     <td>
                         <span th:text="${p.status}"
                               th:class="'status-badge ' +
-                                  (${p.status} == 'Public' ? 'status-public' :
-                                  (${p.status} == 'Pending' ? 'status-pending' :
-                                  (${p.status} == 'Cancelled' ? 'status-cancelled' : '')))">
+                                  (#strings.equalsIgnoreCase(p.status,'public') ? 'status-public' :
+                                  (#strings.equalsIgnoreCase(p.status,'pending') ? 'status-pending' :
+                                  (#strings.equalsIgnoreCase(p.status,'cancelled') ? 'status-cancelled' : '')))">
                         </span>
                     </td>
                 </tr>

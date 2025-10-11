@@ -8,11 +8,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Controller
@@ -23,43 +24,62 @@ public class SellerDashboardController {
     private final SellerOrderRepository sellerOrderRepository;
 
     public SellerDashboardController(ProductsRepository productsRepository,
-                                     UsersRepository usersRepository,
-                                     SellerOrderRepository sellerOrderRepository) {
+            UsersRepository usersRepository,
+            SellerOrderRepository sellerOrderRepository) {
         this.productsRepository = productsRepository;
         this.usersRepository = usersRepository;
         this.sellerOrderRepository = sellerOrderRepository;
     }
 
-    // Temporary: sellerId is read from query or default to 1L until auth in place
     @GetMapping("/seller/dashboard")
     public String dashboard(@RequestParam(name = "sellerId", required = false) Long sellerId,
-                            Model model) {
-        if (sellerId == null) sellerId = 56L; // assumption: demo seller
+            Model model) {
+        // Lấy user hiện tại từ SecurityContext
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Users currentUser = null;
+        if (auth != null && auth.getName() != null) {
+            currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        }
+
+        // Xác định sellerId sử dụng:
+        // - Nếu là ADMIN và có truyền sellerId -> dùng sellerId đó (để xem dashboard
+        // của seller khác)
+        // - Ngược lại: dùng userId của chính user đăng nhập
+        Long sellerIdUsed;
+        if (currentUser != null && "ADMIN".equalsIgnoreCase(currentUser.getUserType()) && sellerId != null) {
+            sellerIdUsed = sellerId;
+        } else if (currentUser != null) {
+            sellerIdUsed = currentUser.getUserId();
+        } else {
+            // Fallback an toàn nếu không xác định được user (không nên xảy ra do route đã
+            // auth)
+            sellerIdUsed = sellerId != null ? sellerId : 0L;
+        }
 
         // KPIs
-        BigDecimal totalRevenue = Optional.ofNullable(productsRepository.totalRevenueBySeller(sellerId))
+        BigDecimal totalRevenue = Optional.ofNullable(productsRepository.totalRevenueBySeller(sellerIdUsed))
                 .orElse(BigDecimal.ZERO);
-        Long totalUnits = Optional.ofNullable(productsRepository.totalUnitsSoldBySeller(sellerId))
+        Long totalUnits = Optional.ofNullable(productsRepository.totalUnitsSoldBySeller(sellerIdUsed))
                 .orElse(0L);
-        Long totalOrders = Optional.ofNullable(productsRepository.totalOrdersBySeller(sellerId))
+        Long totalOrders = Optional.ofNullable(productsRepository.totalOrdersBySeller(sellerIdUsed))
                 .orElse(0L);
-        BigDecimal avgRating = Optional.ofNullable(productsRepository.averageRatingBySeller(sellerId))
+        BigDecimal avgRating = Optional.ofNullable(productsRepository.averageRatingBySeller(sellerIdUsed))
                 .orElse(BigDecimal.ZERO);
 
         // Today/This month
-        BigDecimal todayRev = Optional.ofNullable(productsRepository.todayRevenue(sellerId))
+        BigDecimal todayRev = Optional.ofNullable(productsRepository.todayRevenue(sellerIdUsed))
                 .orElse(BigDecimal.ZERO);
-        BigDecimal monthRev = Optional.ofNullable(productsRepository.thisMonthRevenue(sellerId))
+        BigDecimal monthRev = Optional.ofNullable(productsRepository.thisMonthRevenue(sellerIdUsed))
                 .orElse(BigDecimal.ZERO);
 
-        // Daily revenue for last 14 days
-        LocalDateTime from = LocalDateTime.now().minus(14, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
-        List<Object[]> raw = productsRepository.dailyRevenueFrom(sellerId, from);
-        // Build date -> revenue map covering all days
+        // Daily revenue for last 15 days inclusive (based on calendar date to avoid TZ drift)
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate fromDate = today.minusDays(14); // include today + 14 days back
+        List<Object[]> raw = productsRepository.dailyRevenueFrom(sellerIdUsed, fromDate);
+        // Build date -> revenue map covering all dates from fromDate..today
         LinkedHashMap<String, BigDecimal> series = new LinkedHashMap<>();
-        for (int i = 14; i >= 0; i--) {
-            LocalDateTime d = LocalDateTime.now().minus(i, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
-            series.put(d.toLocalDate().toString(), BigDecimal.ZERO);
+        for (java.time.LocalDate d = fromDate; !d.isAfter(today); d = d.plusDays(1)) {
+            series.put(d.toString(), BigDecimal.ZERO);
         }
         for (Object[] row : raw) {
             String date = Objects.toString(row[0]);
@@ -69,7 +89,7 @@ public class SellerDashboardController {
 
         // Top products
         List<Map<String, Object>> topProducts = new ArrayList<>();
-        for (Object[] row : productsRepository.topProducts(sellerId)) {
+        for (Object[] row : productsRepository.topProducts(sellerIdUsed)) {
             Map<String, Object> m = new HashMap<>();
             m.put("productId", row[0]);
             m.put("name", row[1]);
@@ -82,8 +102,9 @@ public class SellerDashboardController {
         // Recent orders (strictly scoped to this seller)
         List<Map<String, Object>> recentOrders = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        var pageableRecent = org.springframework.data.domain.PageRequest.of(0, 8, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
-        var pageRecent = sellerOrderRepository.findSellerOrders(sellerId, null, null, null, pageableRecent);
+        var pageableRecent = org.springframework.data.domain.PageRequest.of(0, 8, org.springframework.data.domain.Sort
+                .by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        var pageRecent = sellerOrderRepository.findSellerOrders(sellerIdUsed, null, null, null, pageableRecent);
         for (SellerOrderRepository.SellerOrderSummary s : pageRecent.getContent()) {
             Map<String, Object> m = new HashMap<>();
             m.put("orderId", s.getOrderId());
@@ -99,16 +120,18 @@ public class SellerDashboardController {
         }
 
         // Low stock products (<= 5)
-    var lowStock = productsRepository.findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerId, "public", 5);
-    long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "public");
+        var lowStock = productsRepository
+                .findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerIdUsed, "public", 5);
+        long activeProducts = productsRepository.countBySellerIdAndStatus(sellerIdUsed, "public");
 
         // Seller ranking (revenue-based)
-        Integer myRank = productsRepository.sellerRevenueRank(sellerId);
+        Integer myRank = productsRepository.sellerRevenueRank(sellerIdUsed);
         Long totalSellers = Optional.ofNullable(productsRepository.totalSellers()).orElse(0L);
-        double percentile = (myRank != null && totalSellers > 0) ? (100.0 * (totalSellers - myRank + 1) / totalSellers) : 0.0;
-        List<Map<String,Object>> topSellers = new ArrayList<>();
+        double percentile = (myRank != null && totalSellers > 0) ? (100.0 * (totalSellers - myRank + 1) / totalSellers)
+                : 0.0;
+        List<Map<String, Object>> topSellers = new ArrayList<>();
         for (Object[] row : productsRepository.topSellers()) {
-            Map<String,Object> m = new HashMap<>();
+            Map<String, Object> m = new HashMap<>();
             m.put("sellerId", row[0]);
             m.put("username", row[1]);
             m.put("revenue", row[2]);
@@ -116,7 +139,7 @@ public class SellerDashboardController {
             topSellers.add(m);
         }
 
-    model.addAttribute("sellerId", sellerId);
+        model.addAttribute("sellerId", sellerIdUsed);
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("totalUnits", totalUnits);
         model.addAttribute("totalOrders", totalOrders);
@@ -124,18 +147,19 @@ public class SellerDashboardController {
         model.addAttribute("todayRevenue", todayRev);
         model.addAttribute("monthRevenue", monthRev);
         model.addAttribute("dailyRevenueLabels", String.join(",", series.keySet()));
-        model.addAttribute("dailyRevenueData", String.join(",", series.values().stream().map(BigDecimal::toPlainString).toList()));
-    model.addAttribute("topProducts", topProducts);
+        model.addAttribute("dailyRevenueData",
+                String.join(",", series.values().stream().map(BigDecimal::toPlainString).toList()));
+        model.addAttribute("topProducts", topProducts);
         model.addAttribute("recentOrders", recentOrders);
         model.addAttribute("lowStock", lowStock);
         model.addAttribute("activeProducts", activeProducts);
-    model.addAttribute("myRank", myRank == null ? 0 : myRank);
-    model.addAttribute("totalSellers", totalSellers);
-    model.addAttribute("rankPercentile", percentile);
-    model.addAttribute("topSellers", topSellers);
+        model.addAttribute("myRank", myRank == null ? 0 : myRank);
+        model.addAttribute("totalSellers", totalSellers);
+        model.addAttribute("rankPercentile", percentile);
+        model.addAttribute("topSellers", topSellers);
 
         // Load user profile (assume sellerId == userId for now)
-        Users user = usersRepository.findById(sellerId).orElse(null);
+        Users user = usersRepository.findById(sellerIdUsed).orElse(null);
         model.addAttribute("user", user);
         if (user != null) {
             model.addAttribute("userType", user.getUserType());

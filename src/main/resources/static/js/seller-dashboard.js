@@ -366,10 +366,12 @@
       const sellerIdEl = document.getElementById('sellerId');
       const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
 
+      // keep a snapshot of original values to detect changes before save
+      let original = null;
       async function loadProduct(id) {
         const res = await fetch(`/api/products/${id}`);
         if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; }
-        const p = await res.json();
+  const p = await res.json();
         document.getElementById('pm_productId').value = p.productId ?? '';
         document.getElementById('pm_name').value = p.name ?? '';
         document.getElementById('pm_price').value = p.price ?? '';
@@ -377,9 +379,23 @@
         document.getElementById('pm_quantity').value = p.quantity ?? 0;
         document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
         document.getElementById('pm_description').value = p.description ?? '';
-        const st = document.getElementById('pm_status');
-        st.textContent = p.isActive ? 'Public' : 'Hidden';
-        st.className = `badge ${p.isActive ? 'pill good' : ''}`;
+  const st = document.getElementById('pm_status');
+  const stat = (p.status || '').toLowerCase();
+  let label = 'Hidden', cls = 'badge';
+  if (stat === 'public') { label = 'Public'; cls = 'badge pill good'; }
+  else if (stat === 'pending') { label = 'Pending'; cls = 'badge'; }
+  else if (stat === 'cancelled') { label = 'Cancelled'; cls = 'badge'; }
+  else { label = 'Hidden'; cls = 'badge'; }
+  st.textContent = label; st.className = cls;
+        // snapshot after load
+        original = {
+          name: p.name ?? '',
+          price: p.price ?? '',
+          salePrice: p.salePrice ?? '',
+          quantity: p.quantity ?? 0,
+          downloadUrl: p.downloadUrl ?? '',
+          description: p.description ?? ''
+        };
       }
 
       // Row clicks open modal
@@ -413,33 +429,46 @@
           downloadUrl: document.getElementById('pm_downloadUrl').value || null,
           description: document.getElementById('pm_description').value || null
         };
+        // Detect changes vs original snapshot
+        const changed = !original ||
+          original.name !== (payload.name || '') ||
+          String(original.price ?? '') !== String(payload.price ?? '') ||
+          String(original.salePrice ?? '') !== String(payload.salePrice ?? '') ||
+          Number(original.quantity ?? 0) !== Number(payload.quantity ?? 0) ||
+          (original.downloadUrl || '') !== (payload.downloadUrl || '') ||
+          (original.description || '') !== (payload.description || '');
+        if (id && original && !changed) {
+          showToast('Không có thay đổi nào để lưu', 'info');
+          return;
+        }
         const res = await fetch(id ? `/api/products/${id}` : '/api/products', {
           method: id ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        if (res.ok) { closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
+        if (res.status === 304) { showToast('Không có thay đổi nào để lưu', 'info'); return; }
+        if (res.ok) { closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm (đã chuyển sang ẩn)' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
         else { showToast('Lưu sản phẩm thất bại', 'error'); }
       });
 
-      // Publish/unpublish via admin approval
+      // Publish button logic per requirements
       document.getElementById('pm_publish')?.addEventListener('click', async () => {
         const id = document.getElementById('pm_productId').value;
         if (!id) return;
-        const isPublic = document.getElementById('pm_status').textContent === 'Public';
-        const res = await fetch(`/api/products/${id}/approval?publish=${!isPublic}`, {
-          method: 'POST',
-          headers: { 'X-User-Type': window.currentUserType || 'SELLER' }
-        });
-        if (res.ok) {
-          closeModal(productModal);
-          showToast(!isPublic ? 'Đã publish sản phẩm' : 'Đã chuyển sang ẩn', 'success');
-          setTimeout(() => location.reload(), 350);
-        } else if (res.status === 403) {
-          showToast('Bạn không có quyền thực hiện thao tác này (chỉ Admin).', 'error');
-        } else {
-          showToast('Thao tác duyệt/publish thất bại', 'error');
+        const stText = (document.getElementById('pm_status')?.textContent || '').trim();
+        const st = stText.toLowerCase();
+        if (st === 'public') {
+          showToast('Sản phẩm đã được duyệt', 'info');
+          return;
         }
+        if (st === 'pending') {
+          showToast('Sản phẩm đang chờ duyệt', 'info');
+          return;
+        }
+        // hidden -> request pending
+        const res = await fetch(`/api/products/${id}/pending`, { method: 'POST' });
+        if (res.ok) { closeModal(productModal); showToast('Đã gửi duyệt: trạng thái Pending', 'success'); setTimeout(() => location.reload(), 350); }
+        else { showToast('Không thể chuyển sang Pending', 'error'); }
       });
 
       // Delete product
@@ -467,7 +496,9 @@
       orderModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(orderModal)));
 
       async function loadOrder(id) {
-        const res = await fetch(`/api/orders/${id}`);
+        const sellerIdEl = document.getElementById('sellerId');
+        const sellerId = sellerIdEl ? sellerIdEl.textContent.trim() : '';
+  const res = await fetch(`/api/seller/orders/${id}` + (sellerId ? `?sellerId=${encodeURIComponent(sellerId)}` : ''));
         if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
         const data = await res.json();
         const o = data.order;
@@ -502,7 +533,7 @@
       const sellerIdEl = document.getElementById('sellerId');
       const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
       if (!sellerId) return; // require seller
-      const res = await fetch(`/api/products?sellerId=${sellerId}`);
+  const res = await fetch(`/api/products?sellerId=${sellerId}`);
       if (!res.ok) { showToast('Không tải được danh sách sản phẩm của bạn', 'error'); return; }
       const list = await res.json();
       const tbody = document.getElementById('tbMyProducts');
@@ -513,9 +544,13 @@
         const tr = document.createElement('tr');
         tr.className = 'clickable';
         tr.setAttribute('data-product-id', p.productId);
-        const status = p.isActive ? '<span class="pill good">Public</span>' : '<span class="badge">Hidden</span>';
+        const stat = (p.status || '').toLowerCase();
+        let statusHtml = '<span class="badge">Hidden</span>';
+        if (stat === 'public') statusHtml = '<span class="pill good">Public</span>';
+        else if (stat === 'pending') statusHtml = '<span class="badge">Pending</span>';
+        else if (stat === 'cancelled') statusHtml = '<span class="badge">Cancelled</span>';
         const price = (p.price ?? 0).toLocaleString('en-US');
-        tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${status}</td>`;
+        tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
         tbody.appendChild(tr);
       });
       if (counter) counter.textContent = list.length;
@@ -533,8 +568,13 @@
             document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
             document.getElementById('pm_description').value = p.description ?? '';
             const st = document.getElementById('pm_status');
-            st.textContent = p.isActive ? 'Public' : 'Hidden';
-            st.className = `badge ${p.isActive ? 'pill good' : ''}`;
+            const stat = (p.status || '').toLowerCase();
+            let label = 'Hidden', cls = 'badge';
+            if (stat === 'public') { label = 'Public'; cls = 'badge pill good'; }
+            else if (stat === 'pending') { label = 'Pending'; cls = 'badge'; }
+            else if (stat === 'cancelled') { label = 'Cancelled'; cls = 'badge'; }
+            else { label = 'Hidden'; cls = 'badge'; }
+            st.textContent = label; st.className = cls;
             openModal(productModal);
           })();
         });

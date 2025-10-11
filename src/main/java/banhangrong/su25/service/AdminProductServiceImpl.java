@@ -38,7 +38,12 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     public List<Products> findByStatus(String status) {
-        return adminProductsRepository.findByStatus(status);
+        // Prefer case-insensitive to match normalized status
+        List<Products> list = adminProductsRepository.findByStatusIgnoreCase(status);
+        if (list == null || list.isEmpty()) {
+            return adminProductsRepository.findByStatus(status);
+        }
+        return list;
     }
 
     @Override
@@ -48,7 +53,11 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     public Long countByStatus(String status) {
-        return adminProductsRepository.countByStatus(status);
+        Long c = adminProductsRepository.countByStatusIgnoreCase(status);
+        if (c == null || c == 0L) {
+            return adminProductsRepository.countByStatus(status);
+        }
+        return c;
     }
 
 }
