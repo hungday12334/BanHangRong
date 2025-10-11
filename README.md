@@ -2,7 +2,6 @@
 
 Dự án Web xây dựng bằng Spring Boot, Thymeleaf, MySQL.
 
-## Chức năng chính
 
 ## Chạy dự án
 
@@ -18,9 +17,10 @@ Dự án Web xây dựng bằng Spring Boot, Thymeleaf, MySQL.
 ## App đi kèm
 
 1. Clone ứng dụng tại profile của Smile hoặc theo link bên dưới
-🌐 [https://github.com/longmoon2k4/APP-SWP.git]
+
+  🌐[https://github.com/longmoon2k4/APP-SWP.git]
 
 2. Nên xem trước khi bắt tay vào code app
 
-[https://www.youtube.com/watch?v=G-lHnlc5UIs]
+<a href="https://www.youtube.com/c/smile" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/youtube.svg" alt="smile" height="15" width="25" /></a>[https://www.youtube.com/watch?v=G-lHnlc5UIs]
 
