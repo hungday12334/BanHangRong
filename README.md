@@ -5,11 +5,22 @@ Dự án Web xây dựng bằng Spring Boot, Thymeleaf, MySQL.
 ## Chức năng chính
 
 ## Chạy dự án
-1. Cài đặt MySQL, tạo database và import file `data_v2.sql`
-2. Cấu hình kết nối DB trong `application.properties` bằng username và mật khẩu của bạn
-3. Build và chạy:
-   ```
-   ./mvnw spring-boot:run
-   ```
-4. Truy cập: http://localhost:8080/
+
+1. Cách 1
+- Chạy theo local: Tạo Import database rồi chạy ứng dụng Spring-boot 
+
+2. Cách 2
+- Chạy theo hosting: 
+   + Tạo file .evn trong dự án với cấu hình trong Zalo
+   + Sửa pom.xml thêm configuration và profiles [simple]
+   + Chạy ứng dụng Spring-boot 
+
+## App đi kèm
+
+1. Clone ứng dụng tại profile của Smile hoặc theo link bên dưới
+🌐 [https://github.com/longmoon2k4/APP-SWP.git]
+
+2. Nên xem trước khi bắt tay vào code app
+
+[https://www.youtube.com/watch?v=G-lHnlc5UIs]
 
