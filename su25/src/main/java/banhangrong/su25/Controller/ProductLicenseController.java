@@ -1,4 +1,4 @@
-package banhangrong.su25.Controller.seller;
+package banhangrong.su25.Controller;
 
 import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Repository.ProductsRepository;
