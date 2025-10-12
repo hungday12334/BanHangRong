@@ -100,8 +100,8 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     List<Object[]> topSellers();
 
     // Rank (1-based) of a seller by revenue across all sellers
-    @Query(value = "SELECT r.rank FROM (\n" +
-            "  SELECT p.seller_id, DENSE_RANK() OVER (ORDER BY COALESCE(SUM(oi.price_at_time * oi.quantity),0) DESC) AS rank\n" +
+    @Query(value = "SELECT r.seller_rank FROM (\n" +
+            "  SELECT p.seller_id, DENSE_RANK() OVER (ORDER BY COALESCE(SUM(oi.price_at_time * oi.quantity),0) DESC) AS seller_rank\n" +
             "  FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
             "  GROUP BY p.seller_id\n" +
             ") r WHERE r.seller_id = :sellerId", nativeQuery = true)

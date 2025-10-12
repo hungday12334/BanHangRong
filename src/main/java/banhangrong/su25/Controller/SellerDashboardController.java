@@ -121,8 +121,8 @@ public class SellerDashboardController {
 
         // Low stock products (<= 5)
         var lowStock = productsRepository
-                .findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerIdUsed, "public", 5);
-        long activeProducts = productsRepository.countBySellerIdAndStatus(sellerIdUsed, "public");
+                .findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerIdUsed, "Public", 5);
+        long activeProducts = productsRepository.countBySellerIdAndStatus(sellerIdUsed, "Public");
 
         // Seller ranking (revenue-based)
         Integer myRank = productsRepository.sellerRevenueRank(sellerIdUsed);
