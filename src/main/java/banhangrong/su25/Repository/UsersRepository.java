@@ -3,6 +3,9 @@ package banhangrong.su25.Repository;
 import banhangrong.su25.Entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -13,4 +16,8 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     Long countByUserType(String userType);
+
+    @Modifying
+    @Query("UPDATE Users u SET u.email = :email, u.isEmailVerified = false WHERE u.userId = :userId")
+    int updateEmailAndUnverify(@Param("userId") Long userId, @Param("email") String email);
 }

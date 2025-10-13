@@ -99,10 +99,11 @@ public class CustomerProfileController {
             if (existing != null && !existing.getUserId().equals(currentUser.getUserId())) {
                 return "redirect:/customer/profile/" + username + "?error=email_in_use";
             }
-            // Persist the new email immediately so UI shows it even before verification
+            // Persist the new email immediately using update query to avoid stale entity issues
+            usersRepository.updateEmailAndUnverify(currentUser.getUserId(), newEmail);
+            // Refresh in-memory user for the same request
             currentUser.setEmail(newEmail);
             currentUser.setIsEmailVerified(false);
-            usersRepository.saveAndFlush(currentUser);
             // invalidate previous token
             emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(currentUser.getUserId())
                     .ifPresent(emailVerificationTokenRepository::delete);
