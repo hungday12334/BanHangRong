@@ -96,6 +96,32 @@
       <div id="pgSellerKeys" class="pager" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
     </div>
   </section>
+  <!-- Generate Keys Panel -->
+  <section id="generateKeysPanel" class="card section-card" hidden data-panel="gen-keys">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:160px;">Generate license keys</div>
+    </div>
+    <div class="body">
+      <form id="genKeyForm" class="form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:end;">
+        <div>
+          <label class="label" for="gk_product">Product (PUBLIC only)</label>
+          <select id="gk_product" class="input"><option value="">Select product</option></select>
+        </div>
+        <div>
+          <label class="label" for="gk_expire">Expire date</label>
+          <input id="gk_expire" type="date" class="input" />
+        </div>
+        <div>
+          <label class="label" for="gk_qty">Quantity</label>
+          <input id="gk_qty" type="number" min="1" step="1" value="1" class="input" />
+        </div>
+        <div>
+          <button id="gk_submit" type="submit" class="btn primary">Generate</button>
+        </div>
+      </form>
+      <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved immediately.</div>
+    </div>
+  </section>
   <section id="productsPanel" class="card section-card" hidden data-panel="products">
     <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
   <div style="font-weight:700;flex:1;min-width:160px;">Products</div>

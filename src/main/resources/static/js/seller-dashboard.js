@@ -871,6 +871,7 @@
       '#orders': 'ordersPanel',
       '#keys': 'keysPanel',
       '#products': 'productsPanel',
+      '#gen-keys': 'generateKeysPanel',
       '#profile-settings': 'profileSettingsPanel'
     };
     function showPanelByHash(hash) {
@@ -898,6 +899,8 @@
           loadSellerOrders(true);
         } else if (hash === '#keys' && typeof loadSellerKeys === 'function') {
           loadSellerKeys(true);
+        } else if (hash === '#gen-keys' && typeof initGenerateKeys === 'function') {
+          initGenerateKeys();
         } else if (hash === '#products' && typeof loadProductsPanel === 'function') {
           loadProductsPanel(true);
         }
@@ -1314,5 +1317,54 @@
     document.getElementById('prd_status')?.addEventListener('change', () => loadProductsPanel(true));
     if (window.location.hash === '#products') setTimeout(() => loadProductsPanel(true), 120);
     window.addEventListener('hashchange', () => { if (window.location.hash === '#products') loadProductsPanel(false); });
+
+    // ================= Generate Keys Panel =================
+    function onlyPublicProducts(list) {
+      return Array.isArray(list) ? list.filter(p => (p.status||'').toLowerCase()==='public') : [];
+    }
+    async function populatePublicProductsForGen() {
+      const sel = document.getElementById('gk_product'); if (!sel) return;
+      if (sel.getAttribute('data-loaded')==='1') return;
+      try {
+        const sellerIdEl = document.getElementById('sellerId');
+        const userIdEl = document.getElementById('userId');
+        const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+        if (!sellerId) return;
+        const res = await fetch(`/api/products?sellerId=${sellerId}`);
+        if (!res.ok) return;
+        const list = await res.json();
+        onlyPublicProducts(list).forEach(p => { const o=document.createElement('option'); o.value=p.productId; o.textContent=`#${p.productId} • ${p.name}`; o.dataset.qty = p.quantity ?? 0; sel.appendChild(o); });
+        sel.setAttribute('data-loaded','1');
+      } catch(_){}
+    }
+    async function initGenerateKeys() {
+      await populatePublicProductsForGen();
+    }
+
+    document.getElementById('genKeyForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prodSel = document.getElementById('gk_product');
+      const pid = prodSel?.value ? Number(prodSel.value) : null;
+      const exp = document.getElementById('gk_expire')?.value || '';
+      let qty = document.getElementById('gk_qty')?.value ? parseInt(document.getElementById('gk_qty').value,10) : 0;
+      if (!pid) { showToast('Please select a product (PUBLIC)', 'error'); return; }
+      if (!qty || qty <= 0) { showToast('Quantity must be > 0', 'error'); return; }
+      // Server will enforce capacity; we optionally clamp client-side using product.qty meta if available
+      const opt = prodSel.options[prodSel.selectedIndex];
+      const declaredQty = opt?.dataset?.qty ? parseInt(opt.dataset.qty,10) : null;
+      if (declaredQty != null && qty > declaredQty) qty = declaredQty;
+      try {
+        const res = await fetch('/api/seller/' + (document.getElementById('userId')?.textContent?.trim()||document.getElementById('sellerId')?.textContent?.trim()) + '/licenses/generate', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ productId: pid, expireDate: exp, quantity: qty })
+        });
+        if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
+        const data = await res.json();
+        showToast(`Generated ${data.generated} keys (remaining capacity ${data.remaining})`, 'success');
+      } catch (e) { showToast('Failed to generate keys', 'error'); }
+    });
+
+    if (window.location.hash === '#gen-keys') setTimeout(() => initGenerateKeys(), 120);
+    window.addEventListener('hashchange', () => { if (window.location.hash === '#gen-keys') initGenerateKeys(); });
   });
 })();

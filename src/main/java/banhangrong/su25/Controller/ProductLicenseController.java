@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 public class ProductLicenseController {
@@ -103,5 +107,75 @@ public class ProductLicenseController {
         }
         licensesRepository.save(lic);
         return ResponseEntity.ok(lic);
+    }
+
+    /**
+     * Generate license keys for a PUBLIC product owned by the seller.
+     * Request body: { productId: number, expireDate: 'yyyyMMdd' (optional), quantity: number }
+     * Rules:
+     *  - Only for products with status 'public'.
+     *  - Total keys (generated + existing sold) cannot exceed product.quantity.
+     *  - Keys are saved immediately with order_item_id = null, is_active = true by default.
+     *  - Key format: PRD<productId>-<expire>-<random>
+     */
+    @PostMapping("/api/seller/{sellerId}/licenses/generate")
+    public ResponseEntity<?> generateKeys(@PathVariable Long sellerId, @RequestBody Map<String, Object> body) {
+        Object pidObj = body.get("productId");
+        Object qtyObj = body.get("quantity");
+        Object expObj = body.get("expireDate"); // yyyyMMdd or null
+        if (pidObj == null || qtyObj == null) return ResponseEntity.badRequest().body("productId and quantity are required");
+        long productId;
+        int requestQty;
+        try { productId = Long.parseLong(pidObj.toString()); } catch (Exception e) { return ResponseEntity.badRequest().body("invalid productId"); }
+        try { requestQty = Integer.parseInt(qtyObj.toString()); } catch (Exception e) { return ResponseEntity.badRequest().body("invalid quantity"); }
+        if (requestQty <= 0) return ResponseEntity.badRequest().body("quantity must be > 0");
+
+        var productOpt = productsRepository.findById(productId);
+        if (productOpt.isEmpty()) return ResponseEntity.badRequest().body("product not found");
+        var p = productOpt.get();
+        if (p.getSellerId() == null || !p.getSellerId().equals(sellerId)) return ResponseEntity.status(403).body("product does not belong to seller");
+        if (p.getStatus() == null || !"public".equalsIgnoreCase(p.getStatus().trim())) return ResponseEntity.badRequest().body("product must be PUBLIC");
+        int capacity = p.getQuantity() != null ? p.getQuantity() : 0;
+        // existing = sold licenses tied to orders + pre-generated stock for this product
+        long sold = licensesRepository.countByProductViaOrders(productId);
+        long pre = licensesRepository.countPreGeneratedForProduct(productId);
+        long remaining = Math.max(0, (long)capacity - sold - pre);
+        if (remaining <= 0) return ResponseEntity.badRequest().body("no capacity left to generate more keys");
+        if (requestQty > remaining) requestQty = (int) remaining;
+
+        String expStr = null;
+        if (expObj != null && !expObj.toString().isBlank()) {
+            try {
+                // accept yyyy-MM-dd or yyyyMMdd
+                String raw = expObj.toString().trim();
+                LocalDate d = raw.contains("-") ? LocalDate.parse(raw) : LocalDate.parse(raw, DateTimeFormatter.ofPattern("yyyyMMdd"));
+                expStr = d.format(DateTimeFormatter.BASIC_ISO_DATE); // yyyyMMdd
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("invalid expireDate");
+            }
+        } else {
+            expStr = "N/A";
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        for (int i = 0; i < requestQty; i++) {
+            String random = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12).toUpperCase();
+            String key = "PRD" + productId + '-' + expStr + '-' + random;
+            ProductLicenses lic = new ProductLicenses();
+            lic.setOrderItemId(null); // pre-generated stock
+            lic.setUserId(null);
+            lic.setLicenseKey(key);
+            lic.setIsActive(true);
+            lic.setActivationDate(null);
+            lic.setLastUsedDate(null);
+            lic.setDeviceIdentifier(null);
+            lic.setCreatedAt(now);
+            lic.setUpdatedAt(now);
+            licensesRepository.save(lic);
+        }
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("generated", requestQty);
+        resp.put("remaining", Math.max(0, remaining - requestQty));
+        return ResponseEntity.ok(resp);
     }
 }
