@@ -97,7 +97,8 @@ public class CustomerProfileController {
             // Validate duplicate email (belongs to another user)
             var existing = usersRepository.findByEmail(newEmail).orElse(null);
             if (existing != null && !existing.getUserId().equals(currentUser.getUserId())) {
-                return "redirect:/customer/profile/" + username + "?error=email_in_use";
+                // stay on edit page with error
+                return "customer/profile-edit?error=email_in_use";
             }
             // Persist the new email immediately using update query to avoid stale entity issues
             usersRepository.updateEmailAndUnverify(currentUser.getUserId(), newEmail);
@@ -133,8 +134,8 @@ public class CustomerProfileController {
                 currentUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
             } catch (Exception ignored) {}
         }
-        try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) { return "redirect:/customer/profile/" + username + "?error=save_failed"; }
-        return "redirect:/customer/profile/" + username + "?updated=1";
+        try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) { return "customer/profile-edit?error=save_failed"; }
+        return "customer/profile-edit?updated=1";
     }
 
     @GetMapping("/customer/verify-email")
