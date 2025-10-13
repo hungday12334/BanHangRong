@@ -1104,14 +1104,25 @@
       keysTbody.innerHTML='';
       data.content.forEach(l => {
         const tr = document.createElement('tr');
-        const activeBadge = l.isActive ? '<span class="pill good">ON</span>' : '<span class="badge">OFF</span>';
+        const activeBadge = l.isActive
+          ? '<button type="button" class="pill good" data-toggle-lic="'+l.licenseId+'" title="Bấm để tắt">ON</button>'
+          : '<button type="button" class="badge" data-toggle-lic="'+l.licenseId+'" title="Bấm để bật">OFF</button>';
         const actDate = l.activationDate ? l.activationDate.replace('T',' ') : '';
-        tr.innerHTML = `<td>${l.licenseId}</td><td style="font-family:monospace;">${l.licenseKey}</td><td>${l.productName||('#'+l.productId)}</td><td>${l.orderId||''}</td><td>${activeBadge}</td><td>${actDate}</td><td>${l.deviceIdentifier||''}</td><td><button class="btn xs" data-toggle-lic="${l.licenseId}">${l.isActive?'Tắt':'Bật'}</button></td>`;
+        const deviceText = (l.deviceIdentifier && l.deviceIdentifier.trim().length)
+          ? l.deviceIdentifier
+          : 'chưa sử dụng';
+        tr.innerHTML = `<td>${l.licenseId}</td>
+                        <td style="font-family:monospace;">${l.licenseKey}</td>
+                        <td>${l.productName||('#'+l.productId)}</td>
+                        <td>${l.orderId||''}</td>
+                        <td>${activeBadge}</td>
+                        <td>${actDate}</td>
+                        <td>${deviceText}</td>`;
         keysTbody.appendChild(tr);
       });
         if (data.content.length === 0) {
           const tr = document.createElement('tr');
-          const colSpan = 8;
+          const colSpan = 7;
           tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">Không có key nào cho seller hiện tại hoặc sellerId chưa đúng.</td>`;
           keysTbody.appendChild(tr);
         }
@@ -1136,17 +1147,24 @@
     });
     document.getElementById('key_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadSellerKeys(true); } });
 
-    // Toggle active
+    // Toggle active by clicking the ON/OFF badge
     keysTbody?.addEventListener('click', async (e) => {
-      const btn = e.target.closest('button[data-toggle-lic]'); if (!btn) return;
+      const btn = e.target.closest('[data-toggle-lic]'); if (!btn) return;
       const id = btn.getAttribute('data-toggle-lic');
-      // Derive target state by reading cell
-      const row = btn.closest('tr');
-      const isActiveNow = row && row.querySelector('td:nth-child(5) .pill');
-      const next = !(!!isActiveNow);
-  const res = await fetch(`/api/seller/${sellerIdVal}/licenses/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ isActive: next }) });
-      if (res.ok) { showToast(next? 'Đã bật key':'Đã tắt key','success'); loadSellerKeys(false); }
-      else showToast('Cập nhật key thất bại','error');
+      // Determine current state by class name
+      const isOn = btn.classList.contains('pill') && btn.classList.contains('good');
+      const next = !isOn;
+      const res = await fetch(`/api/seller/${sellerIdVal}/licenses/${id}`, {
+        method: 'PATCH',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ isActive: next })
+      });
+      if (res.ok) {
+        showToast(next? 'Đã bật key':'Đã tắt key','success');
+        loadSellerKeys(false);
+      } else {
+        showToast('Cập nhật key thất bại','error');
+      }
     });
 
     // Populate product filter select (reuse my products API)
