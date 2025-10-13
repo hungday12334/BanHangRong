@@ -8,8 +8,24 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductsRepository extends JpaRepository<Products, Long> {
+        // Tìm sản phẩm theo status (phân trang)
+        Page<Products> findByStatus(String status, Pageable pageable);
+    // Tìm sản phẩm theo tên hoặc mô tả (case-insensitive) và status (phân trang)
+    @Query(value = "SELECT p FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)",
+            countQuery = "SELECT COUNT(p) FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)")
+    Page<Products> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndStatus(@Param("name") String name, @Param("desc") String desc, @Param("status") String status, Pageable pageable);
+    // Tìm sản phẩm theo categoryId và status (phân trang)
+    @Query(value = "SELECT p FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)",
+            countQuery = "SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    Page<Products> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status, Pageable pageable);
+    // Tìm sản phẩm theo categoryId, status và từ khóa tìm kiếm (phân trang)
+    @Query(value = "SELECT p FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)",
+            countQuery = "SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId, @Param("status") String status, @Param("search") String search, org.springframework.data.domain.Pageable pageable);
     List<Products> findBySellerId(Long sellerId);
 
         @Query("SELECT p FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status) AND p.quantity <= :threshold ORDER BY p.quantity ASC")
@@ -97,5 +113,9 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     // Total distinct sellers having at least one product
     @Query(value = "SELECT COUNT(DISTINCT seller_id) FROM products", nativeQuery = true)
-    Long totalSellers();
+        Long totalSellers();
+
+        // Đếm số sản phẩm theo categoryId và status
+        @Query("SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+        Long countByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status);
 }
