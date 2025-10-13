@@ -56,12 +56,17 @@
                     <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
                     <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
                 </div>
-                <form id="logoutForm" method="post" action="/logout" style="display:none;"></form>
+                <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                </form>
             </div>
             <div class="search">
                 <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
-                    <input type="search" name="search" placeholder="search" aria-label="Search" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                    <input type="search" name="search" placeholder="search" aria-label="Search" 
+                           th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
                     <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                    <a th:if="${search != null and !search.trim().isEmpty()}" 
+                       th:href="@{/customer/dashboard}" 
+                       style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                 </form>
             </div>
             <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
