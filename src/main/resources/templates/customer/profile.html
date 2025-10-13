@@ -30,6 +30,7 @@
         .avatar { width:140px; height:140px; border-radius:70px; object-fit:cover; border:1px solid var(--line); }
         .label { color:var(--muted); font-size:13px; }
         .value { font-weight:600; margin-bottom:12px; }
+        .notice { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:8px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; font-size:13px; }
     </style>
 </head>
 <body>
@@ -82,12 +83,15 @@
                 <div class="value" th:text="${profileUser.username}">username</div>
                 <div class="label">Email</div>
                 <div class="value" th:text="${profileUser.email}">email@example.com</div>
+                <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">Email chưa được xác thực</div>
                 <div class="label">Phone</div>
                 <div class="value" th:text="${profileUser.phoneNumber}">-</div>
                 <div class="label">Gender</div>
                 <div class="value" th:text="${profileUser.gender != null ? profileUser.gender : '-'}">-</div>
                 <div class="label">Birth date</div>
                 <div class="value" th:text="${profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
+                <div class="label">Balance</div>
+                <div class="value" th:text="${profileUser.balance != null ? #numbers.formatDecimal(profileUser.balance,0,'COMMA',0,'POINT') + '₫' : '0₫'}">0₫</div>
             </div>
             <div>
                 <a th:href="@{'/customer/profile/' + ${profileUser.username} + '/edit'}" class="btn" style="padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;">Edit</a>
