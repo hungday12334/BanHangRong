@@ -28,6 +28,10 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId, @Param("status") String status, @Param("search") String search, org.springframework.data.domain.Pageable pageable);
     List<Products> findBySellerId(Long sellerId);
 
+        // Find products by category regardless of status
+        @Query("SELECT p FROM Products p WHERE EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+        List<Products> findByCategoryIdAnyStatus(@Param("categoryId") Long categoryId);
+
         @Query("SELECT p FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status) AND p.quantity <= :threshold ORDER BY p.quantity ASC")
         List<Products> findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(@Param("sellerId") Long sellerId, @Param("status") String status, @Param("threshold") Integer threshold);
 

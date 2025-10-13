@@ -96,6 +96,43 @@
       <div id="pgSellerKeys" class="pager" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
     </div>
   </section>
+  <section id="productsPanel" class="card section-card" hidden data-panel="products">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:160px;">Quản lý sản phẩm</div>
+      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <input id="prd_search" type="text" placeholder="Tìm theo tên/mô tả" class="input" style="min-width:180px;" />
+        <select id="prd_category" class="input" style="min-width:160px;"><option value="">Tất cả danh mục</option></select>
+        <select id="prd_rating" class="input" title="Tối thiểu đánh giá">
+          <option value="">Đánh giá (tối thiểu)</option>
+          <option value="1">1+</option>
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+          <option value="4.5">4.5+</option>
+        </select>
+        <select id="prd_status" class="input" title="Trạng thái">
+          <option value="">Tất cả trạng thái</option>
+          <option value="public">Public</option>
+          <option value="pending">Pending</option>
+          <option value="hidden">Hidden</option>
+        </select>
+        <select id="prd_downloads" class="input" title="Lượt bán/tải tối thiểu">
+          <option value="">Lượt bán (tối thiểu)</option>
+          <option value="10">10+</option>
+          <option value="50">50+</option>
+          <option value="100">100+</option>
+          <option value="500">500+</option>
+          <option value="1000">1000+</option>
+        </select>
+        <button id="prd_btnFilter" type="button" class="btn">Lọc</button>
+        <button id="prd_btnReset" type="button" class="btn" title="Xóa bộ lọc"><i class="ti ti-restore"></i></button>
+      </div>
+    </div>
+    <div class="body" style="overflow:visible;">
+      <div id="prdGrid" class="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;align-items:stretch;"></div>
+      <div id="pgProducts" class="pager" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
+    </div>
+  </section>
   <section id="profileSettingsPanel" class="card section-card" hidden data-panel="profile-settings">
     <div class="header"><div style="font-weight:700">Cài đặt profile</div></div>
     <div class="body"><div class="footer-note">Bạn có thể sử dụng nút "Chỉnh sửa trang cá nhân" trong panel Trang cá nhân. Phần Cài đặt profile sẽ gom các tuỳ chọn nâng cao (2FA, bảo mật, v.v.).</div></div>

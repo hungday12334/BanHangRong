@@ -349,10 +349,22 @@
         overlay.innerHTML = '<div class="mini-spinner"></div><div>Đang tải...</div>';
         panelEl.appendChild(overlay);
       }
+      // Ensure overlay is visible and blocks interaction while loading
       overlay.hidden = false;
-      overlay.style.opacity = '1';
+      overlay.style.pointerEvents = 'auto';
+      overlay.style.transition = overlay.style.transition || 'opacity .28s ease';
+      // force reflow then set opacity to 1
+      void overlay.offsetWidth; overlay.style.opacity = '1';
       const MIN_PANEL = 500;
       const started = performance.now();
+
+      function cleanupOverlay() {
+        try {
+          // remove overlay from DOM to avoid any accidental blocking
+          if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
+        } catch (_) {}
+      }
+
       Promise.resolve().then(task).catch(err => {
         console.error(err);
         if (fallbackMsg) panelEl.querySelectorAll('tbody').forEach(tb => tb.innerHTML = `<tr><td colspan="10" class="empty-state">${fallbackMsg}</td></tr>`);
@@ -360,8 +372,16 @@
         const elapsed = performance.now() - started;
         const wait = Math.max(0, MIN_PANEL - elapsed);
         setTimeout(() => {
+          // fade out and then remove from DOM
           overlay.style.opacity = '0';
-          setTimeout(()=> { overlay.hidden = true; }, 320);
+          overlay.style.pointerEvents = 'none';
+          const onFinish = () => { try { cleanupOverlay(); } catch(_){} };
+          // If transition finishes, remove then; otherwise fallback timeout
+          const removeAfter = 360;
+          let fired = false;
+          const handler = () => { if (fired) return; fired = true; onFinish(); };
+          overlay.addEventListener('transitionend', handler, { once: true });
+          setTimeout(() => { handler(); }, removeAfter);
         }, wait);
       });
     }
@@ -850,6 +870,7 @@
       '#profile': 'profilePanel',
       '#orders': 'ordersPanel',
       '#keys': 'keysPanel',
+      '#products': 'productsPanel',
       '#profile-settings': 'profileSettingsPanel'
     };
     function showPanelByHash(hash) {
@@ -877,6 +898,8 @@
           loadSellerOrders(true);
         } else if (hash === '#keys' && typeof loadSellerKeys === 'function') {
           loadSellerKeys(true);
+        } else if (hash === '#products' && typeof loadProductsPanel === 'function') {
+          loadProductsPanel(true);
         }
       } catch (_) { /* ignore */ }
     }
@@ -1177,5 +1200,119 @@
 
     if (window.location.hash === '#keys') setTimeout(() => loadSellerKeys(true), 120);
     window.addEventListener('hashchange', () => { if (window.location.hash === '#keys') loadSellerKeys(false); });
+
+    // ================= Products Panel (list + filters in-place) =================
+  const productsGrid = document.getElementById('prdGrid');
+  const productsPager = document.getElementById('pgProducts');
+  const prdCategorySel = document.getElementById('prd_category');
+  let productsPageState = { page:0, size:18, totalPages:0 };
+
+    async function populateCategoriesOnce() {
+      if (!prdCategorySel || prdCategorySel.getAttribute('data-loaded') === '1') return;
+      try {
+        const res = await fetch('/api/categories');
+        if (!res.ok) return;
+        const cats = await res.json();
+        cats.forEach(c => { const o=document.createElement('option'); o.value=c.categoryId; o.textContent=c.name; prdCategorySel.appendChild(o); });
+        prdCategorySel.setAttribute('data-loaded','1');
+      } catch(_){}
+    }
+
+    async function loadProductsPanel(resetPage=false) {
+      if (!productsGrid) return;
+      if (resetPage) productsPageState.page = 0;
+      await populateCategoriesOnce();
+
+      // Compose params and a human-readable filter description
+      const params = new URLSearchParams();
+      params.set('page', productsPageState.page);
+      params.set('size', productsPageState.size);
+      const parts = [];
+      const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`từ khóa "${s}"`); }
+      const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt=prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`danh mục "${opt.text}"`); }
+  const rating = document.getElementById('prd_rating')?.value; if (rating) { params.set('minRating', rating); parts.push(`đánh giá ≥ ${rating}`); }
+  const dl = document.getElementById('prd_downloads')?.value; if (dl) { params.set('minDownloads', dl); parts.push(`đã bán ≥ ${dl}`); }
+      const statusEl = document.getElementById('prd_status');
+      const statusRaw = statusEl?.value;
+      if (statusRaw) {
+        const statusNorm = statusRaw.toString().trim().toLowerCase();
+        params.set('status', statusNorm);
+        // Show friendly label in toast (capitalize first letter)
+        const label = statusNorm.charAt(0).toUpperCase() + statusNorm.slice(1);
+        parts.push(`trạng thái "${label}"`);
+      }
+
+      // Show loading feedback (toast) and overlay on panel
+      try { if (typeof showToast === 'function') showToast('Đang tải sản phẩm' + (parts.length? ' theo ' + parts.join(', ') : ''), 'info', { duration: 1200 }); } catch(_){}
+      const panelEl = document.getElementById('productsPanel');
+      const task = async () => {
+        const res = await fetch('/api/products/search?' + params.toString());
+        if (!res.ok) { showToast('Không tải được sản phẩm', 'error'); return; }
+        const data = await res.json();
+        productsPageState.totalPages = data.totalPages || 1;
+        productsGrid.innerHTML = '';
+        (data.content || []).forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'product-card clickable';
+          card.setAttribute('data-product-id', p.productId);
+          const st = (p.status||'').toLowerCase();
+          let statusHtml = '<span class="badge">Pending</span>';
+          if (st === 'public') statusHtml = '<span class="pill good">Public</span>';
+          else if (st === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
+          const price = (p.price ?? 0).toLocaleString('en-US');
+          const rating = (p.averageRating != null) ? Number(p.averageRating).toFixed(1) : '-';
+          const totalSales = (p.totalSales != null) ? p.totalSales : 0;
+          const img = (p.imageUrl && p.imageUrl.trim().length) ? p.imageUrl : '/img/no-image.png';
+          card.innerHTML = `
+            <div class="thumb" style="width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:10px;background:#0e1430;display:flex;align-items:center;justify-content:center;">
+              <img src="${img}" alt="${p.name ?? ''}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+            <div class="meta" style="padding:8px 2px;display:flex;flex-direction:column;gap:6px;">
+              <div class="line" style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+                <div class="name" title="${p.name ?? ''}" style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
+                <div class="price" style="color:#7c9eff;font-weight:700;">$${price}</div>
+              </div>
+              <div class="sub" style="display:flex;gap:10px;font-size:12px;color:#a8b0d3;">
+                <span title="Đã bán">🛒 ${totalSales}</span>
+                <span title="Đánh giá">⭐ ${rating}</span>
+                <span>${statusHtml}</span>
+              </div>
+            </div>`;
+          card.addEventListener('click', () => { const id=p.productId; loadProduct(id).then(()=> openModal(productModal)); });
+          productsGrid.appendChild(card);
+        });
+        if (productsPager) {
+          productsPager.innerHTML=''; const total = productsPageState.totalPages;
+          if (total>1) {
+            const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ productsPageState.page=page; loadProductsPanel(false); }); return b; };
+            productsPager.appendChild(mk('«', Math.max(0, productsPageState.page-1), productsPageState.page===0,false));
+            for (let i=0;i<total;i++) productsPager.appendChild(mk(String(i+1), i, false, i===productsPageState.page));
+            productsPager.appendChild(mk('»', Math.min(total-1, productsPageState.page+1), productsPageState.page===total-1,false));
+          }
+        }
+        try { showToast(`Đã tải ${data.content ? data.content.length : 0} sản phẩm`, 'info', { duration: 1200 }); } catch(_){}
+      };
+      if (typeof withPanelLoading === 'function' && panelEl) {
+        withPanelLoading(panelEl, task, 'Không tải được sản phẩm');
+      } else {
+        // Fallback: no overlay
+        task();
+      }
+    }
+
+    document.getElementById('prd_btnFilter')?.addEventListener('click', () => loadProductsPanel(true));
+    document.getElementById('prd_btnReset')?.addEventListener('click', () => {
+      const s=document.getElementById('prd_search'); if (s) s.value='';
+      if (prdCategorySel) prdCategorySel.value='';
+      const r=document.getElementById('prd_rating'); if (r) r.value='';
+      const d=document.getElementById('prd_downloads'); if (d) d.value='';
+      const st=document.getElementById('prd_status'); if (st) st.value='';
+      loadProductsPanel(true);
+    });
+    document.getElementById('prd_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadProductsPanel(true);} });
+    // Auto apply when changing status
+    document.getElementById('prd_status')?.addEventListener('change', () => loadProductsPanel(true));
+    if (window.location.hash === '#products') setTimeout(() => loadProductsPanel(true), 120);
+    window.addEventListener('hashchange', () => { if (window.location.hash === '#products') loadProductsPanel(false); });
   });
 })();
