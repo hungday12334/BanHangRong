@@ -67,8 +67,8 @@
         <div class="topbar">
             <div class="brand">BanHangRong</div>
             <nav class="nav" aria-label="Main">
-                <a href="/">Home</a>
-                <a href="/categories" class="active">Category</a>
+                <a th:href="${user != null} ? '/customer/dashboard' : '/'">Home</a>
+                <a href="/categories">Category</a>
                 <a href="#">License Software</a>
                 <a href="#">Game Keys</a>
                 <a href="#">Voucher</a>
@@ -111,6 +111,9 @@
                             <input type="search" name="search" placeholder="search in this category" aria-label="Search" 
                                    th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
                             <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                            <a th:if="${search != null and !search.trim().isEmpty()}" 
+                               th:href="@{'/category/' + ${category.categoryId}}" 
+                               style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                         </form>
                     </div>
                     <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
