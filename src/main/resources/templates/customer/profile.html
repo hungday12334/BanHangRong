@@ -89,7 +89,12 @@
                 <div class="value" th:text="${profileUser.username}">username</div>
                 <div class="label">Email</div>
                 <div class="value" th:text="${profileUser.email}">email@example.com</div>
-                <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">Email chưa được xác thực</div>
+                <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">
+                    Email chưa được xác thực
+                    <form method="post" action="/customer/profile/verify-email" style="margin:0">
+                        <button type="submit" class="btn" style="padding:6px 10px;border:1px solid #fed7aa;background:#fff;border-radius:8px;margin-left:8px;">Verify now</button>
+                    </form>
+                </div>
                 <div class="label">Phone</div>
                 <div class="value" th:text="${profileUser.phoneNumber}">-</div>
                 <div class="label">Gender</div>

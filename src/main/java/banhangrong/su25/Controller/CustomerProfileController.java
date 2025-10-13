@@ -99,6 +99,7 @@ public class CustomerProfileController {
             if (existing != null && !existing.getUserId().equals(currentUser.getUserId())) {
                 return "redirect:/customer/profile/" + username + "?error=email_in_use";
             }
+            // Persist the new email immediately so UI shows it even before verification
             currentUser.setEmail(newEmail);
             currentUser.setIsEmailVerified(false);
             // invalidate previous token
@@ -143,10 +144,22 @@ public class CustomerProfileController {
         Users user = usersRepository.findById(evt.getUserId()).orElse(null);
         if (user == null) return "redirect:/verify-email-required";
         user.setIsEmailVerified(true);
-        usersRepository.save(user);
+        usersRepository.saveAndFlush(user);
         evt.setIsUsed(true);
         emailVerificationTokenRepository.save(evt);
         return "redirect:/customer/dashboard";
+    }
+
+    // Manual verify button (no email link) for customer profile page
+    @PostMapping("/customer/profile/verify-email")
+    public String verifyEmailFromProfile() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/login";
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        if (currentUser == null) return "redirect:/login";
+        currentUser.setIsEmailVerified(true);
+        usersRepository.saveAndFlush(currentUser);
+        return "redirect:/customer/profile/" + currentUser.getUsername() + "?verified=1";
     }
 }
 
