@@ -89,6 +89,7 @@
                 <div class="value" th:text="${profileUser.username}">username</div>
                 <div class="label">Email</div>
                 <div class="value" th:text="${profileUser.email}">email@example.com</div>
+                <div th:if="${param.error != null and param.error[0] == 'email_in_use'}" class="notice">Email đã tồn tại, vui lòng chọn email khác.</div>
                 <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">
                     Email chưa được xác thực
                     <form method="post" action="/customer/profile/verify-email" style="margin:0">

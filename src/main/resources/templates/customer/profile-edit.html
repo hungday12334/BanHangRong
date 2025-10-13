@@ -78,6 +78,7 @@
 
     <section class="card">
         <h2 style="margin-top:0;">Edit Profile</h2>
+        <div th:if="${param.error != null and param.error[0] == 'email_in_use'}" class="notice" style="margin-bottom:12px;">Email đã tồn tại, vui lòng chọn email khác.</div>
         <form th:action="@{'/customer/profile/' + ${user.username} + '/edit'}" method="post">
             <div class="form-grid">
                 <div class="form-group">
