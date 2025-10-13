@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${profileUser.username} + ' - Profile'">Profile</title>
+    <title>Edit Profile</title>
     <link rel="stylesheet" href="/css/styles.min.css">
     <style>
         :root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --line:#eaeef4; }
@@ -25,16 +25,23 @@
         .search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
         .cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
         .cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
-        .content { max-width:1000px; margin:18px auto; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; }
-        .row { display:flex; gap:24px; align-items:flex-start; }
-        .avatar { width:140px; height:140px; border-radius:70px; object-fit:cover; border:1px solid var(--line); }
-        .label { color:var(--muted); font-size:13px; }
-        .value { font-weight:600; margin-bottom:12px; }
+
+        .card { max-width:1000px; margin:18px auto; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; }
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        .form-group { display:flex; flex-direction:column; gap:6px; }
+        .form-group label { font-size:13px; color:var(--muted); }
+        .form-group input, .form-group select { height:40px; padding:0 10px; border:1px solid var(--line); border-radius:8px; }
+        .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+        .btn { padding:10px 16px; border-radius:10px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+        .btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
     </style>
+    <script>
+        function goBack(){ history.back(); }
+    </script>
 </head>
 <body>
 <div class="wrapper">
-        <div class="topbar" style="display:flex;align-items:center;gap:14px;">
+    <div class="topbar">
         <div class="brand">BanHangRong</div>
         <nav class="nav" aria-label="Main">
             <a href="/customer/dashboard">Home</a>
@@ -57,51 +64,55 @@
                     <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
                     <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
                 </div>
-                <form id="logoutForm" method="post" action="/logout" style="display:none;">
-                </form>
+                <form id="logoutForm" method="post" action="/logout" style="display:none;"></form>
             </div>
             <div class="search">
                 <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;flex-wrap:nowrap;align-items:center;">
-                    <input type="search" name="search" placeholder="search" aria-label="Search" 
-                           th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                    <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}">
                     <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-                    <a th:if="${search != null and !search.trim().isEmpty()}" 
-                       th:href="@{/customer/dashboard}" 
-                       style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                 </form>
             </div>
             <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
         </div>
     </div>
 
-    <section class="content">
-        <div class="row" style="justify-content:space-between;align-items:flex-start;">
-            <img class="avatar" th:src="${profileUser != null and profileUser.avatarUrl != null ? profileUser.avatarUrl : '/img/avatar_default.jpg'}" src="/img/avatar_default.jpg" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" alt="Avatar"/>
-            <div style="flex:1;max-width:520px;">
-                <div class="label">Username</div>
-                <div class="value" th:text="${profileUser.username}">username</div>
-                <div class="label">Email</div>
-                <div class="value" th:text="${profileUser.email}">email@example.com</div>
-                <div class="label">Phone</div>
-                <div class="value" th:text="${profileUser.phoneNumber}">-</div>
+    <section class="card">
+        <h2 style="margin-top:0;">Edit Profile</h2>
+        <form th:action="@{'/customer/profile/' + ${profileUser.username} + '/edit'}" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Avatar URL</label>
+                    <input type="text" name="avatarUrl" th:value="${profileUser.avatarUrl}">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" th:value="${profileUser.email}">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phoneNumber" th:value="${profileUser.phoneNumber}">
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select name="gender" th:value="${profileUser.gender}">
+                        <option value="">--</option>
+                        <option value="Male" th:selected="${profileUser.gender == 'Male'}">Male</option>
+                        <option value="Female" th:selected="${profileUser.gender == 'Female'}">Female</option>
+                        <option value="Other" th:selected="${profileUser.gender == 'Other'}">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Birth Date</label>
+                    <input type="date" name="birthDate" th:value="${profileUser.birthDate}">
+                </div>
             </div>
-            <div>
-                <a th:href="@{'/customer/profile/' + ${profileUser.username} + '/edit'}" class="btn" style="padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;">Edit</a>
+            <div class="actions">
+                <button type="button" class="btn" onclick="goBack()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
             </div>
-        </div>
+        </form>
     </section>
 </div>
-<script>
-(function(){
-    const btn = document.getElementById('userMenuBtn');
-    const menu = document.getElementById('userDropdown');
-    function close(){ if(menu) { menu.style.display='none'; btn && btn.setAttribute('aria-expanded','false'); } }
-    function toggle(){ if(!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block':'none'; btn && btn.setAttribute('aria-expanded', show?'true':'false'); }
-    if(btn){ btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); }); }
-    document.addEventListener('click', close);
-    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
-})();
-</script>
 </body>
 </html>
 
