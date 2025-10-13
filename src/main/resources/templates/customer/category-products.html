@@ -136,7 +136,7 @@
         </div>
 
         <div class="results-info" th:if="${search != null and !search.trim().isEmpty()}">
-            <span th:text="'Search results for \"' + ${search} + '\" in ' + ${category.name} + ' (' + ${totalElements} + ' products)'">Search results</span>
+            <span th:text="|Search results for \"${search}\" in ${category.name} (${totalElements} products)|">Search results</span>
         </div>
 
         <div class="section-title" th:text="${category.name}">Category Name</div>
