@@ -1,6 +1,5 @@
 package banhangrong.su25.WebSocket;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,14 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OrderWebSocketHandler extends TextWebSocketHandler {
     private static final Logger log = LoggerFactory.getLogger(OrderWebSocketHandler.class);
     private final Set<WebSocketSession> sessions = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         sessions.add(session);
         log.debug("WebSocket connected: {}", session.getId());
-        // Send a hello ping
-        sendJson(session, new Payload("welcome", "Hệ thống sẵn sàng", null));
+        // Send a hello ping (plain JSON text)
+        sendText(session, asJson(new Payload("welcome", "Hệ thống sẵn sàng", null)));
     }
 
     @Override
@@ -52,23 +50,43 @@ public class OrderWebSocketHandler extends TextWebSocketHandler {
     /** Broadcast a new order event to all sessions. */
     public void broadcastNewOrder(Long orderId, Double amount) {
         Payload p = new Payload("new-order", "Có đơn hàng mới!", new OrderData(orderId, amount));
-        broadcast(p);
+        broadcast(asJson(p));
     }
 
-    private void broadcast(Object payload) {
+    private void broadcast(String textPayload) {
         sessions.forEach(s -> {
             try {
-                sendJson(s, payload);
+                sendText(s, textPayload);
             } catch (IOException e) {
                 log.warn("Failed to send to session {}", s.getId(), e);
             }
         });
     }
 
-    private void sendJson(WebSocketSession session, Object payload) throws IOException {
+    private void sendText(WebSocketSession session, String text) throws IOException {
         if (!session.isOpen()) return;
-        String json = mapper.writeValueAsString(payload);
-        session.sendMessage(new TextMessage(json));
+        session.sendMessage(new TextMessage(text));
+    }
+
+    private String asJson(Payload payload) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('{')
+          .append("\"type\":\"").append(escape(payload.type())).append("\",")
+          .append("\"message\":\"").append(escape(payload.message())).append("\",");
+        if (payload.data() != null) {
+            sb.append("\"data\":{")
+              .append("\"orderId\":").append(payload.data().orderId()).append(',')
+              .append("\"totalAmount\":").append(payload.data().totalAmount())
+              .append('}');
+        } else {
+            sb.append("\"data\":null");
+        }
+        sb.append('}');
+        return sb.toString();
+    }
+
+    private String escape(String s) {
+        return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     // Simple DTOs

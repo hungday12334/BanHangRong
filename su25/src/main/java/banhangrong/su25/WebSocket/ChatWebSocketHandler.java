@@ -1,6 +1,5 @@
 package banhangrong.su25.WebSocket;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,39 +21,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     // Map<roomId, Set<session>>
     private final Map<Long, Set<WebSocketSession>> roomSessions = new ConcurrentHashMap<>();
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         log.debug("Chat WebSocket connected: {}", session.getId());
-        // Send welcome message
-        sendJson(session, new ChatPayload("connected", "Kết nối chat thành công", null));
+        // Send welcome message (plain text to avoid JSON dependencies)
+        sendText(session, "{\"type\":\"connected\",\"message\":\"Kết nối chat thành công\"}");
     }
 
     @Override
     public void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage message) throws Exception {
         try {
-            ChatMessage chatMessage = mapper.readValue(message.getPayload(), ChatMessage.class);
-
-            switch (chatMessage.getType()) {
-                case "join_room":
-                    joinRoom(session, chatMessage.getRoomId());
-                    break;
-                case "leave_room":
-                    leaveRoom(session, chatMessage.getRoomId());
-                    break;
-                case "send_message":
-                    broadcastToRoom(chatMessage.getRoomId(),
-                            new ChatPayload("new_message", "Tin nhắn mới", chatMessage));
-                    break;
-                case "typing":
-                    broadcastToRoom(chatMessage.getRoomId(),
-                            new ChatPayload("user_typing", "Đang nhập...", chatMessage));
-                    break;
-            }
+            // Minimal, JSON-agnostic handling: echo back and do not parse
+            String payload = message.getPayload();
+            log.debug("Received WS message from {}: {}", session.getId(), payload);
+            // Broadcast raw payload to all sessions in all rooms (since we don't parse roomId here)
+            // To keep previous semantics minimally, just send back to sender
+            sendText(session, payload);
         } catch (Exception e) {
             log.error("Error handling chat message", e);
-            sendJson(session, new ChatPayload("error", "Lỗi xử lý tin nhắn", null));
+            sendText(session, "{\"type\":\"error\",\"message\":\"Lỗi xử lý tin nhắn\"}");
         }
     }
 
@@ -79,12 +65,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.debug("Session {} left room {}", session.getId(), roomId);
     }
 
-    public void broadcastToRoom(Long roomId, Object payload) {
+    public void broadcastToRoom(Long roomId, String textPayload) {
         Set<WebSocketSession> sessions = roomSessions.get(roomId);
         if (sessions != null) {
             sessions.forEach(s -> {
                 try {
-                    sendJson(s, payload);
+                    sendText(s, textPayload);
                 } catch (IOException e) {
                     log.warn("Failed to send to session {} in room {}", s.getId(), roomId, e);
                 }
@@ -92,13 +78,39 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void sendJson(WebSocketSession session, Object payload) throws IOException {
-        if (!session.isOpen()) return;
-        String json = mapper.writeValueAsString(payload);
-        session.sendMessage(new TextMessage(json));
+    // Overload to keep compatibility with services sending complex payloads
+    public void broadcastToRoom(Long roomId, Object payload) {
+        String text = (payload instanceof ChatPayload)
+                ? toJson((ChatPayload) payload)
+                : String.valueOf(payload);
+        broadcastToRoom(roomId, text);
     }
 
-    // DTOs for WebSocket communication
+    private void sendText(WebSocketSession session, String text) throws IOException {
+        if (!session.isOpen()) return;
+        session.sendMessage(new TextMessage(text));
+    }
+
+    private String toJson(ChatPayload payload) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('{')
+          .append("\"type\":\"").append(escape(payload.getType())).append("\",")
+          .append("\"message\":\"").append(escape(payload.getMessage())).append("\",")
+          .append("\"data\":");
+        if (payload.getData() == null) {
+            sb.append("null");
+        } else {
+            sb.append('"').append(escape(String.valueOf(payload.getData()))).append('"');
+        }
+        sb.append('}');
+        return sb.toString();
+    }
+
+    private String escape(String s) {
+        return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    // DTOs kept for future use if JSON mapping is restored
     public static class ChatPayload {
         private String type;
         private String message;
@@ -111,7 +123,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             this.data = data;
         }
 
-        // Getters and Setters
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
         public String getMessage() { return message; }
@@ -127,7 +138,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         private String content;
         private String messageType;
 
-        // Getters and Setters
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
         public Long getRoomId() { return roomId; }

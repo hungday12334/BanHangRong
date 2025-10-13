@@ -243,7 +243,72 @@ CREATE TABLE IF NOT EXISTS chat_messages (
                                              CONSTRAINT fk_chat_messages_sender FOREIGN KEY (sender_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Quản lý voucher
+CREATE TABLE IF NOT EXISTS vouchers (
+                                        voucher_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                        seller_id BIGINT NOT NULL,
+                                        code VARCHAR(50) NOT NULL,
+                                        name VARCHAR(255) NOT NULL,
+                                        description TEXT,
+                                        discount_type ENUM('percentage', 'fixed') NOT NULL,
+                                        discount_value DECIMAL(15, 2) NOT NULL,
+                                        max_usage INT DEFAULT 1,
+                                        used_count INT DEFAULT 0,
+                                        min_order_value DECIMAL(15, 2) DEFAULT 0.00,
+                                        valid_from TIMESTAMP NOT NULL,
+                                        valid_to TIMESTAMP NOT NULL,
+                                        is_active BOOLEAN DEFAULT TRUE,
 
+    -- Các trường cho Voucher Thông Minh
+                                        is_auto_generated BOOLEAN DEFAULT FALSE,
+                                        auto_generation_type ENUM('abandoned_cart', 'loyal_customer', 'manual') DEFAULT 'manual',
+                                        auto_generation_rule JSON,
+
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+                                        CONSTRAINT fk_vouchers_seller FOREIGN KEY (seller_id) REFERENCES users(user_id),
+                                        CONSTRAINT ux_vouchers_code UNIQUE (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Voucher đã gửi cho user
+
+CREATE TABLE IF NOT EXISTS user_vouchers (
+                                             user_voucher_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                             user_id BIGINT NOT NULL,
+                                             voucher_id BIGINT NOT NULL,
+                                             is_used BOOLEAN DEFAULT FALSE,
+                                             used_at TIMESTAMP NULL,
+                                             sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- Context for tracking
+                                             sent_reason VARCHAR(100), -- 'abandoned_cart', 'loyal_customer', etc.
+                                             context_data JSON, -- {cart_id: 123, abandoned_hours: 24}
+
+                                             CONSTRAINT fk_user_vouchers_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+                                             CONSTRAINT fk_user_vouchers_voucher FOREIGN KEY (voucher_id) REFERENCES vouchers(voucher_id),
+                                             CONSTRAINT ux_user_voucher UNIQUE (user_id, voucher_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Lịch sử sử dụng voucher
+CREATE TABLE IF NOT EXISTS voucher_usage (
+                                             usage_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                             user_voucher_id BIGINT NOT NULL,
+                                             order_id BIGINT NOT NULL,
+                                             discount_amount DECIMAL(15, 2) NOT NULL,
+                                             used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                                             CONSTRAINT fk_voucher_usage_user_voucher FOREIGN KEY (user_voucher_id) REFERENCES user_vouchers(user_voucher_id),
+                                             CONSTRAINT fk_voucher_usage_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Thêm voucher_id vào bảng orders
+ALTER TABLE orders
+    ADD COLUMN voucher_id BIGINT NULL AFTER user_id,
+    ADD CONSTRAINT fk_orders_voucher FOREIGN KEY (voucher_id) REFERENCES vouchers(voucher_id);
+
+-- Thêm discount_amount vào bảng orders
+ALTER TABLE orders
+    ADD COLUMN discount_amount DECIMAL(15, 2) DEFAULT 0.00 AFTER total_amount;
 -- Thêm cột seller_response vào bảng product_reviews
 ALTER TABLE product_reviews
     ADD COLUMN seller_response TEXT NULL AFTER comment,
@@ -565,4 +630,31 @@ JOIN users u ON o.user_id=u.user_id
 JOIN products p ON oi.product_id=p.product_id
 WHERE p.name='Password Manager X';
 
+
+-- testing voucher
+-- Insert sample smart vouchers
+INSERT IGNORE INTO vouchers (seller_id, code, name, description, discount_type, discount_value, max_usage, valid_from, valid_to, is_auto_generated, auto_generation_type, auto_generation_rule)
+VALUES
+    ((SELECT user_id FROM users WHERE username='seller'), 'WELCOME10', 'Welcome Discount', 'Giảm giá chào mừng khách hàng mới', 'percentage', 10.00, 1000, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), TRUE, 'loyal_customer', '{"min_orders": 1, "min_total_spent": 0}'),
+
+    ((SELECT user_id FROM users WHERE username='seller'), 'ABANDON15', 'Cart Recovery', 'Giảm giá cho khách hàng bỏ giỏ hàng', 'percentage', 15.00, 500, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), TRUE, 'abandoned_cart', '{"abandoned_hours": 24, "max_retries": 1}'),
+
+    ((SELECT user_id FROM users WHERE username='seller'), 'LOYAL20', 'Loyal Customer', 'Ưu đãi khách hàng thân thiết', 'percentage', 20.00, 200, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY), TRUE, 'loyal_customer', '{"min_orders": 3, "min_total_spent": 100}');
+
+-- Sample user vouchers for testing
+INSERT IGNORE INTO user_vouchers (user_id, voucher_id, sent_reason, context_data)
+VALUES
+    ((SELECT user_id FROM users WHERE username='alice'),
+     (SELECT voucher_id FROM vouchers WHERE code = 'LOYAL20'),
+     'loyal_customer',
+     '{"total_orders": 4, "total_spent": 188.88}');
+
+
+-- Indexes for voucher performance
+CREATE INDEX idx_vouchers_seller_valid ON vouchers(seller_id, is_active, valid_from, valid_to);
+CREATE INDEX idx_vouchers_auto_type ON vouchers(auto_generation_type, is_active);
+CREATE INDEX idx_user_vouchers_user_used ON user_vouchers(user_id, is_used);
+CREATE INDEX idx_user_vouchers_sent_reason ON user_vouchers(sent_reason, sent_at);
+CREATE INDEX idx_shopping_cart_updated ON shopping_cart(updated_at);
+CREATE INDEX idx_orders_user_created ON orders(user_id, created_at);
 
