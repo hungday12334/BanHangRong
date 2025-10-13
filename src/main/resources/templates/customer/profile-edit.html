@@ -78,9 +78,9 @@
 
     <section class="card">
         <h2 style="margin-top:0;">Edit Profile</h2>
-        <div th:if="${emailError != null}" class="notice" style="margin-bottom:12px;" th:text="${emailError}">Email đã tồn tại, vui lòng chọn email khác.</div>
+        <div th:if="${emailError != null}" class="notice" style="margin-bottom:12px;color:#dc2626;background:#fef2f2;border-color:#fecaca;" th:text="${emailError}">Email đã tồn tại, vui lòng chọn email khác.</div>
         <div th:if="${saveError != null}" class="notice" style="margin-bottom:12px;" th:text="${saveError}">Không thể lưu thay đổi. Vui lòng thử lại.</div>
-        <div th:if="${updated}" class="notice" style="margin-bottom:12px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46;">Đã lưu thay đổi.</div>
+        <div th:if="${updated}" class="notice" style=" margin-bottom:12px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46;">Đã lưu thay đổi.</div>
         <form th:action="@{'/customer/profile/' + ${user.username} + '/edit'}" method="post">
             <div class="form-grid">
                 <div class="form-group">

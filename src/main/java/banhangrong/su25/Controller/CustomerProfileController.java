@@ -146,11 +146,7 @@ public class CustomerProfileController {
             model.addAttribute("saveError", "Không thể lưu thay đổi. Vui lòng thử lại.");
             return "customer/profile-edit";
         }
-        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-        model.addAttribute("user", currentUser);
-        model.addAttribute("profileUser", currentUser);
-        model.addAttribute("updated", true);
-        return "customer/profile-edit";
+        return "redirect:/customer/profile/" + currentUser.getUsername() + "?updated=1";
     }
 
     @GetMapping("/customer/verify-email")
