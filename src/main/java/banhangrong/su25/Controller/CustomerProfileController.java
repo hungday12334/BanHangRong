@@ -80,7 +80,7 @@ public class CustomerProfileController {
                                     @RequestParam(name = "email", required = false) String email,
                                     @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
                                     @RequestParam(name = "gender", required = false) String gender,
-                                    @RequestParam(name = "birthDate", required = false) java.time.LocalDate birthDate) {
+                                    @RequestParam(name = "birthDate", required = false) String birthDateStr) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Users currentUser = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -113,7 +113,11 @@ public class CustomerProfileController {
         }
         if (phoneNumber != null) currentUser.setPhoneNumber(phoneNumber.trim());
         if (gender != null) currentUser.setGender(gender.trim());
-        if (birthDate != null) currentUser.setBirthDate(birthDate);
+        if (birthDateStr != null && !birthDateStr.trim().isEmpty()) {
+            try {
+                currentUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
+            } catch (Exception ignored) {}
+        }
         usersRepository.save(currentUser);
         return "redirect:/customer/profile/" + username + "?updated=1";
     }
