@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class CustomerProfileController {
+    private static final int VERIFY_CODE_COOLDOWN_SECONDS = 60;
 
     private final UsersRepository usersRepository;
     private final ShoppingCartRepository shoppingCartRepository;
@@ -115,7 +116,7 @@ public class CustomerProfileController {
                     .ifPresent(emailVerificationTokenRepository::delete);
             // create new verify token
             try {
-                String token = java.util.UUID.randomUUID().toString();
+                String token = String.format("%06d", new java.util.Random().nextInt(1_000_000));
                 EmailVerificationToken evt = new EmailVerificationToken();
                 evt.setUserId(currentUser.getUserId());
                 evt.setToken(token);
@@ -123,10 +124,9 @@ public class CustomerProfileController {
                 evt.setIsUsed(false);
                 evt.setCreatedAt(java.time.LocalDateTime.now());
                 emailVerificationTokenRepository.save(evt);
-                // send email
-                String link = "http://localhost:8080/customer/verify-email?token=" + token;
+                // send email with code
                 try {
-                    emailService.sendEmail(new Email(currentUser.getEmail(), "Verify your email", "Click to verify: " + link));
+                    emailService.sendEmail(new Email(currentUser.getEmail(), "Your verification code", "Your code is: " + token + " (valid 24 hours)"));
                 } catch (Exception ignored) {}
             } catch (Exception ignored) {
                 // tolerate missing token table or other issues in dev
@@ -149,6 +149,64 @@ public class CustomerProfileController {
         return "redirect:/customer/profile/" + currentUser.getUsername() + "?updated=1";
     }
 
+    @GetMapping("/customer/verify-code")
+    public String showVerifyCodeForm(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/login";
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        if (currentUser == null) return "redirect:/login";
+        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+        long remaining = 0;
+        var existingOpt = emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(currentUser.getUserId());
+        if (existingOpt.isPresent()) {
+            var evt = existingOpt.get();
+            long seconds = java.time.Duration.between(evt.getCreatedAt(), java.time.LocalDateTime.now()).getSeconds();
+            if (seconds < VERIFY_CODE_COOLDOWN_SECONDS) remaining = VERIFY_CODE_COOLDOWN_SECONDS - seconds;
+        }
+        model.addAttribute("remainingSeconds", remaining);
+        model.addAttribute("user", currentUser);
+        return "customer/verify-email-code";
+    }
+
+    @PostMapping("/customer/verify-code")
+    public String submitVerifyCode(@RequestParam("code") String code, Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/login";
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        if (currentUser == null) return "redirect:/login";
+        var opt = emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(currentUser.getUserId());
+        if (opt.isEmpty()) {
+            model.addAttribute("error", "Không tìm thấy mã xác thực. Hãy đổi email hoặc yêu cầu gửi lại mã.");
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            model.addAttribute("remainingSeconds", 0);
+            model.addAttribute("user", currentUser);
+            return "customer/verify-email-code";
+        }
+        EmailVerificationToken evt = opt.get();
+        if (evt.getExpiresAt() != null && evt.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+            model.addAttribute("error", "Mã đã hết hạn. Vui lòng yêu cầu mã mới.");
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            model.addAttribute("remainingSeconds", 0);
+            model.addAttribute("user", currentUser);
+            return "customer/verify-email-code";
+        }
+        if (!evt.getToken().equals(code.trim())) {
+            model.addAttribute("error", "Mã không đúng. Vui lòng thử lại.");
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            long remaining = 0;
+            long seconds = java.time.Duration.between(evt.getCreatedAt(), java.time.LocalDateTime.now()).getSeconds();
+            if (seconds < VERIFY_CODE_COOLDOWN_SECONDS) remaining = VERIFY_CODE_COOLDOWN_SECONDS - seconds;
+            model.addAttribute("remainingSeconds", remaining);
+            model.addAttribute("user", currentUser);
+            return "customer/verify-email-code";
+        }
+        currentUser.setIsEmailVerified(true);
+        usersRepository.saveAndFlush(currentUser);
+        evt.setIsUsed(true);
+        emailVerificationTokenRepository.save(evt);
+        return "redirect:/customer/profile/" + currentUser.getUsername() + "?verified=1";
+    }
+
     @GetMapping("/customer/verify-email")
     public String verifyEmail(@RequestParam("token") String token) {
         EmailVerificationToken evt = emailVerificationTokenRepository.findByToken(token).orElse(null);
@@ -164,16 +222,40 @@ public class CustomerProfileController {
         return "redirect:/customer/dashboard";
     }
 
-    // Manual verify button (no email link) for customer profile page
+    // Request a new verification code from profile page
     @PostMapping("/customer/profile/verify-email")
-    public String verifyEmailFromProfile() {
+    public String sendVerifyCodeFromProfile() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) return "redirect:/login";
         Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (currentUser == null) return "redirect:/login";
-        currentUser.setIsEmailVerified(true);
-        usersRepository.saveAndFlush(currentUser);
-        return "redirect:/customer/profile/" + currentUser.getUsername() + "?verified=1";
+
+        // Cooldown: if existing unused token within cooldown, do not send new
+        var existingOpt = emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(currentUser.getUserId());
+        if (existingOpt.isPresent()) {
+            var evt = existingOpt.get();
+            long seconds = java.time.Duration.between(evt.getCreatedAt(), java.time.LocalDateTime.now()).getSeconds();
+            if (seconds < VERIFY_CODE_COOLDOWN_SECONDS) {
+                long remaining = VERIFY_CODE_COOLDOWN_SECONDS - seconds;
+                return "redirect:/customer/verify-code?sent=1&remaining=" + remaining;
+            }
+        }
+
+        // Create or overwrite 6-digit code
+        try {
+            String token = String.format("%06d", new java.util.Random().nextInt(1_000_000));
+            EmailVerificationToken evt = existingOpt.orElseGet(EmailVerificationToken::new);
+            evt.setUserId(currentUser.getUserId());
+            evt.setToken(token);
+            evt.setExpiresAt(java.time.LocalDateTime.now().plusDays(1));
+            evt.setIsUsed(false);
+            evt.setCreatedAt(java.time.LocalDateTime.now());
+            emailVerificationTokenRepository.save(evt);
+
+            try { emailService.sendEmail(new Email(currentUser.getEmail(), "Your verification code", "Your code is: " + token + " (valid 24 hours)")); } catch (Exception ignored) {}
+        } catch (Exception ignored) {}
+
+        return "redirect:/customer/verify-code?sent=1&remaining=" + VERIFY_CODE_COOLDOWN_SECONDS;
     }
 }
 
