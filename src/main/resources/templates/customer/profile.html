@@ -100,7 +100,7 @@
                 <div class="value" th:text="${profileUser.balance != null ? #numbers.formatDecimal(profileUser.balance,0,'COMMA',0,'POINT') + '₫' : '0₫'}">0₫</div>
             </div>
             <div>
-                <a th:href="@{'/customer/profile/' + ${profileUser.username} + '/edit'}" class="btn" style="padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;">Edit</a>
+                <a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn" style="padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;">Edit</a>
             </div>
         </div>
     </section>

@@ -130,7 +130,7 @@ public class CustomerProfileController {
                 currentUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
             } catch (Exception ignored) {}
         }
-        try { usersRepository.save(currentUser); } catch (Exception e) { return "redirect:/customer/profile/" + username + "?error=save_failed"; }
+        try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) { return "redirect:/customer/profile/" + username + "?error=save_failed"; }
         return "redirect:/customer/profile/" + username + "?updated=1";
     }
 

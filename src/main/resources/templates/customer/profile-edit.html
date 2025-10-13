@@ -78,7 +78,7 @@
 
     <section class="card">
         <h2 style="margin-top:0;">Edit Profile</h2>
-        <form th:action="@{'/customer/profile/' + ${profileUser.username} + '/edit'}" method="post">
+        <form th:action="@{'/customer/profile/' + ${user.username} + '/edit'}" method="post">
             <div class="form-grid">
                 <div class="form-group">
                     <label>Avatar URL</label>
