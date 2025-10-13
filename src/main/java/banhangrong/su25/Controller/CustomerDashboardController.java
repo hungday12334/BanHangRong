@@ -40,9 +40,10 @@ public class CustomerDashboardController {
                                     Model model) {
         // Kiểm tra email verified cho CUSTOMER
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Users currentUser = null;
         if (auth != null && auth.isAuthenticated()) {
             String username = auth.getName();
-            Users currentUser = usersRepository.findByUsername(username).orElse(null);
+            currentUser = usersRepository.findByUsername(username).orElse(null);
             if (currentUser != null && "CUSTOMER".equals(currentUser.getUserType())) {
                 if (!Boolean.TRUE.equals(currentUser.getIsEmailVerified())) {
                     return "redirect:/verify-email-required";
@@ -90,13 +91,12 @@ public class CustomerDashboardController {
         model.addAttribute("size", featuredPage.getSize());
         model.addAttribute("primaryImageByProduct", primaryImageByProduct);
         model.addAttribute("search", search);
-        // demo userId=2, show cart count in topbar
-        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(2L)); } catch (Exception ignored) {}
+        // Use logged-in user info for header
         try {
-            Users currentUser = usersRepository.findAll().stream()
-                    .sorted((a,b)-> Long.compare(a.getUserId(), b.getUserId()))
-                    .findFirst().orElse(null);
-            model.addAttribute("user", currentUser);
+            if (currentUser != null) {
+                model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+                model.addAttribute("user", currentUser);
+            }
         } catch (Exception ignored) {}
         return "customer/dashboard";
     }
