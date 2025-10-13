@@ -176,8 +176,50 @@
     render();
   }
 
+  // Logo fallback: nếu ảnh không load hoặc trong suốt hoàn toàn -> hiển thị chữ thay thế
+  function initLogoFallback() {
+    const fig = document.querySelector('.app-logo');
+    if (!fig) return;
+    const img = fig.querySelector('img');
+    if (!img) return;
+    let done = false;
+    function toFallback(reason) {
+      if (done) return; done = true;
+      fig.classList.add('fallback');
+      fig.innerHTML = '<span>BR</span>'; // viết tắt Bán Rong
+      if (reason) console.warn('Logo fallback:', reason);
+    }
+    img.addEventListener('error', () => toFallback('error'));
+    // Detect blank (all white) or fully transparent by sampling once it loads
+    img.addEventListener('load', () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const w = canvas.width = img.naturalWidth;
+        const h = canvas.height = img.naturalHeight;
+        if (!w || !h) { toFallback('zero-size'); return; }
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const data = ctx.getImageData(0,0,w,h).data;
+        let sum = 0, opaque = 0;
+        for (let i=0;i<data.length;i+=4){
+          const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+            if (a>12) opaque++;
+            sum += r+g+b;
+        }
+        const avg = sum / ( (data.length/4) * 3 );
+        if (opaque < (data.length/4)*0.05 || avg > 250) {
+          toFallback('blank/transparent');
+        }
+      } catch(e){ console.debug('Logo analysis skipped', e); }
+    }, { once:true });
+  }
+
   function applyTheme(theme) {
     const root = document.documentElement;
+    // Add temporary transition class for smoother theme swap
+    root.classList.add('theme-transition');
+    // Prepare radial wipe overlay (capture current background color before class change)
+    let oldBg = getComputedStyle(root).getPropertyValue('--bg').trim();
     root.classList.remove('theme-dark', 'theme-light');
     if (theme === 'dark') root.classList.add('theme-dark');
     else if (theme === 'light') root.classList.add('theme-light');
@@ -190,24 +232,145 @@
       btn.innerHTML = theme === 'light' ? '<i class="ti ti-moon"></i>' : '<i class="ti ti-sun"></i>';
       btn.setAttribute('aria-label', 'Chuyển giao diện');
       btn.title = 'Chuyển giao diện';
+      btn.dataset.mode = theme;
     }
+    // swap logo variant
+    const logoImg = document.querySelector('.app-logo-img');
+    if (logoImg) {
+      const lightSrc = logoImg.getAttribute('data-logo-light');
+      const darkSrc = logoImg.getAttribute('data-logo-dark');
+      if (theme === 'dark' && darkSrc) {
+        logoImg.src = darkSrc;
+      } else if (lightSrc) {
+        logoImg.src = lightSrc;
+      }
+    }
+    // loader nucleus logo swap
+    const loaderLogo = document.querySelector('#appLoader .loader-logo');
+    if (loaderLogo) {
+      const lightSrc = loaderLogo.getAttribute('data-logo-light');
+      const darkSrc = loaderLogo.getAttribute('data-logo-dark');
+      if (theme === 'dark' && darkSrc) loaderLogo.src = darkSrc; else if (lightSrc) loaderLogo.src = lightSrc;
+    }
+    // Create cross-fade overlay + subtle body pop
+    try {
+      const layer = document.createElement('div');
+      layer.className = 'theme-switch-layer';
+      document.body.appendChild(layer);
+      document.body.classList.add('theme-switching');
+      setTimeout(()=> { layer.remove(); document.body.classList.remove('theme-switching'); }, 620);
+    } catch(_) {}
+    // Remove transition class after a short delay
+    setTimeout(() => root.classList.remove('theme-transition'), 600);
   }
 
   onReady(function () {
-    // Ensure global loader is dismissed so the page becomes visible
-    document.body.classList.remove('loading');
-    document.body.classList.add('ready');
-    // Animate KPI counters
-    document.querySelectorAll('[data-count]').forEach(animateCount);
+    initLogoFallback();
+    const loadStarted = performance.now();
+    const MIN_LOAD = 1400; // ms (slightly longer to showcase enhanced animation)
+    const appLoader = document.getElementById('appLoader');
+    const progressBar = appLoader?.querySelector('[data-loader-progress]');
+    const loadTextEl = appLoader?.querySelector('[data-loader-text]');
+    const tipEl = appLoader?.querySelector('[data-loader-tip]');
+    const TIPS = [
+      'Mẹo: Bạn có thể chuyển nhanh panel bằng #hash trên URL.',
+      'Gợi ý: Nhấn biểu tượng mặt trời / mặt trăng để đổi giao diện.',
+      'Mẹo: Sử dụng bộ lọc để thu hẹp kết quả đơn hàng.',
+      'Thông tin: Các số liệu sẽ được cập nhật tự động định kỳ.',
+      'Mẹo: Kéo xuống dưới cùng để nạp thêm dữ liệu (nếu có).'
+    ];
+    let tipIndex = 0;
+    function cycleTip() {
+      if (!tipEl) return;
+      tipEl.textContent = TIPS[tipIndex % TIPS.length];
+      tipIndex++;
+    }
+    cycleTip();
+    const tipTimer = setInterval(cycleTip, 6500);
 
-    // Progress bar width already set by Thymeleaf inline style; ensure transition applies after a frame
+    let simulated = 0;
+    let done = false;
+    function tickProgress() {
+      if (done) return;
+      // accelerate slower after 70%
+      const inc = simulated < 70 ? (4 + Math.random()*6) : (1 + Math.random()*3);
+      simulated = Math.min(simulated + inc, 94); // stop at 94% until finish
+      if (progressBar) progressBar.style.width = simulated + '%';
+      if (loadTextEl) {
+        if (simulated < 30) loadTextEl.textContent = 'Đang khởi tạo...';
+        else if (simulated < 55) loadTextEl.textContent = 'Đang tải dữ liệu...';
+        else if (simulated < 80) loadTextEl.textContent = 'Xử lý thống kê...';
+        else loadTextEl.textContent = 'Chuẩn bị hiển thị...';
+      }
+      setTimeout(tickProgress, 260 + Math.random()*240);
+    }
+    tickProgress();
+
+    function finishGlobalLoad() {
+      const elapsed = performance.now() - loadStarted;
+      const remain = Math.max(0, MIN_LOAD - elapsed);
+      setTimeout(() => {
+        done = true;
+        if (progressBar) progressBar.style.width = '100%';
+        if (loadTextEl) loadTextEl.textContent = 'Hoàn tất!';
+        document.body.classList.remove('loading');
+        document.body.classList.add('ready');
+        if (appLoader) {
+          appLoader.style.opacity = '0';
+          setTimeout(()=> { clearInterval(tipTimer); appLoader.remove(); }, 600);
+        }
+        // Start animations AFTER loader removed
+        document.querySelectorAll('[data-count]').forEach(animateCount);
+        initChart();
+        document.querySelectorAll('.progress span').forEach(span => {
+          const w = span.getAttribute('data-target-width') || span.style.width || '0%';
+          span.style.width = '0%'; requestAnimationFrame(()=> span.style.width = w);
+        });
+      }, remain);
+    }
+
+    // Delay KPI + chart start until finishGlobalLoad
+    // Replace initial progress width capture
     document.querySelectorAll('.progress span').forEach(span => {
-      const w = span.style.width;
+      span.setAttribute('data-target-width', span.style.width || '0%');
       span.style.width = '0%';
-      requestAnimationFrame(() => { span.style.width = w || '0%'; });
     });
 
-    initChart();
+    // Expose for debugging
+    window.__finishGlobalLoad = finishGlobalLoad;
+
+    // Panel loading helper
+    function withPanelLoading(panelEl, task, fallbackMsg) {
+      if (!panelEl) return;
+      let overlay = panelEl.querySelector(':scope > .panel-loading-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'panel-loading-overlay';
+        overlay.innerHTML = '<div class="mini-spinner"></div><div>Đang tải...</div>';
+        panelEl.appendChild(overlay);
+      }
+      overlay.hidden = false;
+      overlay.style.opacity = '1';
+      const MIN_PANEL = 500;
+      const started = performance.now();
+      Promise.resolve().then(task).catch(err => {
+        console.error(err);
+        if (fallbackMsg) panelEl.querySelectorAll('tbody').forEach(tb => tb.innerHTML = `<tr><td colspan="10" class="empty-state">${fallbackMsg}</td></tr>`);
+      }).finally(() => {
+        const elapsed = performance.now() - started;
+        const wait = Math.max(0, MIN_PANEL - elapsed);
+        setTimeout(() => {
+          overlay.style.opacity = '0';
+          setTimeout(()=> { overlay.hidden = true; }, 320);
+        }, wait);
+      });
+    }
+
+    // Remove old hash handler (merged into showPanelByHash later)
+
+    // Defer finish until next frame to allow initial layout
+    requestAnimationFrame(finishGlobalLoad);
+    // (Animations moved to finishGlobalLoad)
 
     // Tables pagination (progressive enhancement)
     const lowStockTbody = document.getElementById('tbLowStock');
@@ -351,6 +514,61 @@
 
     // Product modal handlers
     const productModal = document.getElementById('productModal');
+
+    // === Product snapshot & helpers (đưa ra ngoài để dùng chung) ===
+    let __originalProduct = null; // snapshot sản phẩm đang edit
+    function normalizeProductObj(p) {
+      return {
+        name: (p.name ?? '').trim(),
+        price: p.price != null ? Number(p.price) : null,
+        salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+        quantity: p.quantity != null ? Number(p.quantity) : 0,
+        downloadUrl: (p.downloadUrl ?? '').trim(),
+        description: (p.description ?? '').trim(),
+        status: (typeof p.status === 'string' && p.status) ? p.status : 'pending'
+      };
+    }
+    function collectFormProduct() {
+      return normalizeProductObj({
+        name: document.getElementById('pm_name')?.value,
+        price: document.getElementById('pm_price')?.value ? Number(document.getElementById('pm_price').value) : null,
+        salePrice: document.getElementById('pm_salePrice')?.value ? Number(document.getElementById('pm_salePrice').value) : null,
+        quantity: document.getElementById('pm_quantity')?.value ? Number(document.getElementById('pm_quantity').value) : 0,
+        downloadUrl: document.getElementById('pm_downloadUrl')?.value || '',
+        description: document.getElementById('pm_description')?.value || '',
+  status: (document.getElementById('pm_status')?.dataset.status || '').trim()
+      });
+    }
+    function productChanged() {
+      if (!__originalProduct) return true; // new product coi như có thay đổi
+      const now = collectFormProduct();
+      return Object.keys(__originalProduct).some(k => __originalProduct[k] !== now[k]);
+    }
+    async function loadProduct(id) {
+      const res = await fetch(`/api/products/${id}`);
+      if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; }
+      const p = await res.json();
+      document.getElementById('pm_productId').value = p.productId ?? '';
+      document.getElementById('pm_name').value = p.name ?? '';
+      document.getElementById('pm_price').value = p.price ?? '';
+      document.getElementById('pm_salePrice').value = p.salePrice ?? '';
+      document.getElementById('pm_quantity').value = p.quantity ?? 0;
+      document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
+      document.getElementById('pm_description').value = p.description ?? '';
+      const st = document.getElementById('pm_status');
+      if (st) {
+        const stVal = (p.status || '').toString().toLowerCase();
+        let statusText = 'Pending';
+        let badgeClass = 'badge';
+        if (stVal === 'public') { statusText = 'Public'; badgeClass = 'badge pill good'; }
+        else if (stVal === 'hidden') { statusText = 'Hidden'; badgeClass = 'badge'; }
+        st.textContent = statusText;
+        st.className = badgeClass;
+        st.dataset.status = stVal;
+      }
+      __originalProduct = normalizeProductObj(p);
+    }
+
     if (productModal) {
       // ensure any native cancel/close events clear locks
       productModal.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(productModal); });
@@ -363,40 +581,11 @@
       });
       productModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(productModal)));
 
-      const sellerIdEl = document.getElementById('sellerId');
-      const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+  const sellerIdEl = document.getElementById('sellerId');
+  const userIdEl = document.getElementById('userId');
+  const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
 
-      // keep a snapshot of original values to detect changes before save
-      let original = null;
-      async function loadProduct(id) {
-        const res = await fetch(`/api/products/${id}`);
-        if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; }
-  const p = await res.json();
-        document.getElementById('pm_productId').value = p.productId ?? '';
-        document.getElementById('pm_name').value = p.name ?? '';
-        document.getElementById('pm_price').value = p.price ?? '';
-        document.getElementById('pm_salePrice').value = p.salePrice ?? '';
-        document.getElementById('pm_quantity').value = p.quantity ?? 0;
-        document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
-        document.getElementById('pm_description').value = p.description ?? '';
-  const st = document.getElementById('pm_status');
-  const stat = (p.status || '').toLowerCase();
-  let label = 'Hidden', cls = 'badge';
-  if (stat === 'public') { label = 'Public'; cls = 'badge pill good'; }
-  else if (stat === 'pending') { label = 'Pending'; cls = 'badge'; }
-  else if (stat === 'cancelled') { label = 'Cancelled'; cls = 'badge'; }
-  else { label = 'Hidden'; cls = 'badge'; }
-  st.textContent = label; st.className = cls;
-        // snapshot after load
-        original = {
-          name: p.name ?? '',
-          price: p.price ?? '',
-          salePrice: p.salePrice ?? '',
-          quantity: p.quantity ?? 0,
-          downloadUrl: p.downloadUrl ?? '',
-          description: p.description ?? ''
-        };
-      }
+      // (định nghĩa đã đưa ra ngoài khối if)
 
       // Row clicks open modal
       document.querySelectorAll('[data-product-id]').forEach(row => {
@@ -405,6 +594,7 @@
 
       // Add product
       document.getElementById('btnAddProduct')?.addEventListener('click', () => {
+        // Clear form for new product
         document.getElementById('pm_productId').value = '';
         document.getElementById('pm_name').value = '';
         document.getElementById('pm_price').value = '';
@@ -412,7 +602,12 @@
         document.getElementById('pm_quantity').value = 0;
         document.getElementById('pm_downloadUrl').value = '';
         document.getElementById('pm_description').value = '';
-        const st = document.getElementById('pm_status'); st.textContent = 'Hidden'; st.className = 'badge';
+        // Default: Public (không tự động ẩn nếu user chưa chỉnh gì)
+  const st = document.getElementById('pm_status');
+  st.textContent = 'Pending';
+  st.className = 'badge';
+  st.dataset.status = 'pending';
+  __originalProduct = null; // sản phẩm mới -> luôn xử lý create
         openModal(productModal);
       });
 
@@ -420,6 +615,12 @@
       document.getElementById('productForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('pm_productId').value;
+        // Nếu đang edit & không có thay đổi thì bỏ qua gọi API để tránh backend chuyển Hidden
+        if (id && !productChanged()) {
+          showToast('Không có thay đổi nào để lưu', 'info');
+          closeModal(productModal);
+          return;
+        }
         const payload = {
           sellerId: sellerId,
           name: document.getElementById('pm_name').value,
@@ -427,48 +628,42 @@
           salePrice: document.getElementById('pm_salePrice').value ? Number(document.getElementById('pm_salePrice').value) : null,
           quantity: document.getElementById('pm_quantity').value ? Number(document.getElementById('pm_quantity').value) : 0,
           downloadUrl: document.getElementById('pm_downloadUrl').value || null,
-          description: document.getElementById('pm_description').value || null
+          description: document.getElementById('pm_description').value || null,
+          status: document.getElementById('pm_status').dataset.status
         };
-        // Detect changes vs original snapshot
-        const changed = !original ||
-          original.name !== (payload.name || '') ||
-          String(original.price ?? '') !== String(payload.price ?? '') ||
-          String(original.salePrice ?? '') !== String(payload.salePrice ?? '') ||
-          Number(original.quantity ?? 0) !== Number(payload.quantity ?? 0) ||
-          (original.downloadUrl || '') !== (payload.downloadUrl || '') ||
-          (original.description || '') !== (payload.description || '');
-        if (id && original && !changed) {
-          showToast('Không có thay đổi nào để lưu', 'info');
-          return;
-        }
         const res = await fetch(id ? `/api/products/${id}` : '/api/products', {
           method: id ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        if (res.status === 304) { showToast('Không có thay đổi nào để lưu', 'info'); return; }
-        if (res.ok) { closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm (đã chuyển sang ẩn)' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
+  if (res.ok) { closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => refreshMyProducts(), 350); }
         else { showToast('Lưu sản phẩm thất bại', 'error'); }
       });
 
-      // Publish button logic per requirements
+      // Publish / gửi duyệt: Seller-only app -> luôn gửi duyệt (pending nếu không phải public)
       document.getElementById('pm_publish')?.addEventListener('click', async () => {
         const id = document.getElementById('pm_productId').value;
         if (!id) return;
-        const stText = (document.getElementById('pm_status')?.textContent || '').trim();
-        const st = stText.toLowerCase();
-        if (st === 'public') {
-          showToast('Sản phẩm đã được duyệt', 'info');
-          return;
+        const statusText = document.getElementById('pm_status').textContent;
+        // Nếu sản phẩm đang ở trạng thái Public và không có thay đổi nào -> bấm duyệt sẽ KHÔNG thay đổi trạng thái
+        if (statusText === 'Public' && !productChanged()) {
+          // Seller: nếu sản phẩm đang Public và không thay đổi gì -> không làm gì cả
+          showToast('Sản phẩm đã ở trạng thái Public (không có thay đổi)', 'info');
+          closeModal(productModal);
+          return; // No-op
         }
-        if (st === 'pending') {
-          showToast('Sản phẩm đang chờ duyệt', 'info');
-          return;
+        // Seller-only: gửi publish=false để tránh tự public
+        const res = await fetch(`/api/products/${id}/approval?publish=${statusText !== 'Public'}`, {
+          method: 'POST',
+          headers: { 'X-User-Type': 'SELLER' }
+        });
+        if (res.ok) {
+          closeModal(productModal);
+          showToast('Đã gửi phê duyệt (status = pending)', 'success');
+          setTimeout(() => refreshMyProducts(), 350);
+        } else {
+          showToast('Thao tác duyệt/publish thất bại', 'error');
         }
-        // hidden -> request pending
-        const res = await fetch(`/api/products/${id}/pending`, { method: 'POST' });
-        if (res.ok) { closeModal(productModal); showToast('Đã gửi duyệt: trạng thái Pending', 'success'); setTimeout(() => location.reload(), 350); }
-        else { showToast('Không thể chuyển sang Pending', 'error'); }
       });
 
       // Delete product
@@ -477,14 +672,14 @@
         if (!id) { closeModal(productModal); return; }
         if (!confirm('Xóa sản phẩm này?')) return;
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-        if (res.ok) { closeModal(productModal); showToast('Đã xóa sản phẩm', 'success'); setTimeout(() => location.reload(), 350); }
+  if (res.ok) { closeModal(productModal); showToast('Đã xóa sản phẩm', 'success'); setTimeout(() => refreshMyProducts(), 350); }
         else { showToast('Xóa sản phẩm thất bại', 'error'); }
       });
     }
 
     // Order modal handlers (view-only)
     const orderModal = document.getElementById('orderModal');
-    if (orderModal) {
+  if (orderModal) {
       orderModal.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(orderModal); });
       orderModal.addEventListener('close', () => {
         const remaining = Array.from(document.querySelectorAll('dialog.modal[open]'));
@@ -496,21 +691,23 @@
       orderModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(orderModal)));
 
       async function loadOrder(id) {
-        const sellerIdEl = document.getElementById('sellerId');
-        const sellerId = sellerIdEl ? sellerIdEl.textContent.trim() : '';
-  const res = await fetch(`/api/seller/orders/${id}` + (sellerId ? `?sellerId=${encodeURIComponent(sellerId)}` : ''));
+        // Prefer seller-scoped endpoint when sellerId is available to avoid leaking other sellers' items
+        const sidEl = document.getElementById('sellerId');
+        const sid = sidEl ? Number(sidEl.textContent.trim()) : null;
+        const url = sid ? `/api/seller/${sid}/orders/${id}` : `/api/orders/${id}`;
+        const res = await fetch(url);
         if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
         const data = await res.json();
-        const o = data.order;
+        const o = data.order || {};
         const user = data.user || {};
         document.getElementById('om_orderId').textContent = o.orderId;
-        document.getElementById('om_userId').textContent = user.username || (`User #${o.userId ?? ''}`);
-        // Total Amount should reflect database value directly with safe formatting
-        const amtVal = o.totalAmount;
+        document.getElementById('om_userId').textContent = user.username || (user.userId ? `User #${user.userId}` : '');
+        // In seller view, show sellerAmount if present; fallback to totalAmount
+        const amtVal = (o.sellerAmount != null ? o.sellerAmount : o.totalAmount);
         const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('om_totalAmount').textContent = amt;
         document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
-        const items = data.items || [];
+        const items = Array.isArray(data.items) ? data.items : (data.items && data.items.content ? data.items.content : []);
         const tb = document.getElementById('om_items');
         tb.innerHTML = '';
         for (const it of items) {
@@ -528,12 +725,13 @@
       // View-only: no save/delete handlers for orders
     }
 
-    // Load "My Products" list
-    (async function loadMyProducts() {
-      const sellerIdEl = document.getElementById('sellerId');
-      const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+    // Load "My Products" list (reusable for refresh after CRUD)
+    async function refreshMyProducts(showToastMsg = true) {
+  const sellerIdEl = document.getElementById('sellerId');
+  const userIdEl = document.getElementById('userId');
+  const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
       if (!sellerId) return; // require seller
-  const res = await fetch(`/api/products?sellerId=${sellerId}`);
+      const res = await fetch(`/api/products?sellerId=${sellerId}`);
       if (!res.ok) { showToast('Không tải được danh sách sản phẩm của bạn', 'error'); return; }
       const list = await res.json();
       const tbody = document.getElementById('tbMyProducts');
@@ -544,13 +742,12 @@
         const tr = document.createElement('tr');
         tr.className = 'clickable';
         tr.setAttribute('data-product-id', p.productId);
-        const stat = (p.status || '').toLowerCase();
-        let statusHtml = '<span class="badge">Hidden</span>';
-        if (stat === 'public') statusHtml = '<span class="pill good">Public</span>';
-        else if (stat === 'pending') statusHtml = '<span class="badge">Pending</span>';
-        else if (stat === 'cancelled') statusHtml = '<span class="badge">Cancelled</span>';
-        const price = (p.price ?? 0).toLocaleString('en-US');
-        tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
+  const stVal = (p.status || '').toString().toLowerCase();
+  let statusHtml = '<span class="badge">Pending</span>';
+  if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
+  else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
+  const price = (p.price ?? 0).toLocaleString('en-US');
+  tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
         tbody.appendChild(tr);
       });
       if (counter) counter.textContent = list.length;
@@ -558,31 +755,16 @@
       document.querySelectorAll('#tbMyProducts [data-product-id]').forEach(row => {
         row.addEventListener('click', () => {
           const id = row.getAttribute('data-product-id');
-          (async () => {
-            const res = await fetch(`/api/products/${id}`); if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; } const p = await res.json();
-            document.getElementById('pm_productId').value = p.productId ?? '';
-            document.getElementById('pm_name').value = p.name ?? '';
-            document.getElementById('pm_price').value = p.price ?? '';
-            document.getElementById('pm_salePrice').value = p.salePrice ?? '';
-            document.getElementById('pm_quantity').value = p.quantity ?? 0;
-            document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
-            document.getElementById('pm_description').value = p.description ?? '';
-            const st = document.getElementById('pm_status');
-            const stat = (p.status || '').toLowerCase();
-            let label = 'Hidden', cls = 'badge';
-            if (stat === 'public') { label = 'Public'; cls = 'badge pill good'; }
-            else if (stat === 'pending') { label = 'Pending'; cls = 'badge'; }
-            else if (stat === 'cancelled') { label = 'Cancelled'; cls = 'badge'; }
-            else { label = 'Hidden'; cls = 'badge'; }
-            st.textContent = label; st.className = cls;
-            openModal(productModal);
-          })();
+          loadProduct(id).then(() => openModal(productModal));
         });
       });
       const pager = document.getElementById('pgMyProducts');
       if (pager) paginateTable(tbody, pager, 5);
-      showToast(`Tải ${list.length} sản phẩm của bạn`, 'info', { duration: 2000 });
-    })();
+      if (showToastMsg) showToast(`Tải ${list.length} sản phẩm của bạn`, 'info', { duration: 2000 });
+    }
+
+    // initial load
+    refreshMyProducts(false);
 
     // === Avatar edit button hover ===
     const avatarWrap = document.querySelector('.avatar-edit-wrap');
@@ -628,6 +810,11 @@
       profilePanel.hidden = true;
       profilePanel.style.display = 'none';
       dashboardContent.style.display = '';
+      // ALSO hide other sidebar panels (orders, keys, profile-settings) to prevent residual content
+      ['ordersPanel','keysPanel','profileSettingsPanel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.hidden = true; el.style.display = 'none'; }
+      });
       // restore active class to dashboard link
       document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
       const dash = Array.from(document.querySelectorAll('.menu a')).find(a => a.getAttribute('href') === '/seller/dashboard');
@@ -684,11 +871,20 @@
       const target = document.getElementById(panelMap[hash]);
       if (target) { target.hidden = false; target.style.display = ''; target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
       try { history.replaceState({}, '', hash); } catch (e) {}
+      // NEW: tự động load dữ liệu khi chuyển panel
+      try {
+        if (hash === '#orders' && typeof loadSellerOrders === 'function') {
+          loadSellerOrders(true);
+        } else if (hash === '#keys' && typeof loadSellerKeys === 'function') {
+          loadSellerKeys(true);
+        }
+      } catch (_) { /* ignore */ }
     }
     // Intercept sidebar anchor clicks
     document.querySelectorAll('.menu a[href^="#"]').forEach(a => {
-      a.addEventListener('click', (e) => { e.preventDefault(); const h = a.getAttribute('href'); showPanelByHash(h); });
+      a.addEventListener('click', (e) => { e.preventDefault(); const h = a.getAttribute('href'); showPanelByHash(h); /* load handled inside showPanelByHash */ });
     });
+    window.addEventListener('hashchange', () => showPanelByHash(window.location.hash));
     // If hash is one of our panels (other than #profile handled earlier), show it on load
     if (window.location.hash && panelMap[window.location.hash] && window.location.hash !== '#profile') {
       setTimeout(() => showPanelByHash(window.location.hash), 50);
@@ -752,5 +948,216 @@
         showToast('Đã cập nhật trang cá nhân', 'success');
       });
     }
+
+    // === WebSocket realtime order notifications ===
+    (function initOrderSocket() {
+      const proto = (location.protocol === 'https:') ? 'wss:' : 'ws:';
+      const url = proto + '//' + location.host + '/ws/orders';
+      let ws;
+      let retry = 0;
+      const maxRetry = 6;
+      function connect() {
+        ws = new WebSocket(url);
+        ws.onopen = () => { retry = 0; showToast('Kết nối realtime đơn hàng', 'info', { duration: 1500 }); };
+        ws.onmessage = (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            if (data && data.type === 'new-order' && data.data) {
+              const id = data.data.orderId;
+              const amt = data.data.totalAmount;
+              const formatted = (amt == null) ? '' : ('$' + Number(amt).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+              showToast(`Đơn hàng mới #${id} ${formatted}`, 'success');
+              // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
+              // Could implement incremental prepend instead of reload; keep simple first.
+              setTimeout(() => { try { refreshMyProducts(); } catch (e) { } }, 1200);
+            }
+          } catch (_) { /* ignore parse errors */ }
+        };
+        ws.onclose = () => {
+          if (retry < maxRetry) {
+            const delay = Math.min(1000 * Math.pow(2, retry), 10000);
+            retry++;
+            setTimeout(connect, delay);
+          } else {
+            showToast('Mất kết nối realtime', 'error', { duration: 4000 });
+          }
+        };
+        ws.onerror = () => { try { ws.close(); } catch (_) { } };
+      }
+      // Only init on dashboard main view (avoid duplicate when showing profile panels)
+      if (document.getElementById('dashboardContent')) {
+        connect();
+      }
+    })();
+
+    // ================= Seller Orders Panel (dynamic load) =================
+  const sellerIdEl = document.getElementById('sellerId');
+  const userIdEl = document.getElementById('userId');
+  // Prefer explicit userId when available (new behavior). Fall back to sellerId for backward compatibility.
+  const sellerIdVal = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+    const ordersTbody = document.getElementById('tbSellerOrders');
+    const ordersPager = document.getElementById('pgSellerOrders');
+    let ordersPageState = { page: 0, size: 10, totalPages: 0 };
+
+    async function loadSellerOrders(resetPage = false) {
+      if (!sellerIdVal || !ordersTbody) return;
+      if (resetPage) ordersPageState.page = 0;
+      const params = new URLSearchParams();
+      params.set('page', ordersPageState.page);
+      params.set('size', ordersPageState.size);
+      const s = document.getElementById('ord_search')?.value.trim();
+      const from = document.getElementById('ord_from')?.value;
+      const to = document.getElementById('ord_to')?.value;
+      if (s) params.set('search', s);
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const res = await fetch(`/api/seller/${sellerIdVal}/orders?` + params.toString());
+      if (!res.ok) { showToast('Không tải được đơn hàng', 'error'); return; }
+      const data = await res.json();
+      ordersPageState.totalPages = data.totalPages;
+      ordersTbody.innerHTML = '';
+      data.content.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${o.orderId}</td>` +
+          `<td>${o.createdAt ? o.createdAt.replace('T',' ') : ''}</td>` +
+          `<td>${o.buyerUsername ? o.buyerUsername : (o.buyerUserId ? ('User #' + o.buyerUserId) : '')}</td>` +
+          `<td>${o.sellerItems ?? 0}</td>` +
+          `<td>$${(o.sellerAmount ?? 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
+        tr.className = 'clickable';
+        tr.addEventListener('click', () => { // open seller-scoped order detail
+          const id = o.orderId;
+          const orderModal = document.getElementById('orderModal');
+          if (!orderModal) return;
+          (async () => {
+            const res = await fetch(`/api/seller/${sellerIdVal}/orders/${id}`);
+            if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
+            const data = await res.json();
+            const ord = data.order || {};
+            const user = data.user || {};
+            document.getElementById('om_orderId').textContent = ord.orderId;
+            document.getElementById('om_userId').textContent = user.username || (user.userId ? ('User #' + user.userId) : '');
+            // Use sellerAmount for seller view total
+            const amtVal = ord.sellerAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+            document.getElementById('om_totalAmount').textContent = amt;
+            document.getElementById('om_createdAt').textContent = ord.createdAt ?? '';
+            const items = data.items || []; const tb = document.getElementById('om_items'); tb.innerHTML='';
+            for (const it of items) { const r=document.createElement('tr'); r.innerHTML=`<td>${it.productName||('#'+it.productId)}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`; tb.appendChild(r); }
+            const overlay = document.getElementById('modalOverlay');
+            if (overlay) { overlay.hidden=false; overlay.classList.add('visible'); }
+            if (typeof orderModal.showModal === 'function') { try { orderModal.showModal(); } catch (_) { orderModal.setAttribute('open',''); } }
+            requestAnimationFrame(()=> orderModal.classList.add('is-open'));
+          })();
+        });
+        ordersTbody.appendChild(tr);
+      });
+      paginateTable(ordersTbody, ordersPager, ordersPageState.size); // reuse for pager skeleton
+      // Override pager to hook page changes via API (not just client slicing)
+      if (ordersPager) {
+        ordersPager.innerHTML='';
+        const total = ordersPageState.totalPages;
+        if (total > 1) {
+          const mk = (label, page, disabled, current) => {
+            const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if (current) b.setAttribute('aria-current','page');
+            b.addEventListener('click', () => { ordersPageState.page = page; loadSellerOrders(false); }); return b; };
+          ordersPager.appendChild(mk('«', Math.max(0, ordersPageState.page-1), ordersPageState.page===0,false));
+          for (let i=0;i<total;i++) ordersPager.appendChild(mk(String(i+1), i, false, i===ordersPageState.page));
+          ordersPager.appendChild(mk('»', Math.min(total-1, ordersPageState.page+1), ordersPageState.page===total-1,false));
+        }
+      }
+    }
+
+    document.getElementById('ord_btnFilter')?.addEventListener('click', () => loadSellerOrders(true));
+    document.getElementById('ord_btnReset')?.addEventListener('click', () => {
+      const f = document.getElementById('ord_from'); if (f) f.value='';
+      const t = document.getElementById('ord_to'); if (t) t.value='';
+      const s = document.getElementById('ord_search'); if (s) s.value='';
+      loadSellerOrders(true);
+    });
+    document.getElementById('ord_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadSellerOrders(true);} });
+    document.getElementById('ord_btnExport')?.addEventListener('click', () => {
+      if (!ordersTbody) return; const rows = [['OrderId','CreatedAt','User','SellerItems','SellerAmount']];
+      ordersTbody.querySelectorAll('tr').forEach(tr => { const cols=[...tr.children].map(td=> td.textContent.replace(/\s+/g,' ').trim()); if (cols.length>=5) rows.push(cols.slice(0,5)); });
+      const csv = rows.map(r=> r.map(c => '"'+c.replace(/"/g,'""')+'"').join(',')).join('\r\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='seller_orders.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500);
+    });
+
+    // Auto load when panel hash activated
+    if (window.location.hash === '#orders') setTimeout(() => loadSellerOrders(true), 120);
+    window.addEventListener('hashchange', () => { if (window.location.hash === '#orders') loadSellerOrders(false); });
+
+    // ================= License Keys Panel =================
+    const keysTbody = document.getElementById('tbSellerKeys');
+    const keysPager = document.getElementById('pgSellerKeys');
+    let keysPageState = { page:0, size:10, totalPages:0 };
+
+    async function loadSellerKeys(resetPage=false) {
+      if (!sellerIdVal || !keysTbody) return;
+      if (resetPage) keysPageState.page = 0;
+      const params = new URLSearchParams();
+      params.set('page', keysPageState.page); params.set('size', keysPageState.size);
+      const prod = document.getElementById('key_product')?.value; if (prod) params.set('productId', prod);
+      const act = document.getElementById('key_active')?.value; if (act) params.set('active', act);
+      const s = document.getElementById('key_search')?.value.trim(); if (s) params.set('search', s);
+      const res = await fetch(`/api/seller/${sellerIdVal}/licenses?` + params.toString());
+      if (!res.ok) { showToast('Không tải được key', 'error'); return; }
+      const data = await res.json(); keysPageState.totalPages = data.totalPages;
+      keysTbody.innerHTML='';
+      data.content.forEach(l => {
+        const tr = document.createElement('tr');
+        const activeBadge = l.isActive ? '<span class="pill good">ON</span>' : '<span class="badge">OFF</span>';
+        const actDate = l.activationDate ? l.activationDate.replace('T',' ') : '';
+        tr.innerHTML = `<td>${l.licenseId}</td><td style="font-family:monospace;">${l.licenseKey}</td><td>${l.productName||('#'+l.productId)}</td><td>${l.orderId||''}</td><td>${activeBadge}</td><td>${actDate}</td><td>${l.deviceIdentifier||''}</td><td><button class="btn xs" data-toggle-lic="${l.licenseId}">${l.isActive?'Tắt':'Bật'}</button></td>`;
+        keysTbody.appendChild(tr);
+      });
+        if (data.content.length === 0) {
+          const tr = document.createElement('tr');
+          const colSpan = 8;
+          tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">Không có key nào cho seller hiện tại hoặc sellerId chưa đúng.</td>`;
+          keysTbody.appendChild(tr);
+        }
+      paginateTable(keysTbody, keysPager, keysPageState.size);
+      if (keysPager) {
+        keysPager.innerHTML=''; const total = keysPageState.totalPages;
+        if (total>1) {
+          const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ keysPageState.page=page; loadSellerKeys(false); }); return b; };
+          keysPager.appendChild(mk('«', Math.max(0, keysPageState.page-1), keysPageState.page===0,false));
+          for (let i=0;i<total;i++) keysPager.appendChild(mk(String(i+1), i, false, i===keysPageState.page));
+          keysPager.appendChild(mk('»', Math.min(total-1, keysPageState.page+1), keysPageState.page===total-1,false));
+        }
+      }
+    }
+
+    document.getElementById('key_btnFilter')?.addEventListener('click', () => loadSellerKeys(true));
+    document.getElementById('key_btnReset')?.addEventListener('click', () => {
+      const p=document.getElementById('key_product'); if (p) p.value='';
+      const a=document.getElementById('key_active'); if (a) a.value='';
+      const s=document.getElementById('key_search'); if (s) s.value='';
+      loadSellerKeys(true);
+    });
+    document.getElementById('key_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadSellerKeys(true); } });
+
+    // Toggle active
+    keysTbody?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-toggle-lic]'); if (!btn) return;
+      const id = btn.getAttribute('data-toggle-lic');
+      // Derive target state by reading cell
+      const row = btn.closest('tr');
+      const isActiveNow = row && row.querySelector('td:nth-child(5) .pill');
+      const next = !(!!isActiveNow);
+  const res = await fetch(`/api/seller/${sellerIdVal}/licenses/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ isActive: next }) });
+      if (res.ok) { showToast(next? 'Đã bật key':'Đã tắt key','success'); loadSellerKeys(false); }
+      else showToast('Cập nhật key thất bại','error');
+    });
+
+    // Populate product filter select (reuse my products API)
+    (async function populateProductsForKeys(){
+      if (!sellerIdVal) return; const sel = document.getElementById('key_product'); if (!sel) return;
+      try { const res = await fetch(`/api/products?sellerId=${sellerIdVal}`); if (!res.ok) return; const list = await res.json();
+        list.forEach(p => { const o=document.createElement('option'); o.value=p.productId; o.textContent=p.name || ('#'+p.productId); sel.appendChild(o); });
+      } catch (_) {}
+    })();
+
+    if (window.location.hash === '#keys') setTimeout(() => loadSellerKeys(true), 120);
+    window.addEventListener('hashchange', () => { if (window.location.hash === '#keys') loadSellerKeys(false); });
   });
 })();

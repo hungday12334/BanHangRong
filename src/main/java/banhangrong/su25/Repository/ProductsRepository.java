@@ -6,29 +6,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface ProductsRepository extends JpaRepository<Products, Long> {
-        List<Products> findBySellerId(Long sellerId);
+    List<Products> findBySellerId(Long sellerId);
 
-        // Gộp thêm method mới
         @Query("SELECT p FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status) AND p.quantity <= :threshold ORDER BY p.quantity ASC")
         List<Products> findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(@Param("sellerId") Long sellerId, @Param("status") String status, @Param("threshold") Integer threshold);
 
         @Query("SELECT COUNT(p) FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status)")
         long countBySellerIdAndStatus(@Param("sellerId") Long sellerId, @Param("status") String status);
-
-        // Removed isActive-based methods; use status instead
-
-        // Find by status with pagination
-        Page<Products> findByStatus(String status, Pageable pageable);
-
-        // Search products by name or description (case insensitive)
-        Page<Products> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndStatus(
-                String name, String description, String status, Pageable pageable);
 
     @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
@@ -40,12 +28,12 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "WHERE p.seller_id = :sellerId", nativeQuery = true)
     Long totalUnitsSoldBySeller(@Param("sellerId") Long sellerId);
 
-    @Query(value = "SELECT DATE(oi.created_at) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
+    @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
-            "WHERE p.seller_id = :sellerId AND DATE(oi.created_at) >= :fromDate\n" +
-            "GROUP BY DATE(oi.created_at)\n" +
-            "ORDER BY DATE(oi.created_at)", nativeQuery = true)
-    List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDate fromDate);
+            "WHERE p.seller_id = :sellerId AND oi.created_at >= :fromDate\n" +
+            "GROUP BY CAST(oi.created_at AS DATE)\n" +
+            "ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
+    List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDateTime fromDate);
 
     @Query(value = "SELECT COUNT(DISTINCT oi.order_id)\n" +
             "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
@@ -110,23 +98,4 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     // Total distinct sellers having at least one product
     @Query(value = "SELECT COUNT(DISTINCT seller_id) FROM products", nativeQuery = true)
     Long totalSellers();
-
-    // Category-related queries
-    // Find products by category ID with pagination
-    @Query(value = "SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)",
-           countQuery = "SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)")
-    Page<Products> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status, Pageable pageable);
-    
-    // Find products by category ID with search
-    @Query(value = "SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status) AND " +
-           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))",
-           countQuery = "SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status) AND " +
-           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))"
-          )
-    Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId, @Param("status") String status, 
-                                                     @Param("search") String search, Pageable pageable);
-    
-    // Count products by category
-    @Query("SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)")
-    Long countByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status);
 }

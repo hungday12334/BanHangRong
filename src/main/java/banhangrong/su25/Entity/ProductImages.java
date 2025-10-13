@@ -12,9 +12,6 @@ public class ProductImages {
     private Long imageId;
     @Column(name = "product_id")
     private Long productId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", insertable = false, updatable = false)
-    private Products product;
     @Column(name = "image_url")
     private String imageUrl;
     @Column(name = "is_primary")
@@ -33,12 +30,6 @@ public class ProductImages {
     }
     public void setProductId(Long productId) {
         this.productId = productId;
-    }
-    public Products getProduct() {
-        return product;
-    }
-    public void setProduct(Products product) {
-        this.product = product;
     }
     public String getImageUrl() {
         return imageUrl;

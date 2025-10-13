@@ -32,17 +32,6 @@ public class Products {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private java.util.List<ProductImages> images;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "categories_products",
-        joinColumns = @JoinColumn(name = "product_id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private java.util.List<Categories> categories;
-
     public Long getProductId() {
         return productId;
     }
@@ -109,6 +98,17 @@ public class Products {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    @PrePersist
+    public void _prePersistNormalizeStatus() {
+        if (status == null || status.isBlank()) status = "pending";
+        status = status.toLowerCase();
+    }
+
+    @PreUpdate
+    public void _preUpdateNormalizeStatus() {
+        if (status != null) status = status.toLowerCase();
+    }
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -120,28 +120,5 @@ public class Products {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-    public java.util.List<ProductImages> getImages() {
-        return images;
-    }
-    public void setImages(java.util.List<ProductImages> images) {
-        this.images = images;
-    }
-    public java.util.List<Categories> getCategories() {
-        return categories;
-    }
-    public void setCategories(java.util.List<Categories> categories) {
-        this.categories = categories;
-    }
-
-    @PrePersist
-    public void _prePersistNormalizeStatus() {
-        if (status == null || status.isBlank()) status = "pending";
-        status = status.toLowerCase();
-    }
-
-    @PreUpdate
-    public void _preUpdateNormalizeStatus() {
-        if (status != null) status = status.toLowerCase();
     }
 }
