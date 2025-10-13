@@ -84,6 +84,10 @@
                 <div class="value" th:text="${profileUser.email}">email@example.com</div>
                 <div class="label">Phone</div>
                 <div class="value" th:text="${profileUser.phoneNumber}">-</div>
+                <div class="label">Gender</div>
+                <div class="value" th:text="${profileUser.gender != null ? profileUser.gender : '-'}">-</div>
+                <div class="label">Birth date</div>
+                <div class="value" th:text="${profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
             </div>
             <div>
                 <a th:href="@{'/customer/profile/' + ${profileUser.username} + '/edit'}" class="btn" style="padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;">Edit</a>
