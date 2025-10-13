@@ -80,7 +80,8 @@ public class CustomerProfileController {
                                     @RequestParam(name = "email", required = false) String email,
                                     @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
                                     @RequestParam(name = "gender", required = false) String gender,
-                                    @RequestParam(name = "birthDate", required = false) String birthDateStr) {
+                                    @RequestParam(name = "birthDate", required = false) String birthDateStr,
+                                    Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Users currentUser = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -97,8 +98,12 @@ public class CustomerProfileController {
             // Validate duplicate email (belongs to another user)
             var existing = usersRepository.findByEmail(newEmail).orElse(null);
             if (existing != null && !existing.getUserId().equals(currentUser.getUserId())) {
-                // stay on edit page with error
-                return "customer/profile-edit?error=email_in_use";
+                // stay on edit page with inline error
+                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+                model.addAttribute("user", currentUser);
+                model.addAttribute("profileUser", currentUser);
+                model.addAttribute("emailError", "Email đã tồn tại, vui lòng chọn email khác.");
+                return "customer/profile-edit";
             }
             // Persist the new email immediately using update query to avoid stale entity issues
             usersRepository.updateEmailAndUnverify(currentUser.getUserId(), newEmail);
@@ -134,8 +139,18 @@ public class CustomerProfileController {
                 currentUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
             } catch (Exception ignored) {}
         }
-        try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) { return "customer/profile-edit?error=save_failed"; }
-        return "customer/profile-edit?updated=1";
+        try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) {
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            model.addAttribute("user", currentUser);
+            model.addAttribute("profileUser", currentUser);
+            model.addAttribute("saveError", "Không thể lưu thay đổi. Vui lòng thử lại.");
+            return "customer/profile-edit";
+        }
+        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+        model.addAttribute("user", currentUser);
+        model.addAttribute("profileUser", currentUser);
+        model.addAttribute("updated", true);
+        return "customer/profile-edit";
     }
 
     @GetMapping("/customer/verify-email")
