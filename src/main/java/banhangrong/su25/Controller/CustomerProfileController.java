@@ -92,24 +92,36 @@ public class CustomerProfileController {
 
         // Update allowed fields only
         if (avatarUrl != null) currentUser.setAvatarUrl(avatarUrl.trim());
-        if (email != null && !email.trim().equalsIgnoreCase(currentUser.getEmail())) {
-            currentUser.setEmail(email.trim());
+        if (email != null && !email.trim().isEmpty() && !email.trim().equalsIgnoreCase(currentUser.getEmail())) {
+            String newEmail = email.trim();
+            // Validate duplicate email (belongs to another user)
+            var existing = usersRepository.findByEmail(newEmail).orElse(null);
+            if (existing != null && !existing.getUserId().equals(currentUser.getUserId())) {
+                return "redirect:/customer/profile/" + username + "?error=email_in_use";
+            }
+            currentUser.setEmail(newEmail);
             currentUser.setIsEmailVerified(false);
             // invalidate previous token
             emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(currentUser.getUserId())
                     .ifPresent(emailVerificationTokenRepository::delete);
             // create new verify token
-            String token = java.util.UUID.randomUUID().toString();
-            EmailVerificationToken evt = new EmailVerificationToken();
-            evt.setUserId(currentUser.getUserId());
-            evt.setToken(token);
-            evt.setExpiresAt(java.time.LocalDateTime.now().plusDays(1));
-            evt.setIsUsed(false);
-            evt.setCreatedAt(java.time.LocalDateTime.now());
-            emailVerificationTokenRepository.save(evt);
-            // send email
-            String link = "http://localhost:8080/customer/verify-email?token=" + token;
-            emailService.sendEmail(new Email(currentUser.getEmail(), "Verify your email", "Click to verify: " + link));
+            try {
+                String token = java.util.UUID.randomUUID().toString();
+                EmailVerificationToken evt = new EmailVerificationToken();
+                evt.setUserId(currentUser.getUserId());
+                evt.setToken(token);
+                evt.setExpiresAt(java.time.LocalDateTime.now().plusDays(1));
+                evt.setIsUsed(false);
+                evt.setCreatedAt(java.time.LocalDateTime.now());
+                emailVerificationTokenRepository.save(evt);
+                // send email
+                String link = "http://localhost:8080/customer/verify-email?token=" + token;
+                try {
+                    emailService.sendEmail(new Email(currentUser.getEmail(), "Verify your email", "Click to verify: " + link));
+                } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                // tolerate missing token table or other issues in dev
+            }
         }
         if (phoneNumber != null) currentUser.setPhoneNumber(phoneNumber.trim());
         if (gender != null) currentUser.setGender(gender.trim());
@@ -118,7 +130,7 @@ public class CustomerProfileController {
                 currentUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
             } catch (Exception ignored) {}
         }
-        usersRepository.save(currentUser);
+        try { usersRepository.save(currentUser); } catch (Exception e) { return "redirect:/customer/profile/" + username + "?error=save_failed"; }
         return "redirect:/customer/profile/" + username + "?updated=1";
     }
 
