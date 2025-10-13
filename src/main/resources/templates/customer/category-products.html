@@ -28,6 +28,8 @@
         .cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
         .cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
         .nav { display:flex; gap:16px; margin:0 12px; }
+        .top-actions { flex-wrap: nowrap; }
+        .top-actions .search form { flex-wrap: nowrap; }
         .nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
         .nav a:hover { background:#f3f4f6; }
         .nav a.active { background:var(--brand); color:#fff; }
@@ -80,7 +82,7 @@
                         <a href="#">Support</a>
                     </nav>
                 </div>
-                <div class="col-auto top-actions d-flex align-items-center gap-2">
+                <div class="col-auto top-actions d-flex align-items-center gap-2 flex-nowrap">
                     <div class="notif">Notification</div>
                     <div class="user" style="position:relative">
                         <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
@@ -96,7 +98,7 @@
                         <form id="logoutForm" method="post" action="/logout" style="display:none;"></form>
                     </div>
                     <div class="search">
-                        <form method="GET" th:action="@{'/category/' + ${category.categoryId}}" class="d-flex gap-1 align-items-center">
+                        <form method="GET" th:action="@{'/category/' + ${category.categoryId}}" class="d-flex gap-1 align-items-center flex-nowrap">
                             <input type="search" name="search" placeholder="search in this category" aria-label="Search" 
                                    th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
                             <button type="submit" class="btn" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
