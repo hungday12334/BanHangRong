@@ -51,10 +51,12 @@ public class SecurityConfig {
                     .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
+                    // Guest-browsable catalog
+                    .requestMatchers("/categories", "/category/**", "/product/**").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()
                 
                 // Customer pages - cho phép tất cả authenticated users
-                .requestMatchers("/customer/**", "/product/**", "/cart/**").authenticated()
+                .requestMatchers("/customer/**", "/cart/**").authenticated()
                 
                 // Role-based access
                 .requestMatchers("/admin/**").hasRole("ADMIN")

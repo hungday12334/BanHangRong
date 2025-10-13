@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - BanHangRong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.min.css">
+    <style>
+        :root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --chip:#e5e7eb; --line:#eaeef4; }
+        * { box-sizing:border-box; }
+        html,body { height:100%; }
+        body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+        .wrapper { min-height:100%; display:flex; flex-direction:column; }
+        .topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
+        .brand { font-weight:800; letter-spacing:.2px; }
+        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
+        .lang, .notif, .user { font-size:14px; color:var(--muted); }
+        .user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
+        .user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
+        .user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
+        .user-menu .item:hover{background:#f3f4f6}
+        .search { position:relative; }
+        .search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
+        .cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
+        .cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+        .nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
+        .nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
+        .nav a:hover { background:#f3f4f6; }
+        .nav a.active { background:var(--brand); color:#fff; }
+        .hero { margin:18px auto 12px; max-width:1200px; background:linear-gradient(180deg,#f8fbff, #eef6ff); border:1px solid var(--line); border-radius:14px; padding:24px; }
+        .hero h1 { margin:0 0 8px; font-size:26px; }
+        .hero p { margin:0 0 16px; color:var(--muted); max-width:720px; }
+        .btn { display:inline-block; padding:10px 16px; background:var(--brand); color:#fff; border:none; border-radius:10px; text-decoration:none; font-weight:600; box-shadow:0 6px 18px rgba(14,165,233,.25); }
+        .btn:hover { filter:brightness(.98); }
+        .section-title { max-width:1200px; margin:10px auto; color:#6b7280; font-weight:600; text-align:center; }
+        .categories-grid { max-width:1200px; margin:0 auto 40px; display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; padding:0 10px; }
+        .category-card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px; text-decoration:none; color:inherit; transition:all 0.2s ease; }
+        .category-card:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,.1); }
+        .category-card h3 { margin:0 0 8px; font-size:20px; font-weight:600; color:#1f2937; }
+        .category-card p { margin:0 0 12px; color:var(--muted); font-size:14px; line-height:1.5; }
+        .category-stats { display:flex; align-items:center; gap:12px; font-size:13px; color:var(--muted); }
+        .product-count { background:#f0f9ff; color:#0369a1; padding:4px 8px; border-radius:6px; font-weight:600; }
+        .breadcrumb { max-width:1200px; margin:10px auto; padding:0 10px; }
+        .breadcrumb a { color:var(--brand); text-decoration:none; }
+        .breadcrumb a:hover { text-decoration:underline; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="topbar">
+            <div class="brand">BanHangRong</div>
+            <nav class="nav" aria-label="Main">
+                <a href="/">Home</a>
+                <a href="/categories" class="active">Category</a>
+                <a href="#">License Software</a>
+                <a href="#">Game Keys</a>
+                <a href="#">Voucher</a>
+                <a href="#">Support</a>
+            </nav>
+            <div class="top-actions">
+                <div class="notif">Notification</div>
+                <div class="lang">English</div>
+                <div class="user" style="position:relative">
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" href="/profile" role="menuitem">Tài khoản của tôi</a>
+                        <a class="item" href="#" role="menuitem">Đơn mua</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
+                        <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+                <div class="search">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+                        <input type="search" name="search" placeholder="search" aria-label="Search" 
+                               style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                        <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                    </form>
+                </div>
+                <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+            </div>
+        </div>
+
+        <div class="breadcrumb">
+            <a href="/">Home</a> / <span>Categories</span>
+        </div>
+
+        <section class="hero">
+            <h1>Browse by Categories</h1>
+            <p>Explore our wide range of software licenses, game keys, and vouchers organized by category. Find exactly what you're looking for.</p>
+        </section>
+
+        <div class="section-title">All Categories</div>
+        <section class="categories-grid" id="categoriesGrid">
+            <a class="category-card" th:each="category : ${categories}" th:href="@{'/category/' + ${category.categoryId}}">
+                <h3 th:text="${category.name}">Category Name</h3>
+                <p th:text="${category.description}">Category description goes here...</p>
+                <div class="category-stats">
+                    <span class="product-count" th:text="${productCountByCategory[category.categoryId]} + ' products'">0 products</span>
+                </div>
+            </a>
+
+            <!-- Fallback categories if no data -->
+            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
+                <h3>Software Licenses</h3>
+                <p>Microsoft Office, Adobe Creative Suite, and other professional software licenses</p>
+                <div class="category-stats">
+                    <span class="product-count">25 products</span>
+                </div>
+            </a>
+            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
+                <h3>Game Keys</h3>
+                <p>Steam keys, Origin keys, and other gaming platform activation codes</p>
+                <div class="category-stats">
+                    <span class="product-count">18 products</span>
+                </div>
+            </a>
+            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
+                <h3>Gaming Vouchers</h3>
+                <p>Gift cards and vouchers for popular gaming platforms and stores</p>
+                <div class="category-stats">
+                    <span class="product-count">12 products</span>
+                </div>
+            </a>
+            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
+                <h3>Security Software</h3>
+                <p>Antivirus, VPN, and other security-related software licenses</p>
+                <div class="category-stats">
+                    <span class="product-count">8 products</span>
+                </div>
+            </a>
+        </section>
+
+        <script>
+        (function(){
+            const btn = document.getElementById('userMenuBtn');
+            const menu = document.getElementById('userDropdown');
+            function close(){ if(menu) { menu.style.display='none'; btn && btn.setAttribute('aria-expanded','false'); } }
+            function toggle(){ if(!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block':'none'; btn && btn.setAttribute('aria-expanded', show?'true':'false'); }
+            if(btn){ btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); }); }
+            document.addEventListener('click', close);
+            document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+        })();
+        </script>
+    </div>
+</body>
+</html>

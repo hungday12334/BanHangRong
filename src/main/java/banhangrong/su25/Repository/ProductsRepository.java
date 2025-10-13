@@ -110,4 +110,19 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     // Total distinct sellers having at least one product
     @Query(value = "SELECT COUNT(DISTINCT seller_id) FROM products", nativeQuery = true)
     Long totalSellers();
+
+    // Category-related queries
+    // Find products by category ID with pagination
+    @Query("SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)")
+    Page<Products> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status, Pageable pageable);
+    
+    // Find products by category ID with search
+    @Query("SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status) AND " +
+           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId, @Param("status") String status, 
+                                                     @Param("search") String search, Pageable pageable);
+    
+    // Count products by category
+    @Query("SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)")
+    Long countByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status);
 }

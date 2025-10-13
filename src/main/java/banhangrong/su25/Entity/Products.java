@@ -35,6 +35,14 @@ public class Products {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private java.util.List<ProductImages> images;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "categories_products",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private java.util.List<Categories> categories;
+
     public Long getProductId() {
         return productId;
     }
@@ -118,6 +126,12 @@ public class Products {
     }
     public void setImages(java.util.List<ProductImages> images) {
         this.images = images;
+    }
+    public java.util.List<Categories> getCategories() {
+        return categories;
+    }
+    public void setCategories(java.util.List<Categories> categories) {
+        this.categories = categories;
     }
 
     @PrePersist
