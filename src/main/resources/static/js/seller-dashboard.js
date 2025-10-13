@@ -45,7 +45,7 @@
         labels,
         datasets: [{
           data,
-          label: 'Doanh thu',
+          label: 'Revenue',
           fill: true,
           borderColor: '#7c9eff',
           backgroundColor: 'rgba(124,158,255,0.16)',
@@ -73,8 +73,8 @@
     if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
-    toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><div class="act"><button class="close" aria-label="Đóng">✕</button></div>`;
+      const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
+  toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><div class="act"><button class="close" aria-label="Close">✕</button></div>`;
     container.appendChild(toast);
     // Force reflow to play animation
     void toast.offsetWidth; toast.classList.add('show');
@@ -157,7 +157,7 @@
           b.textContent = label;
           if (ariaCurrent) b.setAttribute('aria-current', 'page');
           b.disabled = !!disabled;
-          b.setAttribute('aria-label', `Trang ${page}`);
+          b.setAttribute('aria-label', `Page ${page}`);
           b.addEventListener('click', () => { current = page; render(); /* keep pager fixed: avoid scrollIntoView */ });
           return b;
         };
@@ -176,7 +176,7 @@
     render();
   }
 
-  // Logo fallback: nếu ảnh không load hoặc trong suốt hoàn toàn -> hiển thị chữ thay thế
+  // Logo fallback: if the image fails to load or is fully transparent -> show text fallback
   function initLogoFallback() {
     const fig = document.querySelector('.app-logo');
     if (!fig) return;
@@ -228,10 +228,10 @@
     if (meta) meta.setAttribute('content', theme === 'light' ? '#f6f7fb' : '#0b1020');
     // toggle icon
     const btn = document.getElementById('themeToggle');
-    if (btn) {
+      if (btn) {
       btn.innerHTML = theme === 'light' ? '<i class="ti ti-moon"></i>' : '<i class="ti ti-sun"></i>';
-      btn.setAttribute('aria-label', 'Chuyển giao diện');
-      btn.title = 'Chuyển giao diện';
+      btn.setAttribute('aria-label', 'Toggle theme');
+      btn.title = 'Toggle theme';
       btn.dataset.mode = theme;
     }
     // swap logo variant
@@ -273,11 +273,11 @@
     const loadTextEl = appLoader?.querySelector('[data-loader-text]');
     const tipEl = appLoader?.querySelector('[data-loader-tip]');
     const TIPS = [
-      'Mẹo: Bạn có thể chuyển nhanh panel bằng #hash trên URL.',
-      'Gợi ý: Nhấn biểu tượng mặt trời / mặt trăng để đổi giao diện.',
-      'Mẹo: Sử dụng bộ lọc để thu hẹp kết quả đơn hàng.',
-      'Thông tin: Các số liệu sẽ được cập nhật tự động định kỳ.',
-      'Mẹo: Kéo xuống dưới cùng để nạp thêm dữ liệu (nếu có).'
+      'Tip: You can switch panels quickly using the URL #hash.',
+      'Tip: Click the sun/moon icon to toggle theme.',
+      'Tip: Use filters to narrow down results.',
+      'Info: Metrics will refresh periodically.',
+      'Tip: Scroll to the bottom to load more data (if available).'
     ];
     let tipIndex = 0;
     function cycleTip() {
@@ -297,10 +297,10 @@
       simulated = Math.min(simulated + inc, 94); // stop at 94% until finish
       if (progressBar) progressBar.style.width = simulated + '%';
       if (loadTextEl) {
-        if (simulated < 30) loadTextEl.textContent = 'Đang khởi tạo...';
-        else if (simulated < 55) loadTextEl.textContent = 'Đang tải dữ liệu...';
-        else if (simulated < 80) loadTextEl.textContent = 'Xử lý thống kê...';
-        else loadTextEl.textContent = 'Chuẩn bị hiển thị...';
+    if (simulated < 30) loadTextEl.textContent = 'Initializing...';
+    else if (simulated < 55) loadTextEl.textContent = 'Loading data...';
+    else if (simulated < 80) loadTextEl.textContent = 'Processing metrics...';
+    else loadTextEl.textContent = 'Preparing view...';
       }
       setTimeout(tickProgress, 260 + Math.random()*240);
     }
@@ -312,7 +312,7 @@
       setTimeout(() => {
         done = true;
         if (progressBar) progressBar.style.width = '100%';
-        if (loadTextEl) loadTextEl.textContent = 'Hoàn tất!';
+          if (loadTextEl) loadTextEl.textContent = 'Finished!';
         document.body.classList.remove('loading');
         document.body.classList.add('ready');
         if (appLoader) {
@@ -344,9 +344,9 @@
       if (!panelEl) return;
       let overlay = panelEl.querySelector(':scope > .panel-loading-overlay');
       if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'panel-loading-overlay';
-        overlay.innerHTML = '<div class="mini-spinner"></div><div>Đang tải...</div>';
+  overlay = document.createElement('div');
+  overlay.className = 'panel-loading-overlay';
+  overlay.innerHTML = '<div class="mini-spinner"></div><div>Loading...</div>';
         panelEl.appendChild(overlay);
       }
       // Ensure overlay is visible and blocks interaction while loading
@@ -411,14 +411,14 @@
     else applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
 
     const btn = document.getElementById('themeToggle');
-    if (btn) {
+      if (btn) {
       btn.addEventListener('click', () => {
         const isLight = document.documentElement.classList.contains('theme-light');
         const next = isLight ? 'dark' : 'light';
         localStorage.setItem('theme', next);
         applyTheme(next);
         if (typeof showToast === 'function') {
-          showToast(next === 'light' ? 'Đã chuyển sang giao diện sáng' : 'Đã chuyển sang giao diện tối', 'info', { duration: 1500 });
+          showToast(next === 'light' ? 'Switched to light theme' : 'Switched to dark theme', 'info', { duration: 1500 });
         }
       });
     }
@@ -535,8 +535,8 @@
     // Product modal handlers
     const productModal = document.getElementById('productModal');
 
-    // === Product snapshot & helpers (đưa ra ngoài để dùng chung) ===
-    let __originalProduct = null; // snapshot sản phẩm đang edit
+  // === Product snapshot & helpers (exposed for reuse) ===
+  let __originalProduct = null; // snapshot of the product being edited
     function normalizeProductObj(p) {
       return {
         name: (p.name ?? '').trim(),
@@ -562,13 +562,13 @@
     function productChanged() {
       if (!__originalProduct) return true; // new product coi như có thay đổi
       const now = collectFormProduct();
-      return Object.keys(__originalProduct).some(k => __originalProduct[k] !== now[k]);
+    return Object.keys(__originalProduct).some(k => __originalProduct[k] !== now[k] || (k === 'status' && now[k] === 'pending'));
     }
     async function loadProduct(id) {
       const res = await fetch(`/api/products/${id}`);
-      if (!res.ok) { showToast('Không tải được chi tiết sản phẩm', 'error'); return; }
+  if (!res.ok) { showToast('Failed to load product details', 'error'); return; }
       const p = await res.json();
-      document.getElementById('pm_productId').value = p.productId ?? '';
+        document.getElementById('pm_productId').value = p.productId || '';
       document.getElementById('pm_name').value = p.name ?? '';
       document.getElementById('pm_price').value = p.price ?? '';
       document.getElementById('pm_salePrice').value = p.salePrice ?? '';
@@ -622,12 +622,12 @@
         document.getElementById('pm_quantity').value = 0;
         document.getElementById('pm_downloadUrl').value = '';
         document.getElementById('pm_description').value = '';
-        // Default: Public (không tự động ẩn nếu user chưa chỉnh gì)
+  // Default: Public (do not hide automatically if user hasn't changed anything)
   const st = document.getElementById('pm_status');
   st.textContent = 'Pending';
   st.className = 'badge';
   st.dataset.status = 'pending';
-  __originalProduct = null; // sản phẩm mới -> luôn xử lý create
+  __originalProduct = null; // new product -> always treat as create
         openModal(productModal);
       });
 
@@ -635,9 +635,9 @@
       document.getElementById('productForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('pm_productId').value;
-        // Nếu đang edit & không có thay đổi thì bỏ qua gọi API để tránh backend chuyển Hidden
+  // If editing & no changes, skip API call to avoid backend switching status to Hidden
         if (id && !productChanged()) {
-          showToast('Không có thay đổi nào để lưu', 'info');
+          showToast('No changes to save', 'info');
           closeModal(productModal);
           return;
         }
@@ -656,8 +656,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-  if (res.ok) { closeModal(productModal); showToast(id ? 'Đã lưu sản phẩm' : 'Đã tạo sản phẩm', 'success'); setTimeout(() => refreshMyProducts(), 350); }
-        else { showToast('Lưu sản phẩm thất bại', 'error'); }
+  if (res.ok) { closeModal(productModal); showToast(id ? 'Product saved' : 'Product created', 'success'); setTimeout(() => refreshMyProducts(), 350); }
+    else { showToast('Failed to save product', 'error'); }
       });
 
       // Publish / gửi duyệt: Seller-only app -> luôn gửi duyệt (pending nếu không phải public)
@@ -668,7 +668,7 @@
         // Nếu sản phẩm đang ở trạng thái Public và không có thay đổi nào -> bấm duyệt sẽ KHÔNG thay đổi trạng thái
         if (statusText === 'Public' && !productChanged()) {
           // Seller: nếu sản phẩm đang Public và không thay đổi gì -> không làm gì cả
-          showToast('Sản phẩm đã ở trạng thái Public (không có thay đổi)', 'info');
+          showToast('Product is already Public (no changes)', 'info');
           closeModal(productModal);
           return; // No-op
         }
@@ -679,10 +679,10 @@
         });
         if (res.ok) {
           closeModal(productModal);
-          showToast('Đã gửi phê duyệt (status = pending)', 'success');
+          showToast('Approval request sent (status = pending)', 'success');
           setTimeout(() => refreshMyProducts(), 350);
         } else {
-          showToast('Thao tác duyệt/publish thất bại', 'error');
+          showToast('Approval/publish action failed', 'error');
         }
       });
 
@@ -690,10 +690,10 @@
       document.getElementById('pm_delete')?.addEventListener('click', async () => {
         const id = document.getElementById('pm_productId').value;
         if (!id) { closeModal(productModal); return; }
-        if (!confirm('Xóa sản phẩm này?')) return;
+    if (!confirm('Delete this product?')) return;
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-  if (res.ok) { closeModal(productModal); showToast('Đã xóa sản phẩm', 'success'); setTimeout(() => refreshMyProducts(), 350); }
-        else { showToast('Xóa sản phẩm thất bại', 'error'); }
+  if (res.ok) { closeModal(productModal); showToast('Product deleted', 'success'); setTimeout(() => refreshMyProducts(), 350); }
+    else { showToast('Failed to delete product', 'error'); }
       });
     }
 
@@ -716,7 +716,7 @@
         const sid = sidEl ? Number(sidEl.textContent.trim()) : null;
         const url = sid ? `/api/seller/${sid}/orders/${id}` : `/api/orders/${id}`;
         const res = await fetch(url);
-        if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
+    if (!res.ok) { showToast('Failed to load order details', 'error'); return; }
         const data = await res.json();
         const o = data.order || {};
         const user = data.user || {};
@@ -752,7 +752,7 @@
   const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
       if (!sellerId) return; // require seller
       const res = await fetch(`/api/products?sellerId=${sellerId}`);
-      if (!res.ok) { showToast('Không tải được danh sách sản phẩm của bạn', 'error'); return; }
+      if (!res.ok) { showToast('Failed to load your product list', 'error'); return; }
       const list = await res.json();
       const tbody = document.getElementById('tbMyProducts');
       const counter = document.getElementById('myProductsCount');
@@ -780,7 +780,7 @@
       });
       const pager = document.getElementById('pgMyProducts');
       if (pager) paginateTable(tbody, pager, 5);
-      if (showToastMsg) showToast(`Tải ${list.length} sản phẩm của bạn`, 'info', { duration: 2000 });
+      if (showToastMsg) showToast(`Loaded ${list.length} of your products`, 'info', { duration: 2000 });
     }
 
     // initial load
@@ -931,7 +931,7 @@
       async function loadProfile(id) {
         if (!id) return;
         const res = await fetch(`/api/users/${id}`);
-        if (!res.ok) { showToast('Không tải được thông tin người dùng', 'error'); return; }
+        if (!res.ok) { showToast('Failed to load user info', 'error'); return; }
         const u = await res.json();
         document.getElementById('pf_userId').value = u.userId ?? '';
         document.getElementById('pf_username').value = u.username ?? '';
@@ -952,7 +952,7 @@
           avatarUrl: document.getElementById('pf_avatarUrl').value
         };
         const res = await fetch(`/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        if (!res.ok) { showToast('Cập nhật thất bại', 'error'); return; }
+  if (!res.ok) { showToast('Failed to update profile', 'error'); return; }
         const u = await res.json();
         // reflect changes in profile panel UI
         const elU = document.getElementById('profile_username'); if (elU) elU.textContent = u.username || '-';
@@ -968,7 +968,7 @@
           avatarWrap.appendChild(img);
         }
         closeModal(profileModal);
-        showToast('Đã cập nhật trang cá nhân', 'success');
+  showToast('Profile updated', 'success');
       });
     }
 
@@ -981,7 +981,7 @@
       const maxRetry = 6;
       function connect() {
         ws = new WebSocket(url);
-        ws.onopen = () => { retry = 0; showToast('Kết nối realtime đơn hàng', 'info', { duration: 1500 }); };
+  ws.onopen = () => { retry = 0; showToast('Connected to realtime orders', 'info', { duration: 1500 }); };
         ws.onmessage = (ev) => {
           try {
             const data = JSON.parse(ev.data);
@@ -989,7 +989,7 @@
               const id = data.data.orderId;
               const amt = data.data.totalAmount;
               const formatted = (amt == null) ? '' : ('$' + Number(amt).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-              showToast(`Đơn hàng mới #${id} ${formatted}`, 'success');
+              showToast(`New order #${id} ${formatted}`, 'success');
               // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
               // Could implement incremental prepend instead of reload; keep simple first.
               setTimeout(() => { try { refreshMyProducts(); } catch (e) { } }, 1200);
@@ -1002,7 +1002,7 @@
             retry++;
             setTimeout(connect, delay);
           } else {
-            showToast('Mất kết nối realtime', 'error', { duration: 4000 });
+            showToast('Realtime connection lost', 'error', { duration: 4000 });
           }
         };
         ws.onerror = () => { try { ws.close(); } catch (_) { } };
@@ -1034,8 +1034,8 @@
       if (s) params.set('search', s);
       if (from) params.set('from', from);
       if (to) params.set('to', to);
-      const res = await fetch(`/api/seller/${sellerIdVal}/orders?` + params.toString());
-      if (!res.ok) { showToast('Không tải được đơn hàng', 'error'); return; }
+  const res = await fetch(`/api/seller/${sellerIdVal}/orders?` + params.toString());
+  if (!res.ok) { showToast('Failed to load orders', 'error'); return; }
       const data = await res.json();
       ordersPageState.totalPages = data.totalPages;
       ordersTbody.innerHTML = '';
@@ -1053,7 +1053,7 @@
           if (!orderModal) return;
           (async () => {
             const res = await fetch(`/api/seller/${sellerIdVal}/orders/${id}`);
-            if (!res.ok) { showToast('Không tải được chi tiết đơn hàng', 'error'); return; }
+            if (!res.ok) { showToast('Failed to load order details', 'error'); return; }
             const data = await res.json();
             const ord = data.order || {};
             const user = data.user || {};
@@ -1121,19 +1121,19 @@
       const prod = document.getElementById('key_product')?.value; if (prod) params.set('productId', prod);
       const act = document.getElementById('key_active')?.value; if (act) params.set('active', act);
       const s = document.getElementById('key_search')?.value.trim(); if (s) params.set('search', s);
-      const res = await fetch(`/api/seller/${sellerIdVal}/licenses?` + params.toString());
-      if (!res.ok) { showToast('Không tải được key', 'error'); return; }
+  const res = await fetch(`/api/seller/${sellerIdVal}/licenses?` + params.toString());
+  if (!res.ok) { showToast('Failed to load keys', 'error'); return; }
       const data = await res.json(); keysPageState.totalPages = data.totalPages;
       keysTbody.innerHTML='';
       data.content.forEach(l => {
         const tr = document.createElement('tr');
         const activeBadge = l.isActive
-          ? '<button type="button" class="pill good" data-toggle-lic="'+l.licenseId+'" title="Bấm để tắt">ON</button>'
-          : '<button type="button" class="badge" data-toggle-lic="'+l.licenseId+'" title="Bấm để bật">OFF</button>';
+          ? '<button type="button" class="pill good" data-toggle-lic="'+l.licenseId+'" title="Click to disable">ON</button>'
+          : '<button type="button" class="badge" data-toggle-lic="'+l.licenseId+'" title="Click to enable">OFF</button>';
         const actDate = l.activationDate ? l.activationDate.replace('T',' ') : '';
         const deviceText = (l.deviceIdentifier && l.deviceIdentifier.trim().length)
           ? l.deviceIdentifier
-          : 'chưa sử dụng';
+          : 'unused';
         tr.innerHTML = `<td>${l.licenseId}</td>
                         <td style="font-family:monospace;">${l.licenseKey}</td>
                         <td>${l.productName||('#'+l.productId)}</td>
@@ -1146,7 +1146,7 @@
         if (data.content.length === 0) {
           const tr = document.createElement('tr');
           const colSpan = 7;
-          tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">Không có key nào cho seller hiện tại hoặc sellerId chưa đúng.</td>`;
+          tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">No keys for the current seller or sellerId is incorrect.</td>`;
           keysTbody.appendChild(tr);
         }
       paginateTable(keysTbody, keysPager, keysPageState.size);
@@ -1183,10 +1183,10 @@
         body: JSON.stringify({ isActive: next })
       });
       if (res.ok) {
-        showToast(next? 'Đã bật key':'Đã tắt key','success');
+        showToast(next? 'Key enabled':'Key disabled','success');
         loadSellerKeys(false);
       } else {
-        showToast('Cập nhật key thất bại','error');
+        showToast('Failed to update key','error');
       }
     });
 
@@ -1228,26 +1228,26 @@
       params.set('page', productsPageState.page);
       params.set('size', productsPageState.size);
       const parts = [];
-      const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`từ khóa "${s}"`); }
-      const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt=prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`danh mục "${opt.text}"`); }
-  const rating = document.getElementById('prd_rating')?.value; if (rating) { params.set('minRating', rating); parts.push(`đánh giá ≥ ${rating}`); }
-  const dl = document.getElementById('prd_downloads')?.value; if (dl) { params.set('minDownloads', dl); parts.push(`đã bán ≥ ${dl}`); }
+    const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`keyword "${s}"`); }
+    const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt=prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`category "${opt.text}"`); }
+  const rating = document.getElementById('prd_rating')?.value; if (rating) { params.set('minRating', rating); parts.push(`rating ≥ ${rating}`); }
+  const dl = document.getElementById('prd_downloads')?.value; if (dl) { params.set('minDownloads', dl); parts.push(`sold ≥ ${dl}`); }
       const statusEl = document.getElementById('prd_status');
       const statusRaw = statusEl?.value;
       if (statusRaw) {
         const statusNorm = statusRaw.toString().trim().toLowerCase();
         params.set('status', statusNorm);
-        // Show friendly label in toast (capitalize first letter)
-        const label = statusNorm.charAt(0).toUpperCase() + statusNorm.slice(1);
-        parts.push(`trạng thái "${label}"`);
+  // Show friendly label in toast (capitalize first letter)
+  const label = statusNorm.charAt(0).toUpperCase() + statusNorm.slice(1);
+  parts.push(`status "${label}"`);
       }
 
       // Show loading feedback (toast) and overlay on panel
-      try { if (typeof showToast === 'function') showToast('Đang tải sản phẩm' + (parts.length? ' theo ' + parts.join(', ') : ''), 'info', { duration: 1200 }); } catch(_){}
+      try { if (typeof showToast === 'function') showToast('Loading products' + (parts.length? ' by ' + parts.join(', ') : ''), 'info', { duration: 1200 }); } catch(_){ }
       const panelEl = document.getElementById('productsPanel');
       const task = async () => {
         const res = await fetch('/api/products/search?' + params.toString());
-        if (!res.ok) { showToast('Không tải được sản phẩm', 'error'); return; }
+        if (!res.ok) { showToast('Failed to load products', 'error'); return; }
         const data = await res.json();
         productsPageState.totalPages = data.totalPages || 1;
         productsGrid.innerHTML = '';
@@ -1273,10 +1273,10 @@
                 <div class="price" style="color:#7c9eff;font-weight:700;">$${price}</div>
               </div>
               <div class="sub" style="display:flex;gap:10px;font-size:12px;color:#a8b0d3;">
-                <span title="Đã bán">🛒 ${totalSales}</span>
-                <span title="Đánh giá">⭐ ${rating}</span>
-                <span>${statusHtml}</span>
-              </div>
+                  <span title="Sold">🛒 ${totalSales}</span>
+                  <span title="Rating">⭐ ${rating}</span>
+                  <span>${statusHtml}</span>
+                </div>
             </div>`;
           card.addEventListener('click', () => { const id=p.productId; loadProduct(id).then(()=> openModal(productModal)); });
           productsGrid.appendChild(card);
@@ -1290,10 +1290,10 @@
             productsPager.appendChild(mk('»', Math.min(total-1, productsPageState.page+1), productsPageState.page===total-1,false));
           }
         }
-        try { showToast(`Đã tải ${data.content ? data.content.length : 0} sản phẩm`, 'info', { duration: 1200 }); } catch(_){}
+        try { showToast(`Loaded ${data.content ? data.content.length : 0} products`, 'info', { duration: 1200 }); } catch(_){ }
       };
       if (typeof withPanelLoading === 'function' && panelEl) {
-        withPanelLoading(panelEl, task, 'Không tải được sản phẩm');
+        withPanelLoading(panelEl, task, 'Failed to load products');
       } else {
         // Fallback: no overlay
         task();
