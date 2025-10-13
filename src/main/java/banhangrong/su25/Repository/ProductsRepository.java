@@ -113,12 +113,16 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     // Category-related queries
     // Find products by category ID with pagination
-    @Query("SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)")
+    @Query(value = "SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)",
+           countQuery = "SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status)")
     Page<Products> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status, Pageable pageable);
     
     // Find products by category ID with search
-    @Query("SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status) AND " +
-           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))")
+    @Query(value = "SELECT p FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status) AND " +
+           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))",
+           countQuery = "SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER(:status) AND " +
+           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))"
+          )
     Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId, @Param("status") String status, 
                                                      @Param("search") String search, Pageable pageable);
     

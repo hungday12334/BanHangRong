@@ -22,10 +22,10 @@ public interface CategoriesRepository extends JpaRepository<Categories, Long> {
     List<Categories> findByNameContainingIgnoreCase(String name);
     
     // Đếm số lượng products trong một category
-    @Query("SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND p.status = 'Public'")
+    @Query("SELECT COUNT(p) FROM Products p JOIN p.categories c WHERE c.categoryId = :categoryId AND LOWER(p.status) = LOWER('Public')")
     Long countProductsByCategoryId(@Param("categoryId") Long categoryId);
     
     // Tìm categories có ít nhất một product public
-    @Query("SELECT DISTINCT c FROM Categories c JOIN c.products p WHERE p.status = 'Public' ORDER BY c.name ASC")
+    @Query("SELECT DISTINCT c FROM Categories c JOIN c.products p WHERE LOWER(p.status) = LOWER('Public') ORDER BY c.name ASC")
     List<Categories> findCategoriesWithPublicProducts();
 }
