@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.servlet.http.HttpSession;
+import java.security.Principal;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,8 +35,43 @@ public class SellerDashboardController {
     // Temporary: sellerId is read from query or default to 1L until auth in place
     @GetMapping("/seller/dashboard")
     public String dashboard(@RequestParam(name = "sellerId", required = false) Long sellerId,
-                            Model model) {
-        if (sellerId == null) sellerId = 56L; // assumption: demo seller
+                            Model model,
+                            Principal principal,
+                            HttpSession session) {
+        // Resolve sellerId from authenticated principal or session when available.
+        // Order of preference:
+        // 1) explicit request param (useful for testing / admin overrides)
+        // 2) Principal - if Principal.getName() is numeric we parse it as userId; otherwise lookup by username
+        // 3) HttpSession attribute "userId" (Long) or "user" (Users object)
+        // 4) fallback demo id 56L (existing behaviour)
+
+        if (sellerId == null) {
+            // Try principal
+            if (principal != null && principal.getName() != null) {
+                String name = principal.getName();
+                try {
+                    sellerId = Long.parseLong(name);
+                } catch (NumberFormatException e) {
+                    // Not a numeric principal name, try lookup by username
+                    var opt = usersRepository.findByUsername(name);
+                    if (opt.isPresent()) sellerId = opt.get().getUserId();
+                }
+            }
+
+            // Try session attributes
+            if (sellerId == null && session != null) {
+                Object uid = session.getAttribute("userId");
+                if (uid instanceof Long) sellerId = (Long) uid;
+                else if (uid instanceof Integer) sellerId = ((Integer) uid).longValue();
+                else {
+                    Object userObj = session.getAttribute("user");
+                    if (userObj instanceof Users) sellerId = ((Users) userObj).getUserId();
+                }
+            }
+
+            // final fallback
+            if (sellerId == null) sellerId = 6L; // assumption: demo seller
+        }
 
         // KPIs
         BigDecimal totalRevenue = Optional.ofNullable(productsRepository.totalRevenueBySeller(sellerId))
@@ -62,9 +99,40 @@ public class SellerDashboardController {
             series.put(d.toLocalDate().toString(), BigDecimal.ZERO);
         }
         for (Object[] row : raw) {
-            String date = Objects.toString(row[0]);
-            BigDecimal rev = (row[1] instanceof BigDecimal) ? (BigDecimal) row[1] : new BigDecimal(row[1].toString());
-            series.put(date, rev);
+            // Normalize various date types returned by native query into yyyy-MM-dd strings
+            Object dObj = row[0];
+            String dateKey = null;
+            try {
+                if (dObj instanceof java.sql.Date) {
+                    dateKey = ((java.sql.Date) dObj).toLocalDate().toString();
+                } else if (dObj instanceof java.sql.Timestamp) {
+                    dateKey = ((java.sql.Timestamp) dObj).toLocalDateTime().toLocalDate().toString();
+                } else if (dObj instanceof java.time.LocalDate) {
+                    dateKey = dObj.toString();
+                } else if (dObj instanceof java.time.LocalDateTime) {
+                    dateKey = ((java.time.LocalDateTime) dObj).toLocalDate().toString();
+                } else {
+                    String s = Objects.toString(dObj, "");
+                    // If the DB driver returns a datetime string like "2025-09-28 00:00:00",
+                    // take the first 10 chars which correspond to yyyy-MM-dd
+                    if (s.length() >= 10) dateKey = s.substring(0, 10);
+                    else dateKey = s;
+                }
+            } catch (Exception ex) {
+                dateKey = Objects.toString(dObj, "");
+            }
+            if (dateKey == null) continue;
+            BigDecimal rev = BigDecimal.ZERO;
+            if (row.length > 1 && row[1] != null) {
+                if (row[1] instanceof BigDecimal) rev = (BigDecimal) row[1];
+                else {
+                    try { rev = new BigDecimal(row[1].toString()); } catch (Exception e) { rev = BigDecimal.ZERO; }
+                }
+            }
+            // Only put into the series if the dateKey exists (guards against formatting mismatches)
+            if (series.containsKey(dateKey)) {
+                series.put(dateKey, rev);
+            }
         }
 
         // Top products
@@ -117,6 +185,8 @@ public class SellerDashboardController {
         }
 
     model.addAttribute("sellerId", sellerId);
+        // Also expose userId for clarity: the sellerId is the same as the logged-in user's id
+        model.addAttribute("userId", sellerId);
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("totalUnits", totalUnits);
         model.addAttribute("totalOrders", totalOrders);

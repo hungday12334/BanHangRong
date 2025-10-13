@@ -581,8 +581,9 @@
       });
       productModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(productModal)));
 
-      const sellerIdEl = document.getElementById('sellerId');
-      const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+  const sellerIdEl = document.getElementById('sellerId');
+  const userIdEl = document.getElementById('userId');
+  const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
 
       // (định nghĩa đã đưa ra ngoài khối if)
 
@@ -726,8 +727,9 @@
 
     // Load "My Products" list (reusable for refresh after CRUD)
     async function refreshMyProducts(showToastMsg = true) {
-      const sellerIdEl = document.getElementById('sellerId');
-      const sellerId = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+  const sellerIdEl = document.getElementById('sellerId');
+  const userIdEl = document.getElementById('userId');
+  const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
       if (!sellerId) return; // require seller
       const res = await fetch(`/api/products?sellerId=${sellerId}`);
       if (!res.ok) { showToast('Không tải được danh sách sản phẩm của bạn', 'error'); return; }
@@ -989,8 +991,10 @@
     })();
 
     // ================= Seller Orders Panel (dynamic load) =================
-    const sellerIdEl = document.getElementById('sellerId');
-    const sellerIdVal = sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null;
+  const sellerIdEl = document.getElementById('sellerId');
+  const userIdEl = document.getElementById('userId');
+  // Prefer explicit userId when available (new behavior). Fall back to sellerId for backward compatibility.
+  const sellerIdVal = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
     const ordersTbody = document.getElementById('tbSellerOrders');
     const ordersPager = document.getElementById('pgSellerOrders');
     let ordersPageState = { page: 0, size: 10, totalPages: 0 };

@@ -3,7 +3,9 @@
   <header class="title" data-block="dashboard-header">
     <span class="accent"></span>
     <h1>Seller Dashboard</h1>
-    <span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
+  <span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
+  <!-- Expose userId explicitly for client-side code to prefer (falls back to sellerId) -->
+  <span style="display:none"><b id="userId" th:text="${userId}"></b></span>
     <!-- Live clock for sellers -->
     <div id="sellerClock" class="chip" aria-live="polite" title="Thời gian hiện tại">--:--:--</div>
     <button id="btnAddProduct" class="btn primary" type="button" title="Thêm sản phẩm">+ Thêm sản phẩm</button>
