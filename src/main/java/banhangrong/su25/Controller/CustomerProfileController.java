@@ -102,6 +102,7 @@ public class CustomerProfileController {
             // Persist the new email immediately so UI shows it even before verification
             currentUser.setEmail(newEmail);
             currentUser.setIsEmailVerified(false);
+            usersRepository.saveAndFlush(currentUser);
             // invalidate previous token
             emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(currentUser.getUserId())
                     .ifPresent(emailVerificationTokenRepository::delete);
