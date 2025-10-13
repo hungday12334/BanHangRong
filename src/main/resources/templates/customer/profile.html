@@ -77,7 +77,13 @@
 
     <section class="content">
         <div class="row" style="justify-content:space-between;align-items:flex-start;">
-            <img class="avatar" th:src="${profileUser != null and profileUser.avatarUrl != null ? profileUser.avatarUrl : '/img/avatar_default.jpg'}" src="/img/avatar_default.jpg" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" alt="Avatar"/>
+            <span>
+                <img class="avatar" th:if="${profileUser != null and profileUser.avatarUrl != null and !#strings.isEmpty(#strings.trim(profileUser.avatarUrl))}"
+                     th:src="${profileUser.avatarUrl}" src="/img/avatar_default.jpg"
+                     onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" alt="Avatar"/>
+                <img class="avatar" th:unless="${profileUser != null and profileUser.avatarUrl != null and !#strings.isEmpty(#strings.trim(profileUser.avatarUrl))}"
+                     src="/img/avatar_default.jpg" alt="Avatar"/>
+            </span>
             <div style="flex:1;max-width:520px;">
                 <div class="label">Username</div>
                 <div class="value" th:text="${profileUser.username}">username</div>
