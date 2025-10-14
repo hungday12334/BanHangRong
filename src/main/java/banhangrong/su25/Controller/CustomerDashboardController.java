@@ -164,6 +164,25 @@ public class CustomerDashboardController {
 
         return "customer/orderhistory";
     }
+
+    @GetMapping("/support")
+    public String support(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        Users user = usersRepository.findByUsername(username);
+        
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
+        // Get cart count
+        Long cartCount = shoppingCartRepository.countByUserId(user.getUserId());
+        
+        model.addAttribute("user", user);
+        model.addAttribute("cartCount", cartCount);
+        
+        return "customer/support";
+    }
 }
 
 
