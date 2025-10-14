@@ -18,7 +18,8 @@
         .nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
         .nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
         .nav a:hover { background:#f3f4f6; }
-        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; flex-wrap:nowrap; }
+        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
+        .lang, .notif, .user { font-size:14px; color:var(--muted); }
         .user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
         .user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
         .user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
@@ -44,7 +45,7 @@
 </head>
 <body>
 <div class="wrapper">
-        <div class="topbar" style="display:flex;align-items:center;gap:14px;">
+        <div class="topbar">
         <a href="/customer/dashboard" class="brand">
             <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
             BanHangRong
