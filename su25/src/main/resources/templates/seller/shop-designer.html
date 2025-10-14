@@ -6,16 +6,19 @@
     <title>Thiết Kế Cửa Hàng - BanHangRong</title>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="/css/styles.min.css">
-    <link rel="stylesheet" href="/css/seller-dashboard.css">
-    <link rel="stylesheet" href="/css/shop-designer.css">
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}">
+    <link rel="stylesheet" th:href="@{/css/seller-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/shop-designer.css}">
 
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
+
+
 </head>
 <body class="dashboard-layout">
 <!-- Sidebar -->
-<!-- <div th:replace="~{fragments/sidebar :: sidebar}"></div> -->
+ <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
 <!-- Main Content -->
 <main class="main-content">
@@ -321,7 +324,7 @@
 </div>
 
 <!-- Scripts -->
-<script src="/js/home.js"></script>
-<script src="/js/shop-designer.js"></script>
+<script th:src="@{/js/home.js}"></script>
+<script th:src="@{/js/seller-dashboard.js}"></script>
 </body>
 </html>
