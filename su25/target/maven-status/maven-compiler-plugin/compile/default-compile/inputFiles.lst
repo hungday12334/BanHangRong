@@ -12,6 +12,7 @@
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Controller/SellerOrderController.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Controller/SellerProfileController.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Controller/SellerReviewController.java
+/Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Controller/ShopDesignController.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Controller/TestController.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Controller/UsersController.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/Categories.java
@@ -28,6 +29,9 @@
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/ProductLicenses.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/ProductReviews.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/Products.java
+/Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/SectionType.java
+/Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/SellerFeaturedProducts.java
+/Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/SellerShopSections.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/ShoppingCart.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/UserSessions.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Entity/UserSocialAuth.java
@@ -44,7 +48,9 @@
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/ProductLicensesRepository.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/ProductsRepository.java
+/Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/SellerFeaturedProductsRepository.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/SellerOrderRepository.java
+/Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/SellerShopSectionsRepository.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/UserVoucherRepository.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/UsersRepository.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/Repository/VoucherRepository.java
@@ -57,5 +63,6 @@
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/service/CategoryService.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/service/ChatService.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/service/ProductReviewService.java
+/Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/service/ShopDesignService.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/service/UserProfileService.java
 /Users/hoangquangminh/Desktop/FUlearning/FALL25/HSF302/Bonus/BHR/su25/src/main/java/banhangrong/su25/service/VoucherAutoGenerationService.java

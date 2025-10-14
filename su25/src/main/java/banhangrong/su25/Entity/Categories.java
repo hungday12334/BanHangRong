@@ -20,8 +20,7 @@ public class Categories {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    // 🔥 Thêm đoạn này để xóa cascade
+    
     @OneToMany(mappedBy = "category", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<CategoriesProducts> categoryProducts;
 

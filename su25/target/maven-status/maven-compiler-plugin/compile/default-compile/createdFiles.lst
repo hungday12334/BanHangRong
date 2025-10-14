@@ -1,11 +1,14 @@
 banhangrong/su25/WebSocket/OrderWebSocketHandler$OrderData.class
+banhangrong/su25/service/ShopDesignService$1.class
 banhangrong/su25/Repository/VoucherRepository.class
+banhangrong/su25/Entity/SectionType.class
 banhangrong/su25/Repository/ProductLicensesRepository.class
 banhangrong/su25/Entity/UserSessions.class
 banhangrong/su25/Controller/SellerDashboardController.class
 banhangrong/su25/Entity/UserSocialAuth.class
 banhangrong/su25/Entity/PaymentTransactions.class
 banhangrong/su25/Controller/CustomerChatController.class
+banhangrong/su25/Repository/SellerShopSectionsRepository.class
 banhangrong/su25/service/UserProfileService.class
 banhangrong/su25/Controller/TestController.class
 banhangrong/su25/Controller/FaviconController.class
@@ -21,7 +24,9 @@ banhangrong/su25/Repository/ChatRoomRepository.class
 banhangrong/su25/WebSocket/OrderWebSocketHandler$Payload.class
 banhangrong/su25/StartupStatusLogger.class
 banhangrong/su25/Repository/CategoriesProductsRepository.class
+banhangrong/su25/Entity/SellerFeaturedProducts.class
 banhangrong/su25/Repository/ProductsRepository.class
+banhangrong/su25/Repository/SellerFeaturedProductsRepository.class
 banhangrong/su25/Controller/UsersController.class
 banhangrong/su25/Entity/Users.class
 banhangrong/su25/Entity/Orders.class
@@ -48,6 +53,7 @@ banhangrong/su25/Entity/Voucher$AutoGenerationType.class
 banhangrong/su25/service/ChatService.class
 banhangrong/su25/Controller/PublicCatalogController.class
 banhangrong/su25/Entity/Categories.class
+banhangrong/su25/Entity/SellerShopSections.class
 banhangrong/su25/Repository/OrdersRepository.class
 banhangrong/su25/service/CategoryService.class
 banhangrong/su25/Entity/ChatMessage.class
@@ -59,10 +65,12 @@ banhangrong/su25/WebSocket/ChatWebSocketHandler.class
 banhangrong/su25/Repository/SellerOrderRepository.class
 banhangrong/su25/Entity/PasswordResetToken.class
 banhangrong/su25/Controller/ProductAdminController.class
+banhangrong/su25/service/ShopDesignService.class
 banhangrong/su25/Entity/CategoriesProducts.class
 banhangrong/su25/Repository/UserVoucherRepository.class
 banhangrong/su25/Repository/CategoriesRepository.class
 banhangrong/su25/StartupFailureLogger.class
+banhangrong/su25/Controller/ShopDesignController.class
 banhangrong/su25/Controller/SellerProfileController.class
 banhangrong/su25/Su25Application.class
 banhangrong/su25/Controller/SellerOrderController.class

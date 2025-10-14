@@ -658,3 +658,32 @@ CREATE INDEX idx_user_vouchers_sent_reason ON user_vouchers(sent_reason, sent_at
 CREATE INDEX idx_shopping_cart_updated ON shopping_cart(updated_at);
 CREATE INDEX idx_orders_user_created ON orders(user_id, created_at);
 
+-- Bảng lưu cấu hình các khu vực (sections) của shop
+CREATE TABLE seller_shop_sections (
+                                      section_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                      seller_id BIGINT NOT NULL,
+                                      section_type ENUM('FEATURED', 'BEST_SELLER', 'TOP_RATED', 'NEW_ARRIVALS', 'CUSTOM') NOT NULL,
+                                      section_title VARCHAR(255),
+                                      sort_order INT NOT NULL DEFAULT 0,
+                                      is_active BOOLEAN DEFAULT TRUE,
+                                      filter_category_id BIGINT NULL,
+                                      filter_price_min DECIMAL(15,2) NULL,
+                                      filter_price_max DECIMAL(15,2) NULL,
+                                      max_items INT DEFAULT 10,
+                                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                      FOREIGN KEY (seller_id) REFERENCES users(user_id),
+                                      FOREIGN KEY (filter_category_id) REFERENCES categories(category_id)
+);
+
+-- Bảng lưu sản phẩm được chọn thủ công cho khu vực FEATURED
+CREATE TABLE seller_featured_products (
+                                          featured_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                          section_id BIGINT NOT NULL,
+                                          product_id BIGINT NOT NULL,
+                                          sort_order INT NOT NULL DEFAULT 0,
+                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                          FOREIGN KEY (section_id) REFERENCES seller_shop_sections(section_id) ON DELETE CASCADE,
+                                          FOREIGN KEY (product_id) REFERENCES products(product_id),
+                                          UNIQUE KEY ux_section_product (section_id, product_id)
+);

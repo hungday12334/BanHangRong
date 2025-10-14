@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết Kế Cửa Hàng - BanHangRong</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/styles.min.css">
+    <link rel="stylesheet" href="/css/seller-dashboard.css">
+    <link rel="stylesheet" href="/css/shop-designer.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body class="dashboard-layout">
+<!-- Sidebar -->
+<!-- <div th:replace="~{fragments/sidebar :: sidebar}"></div> -->
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="content-wrapper">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="header-content">
+                <div class="header-title-section">
+                    <h1 class="page-title">
+                        <i class="ti ti-palette me-2"></i>
+                        Thiết Kế Cửa Hàng
+                    </h1>
+                    <p class="page-subtitle">Tùy chỉnh bố cục và sắp xếp sản phẩm trong cửa hàng của bạn</p>
+                </div>
+                <div class="header-actions">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="helpBtn">
+                            <i class="ti ti-help"></i>
+                            Hướng dẫn
+                        </button>
+                        <button class="btn btn-outline-secondary" id="viewShopBtn">
+                            <i class="ti ti-external-link"></i>
+                            Xem cửa hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="ti ti-layout-grid"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="activeSectionsCount">0</span>
+                    <span class="stat-label">Khu vực đang hoạt động</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="ti ti-box"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalProductsCount">0</span>
+                    <span class="stat-label">Sản phẩm hiển thị</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="ti ti-eye"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="lastSaved">--</span>
+                    <span class="stat-label">Lần cuối cập nhật</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Designer Area -->
+        <div class="shop-designer-container">
+            <div class="designer-layout">
+                <!-- Left Panel: Components Library -->
+                <div class="components-panel">
+                    <div class="panel-header">
+                        <h3><i class="ti ti-toolbox me-2"></i>Thành Phần</h3>
+                        <div class="panel-actions">
+                            <button class="btn-icon" title="Tìm kiếm">
+                                <i class="ti ti-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="components-categories">
+                        <div class="category-section">
+                            <h4 class="category-title">Khu Vực Sản Phẩm</h4>
+                            <div class="components-list" id="productSections">
+                                <!-- Product sections will be populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="category-section">
+                            <h4 class="category-title">Khu Vực Đặc Biệt</h4>
+                            <div class="components-list" id="specialSections">
+                                <!-- Special sections will be populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center: Preview & Design Area -->
+                <div class="preview-area">
+                    <div class="preview-header">
+                        <div class="preview-controls">
+                            <div class="device-preview">
+                                <button class="device-btn active" data-device="desktop">
+                                    <i class="ti ti-device-desktop"></i>
+                                </button>
+                                <button class="device-btn" data-device="tablet">
+                                    <i class="ti ti-device-tablet"></i>
+                                </button>
+                                <button class="device-btn" data-device="mobile">
+                                    <i class="ti ti-device-mobile"></i>
+                                </button>
+                            </div>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" data-zoom="out">
+                                    <i class="ti ti-zoom-out"></i>
+                                </button>
+                                <span class="zoom-level">100%</span>
+                                <button class="zoom-btn" data-zoom="in">
+                                    <i class="ti ti-zoom-in"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-sm btn-outline-secondary" id="resetViewBtn">
+                                <i class="ti ti-refresh"></i>
+                                Đặt lại chế độ xem
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="preview-container">
+                        <div class="shop-preview" id="shopPreview">
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <div class="placeholder-content">
+                                    <i class="ti ti-layout-kanban"></i>
+                                    <h3>Bắt đầu thiết kế cửa hàng</h3>
+                                    <p>Kéo các thành phần từ bên trái vào đây để xây dựng cửa hàng của bạn</p>
+                                    <button class="btn btn-primary mt-3" id="quickStartBtn">
+                                        <i class="ti ti-rocket"></i>
+                                        Thiết lập nhanh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Settings & Properties -->
+                <div class="properties-panel">
+                    <div class="panel-header">
+                        <h3><i class="ti ti-settings me-2"></i>Thuộc Tính</h3>
+                        <div class="panel-actions">
+                            <button class="btn-icon" title="Đóng">
+                                <i class="ti ti-x"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="properties-content">
+                        <div class="no-selection" id="noSelection">
+                            <i class="ti ti-click"></i>
+                            <p>Chọn một thành phần để chỉnh sửa thuộc tính</p>
+                        </div>
+
+                        <div class="section-properties" id="sectionProperties" style="display: none;">
+                            <div class="property-group">
+                                <h4 class="property-title">Thông tin cơ bản</h4>
+                                <div class="property-field">
+                                    <label>Tiêu đề hiển thị</label>
+                                    <input type="text" class="form-control" id="sectionTitle" placeholder="Nhập tiêu đề...">
+                                </div>
+                                <div class="property-field">
+                                    <label>Mô tả</label>
+                                    <textarea class="form-control" id="sectionDescription" rows="2" placeholder="Mô tả ngắn..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="property-group">
+                                <h4 class="property-title">Hiển thị</h4>
+                                <div class="property-field">
+                                    <label>Số lượng sản phẩm</label>
+                                    <input type="number" class="form-control" id="sectionLimit" min="1" max="20" value="6">
+                                </div>
+                                <div class="property-field">
+                                    <label>Bố cục hiển thị</label>
+                                    <select class="form-control" id="sectionLayout">
+                                        <option value="grid">Lưới</option>
+                                        <option value="list">Danh sách</option>
+                                        <option value="carousel">Carousel</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="property-group" id="filterSettings">
+                                <h4 class="property-title">Bộ lọc</h4>
+                                <div class="property-field">
+                                    <label>Danh mục</label>
+                                    <select class="form-control" id="sectionCategory">
+                                        <option value="">Tất cả danh mục</option>
+                                    </select>
+                                </div>
+                                <div class="property-field">
+                                    <label>Khoảng giá</label>
+                                    <div class="price-range-fields">
+                                        <input type="number" class="form-control" id="priceMin" placeholder="Tối thiểu">
+                                        <span class="range-separator">-</span>
+                                        <input type="number" class="form-control" id="priceMax" placeholder="Tối đa">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="property-group">
+                                <h4 class="property-title">Trạng thái</h4>
+                                <div class="property-field">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="sectionActive" checked>
+                                        <label class="form-check-label" for="sectionActive">Hiển thị trên cửa hàng</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Action Bar -->
+            <div class="action-bar">
+                <div class="action-bar-content">
+                    <div class="action-info">
+                        <span id="actionMessage">Sẵn sàng thiết kế</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline-secondary" id="previewBtn">
+                            <i class="ti ti-eye"></i>
+                            Xem trước
+                        </button>
+                        <button class="btn btn-success" id="saveBtn">
+                            <i class="ti ti-device-floppy"></i>
+                            Lưu thay đổi
+                        </button>
+                        <button class="btn btn-primary" id="publishBtn">
+                            <i class="ti ti-world"></i>
+                            Xuất bản
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Quick Setup Modal -->
+<div class="modal fade" id="quickSetupModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="ti ti-rocket me-2"></i>
+                    Thiết lập nhanh
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="setup-templates">
+                    <div class="template-card" data-template="featured">
+                        <div class="template-preview">
+                            <i class="ti ti-star"></i>
+                        </div>
+                        <h5>Nổi bật</h5>
+                        <p>Hiển thị sản phẩm đặc biệt</p>
+                    </div>
+                    <div class="template-card" data-template="bestseller">
+                        <div class="template-preview">
+                            <i class="ti ti-trending-up"></i>
+                        </div>
+                        <h5>Bán chạy</h5>
+                        <p>Sản phẩm bán chạy nhất</p>
+                    </div>
+                    <div class="template-card" data-template="newarrivals">
+                        <div class="template-preview">
+                            <i class="ti ti-new-section"></i>
+                        </div>
+                        <h5>Mới về</h5>
+                        <p>Sản phẩm mới nhất</p>
+                    </div>
+                    <div class="template-card" data-template="categories">
+                        <div class="template-preview">
+                            <i class="ti ti-category"></i>
+                        </div>
+                        <h5>Danh mục</h5>
+                        <p>Phân loại sản phẩm</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="applyTemplateBtn">Áp dụng mẫu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p>Đang xử lý...</p>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="/js/home.js"></script>
+<script src="/js/shop-designer.js"></script>
+</body>
+</html>
