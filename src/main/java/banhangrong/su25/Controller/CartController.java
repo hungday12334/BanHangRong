@@ -15,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -43,12 +45,22 @@ public class CartController {
         this.orderItemsRepository = orderItemsRepository;
     }
 
-    // For demo: use fixed userId=2 (alice). In real app, read from session/auth
-    private Long getCurrentUserId() { return 2L; }
+    // Lấy userId hiện tại từ SecurityContext
+    private Long getCurrentUserId() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && auth.getName() != null) {
+                return usersRepository.findByUsername(auth.getName()).map(Users::getUserId).orElse(0L);
+            }
+        } catch (Exception ignored) {}
+        return 0L;
+    }
 
     @GetMapping("/cart")
     public String viewCart(Model model) {
-        List<ShoppingCart> items = cartRepository.findByUserId(getCurrentUserId());
+        Long uid = getCurrentUserId();
+        if (uid == 0L) return "redirect:/login";
+        List<ShoppingCart> items = cartRepository.findByUserId(uid);
 
         List<Map<String,Object>> viewItems = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;

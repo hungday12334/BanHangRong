@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -36,7 +38,15 @@ public class VnPayController {
         this.usersRepository = usersRepository;
     }
 
-    private Long getCurrentUserId() { return 2L; }
+    private Long getCurrentUserId() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && auth.getName() != null) {
+                return usersRepository.findByUsername(auth.getName()).map(banhangrong.su25.Entity.Users::getUserId).orElse(0L);
+            }
+        } catch (Exception ignored) {}
+        return 0L;
+    }
 
     @PostMapping(value = "/payment/vnpay/create")
     public String createPayment(HttpServletRequest req) {
