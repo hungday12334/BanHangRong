@@ -14,9 +14,9 @@
 		html,body { height:100%; }
 		body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
 		.wrapper { min-height:100%; display:flex; flex-direction:column; }
-		.topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
-		.brand { font-weight:800; letter-spacing:.2px; }
-        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
+		.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--line); background:var(--card); }
+		.brand { font-weight:800; letter-spacing:.2px; font-size:24px; color:var(--brand); }
+        .top-actions { display:flex; align-items:center; gap:16px; }
 		.lang { font-size:14px; color:var(--muted); }
 		.auth-buttons { display:flex; gap:8px; align-items:center; }
 		.btn-auth { padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:500; font-size:14px; transition:all 0.2s; }
@@ -26,11 +26,6 @@
 		.btn-register:hover { background:#0284c7; }
 		.search { position:relative; }
 		.search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
-		.cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
-		.cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
-		.nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
-		.nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
-		.nav a:hover { background:#f3f4f6; }
 		.hero { margin:18px auto 12px; max-width:1200px; background:linear-gradient(180deg,#f8fbff, #eef6ff); border:1px solid var(--line); border-radius:14px; padding:24px; }
 		.hero h1 { margin:0 0 8px; font-size:26px; }
 		.hero p { margin:0 0 16px; color:var(--muted); max-width:720px; }
@@ -60,14 +55,6 @@
 	<div class="wrapper">
 		<div class="topbar">
 			<div class="brand">BanHangRong</div>
-			<nav class="nav" aria-label="Main">
-				<a href="/">Home</a>
-				<a href="#">Category</a>
-				<a href="#">License Software</a>
-				<a href="#">Game Keys</a>
-				<a href="#">Voucher</a>
-				<a href="#">Support</a>
-			</nav>
 			<div class="top-actions">
                 <div class="lang">English</div>
                 <div class="auth-buttons">
@@ -84,7 +71,6 @@
 						   style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
 		</div>
 
