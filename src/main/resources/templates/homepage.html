@@ -15,7 +15,8 @@
 		body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
 		.wrapper { min-height:100%; display:flex; flex-direction:column; }
 		.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--line); background:var(--card); }
-		.brand { font-weight:800; letter-spacing:.2px; font-size:24px; color:var(--brand); }
+		.brand { font-weight:800; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
+		.logo { height:32px; width:auto; }
         .top-actions { display:flex; align-items:center; gap:16px; }
 		.lang { font-size:14px; color:var(--muted); }
 		.auth-buttons { display:flex; gap:8px; align-items:center; }
@@ -54,7 +55,10 @@
 <body>
 	<div class="wrapper">
 		<div class="topbar">
-			<div class="brand">BanHangRong</div>
+			<div class="brand">
+				<img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+				BanHangRong
+			</div>
 			<div class="top-actions">
                 <div class="lang">English</div>
                 <div class="auth-buttons">
