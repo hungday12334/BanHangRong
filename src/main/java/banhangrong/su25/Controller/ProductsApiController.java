@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/products-lite")
 public class ProductsApiController {
 
     private final ProductsRepository productsRepository;

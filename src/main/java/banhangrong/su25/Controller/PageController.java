@@ -49,26 +49,18 @@ public class PageController {
         java.util.Map<Long, String> primaryImageByProduct = new java.util.HashMap<>();
         for (Products p : featured) {
             String url = null;
-            var imgs = p.getImages();
-            if (imgs != null && !imgs.isEmpty()) {
-                for (var im : imgs) { 
-                    if (Boolean.TRUE.equals(im.getIsPrimary())) { 
-                        url = im.getImageUrl(); 
-                        break; 
-                    } 
-                }
-                if (url == null) url = imgs.get(0).getImageUrl();
-            }
-            
-            // Fallback: tìm ảnh từ repository nếu relation không có
-            if (url == null || url.isBlank()) {
+            // Prefer repository lookups to avoid lazy-loading / type issues with p.getImages()
+            try {
                 var primary = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
-                if (primary != null && !primary.isEmpty()) url = primary.get(0).getImageUrl();
-                if (url == null || url.isBlank()) {
+                if (primary != null && !primary.isEmpty()) {
+                    url = primary.get(0).getImageUrl();
+                } else {
                     var any = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(p.getProductId());
-                    if (any != null && !any.isEmpty()) url = any.get(0).getImageUrl();
+                    if (any != null && !any.isEmpty()) {
+                        url = any.get(0).getImageUrl();
+                    }
                 }
-            }
+            } catch (Exception ignored) {}
             if (url != null && !url.isBlank()) primaryImageByProduct.put(p.getProductId(), url);
         }
         

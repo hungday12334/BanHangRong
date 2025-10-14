@@ -7,11 +7,11 @@
           <span class="avatar lg profile-avatar-center" style="position:relative;display:flex;justify-content:center;align-items:center;">
             <img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" width="120" height="120" fetchpriority="high" decoding="async" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
             <img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar" width="120" height="120" loading="lazy" decoding="async" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
-            <button id="btnEditAvatar" class="avatar-edit-btn" title="Đổi ảnh đại diện" type="button" style="display:none;position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;padding:6px;cursor:pointer;"><i class="ti ti-camera" style="color:#fff;font-size:18px;"></i></button>
+            <button id="btnEditAvatar" class="avatar-edit-btn" title="Change avatar" type="button" style="display:none;position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;padding:6px;cursor:pointer;"><i class="ti ti-camera" style="color:#fff;font-size:18px;"></i></button>
           </span>
         </div>
         <div class="profile-titles" style="text-align:center;">
-          <h2 style="margin-bottom:2px;">Trang cá nhân</h2>
+          <h2 style="margin-bottom:2px;">Profile</h2>
           <div class="footer-note">Seller ID: <b id="profileSellerId" th:text="${sellerId}">-</b> • <span class="chip" th:text="${user != null ? user.userType : 'SELLER'}">SELLER</span></div>
         </div>
       </div>
@@ -19,36 +19,36 @@
     <div class="body profile-body">
       <div class="profile-grid" style="gap:10px;">
         <div class="profile-col">
-          <div class="label">Tên</div>
+          <div class="label">Name</div>
           <div id="profile_username" class="value" style="font-weight:400;" th:text="${user != null and user.username != null ? user.username : '-'}">-</div>
           <div class="label">Email</div>
           <div id="profile_email" class="value" style="font-weight:400;" th:text="${user != null and user.email != null ? user.email : '-'}">-</div>
         </div>
         <div class="profile-col">
-          <div class="label">Số điện thoại</div>
+          <div class="label">Phone</div>
           <div id="profile_phone" class="value" style="font-weight:400;" th:text="${user != null and user.phoneNumber != null ? user.phoneNumber : '-'}">-</div>
-          <div class="label">Giới tính</div>
+          <div class="label">Gender</div>
           <div id="profile_gender" class="value" style="font-weight:400;" th:text="${user != null and user.gender != null ? user.gender : '-'}">-</div>
-          <div class="label">Ngày sinh</div>
+          <div class="label">Date of birth</div>
           <div id="profile_dob" class="value" style="font-weight:400;" th:text="${(user != null and user.birthDate != null) ? #temporals.format(user.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
         </div>
       </div>
     </div>
-    <div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:center;">
-      <button id="btnBackToDashboard" type="button" class="btn"><i class="ti ti-arrow-left" style="margin-right:6px;"></i>Quay lại</button>
-      <button id="btnOpenEditProfile" type="button" class="btn primary"><i class="ti ti-edit" style="margin-right:6px;"></i>Chỉnh sửa</button>
+      <div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:center;">
+      <button id="btnBackToDashboard" type="button" class="btn"><i class="ti ti-arrow-left" style="margin-right:6px;"></i>Back</button>
+      <button id="btnOpenEditProfile" type="button" class="btn primary"><i class="ti ti-edit" style="margin-right:6px;"></i>Edit</button>
     </div>
   </section>
   <section id="ordersPanel" class="card section-card" hidden data-panel="orders">
     <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
-      <div style="font-weight:700;flex:1;min-width:180px;">Quản lý đơn hàng</div>
+  <div style="font-weight:700;flex:1;min-width:180px;">Orders</div>
       <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-        <input id="ord_search" type="text" placeholder="Tìm (#ID / username)" class="input" style="min-width:160px;" />
+  <input id="ord_search" type="text" placeholder="Search (#ID / username)" class="input" style="min-width:160px;" />
         <input id="ord_from" type="datetime-local" class="input" />
         <input id="ord_to" type="datetime-local" class="input" />
-        <button id="ord_btnFilter" type="button" class="btn">Lọc</button>
-        <button id="ord_btnReset" type="button" class="btn" title="Xóa bộ lọc"><i class="ti ti-restore"></i></button>
-        <button id="ord_btnExport" type="button" class="btn" title="Xuất CSV"><i class="ti ti-download"></i></button>
+  <button id="ord_btnFilter" type="button" class="btn">Filter</button>
+  <button id="ord_btnReset" type="button" class="btn" title="Clear filters"><i class="ti ti-restore"></i></button>
+  <button id="ord_btnExport" type="button" class="btn" title="Export CSV"><i class="ti ti-download"></i></button>
       </div>
     </div>
     <div class="body" style="overflow:auto;">
@@ -56,10 +56,10 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Ngày tạo</th>
-            <th>Người mua</th>
-            <th>Số lượng (của bạn)</th>
-            <th>Doanh thu (của bạn)</th>
+        <th>Created At</th>
+          <th>Buyer</th>
+          <th>Qty (yours)</th>
+          <th>Revenue (yours)</th>
           </tr>
         </thead>
         <tbody id="tbSellerOrders"></tbody>
@@ -69,13 +69,13 @@
   </section>
   <section id="keysPanel" class="card section-card" hidden data-panel="keys">
     <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
-      <div style="font-weight:700;flex:1;min-width:140px;">Quản lý key</div>
+  <div style="font-weight:700;flex:1;min-width:140px;">Licenses</div>
       <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-        <select id="key_product" class="input" style="min-width:140px;"><option value="">Sản phẩm</option></select>
-        <select id="key_active" class="input"><option value="">Trạng thái</option><option value="true">Active</option><option value="false">Inactive</option></select>
-        <input id="key_search" class="input" type="text" placeholder="Tìm key" style="min-width:120px;" />
-        <button id="key_btnFilter" class="btn" type="button">Lọc</button>
-        <button id="key_btnReset" class="btn" type="button" title="Xóa bộ lọc"><i class="ti ti-restore"></i></button>
+  <select id="key_product" class="input" style="min-width:140px;"><option value="">Product</option></select>
+  <select id="key_active" class="input"><option value="">Status</option><option value="true">Active</option><option value="false">Inactive</option></select>
+  <input id="key_search" class="input" type="text" placeholder="Search key" style="min-width:120px;" />
+  <button id="key_btnFilter" class="btn" type="button">Filter</button>
+  <button id="key_btnReset" class="btn" type="button" title="Clear filters"><i class="ti ti-restore"></i></button>
       </div>
     </div>
     <div class="body" style="overflow:auto;">
@@ -84,12 +84,11 @@
           <tr>
             <th>ID</th>
             <th>Key</th>
-            <th>Sản phẩm</th>
-            <th>Đơn hàng</th>
+            <th>Product</th>
+            <th>Order</th>
             <th>Active</th>
-            <th>Kích hoạt</th>
-            <th>Thiết bị</th>
-            <th></th>
+            <th>Activated At</th>
+            <th>Device</th>
           </tr>
         </thead>
         <tbody id="tbSellerKeys"></tbody>
@@ -97,8 +96,71 @@
       <div id="pgSellerKeys" class="pager" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
     </div>
   </section>
+  <!-- Generate Keys Panel -->
+  <section id="generateKeysPanel" class="card section-card" hidden data-panel="gen-keys">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:160px;">Generate license keys</div>
+    </div>
+    <div class="body">
+      <form id="genKeyForm" class="form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:end;">
+        <div>
+          <label class="label" for="gk_product">Product (PUBLIC only)</label>
+          <select id="gk_product" class="input"><option value="">Select product</option></select>
+        </div>
+        <div>
+          <label class="label" for="gk_expire">Expire date</label>
+          <input id="gk_expire" type="date" class="input" />
+        </div>
+        <div>
+          <label class="label" for="gk_qty">Quantity</label>
+          <input id="gk_qty" type="number" min="1" step="1" value="1" class="input" />
+        </div>
+        <div>
+          <button id="gk_submit" type="submit" class="btn primary">Generate</button>
+        </div>
+      </form>
+      <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved immediately.</div>
+    </div>
+  </section>
+  <section id="productsPanel" class="card section-card" hidden data-panel="products">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+  <div style="font-weight:700;flex:1;min-width:160px;">Products</div>
+      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+  <input id="prd_search" type="text" placeholder="Search by name/description" class="input" style="min-width:180px;" />
+  <select id="prd_category" class="input" style="min-width:160px;"><option value="">All categories</option></select>
+  <select id="prd_rating" class="input" title="Minimum rating">
+          <option value="">Rating (min)</option>
+          <option value="1">1+</option>
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+          <option value="4.5">4.5+</option>
+        </select>
+        <select id="prd_status" class="input" title="Status">
+          <option value="">All statuses</option>
+          <option value="public">Public</option>
+          <option value="pending">Pending</option>
+          <option value="hidden">Hidden</option>
+        </select>
+        <select id="prd_downloads" class="input" title="Min sales/downloads">
+          <option value="">Sales (min)</option>
+          <option value="10">10+</option>
+          <option value="50">50+</option>
+          <option value="100">100+</option>
+          <option value="500">500+</option>
+          <option value="1000">1000+</option>
+        </select>
+  <button id="prd_btnFilter" type="button" class="btn">Filter</button>
+  <button id="prd_btnReset" type="button" class="btn" title="Clear filters"><i class="ti ti-restore"></i></button>
+      </div>
+    </div>
+    <div class="body" style="overflow:visible;">
+      <div id="prdGrid" class="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;align-items:stretch;"></div>
+      <div id="pgProducts" class="pager" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
+    </div>
+  </section>
   <section id="profileSettingsPanel" class="card section-card" hidden data-panel="profile-settings">
-    <div class="header"><div style="font-weight:700">Cài đặt profile</div></div>
-    <div class="body"><div class="footer-note">Bạn có thể sử dụng nút "Chỉnh sửa trang cá nhân" trong panel Trang cá nhân. Phần Cài đặt profile sẽ gom các tuỳ chọn nâng cao (2FA, bảo mật, v.v.).</div></div>
+  <div class="header"><div style="font-weight:700">Profile settings</div></div>
+  <div class="body"><div class="footer-note">Use the "Edit profile" button in the Profile panel. Profile settings contain advanced options (2FA, security, etc.).</div></div>
   </section>
 </section>

@@ -16,9 +16,7 @@ public class Categories {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
-    private java.util.List<Products> products;
+    // add getters and setters ...
 
     public Long getCategoryId() {
         return categoryId;
@@ -58,14 +56,6 @@ public class Categories {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public java.util.List<Products> getProducts() {
-        return products;
-    }
-
-    public void setProducts(java.util.List<Products> products) {
-        this.products = products;
     }
 
 }

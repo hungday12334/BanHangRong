@@ -1,55 +1,55 @@
 <!-- Modals Fragment -->
 <section th:fragment="modals">
   <div id="modalOverlay" class="modal-overlay" hidden data-modal-overlay></div>
-  <dialog id="profileModal" class="modal" aria-label="Chỉnh sửa trang cá nhân" data-modal="profile-edit">
+  <dialog id="profileModal" class="modal" aria-label="Edit profile" data-modal="profile-edit">
     <form method="dialog" class="modal-body" id="profileForm">
-      <div class="modal-header"><h3>Chỉnh sửa trang cá nhân</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
+  <div class="modal-header"><h3>Edit profile</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
       <input type="hidden" id="pf_userId" />
       <div class="form-grid">
-        <label>Tên hiển thị<input id="pf_username" required /></label>
-        <label>Email<input id="pf_email" type="email" required /></label>
-        <label class="span-2">Điện thoại<input id="pf_phone" /></label>
-        <label class="span-2">Ảnh đại diện (URL)<input id="pf_avatarUrl" /></label>
+  <label>Display name<input id="pf_username" required /></label>
+  <label>Email<input id="pf_email" type="email" required /></label>
+  <label class="span-2">Phone<input id="pf_phone" /></label>
+  <label class="span-2">Avatar URL<input id="pf_avatarUrl" /></label>
       </div>
-      <div class="modal-actions"><button type="submit" class="btn primary">Lưu</button></div>
+  <div class="modal-actions"><button type="submit" class="btn primary">Save</button></div>
     </form>
     <form method="dialog"><button value="close" hidden>Close</button></form>
   </dialog>
-  <dialog id="productModal" class="modal" aria-label="Chi tiết sản phẩm" data-modal="product-detail">
+  <dialog id="productModal" class="modal" aria-label="Product details" data-modal="product-detail">
     <form method="dialog" class="modal-body" id="productForm">
-      <div class="modal-header"><h3>Chi tiết sản phẩm</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
+  <div class="modal-header"><h3>Product details</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
       <input type="hidden" name="productId" id="pm_productId" />
       <div class="form-grid">
-        <label>Tên<input id="pm_name" name="name" required /></label>
-        <label>Giá<input id="pm_price" name="price" type="number" step="0.01" required /></label>
-        <label>Giá sale<input id="pm_salePrice" name="salePrice" type="number" step="0.01" /></label>
-        <label>Số lượng<input id="pm_quantity" name="quantity" type="number" min="0" /></label>
-        <label>URL tải<input id="pm_downloadUrl" name="downloadUrl" /></label>
-        <label class="span-2">Mô tả<textarea id="pm_description" name="description" rows="4"></textarea></label>
-        <div class="status">Trạng thái: <span id="pm_status" class="badge">Hidden</span></div>
+  <label>Name<input id="pm_name" name="name" required /></label>
+  <label>Price<input id="pm_price" name="price" type="number" step="0.01" required /></label>
+  <label>Sale price<input id="pm_salePrice" name="salePrice" type="number" step="0.01" /></label>
+  <label>Quantity<input id="pm_quantity" name="quantity" type="number" min="0" /></label>
+  <label>Download URL<input id="pm_downloadUrl" name="downloadUrl" /></label>
+  <label class="span-2">Description<textarea id="pm_description" name="description" rows="4"></textarea></label>
+  <div class="status">Status: <span id="pm_status" class="badge">Hidden</span></div>
       </div>
       <div class="modal-actions">
-        <button type="button" id="pm_publish" class="btn">Duyệt/Publish</button>
-        <button type="submit" id="pm_save" class="btn primary">Lưu</button>
-        <button type="button" id="pm_delete" class="btn danger">Xóa</button>
+        <button type="button" id="pm_publish" class="btn">Approve/Publish</button>
+        <button type="submit" id="pm_save" class="btn primary">Save</button>
+        <button type="button" id="pm_delete" class="btn danger">Delete</button>
       </div>
     </form>
-    <div class="modal-footer note">Lưu ý: Sửa sản phẩm đang public sẽ tự động chuyển sang trạng thái ẩn chờ duyệt.</div>
+  <div class="modal-footer note">Note: Editing a public product will set it to hidden/pending for approval.</div>
     <form method="dialog"><button value="close" hidden>Close</button></form>
   </dialog>
-  <dialog id="orderModal" class="modal" aria-label="Chi tiết đơn hàng" data-modal="order-detail">
+  <dialog id="orderModal" class="modal" aria-label="Order details" data-modal="order-detail">
     <div class="modal-body">
-      <div class="modal-header"><h3>Chi tiết đơn hàng</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
+      <div class="modal-header"><h3>Order details</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
       <div class="form-grid">
-        <div>Mã đơn: <b id="om_orderId"></b></div>
-        <div>Người dùng: <span id="om_userId"></span></div>
-        <div>Tổng tiền: $<span id="om_totalAmount"></span></div>
-        <div>Ngày tạo: <span id="om_createdAt"></span></div>
+  <div>Order ID: <b id="om_orderId"></b></div>
+  <div>User: <span id="om_userId"></span></div>
+  <div>Total: $<span id="om_totalAmount"></span></div>
+  <div>Created at: <span id="om_createdAt"></span></div>
       </div>
       <div style="margin-top:10px">
-        <div><b>Mặt hàng</b></div>
+        <div><b>Items</b></div>
         <table class="table">
-          <thead><tr><th>Product</th><th>SL</th><th>Giá</th></tr></thead>
+          <thead><tr><th>Product</th><th>Qty</th><th>Price</th></tr></thead>
           <tbody id="om_items"></tbody>
         </table>
       </div>
