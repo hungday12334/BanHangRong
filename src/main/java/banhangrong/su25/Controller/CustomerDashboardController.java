@@ -186,6 +186,27 @@ public class CustomerDashboardController {
         
         return "customer/support";
     }
+
+    @GetMapping("/notification")
+    public String notification(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        Optional<Users> userOptional = usersRepository.findByUsername(username);
+        
+        if (userOptional.isEmpty()) {
+            return "redirect:/login";
+        }
+        
+        Users user = userOptional.get();
+        
+        // Get cart count
+        Long cartCount = shoppingCartRepository.countByUserId(user.getUserId());
+        
+        model.addAttribute("user", user);
+        model.addAttribute("cartCount", cartCount);
+        
+        return "customer/notification";
+    }
 }
 
 

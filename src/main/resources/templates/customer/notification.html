@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo - BanHangRong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg:#f5f7fb; 
+            --card:#ffffff; 
+            --ink:#0f172a; 
+            --muted:#6b7280; 
+            --brand:#0ea5e9; 
+            --line:#eaeef4;
+            --gray:#6b7280;
+            --gray-light:#f3f4f6;
+            --gray-dark:#374151;
+        }
+        * { box-sizing:border-box; }
+        html,body { height:100%; }
+        body { 
+            margin:0; 
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+            color:var(--ink); 
+            background:var(--bg); 
+        }
+        .wrapper { min-height:100%; display:flex; flex-direction:column; }
+        
+        /* Header - Same as Customer Dashboard */
+        .topbar { 
+            display:flex; 
+            align-items:center; 
+            gap:14px; 
+            padding:10px 16px; 
+            border-bottom:1px solid var(--line); 
+            background:var(--card); 
+            flex-wrap:nowrap; 
+        }
+        .brand { 
+            font-weight:800; 
+            letter-spacing:.2px; 
+            display:flex; 
+            align-items:center; 
+            gap:8px; 
+            cursor:pointer; 
+            text-decoration:none; 
+            color:inherit; 
+        }
+        .brand:hover { color:var(--brand); }
+        .logo { height:32px; width:auto; }
+        .nav { 
+            display:flex; 
+            gap:16px; 
+            margin:0 12px; 
+            flex:1; 
+            overflow:auto; 
+            white-space:nowrap; 
+        }
+        .nav a { 
+            text-decoration:none; 
+            color:#111827; 
+            font-weight:500; 
+            padding:8px 10px; 
+            border-radius:8px; 
+        }
+        .nav a:hover { background:#f3f4f6; }
+        .top-actions { 
+            margin-left:auto; 
+            display:flex; 
+            align-items:center; 
+            gap:12px; 
+            position:relative; 
+        }
+        .lang, .notif, .user { font-size:14px; color:var(--muted); }
+        .user-btn{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            cursor:pointer;
+            color:#111827;
+            border:1px solid var(--line);
+            padding:6px 10px;
+            border-radius:8px;
+            background:#fff
+        }
+        .user-menu{
+            position:absolute; 
+            right:0; 
+            top:48px; 
+            background:#fff; 
+            border:1px solid var(--line); 
+            border-radius:10px; 
+            box-shadow:0 10px 25px rgba(0,0,0,.08); 
+            width:200px; 
+            display:none; 
+            z-index:5
+        }
+        .user-menu .item{
+            display:block; 
+            padding:10px 12px; 
+            color:#111827; 
+            text-decoration:none
+        }
+        .user-menu .item:hover{background:#f3f4f6}
+        .search { position:relative; }
+        .search input { 
+            height:34px; 
+            width:220px; 
+            padding:0 12px; 
+            border:1px solid var(--line); 
+            border-radius:8px; 
+            outline:none; 
+        }
+        .cart { 
+            position:relative; 
+            width:28px; 
+            height:28px; 
+            display:grid; 
+            place-items:center; 
+            border:1px solid var(--line); 
+            border-radius:8px; 
+            text-decoration:none; 
+            color:#111827; 
+        }
+        .cart .badge{ 
+            position:absolute; 
+            top:-6px; 
+            right:-6px; 
+            background:#ef4444; 
+            color:#fff; 
+            min-width:18px; 
+            height:18px; 
+            border-radius:9px; 
+            font-size:11px; 
+            display:flex; 
+            align-items:center; 
+            justify-content:center; 
+            padding:0 5px; 
+        }
+
+        /* Notification Content */
+        .notification-content {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 0 0 8px 0;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        /* Notification Filters */
+        .notification-filters {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--ink);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--gray-light);
+            border-color: var(--brand);
+        }
+
+        .filter-btn.active {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+
+        /* Notification List */
+        .notification-list {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .notification-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            transition: background-color 0.2s;
+        }
+
+        .notification-item:hover {
+            background: var(--gray-light);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item.unread {
+            background: #f0f9ff;
+            border-left: 4px solid var(--brand);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .notification-icon.info {
+            background: #dbeafe;
+            color: var(--brand);
+        }
+
+        .notification-icon.success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .notification-icon.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .notification-icon.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .notification-content-item {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ink);
+            margin: 0 0 4px 0;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .notification-action-btn {
+            padding: 4px 12px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--card);
+            color: var(--ink);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .notification-action-btn:hover {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+
+        .notification-action-btn.primary {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+
+        .notification-action-btn.primary:hover {
+            background: #0284c7;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+
+        .empty-state-message {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-btn {
+            padding: 10px 20px;
+            background: var(--brand);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .empty-state-btn:hover {
+            background: #0284c7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .notification-content {
+                padding: 0 10px;
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+            }
+            
+            .notification-item {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .notification-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Header - Same as Customer Dashboard -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
+            <nav class="nav" aria-label="Main">
+                <a href="/categories">Category</a>
+                <a href="#">License Software</a>
+                <a href="#">Game Keys</a>
+                <a href="#">Voucher</a>
+                <a href="/support">Support</a>
+            </nav>
+            <div class="top-actions">
+                <div class="notif" style="color: var(--brand); font-weight: 600;">Notification</div>
+                <div class="user" style="position:relative">
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/orderhistory" role="menuitem">Order History</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
+                        <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+                <div class="search">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+                        <input type="search" name="search" placeholder="search" aria-label="Search" 
+                               th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                        <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                        <a th:if="${search != null and !search.trim().isEmpty()}" 
+                           th:href="@{/customer/dashboard}" 
+                           style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+                    </form>
+                </div>
+                <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+            </div>
+        </div>
+
+        <!-- Notification Content -->
+        <div class="notification-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Thông báo</h1>
+                <p class="page-subtitle">Quản lý và xem tất cả thông báo của bạn</p>
+            </div>
+
+            <!-- Notification Filters -->
+            <div class="notification-filters">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterNotifications('all')">Tất cả</button>
+                    <button class="filter-btn" onclick="filterNotifications('unread')">Chưa đọc</button>
+                    <button class="filter-btn" onclick="filterNotifications('orders')">Đơn hàng</button>
+                    <button class="filter-btn" onclick="filterNotifications('promotions')">Khuyến mãi</button>
+                    <button class="filter-btn" onclick="filterNotifications('system')">Hệ thống</button>
+                </div>
+            </div>
+
+            <!-- Notification List -->
+            <div class="notification-list" id="notificationList">
+                <!-- Sample Notifications -->
+                <div class="notification-item unread" data-category="orders">
+                    <div class="notification-icon info">📦</div>
+                    <div class="notification-content-item">
+                        <h3 class="notification-title">Đơn hàng #12345 đã được xác nhận</h3>
+                        <p class="notification-message">Đơn hàng của bạn đã được xác nhận và đang được chuẩn bị. Bạn sẽ nhận được thông báo khi đơn hàng được giao.</p>
+                        <div class="notification-time">2 giờ trước</div>
+                        <div class="notification-actions">
+                            <button class="notification-action-btn primary" onclick="viewOrder('12345')">Xem đơn hàng</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notification-item" data-category="promotions">
+                    <div class="notification-icon success">🎉</div>
+                    <div class="notification-content-item">
+                        <h3 class="notification-title">Khuyến mãi mới - Giảm 20% tất cả sản phẩm</h3>
+                        <p class="notification-message">Chương trình khuyến mãi đặc biệt dành cho khách hàng VIP. Áp dụng mã giảm giá VIP20 để nhận ưu đãi.</p>
+                        <div class="notification-time">1 ngày trước</div>
+                        <div class="notification-actions">
+                            <button class="notification-action-btn primary" onclick="viewPromotion()">Xem khuyến mãi</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notification-item" data-category="system">
+                    <div class="notification-icon warning">⚠️</div>
+                    <div class="notification-content-item">
+                        <h3 class="notification-title">Cập nhật bảo mật tài khoản</h3>
+                        <p class="notification-message">Chúng tôi khuyến nghị bạn cập nhật mật khẩu để tăng cường bảo mật tài khoản. Mật khẩu hiện tại của bạn đã được sử dụng hơn 90 ngày.</p>
+                        <div class="notification-time">3 ngày trước</div>
+                        <div class="notification-actions">
+                            <button class="notification-action-btn primary" onclick="updatePassword()">Cập nhật mật khẩu</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notification-item" data-category="orders">
+                    <div class="notification-icon success">✅</div>
+                    <div class="notification-content-item">
+                        <h3 class="notification-title">Đơn hàng #12340 đã được giao thành công</h3>
+                        <p class="notification-message">Đơn hàng của bạn đã được giao thành công. Cảm ơn bạn đã mua sắm tại BanHangRong!</p>
+                        <div class="notification-time">5 ngày trước</div>
+                        <div class="notification-actions">
+                            <button class="notification-action-btn primary" onclick="viewOrder('12340')">Xem đơn hàng</button>
+                            <button class="notification-action-btn" onclick="rateOrder()">Đánh giá</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notification-item" data-category="system">
+                    <div class="notification-icon info">ℹ️</div>
+                    <div class="notification-content-item">
+                        <h3 class="notification-title">Chào mừng bạn đến với BanHangRong!</h3>
+                        <p class="notification-message">Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá các sản phẩm tuyệt vời và tận hưởng trải nghiệm mua sắm tốt nhất.</p>
+                        <div class="notification-time">1 tuần trước</div>
+                        <div class="notification-actions">
+                            <button class="notification-action-btn primary" onclick="exploreProducts()">Khám phá ngay</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (Hidden by default) -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-state-icon">🔔</div>
+                <h3 class="empty-state-title">Không có thông báo nào</h3>
+                <p class="empty-state-message">Bạn chưa có thông báo nào trong danh mục này.</p>
+                <a href="/customer/dashboard" class="empty-state-btn">Quay về trang chủ</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User dropdown functionality
+        document.getElementById('userMenuBtn').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            this.setAttribute('aria-expanded', !isExpanded);
+            dropdown.style.display = isExpanded ? 'none' : 'block';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userMenu.contains(event.target)) {
+                dropdown.style.display = 'none';
+                document.getElementById('userMenuBtn').setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Filter notifications
+        function filterNotifications(category) {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const notifications = document.querySelectorAll('.notification-item');
+            const emptyState = document.getElementById('emptyState');
+            const notificationList = document.getElementById('notificationList');
+            
+            // Update active filter button
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter notifications
+            let visibleCount = 0;
+            notifications.forEach(notification => {
+                if (category === 'all' || notification.dataset.category === category) {
+                    notification.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    notification.style.display = 'none';
+                }
+            });
+            
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+                notificationList.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                notificationList.style.display = 'block';
+            }
+        }
+
+        // Mark notification as read
+        function markAsRead(button) {
+            const notification = button.closest('.notification-item');
+            notification.classList.remove('unread');
+            button.textContent = 'Đã đọc';
+            button.disabled = true;
+            button.style.opacity = '0.5';
+        }
+
+        // Action handlers
+        function viewOrder(orderId) {
+            alert('Xem đơn hàng #' + orderId + '\nChức năng đang được phát triển!');
+        }
+
+        function viewPromotion() {
+            alert('Xem khuyến mãi\nChức năng đang được phát triển!');
+        }
+
+        function updatePassword() {
+            alert('Cập nhật mật khẩu\nChức năng đang được phát triển!');
+        }
+
+        function rateOrder() {
+            alert('Đánh giá đơn hàng\nChức năng đang được phát triển!');
+        }
+
+        function exploreProducts() {
+            window.location.href = '/customer/dashboard';
+        }
+    </script>
+</body>
+</html>

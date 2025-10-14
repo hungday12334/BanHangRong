@@ -211,7 +211,7 @@ body {
 				<a href="/support">Support</a>
 			</nav>
 			<div class="top-actions">
-				<div class="notif">Notification</div>
+				<a href="/notification" class="notif" style="text-decoration:none;color:var(--muted);">Notification</a>
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                         <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
