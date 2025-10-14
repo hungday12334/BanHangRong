@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Order History - BanHangRong</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<style>
+		:root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --chip:#e5e7eb; --line:#eaeef4; }
+		* { box-sizing:border-box; }
+		html,body { height:100%; }
+		body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+		.wrapper { min-height:100%; display:flex; flex-direction:column; }
+		.topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
+		.brand { font-weight:800; letter-spacing:.2px; }
+        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
+		.lang, .notif, .user { font-size:14px; color:var(--muted); }
+        .user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
+        .user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
+        .user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
+        .user-menu .item:hover{background:#f3f4f6}
+		.search { position:relative; }
+		.search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
+		.cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
+		.cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+		.nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
+		.nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
+		.nav a:hover { background:#f3f4f6; }
+		
+		.order-history-container {
+            max-width: 1200px;
+            margin: 18px auto 12px;
+            padding: 0 10px;
+        }
+        
+        .page-header {
+            background: linear-gradient(180deg,#f8fbff, #eef6ff);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+        }
+        
+        .page-subtitle {
+            color: var(--muted);
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .order-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s;
+        }
+        
+        .order-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+        
+        .order-id {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+        
+        .order-date {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .order-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .order-items {
+            margin-top: 16px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .item-details {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        .item-price {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 40px;
+            gap: 10px;
+        }
+        
+        .pagination a, .pagination span {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.2s;
+        }
+        
+        .pagination a:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .pagination .current {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        .btn-primary {
+            background: var(--brand);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: #0284c7;
+        }
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<div class="topbar">
+			<div class="brand">BanHangRong</div>
+			<nav class="nav" aria-label="Main">
+				<a href="/customer/dashboard">Home</a>
+				<a href="/categories">Category</a>
+				<a href="#">License Software</a>
+				<a href="#">Game Keys</a>
+				<a href="#">Voucher</a>
+				<a href="#">Support</a>
+			</nav>
+			<div class="top-actions">
+				<div class="notif">Notification</div>
+                <div class="user" style="position:relative">
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/orderhistory" role="menuitem">Order History</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
+                        <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+				<div class="search">
+					<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+						<input type="search" name="search" placeholder="search" aria-label="Search" 
+							   style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+						<button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+					</form>
+				</div>
+				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+			</div>
+		</div>
+
+        <div class="order-history-container">
+            <div class="page-header">
+                <h1 class="page-title">Order History</h1>
+                <p class="page-subtitle">View and track your past orders</p>
+            </div>
+
+            <div th:if="${orders != null and !orders.empty}">
+                <div th:each="order : ${orders}" class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #<span th:text="${order.orderId}">12345</span></div>
+                            <div class="order-date" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 15, 2024 14:30</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="order-total" th:text="${#numbers.formatCurrency(order.totalAmount)}">$99.99</div>
+                            <div class="order-status" th:classappend="${order.status == 'PENDING' ? 'status-pending' : (order.status == 'COMPLETED' ? 'status-completed' : 'status-cancelled')}" th:text="${order.status}">PENDING</div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-items">
+                        <div th:each="item : ${orderItemsMap[order.orderId]}" class="order-item">
+                            <div>
+                                <div class="item-name" th:text="${productNamesMap[item.productId]}">Product Name</div>
+                                <div class="item-details">Quantity: <span th:text="${item.quantity}">1</span></div>
+                            </div>
+                            <div class="item-price" th:text="${#numbers.formatCurrency(item.priceAtTime * item.quantity)}">$29.99</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div th:if="${totalPages > 1}" class="pagination">
+                    <a th:if="${page > 0}" th:href="@{/orderhistory(page=${page - 1}, size=${size})}">Previous</a>
+                    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:class="${i == page ? 'current' : ''}">
+                        <a th:if="${i != page}" th:href="@{/orderhistory(page=${i}, size=${size})}" th:text="${i + 1}">1</a>
+                        <span th:if="${i == page}" th:text="${i + 1}">1</span>
+                    </span>
+                    <a th:if="${page < totalPages - 1}" th:href="@{/orderhistory(page=${page + 1}, size=${size})}">Next</a>
+                </div>
+            </div>
+
+            <div th:if="${orders == null or orders.empty}" class="empty-state">
+                <h3>No orders found</h3>
+                <p>You haven't placed any orders yet.</p>
+                <a href="/customer/dashboard" class="btn-primary">Start Shopping</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User dropdown functionality
+        document.getElementById('userMenuBtn').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            this.setAttribute('aria-expanded', !isExpanded);
+            dropdown.style.display = isExpanded ? 'none' : 'block';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userMenu.contains(event.target)) {
+                dropdown.style.display = 'none';
+                document.getElementById('userMenuBtn').setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+</body>
+</html>

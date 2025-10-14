@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix(seller_dashboard): correct loading text for better user experience" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix(seller_dashboard): correct loading text for better user experience">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrdersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrdersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -36,7 +47,7 @@
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/hungday12334/BanHangRong.git",
-    "accountId": "efd5b86f-5509-426a-a183-1d6d3c55d639"
+    "accountId": "e0255c87-1891-4a10-ac00-ab7ed3312585"
   }
 }]]></component>
   <component name="KubernetesApiPersistence">{}</component>
@@ -111,8 +122,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
       </set>
     </attachedChunks>
   </component>
@@ -132,6 +143,7 @@
       <workItem from="1760335861930" duration="2498000" />
       <workItem from="1760342118902" duration="8292000" />
       <workItem from="1760424344305" duration="333000" />
+      <workItem from="1760462090685" duration="1581000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
