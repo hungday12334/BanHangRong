@@ -66,7 +66,7 @@
 				<a href="#">Voucher</a>
 				<a href="#">Support</a>
 			</nav>
-			<div class="top-actions">
+            <div class="top-actions">
 				<div class="notif">Notification</div>
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
@@ -212,6 +212,19 @@
 		</div>
 
         <!-- No popup; product cards navigate to detail page -->
+        <!-- Pretty popup for topup result -->
+        <div id="topupPopup" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
+            <div style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
+                <div id="topupIcon" style="width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:6px auto 12px auto;border:2px solid #10b981;color:#10b981;font-size:34px">✓</div>
+                <h3 id="topupTitle" style="margin:0 0 6px 0;color:#111827;font-size:18px">Nạp tiền thành công</h3>
+                <div id="topupMsg" style="color:#6b7280;font-size:14px">Số tiền đã được cộng vào ví của bạn.</div>
+                <div style="margin-top:14px;display:flex;gap:8px;justify-content:center">
+                    <a href="/cart" class="btn" style="background:#111827;color:#fff;border:none;padding:8px 12px;border-radius:10px">Về giỏ hàng</a>
+                    <button type="button" id="topupClose" class="btn" style="padding:8px 12px;border-radius:10px">Đóng</button>
+                </div>
+            </div>
+        </div>
+
         <script>
         (function(){
             const btn = document.getElementById('userMenuBtn');
@@ -234,14 +247,31 @@
             return true;
         }
 
-        // popup result after redirect
+        // Pretty popup result after redirect
         (function(){
             const params = new URLSearchParams(window.location.search);
             const topup = params.get('topup');
             if(!topup) return;
             const amount = params.get('amount');
-            if(topup==='success') alert('Nạp tiền thành công' + (amount?(': ' + Number(amount).toLocaleString('vi-VN') + 'đ') : ''));
-            else alert('Nạp tiền thất bại. Mã: ' + (params.get('code')||'')); 
+            const el = document.getElementById('topupPopup');
+            const icon = document.getElementById('topupIcon');
+            const title = document.getElementById('topupTitle');
+            const msg = document.getElementById('topupMsg');
+            const closeBtn = document.getElementById('topupClose');
+            function show(){ el.style.display='flex'; }
+            function hide(){ el.style.display='none'; }
+            closeBtn && closeBtn.addEventListener('click', hide);
+            if (topup === 'success') {
+                if(icon){ icon.style.borderColor = '#10b981'; icon.style.color = '#10b981'; icon.textContent = '✓'; }
+                if(title) title.textContent = 'Nạp tiền thành công';
+                if(msg) msg.textContent = 'Đã cộng ' + (amount?Number(amount).toLocaleString('vi-VN')+'₫':'số tiền') + ' vào ví của bạn.';
+                show();
+            } else {
+                if(icon){ icon.style.borderColor = '#ef4444'; icon.style.color = '#ef4444'; icon.textContent = '!'; }
+                if(title) title.textContent = 'Nạp tiền thất bại';
+                if(msg) msg.textContent = 'Mã lỗi: ' + (params.get('code')||'');
+                show();
+            }
         })();
         </script>
 	</div>
