@@ -830,8 +830,8 @@
       profilePanel.hidden = true;
       profilePanel.style.display = 'none';
       dashboardContent.style.display = '';
-      // ALSO hide other sidebar panels (orders, keys, profile-settings) to prevent residual content
-      ['ordersPanel','keysPanel','profileSettingsPanel'].forEach(id => {
+      // ALSO hide other sidebar panels (orders, keys, productpanel) to prevent residual content
+      ['ordersPanel','keysPanel','profileSettingsPanel','productsPanel'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.hidden = true; el.style.display = 'none'; }
       });
