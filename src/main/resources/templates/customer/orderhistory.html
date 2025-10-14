@@ -16,7 +16,9 @@ body {
 }
 .wrapper{display:flex;flex-direction:column;min-height:100vh}
 .topbar{display:flex;align-items:center;justify-content:space-between;background:#fff;padding:10px 24px;border-bottom:1px solid var(--line)}
-.brand{font-weight:700;font-size:20px}
+.brand{font-weight:700;font-size:20px;display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;color:inherit}
+.brand:hover{color:var(--brand)}
+.logo{height:32px;width:auto}
 .nav a{margin:0 10px;text-decoration:none;color:#111827;font-weight:500}
 .top-actions{display:flex;align-items:center;gap:14px}
 .user-btn{border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;background:#fff}
@@ -192,9 +194,11 @@ body {
 <body>
 	<div class="wrapper">
 		<div class="topbar">
-			<div class="brand">BanHangRong</div>
+			<a href="/customer/dashboard" class="brand">
+				<img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+				BanHangRong
+			</a>
     <nav class="nav">
-				<a href="/customer/dashboard">Home</a>
 				<a href="/categories">Category</a>
 				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>

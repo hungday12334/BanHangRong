@@ -15,7 +15,9 @@
 		body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
 		.wrapper { min-height:100%; display:flex; flex-direction:column; }
 		.topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
-		.brand { font-weight:800; letter-spacing:.2px; }
+		.brand { font-weight:800; letter-spacing:.2px; display:flex; align-items:center; gap:8px; cursor:pointer; text-decoration:none; color:inherit; }
+		.brand:hover { color:var(--brand); }
+		.logo { height:32px; width:auto; }
         .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
 		.lang, .notif, .user { font-size:14px; color:var(--muted); }
         .user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
@@ -57,9 +59,11 @@
 <body>
 	<div class="wrapper">
 		<div class="topbar">
-			<div class="brand">BanHangRong</div>
+			<a href="/customer/dashboard" class="brand">
+				<img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+				BanHangRong
+			</a>
 			<nav class="nav" aria-label="Main">
-				<a href="/customer/dashboard">Home</a>
 				<a href="/categories">Category</a>
 				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>
