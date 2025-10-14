@@ -10,17 +10,48 @@ public class ProductReviews {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_id")
     private Long reviewId;
+
     @Column(name = "product_id")
     private Long productId;
+
     @Column(name = "user_id")
     private Long userId;
+
     private Integer rating;
     private String comment;
+
+    // THÊM 2 FIELD MỚI
+    @Column(name = "seller_response", columnDefinition = "TEXT")
+    private String sellerResponse;
+
+    @Column(name = "seller_response_at")
+    private LocalDateTime sellerResponseAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Thêm getters và setters cho 2 field mới
+    public String getSellerResponse() {
+        return sellerResponse;
+    }
+
+    public void setSellerResponse(String sellerResponse) {
+        this.sellerResponse = sellerResponse;
+        this.sellerResponseAt = LocalDateTime.now();
+    }
+
+    public LocalDateTime getSellerResponseAt() {
+        return sellerResponseAt;
+    }
+
+    public void setSellerResponseAt(LocalDateTime sellerResponseAt) {
+        this.sellerResponseAt = sellerResponseAt;
+    }
+
+    // Các getters và setters cũ giữ nguyên
     public Long getReviewId() {
         return reviewId;
     }
@@ -62,5 +93,10 @@ public class ProductReviews {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
