@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/ImageUploadUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/Validation.java" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: adding an image avatar function.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/product-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/product-management.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/product-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/product-update.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/user-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/user-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/ImageUploadUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/ImageUploadUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/user-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/user-update.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -89,14 +83,14 @@
     "git-widget-placeholder": "hungnthe191662",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
+    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong9/uploads/avatar",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
+    "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.0",
     "settings.editor.selected.configurable": "project.propCompiler",
     "vue.rearranger.settings.migration": "true"
@@ -104,6 +98,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\tpc\Desktop\BanHangRong9\uploads\avatar" />
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
   </component>
@@ -141,7 +136,7 @@
       <workItem from="1760305063239" duration="6164000" />
       <workItem from="1760311682907" duration="132000" />
       <workItem from="1760369820834" duration="13445000" />
-      <workItem from="1760420733180" duration="8631000" />
+      <workItem from="1760420733180" duration="12754000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -199,7 +194,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760311797305</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="update: adding an image avatar function.">
+      <option name="closed" value="true" />
+      <created>1760431787818</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1760431787818</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -236,6 +239,7 @@
     <MESSAGE value="fix: fix error approve Products." />
     <MESSAGE value="fix: fix error navigation to seller_dashboard." />
     <MESSAGE value="update: add sidebar.html ---&gt; to emb into othes html files ." />
-    <option name="LAST_COMMIT_MESSAGE" value="update: add sidebar.html ---&gt; to emb into othes html files ." />
+    <MESSAGE value="update: adding an image avatar function." />
+    <option name="LAST_COMMIT_MESSAGE" value="update: adding an image avatar function." />
   </component>
 </project>

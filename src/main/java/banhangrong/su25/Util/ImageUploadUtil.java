@@ -22,7 +22,7 @@ public class ImageUploadUtil {
         String fileName = username + extension;
 
         // Đường dẫn lưu file
-        Path uploadDir = Paths.get("src/main/resources/static/img/avatar");
+        Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "avatar");
 
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);

@@ -12,21 +12,24 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/")
                 .setCachePeriod(3600);
-        
+
         registry.addResourceHandler("/js/**")
                 .addResourceLocations("classpath:/static/js/")
                 .setCachePeriod(3600);
-        
+
         registry.addResourceHandler("/img/**")
                 .addResourceLocations("classpath:/static/img/")
                 .setCachePeriod(3600);
-        
+
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/")
                 .setCachePeriod(3600);
-        
+
         registry.addResourceHandler("/favicon.ico")
                 .addResourceLocations("classpath:/static/")
+                .setCachePeriod(3600);
+        registry.addResourceHandler("/avatar/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/avatar/")
                 .setCachePeriod(3600);
     }
 }
