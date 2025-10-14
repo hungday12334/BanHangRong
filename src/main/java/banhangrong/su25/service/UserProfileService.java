@@ -27,29 +27,66 @@ public class UserProfileService {
     }
 
     public Users updateSellerProfile(Long sellerId, Users updatedUser) {
-        Users existingUser = getSellerProfile(sellerId);
+        try {
+            System.out.println("=== UPDATING SELLER PROFILE ===");
+            System.out.println("Seller ID: " + sellerId);
 
-        // Chỉ cập nhật các field được phép
-        if (updatedUser.getUsername() != null) {
-            existingUser.setUsername(updatedUser.getUsername());
-        }
-        if (updatedUser.getPhoneNumber() != null) {
-            existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
-        }
-        if (updatedUser.getGender() != null) {
-            existingUser.setGender(updatedUser.getGender());
-        }
-        if (updatedUser.getBirthDate() != null) {
-            existingUser.setBirthDate(updatedUser.getBirthDate());
-        }
-        if (updatedUser.getAvatarUrl() != null) {
-            existingUser.setAvatarUrl(updatedUser.getAvatarUrl());
-        }
+            Users existingUser = getSellerProfile(sellerId);
+            System.out.println("Current username: " + existingUser.getUsername());
+            System.out.println("Current phone: " + existingUser.getPhoneNumber());
+            System.out.println("Current gender: " + existingUser.getGender());
+            System.out.println("Current birth date: " + existingUser.getBirthDate());
 
-        return usersRepository.save(existingUser);
+            // Chỉ cập nhật các field được phép
+            if (updatedUser.getUsername() != null) {
+                existingUser.setUsername(updatedUser.getUsername());
+                System.out.println("New username: " + updatedUser.getUsername());
+            }
+            if (updatedUser.getPhoneNumber() != null) {
+                existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
+                System.out.println("New phone: " + updatedUser.getPhoneNumber());
+            }
+            if (updatedUser.getGender() != null) {
+                existingUser.setGender(updatedUser.getGender());
+                System.out.println("New gender: " + updatedUser.getGender());
+            }
+            if (updatedUser.getBirthDate() != null) {
+                existingUser.setBirthDate(updatedUser.getBirthDate());
+                System.out.println("New birth date: " + updatedUser.getBirthDate());
+            }
+
+            Users savedUser = usersRepository.save(existingUser);
+            System.out.println("✅ Profile saved successfully");
+            System.out.println("Saved username: " + savedUser.getUsername());
+            System.out.println("Saved phone: " + savedUser.getPhoneNumber());
+            System.out.println("Saved gender: " + savedUser.getGender());
+            System.out.println("Saved birth date: " + savedUser.getBirthDate());
+
+            return savedUser;
+
+        } catch (Exception e) {
+            System.out.println("❌ Error in updateSellerProfile: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // === THÊM METHOD UPDATE AVATAR ===
+    public void updateAvatar(Long sellerId, String avatarUrl) {
+        try {
+            System.out.println("Updating avatar for seller " + sellerId + " to: " + avatarUrl);
+            Users existingUser = getSellerProfile(sellerId);
+            existingUser.setAvatarUrl(avatarUrl);
+            usersRepository.save(existingUser);
+            System.out.println("Avatar updated successfully");
+        } catch (Exception e) {
+            System.out.println("Error updating avatar: " + e.getMessage());
+            throw e;
+        }
     }
 
     public Optional<Users> getUserByEmail(String email) {
         return usersRepository.findByEmail(email);
     }
+
+
 }

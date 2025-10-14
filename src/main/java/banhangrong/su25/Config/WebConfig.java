@@ -29,5 +29,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/favicon.ico")
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(3600);
+            // === THÊM DÒNG NÀY ĐỂ PHỤC VỤ FILE UPLOAD ===
+            registry.addResourceHandler("/uploads/**")
+                    .addResourceLocations("file:uploads/")
+                    .setCachePeriod(3600);
     }
 }
