@@ -3,6 +3,7 @@ package banhangrong.su25.service;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -12,6 +13,9 @@ public class UserProfileService {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Users getUserById(Long userId) {
         return usersRepository.findById(userId)
@@ -82,6 +86,31 @@ public class UserProfileService {
             System.out.println("Error updating avatar: " + e.getMessage());
             throw e;
         }
+    }
+
+    // === THÊM METHODS XỬ LÝ MẬT KHẨU ===
+
+    public void changePassword(Long sellerId, String newPassword) {
+        try {
+            System.out.println("Changing password for seller: " + sellerId);
+
+            Users existingUser = getSellerProfile(sellerId);
+
+            // Mã hóa mật khẩu mới (sử dụng BCrypt)
+            String encryptedPassword = passwordEncoder.encode(newPassword);
+            existingUser.setPassword(encryptedPassword);
+
+            Users savedUser = usersRepository.save(existingUser);
+            System.out.println("✅ Password changed successfully");
+
+        } catch (Exception e) {
+            System.out.println("❌ Error in changePassword: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public boolean verifyPassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
     public Optional<Users> getUserByEmail(String email) {

@@ -178,4 +178,41 @@ public class SellerProfileController {
 
         return "redirect:/seller/profile";
     }
+
+    // === THÊM METHOD ĐỔI MẬT KHẨU ===
+    @PostMapping("/profile/change-password")
+    public String changePassword(@RequestParam String currentPassword,
+                                 @RequestParam String newPassword,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("=== START PASSWORD CHANGE ===");
+
+            Long sellerId = getCurrentSellerId();
+            Users user = userProfileService.getSellerProfile(sellerId);
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!userProfileService.verifyPassword(currentPassword, user.getPassword())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu hiện tại không đúng");
+                return "redirect:/seller/profile";
+            }
+
+            // Kiểm tra mật khẩu mới
+            if (newPassword.length() < 6) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới phải có ít nhất 6 ký tự");
+                return "redirect:/seller/profile";
+            }
+
+            // Đổi mật khẩu
+            userProfileService.changePassword(sellerId, newPassword);
+
+            System.out.println("✅ Password changed successfully for user: " + user.getUsername());
+            redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
+
+        } catch (Exception e) {
+            System.out.println("❌ Error changing password: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+
+        return "redirect:/seller/profile";
+    }
 }

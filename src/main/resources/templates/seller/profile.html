@@ -1102,6 +1102,62 @@
             box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
 
+
+        /* === THÊM CSS CHO MODAL MẬT KHẨU === */
+
+        /* Style cho password strength indicator */
+        .password-strength {
+            margin: 1rem 0;
+        }
+
+        .strength-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        /* Password strength levels */
+        .strength-weak .strength-fill {
+            background: var(--bad);
+            width: 33%;
+        }
+
+        .strength-medium .strength-fill {
+            background: var(--warn);
+            width: 66%;
+        }
+
+        .strength-strong .strength-fill {
+            background: var(--good);
+            width: 100%;
+        }
+
+        /* Style cho nút warning */
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warn), #eab308);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
     </style>
 </head>
 <body class="loading">
@@ -1246,6 +1302,12 @@
                         <button type="button" class="btn btn-secondary" id="aboutUsBtn">
                             <i class="ti ti-info-circle"></i>Chúng tôi
                         </button>
+
+                        <!-- === THÊM NÚT ĐỔI MẬT KHẨU === -->
+                        <button type="button" class="btn btn-warning" id="changePasswordBtn">
+                            <i class="ti ti-lock"></i>Đổi mật khẩu
+                        </button>
+
                         <button type="button" class="btn btn-primary" id="editBtn">
                             <i class="ti ti-edit"></i>Chính sửa
                         </button>
@@ -1279,6 +1341,49 @@
                 <button type="button" class="btn btn-cancel" id="cancelUpload">Hủy</button>
                 <button type="submit" class="btn btn-upload">
                     <i class="ti ti-upload"></i>Tải lên
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- === THÊM MODAL ĐỔI MẬT KHẨU === -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Đổi Mật Khẩu</h3>
+            <button class="close-modal" id="closePasswordModal">&times;</button>
+        </div>
+
+        <form id="passwordChangeForm">
+            <div class="form-group">
+                <label for="currentPassword">Mật khẩu hiện tại:</label>
+                <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="newPassword">Mật khẩu mới:</label>
+                <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+            </div>
+
+            <div class="password-strength" id="passwordStrength" style="display: none;">
+                <div class="strength-bar">
+                    <div class="strength-fill" id="strengthFill"></div>
+                </div>
+                <div class="strength-text" id="strengthText"></div>
+            </div>
+
+            <p class="upload-help">Mật khẩu phải có ít nhất 6 ký tự</p>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-cancel" id="cancelPasswordChange">Hủy</button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="ti ti-key"></i>Đổi mật khẩu
                 </button>
             </div>
         </form>
@@ -1680,6 +1785,209 @@
         setTimeout(() => {
             finishGlobalLoad();
         }, 1500);
+    });
+
+
+    // === THÊM BIẾN CHO MODAL MẬT KHẨU ===
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const passwordModal = document.getElementById('passwordModal');
+    const closePasswordModal = document.getElementById('closePasswordModal');
+    const cancelPasswordChange = document.getElementById('cancelPasswordChange');
+    const passwordChangeForm = document.getElementById('passwordChangeForm');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+
+    // === XỬ LÝ NÚT ĐỔI MẬT KHẨU ===
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', function() {
+            console.log("Change password button clicked");
+            if (passwordModal) {
+                passwordModal.style.display = 'block';
+                console.log("Opened password modal");
+            }
+        });
+    }
+
+    // === XỬ LÝ MODAL MẬT KHẨU ===
+
+    // Đóng modal mật khẩu
+    function closePasswordModalFunc() {
+        if (passwordModal) {
+            passwordModal.style.display = 'none';
+            console.log("Closed password modal");
+        }
+        if (passwordChangeForm) {
+            passwordChangeForm.reset();
+        }
+        // Reset password strength indicator
+        if (passwordStrength) {
+            passwordStrength.style.display = 'none';
+        }
+    }
+
+    if (closePasswordModal) {
+        closePasswordModal.addEventListener('click', closePasswordModalFunc);
+    }
+
+    if (cancelPasswordChange) {
+        cancelPasswordChange.addEventListener('click', closePasswordModalFunc);
+    }
+
+    // === KIỂM TRA ĐỘ MẠNH MẬT KHẨU ===
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+        });
+    }
+
+    function checkPasswordStrength(password) {
+        if (!passwordStrength || !strengthFill || !strengthText) return;
+
+        if (password.length === 0) {
+            passwordStrength.style.display = 'none';
+            return;
+        }
+
+        passwordStrength.style.display = 'block';
+
+        let strength = 0;
+        let text = '';
+        let className = '';
+
+        // Kiểm tra độ dài
+        if (password.length >= 6) strength += 1;
+        if (password.length >= 8) strength += 1;
+
+        // Kiểm tra ký tự đặc biệt
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 1;
+
+        // Kiểm tra số
+        if (/[0-9]/.test(password)) strength += 1;
+
+        // Kiểm tra chữ hoa và thường
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+
+        // Xác định độ mạnh
+        if (strength <= 2) {
+            text = 'Yếu';
+            className = 'strength-weak';
+        } else if (strength <= 4) {
+            text = 'Trung bình';
+            className = 'strength-medium';
+        } else {
+            text = 'Mạnh';
+            className = 'strength-strong';
+        }
+
+        strengthFill.className = 'strength-fill';
+        strengthFill.classList.add(className.split('-')[1]);
+        strengthText.textContent = text;
+        passwordStrength.className = 'password-strength ' + className;
+    }
+
+    // === KIỂM TRA XÁC NHẬN MẬT KHẨU ===
+    if (confirmPasswordInput && newPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = this.value;
+
+            if (confirmPassword && newPassword !== confirmPassword) {
+                this.style.borderColor = 'var(--bad)';
+            } else {
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // === XỬ LÝ SUBMIT FORM ĐỔI MẬT KHẨU ===
+    if (passwordChangeForm) {
+        passwordChangeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log("Password change form submitted");
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validate form
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast('Mật khẩu xác nhận không khớp', 'error');
+                return;
+            }
+
+            // Gửi request đổi mật khẩu
+            changePassword(currentPassword, newPassword);
+        });
+    }
+
+    // === HÀM GỬI REQUEST ĐỔI MẬT KHẨU ===
+    function changePassword(currentPassword, newPassword) {
+        const formData = new FormData();
+        formData.append('currentPassword', currentPassword);
+        formData.append('newPassword', newPassword);
+
+        // Hiển thị loading
+        showToast('Đang đổi mật khẩu...', 'info', { duration: 0 });
+
+        // Gửi request đến server
+        fetch('/seller/profile/change-password', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Password change failed with status: ' + response.status);
+            })
+            .then(data => {
+                // Đóng toast loading
+                document.querySelectorAll('.toast').forEach(toast => toast.remove());
+
+                showToast('Đổi mật khẩu thành công!', 'success');
+                closePasswordModalFunc();
+
+                // Đăng xuất sau 2 giây (tuỳ chọn)
+                setTimeout(() => {
+                    showToast('Vui lòng đăng nhập lại với mật khẩu mới', 'info');
+                    setTimeout(() => {
+                        window.location.href = '/logout';
+                    }, 2000);
+                }, 1000);
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                showToast('Lỗi khi đổi mật khẩu: ' + error.message, 'error');
+            });
+    }
+
+    // Đóng modal khi click bên ngoài (cho cả 2 modal)
+    window.addEventListener('click', function(e) {
+        if (e.target === avatarModal) {
+            closeAvatarModal();
+        }
+        if (e.target === passwordModal) {
+            closePasswordModalFunc();
+        }
     });
 </script>
 </body>
