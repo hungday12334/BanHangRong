@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>User Manage</title>
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}" />
-    <link rel="stylesheet" th:href="@{/css/styles.min.css}" />
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -70,6 +70,7 @@
         .btn-create:hover {
             background-color: #5b77e6;
         }
+
         a {
             text-decoration: none;
         }
@@ -77,9 +78,11 @@
         a:hover {
             text-decoration: none;
         }
+
         .sidebar-link .hide-menu {
             margin-left: -8px; /* giảm khoảng cách chữ */
         }
+
         /* Nút hành động tự custom */
         .action-btns {
             display: flex;
@@ -128,31 +131,98 @@
             transform: scale(1.1);
             filter: brightness(1.1);
         }
+
+        .filter-bar {
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .filter-bar #searchInput {
+            flex: 2;
+            min-width: 250px;
+        }
+
+        .filter-bar select {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .date-field {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .date-field label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .userType-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .admin {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .seller {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .customer {
+            background-color: #007bff; /* hoặc #0d6efd nếu bạn dùng tone Bootstrap 5 */
+            color: white;
+        }
     </style>
 </head>
 
 <body>
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
     <!-- Sidebar Start -->
-    <div th:replace="admin/sidebar::sidebar"></div>
+    <div th:replace="~{admin/sidebar::sidebar}"></div>
     <!-- Sidebar End -->
 
     <!-- ListUser Section -->
     <div class="content-wrapper">
         <div class="user-header">
-            <form class="d-flex">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search users">
-                <button type="button" class="btn btn-outline-primary">Search</button>
-                <select id="roleSelect" class="form-select">
-                    <option value="all">All</option>
-                    <option value="admin">Admin</option>
-                    <option value="seller">Seller</option>
-                    <option value="customer">Customer</option>
+            <div class="d-flex filter-bar">
+                <input type="text" id="searchInput" class="form-control" placeholder="ID, Username, Email, Phone">
+                <select id="role" class="form-select">
+                    <option value="ALL">ROLE</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="SELLER">SELLER</option>
+                    <option value="CUSTOMER">CUSTOMER</option>
                 </select>
-            </form>
+                <select id="gentle" class="form-select">
+                    <option value="ALL">GENTLE</option>
+                    <option value="MALE">MALE</option>
+                    <option value="FEMALE">FEMALE</option>
+                    <option value="OTHERS">OTHERS</option>
+                </select>
+                <div class="date-field">
+                    <label for="createAt">Create At</label>
+                    <input type="date" id="createAt" class="form-control">
+                </div>
+
+                <div class="date-field">
+                    <label for="updateAt">Update At</label>
+                    <input type="date" id="updateAt" class="form-control">
+                </div>
+            </div>
             <a th:href="@{/admin/user/create}" class="btn-create">Create User</a>
         </div>
-
         <div class="table-responsive">
             <!-- Thông báo lỗi -->
             <div th:if="${error}"
@@ -170,7 +240,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
-            <table class="table table-bordered text-center align-middle shadow-sm">
+            <table id="userTable" class="table table-bordered text-center align-middle shadow-sm">
                 <thead>
                 <tr>
                     <th></th>
@@ -207,7 +277,15 @@
                     <td th:text="${u.userId}"></td>
                     <td th:text="${u.username}"></td>
                     <td th:text="${u.email}"></td>
-                    <td th:text="${u.userType}"></td>
+                    <td>
+                      <span th:text="${u.userType}"
+                            th:class="${'userType-badge ' +
+                              (#strings.equalsIgnoreCase(u.userType, 'admin') ? 'admin' :
+                              (#strings.equalsIgnoreCase(u.userType, 'seller') ? 'seller' :
+                              (#strings.equalsIgnoreCase(u.userType, 'customer') ? 'customer' : '')))}">
+                      </span>
+                    </td>
+
                     <td th:text="${u.phoneNumber}"></td>
                     <td th:text="${u.gender}"></td>
                     <td th:text="${u.birthDate}"></td>
@@ -224,26 +302,73 @@
     </div>
 </div>
 <script>
-    document.getElementById("searchInput").addEventListener("keyup", function() {
-        const filter = this.value.toLowerCase();
-        const rows = document.querySelectorAll("table tbody tr");
+    document.addEventListener("DOMContentLoaded", () => {
+        const searchInput = document.getElementById("searchInput");
+        const roleSelect = document.getElementById("role");
+        const gentleSelect = document.getElementById("gentle");
+        const createAtInput = document.getElementById("createAt");
+        const updateAtInput = document.getElementById("updateAt");
+        const rows = document.querySelectorAll("#userTable tbody tr");
 
-        rows.forEach(row => {
-            const cells = row.querySelectorAll("td");
-            let match = false;
+        function filterTable() {
+            const search = searchInput.value.trim().toLowerCase();
+            const role = roleSelect.value.toLowerCase();
+            const gentle = gentleSelect.value.toLowerCase();
+            const createAt = createAtInput.value.trim();
+            const updateAt = updateAtInput.value.trim();
 
-            // duyệt qua tất cả các cột trừ 3 cột thời gian cuối
-            for (let i = 0; i < cells.length - 3; i++) {
-                if (cells[i].innerText.toLowerCase().includes(filter)) {
-                    match = true;
-                    break;
-                }
-            }
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                if (cells.length < 14) return; // tránh lỗi nếu thiếu cột
 
-            row.style.display = match ? "" : "none";
+                const id = cells[1].textContent.toLowerCase();
+                const username = cells[2].textContent.toLowerCase();
+                const email = cells[3].textContent.toLowerCase();
+                const roleText = cells[4].textContent.trim().toLowerCase();
+                const phone = cells[5].textContent.toLowerCase();
+                const gentleText = cells[6].textContent.toLowerCase();
+                const createAtText = cells[12].textContent.trim();
+                const updateAtText = cells[13].textContent.trim();
+
+                // 🔍 Tìm kiếm (ID, Username, Email, Phone)
+                const matchSearch =
+                    !search ||
+                    id.includes(search) ||
+                    username.includes(search) ||
+                    email.includes(search) ||
+                    phone.includes(search);
+
+                // 🧩 Lọc role và gender (ignore case)
+                const matchRole = (role === "all" || roleText === role);
+                const matchGentle = (gentle === "all" || gentleText === gentle);
+
+                // 📅 Lọc ngày (so sánh theo tiền tố yyyy-MM-dd)
+                const matchCreateAt = !createAt || createAtText.startsWith(createAt);
+                const matchUpdateAt = !updateAt || updateAtText.startsWith(updateAt);
+
+                // ✅ Nếu tất cả điều kiện đều đúng thì hiển thị
+                row.style.display = (matchSearch && matchRole && matchGentle && matchCreateAt && matchUpdateAt)
+                    ? ""
+                    : "none";
+            });
+        }
+
+        // ⏱ Gõ xong 300ms mới lọc (debounce)
+        let typingTimer;
+        searchInput.addEventListener("input", () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(filterTable, 300);
+        });
+
+        // 🔁 Filter ngay khi thay đổi
+        [roleSelect, gentleSelect, createAtInput, updateAtInput].forEach(el => {
+            el.addEventListener("input", filterTable);
+            el.addEventListener("change", filterTable);
         });
     });
 </script>
+
+
 <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
 <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>

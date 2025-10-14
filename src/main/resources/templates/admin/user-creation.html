@@ -8,6 +8,8 @@
     <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
     <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
     <style>
         /* Căn chỉnh phần nội dung chính để không bị sidebar che */
         .content-wrapper {
@@ -107,19 +109,24 @@
             color: #fff;
             margin-left: 10px;
         }
+        .alert {
+            position: relative;
+            z-index: 9999;
+            margin-top: 20px;
+        }
     </style>
 </head>
 
 <body>
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
     <!-- Sidebar Start -->
-    <div th:replace="admin/sidebar::sidebar"></div>
+    <div th:replace="~{admin/sidebar::sidebar}"></div>
     <!-- Sidebar End -->
 
     <!-- ListUser Section -->
     <div class="content-wrapper">
         <!-- Thông báo lỗi -->
-        <div th:if="${errorExist}"
+        <div th:if="${error}"
              class="alert alert-danger alert-dismissible fade show"
              role="alert">
             <span th:text="${errorExist}"></span>
@@ -168,9 +175,8 @@
 
             <div class="form-group">
                 <label>Avatar:</label>
-                <input type="file" name="avatarUrl">
+                <input type="file" name="avatarUrl" accept="image/*">
             </div>
-
             <div class="form-group">
                 <label>Phone Number:</label>
                 <input type="text" name="phoneNumber" th:value="${user!=null ? user.phoneNumber : ''}">
@@ -191,7 +197,7 @@
 
             <div class="form-group">
                 <label>Balance:</label>
-                <input type="number" step="0.01" name="balance" th:value="${user!=null ? user.balance : ''}">
+                <input readonly type="number" step="0.01" name="balance" th:value="${user!=null ? user.balance : ''}">
             </div>
 
             <div class="form-actions">

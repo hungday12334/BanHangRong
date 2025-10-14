@@ -8,6 +8,7 @@
     <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
     <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         /* Căn chỉnh phần nội dung chính để không bị sidebar che */
         .content-wrapper {
@@ -132,8 +133,8 @@
             background-color: #fff;
         }
 
-        /* Màu cho ô readonly */
-        input[readonly],
+        /* Màu cho ô readonly,disabled */
+        input[readonly], input[disabled],
         select[readonly] {
             background-color: #e9ecef;
             font-weight: bold;
@@ -175,7 +176,7 @@
 <body>
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
     <!-- Sidebar Start -->
-    <div th:replace="admin/sidebar::sidebar"></div>
+    <div th:replace="~{admin/sidebar::sidebar}"></div>
     <!-- Sidebar End -->
 
     <!-- ListUser Section -->
@@ -196,6 +197,10 @@
         </div>
         <h2>Update</h2>
         <form id="userForm" action="/admin/user/update" method="post" enctype="multipart/form-data">
+            <div class="text-center mb-3">
+                <img th:src="@{'/img/avatar/' + ${user.avatarUrl}}" alt="Avatar"
+                     class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+            </div>
             <div class="form-group">
                 <label>Id:</label>
                 <input readonly type="text" name="id" th:value="${user!=null ? user.userId : ''}">
@@ -217,7 +222,7 @@
 
             <div class="form-group">
                 <label>User Type (Role):</label>
-                <select readonly name="userType">
+                <select readonly name="userType" disabled>
                     <option value="CUSTOMER"
                             th:selected="${user != null and user.userType == 'CUSTOMER'}">CUSTOMER
                     </option>
@@ -232,7 +237,7 @@
 
             <div class="form-group">
                 <label>Avatar:</label>
-                <input readonly type="file" name="avatarUrl">
+                <input disabled type="file" name="avatarUrl" accept="image/*">
             </div>
 
             <div class="form-group">
@@ -276,8 +281,9 @@
     // Khi bấm Update
     updateBtn.addEventListener('click', () => {
         inputs.forEach(input => {
-            if (!['id', 'email', 'username'].includes(input.name)) {
+            if (!['id', 'username','userType'].includes(input.name)) {
                 input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
                 input.style.backgroundColor = "#fff";
                 input.style.fontWeight = "normal";
             }
@@ -290,7 +296,11 @@
     // Khi bấm Cancel
     cancelBtn.addEventListener('click', () => {
         inputs.forEach(input => {
-            input.setAttribute('readonly', true);
+            if(!['avatarUrl'].includes(input.name)) {
+                input.setAttribute('readonly', true);
+            }else{
+                input.setAttribute('disabled',true);
+            }
             input.style.backgroundColor = "#e9ecef";
             input.style.fontWeight = "bold";
         });

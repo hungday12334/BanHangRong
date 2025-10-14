@@ -173,7 +173,7 @@
 <body>
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
     <!-- Sidebar Start -->
-    <div th:replace="admin/sidebar::sidebar"></div>
+    <div th:replace="~{admin/sidebar::sidebar}"></div>
     <!-- Sidebar End -->
 
     <!-- ListUser Section -->
@@ -218,7 +218,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="p : ${productsListPending}">
+                <tr th:each="p : ${productsList}">
                     <td>
                         <div class="action-btns">
                             <a th:href="@{'/admin/product/update?id=' + ${p.productId}}">
@@ -237,9 +237,9 @@
                     <td>
                         <span th:text="${p.status}"
                               th:class="'status-badge ' +
-                                  (#strings.equalsIgnoreCase(p.status,'public') ? 'status-public' :
-                                  (#strings.equalsIgnoreCase(p.status,'pending') ? 'status-pending' :
-                                  (#strings.equalsIgnoreCase(p.status,'cancelled') ? 'status-cancelled' : '')))">
+                                  (${p.status.equalsIgnoreCase('public')} ? 'status-public' :
+                                  (${p.status.equalsIgnoreCase('pending')} ? 'status-pending' :
+                                  (${p.status.equalsIgnoreCase('cancelled')} ? 'status-cancelled' : '')))">
                         </span>
                     </td>
                 </tr>
