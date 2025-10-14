@@ -225,6 +225,20 @@
             </div>
         </div>
 
+        <!-- Nice input modal for asking topup amount -->
+        <div id="topupAsk" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
+            <div style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
+                <h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">Nạp tiền VNPay</h3>
+                <div style="color:#6b7280;font-size:14px;margin-bottom:8px">Nhập số tiền muốn nạp (VND)</div>
+                <input id="topupAmountField" type="text" inputmode="numeric" placeholder="200000" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;font-weight:600" />
+                <div id="topupErr" style="color:#ef4444;font-size:12px;height:16px;margin-top:6px"></div>
+                <div style="margin-top:10px;display:flex;gap:8px;justify-content:center">
+                    <button type="button" id="topupCancelBtn" class="btn" style="padding:8px 12px;border-radius:10px">Hủy</button>
+                    <button type="button" id="topupConfirmBtn" class="btn" style="background:#0ea5e9;color:#fff;border:none;padding:8px 12px;border-radius:10px">Nạp</button>
+                </div>
+            </div>
+        </div>
+
         <script>
         (function(){
             const btn = document.getElementById('userMenuBtn');
@@ -236,15 +250,29 @@
             document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
         })();
 
+        let __topupForm = null;
         function topupPrompt(e){
             e.preventDefault();
-            const v = prompt('Nhập số tiền muốn nạp (VND):', '200000');
-            if(!v) return false;
-            const clean = v.replace(/[^0-9]/g,'');
-            if(!clean){ alert('Số tiền không hợp lệ'); return false; }
-            document.getElementById('topupAmountInput').value = clean;
-            e.target.submit();
-            return true;
+            __topupForm = e.target; // remember form
+            const ask = document.getElementById('topupAsk');
+            const field = document.getElementById('topupAmountField');
+            const err = document.getElementById('topupErr');
+            if(ask){ ask.style.display='flex'; setTimeout(()=>{ try{ field.focus(); }catch(_){} }, 0); }
+            function confirm(){
+                const v = field.value || '';
+                const clean = v.replace(/[^0-9]/g,'');
+                if(!clean){ err.textContent = 'Số tiền không hợp lệ'; return; }
+                document.getElementById('topupAmountInput').value = clean;
+                ask.style.display='none';
+                __topupForm.submit();
+            }
+            const okBtn = document.getElementById('topupConfirmBtn');
+            const cancelBtn = document.getElementById('topupCancelBtn');
+            const close = ()=>{ ask.style.display='none'; };
+            okBtn.onclick = confirm;
+            cancelBtn.onclick = close;
+            field.onkeydown = (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); confirm(); } };
+            return false;
         }
 
         // Pretty popup result after redirect
