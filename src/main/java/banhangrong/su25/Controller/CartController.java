@@ -4,6 +4,12 @@ import banhangrong.su25.Entity.ShoppingCart;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Repository.OrdersRepository;
+import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.Orders;
+import banhangrong.su25.Entity.OrderItems;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,13 +25,22 @@ public class CartController {
     private final ShoppingCartRepository cartRepository;
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
+    private final UsersRepository usersRepository;
+    private final OrdersRepository ordersRepository;
+    private final OrderItemsRepository orderItemsRepository;
 
     public CartController(ShoppingCartRepository cartRepository,
                           ProductsRepository productsRepository,
-                          ProductImagesRepository productImagesRepository) {
+                          ProductImagesRepository productImagesRepository,
+                          UsersRepository usersRepository,
+                          OrdersRepository ordersRepository,
+                          OrderItemsRepository orderItemsRepository) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
+        this.usersRepository = usersRepository;
+        this.ordersRepository = ordersRepository;
+        this.orderItemsRepository = orderItemsRepository;
     }
 
     // For demo: use fixed userId=2 (alice). In real app, read from session/auth
@@ -64,6 +79,77 @@ public class CartController {
         model.addAttribute("total", total);
         model.addAttribute("cartCount", items.size());
         return "customer/cart";
+    }
+
+    // Wallet checkout using user balance, with full DB consistency
+    @PostMapping("/cart/checkout-wallet")
+    @Transactional
+    public String checkoutWithWallet() {
+        Long uid = getCurrentUserId();
+        List<ShoppingCart> items = cartRepository.findByUserId(uid);
+        if (items.isEmpty()) return "redirect:/cart?pay=empty";
+
+        // Calculate total and lock/validate stock
+        BigDecimal total = BigDecimal.ZERO;
+        for (ShoppingCart it : items) {
+            Products p = productsRepository.findById(it.getProductId()).orElse(null);
+            if (p == null) continue;
+            BigDecimal unit = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+            int want = it.getQuantity() != null ? it.getQuantity() : 1;
+            int stock = p.getQuantity() != null ? p.getQuantity() : 0;
+            if (want <= 0 || stock <= 0) continue;
+            int buy = Math.min(stock, want);
+            total = total.add(unit.multiply(BigDecimal.valueOf(buy)));
+        }
+        if (total.compareTo(BigDecimal.ZERO) <= 0) return "redirect:/cart?pay=empty";
+
+        // Check balance
+        Users user = usersRepository.findById(uid).orElse(null);
+        if (user == null) return "redirect:/cart?pay=auth";
+        BigDecimal balance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+        if (balance.compareTo(total) < 0) {
+            return "redirect:/cart?pay=insufficient"; // not enough balance
+        }
+
+        // Deduct balance
+        user.setBalance(balance.subtract(total));
+        usersRepository.save(user);
+
+        // Create order
+        Orders order = new Orders();
+        order.setUserId(uid);
+        order.setTotalAmount(total);
+        order.setCreatedAt(java.time.LocalDateTime.now());
+        order.setUpdatedAt(java.time.LocalDateTime.now());
+        Orders saved = ordersRepository.save(order);
+
+        // Create items, update stock/sales
+        for (ShoppingCart it : items) {
+            Products p = productsRepository.findById(it.getProductId()).orElse(null);
+            if (p == null) continue;
+            BigDecimal unit = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+            int want = it.getQuantity() != null ? it.getQuantity() : 1;
+            int stock = p.getQuantity() != null ? p.getQuantity() : 0;
+            int buy = Math.min(stock, want);
+            if (buy <= 0) continue;
+
+            OrderItems oi = new OrderItems();
+            oi.setOrderId(saved.getOrderId());
+            oi.setProductId(p.getProductId());
+            oi.setQuantity(buy);
+            oi.setPriceAtTime(unit);
+            orderItemsRepository.save(oi);
+
+            p.setQuantity(stock - buy);
+            Integer sold = p.getTotalSales();
+            p.setTotalSales((sold != null ? sold : 0) + buy);
+            productsRepository.save(p);
+        }
+
+        // Clear cart
+        for (ShoppingCart it : items) { try { cartRepository.delete(it); } catch (Exception ignored) {} }
+
+        return "redirect:/cart?pay=success";
     }
 
     @PostMapping("/cart/add")

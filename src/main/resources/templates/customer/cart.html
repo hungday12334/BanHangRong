@@ -33,6 +33,7 @@
 <body>
     <div class="wrap">
         <h2>Giỏ hàng</h2>
+        <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999"></div>
         <div class="cart-card">
             <div class="cart-header">
                 <div class="col center"><input type="checkbox" disabled></div>
@@ -110,12 +111,26 @@
             });
         })();
         </script>
-        <form class="summary" method="post" action="/cart/checkout-demo">
+        <form class="summary" method="post" action="/cart/checkout-wallet">
             <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
             <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
-            <button class="btn primary" type="submit">Mua hàng (demo)</button>
+            <button class="btn primary" type="submit">Thanh toán bằng số dư</button>
         </form>
     </div>
+    <script>
+    (function(){
+        const params = new URLSearchParams(window.location.search);
+        const pay = params.get('pay');
+        if(!pay) return;
+        const toast = document.getElementById('toast');
+        if(!toast) return;
+        const show = (msg,bg)=>{ toast.textContent = msg; toast.style.background = bg; toast.style.display='block'; setTimeout(()=>{ toast.style.display='none'; }, 3500); };
+        if (pay==='success') show('Thanh toán thành công bằng số dư.', '#065f46');
+        else if (pay==='insufficient') show('Số dư không đủ. Vui lòng nạp tiền.', '#991b1b');
+        else if (pay==='empty') show('Giỏ hàng trống hoặc không hợp lệ.', '#b45309');
+        else if (pay==='auth') show('Vui lòng đăng nhập lại.', '#1f2937');
+    })();
+    </script>
 </body>
 </html>
 

@@ -50,6 +50,8 @@ public class SecurityConfig {
                     .requestMatchers("/api/database/**").permitAll()
                     .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
+                    // VNPay callback and payment endpoints must be public
+                    .requestMatchers("/payment/**").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
                     // Guest-browsable catalog
                     .requestMatchers("/categories", "/category/**", "/product/**").permitAll()

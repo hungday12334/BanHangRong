@@ -71,10 +71,15 @@
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                         <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <span th:if="${user != null && user.balance != null}" style="margin-left:8px;color:#10b981;font-weight:600" th:text="${#numbers.formatDecimal(user.balance,0,'COMMA',0,'POINT') + '₫'}">0₫</span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                         <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" name="amount" id="topupAmountInput" />
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
+                        </form>
                         <a class="item" href="#" role="menuitem">Đơn mua</a>
                         <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
                         <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
@@ -216,6 +221,27 @@
             if(btn){ btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); }); }
             document.addEventListener('click', close);
             document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+        })();
+
+        function topupPrompt(e){
+            e.preventDefault();
+            const v = prompt('Nhập số tiền muốn nạp (VND):', '200000');
+            if(!v) return false;
+            const clean = v.replace(/[^0-9]/g,'');
+            if(!clean){ alert('Số tiền không hợp lệ'); return false; }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+
+        // popup result after redirect
+        (function(){
+            const params = new URLSearchParams(window.location.search);
+            const topup = params.get('topup');
+            if(!topup) return;
+            const amount = params.get('amount');
+            if(topup==='success') alert('Nạp tiền thành công' + (amount?(': ' + Number(amount).toLocaleString('vi-VN') + 'đ') : ''));
+            else alert('Nạp tiền thất bại. Mã: ' + (params.get('code')||'')); 
         })();
         </script>
 	</div>

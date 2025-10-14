@@ -61,6 +61,10 @@
                 </button>
                 <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                     <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
+                    <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                        <input type="hidden" name="amount" id="topupAmountInput" />
+                        <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
+                    </form>
                     <a class="item" href="#" role="menuitem">Đơn mua</a>
                     <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
                     <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
@@ -128,6 +132,17 @@
     document.addEventListener('click', close);
     document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
 })();
+
+        function topupPrompt(e){
+            e.preventDefault();
+            const v = prompt('Nhập số tiền muốn nạp (VND):', '200000');
+            if(!v) return false;
+            const clean = v.replace(/[^0-9]/g,'');
+            if(!clean){ alert('Số tiền không hợp lệ'); return false; }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
 </script>
 </body>
 </html>

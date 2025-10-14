@@ -6,8 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: fix error approve Products.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -27,7 +32,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Hungnv" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -79,7 +84,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
     &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;datdt&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
@@ -135,7 +140,10 @@
       <workItem from="1759915643459" duration="4057000" />
       <workItem from="1760282719443" duration="1246000" />
       <workItem from="1760335861930" duration="2498000" />
-      <workItem from="1760342118902" duration="8292000" />
+      <workItem from="1760342118902" duration="8508000" />
+      <workItem from="1760351086833" duration="540000" />
+      <workItem from="1760406796876" duration="20000" />
+      <workItem from="1760422761237" duration="7818000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
