@@ -2,486 +2,198 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Order History - BanHangRong</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="/css/styles.min.css">
+<title>History Order - BanHangRong</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 	<style>
-		:root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --chip:#e5e7eb; --line:#eaeef4; }
-		* { box-sizing:border-box; }
-		html,body { height:100%; }
-		body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
-		.wrapper { min-height:100%; display:flex; flex-direction:column; }
-		.topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
-		.brand { font-weight:800; letter-spacing:.2px; }
-        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
-		.lang, .notif, .user { font-size:14px; color:var(--muted); }
-        .user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
-        .user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
-        .user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
-        .user-menu .item:hover{background:#f3f4f6}
-		.search { position:relative; }
-		.search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
-		.cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
-		.cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
-		.nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
-		.nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
-		.nav a:hover { background:#f3f4f6; }
-		
-		.order-history-container {
-            max-width: 1200px;
-            margin: 18px auto 12px;
-            padding: 0 10px;
-        }
-        
-        .page-header {
-            background: linear-gradient(180deg,#f8fbff, #eef6ff);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 30px;
-        }
-        
-        .page-title {
-            font-size: 26px;
-            font-weight: 700;
-            color: #1f2937;
-            margin: 0 0 8px 0;
-        }
-        
-        .page-subtitle {
-            color: var(--muted);
-            font-size: 16px;
-            margin: 0;
-        }
-        
-        .order-card {
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.2s;
-        }
-        
-        .order-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--line);
-        }
-        
-        .order-id {
-            font-weight: 600;
-            color: #1f2937;
-            font-size: 1.1rem;
-        }
-        
-        .order-date {
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-        
-        .order-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-        
-        .status-pending {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        
-        .status-completed {
-            background: #d1fae5;
-            color: #059669;
-        }
-        
-        .status-cancelled {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        
-        .order-total {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #1f2937;
-        }
-        
-        .order-items {
-            margin-top: 16px;
-        }
-        
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .order-item:last-child {
-            border-bottom: none;
-        }
-        
-        .item-name {
-            font-weight: 500;
-            color: #1f2937;
-        }
-        
-        .item-details {
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-        
-        .item-price {
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 40px;
-            gap: 10px;
-        }
-        
-        .pagination a, .pagination span {
-            padding: 8px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #374151;
-            transition: all 0.2s;
-        }
-        
-        .pagination a:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
-        
-        .pagination .current {
-            background: var(--brand);
-            color: white;
-            border-color: var(--brand);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--muted);
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-        }
-        
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #374151;
-        }
-        
-        .empty-state p {
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-        }
-        
-        .btn-primary {
-            background: var(--brand);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        
-        .btn-primary:hover {
-            background: #0284c7;
-        }
+:root {
+  --bg:#f5f7fb; --card:#ffffff; --line:#e5e7eb;
+  --muted:#6b7280; --brand:#0ea5e9;
+}
+body {
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  margin:0;
+}
+.wrapper{display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;background:#fff;padding:10px 24px;border-bottom:1px solid var(--line)}
+.brand{font-weight:700;font-size:20px}
+.nav a{margin:0 10px;text-decoration:none;color:#111827;font-weight:500}
+.top-actions{display:flex;align-items:center;gap:14px}
+.user-btn{border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;background:#fff}
 
-        /* New Design Styles */
+/* ---------- HISTORY SECTION ---------- */
+.order-history-container {
+  max-width:1100px;margin:30px auto;padding:0 20px;
+}
+.page-title{font-size:28px;font-weight:700;margin-bottom:20px;text-align:center}
+
+/* Search + Tabs inline */
         .filter-section {
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px 24px;
+  margin-bottom:24px;
+  gap:20px;
+}
+.search-box {
+  position:relative;
+  flex-shrink:0;
+}
+.search-box svg {
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:1;
+  width:16px;
+  height:16px;
+}
+.search-box input {
+  padding:10px 12px 10px 40px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  width:280px;
+  font-size:16px;
+  outline:none;
+}
+.search-box input:focus {
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+.tab-buttons {
+  display:flex;
+  gap:12px;
+  flex:1;
+  justify-content:flex-end;
+}
+.tab-btn {
+  border:1px solid var(--line);
+  background:#fff;
+  padding:10px 24px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:500;
+  font-size:16px;
+  transition:all 0.2s;
+  min-width:100px;
+}
+.tab-btn:hover {
+  background:#f3f4f6;
+  border-color:#9ca3af;
+}
+.tab-btn.active {
+  background:var(--brand);
+  color:#fff;
+  border-color:var(--brand);
+}
 
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background: white;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-btn:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
-
-        .filter-btn.active {
-            background: var(--brand);
-            color: white;
-            border-color: var(--brand);
-        }
-
-        .search-section {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .search-box {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-box svg {
-            position: absolute;
-            left: 12px;
-            z-index: 1;
-        }
-
-        .search-box input {
-            padding: 8px 12px 8px 40px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            width: 200px;
-            outline: none;
-        }
-
-        .order-card-new {
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
+/* ---------- ORDER CARD ---------- */
+.order-card {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:18px;
+}
         .order-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
         .seller-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .seller-label {
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .seller-input {
-            padding: 4px 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            width: 120px;
-            background: #f9fafb;
-        }
-
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.seller-info input {
+  width:130px;
+  padding:6px;
+  border:1px solid var(--line);
+  border-radius:6px;
+}
         .action-btn {
-            padding: 6px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:6px 12px;
+  cursor:pointer;
+}
+.chat-btn {background:#3b82f6;color:#fff;border-color:#3b82f6}
+.view-seller-btn {background:#ef4444;color:#fff;border-color:#ef4444}
+.status {
+  font-weight:600;
+  color:#ef4444;
+}
+.status.completed {color:#059669}
+.status.cancelled {color:#dc2626}
 
-        .chat-btn {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-
-        .chat-btn:hover {
-            background: #2563eb;
-        }
-
-        .view-seller-btn {
-            background: #ef4444;
-            color: white;
-            border-color: #ef4444;
-        }
-
-        .view-seller-btn:hover {
-            background: #dc2626;
-        }
-
-        .order-status-new {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-label {
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .status-value {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .status-completed {
-            background: #d1fae5;
-            color: #059669;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .status-cancelled {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .product-section {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
+/* product part */
+.product-line {
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-top:10px;
+}
         .product-image {
-            width: 60px;
-            height: 60px;
-            flex-shrink: 0;
-        }
-
-        .image-placeholder {
-            width: 100%;
-            height: 100%;
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .product-details {
-            flex: 1;
-        }
-
+  width:80px;height:80px;
+  background:#f3f4f6;
+  border:1px solid var(--line);
+  border-radius:8px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+}
+.product-info {
+  flex:1;
+}
         .product-name {
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-
-        .product-quantity {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .quantity-label {
-            font-weight: 500;
-            color: #6b7280;
-        }
-
-        .quantity-input {
-            padding: 4px 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            width: 60px;
-            background: #f9fafb;
-        }
-
+  font-weight:600;
+  margin-bottom:6px;
+}
         .order-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .order-total-new {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .total-label {
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .total-amount {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1f2937;
-        }
-
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:14px;
+}
         .order-actions {
-            display: flex;
-            gap: 10px;
+  display:flex;
+  gap:10px;
         }
-
         .rate-btn {
-            background: #ef4444;
-            color: white;
-            border-color: #ef4444;
-        }
+  background:#ef4444;color:#fff;border:1px solid #ef4444;
+  border-radius:8px;padding:8px 14px;
+}
+.contact-btn, .buy-again-btn {
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  padding:8px 14px;
+  cursor:pointer;
+}
+.contact-btn:hover, .buy-again-btn:hover {
+  background:#f3f4f6;
+}
 
-        .rate-btn:hover {
-            background: #dc2626;
-        }
-
-        .contact-btn, .buy-again-btn {
-            background: white;
-            color: #374151;
-            border-color: #d1d5db;
-        }
-
-        .contact-btn:hover, .buy-again-btn:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
+/* Additional styles for new elements */
+.user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
+.user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
+.user-menu .item:hover{background:#f3f4f6}
+.cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
+.cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
 	</style>
 </head>
 <body>
 	<div class="wrapper">
 		<div class="topbar">
 			<div class="brand">BanHangRong</div>
-			<nav class="nav" aria-label="Main">
+    <nav class="nav">
 				<a href="/customer/dashboard">Home</a>
 				<a href="/categories">Category</a>
 				<a href="#">License Software</a>
@@ -517,87 +229,58 @@
 		</div>
 
         <div class="order-history-container">
-            <div class="page-header">
                 <h1 class="page-title">History Order</h1>
-            </div>
 
-            <!-- Filter and Search Section -->
             <div class="filter-section">
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-status="all">All</button>
-                    <button class="filter-btn" data-status="pending">To Pay</button>
-                    <button class="filter-btn" data-status="completed">Completed</button>
-                    <button class="filter-btn" data-status="cancelled">Cancelled</button>
-                </div>
-                <div class="search-section">
                     <div class="search-box">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <input type="text" placeholder="search" id="searchInput">
                     </div>
+      <div class="tab-buttons">
+        <button class="tab-btn active">All</button>
+        <button class="tab-btn">To Pay</button>
+        <button class="tab-btn">Completed</button>
+        <button class="tab-btn">Cancelled</button>
                 </div>
             </div>
 
+    <!-- Dynamic Order Cards -->
             <div th:if="${orders != null and !orders.empty}">
-                <div th:each="order : ${orders}" class="order-card-new">
-                    <!-- Seller Info and Status -->
+      <div th:each="order : ${orders}" class="order-card">
                     <div class="order-top">
                         <div class="seller-info">
-                            <span class="seller-label">Seller:</span>
-                            <input type="text" class="seller-input" th:value="${order.sellerId}" readonly>
+            <span>Seller:</span>
+            <input type="text" th:value="${order.sellerId}" readonly>
                             <button class="action-btn chat-btn">Chat</button>
                             <button class="action-btn view-seller-btn">View seller</button>
                         </div>
-                        <div class="order-status-new">
-                            <span class="status-label">Status:</span>
-                            <span class="status-value" th:text="${order.status}" th:class="${'status-' + order.status.toLowerCase()}">Completed</span>
+          <div class="status" th:class="${'status ' + order.status.toLowerCase()}" th:text="'Status: ' + ${order.status}">Status: Completed</div>
                         </div>
-                    </div>
-
-                    <!-- Product Details -->
-                    <div class="product-section">
-                        <div class="product-image">
-                            <div class="image-placeholder">📦</div>
-                        </div>
-                        <div class="product-details">
+        <div class="product-line">
+          <div class="product-image">📦</div>
+          <div class="product-info">
                             <div class="product-name" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
-                            <div class="product-quantity">
-                                <span class="quantity-label">Quantities:</span>
-                                <input type="text" class="quantity-input" th:value="${orderItemsMap[order.orderId][0].quantity}" readonly>
-                            </div>
+            <div th:text="'Quantities: ' + ${orderItemsMap[order.orderId][0].quantity}">Quantities: 1</div>
                         </div>
                     </div>
-
-                    <!-- Order Summary and Actions -->
                     <div class="order-bottom">
-                        <div class="order-total-new">
-                            <span class="total-label">Order total:</span>
-                            <span class="total-amount">$<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">99.99</span></span>
+          <div th:text="'Order total: $' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">Order total: $$$</div>
+          <div class="order-actions">
+            <button class="rate-btn">Rate</button>
+            <button class="contact-btn">Contact Seller</button>
+            <button class="buy-again-btn">Buy again</button>
                         </div>
-                        <div class="order-actions">
-                            <button class="action-btn rate-btn">Rate</button>
-                            <button class="action-btn contact-btn">Contact Seller</button>
-                            <button class="action-btn buy-again-btn">Buy again</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pagination -->
-                <div th:if="${totalPages > 1}" class="pagination">
-                    <a th:if="${page > 0}" th:href="@{/orderhistory(page=${page - 1}, size=${size})}">Previous</a>
-                    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:class="${i == page ? 'current' : ''}">
-                        <a th:if="${i != page}" th:href="@{/orderhistory(page=${i}, size=${size})}" th:text="${i + 1}">1</a>
-                        <span th:if="${i == page}" th:text="${i + 1}">1</span>
-                    </span>
-                    <a th:if="${page < totalPages - 1}" th:href="@{/orderhistory(page=${page + 1}, size=${size})}">Next</a>
-                </div>
-            </div>
-
-            <div th:if="${orders == null or orders.empty}" class="empty-state">
+    <!-- Empty State -->
+    <div th:if="${orders == null or orders.empty}" class="order-card" style="text-align: center; padding: 40px;">
                 <h3>No orders found</h3>
                 <p>You haven't placed any orders yet.</p>
-                <a href="/customer/dashboard" class="btn-primary">Start Shopping</a>
+      <a href="/customer/dashboard" class="rate-btn" style="text-decoration: none; display: inline-block; margin-top: 20px;">Start Shopping</a>
             </div>
         </div>
     </div>
@@ -624,14 +307,14 @@
         });
 
         // Filter functionality
-        document.querySelectorAll('.filter-btn').forEach(btn => {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 // Remove active class from all buttons
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 // Add active class to clicked button
                 this.classList.add('active');
                 
-                const status = this.getAttribute('data-status');
+      const status = this.textContent.toLowerCase();
                 filterOrders(status);
             });
         });
@@ -643,13 +326,13 @@
         });
 
         function filterOrders(status) {
-            const orderCards = document.querySelectorAll('.order-card-new');
+    const orderCards = document.querySelectorAll('.order-card');
             
             orderCards.forEach(card => {
-                const statusElement = card.querySelector('.status-value');
+      const statusElement = card.querySelector('.status');
                 const orderStatus = statusElement.textContent.toLowerCase();
                 
-                if (status === 'all' || orderStatus === status) {
+      if (status === 'all' || orderStatus.includes(status)) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
@@ -658,11 +341,11 @@
         }
 
         function searchOrders(searchTerm) {
-            const orderCards = document.querySelectorAll('.order-card-new');
+    const orderCards = document.querySelectorAll('.order-card');
             
             orderCards.forEach(card => {
                 const productName = card.querySelector('.product-name').textContent.toLowerCase();
-                const sellerId = card.querySelector('.seller-input').value.toLowerCase();
+      const sellerId = card.querySelector('input[readonly]').value.toLowerCase();
                 
                 if (productName.includes(searchTerm) || sellerId.includes(searchTerm)) {
                     card.style.display = 'block';
