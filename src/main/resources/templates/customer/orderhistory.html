@@ -211,6 +211,270 @@
         .btn-primary:hover {
             background: #0284c7;
         }
+
+        /* New Design Styles */
+        .filter-section {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .filter-btn.active {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+
+        .search-section {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            z-index: 1;
+        }
+
+        .search-box input {
+            padding: 8px 12px 8px 40px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            width: 200px;
+            outline: none;
+        }
+
+        .order-card-new {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .seller-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .seller-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .seller-input {
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            width: 120px;
+            background: #f9fafb;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .chat-btn {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .chat-btn:hover {
+            background: #2563eb;
+        }
+
+        .view-seller-btn {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .view-seller-btn:hover {
+            background: #dc2626;
+        }
+
+        .order-status-new {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .status-value {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .product-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .product-quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .quantity-input {
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            width: 60px;
+            background: #f9fafb;
+        }
+
+        .order-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-total-new {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .total-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .rate-btn {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .rate-btn:hover {
+            background: #dc2626;
+        }
+
+        .contact-btn, .buy-again-btn {
+            background: white;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
+        .contact-btn:hover, .buy-again-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
 	</style>
 </head>
 <body>
@@ -254,30 +518,67 @@
 
         <div class="order-history-container">
             <div class="page-header">
-                <h1 class="page-title">Order History</h1>
-                <p class="page-subtitle">View and track your past orders</p>
+                <h1 class="page-title">History Order</h1>
+            </div>
+
+            <!-- Filter and Search Section -->
+            <div class="filter-section">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-status="all">All</button>
+                    <button class="filter-btn" data-status="pending">To Pay</button>
+                    <button class="filter-btn" data-status="completed">Completed</button>
+                    <button class="filter-btn" data-status="cancelled">Cancelled</button>
+                </div>
+                <div class="search-section">
+                    <div class="search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <input type="text" placeholder="search" id="searchInput">
+                    </div>
+                </div>
             </div>
 
             <div th:if="${orders != null and !orders.empty}">
-                <div th:each="order : ${orders}" class="order-card">
-                    <div class="order-header">
-                        <div>
-                            <div class="order-id">Order #<span th:text="${order.orderId}">12345</span></div>
-                            <div class="order-date" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 15, 2024 14:30</div>
+                <div th:each="order : ${orders}" class="order-card-new">
+                    <!-- Seller Info and Status -->
+                    <div class="order-top">
+                        <div class="seller-info">
+                            <span class="seller-label">Seller:</span>
+                            <input type="text" class="seller-input" th:value="${order.sellerId}" readonly>
+                            <button class="action-btn chat-btn">Chat</button>
+                            <button class="action-btn view-seller-btn">View seller</button>
                         </div>
-                        <div style="text-align: right;">
-                            <div class="order-total" th:text="${#numbers.formatCurrency(order.totalAmount)}">$99.99</div>
-                            <div class="order-status" th:classappend="${order.status == 'PENDING' ? 'status-pending' : (order.status == 'COMPLETED' ? 'status-completed' : 'status-cancelled')}" th:text="${order.status}">PENDING</div>
+                        <div class="order-status-new">
+                            <span class="status-label">Status:</span>
+                            <span class="status-value" th:text="${order.status}" th:class="${'status-' + order.status.toLowerCase()}">Completed</span>
                         </div>
                     </div>
-                    
-                    <div class="order-items">
-                        <div th:each="item : ${orderItemsMap[order.orderId]}" class="order-item">
-                            <div>
-                                <div class="item-name" th:text="${productNamesMap[item.productId]}">Product Name</div>
-                                <div class="item-details">Quantity: <span th:text="${item.quantity}">1</span></div>
+
+                    <!-- Product Details -->
+                    <div class="product-section">
+                        <div class="product-image">
+                            <div class="image-placeholder">📦</div>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-name" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
+                            <div class="product-quantity">
+                                <span class="quantity-label">Quantities:</span>
+                                <input type="text" class="quantity-input" th:value="${orderItemsMap[order.orderId][0].quantity}" readonly>
                             </div>
-                            <div class="item-price" th:text="${#numbers.formatCurrency(item.priceAtTime * item.quantity)}">$29.99</div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary and Actions -->
+                    <div class="order-bottom">
+                        <div class="order-total-new">
+                            <span class="total-label">Order total:</span>
+                            <span class="total-amount">$<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">99.99</span></span>
+                        </div>
+                        <div class="order-actions">
+                            <button class="action-btn rate-btn">Rate</button>
+                            <button class="action-btn contact-btn">Contact Seller</button>
+                            <button class="action-btn buy-again-btn">Buy again</button>
                         </div>
                     </div>
                 </div>
@@ -319,6 +620,70 @@
             if (!userMenu.contains(event.target)) {
                 dropdown.style.display = 'none';
                 document.getElementById('userMenuBtn').setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const status = this.getAttribute('data-status');
+                filterOrders(status);
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            searchOrders(searchTerm);
+        });
+
+        function filterOrders(status) {
+            const orderCards = document.querySelectorAll('.order-card-new');
+            
+            orderCards.forEach(card => {
+                const statusElement = card.querySelector('.status-value');
+                const orderStatus = statusElement.textContent.toLowerCase();
+                
+                if (status === 'all' || orderStatus === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function searchOrders(searchTerm) {
+            const orderCards = document.querySelectorAll('.order-card-new');
+            
+            orderCards.forEach(card => {
+                const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                const sellerId = card.querySelector('.seller-input').value.toLowerCase();
+                
+                if (productName.includes(searchTerm) || sellerId.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Action button handlers
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('chat-btn')) {
+                alert('Chat functionality coming soon!');
+            } else if (event.target.classList.contains('view-seller-btn')) {
+                alert('View seller functionality coming soon!');
+            } else if (event.target.classList.contains('rate-btn')) {
+                alert('Rate functionality coming soon!');
+            } else if (event.target.classList.contains('contact-btn')) {
+                alert('Contact seller functionality coming soon!');
+            } else if (event.target.classList.contains('buy-again-btn')) {
+                alert('Buy again functionality coming soon!');
             }
         });
     </script>
