@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class CustomerDashboardController {
@@ -169,11 +170,13 @@ public class CustomerDashboardController {
     public String support(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        Users user = usersRepository.findByUsername(username);
+        Optional<Users> userOptional = usersRepository.findByUsername(username);
         
-        if (user == null) {
+        if (userOptional.isEmpty()) {
             return "redirect:/login";
         }
+        
+        Users user = userOptional.get();
         
         // Get cart count
         Long cartCount = shoppingCartRepository.countByUserId(user.getUserId());
