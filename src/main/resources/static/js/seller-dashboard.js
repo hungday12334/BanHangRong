@@ -1337,31 +1337,135 @@
         sel.setAttribute('data-loaded','1');
       } catch(_){}
     }
+
+    // ==== Generate Keys Panel: Custom Product Table ====
+    async function renderProductTableForGenKey() {
+      const table = document.getElementById('gk_product_table');
+      const tbody = table?.querySelector('tbody');
+      const selectedDiv = document.getElementById('gk_product_selected');
+      const input = document.getElementById('gk_product');
+      if (!tbody || !input) return;
+      tbody.innerHTML = '<tr><td colspan="4">Đang tải sản phẩm...</td></tr>';
+      selectedDiv.textContent = '';
+      input.value = '';
+      try {
+        const sellerIdEl = document.getElementById('sellerId');
+        const userIdEl = document.getElementById('userId');
+        const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+        if (!sellerId) return;
+        const res = await fetch(`/api/products?sellerId=${sellerId}`);
+        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="4">Không thể tải sản phẩm</td></tr>'; return; }
+        const list = await res.json();
+        const products = Array.isArray(list) ? list.filter(p => (p.status||'').toLowerCase()==='public') : [];
+        if (!products.length) { tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm PUBLIC</td></tr>'; return; }
+        tbody.innerHTML = '';
+        products.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.className = 'clickable';
+          tr.innerHTML = `<td>${p.productId}</td><td>${p.name}</td><td>${p.categoryName||''}</td><td>${p.status}</td>`;
+          tr.addEventListener('click', () => {
+            input.value = p.productId;
+            selectedDiv.textContent = `Đã chọn: #${p.productId} • ${p.name}`;
+            // Highlight row
+            tbody.querySelectorAll('tr').forEach(row => row.classList.remove('selected'));
+            tr.classList.add('selected');
+          });
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4">Lỗi tải sản phẩm</td></tr>';
+      }
+    }
+
+    // ==== Generate Keys Panel: User selection with search + pagination ====
+    const gkUsersState = { page: 0, size: 8, totalPages: 0, q: '', type: '' };
+
+    async function loadGenUsers(resetPage=false) {
+      const tbody = document.querySelector('#gk_user_table tbody');
+      const pager = document.getElementById('pgGenUsers');
+      const selDiv = document.getElementById('gk_user_selected');
+      const hidden = document.getElementById('gk_user');
+      if (!tbody || !pager) return;
+      if (resetPage) gkUsersState.page = 0;
+      const params = new URLSearchParams();
+      params.set('page', gkUsersState.page);
+      params.set('size', gkUsersState.size);
+      if (gkUsersState.q) params.set('q', gkUsersState.q);
+      if (gkUsersState.type) params.set('type', gkUsersState.type);
+      tbody.innerHTML = '<tr><td colspan="4">Loading users...</td></tr>';
+      try {
+        const res = await fetch('/api/users/search?' + params.toString());
+        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="4">Failed to load users</td></tr>'; return; }
+        const data = await res.json();
+        gkUsersState.totalPages = data.totalPages || 1;
+        const list = Array.isArray(data.content) ? data.content : [];
+        tbody.innerHTML = '';
+        if (!list.length) tbody.innerHTML = '<tr><td colspan="4">No users</td></tr>';
+        list.forEach(u => {
+          const tr = document.createElement('tr');
+          tr.className = 'clickable';
+          const uname = u.username ?? '';
+          const email = u.email ?? '';
+          const type = u.userType ?? '';
+          tr.innerHTML = `<td>${u.userId}</td><td>${uname}</td><td>${email}</td><td>${type}</td>`;
+          tr.addEventListener('click', () => {
+            if (hidden) hidden.value = u.userId;
+            if (selDiv) selDiv.textContent = `Assign to: #${u.userId} • ${uname} • ${email}`;
+            tbody.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+            tr.classList.add('selected');
+          });
+          tbody.appendChild(tr);
+        });
+        // Build server pager
+        pager.innerHTML = '';
+        if (gkUsersState.totalPages > 1) {
+          const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ gkUsersState.page=page; loadGenUsers(false); }); return b; };
+          pager.appendChild(mk('«', Math.max(0, gkUsersState.page-1), gkUsersState.page===0,false));
+          for (let i=0;i<gkUsersState.totalPages;i++) pager.appendChild(mk(String(i+1), i, false, i===gkUsersState.page));
+          pager.appendChild(mk('»', Math.min(gkUsersState.totalPages-1, gkUsersState.page+1), gkUsersState.page===gkUsersState.totalPages-1,false));
+        }
+      } catch (_) {
+        tbody.innerHTML = '<tr><td colspan="4">Error loading users</td></tr>';
+      }
+    }
+
+    function initGenUserSearchHandlers() {
+      const q = document.getElementById('gk_user_q');
+      const t = document.getElementById('gk_user_type');
+      const btn = document.getElementById('gk_user_search');
+      if (q) q.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); gkUsersState.q = (q.value||'').trim(); loadGenUsers(true); } });
+      if (t) t.addEventListener('change', () => { gkUsersState.type = (t.value||'').trim(); loadGenUsers(true); });
+      if (btn) btn.addEventListener('click', () => { gkUsersState.q = (q?.value||'').trim(); gkUsersState.type = (t?.value||'').trim(); loadGenUsers(true); });
+    }
+
     async function initGenerateKeys() {
-      await populatePublicProductsForGen();
+      await renderProductTableForGenKey();
+      initGenUserSearchHandlers();
+      await loadGenUsers(true);
     }
 
     document.getElementById('genKeyForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const prodSel = document.getElementById('gk_product');
-      const pid = prodSel?.value ? Number(prodSel.value) : null;
+      const prodInput = document.getElementById('gk_product');
+      const pid = prodInput?.value ? Number(prodInput.value) : null;
       const exp = document.getElementById('gk_expire')?.value || '';
       let qty = document.getElementById('gk_qty')?.value ? parseInt(document.getElementById('gk_qty').value,10) : 0;
-      if (!pid) { showToast('Please select a product (PUBLIC)', 'error'); return; }
-      if (!qty || qty <= 0) { showToast('Quantity must be > 0', 'error'); return; }
-      // Server will enforce capacity; we optionally clamp client-side using product.qty meta if available
-      const opt = prodSel.options[prodSel.selectedIndex];
-      const declaredQty = opt?.dataset?.qty ? parseInt(opt.dataset.qty,10) : null;
-      if (declaredQty != null && qty > declaredQty) qty = declaredQty;
+      if (!pid) { showToast('Vui lòng chọn sản phẩm PUBLIC', 'error'); return; }
+      if (!qty || qty <= 0) { showToast('Số lượng phải > 0', 'error'); return; }
       try {
         const res = await fetch('/api/seller/' + (document.getElementById('userId')?.textContent?.trim()||document.getElementById('sellerId')?.textContent?.trim()) + '/licenses/generate', {
           method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ productId: pid, expireDate: exp, quantity: qty })
+          body: JSON.stringify({
+            productId: pid,
+            expireDate: exp,
+            quantity: qty,
+            userId: (document.getElementById('gk_user')?.value ? Number(document.getElementById('gk_user').value) : undefined)
+          })
         });
         if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
         const data = await res.json();
-        showToast(`Generated ${data.generated} keys (remaining capacity ${data.remaining})`, 'success');
-      } catch (e) { showToast('Failed to generate keys', 'error'); }
+        showToast(`Đã tạo ${data.generated} key (còn lại ${data.remaining})`, 'success');
+      } catch (e) { showToast('Lỗi tạo key', 'error'); }
     });
 
     if (window.location.hash === '#gen-keys') setTimeout(() => initGenerateKeys(), 120);
