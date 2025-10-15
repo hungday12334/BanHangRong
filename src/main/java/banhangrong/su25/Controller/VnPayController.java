@@ -250,7 +250,7 @@ public class VnPayController {
         System.out.println("[VNPay] return-signData=" + signData);
         System.out.println("[VNPay] return-receivedHash=" + receivedHash);
         System.out.println("[VNPay] return-calcHash=" + calcHash);
-        boolean valid = calcHash.equalsIgnoreCase(receivedHash);
+        // boolean valid = calcHash.equalsIgnoreCase(receivedHash); // Not used currently
         String respCode = vnp.getOrDefault("vnp_ResponseCode","99");
         // Sandbox: treat ResponseCode=00 as success to avoid false negatives from encoding differences
         boolean success = "00".equals(respCode);
@@ -304,7 +304,7 @@ public class VnPayController {
             
             // Deduct money from user's wallet
             boolean paymentSuccess = false;
-            for (Users user : usersRepository.findAll()) {
+            for (banhangrong.su25.Entity.Users user : usersRepository.findAll()) {
                 if (user.getUserId().equals(uid)) {
                     BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
                     if (currentBalance.compareTo(totalAmount) >= 0) {
