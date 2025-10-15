@@ -104,6 +104,7 @@
                 <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">
                     Email chưa được xác thực
                     <form method="post" action="/customer/profile/verify-email" style="margin:0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="btn" style="padding:6px 10px;border:1px solid #fed7aa;background:#fff;border-radius:8px;margin-left:8px;">Verify now</button>
                     </form>
                 </div>

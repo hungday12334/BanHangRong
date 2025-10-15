@@ -24,6 +24,7 @@
         <div class="desc">Nhập mã 6 chữ số đã được gửi đến email của bạn.</div>
         <div th:if="${error != null}" class="notice" th:text="${error}">Mã không hợp lệ</div>
         <form method="post" action="/customer/verify-code">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <input type="text" name="code" placeholder="Nhập mã 6 số" maxlength="6" pattern="[0-9]{6}" required>
             <div class="actions">
                 <div>
@@ -52,7 +53,8 @@
             })();
 
             function resendCode(){
-                fetch('/customer/verify-code/resend', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                var token = (function(){ try { return document.cookie.split('; ').find(function(r){return r.startsWith('XSRF-TOKEN=')})?.split('=')[1] || ''; } catch(_) { return ''; } })();
+                fetch('/customer/verify-code/resend', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': token } })
                     .then(function(){ window.location.search = '?remaining=60'; })
                     .catch(function(){ window.location.href = '/customer/verify-code/resend'; });
             }

@@ -77,12 +77,15 @@
         (function(){
             function fmt(n){try{return new Intl.NumberFormat('vi-VN').format(n)}catch(e){return n}}
             const inputs = document.querySelectorAll('.qty-input');
+            function xsrf(){
+                try { return document.cookie.split('; ').find(r=>r.startsWith('XSRF-TOKEN='))?.split('=')[1] || ''; } catch(_) { return ''; }
+            }
             inputs.forEach(inp=>{
                 inp.addEventListener('change', ()=>{
                     const pid = inp.getAttribute('data-product-id');
                     let val = parseInt(inp.value||'1',10); if(!val||val<1) val=1;
                     fetch('/cart/update',{
-                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN': xsrf()},
                         body:`productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
                     }).then(r=>r.json()).then(d=>{
                         const err = document.getElementById('err-'+pid);
@@ -102,7 +105,7 @@
                     const pid = a.getAttribute('data-product-id');
                     const href = a.getAttribute('href') || ('/cart/remove?productId=' + encodeURIComponent(pid));
                     fetch('/cart/remove',{
-                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN': (function(){try{return document.cookie.split('; ').find(r=>r.startsWith('XSRF-TOKEN='))?.split('=')[1]||''}catch(_){return ''}})()},
                         body:`productId=${encodeURIComponent(pid)}`
                     }).then(r=>{ if(!r.ok) throw new Error('bad'); return r.json(); })
                     .then(()=> location.reload())
@@ -112,6 +115,7 @@
         })();
         </script>
         <form class="summary" method="post" action="/cart/checkout-wallet">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
             <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
             <button class="btn primary" type="submit">Thanh toán bằng số dư</button>
