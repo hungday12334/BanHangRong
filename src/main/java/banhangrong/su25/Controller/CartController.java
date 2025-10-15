@@ -98,6 +98,7 @@ public class CartController {
     @Transactional
     public String checkoutWithWallet() {
         Long uid = getCurrentUserId();
+        if (uid == 0L) return "redirect:/login";
         List<ShoppingCart> items = cartRepository.findByUserId(uid);
         if (items.isEmpty()) return "redirect:/cart?pay=empty";
 
@@ -167,12 +168,14 @@ public class CartController {
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam("productId") Long productId,
                             @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity) {
+        Long uid = getCurrentUserId();
+        if (uid == 0L) return "redirect:/login";
         int qty = (quantity != null && quantity > 0) ? quantity : 1;
         // clamp with stock
         int stock = productsRepository.findById(productId)
                 .map(p -> p.getQuantity() != null ? p.getQuantity() : 0).orElse(0);
         // merge quantity if item already exists
-        var existing = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+        var existing = cartRepository.findByUserIdAndProductId(uid, productId);
         if (existing.isPresent()) {
             ShoppingCart it = existing.get();
             int current = it.getQuantity() == null ? 0 : it.getQuantity();
@@ -180,8 +183,9 @@ public class CartController {
             it.setQuantity(applied);
             cartRepository.save(it);
         } else {
+            if (stock <= 0) return "redirect:/cart"; // nothing to add when out of stock
             ShoppingCart item = new ShoppingCart();
-            item.setUserId(getCurrentUserId());
+            item.setUserId(uid);
             item.setProductId(productId);
             int applied = Math.min(qty, stock);
             item.setQuantity(applied);
@@ -196,12 +200,14 @@ public class CartController {
     public Map<String, Object> updateQty(@RequestParam("productId") Long productId,
                                          @RequestParam("quantity") Integer quantity) {
         Map<String, Object> res = new HashMap<>();
+        Long uid = getCurrentUserId();
+        if (uid == 0L) { res.put("ok", false); res.put("auth", true); return res; }
         int requested = quantity != null && quantity > 0 ? quantity : 1;
         // get product stock
         int stock = productsRepository.findById(productId)
                 .map(p -> p.getQuantity() != null ? p.getQuantity() : 0).orElse(0);
         int applied = Math.min(requested, stock);
-        var existing = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+        var existing = cartRepository.findByUserIdAndProductId(uid, productId);
         if (existing.isPresent()) {
             ShoppingCart it = existing.get();
             it.setQuantity(applied);
@@ -218,8 +224,10 @@ public class CartController {
     @ResponseBody
     public Map<String, Object> removeFromCart(@RequestParam("productId") Long productId) {
         Map<String,Object> res = new HashMap<>();
+        Long uid = getCurrentUserId();
+        if (uid == 0L) { res.put("ok", false); res.put("auth", true); return res; }
         try {
-            var ex = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+            var ex = cartRepository.findByUserIdAndProductId(uid, productId);
             ex.ifPresent(cartRepository::delete);
             res.put("ok", true);
         } catch (Exception e) {
@@ -232,7 +240,9 @@ public class CartController {
     @GetMapping("/cart/remove")
     public String removeFromCartGet(@RequestParam("productId") Long productId) {
         try {
-            var ex = cartRepository.findByUserIdAndProductId(getCurrentUserId(), productId);
+            Long uid = getCurrentUserId();
+            if (uid == 0L) return "redirect:/login";
+            var ex = cartRepository.findByUserIdAndProductId(uid, productId);
             ex.ifPresent(cartRepository::delete);
         } catch (Exception ignored) {}
         return "redirect:/cart";
@@ -243,6 +253,7 @@ public class CartController {
     @Transactional
     public String checkoutDemo() {
         Long uid = getCurrentUserId();
+        if (uid == 0L) return "redirect:/login";
         List<ShoppingCart> items = cartRepository.findByUserId(uid);
         for (ShoppingCart it : items) {
             productsRepository.findById(it.getProductId()).ifPresent(p -> {
