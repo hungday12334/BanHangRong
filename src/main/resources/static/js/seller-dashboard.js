@@ -1163,18 +1163,31 @@
         const deviceText = (l.deviceIdentifier && l.deviceIdentifier.trim().length)
           ? l.deviceIdentifier
           : 'unused';
+        // Try to extract expire date from licenseKey format: PRD<productId>-yyyyMMdd-<random>
+        let expireText = '';
+        try {
+          const parts = (l.licenseKey || '').split('-');
+          if (parts.length >= 3) {
+            const maybe = parts[1];
+            if (/^\d{8}$/.test(maybe)) {
+              // format yyyyMMdd -> yyyy-MM-dd for readability
+              expireText = maybe.slice(0,4) + '-' + maybe.slice(4,6) + '-' + maybe.slice(6,8);
+            }
+          }
+        } catch (e) { expireText = ''; }
         tr.innerHTML = `<td>${l.licenseId}</td>
                         <td style="font-family:monospace;">${l.licenseKey}</td>
                         <td>${l.productName||('#'+l.productId)}</td>
                         <td>${l.orderId||''}</td>
                         <td>${activeBadge}</td>
+                        <td>${expireText}</td>
                         <td>${actDate}</td>
                         <td>${deviceText}</td>`;
         keysTbody.appendChild(tr);
       });
         if (data.content.length === 0) {
           const tr = document.createElement('tr');
-          const colSpan = 7;
+          const colSpan = 8;
           tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">No keys for the current seller or sellerId is incorrect.</td>`;
           keysTbody.appendChild(tr);
         }
