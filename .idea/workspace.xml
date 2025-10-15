@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update change password">
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerReviewController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductReviewService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update product review">
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,8 +105,8 @@
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="banhangrong.su25.Entity" />
       <recent name="banhangrong.su25.service" />
+      <recent name="banhangrong.su25.Entity" />
       <recent name="banhangrong.su25.Controller" />
     </key>
   </component>
@@ -253,7 +249,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760479564273</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="update product review">
+      <option name="closed" value="true" />
+      <created>1760480378920</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1760480378920</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -294,6 +298,7 @@
     <MESSAGE value="Merge remote-tracking branch 'origin/MinhHQ' into MinhHQ" />
     <MESSAGE value="upadte function seller profile" />
     <MESSAGE value="update change password" />
-    <option name="LAST_COMMIT_MESSAGE" value="update change password" />
+    <MESSAGE value="update product review" />
+    <option name="LAST_COMMIT_MESSAGE" value="update product review" />
   </component>
 </project>
