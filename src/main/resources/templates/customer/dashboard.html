@@ -75,11 +75,16 @@
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                         <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <span th:if="${user != null && user.balance != null}" style="margin-left:8px;color:#10b981;font-weight:600" th:text="${#numbers.formatDecimal(user.balance,0,'COMMA',0,'POINT') + '₫'}">0₫</span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                         <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
                         <a class="item" href="/orderhistory" role="menuitem">Order History</a>
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" name="amount" id="topupAmountInput" />
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
+                        </form>
                         <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
                         <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
                     </div>
@@ -210,7 +215,32 @@
 			   style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">Sau »</a>
 		</div>
 
-        <!-- No popup; product cards navigate to detail page -->
+        <!-- VNPay Topup Popups -->
+        <div id="topupPopup" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
+            <div style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
+                <div id="topupIcon" style="width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:6px auto 12px auto;border:2px solid #10b981;color:#10b981;font-size:34px">✓</div>
+                <h3 id="topupTitle" style="margin:0 0 6px 0;color:#111827;font-size:18px">Nạp tiền thành công</h3>
+                <div id="topupMsg" style="color:#6b7280;font-size:14px">Số tiền đã được cộng vào ví của bạn.</div>
+                <div style="margin-top:14px;display:flex;gap:8px;justify-content:center">
+                    <a href="/cart" class="btn" style="background:#111827;color:#fff;border:none;padding:8px 12px;border-radius:10px">Về giỏ hàng</a>
+                    <button type="button" id="topupClose" class="btn" style="padding:8px 12px;border-radius:10px">Đóng</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="topupAsk" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
+            <div style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
+                <h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">Nạp tiền VNPay</h3>
+                <div style="color:#6b7280;font-size:14px;margin-bottom:8px">Nhập số tiền muốn nạp (VND)</div>
+                <input id="topupAmountField" type="text" inputmode="numeric" placeholder="200000" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;font-weight:600" />
+                <div id="topupErr" style="color:#ef4444;font-size:12px;height:16px;margin-top:6px"></div>
+                <div style="margin-top:10px;display:flex;gap:8px;justify-content:center">
+                    <button type="button" id="topupCancelBtn" class="btn" style="padding:8px 12px;border-radius:10px">Hủy</button>
+                    <button type="button" id="topupConfirmBtn" class="btn" style="background:#0ea5e9;color:#fff;border:none;padding:8px 12px;border-radius:10px">Nạp</button>
+                </div>
+            </div>
+        </div>
+
         <script>
         (function(){
             const btn = document.getElementById('userMenuBtn');
@@ -220,6 +250,58 @@
             if(btn){ btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); }); }
             document.addEventListener('click', close);
             document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+        })();
+
+        let __topupForm = null;
+        function topupPrompt(e){
+            e.preventDefault();
+            __topupForm = e.target; // remember form
+            const ask = document.getElementById('topupAsk');
+            const field = document.getElementById('topupAmountField');
+            const err = document.getElementById('topupErr');
+            if(ask){ ask.style.display='flex'; setTimeout(()=>{ try{ field.focus(); }catch(_){} }, 0); }
+            function confirm(){
+                const v = field.value || '';
+                const clean = v.replace(/[^0-9]/g,'');
+                if(!clean){ err.textContent = 'Số tiền không hợp lệ'; return; }
+                document.getElementById('topupAmountInput').value = clean;
+                ask.style.display='none';
+                __topupForm.submit();
+            }
+            const okBtn = document.getElementById('topupConfirmBtn');
+            const cancelBtn = document.getElementById('topupCancelBtn');
+            const close = ()=>{ ask.style.display='none'; };
+            okBtn.onclick = confirm;
+            cancelBtn.onclick = close;
+            field.onkeydown = (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); confirm(); } };
+            return false;
+        }
+
+        // Pretty popup result after redirect
+        (function(){
+            const params = new URLSearchParams(window.location.search);
+            const topup = params.get('topup');
+            if(!topup) return;
+            const amount = params.get('amount');
+            const el = document.getElementById('topupPopup');
+            const icon = document.getElementById('topupIcon');
+            const title = document.getElementById('topupTitle');
+            const msg = document.getElementById('topupMsg');
+            const closeBtn = document.getElementById('topupClose');
+            function show(){ el.style.display='flex'; }
+            function hide(){ el.style.display='none'; }
+            closeBtn && closeBtn.addEventListener('click', hide);
+            if (topup === 'success') {
+                if(icon){ icon.style.borderColor = '#10b981'; icon.style.color = '#10b981'; icon.textContent = '✓'; }
+                if(title) title.textContent = 'Nạp tiền thành công';
+                if(msg) msg.textContent = 'Đã cộng ' + (amount?Number(amount).toLocaleString('vi-VN')+'₫':'số tiền') + ' vào ví của bạn.';
+                show();
+            } else {
+                if(icon){ icon.style.borderColor = '#ef4444'; icon.style.color = '#ef4444'; icon.textContent = '!'; }
+                if(title) title.textContent = 'Nạp tiền thất bại';
+                if(msg) msg.textContent = 'Mã lỗi: ' + (params.get('code')||'');
+                show();
+            }
         })();
         </script>
 	</div>

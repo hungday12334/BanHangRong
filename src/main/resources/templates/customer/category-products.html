@@ -87,6 +87,10 @@
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                         <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
                         <a class="item" href="/orderhistory" role="menuitem">Order History</a>
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" name="amount" id="topupAmountInput" />
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
+                        </form>
                         <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
                         <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
                     </div>
