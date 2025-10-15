@@ -5,6 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ hàng</title>
 	<link rel="stylesheet" href="/css/styles.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <style>
         .wrap{max-width:1100px;margin:20px auto;padding:0 10px}
         .cart-card{background:#fff;border:1px solid #eaeef4;border-radius:12px;overflow:hidden}
@@ -92,12 +94,18 @@
                 if(totalEl){ try{ totalEl.textContent = new Intl.NumberFormat('vi-VN').format(sum); }catch(_){} }
             }
             function xsrf(){
-                try { return document.cookie.split('; ').find(r=>r.startsWith('XSRF-TOKEN='))?.split('=')[1] || ''; } catch(_) { return ''; }
+                var m = document.querySelector('meta[name="_csrf"]');
+                return m ? m.getAttribute('content') : '';
+            }
+            function xsrfHeader(){
+                var m = document.querySelector('meta[name="_csrf_header"]');
+                return m ? m.getAttribute('content') : 'X-XSRF-TOKEN';
             }
             inputs.forEach(inp=>{
                 inp.addEventListener('change', ()=>{
                     const pid = inp.getAttribute('data-product-id');
                     let val = parseInt(inp.value||'1',10); if(!val||val<1) val=1;
+                    const hdr = {}; hdr['Content-Type'] = 'application/x-www-form-urlencoded'; hdr[xsrfHeader()] = xsrf();
                     fetch('/cart/update',{
                         method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN': xsrf()},
                         body:`productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
@@ -123,8 +131,9 @@
                     e.preventDefault();
                     const pid = a.getAttribute('data-product-id');
                     const href = a.getAttribute('href') || ('/cart/remove?productId=' + encodeURIComponent(pid));
+                    const hdr2 = {}; hdr2['Content-Type'] = 'application/x-www-form-urlencoded'; hdr2[xsrfHeader()] = xsrf();
                     fetch('/cart/remove',{
-                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN': (function(){try{return document.cookie.split('; ').find(r=>r.startsWith('XSRF-TOKEN='))?.split('=')[1]||''}catch(_){return ''}})()},
+                        method:'POST', headers: hdr2,
                         body:`productId=${encodeURIComponent(pid)}`
                     }).then(r=>{ if(!r.ok) throw new Error('bad'); return r.json(); })
                     .then(()=> { a.closest('.cart-row')?.remove(); recomputeTotals(); })
