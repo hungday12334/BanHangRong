@@ -101,7 +101,10 @@
                     fetch('/cart/update',{
                         method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN': xsrf()},
                         body:`productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
-                    }).then(r=>r.json()).then(d=>{
+                    }).then(r=>{
+                        if(!r.ok){ if(r.status===403){ alert('Phiên làm việc đã hết hạn. Vui lòng tải lại trang và thử lại.'); } throw new Error('bad'); }
+                        return r.json();
+                    }).then(d=>{
                         const err = document.getElementById('err-'+pid);
                         if(d.over){ err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
                         else { err.textContent=''; }
