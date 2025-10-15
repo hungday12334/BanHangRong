@@ -281,15 +281,17 @@ public class VnPayController {
             List<ShoppingCart> items = cartRepository.findByUserId(uid);
             
             // Calculate total amount to deduct from wallet
-            BigDecimal totalAmount = BigDecimal.ZERO;
-            for (ShoppingCart it : items) {
-                Products p = productsRepository.findById(it.getProductId()).orElse(null);
-                if (p != null) {
-                    BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
-                    int qty = it.getQuantity() != null ? it.getQuantity() : 1;
-                    totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(qty)));
-                }
-            }
+            final BigDecimal totalAmount = items.stream()
+                .map(it -> {
+                    Products p = productsRepository.findById(it.getProductId()).orElse(null);
+                    if (p != null) {
+                        BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                        int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                        return unitPrice.multiply(BigDecimal.valueOf(qty));
+                    }
+                    return BigDecimal.ZERO;
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
             
             // Deduct money from user's wallet
             usersRepository.findById(uid).ifPresent(user -> {
