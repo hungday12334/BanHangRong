@@ -162,8 +162,26 @@
           return b;
         };
         pager.appendChild(mkBtn('«', Math.max(1, current - 1), current === 1, false));
-        for (let i = 1; i <= totalPages; i++) {
-          pager.appendChild(mkBtn(String(i), i, false, i === current));
+        // Sliding window: show up to 10 consecutive pages.
+        const windowSize = 10;
+        let start = 1;
+        if (totalPages <= windowSize) {
+          start = 1;
+        } else {
+          if (current <= windowSize) {
+            start = 1;
+          } else {
+            start = current - (windowSize - 1); // e.g. current=11 -> start=2 (2..11)
+            // ensure window doesn't overflow at high end
+            if (start > totalPages - windowSize + 1) start = totalPages - windowSize + 1;
+          }
+        }
+        const end = Math.min(totalPages, start + windowSize - 1);
+        for (let i = start; i <= end; i++) {
+          const btn = mkBtn(String(i), i, false, i === current);
+          btn.classList.add('page-btn');
+          if (i === current) btn.classList.add('active');
+          pager.appendChild(btn);
         }
         pager.appendChild(mkBtn('»', Math.min(totalPages, current + 1), current === totalPages, false));
       } else {
@@ -1086,7 +1104,15 @@
             const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if (current) b.setAttribute('aria-current','page');
             b.addEventListener('click', () => { ordersPageState.page = page; loadSellerOrders(false); }); return b; };
           ordersPager.appendChild(mk('«', Math.max(0, ordersPageState.page-1), ordersPageState.page===0,false));
-          for (let i=0;i<total;i++) ordersPager.appendChild(mk(String(i+1), i, false, i===ordersPageState.page));
+          // sliding window of up to 10 pages (1-based labels, page is 0-based)
+          const wSize = 10;
+          let startIdx = 0;
+          if (total <= wSize) startIdx = 0; else {
+            if (ordersPageState.page <= wSize - 1) startIdx = 0; else startIdx = ordersPageState.page - (wSize - 1);
+            if (startIdx > total - wSize) startIdx = total - wSize;
+          }
+          const endIdx = Math.min(total - 1, startIdx + wSize - 1);
+          for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===ordersPageState.page); btn.classList.add('page-btn'); if (i===ordersPageState.page) btn.classList.add('active'); ordersPager.appendChild(btn); }
           ordersPager.appendChild(mk('»', Math.min(total-1, ordersPageState.page+1), ordersPageState.page===total-1,false));
         }
       }
@@ -1158,8 +1184,12 @@
         if (total>1) {
           const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ keysPageState.page=page; loadSellerKeys(false); }); return b; };
           keysPager.appendChild(mk('«', Math.max(0, keysPageState.page-1), keysPageState.page===0,false));
-          for (let i=0;i<total;i++) keysPager.appendChild(mk(String(i+1), i, false, i===keysPageState.page));
-          keysPager.appendChild(mk('»', Math.min(total-1, keysPageState.page+1), keysPageState.page===total-1,false));
+            {
+              const wSize = 10; let startIdx = 0; if (total <= wSize) startIdx = 0; else { if (keysPageState.page <= wSize - 1) startIdx = 0; else startIdx = keysPageState.page - (wSize - 1); if (startIdx > total - wSize) startIdx = total - wSize; }
+              const endIdx = Math.min(total - 1, startIdx + wSize - 1);
+              for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===keysPageState.page); btn.classList.add('page-btn'); if (i===keysPageState.page) btn.classList.add('active'); keysPager.appendChild(btn); }
+            }
+            keysPager.appendChild(mk('»', Math.min(total-1, keysPageState.page+1), keysPageState.page===total-1,false));
         }
       }
     }
@@ -1289,7 +1319,11 @@
           if (total>1) {
             const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ productsPageState.page=page; loadProductsPanel(false); }); return b; };
             productsPager.appendChild(mk('«', Math.max(0, productsPageState.page-1), productsPageState.page===0,false));
-            for (let i=0;i<total;i++) productsPager.appendChild(mk(String(i+1), i, false, i===productsPageState.page));
+            {
+              const wSize = 10; let startIdx = 0; if (total <= wSize) startIdx = 0; else { if (productsPageState.page <= wSize - 1) startIdx = 0; else startIdx = productsPageState.page - (wSize - 1); if (startIdx > total - wSize) startIdx = total - wSize; }
+              const endIdx = Math.min(total - 1, startIdx + wSize - 1);
+              for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===productsPageState.page); btn.classList.add('page-btn'); if (i===productsPageState.page) btn.classList.add('active'); productsPager.appendChild(btn); }
+            }
             productsPager.appendChild(mk('»', Math.min(total-1, productsPageState.page+1), productsPageState.page===total-1,false));
           }
         }
@@ -1421,7 +1455,13 @@
         if (gkUsersState.totalPages > 1) {
           const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ gkUsersState.page=page; loadGenUsers(false); }); return b; };
           pager.appendChild(mk('«', Math.max(0, gkUsersState.page-1), gkUsersState.page===0,false));
-          for (let i=0;i<gkUsersState.totalPages;i++) pager.appendChild(mk(String(i+1), i, false, i===gkUsersState.page));
+          // Server pager for generate-keys users: sliding window (7 pages only)
+          const totalG = gkUsersState.totalPages;
+          const wSizeG = 7;
+          let startG = 0;
+          if (totalG <= wSizeG) startG = 0; else { if (gkUsersState.page <= wSizeG - 1) startG = 0; else startG = gkUsersState.page - (wSizeG - 1); if (startG > totalG - wSizeG) startG = totalG - wSizeG; }
+          const endG = Math.min(totalG - 1, startG + wSizeG - 1);
+          for (let i = startG; i <= endG; i++) { const b = mk(String(i+1), i, false, i===gkUsersState.page); b.classList.add('page-btn'); if (i===gkUsersState.page) b.classList.add('active'); pager.appendChild(b); }
           pager.appendChild(mk('»', Math.min(gkUsersState.totalPages-1, gkUsersState.page+1), gkUsersState.page===gkUsersState.totalPages-1,false));
         }
       } catch (_) {
