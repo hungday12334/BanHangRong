@@ -249,6 +249,7 @@
         </div>
         
         <form id="loginForm" class="form" action="/perform-login" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
