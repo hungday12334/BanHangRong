@@ -4,8 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update product review">
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update change password">
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatRoom.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ChatMessageRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ChatRoomRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/ChatWebSocketHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,8 +112,10 @@
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="banhangrong.su25.service" />
+      <recent name="banhangrong.su25.WebSocket" />
       <recent name="banhangrong.su25.Entity" />
+      <recent name="banhangrong.su25.service" />
+      <recent name="banhangrong.su25.Repository" />
       <recent name="banhangrong.su25.Controller" />
     </key>
   </component>
@@ -273,7 +282,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760504260249</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="update change password">
+      <option name="closed" value="true" />
+      <created>1760505944538</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1760505944538</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -313,8 +330,8 @@
     <MESSAGE value="update edit profile" />
     <MESSAGE value="Merge remote-tracking branch 'origin/MinhHQ' into MinhHQ" />
     <MESSAGE value="upadte function seller profile" />
-    <MESSAGE value="update change password" />
     <MESSAGE value="update product review" />
-    <option name="LAST_COMMIT_MESSAGE" value="update product review" />
+    <MESSAGE value="update change password" />
+    <option name="LAST_COMMIT_MESSAGE" value="update change password" />
   </component>
 </project>
