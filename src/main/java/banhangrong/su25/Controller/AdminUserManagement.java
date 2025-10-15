@@ -13,13 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 
 @Controller
 @RequestMapping("/admin/user")
 public class AdminUserManagement {
+
     @Autowired
     private UserService userService;
 
@@ -32,7 +33,7 @@ public class AdminUserManagement {
     public String createUser(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
         //Delare
         ImageUploadUtil imageUploadUtil = new ImageUploadUtil();
-        Validation valid =  new Validation();
+        Validation valid = new Validation();
         LocalDateTime now = LocalDateTime.now();
         Users user = new Users();
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -49,8 +50,6 @@ public class AdminUserManagement {
         if (birthDate != null && !birthDate.isEmpty()) {
             user.setBirthDate(LocalDate.parse(birthDate));//from yyyy-MM-dd to LocalDate
         }
-        user.setCreatedAt(now);
-        user.setUpdatedAt(now);
         //Check valid username and email
         if (userService.existsByUsername(user.getUsername()) || userService.existsByEmail(user.getEmail())) {
             model.addAttribute("error", "Username or Email already exists");
@@ -59,14 +58,14 @@ public class AdminUserManagement {
         }
 
         //Check valid pasword
-        if(!valid.isPasswordValid(user.getPassword())){
+        if (!valid.isPasswordValid(user.getPassword())) {
             model.addAttribute("error", "Password must be at least 6 characters long");
             model.addAttribute("user", user);
             return "admin/user-creation";
         }
         //Check valid phone
-        if(user.getPhoneNumber()!=null&&!user.getPhoneNumber().isEmpty()){
-            if(!valid.isPhoneValid(user.getPhoneNumber())){
+        if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
+            if (!valid.isPhoneValid(user.getPhoneNumber())) {
                 model.addAttribute("error", "Invalid phone number");
                 model.addAttribute("user", user);
                 return "admin/user-creation";
@@ -96,6 +95,10 @@ public class AdminUserManagement {
         }
 //         Save hashed password
         user.setPassword(valid.hashPassword(user.getPassword()));
+        //Blance default 0
+        user.setBalance(BigDecimal.ZERO);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
         userService.save(user);
         redirectAttributes.addFlashAttribute("success", "User created successfully");
         //redirect to user list page
@@ -128,6 +131,7 @@ public class AdminUserManagement {
     public String updateUser(HttpServletRequest request,
                              RedirectAttributes redirectAttributes,
                              Model model) {
+        //Check id valid  start
         String sId = request.getParameter("id");
         if (sId == null || sId.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "User not found");
@@ -147,44 +151,99 @@ public class AdminUserManagement {
             redirectAttributes.addFlashAttribute("error", "User not found");
             return "redirect:/admin/user";
         }
+        //Check id valid  end
 
-        // update fields (chỉ update những field được phép)
+        // Update fields (chỉ update những field được phép)
         try {
+            //Delare
+            ImageUploadUtil imageUploadUtil = new ImageUploadUtil();
+            Validation valid = new Validation();
+            LocalDateTime now = LocalDateTime.now();
+            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+            //Get infor from font-end
+            String email = request.getParameter("email");
             String password = request.getParameter("password");
-            if (password != null) user.setPassword(password);
-
-            String userType = request.getParameter("userType");
-            if (userType != null) user.setUserType(userType);
-
-            String phone = request.getParameter("phoneNumber");
-            if (phone != null) user.setPhoneNumber(phone);
-
-            String avatar = request.getParameter("avatarUrl");
-            if (avatar != null) user.setAvatarUrl(avatar);
-
+            String phoneNumber = request.getParameter("phoneNumber");
             String gender = request.getParameter("gender");
-            if (gender != null) user.setGender(gender);
-
             String birthDate = request.getParameter("birthDate");
-            if (birthDate != null && !birthDate.isEmpty()) {
-                try {
-                    user.setBirthDate(LocalDate.parse(birthDate)); // expects yyyy-MM-dd
-                } catch (DateTimeParseException dtpe) {
-                    // trả về lại form với thông báo, giữ user hiện tại (không redirect)
-                    model.addAttribute("error", "Invalid birth date format. Expected yyyy-MM-dd");
+            String balance = request.getParameter("balance");
+
+            //Check valid email
+            if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
+                //Kiem tra xem email da ton tai hay chua (Khong xet den email cu)
+                model.addAttribute("error", "Email already exists");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }
+
+            //Check valid pasword
+            if (!valid.isPasswordValid(password)) {
+                model.addAttribute("error", "Password must be at least 6 characters long");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }
+            //Check valid phone
+            if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
+                if (!valid.isPhoneValid(phoneNumber)) {
+                    model.addAttribute("error", "Invalid phone number");
                     model.addAttribute("user", user);
                     return "admin/user-update";
                 }
             }
+            //Check valid balance
+            BigDecimal balanceD = null;
+            if (balance != null && !balance.isEmpty()) {
+                try {
+                    balanceD = new BigDecimal(balance);
+                    if(balanceD.compareTo(BigDecimal.ZERO) < 0){
+                        model.addAttribute("error", "Please enter a positive number");
+                        model.addAttribute("user", user);
+                        return "admin/user-update";
+                    }
+                    if(balanceD.compareTo(user.getBalance()) > 0){}
+                } catch (Exception e) {
+                    model.addAttribute("error", "Invalid balance");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }
+            }else{
+                balanceD = BigDecimal.ZERO;
+            }
+            // Solving if having image
+            MultipartFile avatar = multipartRequest.getFile("avatarUrl");
 
+            if (avatar != null && !avatar.isEmpty()) {
+
+                // User entered an invalid file
+                if (!valid.isImageFileValid(avatar)) {
+                    model.addAttribute("error", "This file is not an image");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }
+
+                // Save the image into static/img/avatar folder, naming follows role+id
+                try {
+                    user.setAvatarUrl(imageUploadUtil.saveAvatar(avatar, user.getUsername()));
+                } catch (Exception e) {
+                    model.addAttribute("error", "Upload failed");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }
+            }
+            user.setEmail(email);
+//          Save hashed password
+            user.setPassword(valid.hashPassword(password));
+            user.setPhoneNumber(phoneNumber);
+            user.setGender(gender);
+            if (!birthDate.isEmpty()) {
+                user.setBirthDate(LocalDate.parse(birthDate));//from yyyy-MM-dd to LocalDate
+            }
+            user.setBalance(balanceD);
             user.setUpdatedAt(LocalDateTime.now());
-
-            // Lưu và lấy lại entity (nếu service trả về saved entity thì dùng kết quả)
             userService.save(user);
-            // user = userService.findById(id); // tuỳ service, có thể reload để chắc chắn
-
+            model.addAttribute("success", "User created successfully");
             model.addAttribute("user", user);
-            model.addAttribute("success", "Updated user successfully");
             return "admin/user-update";
 
         } catch (Exception e) {

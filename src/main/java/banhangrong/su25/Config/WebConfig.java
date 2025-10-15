@@ -30,6 +30,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .setCachePeriod(3600);
         registry.addResourceHandler("/avatar/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/avatar/")
-                .setCachePeriod(3600);
+                .setCachePeriod(0);
     }
 }
