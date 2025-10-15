@@ -1158,6 +1158,66 @@
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
 
+        /* === THÊM CSS CHO PASSWORD TOGGLE === */
+
+        .password-input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 45px; /* Tạo khoảng trống cho icon */
+            width: 100%;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .password-toggle:hover {
+            color: var(--text);
+            background: color-mix(in oklab, var(--accent) 12%, transparent);
+        }
+
+        .password-toggle .ti {
+            font-size: 16px;
+        }
+
+        /* Style khi password đang hiển thị */
+        .password-toggle.active {
+            color: var(--accent);
+        }
+
+        .password-toggle.active .ti-eye {
+            display: none;
+        }
+
+        .password-toggle.active .ti-eye-off {
+            display: block;
+        }
+
+        .password-toggle .ti-eye-off {
+            display: none;
+        }
+
     </style>
 </head>
 <body class="loading">
@@ -1356,19 +1416,34 @@
         </div>
 
         <form id="passwordChangeForm">
-            <div class="form-group">
+            <div class="form-group password-input-group">
                 <label for="currentPassword">Mật khẩu hiện tại:</label>
-                <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+                <div class="password-wrapper">
+                    <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+                    <button type="button" class="password-toggle" data-target="currentPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-input-group">
                 <label for="newPassword">Mật khẩu mới:</label>
-                <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="6">
+                <div class="password-wrapper">
+                    <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="6">
+                    <button type="button" class="password-toggle" data-target="newPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-input-group">
                 <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                    <button type="button" class="password-toggle" data-target="confirmPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="password-strength" id="passwordStrength" style="display: none;">
@@ -1513,6 +1588,7 @@
 
         // Initialize theme
         initTheme();
+        initPasswordToggles();
 
         // Theme toggle event
         if (themeToggle) {
@@ -1826,6 +1902,18 @@
         if (passwordStrength) {
             passwordStrength.style.display = 'none';
         }
+
+        const passwordInputs = document.querySelectorAll('.password-wrapper input[type="text"]');
+        const toggleButtons = document.querySelectorAll('.password-toggle');
+
+        passwordInputs.forEach(input => {
+            input.type = 'password';
+        });
+
+        toggleButtons.forEach(button => {
+            button.classList.remove('active');
+            button.innerHTML = '<i class="ti ti-eye"></i>';
+        });
     }
 
     if (closePasswordModal) {
@@ -1989,6 +2077,34 @@
             closePasswordModalFunc();
         }
     });
+
+    // Xử lý toggle password visibility
+    function initPasswordToggles() {
+        const toggleButtons = document.querySelectorAll('.password-toggle');
+
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+
+                if (passwordInput) {
+                    // Chuyển đổi giữa type password và text
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        this.classList.add('active');
+                        // Đổi icon thành eye-off
+                        this.innerHTML = '<i class="ti ti-eye-off"></i>';
+                    } else {
+                        passwordInput.type = 'password';
+                        this.classList.remove('active');
+                        // Đổi icon thành eye
+                        this.innerHTML = '<i class="ti ti-eye"></i>';
+                    }
+                }
+            });
+        });
+    }
+
 </script>
 </body>
 </html>
