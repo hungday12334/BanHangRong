@@ -247,7 +247,24 @@
             </div>
             <h1 class="app-title">BanHangRong</h1>
         </div>
-        
+        <div th:if="${param.expired}"
+             class="d-flex align-items-center justify-content-center mt-3 shadow-sm rounded-3"
+             role="alert"
+             style="
+        max-width: 520px;
+        margin-bottom: 10px;
+        background-color: #ffeaea;
+        border: 2px solid #dc3545;
+        color: #b30000;
+        padding: 12px 18px;
+     ">
+
+            <div class="fw-semibold" style="font-size: 15px;">
+                Your session has expired.<br>
+                Please log in again to continue.
+            </div>
+        </div>
+
         <form id="loginForm" class="form" action="/perform-login" method="post">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -279,6 +296,8 @@
         </div>
         
         <!-- Messages -->
+
+
         <div id="errorMessage" class="error-message">
             <i class="fas fa-exclamation-circle"></i>
             <span id="errorText"></span>

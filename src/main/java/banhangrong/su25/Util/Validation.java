@@ -1,6 +1,7 @@
 package banhangrong.su25.Util;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 public class Validation {
@@ -14,10 +15,7 @@ public class Validation {
         return password != null && password.length() >= 6;
     }
     public  String hashPassword(String password){
-        if(!isPasswordValid(password)){
-            return null;
-        }
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        PasswordEncoder encoder= new BCryptPasswordEncoder();
         return encoder.encode(password);
     }
     public boolean isImageFileValid(MultipartFile file) {

@@ -97,6 +97,7 @@ public class AdminUserManagement {
         user.setPassword(valid.hashPassword(user.getPassword()));
         //Blance default 0
         user.setBalance(BigDecimal.ZERO);
+        user.setIsActive(false);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         userService.save(user);
@@ -265,6 +266,7 @@ public class AdminUserManagement {
             if (user == null) {
                 redirectAttributes.addFlashAttribute("error", "User not found");
             } else {
+                userService.setExpireSessionByUsername(user.getUsername());
                 userService.delete(id);
                 redirectAttributes.addFlashAttribute("success", "Removed user successfully");
 
