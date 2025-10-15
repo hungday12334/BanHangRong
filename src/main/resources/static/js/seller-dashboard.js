@@ -1515,9 +1515,12 @@
             userId: (document.getElementById('gk_user')?.value ? Number(document.getElementById('gk_user').value) : undefined)
           })
         });
-        if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
-        const data = await res.json();
-        showToast(`Đã tạo ${data.generated} key (còn lại ${data.remaining})`, 'success');
+  if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
+  const data = await res.json();
+  showToast(`Đã tạo ${data.generated} key (còn lại ${data.remaining})`, 'success');
+  // Reload keys list and navigate to Keys panel so new keys are visible immediately
+  try { if (typeof loadSellerKeys === 'function') loadSellerKeys(true); } catch (e) { /* ignore */ }
+  try { if (typeof showPanelByHash === 'function') showPanelByHash('#keys'); } catch (e) { /* ignore */ }
       } catch (e) { showToast('Lỗi tạo key', 'error'); }
     });
 
