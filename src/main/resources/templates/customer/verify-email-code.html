@@ -27,11 +27,9 @@
             <input type="text" name="code" placeholder="Nhập mã 6 số" maxlength="6" pattern="[0-9]{6}" required>
             <div class="actions">
                 <div>
-                    <form method="post" action="/customer/verify-code/resend" style="display:inline;">
-                        <button id="resendBtn" type="submit" class="btn" th:disabled="${remainingSeconds != null and remainingSeconds > 0}">
-                            Gửi lại mã <span id="countdown" th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
-                        </button>
-                    </form>
+                    <button id="resendBtn" type="button" class="btn" th:disabled="${remainingSeconds != null and remainingSeconds > 0}" onclick="resendCode()">
+                        Gửi lại mã <span id="countdown" th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
+                    </button>
                 </div>
                 <div style="display:flex;gap:10px;">
                     <button type="button" class="btn" onclick="history.back()">Hủy</button>
@@ -52,6 +50,12 @@
                     },1000);
                 }
             })();
+
+            function resendCode(){
+                fetch('/customer/verify-code/resend', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                    .then(function(){ window.location.search = '?remaining=60'; })
+                    .catch(function(){ window.location.href = '/customer/verify-code/resend'; });
+            }
         </script>
     </div>
 </body>
