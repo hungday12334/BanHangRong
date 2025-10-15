@@ -5,6 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
 	<link rel="stylesheet" href="/css/styles.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 	<style>
 		.container{max-width:1100px;margin:20px auto;padding:0 10px}
 		.breadcrumb{font-size:14px;color:#6b7280;margin-bottom:10px}
