@@ -38,7 +38,7 @@ public class SecurityConfig {
             
             // Cấu hình session management
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
             )

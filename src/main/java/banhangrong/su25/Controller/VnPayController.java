@@ -276,9 +276,36 @@ public class VnPayController {
             }
         } else {
         if (success) {
-            // on success: subtract stock and clear cart (same as demo checkout)
+            // on success: subtract stock, deduct money from wallet, and clear cart
             Long uid = getCurrentUserId();
             List<ShoppingCart> items = cartRepository.findByUserId(uid);
+            
+            // Calculate total amount to deduct from wallet
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            for (ShoppingCart it : items) {
+                Products p = productsRepository.findById(it.getProductId()).orElse(null);
+                if (p != null) {
+                    BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                    int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                    totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(qty)));
+                }
+            }
+            
+            // Deduct money from user's wallet
+            usersRepository.findById(uid).ifPresent(user -> {
+                BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+                if (currentBalance.compareTo(totalAmount) >= 0) {
+                    BigDecimal newBalance = currentBalance.subtract(totalAmount);
+                    user.setBalance(newBalance);
+                    usersRepository.save(user);
+                    System.out.println("[VNPay] Payment success: deducted " + totalAmount + " from user " + uid + ", new balance: " + newBalance);
+                } else {
+                    System.out.println("[VNPay] Payment failed: insufficient balance for user " + uid);
+                    return;
+                }
+            });
+            
+            // Update product stock and sales
             for (ShoppingCart it : items) {
                 productsRepository.findById(it.getProductId()).ifPresent(p -> {
                     int stock = p.getQuantity() != null ? p.getQuantity() : 0;
@@ -292,6 +319,7 @@ public class VnPayController {
                     }
                 });
             }
+            // Clear cart
             for (ShoppingCart it : items) { try { cartRepository.delete(it); } catch (Exception ignored) {} }
         }
         return "customer/vnpay-result";
