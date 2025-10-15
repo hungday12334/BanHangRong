@@ -77,6 +77,7 @@
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                         <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
                         <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="amount" id="topupAmountInput" />
                             <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
                         </form>

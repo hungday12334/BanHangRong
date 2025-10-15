@@ -106,6 +106,9 @@
                         if(d.over){ err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
                         else { err.textContent=''; }
                         inp.value = d.appliedQty;
+                        // update qty badge
+                        const pill = inp.closest('.cart-row')?.querySelector('.qty-pill');
+                        if(pill){ pill.textContent = 'x' + d.appliedQty; }
                         recomputeTotals();
                     }).catch(()=>{});
                 });
