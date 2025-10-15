@@ -77,6 +77,20 @@
         (function(){
             function fmt(n){try{return new Intl.NumberFormat('vi-VN').format(n)}catch(e){return n}}
             const inputs = document.querySelectorAll('.qty-input');
+            const totalEl = document.querySelector('.total span');
+            function recomputeTotals(){
+                let sum = 0;
+                document.querySelectorAll('.cart-row').forEach(function(row){
+                    const priceText = row.querySelector('.col.center span')?.textContent?.replace(/\D/g,'')||'0';
+                    const qtyInput = row.querySelector('.qty-input');
+                    const price = parseInt(priceText||'0',10);
+                    const qty = parseInt(qtyInput?.value||'1',10);
+                    sum += (price * qty);
+                    const lineEl = row.querySelector('.col.right span');
+                    if(lineEl){ try{ lineEl.textContent = new Intl.NumberFormat('vi-VN').format(price*qty); }catch(_){} }
+                });
+                if(totalEl){ try{ totalEl.textContent = new Intl.NumberFormat('vi-VN').format(sum); }catch(_){} }
+            }
             function xsrf(){
                 try { return document.cookie.split('; ').find(r=>r.startsWith('XSRF-TOKEN='))?.split('=')[1] || ''; } catch(_) { return ''; }
             }
@@ -92,8 +106,7 @@
                         if(d.over){ err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
                         else { err.textContent=''; }
                         inp.value = d.appliedQty;
-                        // reload to reflect totals quickly (simple way)
-                        location.reload();
+                        recomputeTotals();
                     }).catch(()=>{});
                 });
             });
@@ -108,10 +121,11 @@
                         method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN': (function(){try{return document.cookie.split('; ').find(r=>r.startsWith('XSRF-TOKEN='))?.split('=')[1]||''}catch(_){return ''}})()},
                         body:`productId=${encodeURIComponent(pid)}`
                     }).then(r=>{ if(!r.ok) throw new Error('bad'); return r.json(); })
-                    .then(()=> location.reload())
+                    .then(()=> { a.closest('.cart-row')?.remove(); recomputeTotals(); })
                     .catch(()=>{ window.location.href = href; });
                 });
             });
+            recomputeTotals();
         })();
         </script>
         <form class="summary" method="post" action="/cart/checkout-wallet">
