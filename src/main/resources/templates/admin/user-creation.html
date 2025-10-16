@@ -5,13 +5,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>User Creation</title>
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
-    <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <style>
         /* Căn chỉnh phần nội dung chính để không bị sidebar che */
         .content-wrapper {
-            margin-left: 260px; /* Đẩy sang phải bằng độ rộng sidebar */
+            margin-left: 260px;
+            /* Đẩy sang phải bằng độ rộng sidebar */
             padding: 30px;
             background-color: #f8f9fa;
             min-height: 100vh;
@@ -33,7 +34,8 @@
             text-align: center;
         }
 
-        td, th {
+        td,
+        th {
             padding: 10px;
             vertical-align: middle;
         }
@@ -111,220 +113,218 @@
 </head>
 
 <body>
-<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
-    <!-- Sidebar Start -->
-    <aside class="left-sidebar">
-        <div>
-            <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
-                <a th:href="@{/admin/index}" class="text-center">
-                    <img th:src="@{/img/favicon.png}" alt="LOGO" style="width: 80px; height: auto; display: block; margin: 0 auto;">
-                    <span style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
-                </a>
-                <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
-                    <i class="ti ti-x fs-6"></i>
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar">
+            <div>
+                <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
+                    <a th:href="@{/admin/index}" class="text-center">
+                        <img th:src="@{/img/favicon.png}" alt="LOGO"
+                            style="width: 80px; height: auto; display: block; margin: 0 auto;">
+                        <span
+                            style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
+                    </a>
+                    <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
+                        <i class="ti ti-x fs-6"></i>
+                    </div>
                 </div>
-            </div>
-            <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-                <ul id="sidebarnav">
-                    <li class="nav-small-cap">
-                        <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-                        <span class="hide-menu">Lists</span>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  th:href="@{/admin/index}"
-                           aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
-                                <span class="hide-menu">DASHBOARD</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" th:href="@{/admin/user}" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
-                            <span class="hide-menu">USER MANAGEMENT</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  th:href="@{/admin/product}" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-key-fill"></i></span>
-                                <span class="hide-menu">PRODUCT MANAGEMENT</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
-                           aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-patch-question-fill"></i></span>
-                                <span class="hide-menu">HELP</span>
-                            </div>
-                        </a>
-                        <ul aria-expanded="false" class="collapse first-level">
-                            <li class="sidebar-item">
-                                <a class="sidebar-link justify-content-between"  href="#">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-circle"></i>
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Lists</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/index}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
+                                    <span class="hide-menu">DASHBOARD</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" th:href="@{/admin/user}" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                <span class="hide-menu">USER MANAGEMENT</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/product}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-key-fill"></i></span>
+                                    <span class="hide-menu">PRODUCT MANAGEMENT</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-patch-question-fill"></i></span>
+                                    <span class="hide-menu">HELP</span>
+                                </div>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">REPORT</span>
                                         </div>
-                                        <span class="hide-menu">REPORT</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link justify-content-between"  href="#">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-circle"></i>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">APPLY TO SELLER</span>
                                         </div>
-                                        <span class="hide-menu">APPLY TO SELLER</span>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  href="#" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
-                                <span class="hide-menu">SETTING</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  href="#" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
-                                <span class="hide-menu">LOGOUT</span>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
+                                    <span class="hide-menu">SETTING</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
+                                    <span class="hide-menu">LOGOUT</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!-- Sidebar End -->
+
+        <!-- ListUser Section -->
+        <div class="content-wrapper">
+            <!-- Thông báo lỗi -->
+            <div th:if="${errorExist}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorExist}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Thông báo thành công -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <h2>Create New User</h2>
+            <form id="userForm" action="/admin/user/create" method="post" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" name="username" th:value="${user!=null ? user.username : ''}">
+                </div>
+
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" name="email" th:value="${user!=null ? user.email : ''}">
+                </div>
+
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="text" name="password" th:value="${user!=null ? user.password : ''}">
+                </div>
+
+                <div class="form-group">
+                    <label>User Type (Role):</label>
+                    <select name="userType">
+                        <option value="CUSTOMER" th:selected="${user != null and user.userType == 'CUSTOMER'}">CUSTOMER
+                        </option>
+                        <option value="ADMIN" th:selected="${user != null and user.userType == 'ADMIN'}">ADMIN
+                        </option>
+                        <option value="SELLER" th:selected="${user != null and user.userType == 'SELLER'}">SELLER
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Avatar:</label>
+                    <input type="file" name="avatarUrl">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number:</label>
+                    <input type="text" name="phoneNumber" th:value="${user!=null ? user.phoneNumber : ''}">
+                </div>
+
+                <div class="form-group">
+                    <label>Gender:</label>
+                    <select name="gender" class="form-control">
+                        <option value="MALE" th:selected="${user != null and user.gender == 'MALE'}">Male</option>
+                        <option value="FEMALE" th:selected="${user != null and user.gender == 'FEMALE'}">Female</option>
+                        <option value="OTHER" th:selected="${user != null and user.gender == 'OTHER'}">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Birth Date:</label>
+                    <input type="date" name="birthDate"
+                        th:value="${user != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : ''}">
+                </div>
+
+                <div class="form-group">
+                    <label>Balance:</label>
+                    <input type="number" step="0.01" name="balance" th:value="${user!=null ? user.balance : ''}">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit">Create User</button>
+                    <button type="reset" class="reset">Reset</button>
+                </div>
+
+            </form>
         </div>
-    </aside>
-    <!-- Sidebar End -->
-
-    <!-- ListUser Section -->
-    <div class="content-wrapper">
-        <!-- Thông báo lỗi -->
-        <div th:if="${errorExist}"
-             class="alert alert-danger alert-dismissible fade show"
-             role="alert">
-            <span th:text="${errorExist}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-
-        <!-- Thông báo thành công -->
-        <div th:if="${success}"
-             class="alert alert-success alert-dismissible fade show"
-             role="alert">
-            <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <h2>Create New User</h2>
-        <form id="userForm" action="/admin/user/create" method="post" enctype="multipart/form-data">
-
-            <div class="form-group">
-                <label>Username:</label>
-                <input type="text" name="username" th:value="${user!=null ? user.username : ''}">
-            </div>
-
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" name="email" th:value="${user!=null ? user.email : ''}">
-            </div>
-
-            <div class="form-group">
-                <label>Password:</label>
-                <input type="text" name="password" th:value="${user!=null ? user.password : ''}">
-            </div>
-
-            <div class="form-group">
-                <label>User Type (Role):</label>
-                <select name="userType">
-                    <option value="CUSTOMER"
-                            th:selected="${user != null and user.userType == 'CUSTOMER'}">CUSTOMER
-                    </option>
-                    <option value="ADMIN"
-                            th:selected="${user != null and user.userType == 'ADMIN'}">ADMIN
-                    </option>
-                    <option value="SELLER"
-                            th:selected="${user != null and user.userType == 'SELLER'}">SELLER
-                    </option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Avatar:</label>
-                <input type="file" name="avatarUrl">
-            </div>
-
-            <div class="form-group">
-                <label>Phone Number:</label>
-                <input type="text" name="phoneNumber" th:value="${user!=null ? user.phoneNumber : ''}">
-            </div>
-
-            <div class="form-group">
-                <label>Gender:</label>
-                <select name="gender" class="form-control">
-                    <option value="MALE" th:selected="${user != null and user.gender == 'MALE'}">Male</option>
-                    <option value="FEMALE" th:selected="${user != null and user.gender == 'FEMALE'}">Female</option>
-                    <option value="OTHER" th:selected="${user != null and user.gender == 'OTHER'}">Other</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Birth Date:</label>
-                <input type="date" name="birthDate" th:value="${user != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : ''}"></div>
-
-            <div class="form-group">
-                <label>Balance:</label>
-                <input type="number" step="0.01" name="balance" th:value="${user!=null ? user.balance : ''}">
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="submit">Create User</button>
-                <button type="reset" class="reset">Reset</button>
-            </div>
-
-        </form>
     </div>
-</div>
-<script>
-    document.getElementById("userForm").addEventListener("submit", function (event) {
-        const username = document.querySelector("[name='username']").value.trim();
-        const email = document.querySelector("[name='email']").value.trim();
-        const password = document.querySelector("[name='password']").value.trim();
-        const userType = document.querySelector("[name='userType']").value.trim();
+    <script>
+        document.getElementById("userForm").addEventListener("submit", function (event) {
+            const username = document.querySelector("[name='username']").value.trim();
+            const email = document.querySelector("[name='email']").value.trim();
+            const password = document.querySelector("[name='password']").value.trim();
+            const userType = document.querySelector("[name='userType']").value.trim();
 
-        let errors = [];
+            let errors = [];
 
-        if (!username) errors.push("Username is required");
-        if (!email) errors.push("Email is required");
-        if (!password) errors.push("Password is required");
-        if (!userType) errors.push("User type (role) is required");
+            if (!username) errors.push("Username is required");
+            if (!email) errors.push("Email is required");
+            if (!password) errors.push("Password is required");
+            if (!userType) errors.push("User type (role) is required");
 
-        // basic email pattern
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (email && !emailPattern.test(email)) {
-            errors.push("Email format is invalid");
-        }
+            // basic email pattern
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email && !emailPattern.test(email)) {
+                errors.push("Email format is invalid");
+            }
 
-        if (errors.length > 0) {
-            event.preventDefault(); // stop form submission
-            alert("Please fix the following errors:\n- " + errors.join("\n- "));
-        }
-    });
-</script>
-<script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
-<script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-<script src="../assets/libs/simplebar/dist/simplebar.js"></script>
-<script src="../assets/js/dashboard.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            if (errors.length > 0) {
+                event.preventDefault(); // stop form submission
+                alert("Please fix the following errors:\n- " + errors.join("\n- "));
+            }
+        });
+    </script>
+    <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
+    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

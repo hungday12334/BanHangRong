@@ -12,7 +12,8 @@
     <style>
         /* Căn chỉnh phần nội dung chính để không bị sidebar che */
         .content-wrapper {
-            margin-left: 260px; /* Đẩy sang phải bằng độ rộng sidebar */
+            margin-left: 260px;
+            /* Đẩy sang phải bằng độ rộng sidebar */
             padding: 30px;
             background-color: #f8f9fa;
             min-height: 100vh;
@@ -44,7 +45,8 @@
             text-align: center;
         }
 
-        td, th {
+        td,
+        th {
             padding: 10px;
             vertical-align: middle;
         }
@@ -70,6 +72,7 @@
         .btn-create:hover {
             background-color: #5b77e6;
         }
+
         a {
             text-decoration: none;
         }
@@ -77,13 +80,17 @@
         a:hover {
             text-decoration: none;
         }
+
         .sidebar-link .hide-menu {
-            margin-left: -8px; /* giảm khoảng cách chữ */
+            margin-left: -8px;
+            /* giảm khoảng cách chữ */
         }
+
         /* Nút hành động tự custom */
         .action-btns {
             display: flex;
-            flex-direction: column; /* icon xếp dọc */
+            flex-direction: column;
+            /* icon xếp dọc */
             align-items: center;
             gap: 6px;
         }
@@ -104,7 +111,8 @@
 
         /* Nút Update */
         .action-btns a {
-            background-color: #4e73df; /* xanh dương */
+            background-color: #4e73df;
+            /* xanh dương */
         }
 
         .action-btns a i {
@@ -114,7 +122,8 @@
 
         /* Nút Delete */
         .action-btns button {
-            background-color: #e74a3b; /* đỏ cam */
+            background-color: #e74a3b;
+            /* đỏ cam */
         }
 
         .action-btns button i {
@@ -132,213 +141,214 @@
 </head>
 
 <body>
-<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
-    <!-- Sidebar Start -->
-    <aside class="left-sidebar">
-        <div>
-            <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
-                <a th:href="@{/admin/index}" class="text-center">
-                    <img th:src="@{/img/favicon.png}" alt="LOGO" style="width: 80px; height: auto; display: block; margin: 0 auto;">
-                    <span style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
-                </a>
-                <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
-                    <i class="ti ti-x fs-6"></i>
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar">
+            <div>
+                <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
+                    <a th:href="@{/admin/index}" class="text-center">
+                        <img th:src="@{/img/favicon.png}" alt="LOGO"
+                            style="width: 80px; height: auto; display: block; margin: 0 auto;">
+                        <span
+                            style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
+                    </a>
+                    <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
+                        <i class="ti ti-x fs-6"></i>
+                    </div>
                 </div>
-            </div>
-            <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-                <ul id="sidebarnav">
-                    <li class="nav-small-cap">
-                        <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-                        <span class="hide-menu">Lists</span>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  th:href="@{/admin/index}" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
-                                <span class="hide-menu">DASHBOARD</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" th:href="@{/admin/user}" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
-                            <span class="hide-menu">USER MANAGEMENT</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  th:href="@{/admin/product}" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-key-fill"></i></span>
-                                <span class="hide-menu">PRODUCT MANAGEMENT</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-patch-question-fill"></i></span>
-                                <span class="hide-menu">HELP</span>
-                            </div>
-                        </a>
-                        <ul aria-expanded="false" class="collapse first-level">
-                            <li class="sidebar-item">
-                                <a class="sidebar-link justify-content-between"  href="#">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-circle"></i>
-                                        </div>
-                                        <span class="hide-menu">REPORT</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link justify-content-between"  href="#">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-circle"></i>
-                                        </div>
-                                        <span class="hide-menu">APPLY TO SELLER</span>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  href="#" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
-                                <span class="hide-menu">SETTING</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between"  href="#" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
-                                <span class="hide-menu">LOGOUT</span>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </aside>
-    <!-- Sidebar End -->
-
-    <!-- ListUser Section -->
-    <div class="content-wrapper">
-        <div class="user-header">
-            <form class="d-flex">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search users">
-                <button type="button" class="btn btn-outline-primary">Search</button>
-                <select id="roleSelect" class="form-select">
-                    <option value="all">All</option>
-                    <option value="admin">Admin</option>
-                    <option value="seller">Seller</option>
-                    <option value="customer">Customer</option>
-                </select>
-            </form>
-            <a th:href="@{/admin/user/create}" class="btn-create">Create User</a>
-        </div>
-
-        <div class="table-responsive">
-            <!-- Thông báo lỗi -->
-            <div th:if="${error}"
-                 class="alert alert-danger alert-dismissible fade show"
-                 role="alert">
-                <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-
-            <!-- Thông báo thành công -->
-            <div th:if="${success}"
-                 class="alert alert-success alert-dismissible fade show"
-                 role="alert">
-                <span th:text="${success}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-
-            <table class="table table-bordered text-center align-middle shadow-sm">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>User Type</th>
-                    <th>Phone</th>
-                    <th>Gender</th>
-                    <th>Birth Date</th>
-                    <th>Balance</th>
-                    <th>Active</th>
-                    <th>Verified</th>
-                    <th>Last Login</th>
-                    <th>Created</th>
-                    <th>Updated</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="u : ${userList}">
-                    <td>
-                        <div class="action-btns">
-                            <a th:href="@{'/admin/user/update?id=' + ${u.userId}}">
-                                <i class="bi bi-pencil-square"></i>
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Lists</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/index}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
+                                    <span class="hide-menu">DASHBOARD</span>
+                                </div>
                             </a>
-                            <form th:action="@{'/admin/user/delete'}" method="post">
-                                <input type="hidden" name="id" th:value="${u.userId}">
-                                <button type="submit" onclick="return confirm('Are you sure?');">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                    <td th:text="${u.userId}"></td>
-                    <td th:text="${u.username}"></td>
-                    <td th:text="${u.email}"></td>
-                    <td th:text="${u.userType}"></td>
-                    <td th:text="${u.phoneNumber}"></td>
-                    <td th:text="${u.gender}"></td>
-                    <td th:text="${u.birthDate}"></td>
-                    <td th:text="${u.balance}"></td>
-                    <td th:text="${u.isActive}"></td>
-                    <td th:text="${u.isEmailVerified}"></td>
-                    <td th:text="${#temporals.format(u.lastLogin, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${#temporals.format(u.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                </tr>
-                </tbody>
-            </table>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" th:href="@{/admin/user}" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                <span class="hide-menu">USER MANAGEMENT</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/product}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-key-fill"></i></span>
+                                    <span class="hide-menu">PRODUCT MANAGEMENT</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-patch-question-fill"></i></span>
+                                    <span class="hide-menu">HELP</span>
+                                </div>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">REPORT</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">APPLY TO SELLER</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
+                                    <span class="hide-menu">SETTING</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
+                                    <span class="hide-menu">LOGOUT</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!-- Sidebar End -->
+
+        <!-- ListUser Section -->
+        <div class="content-wrapper">
+            <div class="user-header">
+                <form class="d-flex">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search users">
+                    <button type="button" class="btn btn-outline-primary">Search</button>
+                    <select id="roleSelect" class="form-select">
+                        <option value="all">All</option>
+                        <option value="admin">Admin</option>
+                        <option value="seller">Seller</option>
+                        <option value="customer">Customer</option>
+                    </select>
+                </form>
+                <a th:href="@{/admin/user/create}" class="btn-create">Create User</a>
+            </div>
+
+            <div class="table-responsive">
+                <!-- Thông báo lỗi -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Thông báo thành công -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <table class="table table-bordered text-center align-middle shadow-sm">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>User Type</th>
+                            <th>Phone</th>
+                            <th>Gender</th>
+                            <th>Birth Date</th>
+                            <th>Balance</th>
+                            <th>Active</th>
+                            <th>Verified</th>
+                            <th>Last Login</th>
+                            <th>Created</th>
+                            <th>Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="u : ${userList}">
+                            <td>
+                                <div class="action-btns">
+                                    <a th:href="@{'/admin/user/update?id=' + ${u.userId}}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form th:action="@{'/admin/user/delete'}" method="post">
+                                        <input type="hidden" name="id" th:value="${u.userId}">
+                                        <button type="submit" onclick="return confirm('Are you sure?');">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                            <td th:text="${u.userId}"></td>
+                            <td th:text="${u.username}"></td>
+                            <td th:text="${u.email}"></td>
+                            <td th:text="${u.userType}"></td>
+                            <td th:text="${u.phoneNumber}"></td>
+                            <td th:text="${u.gender}"></td>
+                            <td th:text="${u.birthDate}"></td>
+                            <td th:text="${u.balance}"></td>
+                            <td th:text="${u.isActive}"></td>
+                            <td th:text="${u.isEmailVerified}"></td>
+                            <td th:text="${#temporals.format(u.lastLogin, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            <td th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            <td th:text="${#temporals.format(u.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
-<script>
-    document.getElementById("searchInput").addEventListener("keyup", function() {
-        const filter = this.value.toLowerCase();
-        const rows = document.querySelectorAll("table tbody tr");
+    <script>
+        document.getElementById("searchInput").addEventListener("keyup", function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll("table tbody tr");
 
-        rows.forEach(row => {
-            const cells = row.querySelectorAll("td");
-            let match = false;
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                let match = false;
 
-            // duyệt qua tất cả các cột trừ 3 cột thời gian cuối
-            for (let i = 0; i < cells.length - 3; i++) {
-                if (cells[i].innerText.toLowerCase().includes(filter)) {
-                    match = true;
-                    break;
+                // duyệt qua tất cả các cột trừ 3 cột thời gian cuối
+                for (let i = 0; i < cells.length - 3; i++) {
+                    if (cells[i].innerText.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
                 }
-            }
 
-            row.style.display = match ? "" : "none";
+                row.style.display = match ? "" : "none";
+            });
         });
-    });
-</script>
-<script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
-<script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-<script src="../assets/libs/simplebar/dist/simplebar.js"></script>
-<script src="../assets/js/dashboard.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </script>
+    <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
+    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
