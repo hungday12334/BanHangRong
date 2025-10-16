@@ -5,12 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: add spring boot devtools">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_v2.sql" beforeDir="false" afterPath="$PROJECT_DIR$/data_v2.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/set_password.sql" beforeDir="false" afterPath="$PROJECT_DIR$/set_password.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Users.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Users.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +137,7 @@
       <workItem from="1760282719443" duration="1246000" />
       <workItem from="1760335861930" duration="2498000" />
       <workItem from="1760342118902" duration="8292000" />
-      <workItem from="1760599260103" duration="3178000" />
+      <workItem from="1760599260103" duration="3586000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />

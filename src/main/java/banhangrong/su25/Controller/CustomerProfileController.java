@@ -114,9 +114,6 @@ public class CustomerProfileController {
                                     @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
                                     @RequestParam(name = "gender", required = false) String gender,
                                     @RequestParam(name = "birthDate", required = false) String birthDateStr,
-                                    @RequestParam(name = "currentPassword", required = false) String currentPassword,
-                                    @RequestParam(name = "newPassword", required = false) String newPassword,
-                                    @RequestParam(name = "confirmPassword", required = false) String confirmPassword,
                                     Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Users currentUser = null;
@@ -176,45 +173,7 @@ public class CustomerProfileController {
             } catch (Exception ignored) {}
         }
 
-        // Change password if requested
-        boolean wantsPasswordChange = (currentPassword != null && !currentPassword.trim().isEmpty())
-                || (newPassword != null && !newPassword.trim().isEmpty())
-                || (confirmPassword != null && !confirmPassword.trim().isEmpty());
-        if (wantsPasswordChange) {
-            String curr = currentPassword == null ? "" : currentPassword.trim();
-            String npw = newPassword == null ? "" : newPassword.trim();
-            String cfm = confirmPassword == null ? "" : confirmPassword.trim();
-
-            if (curr.isEmpty() || npw.isEmpty() || cfm.isEmpty()) {
-                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-                model.addAttribute("user", currentUser);
-                model.addAttribute("profileUser", currentUser);
-                model.addAttribute("pwdError", "Vui lòng nhập đủ mật khẩu hiện tại, mật khẩu mới và xác nhận.");
-                return "customer/profile-edit";
-            }
-            if (!passwordEncoder.matches(curr, currentUser.getPassword())) {
-                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-                model.addAttribute("user", currentUser);
-                model.addAttribute("profileUser", currentUser);
-                model.addAttribute("pwdError", "Mật khẩu hiện tại không đúng.");
-                return "customer/profile-edit";
-            }
-            if (npw.length() < 6) {
-                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-                model.addAttribute("user", currentUser);
-                model.addAttribute("profileUser", currentUser);
-                model.addAttribute("pwdError", "Mật khẩu mới phải có ít nhất 6 ký tự.");
-                return "customer/profile-edit";
-            }
-            if (!npw.equals(cfm)) {
-                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-                model.addAttribute("user", currentUser);
-                model.addAttribute("profileUser", currentUser);
-                model.addAttribute("pwdError", "Xác nhận mật khẩu không khớp.");
-                return "customer/profile-edit";
-            }
-            currentUser.setPassword(passwordEncoder.encode(npw));
-        }
+        // Password change moved to separate endpoint
         try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) {
             try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
             model.addAttribute("user", currentUser);
@@ -223,6 +182,67 @@ public class CustomerProfileController {
             return "customer/profile-edit";
         }
         return "redirect:/customer/profile/" + currentUser.getUsername() + "?updated=1";
+    }
+
+    @GetMapping("/customer/profile/{username}/change-password")
+    public String changePasswordForm(@PathVariable("username") String username, Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Users currentUser = null;
+        if (auth != null && auth.isAuthenticated()) {
+            currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        }
+        if (currentUser == null || !username.equalsIgnoreCase(currentUser.getUsername())) {
+            return "redirect:/customer/profile/" + username;
+        }
+        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+        model.addAttribute("user", currentUser);
+        return "customer/change-password";
+    }
+
+    @PostMapping("/customer/profile/{username}/change-password")
+    public String changePasswordSubmit(@PathVariable("username") String username,
+                                       @RequestParam(name = "currentPassword") String currentPassword,
+                                       @RequestParam(name = "newPassword") String newPassword,
+                                       @RequestParam(name = "confirmPassword") String confirmPassword,
+                                       Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Users currentUser = null;
+        if (auth != null && auth.isAuthenticated()) {
+            currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        }
+        if (currentUser == null || !username.equalsIgnoreCase(currentUser.getUsername())) {
+            return "redirect:/customer/profile/" + username;
+        }
+        // validations
+        if (currentPassword == null || newPassword == null || confirmPassword == null
+                || currentPassword.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            model.addAttribute("user", currentUser);
+            model.addAttribute("pwdError", "Vui lòng nhập đủ thông tin.");
+            return "customer/change-password";
+        }
+        if (!passwordEncoder.matches(currentPassword, currentUser.getPassword())) {
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            model.addAttribute("user", currentUser);
+            model.addAttribute("pwdError", "Mật khẩu hiện tại không đúng.");
+            return "customer/change-password";
+        }
+        if (newPassword.length() < 6) {
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            model.addAttribute("user", currentUser);
+            model.addAttribute("pwdError", "Mật khẩu mới phải có ít nhất 6 ký tự.");
+            return "customer/change-password";
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+            model.addAttribute("user", currentUser);
+            model.addAttribute("pwdError", "Xác nhận mật khẩu không khớp.");
+            return "customer/change-password";
+        }
+
+        currentUser.setPassword(passwordEncoder.encode(newPassword));
+        usersRepository.saveAndFlush(currentUser);
+        return "redirect:/customer/profile/" + currentUser.getUsername() + "?pwdUpdated=1";
     }
 
     @GetMapping("/customer/verify-code")
