@@ -41,6 +41,60 @@
     <div class="modal-footer note">Note: Editing a public product will set it to hidden/pending for approval.</div>
     <form method="dialog"><button value="close" hidden>Close</button></form>
   </dialog>
+    <dialog id="voucherModal" class="modal" aria-label="Voucher" data-modal="voucher">
+      <form method="dialog" class="modal-body" id="voucherForm">
+        <div class="modal-header">
+          <h3>Voucher</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-content" style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+          <input type="hidden" id="vc_voucherId" />
+          <div>
+            <label class="label" for="vc_code">Code</label>
+            <input id="vc_code" class="input" placeholder="e.g. FALL25" required />
+          </div>
+          <div>
+            <label class="label" for="vc_type">Discount type</label>
+            <select id="vc_type" class="input">
+              <option value="PERCENT">Percent %</option>
+              <option value="AMOUNT">Amount</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="vc_value">Value</label>
+            <input id="vc_value" type="number" min="0" step="0.01" class="input" placeholder="10 or 10.00" />
+          </div>
+          <div>
+            <label class="label" for="vc_min">Min order</label>
+            <input id="vc_min" type="number" min="0" step="0.01" class="input" placeholder="0.00" />
+          </div>
+          <div>
+            <label class="label" for="vc_start">Start at</label>
+            <input id="vc_start" type="datetime-local" class="input" />
+          </div>
+          <div>
+            <label class="label" for="vc_end">End at</label>
+            <input id="vc_end" type="datetime-local" class="input" />
+          </div>
+          <div>
+            <label class="label" for="vc_maxUses">Max uses</label>
+            <input id="vc_maxUses" type="number" min="0" step="1" class="input" placeholder="(unlimited)" />
+          </div>
+          <div>
+            <label class="label" for="vc_maxPerUser">Max per user</label>
+            <input id="vc_maxPerUser" type="number" min="0" step="1" class="input" placeholder="(unlimited)" />
+          </div>
+          <div>
+            <label class="label" for="vc_status">Status</label>
+            <select id="vc_status" class="input">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions"><button type="submit" class="btn primary" id="vc_save">Save</button></div>
+      </form>
+      <div class="modal-footer note">Vouchers are scoped to a single product.</div>
+    </dialog>
   <dialog id="orderModal" class="modal" aria-label="Order details" data-modal="order-detail">
     <div class="modal-body">
       <div class="modal-header">
@@ -64,6 +118,36 @@
           </thead>
           <tbody id="om_items"></tbody>
         </table>
+      </div>
+    </div>
+    <form method="dialog"><button value="close" hidden>Close</button></form>
+  </dialog>
+  <dialog id="voucherUsageModal" class="modal" aria-label="Voucher usage" data-modal="voucher-usage">
+    <div class="modal-body">
+      <div class="modal-header">
+        <h3>Voucher usage — <span id="vu_code"></span></h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+      </div>
+      <div class="form-grid">
+        <div>Total uses: <b id="vu_used">0</b></div>
+        <div>Max uses: <b id="vu_max">∞</b></div>
+        <div>Remaining: <b id="vu_left">∞</b></div>
+      </div>
+      <div style="margin-top:10px">
+        <div><b>Redemptions</b></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Order</th>
+                <th>User</th>
+                <th>Discount</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="vu_table"><tr class="footer-note"><td colspan="5">No usage yet.</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
     <form method="dialog"><button value="close" hidden>Close</button></form>
