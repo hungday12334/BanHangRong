@@ -2,10 +2,16 @@
 <section th:fragment="dashboard" id="dashboardContent" data-section="dashboard">
   <header class="title" data-block="dashboard-header">
     <span class="accent"></span>
-    <h1>Seller Dashboard</h1>
-    <span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
-    <!-- Expose userId explicitly for client-side code to prefer (falls back to sellerId) -->
-    <span style="display:none"><b id="userId" th:text="${userId}"></b></span>
+  <h1 style="margin-bottom:0;">Welcome back,
+    <span class="chip you" id="userName"
+      th:text="${userName != null and userName != '' ? userName : (user != null and user.username != null ? user.username : (sellerId != null ? 'Seller #' + sellerId : 'Seller'))}">
+      Seller
+    </span>!
+  </h1>
+  <!-- Keep sellerId hidden for client-side scripts that depend on it -->
+  <span style="display:none"><b id="sellerId" th:text="${sellerId}"></b></span>
+  <!-- Expose userId explicitly for client-side code to prefer (falls back to sellerId) -->
+  <span style="display:none"><b id="userId" th:text="${userId}"></b></span>
     <!-- Live clock for sellers -->
     <div id="sellerClock" class="chip" aria-live="polite" title="Current time">--:--:--</div>
     <button id="btnAddProduct" class="btn primary" type="button" title="Add product">+ Add product</button>

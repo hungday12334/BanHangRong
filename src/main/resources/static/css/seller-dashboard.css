@@ -1,3 +1,9 @@
+.chip.you {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  font-weight: 600;
+}
 /* Avatar center and edit button */
 .profile-avatar-center {
   margin: 0 auto;
@@ -1081,6 +1087,58 @@ main {
   margin: 0;
   font-size: 24px;
   letter-spacing: 0.2px;
+}
+
+/* Dashboard-specific greeting enhancements */
+header[data-block="dashboard-header"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+header[data-block="dashboard-header"] h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+}
+
+header[data-block="dashboard-header"] .chip.you {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  border: 0;
+  font-weight: 700;
+  min-height: 36px;
+}
+
+/* If username is long, clamp to one line with ellipsis */
+header[data-block="dashboard-header"] .chip.you {
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 820px) {
+  header[data-block="dashboard-header"] h1 {
+    font-size: 20px;
+  }
+  header[data-block="dashboard-header"] .chip.you {
+    font-size: 13px;
+    padding: 5px 10px;
+    min-height: 32px;
+  }
 }
 
 .accent {
