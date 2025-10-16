@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: fix adding image avatar function.">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(auth): add feature to deactive user account&#10;- Set all status of product to &quot;Cancelled&quot; if users are seller.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/WebConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/user-update.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/user-update.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,7 +136,11 @@
       <workItem from="1760420733180" duration="12923000" />
       <workItem from="1760451365221" duration="1402000" />
       <workItem from="1760484025934" duration="4401000" />
-      <workItem from="1760488481928" duration="1756000" />
+      <workItem from="1760488481928" duration="20814000" />
+      <workItem from="1760553092285" duration="1584000" />
+      <workItem from="1760588048162" duration="726000" />
+      <workItem from="1760593267893" duration="5519000" />
+      <workItem from="1760626588270" duration="8771000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -213,7 +214,31 @@
       <option name="project" value="LOCAL" />
       <updated>1760437413366</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="fix: updating user information.&#10;+ Can change avatar, email, balance.&#10;+ Can't update username, role.">
+      <option name="closed" value="true" />
+      <created>1760490466160</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1760490466160</updated>
+    </task>
+    <task id="LOCAL-00011" summary="feat(auth): add feature to invalidate user session when expired&#10;&#10;- Configure Spring Security with invalidSessionUrl and expiredUrl&#10;- Display error message &quot;Your session has expired. Please log in again to continue.&quot;&#10;- Automatically redirect users to the login page when the session expires">
+      <option name="closed" value="true" />
+      <created>1760554684419</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1760554684419</updated>
+    </task>
+    <task id="LOCAL-00012" summary="feat(auth): add feature to deactive user account&#10;- Set all status of product to &quot;Cancelled&quot; if users are seller.">
+      <option name="closed" value="true" />
+      <created>1760635847093</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1760635847098</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -252,6 +277,9 @@
     <MESSAGE value="update: add sidebar.html ---&gt; to emb into othes html files ." />
     <MESSAGE value="update: adding an image avatar function." />
     <MESSAGE value="update: fix adding image avatar function." />
-    <option name="LAST_COMMIT_MESSAGE" value="update: fix adding image avatar function." />
+    <MESSAGE value="fix: updating user information.&#10;+ Can change avatar, email, balance.&#10;+ Can't update username, role." />
+    <MESSAGE value="feat(auth): add feature to invalidate user session when expired&#10;&#10;- Configure Spring Security with invalidSessionUrl and expiredUrl&#10;- Display error message &quot;Your session has expired. Please log in again to continue.&quot;&#10;- Automatically redirect users to the login page when the session expires" />
+    <MESSAGE value="feat(auth): add feature to deactive user account&#10;- Set all status of product to &quot;Cancelled&quot; if users are seller." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(auth): add feature to deactive user account&#10;- Set all status of product to &quot;Cancelled&quot; if users are seller." />
   </component>
 </project>
