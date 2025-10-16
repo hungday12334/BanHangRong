@@ -1,13 +1,12 @@
+// SellerFeaturedProducts.java - CẦN SỬA LẠI
 package banhangrong.su25.Entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "seller_featured_products")
 public class SellerFeaturedProducts {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "featured_id")
@@ -22,61 +21,36 @@ public class SellerFeaturedProducts {
     private Products product;
 
     @Column(name = "sort_order")
-    private Integer sortOrder;
+    private Integer sortOrder = 0;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // --- Constructors ---
+    // Constructors
     public SellerFeaturedProducts() {
+        this.createdAt = LocalDateTime.now();
     }
 
-    public SellerFeaturedProducts(SellerShopSections section, Products product,
-                                  Integer sortOrder, LocalDateTime createdAt) {
+    public SellerFeaturedProducts(SellerShopSections section, Products product, Integer sortOrder) {
+        this();
         this.section = section;
         this.product = product;
         this.sortOrder = sortOrder;
-        this.createdAt = createdAt;
     }
 
-    // --- Getters and Setters ---
-    public Long getFeaturedId() {
-        return featuredId;
-    }
+    // Getters and Setters
+    public Long getFeaturedId() { return featuredId; }
+    public void setFeaturedId(Long featuredId) { this.featuredId = featuredId; }
 
-    public void setFeaturedId(Long featuredId) {
-        this.featuredId = featuredId;
-    }
+    public SellerShopSections getSection() { return section; }
+    public void setSection(SellerShopSections section) { this.section = section; }
 
-    public SellerShopSections getSection() {
-        return section;
-    }
+    public Products getProduct() { return product; }
+    public void setProduct(Products product) { this.product = product; }
 
-    public void setSection(SellerShopSections section) {
-        this.section = section;
-    }
+    public Integer getSortOrder() { return sortOrder; }
+    public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
 
-    public Products getProduct() {
-        return product;
-    }
-
-    public void setProduct(Products product) {
-        this.product = product;
-    }
-
-    public Integer getSortOrder() {
-        return sortOrder;
-    }
-
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

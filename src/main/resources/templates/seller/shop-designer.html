@@ -8,17 +8,484 @@
     <!-- CSS -->
     <link rel="stylesheet" th:href="@{/css/styles.min.css}">
     <link rel="stylesheet" th:href="@{/css/seller-dashboard.css}">
-    <link rel="stylesheet" th:href="@{/css/shop-designer.css}">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.css">
     <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
 
+    <style>
+        /* Shop Designer Styles */
+        .shop-designer-container {
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
 
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: 100%;
+            gap: 1px;
+            background: #e9ecef;
+        }
+
+        /* Components Panel */
+        .components-panel {
+            background: white;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+
+        .components-categories {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .category-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .components-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .component-item {
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .component-item:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+        }
+
+        .component-item:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+        }
+
+        .component-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        /* Preview Area */
+        .preview-area {
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .device-preview {
+            display: flex;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .device-btn {
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .device-btn.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.25rem;
+        }
+
+        .zoom-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .zoom-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .preview-container {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .shop-preview {
+            min-height: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .preview-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: #6c757d;
+        }
+
+        .placeholder-content {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .placeholder-content i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .placeholder-content h3 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .placeholder-content p {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        /* Shop Sections in Preview */
+        .shop-section {
+            margin: 1.5rem;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .shop-section:hover {
+            border-color: #007bff;
+        }
+
+        .shop-section.dragover {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .shop-section.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px 6px 0 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .shop-section:hover .section-actions {
+            opacity: 1;
+        }
+
+        .btn-section {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-section:hover {
+            background: #f8f9fa;
+            border-color: #6c757d;
+        }
+
+        .btn-section.delete:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .section-content {
+            padding: 1rem;
+            min-height: 100px;
+        }
+
+        .section-products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .product-preview {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .product-preview img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Properties Panel */
+        .properties-panel {
+            background: white;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .properties-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: #6c757d;
+            padding: 3rem 1rem;
+        }
+
+        .no-selection i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .property-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .property-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .property-field {
+            margin-bottom: 1rem;
+        }
+
+        .property-field label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-range-fields {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .range-separator {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background: white;
+            border-top: 1px solid #dee2e6;
+            padding: 1rem;
+        }
+
+        .action-bar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-info {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Setup Templates */
+        .setup-templates {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .template-card {
+            padding: 1.5rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .template-card.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .template-preview {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .template-preview i {
+            font-size: 1.5rem;
+            color: #495057;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .designer-layout {
+                grid-template-columns: 250px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .designer-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .components-panel,
+            .properties-panel {
+                height: 200px;
+            }
+        }
+    </style>
 </head>
 <body class="dashboard-layout">
 <!-- Sidebar -->
- <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
 <!-- Main Content -->
 <main class="main-content">
@@ -326,5 +793,412 @@
 <!-- Scripts -->
 <script th:src="@{/js/home.js}"></script>
 <script th:src="@{/js/seller-dashboard.js}"></script>
+
+<script>
+    // Shop Designer JavaScript
+    class ShopDesigner {
+        constructor() {
+            this.sections = [];
+            this.currentSection = null;
+            this.selectedTemplate = null;
+            this.sellerId = 1; // Lấy từ session hoặc context
+            this.init();
+        }
+
+        init() {
+            this.loadComponents();
+            this.setupEventListeners();
+            this.setupDragAndDrop();
+            this.loadExistingLayout();
+        }
+
+        loadComponents() {
+            const productSections = [
+                { type: 'featured', title: '⭐ Sản phẩm nổi bật', icon: 'ti-star', description: 'Chọn sản phẩm hiển thị nổi bật' },
+                { type: 'bestseller', title: '🔥 Bán chạy nhất', icon: 'ti-trending-up', description: 'Tự động hiển thị sản phẩm bán chạy' },
+                { type: 'toprated', title: '💎 Đánh giá cao', icon: 'ti-award', description: 'Sản phẩm được đánh giá tốt nhất' },
+                { type: 'newarrivals', title: '🆕 Sản phẩm mới', icon: 'ti-new-section', description: 'Sản phẩm mới được thêm vào' }
+            ];
+
+            const specialSections = [
+                { type: 'categories', title: '📂 Danh mục', icon: 'ti-category', description: 'Hiển thị danh mục sản phẩm' },
+                { type: 'custom', title: '🎛️ Khu vực tùy chỉnh', icon: 'ti-settings', description: 'Tùy chỉnh bộ lọc theo nhu cầu' }
+            ];
+
+            this.renderComponents('productSections', productSections);
+            this.renderComponents('specialSections', specialSections);
+        }
+
+        renderComponents(containerId, components) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = components.map(comp => `
+                <div class="component-item" draggable="true" data-type="${comp.type}">
+                    <div class="d-flex align-items-center">
+                        <i class="ti ${comp.icon} me-2"></i>
+                        <div>
+                            <div class="fw-medium">${comp.title}</div>
+                            <small class="text-muted">${comp.description}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        setupEventListeners() {
+            // Quick setup modal
+            document.getElementById('quickStartBtn').addEventListener('click', () => {
+                this.showQuickSetupModal();
+            });
+
+            // Template selection
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    this.selectedTemplate = card.dataset.template;
+                });
+            });
+
+            // Apply template
+            document.getElementById('applyTemplateBtn').addEventListener('click', () => {
+                this.applyTemplate(this.selectedTemplate);
+                bootstrap.Modal.getInstance(document.getElementById('quickSetupModal')).hide();
+            });
+
+            // Save button
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                this.saveLayout();
+            });
+
+            // Publish button
+            document.getElementById('publishBtn').addEventListener('click', () => {
+                this.publishLayout();
+            });
+
+            // Preview button
+            document.getElementById('previewBtn').addEventListener('click', () => {
+                this.previewLayout();
+            });
+
+            // Property changes
+            document.getElementById('sectionTitle').addEventListener('input', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.title = e.target.value;
+                    this.updateSectionHeader(this.currentSection);
+                }
+            });
+
+            document.getElementById('sectionActive').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.isActive = e.target.checked;
+                }
+            });
+
+            // View shop button
+            document.getElementById('viewShopBtn').addEventListener('click', () => {
+                window.open(`/shop/${this.sellerId}`, '_blank');
+            });
+
+            // Help button
+            document.getElementById('helpBtn').addEventListener('click', () => {
+                alert('Hướng dẫn sử dụng:\n\n1. Kéo thành phần từ bên trái vào khu vực preview\n2. Click vào section để chỉnh sửa thuộc tính\n3. Sử dụng thiết lập nhanh để áp dụng mẫu có sẵn\n4. Lưu thay đổi và xuất bản khi hoàn thành');
+            });
+        }
+
+        setupDragAndDrop() {
+            const dropZone = document.getElementById('shopPreview');
+
+            // Drag start
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('component-item')) {
+                    e.target.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', e.target.dataset.type);
+                }
+            });
+
+            // Drag end
+            document.addEventListener('dragend', (e) => {
+                if (e.target.classList.contains('component-item')) {
+                    e.target.classList.remove('dragging');
+                }
+            });
+
+            // Drag over
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            // Drag leave
+            dropZone.addEventListener('dragleave', (e) => {
+                if (!dropZone.contains(e.relatedTarget)) {
+                    dropZone.classList.remove('dragover');
+                }
+            });
+
+            // Drop
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+
+                const sectionType = e.dataTransfer.getData('text/plain');
+                this.addNewSection(sectionType);
+            });
+        }
+
+        addNewSection(type) {
+            const section = {
+                id: Date.now(),
+                type: type,
+                title: this.getDefaultTitle(type),
+                description: '',
+                limit: 6,
+                layout: 'grid',
+                isActive: true,
+                filters: {},
+                sortOrder: this.sections.length
+            };
+
+            this.sections.push(section);
+            this.renderSection(section);
+            this.updateStats();
+            this.hidePlaceholder();
+        }
+
+        getDefaultTitle(type) {
+            const titles = {
+                'featured': 'Sản phẩm nổi bật',
+                'bestseller': 'Bán chạy nhất',
+                'toprated': 'Đánh giá cao nhất',
+                'newarrivals': 'Sản phẩm mới về',
+                'categories': 'Danh mục sản phẩm',
+                'custom': 'Khu vực tùy chỉnh'
+            };
+            return titles[type] || 'Khu vực sản phẩm';
+        }
+
+        renderSection(section) {
+            const sectionHTML = `
+                <div class="shop-section" data-section-id="${section.id}">
+                    <div class="section-header">
+                        <span class="fw-medium">${section.title}</span>
+                        <div class="section-actions">
+                            <button class="btn-section edit" onclick="designer.editSection(${section.id})">
+                                <i class="ti ti-edit"></i>
+                            </button>
+                            <button class="btn-section delete" onclick="designer.deleteSection(${section.id})">
+                                <i class="ti ti-trash"></i>
+                            </button>
+                            <button class="btn-section move">
+                                <i class="ti ti-grip-vertical"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="section-products">
+                            ${this.getSectionPreview(section)}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('shopPreview').insertAdjacentHTML('beforeend', sectionHTML);
+        }
+
+        getSectionPreview(section) {
+            // Hiển thị preview sản phẩm mẫu
+            return `
+                <div class="product-preview">
+                    <div class="bg-light rounded p-3 mb-2">
+                        <i class="ti ti-box"></i>
+                    </div>
+                    <small>Sản phẩm mẫu</small>
+                </div>
+            `.repeat(3);
+        }
+
+        editSection(sectionId) {
+            this.currentSection = this.sections.find(s => s.id === sectionId);
+            this.showPropertiesPanel();
+
+            // Highlight section selected
+            document.querySelectorAll('.shop-section').forEach(section => {
+                section.classList.remove('selected');
+            });
+            document.querySelector(`[data-section-id="${sectionId}"]`).classList.add('selected');
+        }
+
+        showPropertiesPanel() {
+            document.getElementById('noSelection').style.display = 'none';
+            document.getElementById('sectionProperties').style.display = 'block';
+
+            // Fill form với section data
+            document.getElementById('sectionTitle').value = this.currentSection.title;
+            document.getElementById('sectionDescription').value = this.currentSection.description;
+            document.getElementById('sectionLimit').value = this.currentSection.limit;
+            document.getElementById('sectionLayout').value = this.currentSection.layout;
+            document.getElementById('sectionActive').checked = this.currentSection.isActive;
+
+            // Hiển thị filter settings cho custom section
+            this.toggleFilterSettings(this.currentSection.type === 'custom');
+        }
+
+        toggleFilterSettings(show) {
+            document.getElementById('filterSettings').style.display = show ? 'block' : 'none';
+        }
+
+        updateSectionHeader(section) {
+            const sectionElement = document.querySelector(`[data-section-id="${section.id}"]`);
+            if (sectionElement) {
+                const header = sectionElement.querySelector('.section-header span');
+                header.textContent = section.title;
+            }
+        }
+
+        deleteSection(sectionId) {
+            if (confirm('Bạn có chắc muốn xóa khu vực này?')) {
+                this.sections = this.sections.filter(s => s.id !== sectionId);
+                document.querySelector(`[data-section-id="${sectionId}"]`).remove();
+                this.updateStats();
+
+                if (this.currentSection && this.currentSection.id === sectionId) {
+                    this.hidePropertiesPanel();
+                }
+            }
+        }
+
+        hidePropertiesPanel() {
+            document.getElementById('noSelection').style.display = 'block';
+            document.getElementById('sectionProperties').style.display = 'none';
+            this.currentSection = null;
+
+            document.querySelectorAll('.shop-section').forEach(section => {
+                section.classList.remove('selected');
+            });
+        }
+
+        hidePlaceholder() {
+            document.getElementById('previewPlaceholder').style.display = 'none';
+        }
+
+        updateStats() {
+            document.getElementById('activeSectionsCount').textContent = this.sections.length;
+            document.getElementById('totalProductsCount').textContent = this.sections.reduce((total, section) => total + section.limit, 0);
+            document.getElementById('lastSaved').textContent = new Date().toLocaleTimeString('vi-VN');
+        }
+
+        showQuickSetupModal() {
+            const modal = new bootstrap.Modal(document.getElementById('quickSetupModal'));
+            modal.show();
+        }
+
+        applyTemplate(template) {
+            // Áp dụng template mẫu
+            const templates = {
+                'featured': ['featured', 'bestseller', 'newarrivals'],
+                'bestseller': ['bestseller', 'toprated', 'categories'],
+                'newarrivals': ['newarrivals', 'featured', 'bestseller'],
+                'categories': ['categories', 'featured', 'bestseller', 'newarrivals']
+            };
+
+            // Xóa sections hiện tại
+            this.sections = [];
+            document.getElementById('shopPreview').innerHTML = '';
+
+            // Thêm sections theo template
+            templates[template]?.forEach(type => {
+                this.addNewSection(type);
+            });
+
+            this.hidePlaceholder();
+        }
+
+        async saveLayout() {
+            this.showLoading();
+
+            try {
+                const response = await fetch(`/api/seller/shop-design/layout?sellerId=${this.sellerId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.sections)
+                });
+
+                if (response.ok) {
+                    this.showMessage('✅ Đã lưu thiết kế cửa hàng!', 'success');
+                    this.updateStats();
+                } else {
+                    throw new Error('Lỗi khi lưu layout');
+                }
+            } catch (error) {
+                this.showMessage('❌ Lỗi khi lưu thiết kế: ' + error.message, 'error');
+            } finally {
+                this.hideLoading();
+            }
+        }
+
+        async publishLayout() {
+            if (confirm('Xuất bản thiết kế này lên cửa hàng công khai?')) {
+                await this.saveLayout();
+                this.showMessage('🚀 Đã xuất bản cửa hàng!', 'success');
+            }
+        }
+
+        previewLayout() {
+            this.showMessage('👁️ Đang mở xem trước...', 'info');
+            // Mở cửa hàng preview trong tab mới
+            window.open(`/shop/preview/${this.sellerId}`, '_blank');
+        }
+
+        async loadExistingLayout() {
+            try {
+                const response = await fetch(`/api/seller/shop-design/sections?sellerId=${this.sellerId}`);
+                if (response.ok) {
+                    const existingSections = await response.json();
+                    if (existingSections.length > 0) {
+                        this.sections = existingSections;
+                        this.renderExistingSections();
+                        this.hidePlaceholder();
+                        this.updateStats();
+                    }
+                }
+            } catch (error) {
+                console.log('Không có layout cũ hoặc lỗi khi tải:', error);
+            }
+        }
+
+        renderExistingSections() {
+            this.sections.forEach(section => {
+                this.renderSection(section);
+            });
+        }
+
+        showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        showMessage(message, type = 'info') {
+            const actionMessage = document.getElementById('actionMessage');
+            actionMessage.textContent = message;
+            actionMessage.className = `action-message ${type}`;
+
+            setTimeout(() => {
+                actionMessage.textContent = 'Sẵn sàng thiết kế';
+                actionMessage.className = 'action-message';
+            }, 3000);
+        }
+    }
+
+    // Khởi tạo khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        window.designer = new ShopDesigner();
+    });
+</script>
+
 </body>
 </html>

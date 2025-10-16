@@ -4,18 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update category management">
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ShopDesignController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SectionType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerFeaturedProducts.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerShopSections.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerFeaturedProductsRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerShopSectionsRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ShopDesignService.java" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update seller edit strore">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Products.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Products.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductDetailController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductLicenseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductLicenseController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductSearchController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductSearchController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerOrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerOrderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ShopDesignController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ShopDesignController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerFeaturedProducts.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerFeaturedProducts.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerShopSections.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerShopSections.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerFeaturedProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerFeaturedProductsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerShopSectionsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerShopSectionsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ShopDesignService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ShopDesignService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,9 +121,9 @@
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="banhangrong.su25.service" />
       <recent name="banhangrong.su25.Repository" />
       <recent name="banhangrong.su25.Entity" />
-      <recent name="banhangrong.su25.service" />
       <recent name="banhangrong.su25.Controller" />
       <recent name="banhangrong.su25.WebSocket" />
     </key>
@@ -317,7 +323,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760514350232</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="update seller edit strore">
+      <option name="closed" value="true" />
+      <created>1760628659239</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1760628659239</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -361,6 +375,7 @@
     <MESSAGE value="update change password" />
     <MESSAGE value="update chat message and chat room" />
     <MESSAGE value="update category management" />
-    <option name="LAST_COMMIT_MESSAGE" value="update category management" />
+    <MESSAGE value="update seller edit strore" />
+    <option name="LAST_COMMIT_MESSAGE" value="update seller edit strore" />
   </component>
 </project>

@@ -1,8 +1,8 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
-import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.ProductsRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

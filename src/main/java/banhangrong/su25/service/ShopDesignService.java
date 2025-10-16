@@ -1,19 +1,14 @@
+// ShopDesignService.java - SỬA LẠI HOÀN TOÀN
 package banhangrong.su25.service;
 
-import banhangrong.su25.Entity.Products;
-import banhangrong.su25.Entity.SellerFeaturedProducts;
-import banhangrong.su25.Entity.SellerShopSections;
-import banhangrong.su25.Repository.ProductsRepository;
-import banhangrong.su25.Repository.SellerFeaturedProductsRepository;
-import banhangrong.su25.Repository.SellerShopSectionsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import banhangrong.su25.Entity.*;
+import banhangrong.su25.Repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ShopDesignService {
@@ -22,7 +17,7 @@ public class ShopDesignService {
     private final SellerFeaturedProductsRepository featuredProductsRepository;
     private final ProductsRepository productsRepository;
 
-    @Autowired
+    // Constructor injection
     public ShopDesignService(
             SellerShopSectionsRepository sectionsRepository,
             SellerFeaturedProductsRepository featuredProductsRepository,
@@ -32,12 +27,12 @@ public class ShopDesignService {
         this.productsRepository = productsRepository;
     }
 
-    // Lấy cấu hình cửa hàng
+    // Lấy cấu hình cửa hàng - FIXED
     public List<SellerShopSections> getShopSections(Long sellerId) {
         return sectionsRepository.findBySellerIdAndIsActiveTrueOrderBySortOrderAsc(sellerId);
     }
 
-    // Lưu cấu hình cửa hàng
+    // Lưu cấu hình cửa hàng - FIXED
     @Transactional
     public void saveShopLayout(Long sellerId, List<SellerShopSections> sections) {
         // Xóa cấu hình cũ
@@ -48,25 +43,46 @@ public class ShopDesignService {
             SellerShopSections section = sections.get(i);
             section.setSellerId(sellerId);
             section.setSortOrder(i);
-            sectionsRepository.save(section);
+            section.setIsActive(true);
+
+            SellerShopSections savedSection = sectionsRepository.save(section);
+
+            // Xử lý featured products nếu là section FEATURED
+            if (section.getSectionType() == SectionType.FEATURED &&
+                    section.getFeaturedProducts() != null &&
+                    !section.getFeaturedProducts().isEmpty()) {
+
+                saveFeaturedProducts(savedSection, section.getFeaturedProducts());
+            }
         }
     }
 
-    // Lấy sản phẩm theo section type để hiển thị
-    public List<Products> getProductsForSection(SellerShopSections section) {
-        // Tạo Pageable với limit
-        Integer maxItems = section.getMaxItems() != null ? section.getMaxItems() : 10;
-        Pageable pageable = PageRequest.of(0, maxItems);
+    // Lưu featured products - METHOD MỚI
+    @Transactional
+    public void saveFeaturedProducts(SellerShopSections section, List<SellerFeaturedProducts> featuredProducts) {
+        // Xóa featured products cũ
+        featuredProductsRepository.deleteBySectionSectionId(section.getSectionId());
 
+        // Lưu featured products mới
+        for (int i = 0; i < featuredProducts.size(); i++) {
+            SellerFeaturedProducts featuredProduct = featuredProducts.get(i);
+            featuredProduct.setSection(section);
+            featuredProduct.setSortOrder(i);
+            featuredProductsRepository.save(featuredProduct);
+        }
+    }
+
+    // Lấy sản phẩm theo section type để hiển thị - FIXED
+    public List<Products> getProductsForSection(SellerShopSections section) {
         switch (section.getSectionType()) {
             case FEATURED:
                 return getFeaturedProducts(section);
             case BEST_SELLER:
-                return productsRepository.findTopBestSellersBySellerId(section.getSellerId(), pageable);
+                return getBestSellerProducts(section);
             case TOP_RATED:
-                return productsRepository.findTopRatedBySellerId(section.getSellerId(), pageable);
+                return getTopRatedProducts(section);
             case NEW_ARRIVALS:
-                return productsRepository.findNewArrivalsBySellerId(section.getSellerId(), pageable);
+                return getNewArrivalsProducts(section);
             case CUSTOM:
                 return getCustomFilteredProducts(section);
             default:
@@ -77,20 +93,75 @@ public class ShopDesignService {
     private List<Products> getFeaturedProducts(SellerShopSections section) {
         List<SellerFeaturedProducts> featured = featuredProductsRepository
                 .findBySectionSectionIdOrderBySortOrderAsc(section.getSectionId());
+
         List<Products> products = new ArrayList<>();
         for (SellerFeaturedProducts fp : featured) {
-            products.add(fp.getProduct());
+            if (fp.getProduct() != null && fp.getProduct().getIsActive()) {
+                products.add(fp.getProduct());
+            }
         }
         return products;
     }
 
+    private List<Products> getBestSellerProducts(SellerShopSections section) {
+        List<Products> allProducts = productsRepository.findTopBySellerIdOrderByTotalSalesDesc(section.getSellerId());
+        return limitProducts(allProducts, section.getMaxItems());
+    }
+
+    private List<Products> getTopRatedProducts(SellerShopSections section) {
+        List<Products> allProducts = productsRepository.findTopBySellerIdOrderByAverageRatingDesc(section.getSellerId());
+        return limitProducts(allProducts, section.getMaxItems());
+    }
+
+    private List<Products> getNewArrivalsProducts(SellerShopSections section) {
+        List<Products> allProducts = productsRepository.findTopBySellerIdOrderByCreatedAtDesc(section.getSellerId());
+        return limitProducts(allProducts, section.getMaxItems());
+    }
+
     private List<Products> getCustomFilteredProducts(SellerShopSections section) {
-        return productsRepository.findWithCustomFilters(
+        List<Products> filteredProducts = productsRepository.findWithCustomFilters(
                 section.getSellerId(),
                 section.getFilterCategoryId(),
                 section.getFilterPriceMin(),
-                section.getFilterPriceMax(),
-                section.getMaxItems() != null ? section.getMaxItems() : 10
+                section.getFilterPriceMax()
         );
+        return limitProducts(filteredProducts, section.getMaxItems());
+    }
+
+    private List<Products> limitProducts(List<Products> products, Integer maxItems) {
+        if (maxItems == null || maxItems <= 0) {
+            maxItems = 6; // Default value
+        }
+        return products.stream()
+                .limit(maxItems)
+                .toList();
+    }
+
+    // Thêm method để quản lý featured products - METHOD MỚI
+    @Transactional
+    public void updateFeaturedProducts(Long sectionId, List<Long> productIds) {
+        Optional<SellerShopSections> sectionOpt = sectionsRepository.findById(sectionId);
+        if (sectionOpt.isEmpty()) {
+            throw new RuntimeException("Section not found");
+        }
+
+        SellerShopSections section = sectionOpt.get();
+
+        // Xóa featured products cũ
+        featuredProductsRepository.deleteBySectionSectionId(sectionId);
+
+        // Thêm featured products mới
+        for (int i = 0; i < productIds.size(); i++) {
+            Long productId = productIds.get(i);
+            Optional<Products> productOpt = productsRepository.findById(productId);
+
+            if (productOpt.isPresent() && productOpt.get().getSellerId().equals(section.getSellerId())) {
+                SellerFeaturedProducts featuredProduct = new SellerFeaturedProducts();
+                featuredProduct.setSection(section);
+                featuredProduct.setProduct(productOpt.get());
+                featuredProduct.setSortOrder(i);
+                featuredProductsRepository.save(featuredProduct);
+            }
+        }
     }
 }
