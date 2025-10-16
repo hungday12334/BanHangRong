@@ -53,12 +53,13 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         System.out.println("Remote Address: " + request.getRemoteAddr());
         System.out.println("================================");
         
-        // Redirect based on user type
-        if (user.getUserType().equals("ADMIN")) {
+        // Redirect based on user type (null-safe, case-insensitive)
+        String type = user.getUserType() == null ? "" : user.getUserType().toUpperCase();
+        if ("ADMIN".equals(type)) {
             response.sendRedirect("/admin/dashboard");
-        } else if (user.getUserType().equals("SELLER")) {
+        } else if ("SELLER".equals(type)) {
             response.sendRedirect("/seller/dashboard");
-        } else if (user.getUserType().equals("CUSTOMER")) {
+        } else if ("CUSTOMER".equals(type)) {
             // Customer phải verify email mới vào được dashboard
             if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
                 response.sendRedirect("/customer/dashboard");

@@ -5,8 +5,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
 	<link rel="stylesheet" href="/css/styles.min.css">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 	<style>
 		.container{max-width:1100px;margin:20px auto;padding:0 10px}
 		.breadcrumb{font-size:14px;color:#6b7280;margin-bottom:10px}
@@ -45,8 +43,7 @@
                 </div>
                 <div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Mô tả...</div>
                 <div class="section">
-                    <form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center">
                         <input type="hidden" name="productId" th:value="${product.productId}" />
                         <input type="number" name="quantity" min="1" value="1" th:attr="max=${product.quantity}" style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
                         <button class="btn primary" type="submit" th:disabled="${product.quantity == null or product.quantity <= 0}">Thêm vào giỏ</button>

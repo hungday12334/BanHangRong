@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${profileUser.username} + ' - Profile'">Profile</title>
     <link rel="stylesheet" href="/css/styles.min.css">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <style>
         :root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --line:#eaeef4; }
         * { box-sizing:border-box; }
@@ -63,8 +61,7 @@
                 </button>
                 <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                     <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
-                    <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
                         <input type="hidden" name="amount" id="topupAmountInput" />
                         <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
                     </form>
@@ -106,8 +103,7 @@
                 <div th:if="${param.error != null and param.error[0] == 'email_in_use'}" class="notice">Email đã tồn tại, vui lòng chọn email khác.</div>
                 <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">
                     Email chưa được xác thực
-                    <form method="post" action="/customer/profile/verify-email" style="margin:0">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <form method="post" action="/customer/profile/verify-email" style="margin:0">
                         <button type="submit" class="btn" style="padding:6px 10px;border:1px solid #fed7aa;background:#fff;border-radius:8px;margin-left:8px;">Verify now</button>
                     </form>
                 </div>

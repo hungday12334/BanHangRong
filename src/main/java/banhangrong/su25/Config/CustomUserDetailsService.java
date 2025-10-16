@@ -25,15 +25,16 @@ public class CustomUserDetailsService implements UserDetailsService {
         Users user = usersRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // Kiểm tra user có active không
-        if (!user.getIsActive()) {
+        // Kiểm tra trạng thái hoạt động (mặc định active nếu null)
+        boolean isActive = Boolean.TRUE.equals(user.getIsActive());
+        if (!isActive) {
             throw new UsernameNotFoundException("User is not active: " + username);
         }
 
         // Tạo authorities dựa trên userType
         List<GrantedAuthority> authorities = new ArrayList<>();
         String userType = user.getUserType();
-        if (userType != null) {
+        if (userType != null && !userType.isBlank()) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + userType.toUpperCase()));
         }
         
@@ -46,9 +47,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .password(user.getPassword()) // Password sẽ được hash bằng BCrypt
                 .authorities(authorities)
                 .accountExpired(false)
-                .accountLocked(!user.getIsActive())
+                .accountLocked(!isActive)
                 .credentialsExpired(false)
-                .disabled(!user.getIsActive())
+                .disabled(!isActive)
                 .build();
     }
 

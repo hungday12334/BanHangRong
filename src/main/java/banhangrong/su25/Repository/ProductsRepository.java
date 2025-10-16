@@ -109,12 +109,21 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "LIMIT 10", nativeQuery = true)
     List<Object[]> topSellers();
 
-    // Rank (1-based) of a seller by revenue across all sellers
-    @Query(value = "SELECT r.rank FROM (\n" +
-            "  SELECT p.seller_id, DENSE_RANK() OVER (ORDER BY COALESCE(SUM(oi.price_at_time * oi.quantity),0) DESC) AS rank\n" +
-            "  FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
-            "  GROUP BY p.seller_id\n" +
-            ") r WHERE r.seller_id = :sellerId", nativeQuery = true)
+    // Rank (1-based) of a seller by revenue across all sellers (MySQL-compatible without window functions)
+    @Query(value = "SELECT 1 + (\n" +
+            "  SELECT COUNT(*) FROM (\n" +
+            "    SELECT p2.seller_id, COALESCE(SUM(oi2.price_at_time * oi2.quantity),0) AS revenue\n" +
+            "    FROM products p2\n" +
+            "    LEFT JOIN order_items oi2 ON oi2.product_id = p2.product_id\n" +
+            "    GROUP BY p2.seller_id\n" +
+            "  ) t\n" +
+            "  WHERE t.revenue > (\n" +
+            "    SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
+            "    FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
+            "    WHERE p.seller_id = :sellerId\n" +
+            "  )\n" +
+            ")",
+            nativeQuery = true)
     Integer sellerRevenueRank(@Param("sellerId") Long sellerId);
 
     // Total distinct sellers having at least one product

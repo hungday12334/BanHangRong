@@ -8,8 +8,8 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/styles.min.css">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
 	<style>
 		:root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --chip:#e5e7eb; --line:#eaeef4; }
 		* { box-sizing:border-box; }
@@ -77,9 +77,10 @@
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
+                        <a class="item" th:if="${user != null}" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
+                        <a class="item" th:if="${user == null}" href="/login" role="menuitem">Đăng nhập</a>
                         <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="amount" id="topupAmountInput" />
                             <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
                         </form>
@@ -140,7 +141,7 @@
 				<div class="body">
 					<div class="title" th:text="${p.name}">Product Title</div>
 					<div class="meta">
-						<span class="rating">⭐ <span th:text="${#numbers.formatDecimal(p.averageRating,1,'COMMA',1,'POINT')}">4.5</span></span>
+						<span class="rating">⭐ <span th:text="${p.averageRating != null ? #numbers.formatDecimal(p.averageRating,1,'COMMA',1,'POINT') : '0.0'}">4.5</span></span>
 						<span class="sales">•</span>
 						<span class="sales">Đã bán: <span th:text="${p.totalSales}">0</span></span>
 					</div>
