@@ -6,6 +6,7 @@ USE wap;
 CREATE TABLE IF NOT EXISTS users (
                                      user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                      username VARCHAR(50) NOT NULL,
+                                     full_name VARCHAR(100),
                                      email VARCHAR(100) NOT NULL,
                                      password VARCHAR(512) NOT NULL,
                                      user_type VARCHAR(20),

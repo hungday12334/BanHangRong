@@ -93,7 +93,9 @@ public class CustomerDashboardController {
         try {
             if (currentUser != null) {
                 model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
-                model.addAttribute("user", currentUser);
+                // refresh balance from DB to show in topbar
+                Users fresh = usersRepository.findById(currentUser.getUserId()).orElse(currentUser);
+                model.addAttribute("user", fresh);
             }
         } catch (Exception ignored) {}
         return "customer/dashboard";

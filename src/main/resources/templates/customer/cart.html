@@ -33,6 +33,7 @@
 <body>
     <div class="wrap">
         <h2>Giỏ hàng</h2>
+        <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999"></div>
         <div class="cart-card">
             <div class="cart-header">
                 <div class="col center"><input type="checkbox" disabled></div>
@@ -76,20 +77,42 @@
         (function(){
             function fmt(n){try{return new Intl.NumberFormat('vi-VN').format(n)}catch(e){return n}}
             const inputs = document.querySelectorAll('.qty-input');
+            const totalEl = document.querySelector('.total span');
+            function recomputeTotals(){
+                let sum = 0;
+                document.querySelectorAll('.cart-row').forEach(function(row){
+                    const priceText = row.querySelector('.col.center span')?.textContent?.replace(/\D/g,'')||'0';
+                    const qtyInput = row.querySelector('.qty-input');
+                    const price = parseInt(priceText||'0',10);
+                    const qty = parseInt(qtyInput?.value||'1',10);
+                    sum += (price * qty);
+                    const lineEl = row.querySelector('.col.right span');
+                    if(lineEl){ try{ lineEl.textContent = new Intl.NumberFormat('vi-VN').format(price*qty); }catch(_){} }
+                });
+                if(totalEl){ try{ totalEl.textContent = new Intl.NumberFormat('vi-VN').format(sum); }catch(_){} }
+            }
+            function xsrf(){ return ''; }
+            function xsrfHeader(){ return 'X-XSRF-TOKEN'; }
             inputs.forEach(inp=>{
                 inp.addEventListener('change', ()=>{
                     const pid = inp.getAttribute('data-product-id');
                     let val = parseInt(inp.value||'1',10); if(!val||val<1) val=1;
+                    const hdr = { 'Content-Type': 'application/x-www-form-urlencoded' };
                     fetch('/cart/update',{
-                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        method:'POST', headers: hdr,
                         body:`productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
-                    }).then(r=>r.json()).then(d=>{
+                    }).then(r=>{
+                        if(!r.ok){ if(r.status===403){ alert('Phiên làm việc đã hết hạn. Vui lòng tải lại trang và thử lại.'); } throw new Error('bad'); }
+                        return r.json();
+                    }).then(d=>{
                         const err = document.getElementById('err-'+pid);
                         if(d.over){ err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
                         else { err.textContent=''; }
                         inp.value = d.appliedQty;
-                        // reload to reflect totals quickly (simple way)
-                        location.reload();
+                        // update qty badge
+                        const pill = inp.closest('.cart-row')?.querySelector('.qty-pill');
+                        if(pill){ pill.textContent = 'x' + d.appliedQty; }
+                        recomputeTotals();
                     }).catch(()=>{});
                 });
             });
@@ -100,22 +123,38 @@
                     e.preventDefault();
                     const pid = a.getAttribute('data-product-id');
                     const href = a.getAttribute('href') || ('/cart/remove?productId=' + encodeURIComponent(pid));
+                    const hdr2 = { 'Content-Type': 'application/x-www-form-urlencoded' };
                     fetch('/cart/remove',{
-                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        method:'POST', headers: hdr2,
                         body:`productId=${encodeURIComponent(pid)}`
                     }).then(r=>{ if(!r.ok) throw new Error('bad'); return r.json(); })
-                    .then(()=> location.reload())
+                    .then(()=> { a.closest('.cart-row')?.remove(); recomputeTotals(); })
                     .catch(()=>{ window.location.href = href; });
                 });
             });
+            recomputeTotals();
         })();
         </script>
-        <form class="summary" method="post" action="/cart/checkout-demo">
+        <form class="summary" method="post" action="/cart/checkout-wallet">
             <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
             <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
-            <button class="btn primary" type="submit">Mua hàng (demo)</button>
+            <button class="btn primary" type="submit">Thanh toán bằng số dư</button>
         </form>
     </div>
+    <script>
+    (function(){
+        const params = new URLSearchParams(window.location.search);
+        const pay = params.get('pay');
+        if(!pay) return;
+        const toast = document.getElementById('toast');
+        if(!toast) return;
+        const show = (msg,bg)=>{ toast.textContent = msg; toast.style.background = bg; toast.style.display='block'; setTimeout(()=>{ toast.style.display='none'; }, 3500); };
+        if (pay==='success') show('Thanh toán thành công bằng số dư.', '#065f46');
+        else if (pay==='insufficient') show('Số dư không đủ. Vui lòng nạp tiền.', '#991b1b');
+        else if (pay==='empty') show('Giỏ hàng trống hoặc không hợp lệ.', '#b45309');
+        else if (pay==='auth') show('Vui lòng đăng nhập lại.', '#1f2937');
+    })();
+    </script>
 </body>
 </html>
 
