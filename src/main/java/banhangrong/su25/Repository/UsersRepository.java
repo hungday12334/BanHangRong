@@ -1,6 +1,8 @@
 package banhangrong.su25.Repository;
 
 import banhangrong.su25.Entity.Users;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -17,6 +19,10 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     Long countByUserType(String userType);
+
+    // Search by username or email (contains, case-insensitive) with optional userType filter
+    @Query("SELECT u FROM Users u WHERE (:type IS NULL OR LOWER(u.userType) = LOWER(:type)) AND ( :q IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%')) )")
+    Page<Users> searchUsers(@Param("type") String type, @Param("q") String q, Pageable pageable);
 
     @Modifying
     @Transactional

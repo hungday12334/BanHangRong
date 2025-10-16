@@ -48,11 +48,13 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "WHERE p.seller_id = :sellerId", nativeQuery = true)
     Long totalUnitsSoldBySeller(@Param("sellerId") Long sellerId);
 
-    @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
-            "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
-            "WHERE p.seller_id = :sellerId AND oi.created_at >= :fromDate\n" +
-            "GROUP BY CAST(oi.created_at AS DATE)\n" +
-            "ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
+    @Query(value = "SELECT CAST(o.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
+            "FROM orders o\n" +
+            "JOIN order_items oi ON oi.order_id = o.order_id\n" +
+            "JOIN products p ON p.product_id = oi.product_id\n" +
+            "WHERE p.seller_id = :sellerId AND o.created_at >= :fromDate\n" +
+            "GROUP BY CAST(o.created_at AS DATE)\n" +
+            "ORDER BY CAST(o.created_at AS DATE)", nativeQuery = true)
     List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDateTime fromDate);
 
     @Query(value = "SELECT COUNT(DISTINCT oi.order_id)\n" +

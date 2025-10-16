@@ -5,6 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ hàng</title>
 	<link rel="stylesheet" href="/css/styles.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <style>
         .wrap{max-width:1100px;margin:20px auto;padding:0 10px}
         .cart-card{background:#fff;border:1px solid #eaeef4;border-radius:12px;overflow:hidden}
@@ -77,20 +79,48 @@
         (function(){
             function fmt(n){try{return new Intl.NumberFormat('vi-VN').format(n)}catch(e){return n}}
             const inputs = document.querySelectorAll('.qty-input');
+            const totalEl = document.querySelector('.total span');
+            function recomputeTotals(){
+                let sum = 0;
+                document.querySelectorAll('.cart-row').forEach(function(row){
+                    const priceText = row.querySelector('.col.center span')?.textContent?.replace(/\D/g,'')||'0';
+                    const qtyInput = row.querySelector('.qty-input');
+                    const price = parseInt(priceText||'0',10);
+                    const qty = parseInt(qtyInput?.value||'1',10);
+                    sum += (price * qty);
+                    const lineEl = row.querySelector('.col.right span');
+                    if(lineEl){ try{ lineEl.textContent = new Intl.NumberFormat('vi-VN').format(price*qty); }catch(_){} }
+                });
+                if(totalEl){ try{ totalEl.textContent = new Intl.NumberFormat('vi-VN').format(sum); }catch(_){} }
+            }
+            function xsrf(){
+                var m = document.querySelector('meta[name="_csrf"]');
+                return m ? m.getAttribute('content') : '';
+            }
+            function xsrfHeader(){
+                var m = document.querySelector('meta[name="_csrf_header"]');
+                return m ? m.getAttribute('content') : 'X-XSRF-TOKEN';
+            }
             inputs.forEach(inp=>{
                 inp.addEventListener('change', ()=>{
                     const pid = inp.getAttribute('data-product-id');
                     let val = parseInt(inp.value||'1',10); if(!val||val<1) val=1;
+                    const hdr = {}; hdr['Content-Type'] = 'application/x-www-form-urlencoded'; hdr[xsrfHeader()] = xsrf();
                     fetch('/cart/update',{
-                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN': xsrf()},
                         body:`productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
-                    }).then(r=>r.json()).then(d=>{
+                    }).then(r=>{
+                        if(!r.ok){ if(r.status===403){ alert('Phiên làm việc đã hết hạn. Vui lòng tải lại trang và thử lại.'); } throw new Error('bad'); }
+                        return r.json();
+                    }).then(d=>{
                         const err = document.getElementById('err-'+pid);
                         if(d.over){ err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
                         else { err.textContent=''; }
                         inp.value = d.appliedQty;
-                        // reload to reflect totals quickly (simple way)
-                        location.reload();
+                        // update qty badge
+                        const pill = inp.closest('.cart-row')?.querySelector('.qty-pill');
+                        if(pill){ pill.textContent = 'x' + d.appliedQty; }
+                        recomputeTotals();
                     }).catch(()=>{});
                 });
             });
@@ -101,17 +131,20 @@
                     e.preventDefault();
                     const pid = a.getAttribute('data-product-id');
                     const href = a.getAttribute('href') || ('/cart/remove?productId=' + encodeURIComponent(pid));
+                    const hdr2 = {}; hdr2['Content-Type'] = 'application/x-www-form-urlencoded'; hdr2[xsrfHeader()] = xsrf();
                     fetch('/cart/remove',{
-                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        method:'POST', headers: hdr2,
                         body:`productId=${encodeURIComponent(pid)}`
                     }).then(r=>{ if(!r.ok) throw new Error('bad'); return r.json(); })
-                    .then(()=> location.reload())
+                    .then(()=> { a.closest('.cart-row')?.remove(); recomputeTotals(); })
                     .catch(()=>{ window.location.href = href; });
                 });
             });
+            recomputeTotals();
         })();
         </script>
         <form class="summary" method="post" action="/cart/checkout-wallet">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
             <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
             <button class="btn primary" type="submit">Thanh toán bằng số dư</button>
