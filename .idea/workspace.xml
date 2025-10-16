@@ -4,15 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update chat message and chat room">
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/CategoriesProductsId.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesProductsRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryService.java" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update category management">
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ShopDesignController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SectionType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerFeaturedProducts.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/SellerShopSections.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerFeaturedProductsRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/SellerShopSectionsRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ShopDesignService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Categories.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Categories.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/CategoriesProducts.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/CategoriesProducts.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Products.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Products.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/sidebar.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -94,7 +96,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   },
@@ -307,7 +309,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760506816286</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="update category management">
+      <option name="closed" value="true" />
+      <created>1760514350230</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1760514350232</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -350,6 +360,7 @@
     <MESSAGE value="update product review" />
     <MESSAGE value="update change password" />
     <MESSAGE value="update chat message and chat room" />
-    <option name="LAST_COMMIT_MESSAGE" value="update chat message and chat room" />
+    <MESSAGE value="update category management" />
+    <option name="LAST_COMMIT_MESSAGE" value="update category management" />
   </component>
 </project>
