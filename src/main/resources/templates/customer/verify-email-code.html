@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Email</title>
     <link rel="stylesheet" href="/css/styles.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <style>
         :root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --line:#eaeef4; }
         body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
@@ -24,14 +26,13 @@
         <div class="desc">Nhập mã 6 chữ số đã được gửi đến email của bạn.</div>
         <div th:if="${error != null}" class="notice" th:text="${error}">Mã không hợp lệ</div>
         <form method="post" action="/customer/verify-code">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <input type="text" name="code" placeholder="Nhập mã 6 số" maxlength="6" pattern="[0-9]{6}" required>
             <div class="actions">
                 <div>
-                    <form method="post" action="/customer/verify-code/resend" style="display:inline;">
-                        <button id="resendBtn" type="submit" class="btn" th:disabled="${remainingSeconds != null and remainingSeconds > 0}">
-                            Gửi lại mã <span id="countdown" th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
-                        </button>
-                    </form>
+                    <button id="resendBtn" type="button" class="btn" th:disabled="${remainingSeconds != null and remainingSeconds > 0}" onclick="resendCode()">
+                        Gửi lại mã <span id="countdown" th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
+                    </button>
                 </div>
                 <div style="display:flex;gap:10px;">
                     <button type="button" class="btn" onclick="history.back()">Hủy</button>
@@ -52,6 +53,15 @@
                     },1000);
                 }
             })();
+
+            function resendCode(){
+                var t = (function(){ var m=document.querySelector('meta[name="_csrf"]'); return m?m.getAttribute('content'):''; })();
+                var h = (function(){ var m=document.querySelector('meta[name="_csrf_header"]'); return m?m.getAttribute('content'):'X-XSRF-TOKEN'; })();
+                var headers = { 'Content-Type': 'application/x-www-form-urlencoded' }; headers[h] = t;
+                fetch('/customer/verify-code/resend', { method: 'POST', headers: headers })
+                    .then(function(){ window.location.search = '?remaining=60'; })
+                    .catch(function(){ window.location.href = '/customer/verify-code/resend'; });
+            }
         </script>
     </div>
 </body>
