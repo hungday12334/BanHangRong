@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Controller
 public class CustomerProfileController {
@@ -24,14 +25,17 @@ public class CustomerProfileController {
     private final ShoppingCartRepository shoppingCartRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     public CustomerProfileController(UsersRepository usersRepository, ShoppingCartRepository shoppingCartRepository,
                                      EmailVerificationTokenRepository emailVerificationTokenRepository,
-                                     EmailService emailService) {
+                                     EmailService emailService,
+                                     PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
         this.shoppingCartRepository = shoppingCartRepository;
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/customer/profile/{username}")
@@ -55,6 +59,33 @@ public class CustomerProfileController {
         }
 
         model.addAttribute("profileUser", profileUser);
+
+        // Masked values for display like Shopee
+        try {
+            String email = profileUser.getEmail();
+            if (email != null && email.contains("@")) {
+                String[] parts = email.split("@", 2);
+                String local = parts[0];
+                String domain = parts[1];
+                String prefix = local.length() <= 2 ? local : local.substring(0, 2);
+                String stars = "*".repeat(Math.max(0, Math.max(1, local.length() - prefix.length())));
+                model.addAttribute("maskedEmail", prefix + stars + "@" + domain);
+            }
+        } catch (Exception ignored) {}
+        try {
+            String phone = profileUser.getPhoneNumber();
+            if (phone != null && phone.length() >= 2) {
+                String last2 = phone.substring(phone.length() - 2);
+                String stars = "*".repeat(Math.max(0, phone.length() - 2));
+                model.addAttribute("maskedPhone", stars + last2);
+            }
+        } catch (Exception ignored) {}
+        try {
+            java.time.LocalDate bd = profileUser.getBirthDate();
+            if (bd != null) {
+                model.addAttribute("maskedBirth", "**/**/" + String.format("%04d", bd.getYear()));
+            }
+        } catch (Exception ignored) {}
         return "customer/profile";
     }
 
@@ -78,10 +109,14 @@ public class CustomerProfileController {
     @PostMapping("/customer/profile/{username}/edit")
     public String editProfileSubmit(@PathVariable("username") String username,
                                     @RequestParam(name = "avatarUrl", required = false) String avatarUrl,
+                                    @RequestParam(name = "fullName", required = false) String fullName,
                                     @RequestParam(name = "email", required = false) String email,
                                     @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
                                     @RequestParam(name = "gender", required = false) String gender,
                                     @RequestParam(name = "birthDate", required = false) String birthDateStr,
+                                    @RequestParam(name = "currentPassword", required = false) String currentPassword,
+                                    @RequestParam(name = "newPassword", required = false) String newPassword,
+                                    @RequestParam(name = "confirmPassword", required = false) String confirmPassword,
                                     Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Users currentUser = null;
@@ -94,6 +129,7 @@ public class CustomerProfileController {
 
         // Update allowed fields only
         if (avatarUrl != null) currentUser.setAvatarUrl(avatarUrl.trim());
+        if (fullName != null) currentUser.setFullName(fullName.trim());
         if (email != null && !email.trim().isEmpty() && !email.trim().equalsIgnoreCase(currentUser.getEmail())) {
             String newEmail = email.trim();
             // Validate duplicate email (belongs to another user)
@@ -138,6 +174,46 @@ public class CustomerProfileController {
             try {
                 currentUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
             } catch (Exception ignored) {}
+        }
+
+        // Change password if requested
+        boolean wantsPasswordChange = (currentPassword != null && !currentPassword.trim().isEmpty())
+                || (newPassword != null && !newPassword.trim().isEmpty())
+                || (confirmPassword != null && !confirmPassword.trim().isEmpty());
+        if (wantsPasswordChange) {
+            String curr = currentPassword == null ? "" : currentPassword.trim();
+            String npw = newPassword == null ? "" : newPassword.trim();
+            String cfm = confirmPassword == null ? "" : confirmPassword.trim();
+
+            if (curr.isEmpty() || npw.isEmpty() || cfm.isEmpty()) {
+                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+                model.addAttribute("user", currentUser);
+                model.addAttribute("profileUser", currentUser);
+                model.addAttribute("pwdError", "Vui lòng nhập đủ mật khẩu hiện tại, mật khẩu mới và xác nhận.");
+                return "customer/profile-edit";
+            }
+            if (!passwordEncoder.matches(curr, currentUser.getPassword())) {
+                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+                model.addAttribute("user", currentUser);
+                model.addAttribute("profileUser", currentUser);
+                model.addAttribute("pwdError", "Mật khẩu hiện tại không đúng.");
+                return "customer/profile-edit";
+            }
+            if (npw.length() < 6) {
+                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+                model.addAttribute("user", currentUser);
+                model.addAttribute("profileUser", currentUser);
+                model.addAttribute("pwdError", "Mật khẩu mới phải có ít nhất 6 ký tự.");
+                return "customer/profile-edit";
+            }
+            if (!npw.equals(cfm)) {
+                try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+                model.addAttribute("user", currentUser);
+                model.addAttribute("profileUser", currentUser);
+                model.addAttribute("pwdError", "Xác nhận mật khẩu không khớp.");
+                return "customer/profile-edit";
+            }
+            currentUser.setPassword(passwordEncoder.encode(npw));
         }
         try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) {
             try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}

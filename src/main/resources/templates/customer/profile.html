@@ -86,37 +86,40 @@
         </div>
     </div>
 
-    <section class="content">
-        <div class="profile-row">
-            <div class="profile-left">
-                <img class="avatar" th:if="${profileUser != null and profileUser.avatarUrl != null and !#strings.isEmpty(#strings.trim(profileUser.avatarUrl))}"
-                     th:src="${profileUser.avatarUrl}" src="/img/avatar_default.jpg"
-                     onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" alt="Avatar"/>
-                <img class="avatar" th:unless="${profileUser != null and profileUser.avatarUrl != null and !#strings.isEmpty(#strings.trim(profileUser.avatarUrl))}"
-                     src="/img/avatar_default.jpg" alt="Avatar"/>
-            </div>
-            <div class="profile-right">
-                <div class="label">Username</div>
-                <div class="value" th:text="${profileUser.username}">username</div>
-                <div class="label">Email</div>
-                <div class="value" th:text="${profileUser.email}">email@example.com</div>
-                <div th:if="${param.error != null and param.error[0] == 'email_in_use'}" class="notice">Email đã tồn tại, vui lòng chọn email khác.</div>
-                <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">
-                    Email chưa được xác thực
-                <form method="post" action="/customer/profile/verify-email" style="margin:0">
-                        <button type="submit" class="btn" style="padding:6px 10px;border:1px solid #fed7aa;background:#fff;border-radius:8px;margin-left:8px;">Verify now</button>
-                    </form>
-                </div>
-                <div class="label">Phone</div>
-                <div class="value" th:text="${profileUser.phoneNumber}">-</div>
-                <div class="label">Gender</div>
-                <div class="value" th:text="${profileUser.gender != null ? profileUser.gender : '-'}">-</div>
-                <div class="label">Birth date</div>
-                <div class="value" th:text="${profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
-                <div class="label">Balance</div>
-                <div class="value" th:text="${profileUser.balance != null ? #numbers.formatDecimal(profileUser.balance,0,'COMMA',0,'POINT') + '₫' : '0₫'}">0₫</div>
-                <div style="margin-top:12px;">
-                    <a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn" style="padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;">Edit</a>
+    <section class="content" style="display:flex;gap:18px;align-items:flex-start;">
+        <aside style="width:240px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;">
+            <div style="font-weight:700;margin-bottom:8px;">Tài Khoản Của Tôi</div>
+            <a th:href="@{'/customer/profile/' + ${user.username}}" style="display:block;padding:10px 12px;border-radius:10px;background:#f3f4f6;text-decoration:none;color:#111827;">Hồ sơ</a>
+            <a th:href="@{'/customer/profile/' + ${user.username} + '/edit#change-password'}" style="display:block;padding:10px 12px;border-radius:10px;text-decoration:none;color:#111827;">Đổi Mật khẩu</a>
+        </aside>
+        <div class="profile-row" style="flex:1;">
+            <div class="profile-right" style="width:100%">
+                <h2 style="margin:0 0 8px 0">Hồ Sơ Của Tôi</h2>
+                <div style="color:#6b7280;margin-bottom:16px">Quản lý thông tin hồ sơ để bảo mật tài khoản</div>
+                <div style="display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:center">
+                    <div class="label">Tên đăng nhập</div>
+                    <div class="value" th:text="${profileUser.username}">datbautroi11</div>
+                    <div></div>
+
+                    <div class="label">Tên</div>
+                    <div class="value" th:text="${profileUser.fullName != null ? profileUser.fullName : '-'}">Đặng Tuấn Đạt</div>
+                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn" style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
+
+                    <div class="label">Email</div>
+                    <div class="value" th:text="${maskedEmail != null ? maskedEmail : profileUser.email}">td*********@gmail.com</div>
+                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn" style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
+
+                    <div class="label">Số điện thoại</div>
+                    <div class="value" th:text="${maskedPhone != null ? maskedPhone : (profileUser.phoneNumber != null ? profileUser.phoneNumber : '-')}">*********15</div>
+                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn" style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
+
+                    <div class="label">Giới tính</div>
+                    <div class="value" th:text="${profileUser.gender != null ? profileUser.gender : '-'}">Nam</div>
+                    <div></div>
+
+                    <div class="label">Ngày sinh</div>
+                    <div class="value" th:text="${maskedBirth != null ? maskedBirth : (profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'dd/MM/yyyy') : '-')}">**/**/2004</div>
+                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn" style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
                 </div>
             </div>
         </div>
