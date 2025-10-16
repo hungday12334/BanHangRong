@@ -25,19 +25,15 @@
         .search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
         .cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
         .cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
-        .content { max-width:1000px; margin:18px auto; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; }
-        .profile-row { display:flex; gap:24px; align-items:flex-start; }
-        .profile-left { flex:0 0 30%; max-width:30%; display:flex; justify-content:center; border-right:1px solid var(--line); padding-right:24px; }
-        .profile-right { flex:0 0 70%; max-width:70%; padding-left:24px; }
-        .avatar { width:100%; max-width:180px; aspect-ratio:1/1; height:auto; border-radius:50%; object-fit:cover; border:1px solid var(--line); }
+        .layout { max-width:1000px; margin:18px auto; display:flex; gap:18px; align-items:flex-start; }
+        .sidebar { width:240px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; position:sticky; top:18px; align-self:flex-start; }
+        .sidebar .title { font-weight:700; margin-bottom:8px; }
+        .sidebar a { display:block; padding:10px 12px; border-radius:10px; color:#111827; text-decoration:none; }
+        .sidebar a.active, .sidebar a:hover { background:#f3f4f6; }
+        .card { flex:1; background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px; }
         .label { color:var(--muted); font-size:13px; }
-        .value { font-weight:600; margin-bottom:12px; }
+        .value { font-weight:600; }
         .notice { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:8px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; font-size:13px; }
-        @media (max-width: 768px) {
-            .profile-left { flex:0 0 100%; max-width:100%; border-right:none; padding-right:0; justify-content:flex-start; margin-bottom:16px; }
-            .profile-right { flex:0 0 100%; max-width:100%; padding-left:0; }
-            .profile-row { flex-direction:column; }
-        }
     </style>
 </head>
 <body>
@@ -86,14 +82,13 @@
         </div>
     </div>
 
-    <section class="content" style="display:flex;gap:18px;align-items:flex-start;">
-        <aside style="width:240px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;position:sticky;top:18px;align-self:flex-start;">
-            <div style="font-weight:700;margin-bottom:8px;">Tài Khoản Của Tôi</div>
-            <a th:href="@{'/customer/profile/' + ${user.username}}" style="display:block;padding:10px 12px;border-radius:10px;background:#f3f4f6;text-decoration:none;color:#111827;">Hồ sơ</a>
-            <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}" style="display:block;padding:10px 12px;border-radius:10px;text-decoration:none;color:#111827;">Đổi Mật khẩu</a>
+    <section class="layout">
+        <aside class="sidebar">
+            <div class="title">Tài Khoản Của Tôi</div>
+            <a th:href="@{'/customer/profile/' + ${user.username}}" class="active">Hồ sơ</a>
+            <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}">Đổi Mật khẩu</a>
         </aside>
-        <div class="profile-row" style="flex:1;">
-            <div class="profile-right" style="width:100%">
+        <div class="card">
                 <h2 style="margin:0 0 8px 0">Hồ Sơ Của Tôi</h2>
                 <div style="color:#6b7280;margin-bottom:16px">Quản lý thông tin hồ sơ để bảo mật tài khoản</div>
                 <div style="display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:center">
