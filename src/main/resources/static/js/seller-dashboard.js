@@ -1464,6 +1464,13 @@
       const params = new URLSearchParams();
       params.set('page', productsPageState.page);
       params.set('size', productsPageState.size);
+      // Restrict to current seller by default
+      try {
+        const sellerIdEl = document.getElementById('sellerId');
+        const userIdEl = document.getElementById('userId');
+        const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+        if (sellerId) params.set('sellerId', String(sellerId));
+      } catch(_) {}
       const parts = [];
     const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`keyword "${s}"`); }
     const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt=prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`category "${opt.text}"`); }
