@@ -87,7 +87,7 @@
     </div>
 
     <section class="content" style="display:flex;gap:18px;align-items:flex-start;">
-        <aside style="width:240px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;">
+        <aside style="width:240px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;position:sticky;top:18px;align-self:flex-start;">
             <div style="font-weight:700;margin-bottom:8px;">Tài Khoản Của Tôi</div>
             <a th:href="@{'/customer/profile/' + ${user.username}}" style="display:block;padding:10px 12px;border-radius:10px;background:#f3f4f6;text-decoration:none;color:#111827;">Hồ sơ</a>
             <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}" style="display:block;padding:10px 12px;border-radius:10px;text-decoration:none;color:#111827;">Đổi Mật khẩu</a>
