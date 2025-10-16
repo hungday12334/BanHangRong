@@ -112,6 +112,7 @@
             <th>Product</th>
             <th>Order</th>
             <th>Active</th>
+            <th>Expire date</th>
             <th>Activated At</th>
             <th>Device</th>
           </tr>
@@ -127,28 +128,78 @@
       <div style="font-weight:700;flex:1;min-width:160px;">Generate license keys</div>
     </div>
     <div class="body">
-      <form id="genKeyForm" class="form"
-        style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:end;">
-        <div>
-          <label class="label" for="gk_product">Product (PUBLIC only)</label>
-          <select id="gk_product" class="input">
-            <option value="">Select product</option>
-          </select>
-        </div>
-        <div>
-          <label class="label" for="gk_expire">Expire date</label>
-          <input id="gk_expire" type="date" class="input" />
-        </div>
-        <div>
-          <label class="label" for="gk_qty">Quantity</label>
-          <input id="gk_qty" type="number" min="1" step="1" value="1" class="input" />
-        </div>
-        <div>
-          <button id="gk_submit" type="submit" class="btn primary">Generate</button>
+      <form id="genKeyForm" class="form">
+        <div class="gen-grid">
+          <!-- Left: Product list -->
+          <div>
+            <label class="label">Product (PUBLIC only)</label>
+            <input type="hidden" id="gk_product" name="gk_product" />
+            <div id="gk_product_table_wrap" class="panel-table-wrap">
+              <table id="gk_product_table" class="table slim panel-table" style="width:100%;min-width:220px;">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- JS will render product rows here -->
+                </tbody>
+              </table>
+            </div>
+            <div id="gk_product_selected" style="margin-top:8px;color:var(--accent);font-weight:600;"></div>
+          </div>
+
+          <!-- Center: User search and pager -->
+          <div>
+            <label class="label">Assign to user (optional)</label>
+            <input type="hidden" id="gk_user" name="gk_user" />
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
+              <input id="gk_user_q" class="input" type="text" placeholder="Search name or email" style="flex:1;min-width:160px;" />
+              <select id="gk_user_type" class="input" style="width:120px;">
+                <option value="">All types</option>
+                <option value="CUSTOMER">Customer</option>
+                <option value="SELLER">Seller</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+              <button id="gk_user_search" type="button" class="btn">Search</button>
+            </div>
+            <div id="gk_user_table_wrap" class="panel-table-wrap">
+              <table id="gk_user_table" class="table slim panel-table" style="width:100%;min-width:360px;">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="pgGenUsers" class="pager" style="margin-top:8px;"></div>
+            <div id="gk_user_selected" style="margin-top:8px;color:var(--accent);font-weight:600;"></div>
+          </div>
+
+          <!-- Right: Controls and action -->
+          <div class="gen-controls">
+            <div>
+              <label class="label" for="gk_expire">Expire date</label>
+              <input id="gk_expire" type="date" class="input" />
+            </div>
+            <div>
+              <label class="label" for="gk_qty">Quantity</label>
+              <input id="gk_qty" type="number" min="1" step="1" value="1" class="input" />
+            </div>
+            <div class="action-row">
+              <button id="gk_submit" type="submit" class="btn primary">Generate</button>
+            </div>
+            <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved immediately.</div>
+          </div>
         </div>
       </form>
-      <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved immediately.
-      </div>
     </div>
   </section>
   <section id="productsPanel" class="card section-card" hidden data-panel="products">
