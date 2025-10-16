@@ -1,8 +1,10 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Util.ImageUploadUtil;
 import banhangrong.su25.Util.Validation;
+import banhangrong.su25.service.AdminProductService;
 import banhangrong.su25.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/user")
@@ -23,6 +26,8 @@ public class AdminUserManagement {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private AdminProductService adminProductService;
 
     @GetMapping("/create")
     public String showCreateScreen(Model model) {
@@ -97,7 +102,8 @@ public class AdminUserManagement {
         user.setPassword(valid.hashPassword(user.getPassword()));
         //Blance default 0
         user.setBalance(BigDecimal.ZERO);
-        user.setIsActive(false);
+        user.setIsEmailVerified(true);
+        user.setIsActive(true);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         userService.save(user);
@@ -255,8 +261,8 @@ public class AdminUserManagement {
         }
     }
 
-    @PostMapping("/delete")
-    public String deleteUser(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    @PostMapping("/deactive")
+    public String deactiveUser(HttpServletRequest request, RedirectAttributes redirectAttributes) {
         String sId = request.getParameter("id");
         if (sId == null || sId.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "User not found");
@@ -267,8 +273,16 @@ public class AdminUserManagement {
                 redirectAttributes.addFlashAttribute("error", "User not found");
             } else {
                 userService.setExpireSessionByUsername(user.getUsername());
-                userService.delete(id);
-                redirectAttributes.addFlashAttribute("success", "Removed user successfully");
+                user.setIsActive(false);
+                if(user.getUserType().equalsIgnoreCase("SELLER")){
+                    List<Products> listProduct= adminProductService.findBySellerIdAndStatusIgnoreCase(user.getUserId(),"public");
+                    for(Products p:listProduct){
+                        p.setStatus("Cancelled");
+                        adminProductService.save(p);
+                    }
+                }
+                userService.save(user);
+                redirectAttributes.addFlashAttribute("success", "Deactivated user successfully");
 
             }
         }

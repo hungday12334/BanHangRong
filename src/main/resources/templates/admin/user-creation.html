@@ -184,7 +184,7 @@
 
             <div class="form-group">
                 <label>Gender:</label>
-                <select name="gender" class="form-control">
+                <select  name="gender" >
                     <option value="MALE" th:selected="${user != null and user.gender == 'MALE'}">Male</option>
                     <option value="FEMALE" th:selected="${user != null and user.gender == 'FEMALE'}">Female</option>
                     <option value="OTHER" th:selected="${user != null and user.gender == 'OTHER'}">Other</option>

@@ -206,10 +206,15 @@
                     <option value="CUSTOMER">CUSTOMER</option>
                 </select>
                 <select id="gentle" class="form-select">
-                    <option value="ALL">GENTLE</option>
+                    <option value="ALL">GENDER</option>
                     <option value="MALE">MALE</option>
                     <option value="FEMALE">FEMALE</option>
                     <option value="OTHERS">OTHERS</option>
+                </select>
+                <select id="Active" class="form-select">
+                    <option value="ALL">Active</option>
+                    <option value="TRUE">TRUE</option>
+                    <option value="FALSE">FALSE</option>
                 </select>
                 <div class="date-field">
                     <label for="createAt">Create At</label>
@@ -266,7 +271,7 @@
                             <a th:href="@{'/admin/user/update?id=' + ${u.userId}}">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <form th:action="@{'/admin/user/delete'}" method="post">
+                            <form th:action="@{'/admin/user/deactive'}" method="post">
                                 <input type="hidden" name="id" th:value="${u.userId}">
                                 <button type="submit" onclick="return confirm('Are you sure?');">
                                     <i class="bi bi-trash"></i>
@@ -306,6 +311,7 @@
         const searchInput = document.getElementById("searchInput");
         const roleSelect = document.getElementById("role");
         const gentleSelect = document.getElementById("gentle");
+        const activeSelect = document.getElementById("Active");
         const createAtInput = document.getElementById("createAt");
         const updateAtInput = document.getElementById("updateAt");
         const rows = document.querySelectorAll("#userTable tbody tr");
@@ -314,6 +320,7 @@
             const search = searchInput.value.trim().toLowerCase();
             const role = roleSelect.value.toLowerCase();
             const gentle = gentleSelect.value.toLowerCase();
+            const active = activeSelect.value.toLowerCase();
             const createAt = createAtInput.value.trim();
             const updateAt = updateAtInput.value.trim();
 
@@ -327,6 +334,7 @@
                 const roleText = cells[4].textContent.trim().toLowerCase();
                 const phone = cells[5].textContent.toLowerCase();
                 const gentleText = cells[6].textContent.toLowerCase();
+                const activeText = cells[9].textContent.toLowerCase();
                 const createAtText = cells[12].textContent.trim();
                 const updateAtText = cells[13].textContent.trim();
 
@@ -338,16 +346,17 @@
                     email.includes(search) ||
                     phone.includes(search);
 
-                // 🧩 Lọc role và gender (ignore case)
+                // 🧩 Lọc role và gender (ignore case), active
                 const matchRole = (role === "all" || roleText === role);
                 const matchGentle = (gentle === "all" || gentleText === gentle);
+                const matchActive = (active === "all" || activeText === active);
 
                 // 📅 Lọc ngày (so sánh theo tiền tố yyyy-MM-dd)
                 const matchCreateAt = !createAt || createAtText.startsWith(createAt);
                 const matchUpdateAt = !updateAt || updateAtText.startsWith(updateAt);
 
                 // ✅ Nếu tất cả điều kiện đều đúng thì hiển thị
-                row.style.display = (matchSearch && matchRole && matchGentle && matchCreateAt && matchUpdateAt)
+                row.style.display = (matchSearch && matchRole && matchGentle && matchActive && matchCreateAt && matchUpdateAt)
                     ? ""
                     : "none";
             });
@@ -361,9 +370,10 @@
         });
 
         // 🔁 Filter ngay khi thay đổi
-        [roleSelect, gentleSelect, createAtInput, updateAtInput].forEach(el => {
+        [roleSelect, gentleSelect,activeSelect, createAtInput, updateAtInput].forEach(el => {
             el.addEventListener("input", filterTable);
             el.addEventListener("change", filterTable);
+            el.addEventListener("keyup", filterTable);
         });
     });
 </script>
