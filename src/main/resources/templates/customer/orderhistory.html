@@ -302,7 +302,7 @@ body {
 
     <!-- Dynamic Order Cards -->
             <div th:if="${orders != null and !orders.empty}">
-      <div th:each="order : ${orders}" class="order-card">
+      <div th:each="order : ${orders}" class="order-card" th:if="${orderItemsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}">
                     <div class="order-top">
                         <div class="seller-info">
             <span>Seller:</span>
@@ -315,22 +315,22 @@ body {
         <div class="product-line">
           <div class="product-image">📦</div>
           <div class="product-info">
-                            <div class="product-name" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
-            <div th:text="'Quantities: ' + ${orderItemsMap[order.orderId][0].quantity}">Quantities: 1</div>
+                            <div class="product-name" th:if="${productNamesMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
+            <div th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Quantities: ' + ${orderItemsMap[order.orderId][0].quantity}">Quantities: 1</div>
             <!-- Product Description -->
-            <div class="product-description" th:if="${productsMap != null and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="${productsMap[orderItemsMap[order.orderId][0].productId].description}">Bảo vệ toàn diện: Antivirus, VPN, Password Manager. 5 devices, 12 tháng.</div>
+            <div class="product-description" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="${productsMap[orderItemsMap[order.orderId][0].productId].description}">Bảo vệ toàn diện: Antivirus, VPN, Password Manager. 5 devices, 12 tháng.</div>
             
             <div class="price-info" style="margin-top: 8px;">
-              <span th:if="${productsMap != null and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
+              <span th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
                 <span class="sale-price" style="color: #ef4444; font-weight: 600;" th:text="'Giá khuyến mãi: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].salePrice, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá khuyến mãi: 1,100,000₫</span>
                 <br>
                 <span class="original-price" style="color: #6b7280; text-decoration: line-through; font-size: 14px;" th:text="'Giá gốc: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá gốc: 1,250,000₫</span>
               </span>
-              <span th:unless="${productsMap != null and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
-                <span class="regular-price" style="color: #111827; font-weight: 600;" th:if="${productsMap != null and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="'Giá: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá: 1,250,000₫</span>
+              <span th:unless="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
+                <span class="regular-price" style="color: #111827; font-weight: 600;" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="'Giá: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá: 1,250,000₫</span>
               </span>
               <br>
-              <span class="price-at-time" style="color: #059669; font-weight: 500; font-size: 14px;" th:text="'Đã mua với giá: ' + ${#numbers.formatDecimal(orderItemsMap[order.orderId][0].priceAtTime, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Đã mua với giá: 1,100,000₫</span>
+              <span class="price-at-time" style="color: #059669; font-weight: 500; font-size: 14px;" th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Đã mua với giá: ' + ${#numbers.formatDecimal(orderItemsMap[order.orderId][0].priceAtTime, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Đã mua với giá: 1,100,000₫</span>
             </div>
                         </div>
                     </div>
