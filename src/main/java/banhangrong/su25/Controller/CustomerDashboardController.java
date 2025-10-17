@@ -135,16 +135,18 @@ public class CustomerDashboardController {
         // Lấy order items cho mỗi order
         java.util.Map<Long, List<OrderItems>> orderItemsMap = new java.util.HashMap<>();
         java.util.Map<Long, String> productNamesMap = new java.util.HashMap<>();
+        java.util.Map<Long, Products> productsMap = new java.util.HashMap<>();
         
         for (Orders order : orders) {
             List<OrderItems> items = orderItemsRepository.findByOrderId(order.getOrderId());
             orderItemsMap.put(order.getOrderId(), items);
             
-            // Lấy tên sản phẩm
+            // Lấy tên sản phẩm và thông tin sản phẩm
             for (OrderItems item : items) {
                 if (item.getProductId() != null) {
                     productsRepository.findById(item.getProductId()).ifPresent(product -> {
                         productNamesMap.put(item.getProductId(), product.getName());
+                        productsMap.put(item.getProductId(), product);
                     });
                 }
             }
@@ -153,6 +155,7 @@ public class CustomerDashboardController {
         model.addAttribute("orders", orders);
         model.addAttribute("orderItemsMap", orderItemsMap);
         model.addAttribute("productNamesMap", productNamesMap);
+        model.addAttribute("productsMap", productsMap);
         model.addAttribute("page", ordersPage.getNumber());
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("size", ordersPage.getSize());
