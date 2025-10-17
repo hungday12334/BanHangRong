@@ -71,11 +71,15 @@ public class AdminProductManagement {
         }
         Long id = Long.parseLong(sId);
         Products product = adminProductService.findById(id);
-        if (product == null || product.getStatus() == null || !product.getStatus().equalsIgnoreCase("pending")) {
+        if (product == null || product.getStatus() == null) {
             redirectAttributes.addFlashAttribute("error", "Product not found");
             return "redirect:/admin/product";
         }
-        product.setStatus("cancelled");
+        if(!product.getStatus().equalsIgnoreCase("pending") && !product.getStatus().equalsIgnoreCase("public")){
+            redirectAttributes.addFlashAttribute("error", "Only Public or Pending product can be cancelled");
+            return "redirect:/admin/product";
+        }
+        product.setStatus("Cancelled");
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Cancelled successfully");
         return "redirect:/admin/product";
