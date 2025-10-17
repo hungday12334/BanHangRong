@@ -649,6 +649,48 @@
         openModal(productModal);
       });
 
+      // Upload image -> autofill URL
+      (function initImageGenerate(){
+        const btn = document.getElementById('pm_genImage');
+        const fileInput = document.getElementById('pm_imageFile');
+  const urlInput = document.getElementById('pm_imageUrl');
+        const previewWrap = document.getElementById('pm_imagePreview');
+        const previewImg = previewWrap ? previewWrap.querySelector('img') : null;
+        if (!btn || !fileInput || !urlInput) return;
+        btn.addEventListener('click', () => { fileInput.click(); });
+        fileInput.addEventListener('change', async () => {
+          const f = fileInput.files && fileInput.files[0];
+          if (!f) return;
+          try {
+            const fd = new FormData(); fd.append('file', f);
+            // Optional: allow passing expiration via data-expiration on Generate button
+            const exp = btn && btn.dataset ? (btn.dataset.expiration || '') : '';
+            if (exp && /^\d+$/.test(exp)) { fd.append('expiration', exp); }
+            const res = await fetch('/api/uploads/image', { method:'POST', body: fd });
+            if (!res.ok) {
+              let msg = 'Upload failed';
+              try { msg = (await res.text()) || msg; } catch(_) {}
+              showToast(msg, 'error');
+              return;
+            }
+            const data = await res.json();
+            const url = data && data.url ? data.url : null;
+            if (!url) { showToast('Invalid upload response', 'error'); return; }
+            urlInput.value = url;
+            if (previewWrap && previewImg) {
+              previewImg.src = url; previewWrap.style.display = '';
+            }
+            // Mark as changed so Save will persist
+            __originalProduct = null;
+            showToast('Image uploaded', 'success', { duration: 1500 });
+          } catch (e) {
+            showToast('Upload error', 'error');
+          } finally {
+            fileInput.value = '';
+          }
+        });
+      })();
+
       // Save product (create/update)
       document.getElementById('productForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -674,8 +716,26 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-  if (res.ok) { closeModal(productModal); showToast(id ? 'Product saved' : 'Product created', 'success'); setTimeout(() => refreshMyProducts(), 350); }
-    else { showToast('Failed to save product', 'error'); }
+        if (res.ok) {
+          // Try to set primary image if URL present
+          try {
+            const saved = await res.json().catch(() => null);
+            const pid = id || (saved && (saved.productId || saved.id));
+            const url = (document.getElementById('pm_imageUrl').value || '').trim();
+            if (pid && url) {
+              await fetch(`/api/products/${pid}/primary-image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+              });
+            }
+          } catch (_) { /* non-blocking */ }
+          closeModal(productModal);
+          showToast(id ? 'Product saved' : 'Product created', 'success');
+          setTimeout(() => refreshMyProducts(), 350);
+        } else {
+          showToast('Failed to save product', 'error');
+        }
       });
 
       // Publish / gửi duyệt: Seller-only app -> luôn gửi duyệt (pending nếu không phải public)
@@ -1464,6 +1524,13 @@
       const params = new URLSearchParams();
       params.set('page', productsPageState.page);
       params.set('size', productsPageState.size);
+      // Restrict to current seller by default
+      try {
+        const sellerIdEl = document.getElementById('sellerId');
+        const userIdEl = document.getElementById('userId');
+        const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+        if (sellerId) params.set('sellerId', String(sellerId));
+      } catch(_) {}
       const parts = [];
     const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`keyword "${s}"`); }
     const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt=prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`category "${opt.text}"`); }

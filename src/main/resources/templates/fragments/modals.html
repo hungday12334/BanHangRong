@@ -28,7 +28,21 @@
         <label>Price<input id="pm_price" name="price" type="number" step="0.01" required /></label>
         <label>Sale price<input id="pm_salePrice" name="salePrice" type="number" step="0.01" /></label>
         <label>Quantity<input id="pm_quantity" name="quantity" type="number" min="0" /></label>
-        <label>Download URL<input id="pm_downloadUrl" name="downloadUrl" /></label>
+        <label>
+          Download URL
+          <input id="pm_downloadUrl" name="downloadUrl" />
+        </label>
+        <label>
+          Image URL
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input id="pm_imageUrl" name="imageUrl" style="flex:1;" />
+            <input id="pm_imageFile" type="file" accept="image/*" style="display:none" />
+            <button type="button" id="pm_genImage" class="btn" title="Upload image and fill image URL">Generate</button>
+          </div>
+          <div id="pm_imagePreview" style="margin-top:6px;display:none">
+            <img alt="Preview" style="max-width:100%;border-radius:8px;" />
+          </div>
+        </label>
         <label class="span-2">Description<textarea id="pm_description" name="description" rows="4"></textarea></label>
         <div class="status">Status: <span id="pm_status" class="badge">Hidden</span></div>
       </div>

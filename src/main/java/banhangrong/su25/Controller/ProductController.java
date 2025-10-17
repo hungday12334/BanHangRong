@@ -1,7 +1,9 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +19,11 @@ import java.util.Optional;
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductsRepository productsRepository;
+    private final ProductImagesRepository productImagesRepository;
 
-    public ProductController(ProductsRepository productsRepository) {
+    public ProductController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository) {
         this.productsRepository = productsRepository;
+        this.productImagesRepository = productImagesRepository;
     }
 
     @GetMapping
@@ -108,5 +112,29 @@ public class ProductController {
         p.setUpdatedAt(LocalDateTime.now());
         Products saved = productsRepository.save(p);
         return ResponseEntity.ok(saved);
+    }
+
+    // Set/replace product primary image by URL, and ensure a ProductImages row exists
+    @PostMapping("/{id}/primary-image")
+    public ResponseEntity<?> setPrimaryImage(@PathVariable Long id, @RequestBody java.util.Map<String, String> body) {
+        String url = body != null ? body.get("url") : null;
+        if (url == null || url.isBlank()) return ResponseEntity.badRequest().body("url is required");
+        return productsRepository.findById(id).map(p -> {
+            // create or update primary image row
+            java.util.List<ProductImages> prim = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id);
+            ProductImages img;
+            if (prim != null && !prim.isEmpty()) {
+                img = prim.get(0);
+                img.setImageUrl(url);
+            } else {
+                img = new ProductImages();
+                img.setProductId(id);
+                img.setImageUrl(url);
+                img.setIsPrimary(true);
+                img.setCreatedAt(LocalDateTime.now());
+            }
+            productImagesRepository.save(img);
+            return ResponseEntity.ok(java.util.Map.of("ok", true, "url", url));
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 public interface ProductImagesRepository extends JpaRepository<ProductImages, Long> {
     List<ProductImages> findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(Long productId);
     List<ProductImages> findTop1ByProductIdOrderByImageIdAsc(Long productId);
+    List<ProductImages> findByProductId(Long productId);
 }
 
 
