@@ -157,7 +157,8 @@
             <label class="label">Assign to user (optional)</label>
             <input type="hidden" id="gk_user" name="gk_user" />
             <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
-              <input id="gk_user_q" class="input" type="text" placeholder="Search name or email" style="flex:1;min-width:160px;" />
+              <input id="gk_user_q" class="input" type="text" placeholder="Search name or email"
+                style="flex:1;min-width:160px;" />
               <select id="gk_user_type" class="input" style="width:120px;">
                 <option value="">All types</option>
                 <option value="CUSTOMER">Customer</option>
@@ -196,7 +197,8 @@
             <div class="action-row">
               <button id="gk_submit" type="submit" class="btn primary">Generate</button>
             </div>
-            <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved immediately.</div>
+            <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved
+              immediately.</div>
           </div>
         </div>
       </form>
@@ -243,6 +245,48 @@
       </div>
       <div id="pgProducts" class="pager"
         style="margin-top:12px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
+    </div>
+  </section>
+  <section id="vouchersPanel" class="card section-card" hidden data-panel="vouchers" aria-hidden="true">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:160px;">Vouchers</div>
+      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <input id="vc_search" type="text" class="input" placeholder="Search code…" style="min-width:160px;" />
+        <select id="vc_product" class="input" style="min-width:180px;">
+          <option value="">Select product</option>
+        </select>
+        <select id="vc_status" class="input" title="Status">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <!-- <option value="expired">Expired</option> -->
+        </select>
+        <button id="vc_btnNew" type="button" class="btn primary">New voucher</button>
+        <button id="vc_btnRefresh" type="button" class="btn" title="Reload"><i class="ti ti-refresh"></i></button>
+      </div>
+    </div>
+    <div class="body paged">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Type</th>
+              <th>Value</th>
+              <th class="hide-md">Period</th>
+              <th>Uses</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbVouchers">
+            <tr class="footer-note">
+              <td colspan="7">Select a product to manage vouchers.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pgVouchers"></div>
     </div>
   </section>
   <section id="profileSettingsPanel" class="card section-card" hidden data-panel="profile-settings">

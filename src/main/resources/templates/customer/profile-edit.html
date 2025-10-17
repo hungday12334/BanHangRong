@@ -12,11 +12,14 @@
         body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
         .wrapper { min-height:100%; display:flex; flex-direction:column; }
         .topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
-        .brand { font-weight:800; letter-spacing:.2px; }
+        .brand { font-weight:800; letter-spacing:.2px; display:flex; align-items:center; gap:8px; cursor:pointer; text-decoration:none; color:inherit; }
+        .brand:hover { color:var(--brand); }
+        .logo { height:32px; width:auto; }
         .nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
         .nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
         .nav a:hover { background:#f3f4f6; }
-        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; flex-wrap:nowrap; }
+        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
+        .lang, .notif, .user { font-size:14px; color:var(--muted); }
         .user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
         .user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
         .user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
@@ -34,13 +37,6 @@
         .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
         .btn { padding:10px 16px; border-radius:10px; border:1px solid var(--line); background:#fff; cursor:pointer; }
         .btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
-        .layout { max-width:1000px; margin:18px auto; display:flex; gap:18px; align-items:flex-start; }
-        .sidebar { width:240px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; position:sticky; top:18px; align-self:flex-start; }
-        .sidebar .title { font-weight:700; margin-bottom:8px; }
-        .sidebar a { display:block; padding:10px 12px; border-radius:10px; color:#111827; text-decoration:none; }
-        .sidebar a.active, .sidebar a:hover { background:#f3f4f6; }
-        .main { flex:1; }
-        @media (max-width: 900px) { .layout{ flex-direction:column; } .sidebar{ width:auto; } }
     </style>
     <script>
         function goBack(){ history.back(); }
@@ -49,27 +45,29 @@
 <body>
 <div class="wrapper">
     <div class="topbar">
-        <div class="brand">BanHangRong</div>
+        <a href="/customer/dashboard" class="brand">
+            <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+            BanHangRong
+        </a>
         <nav class="nav" aria-label="Main">
-            <a href="/customer/dashboard">Home</a>
             <a href="/categories">Category</a>
             <a href="#">License Software</a>
             <a href="#">Game Keys</a>
             <a href="#">Voucher</a>
-            <a href="#">Support</a>
+            <a href="/support">Support</a>
         </nav>
         <div class="top-actions">
-            <div class="notif">Notification</div>
+            <a href="/notification" class="notif" style="text-decoration:none;color:var(--muted);">Notification</a>
             <div class="user" style="position:relative">
                 <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                     <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
                 <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                    <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
-                    <a class="item" href="#" role="menuitem">Đơn mua</a>
+                    <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                    <a class="item" href="/orderhistory" role="menuitem">Order History</a>
                     <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
-                    <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
+                    <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
                 </div>
                 <form id="logoutForm" method="post" action="/logout" style="display:none;"></form>
             </div>
@@ -83,27 +81,16 @@
         </div>
     </div>
 
-    <div class="layout">
-      <aside class="sidebar" aria-label="Profile navigation">
-        <div class="title">Tài Khoản Của Tôi</div>
-        <a th:href="@{'/customer/profile/' + ${user.username}}">Hồ sơ</a>
-        <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}">Đổi Mật khẩu</a>
-      </aside>
-      <section class="card main">
+    <section class="card">
         <h2 style="margin-top:0;">Edit Profile</h2>
         <div th:if="${emailError != null}" class="notice" style="margin-bottom:12px;color:#dc2626;background:#fef2f2;border-color:#fecaca;" th:text="${emailError}">Email đã tồn tại, vui lòng chọn email khác.</div>
         <div th:if="${saveError != null}" class="notice" style="margin-bottom:12px;" th:text="${saveError}">Không thể lưu thay đổi. Vui lòng thử lại.</div>
-        <div th:if="${pwdError != null}" class="notice" style="margin-bottom:12px;color:#dc2626;background:#fef2f2;border-color:#fecaca;" th:text="${pwdError}">Lỗi đổi mật khẩu.</div>
         <div th:if="${updated}" class="notice" style=" margin-bottom:12px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46;">Đã lưu thay đổi.</div>
         <form th:action="@{'/customer/profile/' + ${user.username} + '/edit'}" method="post">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Tên đăng nhập</label>
-                    <input type="text" th:value="${profileUser.username}" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Tên</label>
-                    <input type="text" name="fullName" th:value="${profileUser.fullName}" placeholder="Họ và tên">
+                    <label>Avatar URL</label>
+                    <input type="url" name="avatarUrl" th:value="${profileUser.avatarUrl}" placeholder="https://...">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
@@ -114,7 +101,7 @@
                     <input type="text" name="phoneNumber" th:value="${profileUser.phoneNumber}">
                 </div>
                 <div class="form-group">
-                    <label>Giới tính</label>
+                    <label>Gender</label>
                     <select name="gender" th:value="${profileUser.gender}">
                         <option value="">--</option>
                         <option value="Male" th:selected="${profileUser.gender == 'Male'}">Male</option>
@@ -123,23 +110,16 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Ngày sinh</label>
+                    <label>Birth Date</label>
                     <input type="date" name="birthDate" th:value="${profileUser.birthDate}">
                 </div>
-                <div class="form-group">
-                    <label>Avatar URL</label>
-                    <input type="url" name="avatarUrl" th:value="${profileUser.avatarUrl}" placeholder="https://...">
-                </div>
             </div>
-
-            
             <div class="actions">
                 <button type="button" class="btn" onclick="goBack()">Cancel</button>
                 <button type="submit" class="btn primary">Save</button>
             </div>
         </form>
-      </section>
-    </div>
+    </section>
 </div>
 </body>
 </html>
