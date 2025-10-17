@@ -50,15 +50,16 @@ public class AdminProductManagement {
         }
         Long id = Long.parseLong(sId);
         Products product = adminProductService.findById(id);
-        if (product == null|| product.getStatus()==null || !product.getStatus().equalsIgnoreCase("pending")) {
+        if (product == null || product.getStatus() == null || !product.getStatus().equalsIgnoreCase("pending")) {
             redirectAttributes.addFlashAttribute("error", "Product not found");
             return "redirect:/admin/product";
         }
-    product.setStatus("public");
+        product.setStatus("public");
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Product updated successfully");
         return "redirect:/admin/product";
     }
+
     @PostMapping("/cancel")
     public String cancelProduct(HttpServletRequest request,
                                 RedirectAttributes redirectAttributes,
@@ -70,11 +71,11 @@ public class AdminProductManagement {
         }
         Long id = Long.parseLong(sId);
         Products product = adminProductService.findById(id);
-        if (product == null|| product.getStatus()==null || !product.getStatus().equalsIgnoreCase("pending")) {
+        if (product == null || product.getStatus() == null || !product.getStatus().equalsIgnoreCase("pending")) {
             redirectAttributes.addFlashAttribute("error", "Product not found");
             return "redirect:/admin/product";
         }
-    product.setStatus("cancelled");
+        product.setStatus("cancelled");
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Cancelled successfully");
         return "redirect:/admin/product";

@@ -50,7 +50,7 @@ public class AdminIndex {
         return "admin/user-management"; // trả về file admin/user-management.html
     }
 
-    @GetMapping("/all-product")
+    @GetMapping("/product")
     public String getAllProduct(Model model) {
         List<Products> productsList = adminProductService.findAll();
         List<Products> productsListPening = adminProductService.findByStatus("pending");
@@ -67,7 +67,6 @@ public class AdminIndex {
     public String getPendingProduct(Model model) {
         List<Products> productsList = adminProductService.findByStatus("pending");
         model.addAttribute("productsList", productsList);
-        model.addAttribute("pendingCount", productsList.size());
         return "admin/pendingproduct-management";
     }
 }
