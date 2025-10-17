@@ -40,17 +40,39 @@
                 </li>
 
                 <li class="sidebar-item">
-                    <a class="sidebar-link justify-content-between" th:href="@{/admin/product}">
+                    <a class="sidebar-link d-flex align-items-center justify-content-between" href="#">
                         <div class="d-flex align-items-center gap-3">
-                            <span class="d-flex"><i class="bi bi-key-fill"></i></span>
-                            <span class="hide-menu">PRODUCT MANAGEMENT</span>
+                            <i class="bi bi-box-seam"></i>
+                            <span class="hide-menu">PRODUCT MANAGEMENT </span>
+                            <span class="badge" th:text="${pendingCount}">0</span>
                         </div>
                     </a>
+                    <ul>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/all-product}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-key-fill"></i></span>
+                                    <span class="hide-menu">ALL PRODUCTS</span>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/pending-product}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="fa-solid fa-hourglass-start"></i></span>
+                                    <span class="hide-menu">PENDING PRODUCTS </span>
+                                    <span class="badge" th:text="${pendingCount}">0</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between" th:href="@{/admin/apply-seller}">
                         <div class="d-flex align-items-center gap-3">
-                            <span class="d-flex"><i class="fa-solid fa-shop"></i></i></span>
+                            <span class="d-flex"><i class="fa-solid fa-shop"></i></span>
                             <span class="hide-menu">APPLY TO SELLER</span>
                         </div>
                     </a>
