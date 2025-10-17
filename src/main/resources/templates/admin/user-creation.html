@@ -89,26 +89,58 @@
         .form-actions {
             text-align: center;
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
         }
 
         .form-actions button {
             padding: 10px 20px;
-            border: none;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
+            margin: 0 5px;
+            background-color: #fff;
         }
 
-        .form-actions button.submit {
+
+        .submit-btn,
+        .cancel-btn {
+            padding: 12px 28px; /* to hơn */
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background-color: #fff;
+            min-width: 130px; /* cho 2 nút đều nhau */
+        }
+
+        /* Approve button (xanh lá) */
+        .submit-btn {
+            color: #28a745;
+            border: 2px solid #1e7e34;
+        }
+        .submit-btn:hover {
+            color: #fff;
             background-color: #28a745;
+            border-color: #1e7e34;
+            transform: scale(1.05); /* phóng nhẹ khi hover */
+            box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+        }
+        /* Cancel button (đỏ) */
+        .cancel-btn {
+            color: #d9534f;
+            border: 2px solid #b52b27;
+        }
+        .cancel-btn:hover {
             color: #fff;
+            background-color: #d9534f;
+            border-color: #b52b27;
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(217, 83, 79, 0.4);
         }
 
-        .form-actions button.reset {
-            background-color: #dc3545;
-            color: #fff;
-            margin-left: 10px;
-        }
         .alert {
             position: relative;
             z-index: 9999;
@@ -216,8 +248,8 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="submit">Create User</button>
-                <button type="reset" class="reset">Reset</button>
+                <button type="submit" class="submit-btn">Create User</button>
+                <button type="reset" class="cancel-btn">Reset</button>
             </div>
 
         </form>
