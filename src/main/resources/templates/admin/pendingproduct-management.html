@@ -181,6 +181,36 @@
             border-radius: 10px;
             font-size: 0.8rem;
         }
+        /*filter*/
+        .filter-bar {
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .filter-bar input {
+            border-color: #0b1020;
+        }
+        .filter-bar select {
+            flex: 1;
+            min-width: 120px;
+            border-color: #0b1020;
+        }
+
+        .date-field {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .date-field label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 3px;
+        }
     </style>
 </head>
 
@@ -192,11 +222,23 @@
 
     <!-- ListUser Section -->
     <div class="content-wrapper">
+<!--        Filter-->
         <div class="user-header">
-            <form class="d-flex">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search users">
-                <button type="button" class="btn btn-outline-primary">Search</button>
-            </form>
+            <div class="d-flex filter-bar">
+                <input type="text" id="search" class="form-control" placeholder="ID, Name">
+                <input type="text" id="sellerId" class="form-control" placeholder="SellerID">
+                <input type="number" id="priceMin" class="form-control" placeholder="Price Min">
+                <input type="number" id="priceMax" class="form-control" placeholder="Price Max">
+                <div class="date-field">
+                    <label for="createAt">Create At</label>
+                    <input type="date" id="createAt" class="form-control">
+                </div>
+
+                <div class="date-field">
+                    <label for="updateAt">Update At</label>
+                    <input type="date" id="updateAt" class="form-control">
+                </div>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -222,6 +264,7 @@
                     <th></th>
                     <th>ID</th>
                     <th>Seller ID</th>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Price</th>
@@ -229,6 +272,8 @@
                     <th>Total Sales</th>
                     <th>Average Rating</th>
                     <th>Status</th>
+                    <th>Create At</th>
+                    <th>Update At</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -242,6 +287,9 @@
                     </td>
                     <td th:text="${p.productId}"></td>
                     <td th:text="${p.sellerId}"></td>
+                    <td>
+                        <img th:src="@{${p.images}}" alt="Product Image" style="width: 100px; height: 100px; object-fit: cover;">
+                    </td>
                     <td th:text="${p.name}"></td>
                     <td th:text="${p.description}"></td>
                     <td th:text="${p.price}"></td>
@@ -256,6 +304,8 @@
                                   (${p.status.equalsIgnoreCase('cancelled')} ? 'status-cancelled' : '')))">
                         </span>
                     </td>
+                    <td th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm:ss')}" ></td>
+                    <td th:text="${#temporals.format(p.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
                 </tr>
                 </tbody>
             </table>
@@ -263,25 +313,57 @@
     </div>
 </div>
 <script>
-    document.getElementById("searchInput").addEventListener("keyup", function () {
-        const filter = this.value.toLowerCase();
-        const rows = document.querySelectorAll("table tbody tr");
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('search');
+        const sellerIdInput = document.getElementById('sellerId');
+        const priceMinInput = document.getElementById('priceMin');
+        const priceMaxInput = document.getElementById('priceMax');
+        const createAtInput = document.getElementById('createAt');
+        const updateAtInput = document.getElementById('updateAt');
+        const rows = document.querySelectorAll('#productTable tbody tr');
 
-        rows.forEach(row => {
-            const cells = row.querySelectorAll("td");
-            let match = false;
+        function filterTable() {
+            const search = searchInput.value.trim().toLowerCase();
+            const sellerId = sellerIdInput.value.trim().toLowerCase();
+            const priceMin = parseFloat(priceMinInput.value) || 0;
+            const priceMax = parseFloat(priceMaxInput.value) || Infinity;
+            const createAt = createAtInput.value.trim();
+            const updateAt = updateAtInput.value.trim();
 
-            // duyệt qua tất cả các cột trừ 3 cột thời gian cuối
-            for (let i = 0; i < cells.length; i++) {
-                if (cells[i].innerText.toLowerCase().includes(filter)) {
-                    match = true;
-                    break;
-                }
-            }
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const idCell = cells[1].textContent.trim().toLowerCase();
+                const sellerIdCell = cells[2].textContent.trim().toLowerCase();
+                const nameCell = cells[4].textContent.trim().toLowerCase();
+                const priceCell = parseFloat(cells[6].textContent.trim()) || 0;
+                const statusCell = cells[10].textContent.trim().toLowerCase();
+                const createAtCell = cells[11].textContent.trim();
+                const updateAtCell = cells[12].textContent.trim();
 
-            row.style.display = match ? "" : "none";
+                const matchSearch = idCell.includes(search) || nameCell.includes(search);
+                const matchSellerId = sellerIdCell.includes(sellerId);
+                const matchPrice = priceCell >= priceMin && priceCell <= priceMax;
+                const matchCreateAt = !createAt || createAtCell.startsWith(createAt);
+                const matchUpdateAt = !updateAt || updateAtCell.startsWith(updateAt);
+
+                row.style.display = (matchSearch && matchSellerId && matchPrice && matchStatus && matchCreateAt && matchUpdateAt)
+                    ? ''
+                    : 'none';
+            });
+        }
+
+        let typingTimer;
+        searchInput.addEventListener("input", () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(filterTable, 300);
+        });
+
+        [sellerIdInput, priceMinInput, priceMaxInput, createAtInput, updateAtInput].forEach(el => {
+            el.addEventListener("input", filterTable);
+            el.addEventListener("change", filterTable);
         });
     });
+
 </script>
 <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
 <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
