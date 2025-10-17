@@ -5,10 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="init commit">
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VnPayController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VnPayController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/VnPayConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/VnPayConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_v2.sql" beforeDir="false" afterPath="$PROJECT_DIR$/data_v2.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fix_database_add_status.sql" beforeDir="false" afterPath="$PROJECT_DIR$/fix_database_add_status.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reset-password-link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/reset-password-link.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/set_password.sql" beforeDir="false" afterPath="$PROJECT_DIR$/set_password.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/OrderHistoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/OrderHistoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/orderhistory.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/orderhistory.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test-redirect.html" beforeDir="false" afterPath="$PROJECT_DIR$/test-redirect.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,6 +145,9 @@
       <workItem from="1760424344305" duration="333000" />
       <workItem from="1760462090685" duration="10872000" />
       <workItem from="1760517397805" duration="2146000" />
+      <workItem from="1760537513290" duration="2406000" />
+      <workItem from="1760604144309" duration="2415000" />
+      <workItem from="1760667499299" duration="738000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />

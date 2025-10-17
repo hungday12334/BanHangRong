@@ -45,7 +45,7 @@ public class OrderHistoryController {
         return 2L; // fallback for demo
     }
 
-    @GetMapping("/orderhistory")
+    @GetMapping("/orders")
     public String orderHistory(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
                               @RequestParam(name = "size", required = false, defaultValue = "10") int size,
                               Model model) {
@@ -58,16 +58,18 @@ public class OrderHistoryController {
         // Get order items for each order
         Map<Long, List<OrderItems>> orderItemsMap = new HashMap<>();
         Map<Long, String> productNamesMap = new HashMap<>();
+        Map<Long, Products> productsMap = new HashMap<>();
         
         for (Orders order : orders) {
             List<OrderItems> orderItems = orderItemsRepository.findByOrderId(order.getOrderId());
             orderItemsMap.put(order.getOrderId(), orderItems);
             
-            // Get product names for order items
+            // Get product names and details for order items
             for (OrderItems item : orderItems) {
                 Products product = productsRepository.findById(item.getProductId()).orElse(null);
                 if (product != null) {
                     productNamesMap.put(item.getProductId(), product.getName());
+                    productsMap.put(item.getProductId(), product);
                 }
             }
         }
@@ -75,6 +77,7 @@ public class OrderHistoryController {
         model.addAttribute("orders", orders);
         model.addAttribute("orderItemsMap", orderItemsMap);
         model.addAttribute("productNamesMap", productNamesMap);
+        model.addAttribute("productsMap", productsMap);
         model.addAttribute("page", ordersPage.getNumber());
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("size", ordersPage.getSize());
