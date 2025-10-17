@@ -18,6 +18,7 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     // ========================= SẢN PHẨM CHUNG =========================
 
     Page<Products> findByStatus(String status, Pageable pageable);
+    List<Products> findBySellerIdAndIsActiveTrue(Long sellerId);
 
     @Query(value = "SELECT p FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)",
             countQuery = "SELECT COUNT(p) FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)")
@@ -153,4 +154,12 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     // Featured products (bản rút gọn)
     @Query("SELECT p FROM Products p WHERE p.productId IN :productIds AND p.sellerId = :sellerId AND p.isActive = true")
     List<Products> findFeaturedProducts(@Param("sellerId") Long sellerId, @Param("productIds") List<Long> productIds);
+
+    // THÊM METHOD MỚI - Lấy sản phẩm với limit (cho frontend)
+    @Query("SELECT p FROM Products p WHERE p.sellerId = :sellerId AND p.isActive = true ORDER BY p.createdAt DESC LIMIT :limit")
+    List<Products> findTopBySellerIdWithLimit(@Param("sellerId") Long sellerId, @Param("limit") int limit);
+
+    // THÊM METHOD MỚI - Đếm số sản phẩm active
+    @Query("SELECT COUNT(p) FROM Products p WHERE p.sellerId = :sellerId AND p.isActive = true")
+    Long countActiveProductsBySellerId(@Param("sellerId") Long sellerId);
 }

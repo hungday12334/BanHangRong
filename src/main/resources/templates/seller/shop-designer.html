@@ -481,6 +481,199 @@
                 height: 200px;
             }
         }
+
+        /* Thêm vào shop-designer.css */
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: calc(100vh - 300px); /* Chiều cao cố định */
+            gap: 1px;
+            background: #e9ecef;
+            overflow: hidden; /* Quan trọng: không cho scroll layout */
+        }
+
+        .components-panel,
+        .preview-area,
+        .properties-panel {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .components-categories,
+        .preview-container,
+        .properties-content {
+            flex: 1;
+            overflow-y: auto; /* Cho phép scroll nội dung */
+        }
+
+        /* Custom scrollbar */
+        .components-categories::-webkit-scrollbar,
+        .preview-container::-webkit-scrollbar,
+        .properties-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .components-categories::-webkit-scrollbar-track,
+        .preview-container::-webkit-scrollbar-track,
+        .properties-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb,
+        .preview-container::-webkit-scrollbar-thumb,
+        .properties-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb:hover,
+        .preview-container::-webkit-scrollbar-thumb:hover,
+        .properties-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* CẬP NHẬT CSS CHO SCROLL ĐỘC LẬP */
+        .shop-designer-container {
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: 100%;
+            gap: 1px;
+            background: #e9ecef;
+            overflow: hidden; /* Quan trọng: không cho scroll toàn bộ layout */
+        }
+
+        /* MỖI PANEL SCROLL ĐỘC LẬP */
+        .components-panel {
+            background: white;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden; /* Quan trọng */
+        }
+
+        .preview-area {
+            background: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden; /* Quan trọng */
+        }
+
+        .properties-panel {
+            background: white;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden; /* Quan trọng */
+        }
+
+        /* PHẦN NỘI DUNG CÓ THỂ SCROLL */
+        .components-categories {
+            flex: 1;
+            overflow-y: auto; /* Scroll độc lập */
+            padding: 1rem;
+        }
+
+        .preview-container {
+            flex: 1;
+            overflow-y: auto; /* Scroll độc lập */
+            padding: 2rem;
+        }
+
+        .properties-content {
+            flex: 1;
+            overflow-y: auto; /* Scroll độc lập */
+            padding: 1rem;
+        }
+
+        /* CUSTOM SCROLLBAR ĐẸP HƠN */
+        .components-categories::-webkit-scrollbar,
+        .preview-container::-webkit-scrollbar,
+        .properties-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .components-categories::-webkit-scrollbar-track,
+        .preview-container::-webkit-scrollbar-track,
+        .properties-content::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb,
+        .preview-container::-webkit-scrollbar-thumb,
+        .properties-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+            border: 2px solid #f8f9fa;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb:hover,
+        .preview-container::-webkit-scrollbar-thumb:hover,
+        .properties-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* ĐẢM BẢO HEADER KHÔNG SCROLL */
+        .panel-header,
+        .preview-header {
+            flex-shrink: 0; /* Không bị co lại khi scroll */
+        }
+
+        /* ACTION BAR CỐ ĐỊNH Ở DƯỚI */
+        .action-bar {
+            flex-shrink: 0; /* Không scroll */
+            background: white;
+            border-top: 1px solid #dee2e6;
+            padding: 1rem;
+        }
+
+        .components-categories,
+        .preview-container,
+        .properties-content {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Cho mobile */
+        }
+
+        /* Ẩn scrollbar nhưng vẫn scroll được (tuỳ chọn) */
+        .components-categories {
+            scrollbar-width: thin; /* Firefox */
+        }
+
+        .preview-container {
+            scrollbar-width: thin;
+        }
+
+        .properties-content {
+            scrollbar-width: thin;
+        }
+
+        @media (max-width: 768px) {
+            .designer-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: 200px 1fr 250px;
+            }
+
+            .components-categories,
+            .preview-container,
+            .properties-content {
+                overflow-y: auto;
+                height: 100%;
+            }
+        }
     </style>
 </head>
 <body class="dashboard-layout">
@@ -797,11 +990,66 @@
 <script>
     // Shop Designer JavaScript
     class ShopDesigner {
+
+        // Trong ShopDesigner class - sửa preview và view shop
+        previewLayout() {
+            this.showMessage('👁️ Đang mở xem trước...', 'info');
+
+            // Mở preview trong tab mới
+            const previewUrl = `/shop/preview/${this.sellerId}`;
+            console.log('Opening preview:', previewUrl);
+
+            const newWindow = window.open(previewUrl, '_blank');
+            if (!newWindow) {
+                this.showMessage('❌ Popup bị chặn. Vui lòng cho phép popup.', 'error');
+            }
+        }
+
+        viewShop() {
+            this.showMessage('🛍️ Đang mở cửa hàng...', 'info');
+
+            // Mở cửa hàng thật trong tab mới
+            const shopUrl = `/shop/${this.sellerId}`;
+            console.log('Opening shop:', shopUrl);
+
+            const newWindow = window.open(shopUrl, '_blank');
+            if (!newWindow) {
+                this.showMessage('❌ Popup bị chặn. Vui lòng cho phép popup.', 'error');
+            }
+        }
+
+// Test method để debug
+        async testShopEndpoints() {
+            try {
+                console.log('🧪 Testing shop endpoints...');
+
+                // Test preview
+                const previewResponse = await fetch(`/shop/preview/${this.sellerId}`);
+                console.log('Preview status:', previewResponse.status);
+
+                // Test shop
+                const shopResponse = await fetch(`/shop/${this.sellerId}`);
+                console.log('Shop status:', shopResponse.status);
+
+                // Test API
+                const apiResponse = await fetch(`/api/shop/${this.sellerId}/data`);
+                const apiData = await apiResponse.json();
+                console.log('API response:', apiData);
+
+            } catch (error) {
+                console.error('Test failed:', error);
+            }
+        }
+
+
         constructor() {
             this.sections = [];
             this.currentSection = null;
             this.selectedTemplate = null;
-            this.sellerId = 1; // Lấy từ session hoặc context
+            this.sellerId = 1;
+            this.availableProducts = [];
+            this.currentDevice = 'desktop';
+            this.currentZoom = 100;
             this.init();
         }
 
@@ -810,7 +1058,48 @@
             this.setupEventListeners();
             this.setupDragAndDrop();
             this.loadExistingLayout();
+            this.loadRealProducts();
+            this.setupDevicePreview();
+            this.setupZoomControls();
         }
+
+        setupDevicePreview() {
+            document.querySelectorAll('.device-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    this.currentDevice = e.target.dataset.device;
+                    this.updateDevicePreview();
+                });
+            });
+        }
+
+        setupZoomControls() {
+            document.querySelectorAll('.zoom-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const action = e.target.closest('.zoom-btn').dataset.zoom;
+                    if (action === 'in') {
+                        this.currentZoom = Math.min(this.currentZoom + 25, 200);
+                    } else {
+                        this.currentZoom = Math.max(this.currentZoom - 25, 50);
+                    }
+                    this.updateZoomDisplay();
+                });
+            });
+        }
+
+        updateDevicePreview() {
+            const preview = document.getElementById('shopPreview');
+            preview.className = 'shop-preview';
+            preview.classList.add(`device-${this.currentDevice}`);
+        }
+
+        updateZoomDisplay() {
+            document.querySelector('.zoom-level').textContent = `${this.currentZoom}%`;
+            document.getElementById('shopPreview').style.transform = `scale(${this.currentZoom / 100})`;
+        }
+
+
 
         loadComponents() {
             const productSections = [
@@ -880,6 +1169,21 @@
                 this.previewLayout();
             });
 
+            // Reset view button
+            document.getElementById('resetViewBtn').addEventListener('click', () => {
+                this.resetView();
+            });
+
+            // View shop button
+            document.getElementById('viewShopBtn').addEventListener('click', () => {
+                this.viewShop();
+            });
+
+            // Help button
+            document.getElementById('helpBtn').addEventListener('click', () => {
+                this.showHelp();
+            });
+
             // Property changes
             document.getElementById('sectionTitle').addEventListener('input', (e) => {
                 if (this.currentSection) {
@@ -888,22 +1192,111 @@
                 }
             });
 
-            document.getElementById('sectionActive').addEventListener('change', (e) => {
+            document.getElementById('sectionDescription').addEventListener('input', (e) => {
                 if (this.currentSection) {
-                    this.currentSection.isActive = e.target.checked;
+                    this.currentSection.description = e.target.value;
                 }
             });
 
-            // View shop button
-            document.getElementById('viewShopBtn').addEventListener('click', () => {
-                window.open(`/shop/${this.sellerId}`, '_blank');
+            document.getElementById('sectionLimit').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.limit = parseInt(e.target.value);
+                    this.updateSectionPreview(this.currentSection);
+                }
             });
 
-            // Help button
-            document.getElementById('helpBtn').addEventListener('click', () => {
-                alert('Hướng dẫn sử dụng:\n\n1. Kéo thành phần từ bên trái vào khu vực preview\n2. Click vào section để chỉnh sửa thuộc tính\n3. Sử dụng thiết lập nhanh để áp dụng mẫu có sẵn\n4. Lưu thay đổi và xuất bản khi hoàn thành');
+            document.getElementById('sectionLayout').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.layout = e.target.value;
+                    this.updateSectionPreview(this.currentSection);
+                }
+            });
+
+            document.getElementById('sectionActive').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.isActive = e.target.checked;
+                    this.toggleSectionVisibility(this.currentSection);
+                }
+            });
+
+            // Filter settings
+            document.getElementById('priceMin').addEventListener('input', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.filters = this.currentSection.filters || {};
+                    this.currentSection.filters.minPrice = e.target.value;
+                }
+            });
+
+            document.getElementById('priceMax').addEventListener('input', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.filters = this.currentSection.filters || {};
+                    this.currentSection.filters.maxPrice = e.target.value;
+                }
+            });
+
+            document.getElementById('sectionCategory').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.filters = this.currentSection.filters || {};
+                    this.currentSection.filters.categoryId = e.target.value;
+                }
             });
         }
+
+        resetView() {
+            this.currentDevice = 'desktop';
+            this.currentZoom = 100;
+            document.querySelectorAll('.device-btn').forEach((btn, index) => {
+                btn.classList.toggle('active', index === 0);
+            });
+            this.updateDevicePreview();
+            this.updateZoomDisplay();
+            this.showMessage('✅ Đã đặt lại chế độ xem', 'success');
+        }
+
+        viewShop() {
+            window.open(`/shop/${this.sellerId}`, '_blank');
+        }
+
+        showHelp() {
+            const helpContent = `
+Hướng dẫn sử dụng Shop Designer:
+
+🏗️ THIẾT KẾ:
+• Kéo thành phần từ bên trái vào khu vực preview
+• Click vào section để chỉnh sửa thuộc tính
+• Sắp xếp thứ tự bằng cách kéo section
+
+⚙️ TÙY CHỈNH:
+• Thay đổi tiêu đề, số lượng sản phẩm
+• Chọn bố cục hiển thị (lưới, danh sách, carousel)
+• Thiết lập bộ lọc cho khu vực tùy chỉnh
+
+🚀 HÀNH ĐỘNG:
+• Lưu thay đổi: Lưu bản nháp
+• Xuất bản: Áp dụng lên cửa hàng thật
+• Xem trước: Xem cửa hàng trước khi xuất bản
+
+💡 MẸO:
+• Dùng "Thiết lập nhanh" để bắt đầu nhanh chóng
+• Kiểm tra trên nhiều thiết bị (desktop/tablet/mobile)
+        `;
+            alert(helpContent);
+        }
+
+        toggleSectionVisibility(section) {
+            const sectionElement = document.querySelector(`[data-section-id="${section.id}"]`);
+            if (sectionElement) {
+                sectionElement.style.opacity = section.isActive ? '1' : '0.5';
+            }
+        }
+
+        updateSectionPreview(section) {
+            const sectionElement = document.querySelector(`[data-section-id="${section.id}"] .section-products`);
+            if (sectionElement) {
+                sectionElement.innerHTML = this.renderRealProducts(section);
+            }
+        }
+
 
         setupDragAndDrop() {
             const dropZone = document.getElementById('shopPreview');
@@ -1192,7 +1585,204 @@
                 actionMessage.className = 'action-message';
             }, 3000);
         }
+
+        async loadRealProducts() {
+            try {
+                this.showLoading();
+                // ✅ SỬA URL - dùng endpoint mới
+                const response = await fetch(`/api/products/seller/${this.sellerId}/active`);
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.availableProducts = data.products;
+                        this.updateProductSelection();
+                        this.showMessage(`✅ Đã tải ${data.count} sản phẩm`, 'success');
+                        this.updateProductStats();
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } else {
+                    throw new Error('Lỗi kết nối server');
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải sản phẩm:', error);
+                this.showMessage('❌ Không thể tải sản phẩm: ' + error.message, 'error');
+                this.availableProducts = this.getMockProducts();
+                this.updateProductSelection();
+            } finally {
+                this.hideLoading();
+            }
+        }
+
+        renderRealProducts(section) {
+            if (!this.availableProducts || this.availableProducts.length === 0) {
+                return '<div class="text-muted text-center p-3">Chưa có sản phẩm nào</div>';
+            }
+
+            let productsToShow = [];
+
+            switch(section.type) {
+                case 'featured':
+                    // Lấy 3 sản phẩm đầu tiên cho featured (có thể cải tiến sau)
+                    productsToShow = this.availableProducts.slice(0, Math.min(section.limit || 3, 3));
+                    break;
+                case 'bestseller':
+                    productsToShow = [...this.availableProducts]
+                        .sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                case 'toprated':
+                    productsToShow = [...this.availableProducts]
+                        .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                case 'newarrivals':
+                    productsToShow = this.availableProducts
+                        .slice(0, section.limit || 6);
+                    break;
+                default:
+                    productsToShow = this.availableProducts.slice(0, section.limit || 6);
+            }
+
+            if (productsToShow.length === 0) {
+                return '<div class="text-muted text-center p-3">Không có sản phẩm phù hợp</div>';
+            }
+
+            return productsToShow.map(product => `
+        <div class="product-preview">
+            <div class="product-image bg-light rounded p-3 mb-2 text-center">
+                <i class="ti ti-box" style="font-size: 2rem; color: #6c757d;"></i>
+            </div>
+            <h6 class="product-name mb-1" title="${product.name}">${this.truncateText(product.name, 20)}</h6>
+            <small class="text-primary fw-bold d-block">$${product.price}</small>
+            ${product.totalSales ? `<small class="text-success">🛒 ${product.totalSales}</small>` : ''}
+            ${product.averageRating ? `<small class="text-warning">⭐ ${product.averageRating}</small>` : ''}
+        </div>
+    `).join('');
+        }
+
+        truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        updateProductStats() {
+            const totalProducts = this.availableProducts.length;
+            const totalValue = this.availableProducts.reduce((sum, product) => sum + parseFloat(product.price), 0);
+
+            document.getElementById('totalProductsCount').textContent = totalProducts;
+            document.getElementById('actionMessage').textContent = `📦 ${totalProducts} sản phẩm có sẵn`;
+        }
+
+        getMockProducts() {
+            return [
+                {
+                    productId: 1,
+                    name: "E-Book X",
+                    description: "Cuốn sách hướng dẫn nâng cao",
+                    price: 19.99,
+                    totalSales: 10,
+                    averageRating: 4.5,
+                    isActive: true
+                },
+                {
+                    productId: 2,
+                    name: "Music Pack Vol.1",
+                    description: "Bộ sample âm nhạc đa thể loại",
+                    price: 9.99,
+                    totalSales: 25,
+                    averageRating: 4.2,
+                    isActive: true
+                },
+                {
+                    productId: 3,
+                    name: "Software Pro",
+                    description: "Tiện ích chuyên nghiệp cho công việc",
+                    price: 49.00,
+                    totalSales: 5,
+                    averageRating: 4.8,
+                    isActive: true
+                },
+                {
+                    productId: 4,
+                    name: "Antivirus Pro Plus",
+                    description: "Bảo vệ máy tính toàn diện",
+                    price: 59.00,
+                    totalSales: 18,
+                    averageRating: 4.6,
+                    isActive: true
+                }
+            ];
+        }
+
+        updateProductSelection() {
+            const container = document.getElementById('productSelection');
+            if (!container) return;
+
+            container.innerHTML = this.availableProducts.map(product => `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                       value="${product.productId}"
+                       id="product-${product.productId}">
+                <label class="form-check-label" for="product-${product.productId}">
+                    ${product.name} - $${product.price}
+                </label>
+            </div>
+        `).join('');
+        }
+
+        getSelectedProducts() {
+            const checkboxes = document.querySelectorAll('#productSelection input:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+        }
+
+        // Hiển thị sản phẩm thật trong preview
+        renderRealProducts(section) {
+            if (!this.availableProducts || this.availableProducts.length === 0) {
+                return this.getSectionPreview(section); // Fallback to mock data
+            }
+
+            // Lấy sản phẩm theo loại section
+            let productsToShow = [];
+            switch(section.type) {
+                case 'featured':
+                    // Hiển thị selected products hoặc 3 sản phẩm đầu
+                    const selected = this.getSelectedProducts();
+                    productsToShow = this.availableProducts
+                        .filter(p => selected.includes(p.productId))
+                        .slice(0, section.limit || 3);
+                    break;
+                case 'bestseller':
+                    productsToShow = this.availableProducts
+                        .sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                case 'toprated':
+                    productsToShow = this.availableProducts
+                        .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                default:
+                    productsToShow = this.availableProducts.slice(0, section.limit || 6);
+            }
+
+            return productsToShow.map(product => `
+            <div class="product-preview">
+                <div class="bg-light rounded p-3 mb-2 text-center">
+                    <i class="ti ti-box" style="font-size: 2rem;"></i>
+                </div>
+                <h6 class="mb-1">${product.name}</h6>
+                <small class="text-muted d-block">$${product.price}</small>
+                <small class="text-success">Đã bán: ${product.totalSales || 0}</small>
+            </div>
+        `).join('');
+        }
     }
+
+
+
+
 
     // Khởi tạo khi trang load
     document.addEventListener('DOMContentLoaded', function() {

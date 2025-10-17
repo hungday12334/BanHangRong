@@ -1,10 +1,11 @@
-// ShopDesignController.java - SỬA LẠI
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.SellerShopSections;
 import banhangrong.su25.service.ShopDesignService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
@@ -65,4 +66,5 @@ public class ShopDesignController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
 }

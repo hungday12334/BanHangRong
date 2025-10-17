@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-/**
- * Controller xử lý CRUD sản phẩm cho Seller và luồng duyệt/publish cho Admin.
- * (Tên cũ: ProductAdminController – đổi thành ProductController vì lớp này phục vụ cả seller lẫn admin.)
- */
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -22,12 +21,16 @@ public class ProductController {
         this.productsRepository = productsRepository;
     }
 
+    // GET /api/products?sellerId=1 → Lấy products (có thể filter theo seller)
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(name = "sellerId", required = false) Long sellerId) {
-        if (sellerId != null) return ResponseEntity.ok(productsRepository.findBySellerId(sellerId));
+        if (sellerId != null) {
+            return ResponseEntity.ok(productsRepository.findBySellerId(sellerId));
+        }
         return ResponseEntity.ok(productsRepository.findAll());
     }
 
+    // GET /api/products/{id} → Lấy product by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
         return productsRepository.findById(id)
@@ -35,7 +38,38 @@ public class ProductController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Seller creates product: default status = pending (requires admin approval to become public)
+    // GET /api/products/seller/{sellerId}/active → Lấy ACTIVE products của seller (CHO SHOP DESIGNER)
+    @GetMapping("/seller/{sellerId}/active")
+    public ResponseEntity<?> getSellerActiveProducts(@PathVariable Long sellerId) {
+        try {
+            List<Products> products = productsRepository.findBySellerIdAndIsActiveTrue(sellerId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("products", products);
+            response.put("count", products.size());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Lỗi khi lấy sản phẩm: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    // GET /api/products/seller/{sellerId}/active/simple → Simple format
+    @GetMapping("/seller/{sellerId}/active/simple")
+    public ResponseEntity<List<Products>> getSellerActiveProductsSimple(@PathVariable Long sellerId) {
+        try {
+            List<Products> products = productsRepository.findBySellerIdAndIsActiveTrue(sellerId);
+            return ResponseEntity.ok(products);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // POST /api/products → Seller tạo product mới
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Products req) {
         if (req.getSellerId() == null || req.getName() == null || req.getPrice() == null) {
@@ -48,7 +82,7 @@ public class ProductController {
         return ResponseEntity.created(URI.create("/api/products/" + saved.getProductId())).body(saved);
     }
 
-    // Seller updates product: nếu có thay đổi ở các trường cơ bản -> chuyển hidden (để chờ duyệt lại)
+    // PUT /api/products/{id} → Seller cập nhật product
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Products req) {
         Optional<Products> opt = productsRepository.findById(id);
@@ -72,6 +106,7 @@ public class ProductController {
         return ResponseEntity.ok(saved);
     }
 
+    // DELETE /api/products/{id} → Xóa product
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         if (!productsRepository.existsById(id)) return ResponseEntity.notFound().build();
@@ -79,7 +114,7 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    // Admin phê duyệt / huỷ publish; Seller bấm publish để gửi duyệt -> pending
+    // POST /api/products/{id}/approval → Admin duyệt/ Seller publish
     @PostMapping("/{id}/approval")
     public ResponseEntity<?> approve(
             @PathVariable Long id,
@@ -99,14 +134,29 @@ public class ProductController {
             }
         } else { // Seller flow
             if ("public".equals(p.getStatus())) {
-                // Seller không chỉnh sửa gì nhưng bấm publish -> giữ nguyên public, no-op
                 return ResponseEntity.ok(p);
             }
-            // Các trạng thái khác (hidden / pending) khi seller bấm publish -> gửi lại duyệt (pending)
             p.setStatus("pending");
         }
         p.setUpdatedAt(LocalDateTime.now());
         Products saved = productsRepository.save(p);
         return ResponseEntity.ok(saved);
+    }
+
+    // THÊM: Lấy products theo status (cho admin)
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Products>> getProductsByStatus(@PathVariable String status) {
+        try {
+            // Cần thêm method này trong Repository
+            // List<Products> products = productsRepository.findByStatus(status);
+            // Tạm thời filter manual
+            List<Products> allProducts = productsRepository.findAll();
+            List<Products> filtered = allProducts.stream()
+                    .filter(p -> status.equals(p.getStatus()))
+                    .toList();
+            return ResponseEntity.ok(filtered);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
