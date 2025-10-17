@@ -188,6 +188,17 @@ body {
   background:#f3f4f6;
 }
 
+/* Product description styles */
+.product-description {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
 /* Price display styles */
 .price-info {
   margin-top: 8px;
@@ -306,6 +317,9 @@ body {
           <div class="product-info">
                             <div class="product-name" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
             <div th:text="'Quantities: ' + ${orderItemsMap[order.orderId][0].quantity}">Quantities: 1</div>
+            <!-- Product Description -->
+            <div class="product-description" th:text="${productsMap[orderItemsMap[order.orderId][0].productId].description}">Bảo vệ toàn diện: Antivirus, VPN, Password Manager. 5 devices, 12 tháng.</div>
+            
             <div class="price-info" style="margin-top: 8px;">
               <span th:if="${productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
                 <span class="sale-price" style="color: #ef4444; font-weight: 600;" th:text="'Giá khuyến mãi: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].salePrice, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá khuyến mãi: 1,100,000₫</span>
