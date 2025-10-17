@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung tâm trợ giúp - BanHangRong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg:#f5f7fb; 
+            --card:#ffffff; 
+            --ink:#0f172a; 
+            --muted:#6b7280; 
+            --brand:#0ea5e9; 
+            --line:#eaeef4;
+            --gray:#6b7280;
+            --gray-light:#f3f4f6;
+            --gray-dark:#374151;
+        }
+        * { box-sizing:border-box; }
+        html,body { height:100%; }
+        body { 
+            margin:0; 
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+            color:var(--ink); 
+            background:var(--bg); 
+        }
+        .wrapper { min-height:100%; display:flex; flex-direction:column; }
+        
+        /* Header */
+        .topbar { 
+            display:flex; 
+            align-items:center; 
+            gap:14px; 
+            padding:10px 16px; 
+            border-bottom:1px solid var(--line); 
+            background:var(--card); 
+            flex-wrap:nowrap; 
+        }
+        .brand { 
+            font-weight:800; 
+            letter-spacing:.2px; 
+            display:flex; 
+            align-items:center; 
+            gap:8px; 
+            cursor:pointer; 
+            text-decoration:none; 
+            color:inherit; 
+        }
+        .brand:hover { color:var(--brand); }
+        .logo { height:32px; width:auto; }
+        .nav { 
+            display:flex; 
+            gap:16px; 
+            margin:0 12px; 
+            flex:1; 
+            overflow:auto; 
+            white-space:nowrap; 
+        }
+        .nav a { 
+            text-decoration:none; 
+            color:#111827; 
+            font-weight:500; 
+            padding:8px 10px; 
+            border-radius:8px; 
+        }
+        .nav a:hover { background:#f3f4f6; }
+        .top-actions { 
+            margin-left:auto; 
+            display:flex; 
+            align-items:center; 
+            gap:12px; 
+            position:relative; 
+        }
+        .lang, .notif, .user { font-size:14px; color:var(--muted); }
+        .user-btn{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            cursor:pointer;
+            color:#111827;
+            border:1px solid var(--line);
+            padding:6px 10px;
+            border-radius:8px;
+            background:#fff
+        }
+        .user-menu{
+            position:absolute; 
+            right:0; 
+            top:48px; 
+            background:#fff; 
+            border:1px solid var(--line); 
+            border-radius:10px; 
+            box-shadow:0 10px 25px rgba(0,0,0,.08); 
+            width:200px; 
+            display:none; 
+            z-index:5
+        }
+        .user-menu .item{
+            display:block; 
+            padding:10px 12px; 
+            color:#111827; 
+            text-decoration:none
+        }
+        .user-menu .item:hover{background:#f3f4f6}
+        .search { position:relative; }
+        .search input { 
+            height:34px; 
+            width:220px; 
+            padding:0 12px; 
+            border:1px solid var(--line); 
+            border-radius:8px; 
+            outline:none; 
+        }
+        .cart { 
+            position:relative; 
+            width:28px; 
+            height:28px; 
+            display:grid; 
+            place-items:center; 
+            border:1px solid var(--line); 
+            border-radius:8px; 
+            text-decoration:none; 
+            color:#111827; 
+        }
+        .cart .badge{ 
+            position:absolute; 
+            top:-6px; 
+            right:-6px; 
+            background:#ef4444; 
+            color:#fff; 
+            min-width:18px; 
+            height:18px; 
+            border-radius:9px; 
+            font-size:11px; 
+            display:flex; 
+            align-items:center; 
+            justify-content:center; 
+            padding:0 5px; 
+        }
+
+        /* Support Hero Section */
+        .support-hero {
+            background: linear-gradient(135deg, var(--brand), #0284c7);
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+        }
+        .support-hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+        }
+        .support-hero p {
+            font-size: 18px;
+            margin: 0 0 40px 0;
+            opacity: 0.9;
+        }
+        .support-search {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .support-search input {
+            width: 100%;
+            height: 56px;
+            padding: 0 20px 0 60px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .support-search .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: var(--muted);
+        }
+        .support-search .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--brand);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .support-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Categories Section */
+        .categories-section {
+            margin-bottom: 60px;
+        }
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .category-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: var(--brand);
+            background: var(--gray-light);
+        }
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            background: var(--brand);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+        .category-desc {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            margin-bottom: 60px;
+        }
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .faq-item {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .faq-question {
+            padding: 20px;
+            font-weight: 600;
+            color: var(--ink);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .faq-question:hover {
+            background: var(--gray-light);
+        }
+        .faq-answer {
+            padding: 0 20px 20px;
+            color: var(--muted);
+            line-height: 1.6;
+            display: none;
+        }
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            text-align: center;
+            background: var(--gray-light);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 40px;
+        }
+        .contact-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 16px;
+        }
+        .contact-desc {
+            font-size: 16px;
+            color: var(--muted);
+            margin-bottom: 30px;
+        }
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--brand);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .contact-btn:hover {
+            background: var(--gray-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .support-hero h1 { font-size: 28px; }
+            .support-hero p { font-size: 16px; }
+            .categories-grid { grid-template-columns: 1fr; }
+            .support-content { padding: 20px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Header -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
+            <nav class="nav" aria-label="Main">
+                <a href="/categories">Category</a>
+                <a href="#">License Software</a>
+                <a href="#">Game Keys</a>
+                <a href="#">Voucher</a>
+                <a href="/support" style="color: var(--brand); font-weight: 600;">Support</a>
+            </nav>
+            <div class="top-actions">
+                <div class="notif">Notification</div>
+                <div class="user" style="position:relative">
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/orderhistory" role="menuitem">Order History</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
+                        <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+                <div class="search">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+                        <input type="search" name="search" placeholder="search" aria-label="Search" 
+                               th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                        <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                        <a th:if="${search != null and !search.trim().isEmpty()}" 
+                           th:href="@{/customer/dashboard}" 
+                           style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+                    </form>
+                </div>
+                <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+            </div>
+        </div>
+
+        <!-- Support Hero Section -->
+        <section class="support-hero">
+            <h1>Xin chào, BanHangRong có thể giúp gì cho bạn?</h1>
+            <p>Chúng tôi luôn sẵn sàng hỗ trợ bạn trong mọi vấn đề</p>
+            <div class="support-search">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input type="text" placeholder="Nhập từ khóa hoặc nội dung cần tìm" id="supportSearch">
+                <button class="search-btn" onclick="searchSupport()">Tìm kiếm</button>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <div class="support-content">
+            <!-- Categories Section -->
+            <section class="categories-section">
+                <h2 class="section-title">Danh mục</h2>
+                <div class="categories-grid">
+                    <a href="#" class="category-card" onclick="showCategory('shopping')">
+                        <div class="category-icon">🛒</div>
+                        <div class="category-title">Mua Sắm Cùng BanHangRong</div>
+                        <div class="category-desc">Hướng dẫn mua hàng, tìm kiếm sản phẩm và thanh toán</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('promotions')">
+                        <div class="category-icon">🏷️</div>
+                        <div class="category-title">Khuyến Mãi & Ưu Đãi</div>
+                        <div class="category-desc">Thông tin về các chương trình khuyến mãi và mã giảm giá</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('payment')">
+                        <div class="category-icon">💳</div>
+                        <div class="category-title">Thanh Toán</div>
+                        <div class="category-desc">Hướng dẫn thanh toán và quản lý ví điện tử</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('orders')">
+                        <div class="category-icon">📦</div>
+                        <div class="category-title">Đơn Hàng & Vận Chuyển</div>
+                        <div class="category-desc">Theo dõi đơn hàng và thông tin vận chuyển</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('returns')">
+                        <div class="category-icon">🔄</div>
+                        <div class="category-title">Trả Hàng & Hoàn Tiền</div>
+                        <div class="category-desc">Chính sách trả hàng và hoàn tiền</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('general')">
+                        <div class="category-icon">❓</div>
+                        <div class="category-title">Thông Tin Chung</div>
+                        <div class="category-desc">Câu hỏi thường gặp và thông tin chung</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="faq-section">
+                <h2 class="section-title">Câu hỏi thường gặp</h2>
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>[Cảnh báo lừa đảo] Mua sắm an toàn cùng BanHangRong</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            BanHangRong cam kết bảo vệ thông tin cá nhân và giao dịch của bạn. Luôn kiểm tra thông tin người bán, đọc kỹ mô tả sản phẩm và sử dụng hệ thống thanh toán an toàn của chúng tôi.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>[Dịch vụ] Cách liên hệ Chăm sóc khách hàng, Hotline, Tổng đài BanHangRong</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Bạn có thể liên hệ với chúng tôi qua: Email: support@banhangrong.com, Hotline: 1900-xxxx, hoặc sử dụng chức năng chat trực tuyến trên website.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Làm thế nào để đăng ký tài khoản BanHangRong?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Bạn có thể đăng ký tài khoản bằng cách nhấn nút "Đăng ký" ở góc phải màn hình, điền đầy đủ thông tin và xác thực email để hoàn tất đăng ký.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Làm sao để trở thành người bán trên BanHangRong?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Để trở thành người bán, bạn cần đăng ký tài khoản, xác thực danh tính, cung cấp thông tin kinh doanh và chờ phê duyệt từ đội ngũ BanHangRong.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section class="contact-section">
+                <h3 class="contact-title">Bạn có muốn tìm thêm thông tin gì không?</h3>
+                <p class="contact-desc">Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ bạn</p>
+                <a href="#" class="contact-btn" onclick="contactSupport()">
+                    <span>📞</span>
+                    <span>Liên hệ BanHangRong</span>
+                </a>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // User dropdown functionality
+        document.getElementById('userMenuBtn').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            this.setAttribute('aria-expanded', !isExpanded);
+            dropdown.style.display = isExpanded ? 'none' : 'block';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userMenu.contains(event.target)) {
+                dropdown.style.display = 'none';
+                document.getElementById('userMenuBtn').setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // FAQ functionality
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Toggle current item
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Search functionality
+        function searchSupport() {
+            const searchTerm = document.getElementById('supportSearch').value;
+            if (searchTerm.trim()) {
+                alert('Tìm kiếm: ' + searchTerm + '\nChức năng tìm kiếm đang được phát triển!');
+            }
+        }
+
+        // Category functionality
+        function showCategory(category) {
+            const categoryNames = {
+                'shopping': 'Mua Sắm Cùng BanHangRong',
+                'promotions': 'Khuyến Mãi & Ưu Đãi',
+                'payment': 'Thanh Toán',
+                'orders': 'Đơn Hàng & Vận Chuyển',
+                'returns': 'Trả Hàng & Hoàn Tiền',
+                'general': 'Thông Tin Chung'
+            };
+            alert('Chọn danh mục: ' + categoryNames[category] + '\nChức năng đang được phát triển!');
+        }
+
+        // Contact functionality
+        function contactSupport() {
+            alert('Liên hệ hỗ trợ:\n📧 Email: support@banhangrong.com\n📞 Hotline: 1900-xxxx\n💬 Chat trực tuyến: Đang phát triển');
+        }
+
+        // Search on Enter key
+        document.getElementById('supportSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchSupport();
+            }
+        });
+    </script>
+</body>
+</html>
