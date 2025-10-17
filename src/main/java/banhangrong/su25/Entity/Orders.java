@@ -13,8 +13,12 @@ public class Orders {
     private Long orderId;
     @Column(name = "user_id")
     private Long userId;
+    @Column(name = "seller_id")
+    private Long sellerId;
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
+    @Column(name = "status")
+    private String status; // "pending", "completed", "cancelled"
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -49,5 +53,21 @@ public class Orders {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public Long getSellerId() {
+        return sellerId;
+    }
+    
+    public void setSellerId(Long sellerId) {
+        this.sellerId = sellerId;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

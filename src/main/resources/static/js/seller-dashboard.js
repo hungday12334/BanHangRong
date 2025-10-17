@@ -162,26 +162,8 @@
           return b;
         };
         pager.appendChild(mkBtn('«', Math.max(1, current - 1), current === 1, false));
-        // Sliding window: show up to 10 consecutive pages.
-        const windowSize = 10;
-        let start = 1;
-        if (totalPages <= windowSize) {
-          start = 1;
-        } else {
-          if (current <= windowSize) {
-            start = 1;
-          } else {
-            start = current - (windowSize - 1); // e.g. current=11 -> start=2 (2..11)
-            // ensure window doesn't overflow at high end
-            if (start > totalPages - windowSize + 1) start = totalPages - windowSize + 1;
-          }
-        }
-        const end = Math.min(totalPages, start + windowSize - 1);
-        for (let i = start; i <= end; i++) {
-          const btn = mkBtn(String(i), i, false, i === current);
-          btn.classList.add('page-btn');
-          if (i === current) btn.classList.add('active');
-          pager.appendChild(btn);
+        for (let i = 1; i <= totalPages; i++) {
+          pager.appendChild(mkBtn(String(i), i, false, i === current));
         }
         pager.appendChild(mkBtn('»', Math.min(totalPages, current + 1), current === totalPages, false));
       } else {
@@ -848,8 +830,8 @@
       profilePanel.hidden = true;
       profilePanel.style.display = 'none';
       dashboardContent.style.display = '';
-      // ALSO hide other sidebar panels (orders, keys, products, vouchers) to prevent residual content
-      ['ordersPanel','keysPanel','profileSettingsPanel','productsPanel','vouchersPanel'].forEach(id => {
+      // ALSO hide other sidebar panels (orders, keys, productpanel) to prevent residual content
+      ['ordersPanel','keysPanel','profileSettingsPanel','productsPanel'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.hidden = true; el.style.display = 'none'; }
       });
@@ -890,7 +872,6 @@
       '#keys': 'keysPanel',
       '#products': 'productsPanel',
       '#gen-keys': 'generateKeysPanel',
-      '#vouchers': 'vouchersPanel',
       '#profile-settings': 'profileSettingsPanel'
     };
     function showPanelByHash(hash) {
@@ -899,12 +880,6 @@
         hideProfile();
         // also hide any other panels
         Object.values(panelMap).forEach(id => { const el = document.getElementById(id); if (el) { el.hidden = true; el.style.display = 'none'; } });
-        // ensure vouchers panel remains hidden and flagged aria-hidden for a11y
-        const vp = document.getElementById('vouchersPanel');
-        if (vp) { vp.hidden = true; vp.style.display = 'none'; vp.setAttribute('aria-hidden','true'); }
-        // close product modal if somehow left open and prevent its inline form from being visible
-        const pm = document.getElementById('productModal');
-        if (pm && pm.hasAttribute('open')) { try { pm.close(); } catch(_) { pm.removeAttribute('open'); pm.style.display='none'; } }
         return;
       }
       // hide dashboard and all panels first
@@ -928,8 +903,6 @@
           initGenerateKeys();
         } else if (hash === '#products' && typeof loadProductsPanel === 'function') {
           loadProductsPanel(true);
-        } else if (hash === '#vouchers' && typeof loadVouchersPanel === 'function') {
-          loadVouchersPanel(true);
         }
       } catch (_) { /* ignore */ }
     }
@@ -944,188 +917,6 @@
     }
 
     // === Profile edit modal ===
-    // ===== Vouchers panel logic =====
-    async function fetchSellerProductsLite(sellerId) {
-      const res = await fetch(`/api/products-lite?sellerId=${sellerId}`);
-      if (!res.ok) return [];
-      return await res.json();
-    }
-
-    async function fetchVouchers(sellerId, productId, q) {
-      const url = new URL(`/api/seller/${sellerId}/products/${productId}/vouchers`, window.location.origin);
-      if (q && q.trim()) url.searchParams.set('q', q.trim());
-      const res = await fetch(url);
-      if (!res.ok) return [];
-      return await res.json();
-    }
-
-    async function saveVoucher(sellerId, productId, payload, voucherId) {
-      const url = `/api/seller/${sellerId}/products/${productId}/vouchers` + (voucherId ? `/${voucherId}` : '');
-      const method = voucherId ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      return res;
-    }
-
-    async function deleteVoucher(sellerId, productId, voucherId) {
-      const url = `/api/seller/${sellerId}/products/${productId}/vouchers/${voucherId}`;
-      return await fetch(url, { method: 'DELETE' });
-    }
-
-    async function loadVouchersPanel(forceReload) {
-      const panel = document.getElementById('vouchersPanel');
-      if (!panel) return;
-      const sellerIdEl = document.getElementById('sellerId');
-      const userIdEl = document.getElementById('userId');
-      const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
-      if (!sellerId) { showToast('Seller not identified', 'error'); return; }
-
-  const selProduct = document.getElementById('vc_product');
-      const selStatus = document.getElementById('vc_status');
-  const inpSearch = document.getElementById('vc_search');
-      const tb = document.getElementById('tbVouchers');
-      const btnNew = document.getElementById('vc_btnNew');
-      const btnRefresh = document.getElementById('vc_btnRefresh');
-
-      // load product list once
-      if (!selProduct.dataset.loaded || forceReload) {
-        selProduct.innerHTML = '<option value="">Select product</option>';
-        const products = await fetchSellerProductsLite(sellerId);
-        for (const p of products) {
-          const opt = document.createElement('option');
-          opt.value = p.productId;
-          opt.textContent = `#${p.productId} — ${p.name}`;
-          selProduct.appendChild(opt);
-        }
-        selProduct.dataset.loaded = '1';
-      }
-
-      let lastReq = 0;
-      async function render() {
-        const pid = Number(selProduct.value || '0');
-        tb.innerHTML = '';
-        if (!pid) { tb.innerHTML = '<tr class="footer-note"><td colspan="7">Select a product to manage vouchers.</td></tr>'; return; }
-        const reqId = ++lastReq;
-        const list = await fetchVouchers(sellerId, pid, inpSearch?.value || '');
-        if (reqId !== lastReq) return; // ignore out-of-order responses (typing fast)
-        const statusFilter = (selStatus.value || '').toLowerCase();
-        const filtered = list.filter(v => !statusFilter || (v.status || '').toLowerCase() === statusFilter);
-        if (!filtered.length) {
-          tb.innerHTML = '<tr class="footer-note"><td colspan="7">No vouchers found.</td></tr>';
-          return;
-        }
-        for (const v of filtered) {
-          const tr = document.createElement('tr');
-          const period = [v.startAt ? new Date(v.startAt).toLocaleString() : '-', v.endAt ? new Date(v.endAt).toLocaleString() : '-'].join(' → ');
-          const uses = `${v.usedCount ?? 0}${v.maxUses ? ' / ' + v.maxUses : ''}`;
-          const val = (v.discountType === 'AMOUNT' ? ('$' + Number(v.discountValue || 0).toLocaleString('en-US')) : (Number(v.discountValue || 0) + '%'));
-          tr.innerHTML = `
-            <td><b>${v.code}</b></td>
-            <td>${v.discountType}</td>
-            <td>${val}</td>
-            <td class="hide-md">${period}</td>
-            <td>${uses}</td>
-            <td><span class="badge">${(v.status||'').toUpperCase()}</span></td>
-            <td style="text-align:right;white-space:nowrap">
-              <button class="btn" data-act="usage">Usage</button>
-              <button class="btn" data-act="edit">Edit</button>
-              <button class="btn danger" data-act="del">Delete</button>
-            </td>`;
-          // actions
-          tr.querySelector('[data-act="edit"]').addEventListener('click', () => openVoucherModal(pid, v));
-          tr.querySelector('[data-act="usage"]').addEventListener('click', () => openUsageModal(pid, v));
-          tr.querySelector('[data-act="del"]').addEventListener('click', async () => {
-            if (!confirm('Delete this voucher?')) return;
-            const res = await deleteVoucher(sellerId, pid, v.voucherId);
-            if (res.ok) { showToast('Voucher deleted', 'success'); render(); } else showToast('Delete failed', 'error');
-          });
-          tb.appendChild(tr);
-        }
-      }
-
-  selProduct.addEventListener('change', render);
-      selStatus.addEventListener('change', render);
-      btnRefresh?.addEventListener('click', render);
-  // live search with debounce 250ms, DB-backed
-  let tmr;
-  inpSearch?.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(render, 250); });
-
-      function openVoucherModal(productId, voucher) {
-        const dlg = document.getElementById('voucherModal');
-        if (!dlg) return;
-        dlg.querySelector('#vc_voucherId').value = voucher?.voucherId ?? '';
-        dlg.querySelector('#vc_code').value = voucher?.code ?? '';
-        dlg.querySelector('#vc_type').value = voucher?.discountType ?? 'PERCENT';
-        dlg.querySelector('#vc_value').value = voucher?.discountValue ?? '';
-        dlg.querySelector('#vc_min').value = voucher?.minOrder ?? '';
-        dlg.querySelector('#vc_start').value = voucher?.startAt ? new Date(voucher.startAt).toISOString().slice(0,16) : '';
-        dlg.querySelector('#vc_end').value = voucher?.endAt ? new Date(voucher.endAt).toISOString().slice(0,16) : '';
-        dlg.querySelector('#vc_maxUses').value = voucher?.maxUses ?? '';
-        dlg.querySelector('#vc_maxPerUser').value = voucher?.maxUsesPerUser ?? '';
-        dlg.querySelector('#vc_status').value = voucher?.status ?? 'active';
-
-        dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(dlg); }, { once: true });
-        dlg.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(dlg), { once: true }));
-        dlg.querySelector('#voucherForm').onsubmit = async (e) => {
-          e.preventDefault();
-          const payload = {
-            code: dlg.querySelector('#vc_code').value.trim(),
-            discountType: dlg.querySelector('#vc_type').value,
-            discountValue: Number(dlg.querySelector('#vc_value').value || '0'),
-            minOrder: dlg.querySelector('#vc_min').value ? Number(dlg.querySelector('#vc_min').value) : null,
-            startAt: dlg.querySelector('#vc_start').value ? new Date(dlg.querySelector('#vc_start').value).toISOString() : null,
-            endAt: dlg.querySelector('#vc_end').value ? new Date(dlg.querySelector('#vc_end').value).toISOString() : null,
-            maxUses: dlg.querySelector('#vc_maxUses').value ? Number(dlg.querySelector('#vc_maxUses').value) : null,
-            maxUsesPerUser: dlg.querySelector('#vc_maxPerUser').value ? Number(dlg.querySelector('#vc_maxPerUser').value) : null,
-            status: dlg.querySelector('#vc_status').value
-          };
-          const vid = dlg.querySelector('#vc_voucherId').value || null;
-          const res = await saveVoucher(sellerId, productId, payload, vid);
-          if (res.ok) { closeModal(dlg); showToast('Voucher saved', 'success'); render(); }
-          else { const msg = await res.text(); showToast('Save failed: ' + msg, 'error'); }
-        };
-        openModal(dlg);
-      }
-
-      async function openUsageModal(productId, voucher) {
-        const dlg = document.getElementById('voucherUsageModal');
-        if (!dlg) return;
-        const codeEl = dlg.querySelector('#vu_code');
-        const usedEl = dlg.querySelector('#vu_used');
-        const maxEl = dlg.querySelector('#vu_max');
-        const leftEl = dlg.querySelector('#vu_left');
-        const table = dlg.querySelector('#vu_table');
-        codeEl.textContent = voucher.code;
-        usedEl.textContent = voucher.usedCount ?? 0;
-        maxEl.textContent = voucher.maxUses ?? '∞';
-        leftEl.textContent = voucher.maxUses ? Math.max(0, voucher.maxUses - (voucher.usedCount ?? 0)) : '∞';
-        table.innerHTML = '<tr class="footer-note"><td colspan="5">Loading...</td></tr>';
-        const res = await fetch(`/api/seller/${sellerId}/products/${productId}/vouchers/${voucher.voucherId}/usage`);
-        if (res.ok) {
-          const list = await res.json();
-          table.innerHTML = '';
-          if (!list.length) table.innerHTML = '<tr class="footer-note"><td colspan="5">No usage yet.</td></tr>';
-          list.forEach((r, idx) => {
-            const trr = document.createElement('tr');
-            trr.innerHTML = `<td>${idx + 1}</td><td>#${r.orderId || '-'}</td><td>#${r.userId || '-'}</td><td>$${Number(r.discountAmount || 0).toFixed(2)}</td><td>${r.createdAt ? new Date(r.createdAt).toLocaleString() : '-'}</td>`;
-            table.appendChild(trr);
-          });
-        } else {
-          table.innerHTML = '<tr class="footer-note"><td colspan="5">Failed to load usage.</td></tr>';
-        }
-        dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(dlg); }, { once: true });
-        dlg.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(dlg), { once: true }));
-        openModal(dlg);
-      }
-
-      btnNew?.addEventListener('click', () => {
-        const pid = Number(selProduct.value || '0');
-        if (!pid) { showToast('Select a product first', 'error'); return; }
-        openVoucherModal(pid, null);
-      });
-
-      // initial render if product already chosen
-      render();
-    }
     const profileModal = document.getElementById('profileModal');
     if (profileModal) {
       // reuse existing overlay + lock helpers
@@ -1295,15 +1086,7 @@
             const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if (current) b.setAttribute('aria-current','page');
             b.addEventListener('click', () => { ordersPageState.page = page; loadSellerOrders(false); }); return b; };
           ordersPager.appendChild(mk('«', Math.max(0, ordersPageState.page-1), ordersPageState.page===0,false));
-          // sliding window of up to 10 pages (1-based labels, page is 0-based)
-          const wSize = 10;
-          let startIdx = 0;
-          if (total <= wSize) startIdx = 0; else {
-            if (ordersPageState.page <= wSize - 1) startIdx = 0; else startIdx = ordersPageState.page - (wSize - 1);
-            if (startIdx > total - wSize) startIdx = total - wSize;
-          }
-          const endIdx = Math.min(total - 1, startIdx + wSize - 1);
-          for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===ordersPageState.page); btn.classList.add('page-btn'); if (i===ordersPageState.page) btn.classList.add('active'); ordersPager.appendChild(btn); }
+          for (let i=0;i<total;i++) ordersPager.appendChild(mk(String(i+1), i, false, i===ordersPageState.page));
           ordersPager.appendChild(mk('»', Math.min(total-1, ordersPageState.page+1), ordersPageState.page===total-1,false));
         }
       }
@@ -1354,31 +1137,18 @@
         const deviceText = (l.deviceIdentifier && l.deviceIdentifier.trim().length)
           ? l.deviceIdentifier
           : 'unused';
-        // Try to extract expire date from licenseKey format: PRD<productId>-yyyyMMdd-<random>
-        let expireText = '';
-        try {
-          const parts = (l.licenseKey || '').split('-');
-          if (parts.length >= 3) {
-            const maybe = parts[1];
-            if (/^\d{8}$/.test(maybe)) {
-              // format yyyyMMdd -> yyyy-MM-dd for readability
-              expireText = maybe.slice(0,4) + '-' + maybe.slice(4,6) + '-' + maybe.slice(6,8);
-            }
-          }
-        } catch (e) { expireText = ''; }
         tr.innerHTML = `<td>${l.licenseId}</td>
                         <td style="font-family:monospace;">${l.licenseKey}</td>
                         <td>${l.productName||('#'+l.productId)}</td>
                         <td>${l.orderId||''}</td>
                         <td>${activeBadge}</td>
-                        <td>${expireText}</td>
                         <td>${actDate}</td>
                         <td>${deviceText}</td>`;
         keysTbody.appendChild(tr);
       });
         if (data.content.length === 0) {
           const tr = document.createElement('tr');
-          const colSpan = 8;
+          const colSpan = 7;
           tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">No keys for the current seller or sellerId is incorrect.</td>`;
           keysTbody.appendChild(tr);
         }
@@ -1388,12 +1158,8 @@
         if (total>1) {
           const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ keysPageState.page=page; loadSellerKeys(false); }); return b; };
           keysPager.appendChild(mk('«', Math.max(0, keysPageState.page-1), keysPageState.page===0,false));
-            {
-              const wSize = 10; let startIdx = 0; if (total <= wSize) startIdx = 0; else { if (keysPageState.page <= wSize - 1) startIdx = 0; else startIdx = keysPageState.page - (wSize - 1); if (startIdx > total - wSize) startIdx = total - wSize; }
-              const endIdx = Math.min(total - 1, startIdx + wSize - 1);
-              for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===keysPageState.page); btn.classList.add('page-btn'); if (i===keysPageState.page) btn.classList.add('active'); keysPager.appendChild(btn); }
-            }
-            keysPager.appendChild(mk('»', Math.min(total-1, keysPageState.page+1), keysPageState.page===total-1,false));
+          for (let i=0;i<total;i++) keysPager.appendChild(mk(String(i+1), i, false, i===keysPageState.page));
+          keysPager.appendChild(mk('»', Math.min(total-1, keysPageState.page+1), keysPageState.page===total-1,false));
         }
       }
     }
@@ -1464,13 +1230,6 @@
       const params = new URLSearchParams();
       params.set('page', productsPageState.page);
       params.set('size', productsPageState.size);
-      // Restrict to current seller by default
-      try {
-        const sellerIdEl = document.getElementById('sellerId');
-        const userIdEl = document.getElementById('userId');
-        const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
-        if (sellerId) params.set('sellerId', String(sellerId));
-      } catch(_) {}
       const parts = [];
     const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`keyword "${s}"`); }
     const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt=prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`category "${opt.text}"`); }
@@ -1530,11 +1289,7 @@
           if (total>1) {
             const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ productsPageState.page=page; loadProductsPanel(false); }); return b; };
             productsPager.appendChild(mk('«', Math.max(0, productsPageState.page-1), productsPageState.page===0,false));
-            {
-              const wSize = 10; let startIdx = 0; if (total <= wSize) startIdx = 0; else { if (productsPageState.page <= wSize - 1) startIdx = 0; else startIdx = productsPageState.page - (wSize - 1); if (startIdx > total - wSize) startIdx = total - wSize; }
-              const endIdx = Math.min(total - 1, startIdx + wSize - 1);
-              for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===productsPageState.page); btn.classList.add('page-btn'); if (i===productsPageState.page) btn.classList.add('active'); productsPager.appendChild(btn); }
-            }
+            for (let i=0;i<total;i++) productsPager.appendChild(mk(String(i+1), i, false, i===productsPageState.page));
             productsPager.appendChild(mk('»', Math.min(total-1, productsPageState.page+1), productsPageState.page===total-1,false));
           }
         }
@@ -1582,144 +1337,31 @@
         sel.setAttribute('data-loaded','1');
       } catch(_){}
     }
-
-    // ==== Generate Keys Panel: Custom Product Table ====
-    async function renderProductTableForGenKey() {
-      const table = document.getElementById('gk_product_table');
-      const tbody = table?.querySelector('tbody');
-      const selectedDiv = document.getElementById('gk_product_selected');
-      const input = document.getElementById('gk_product');
-      if (!tbody || !input) return;
-      tbody.innerHTML = '<tr><td colspan="4">Đang tải sản phẩm...</td></tr>';
-      selectedDiv.textContent = '';
-      input.value = '';
-      try {
-        const sellerIdEl = document.getElementById('sellerId');
-        const userIdEl = document.getElementById('userId');
-        const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
-        if (!sellerId) return;
-        const res = await fetch(`/api/products?sellerId=${sellerId}`);
-        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="4">Không thể tải sản phẩm</td></tr>'; return; }
-        const list = await res.json();
-        const products = Array.isArray(list) ? list.filter(p => (p.status||'').toLowerCase()==='public') : [];
-        if (!products.length) { tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm PUBLIC</td></tr>'; return; }
-        tbody.innerHTML = '';
-        products.forEach(p => {
-          const tr = document.createElement('tr');
-          tr.className = 'clickable';
-          tr.innerHTML = `<td>${p.productId}</td><td>${p.name}</td><td>${p.categoryName||''}</td><td>${p.status}</td>`;
-          tr.addEventListener('click', () => {
-            input.value = p.productId;
-            selectedDiv.textContent = `Đã chọn: #${p.productId} • ${p.name}`;
-            // Highlight row
-            tbody.querySelectorAll('tr').forEach(row => row.classList.remove('selected'));
-            tr.classList.add('selected');
-          });
-          tbody.appendChild(tr);
-        });
-      } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="4">Lỗi tải sản phẩm</td></tr>';
-      }
-    }
-
-    // ==== Generate Keys Panel: User selection with search + pagination ====
-    const gkUsersState = { page: 0, size: 8, totalPages: 0, q: '', type: '' };
-
-    async function loadGenUsers(resetPage=false) {
-      const tbody = document.querySelector('#gk_user_table tbody');
-      const pager = document.getElementById('pgGenUsers');
-      const selDiv = document.getElementById('gk_user_selected');
-      const hidden = document.getElementById('gk_user');
-      if (!tbody || !pager) return;
-      if (resetPage) gkUsersState.page = 0;
-      const params = new URLSearchParams();
-      params.set('page', gkUsersState.page);
-      params.set('size', gkUsersState.size);
-      if (gkUsersState.q) params.set('q', gkUsersState.q);
-      if (gkUsersState.type) params.set('type', gkUsersState.type);
-      tbody.innerHTML = '<tr><td colspan="4">Loading users...</td></tr>';
-      try {
-        const res = await fetch('/api/users/search?' + params.toString());
-        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="4">Failed to load users</td></tr>'; return; }
-        const data = await res.json();
-        gkUsersState.totalPages = data.totalPages || 1;
-        const list = Array.isArray(data.content) ? data.content : [];
-        tbody.innerHTML = '';
-        if (!list.length) tbody.innerHTML = '<tr><td colspan="4">No users</td></tr>';
-        list.forEach(u => {
-          const tr = document.createElement('tr');
-          tr.className = 'clickable';
-          const uname = u.username ?? '';
-          const email = u.email ?? '';
-          const type = u.userType ?? '';
-          tr.innerHTML = `<td>${u.userId}</td><td>${uname}</td><td>${email}</td><td>${type}</td>`;
-          tr.addEventListener('click', () => {
-            if (hidden) hidden.value = u.userId;
-            if (selDiv) selDiv.textContent = `Assign to: #${u.userId} • ${uname} • ${email}`;
-            tbody.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
-            tr.classList.add('selected');
-          });
-          tbody.appendChild(tr);
-        });
-        // Build server pager
-        pager.innerHTML = '';
-        if (gkUsersState.totalPages > 1) {
-          const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ gkUsersState.page=page; loadGenUsers(false); }); return b; };
-          pager.appendChild(mk('«', Math.max(0, gkUsersState.page-1), gkUsersState.page===0,false));
-          // Server pager for generate-keys users: sliding window (7 pages only)
-          const totalG = gkUsersState.totalPages;
-          const wSizeG = 7;
-          let startG = 0;
-          if (totalG <= wSizeG) startG = 0; else { if (gkUsersState.page <= wSizeG - 1) startG = 0; else startG = gkUsersState.page - (wSizeG - 1); if (startG > totalG - wSizeG) startG = totalG - wSizeG; }
-          const endG = Math.min(totalG - 1, startG + wSizeG - 1);
-          for (let i = startG; i <= endG; i++) { const b = mk(String(i+1), i, false, i===gkUsersState.page); b.classList.add('page-btn'); if (i===gkUsersState.page) b.classList.add('active'); pager.appendChild(b); }
-          pager.appendChild(mk('»', Math.min(gkUsersState.totalPages-1, gkUsersState.page+1), gkUsersState.page===gkUsersState.totalPages-1,false));
-        }
-      } catch (_) {
-        tbody.innerHTML = '<tr><td colspan="4">Error loading users</td></tr>';
-      }
-    }
-
-    function initGenUserSearchHandlers() {
-      const q = document.getElementById('gk_user_q');
-      const t = document.getElementById('gk_user_type');
-      const btn = document.getElementById('gk_user_search');
-      if (q) q.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); gkUsersState.q = (q.value||'').trim(); loadGenUsers(true); } });
-      if (t) t.addEventListener('change', () => { gkUsersState.type = (t.value||'').trim(); loadGenUsers(true); });
-      if (btn) btn.addEventListener('click', () => { gkUsersState.q = (q?.value||'').trim(); gkUsersState.type = (t?.value||'').trim(); loadGenUsers(true); });
-    }
-
     async function initGenerateKeys() {
-      await renderProductTableForGenKey();
-      initGenUserSearchHandlers();
-      await loadGenUsers(true);
+      await populatePublicProductsForGen();
     }
 
     document.getElementById('genKeyForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const prodInput = document.getElementById('gk_product');
-      const pid = prodInput?.value ? Number(prodInput.value) : null;
+      const prodSel = document.getElementById('gk_product');
+      const pid = prodSel?.value ? Number(prodSel.value) : null;
       const exp = document.getElementById('gk_expire')?.value || '';
       let qty = document.getElementById('gk_qty')?.value ? parseInt(document.getElementById('gk_qty').value,10) : 0;
-      if (!pid) { showToast('Vui lòng chọn sản phẩm PUBLIC', 'error'); return; }
-      if (!qty || qty <= 0) { showToast('Số lượng phải > 0', 'error'); return; }
+      if (!pid) { showToast('Please select a product (PUBLIC)', 'error'); return; }
+      if (!qty || qty <= 0) { showToast('Quantity must be > 0', 'error'); return; }
+      // Server will enforce capacity; we optionally clamp client-side using product.qty meta if available
+      const opt = prodSel.options[prodSel.selectedIndex];
+      const declaredQty = opt?.dataset?.qty ? parseInt(opt.dataset.qty,10) : null;
+      if (declaredQty != null && qty > declaredQty) qty = declaredQty;
       try {
         const res = await fetch('/api/seller/' + (document.getElementById('userId')?.textContent?.trim()||document.getElementById('sellerId')?.textContent?.trim()) + '/licenses/generate', {
           method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({
-            productId: pid,
-            expireDate: exp,
-            quantity: qty,
-            userId: (document.getElementById('gk_user')?.value ? Number(document.getElementById('gk_user').value) : undefined)
-          })
+          body: JSON.stringify({ productId: pid, expireDate: exp, quantity: qty })
         });
-  if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
-  const data = await res.json();
-  showToast(`Đã tạo ${data.generated} key (còn lại ${data.remaining})`, 'success');
-  // Reload keys list and navigate to Keys panel so new keys are visible immediately
-  try { if (typeof loadSellerKeys === 'function') loadSellerKeys(true); } catch (e) { /* ignore */ }
-  try { if (typeof showPanelByHash === 'function') showPanelByHash('#keys'); } catch (e) { /* ignore */ }
-      } catch (e) { showToast('Lỗi tạo key', 'error'); }
+        if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
+        const data = await res.json();
+        showToast(`Generated ${data.generated} keys (remaining capacity ${data.remaining})`, 'success');
+      } catch (e) { showToast('Failed to generate keys', 'error'); }
     });
 
     if (window.location.hash === '#gen-keys') setTimeout(() => initGenerateKeys(), 120);

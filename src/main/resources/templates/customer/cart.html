@@ -1,163 +1,38 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ hàng</title>
-    <link rel="stylesheet" href="/css/styles.min.css">
+	<link rel="stylesheet" href="/css/styles.min.css">
     <style>
-        .wrap {
-            max-width: 1100px;
-            margin: 20px auto;
-            padding: 0 10px
-        }
-
-        .cart-card {
-            background: #fff;
-            border: 1px solid #eaeef4;
-            border-radius: 12px;
-            overflow: hidden
-        }
-
-        .cart-header,
-        .cart-row {
-            display: grid;
-            grid-template-columns: 40px 1fr 120px 160px 120px 120px;
-            align-items: center
-        }
-
-        .cart-header {
-            background: #f9fafb;
-            color: #111827;
-            font-weight: 600
-        }
-
-        .col {
-            padding: 12px;
-            border-bottom: 1px solid #eaeef4
-        }
-
-        .col.center {
-            text-align: center
-        }
-
-        .col.right {
-            text-align: right
-        }
-
-        .prod {
-            display: flex;
-            gap: 12px;
-            align-items: center
-        }
-
-        .thumb {
-            width: 56px;
-            height: 56px;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #f3f4f6;
-            display: grid;
-            place-items: center
-        }
-
-        .thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover
-        }
-
-        .name {
-            font-weight: 600;
-            color: #111827
-        }
-
-        .name-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px
-        }
-
-        .qty-pill {
-            background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            color: #111827;
-            padding: 2px 8px;
-            border-radius: 999px;
-            font-size: 12px;
-            white-space: nowrap
-        }
-
-        .muted {
-            color: #6b7280;
-            font-size: 12px
-        }
-
-        .qty {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            align-items: center
-        }
-
-        .qty input {
-            width: 58px;
-            padding: 6px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            text-align: center
-        }
-
-        .errmsg {
-            color: #ef4444;
-            font-size: 12px;
-            margin-top: 4px
-        }
-
-        .btn {
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid #eaeef4;
-            background: #fff;
-            cursor: pointer
-        }
-
-        .btn.danger {
-            border-color: #fecaca;
-            background: #fee2e2;
-            color: #b91c1c
-        }
-
-        .btn.primary {
-            background: #0ea5e9;
-            color: #fff;
-            border: none
-        }
-
-        .summary {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            align-items: center;
-            padding: 12px
-        }
-
-        .total {
-            font-size: 18px;
-            font-weight: 800;
-            color: #111827
-        }
+        .wrap{max-width:1100px;margin:20px auto;padding:0 10px}
+        .cart-card{background:#fff;border:1px solid #eaeef4;border-radius:12px;overflow:hidden}
+        .cart-header,.cart-row{display:grid;grid-template-columns:40px 1fr 120px 160px 120px 120px;align-items:center}
+        .cart-header{background:#f9fafb;color:#111827;font-weight:600}
+        .col{padding:12px;border-bottom:1px solid #eaeef4}
+        .col.center{text-align:center}
+        .col.right{text-align:right}
+        .prod{display:flex;gap:12px;align-items:center}
+        .thumb{width:56px;height:56px;border-radius:8px;overflow:hidden;background:#f3f4f6;display:grid;place-items:center}
+        .thumb img{width:100%;height:100%;object-fit:cover}
+        .name{font-weight:600;color:#111827}
+        .name-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .qty-pill{background:#f3f4f6;border:1px solid #e5e7eb;color:#111827;padding:2px 8px;border-radius:999px;font-size:12px;white-space:nowrap}
+        .muted{color:#6b7280;font-size:12px}
+        .qty{display:flex;gap:6px;justify-content:center;align-items:center}
+        .qty input{width:58px;padding:6px;border:1px solid #e5e7eb;border-radius:8px;text-align:center}
+        .errmsg{color:#ef4444;font-size:12px;margin-top:4px}
+        .btn{padding:8px 12px;border-radius:8px;border:1px solid #eaeef4;background:#fff;cursor:pointer}
+        .btn.danger{border-color:#fecaca;background:#fee2e2;color:#b91c1c}
+        .btn.primary{background:#0ea5e9;color:#fff;border:none}
+        .summary{display:flex;justify-content:flex-end;gap:12px;align-items:center;padding:12px}
+        .total{font-size:18px;font-weight:800;color:#111827}
     </style>
 </head>
-
 <body>
     <div class="wrap">
         <h2>Giỏ hàng</h2>
-        <div id="toast"
-            style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999">
-        </div>
         <div class="cart-card">
             <div class="cart-header">
                 <div class="col center"><input type="checkbox" disabled></div>
@@ -171,8 +46,7 @@
                 <div class="col center"><input type="checkbox" checked></div>
                 <div class="col">
                     <div class="prod">
-                        <div class="thumb"><img th:if="${it.image != null}" th:src="${it.image}"
-                                onerror="this.onerror=null;this.src='/img/avatar_default.jpg'" alt=""></div>
+                        <div class="thumb"><img th:if="${it.image != null}" th:src="${it.image}" onerror="this.onerror=null;this.src='/img/avatar_default.jpg'" alt=""></div>
                         <div style="width:100%">
                             <div class="name-row">
                                 <div class="name" th:text="${it.product.name}">Tên</div>
@@ -183,108 +57,66 @@
                         </div>
                     </div>
                 </div>
-                <div class="col center"><span
-                        th:text="${#numbers.formatDecimal(it.unitPrice,0,'COMMA',0,'POINT')}">0</span>₫</div>
+                <div class="col center"><span th:text="${#numbers.formatDecimal(it.unitPrice,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <div class="col center">
                     <div class="qty">
                         <input type="number" min="1" th:value="${it.quantity}"
-                            th:attr="data-product-id=${it.product.productId}" class="qty-input">
+                               th:attr="data-product-id=${it.product.productId}" class="qty-input">
                     </div>
                     <div class="errmsg" th:attr="id=${'err-' + it.product.productId}"></div>
                 </div>
-                <div class="col right"><span
-                        th:text="${#numbers.formatDecimal(it.lineTotal,0,'COMMA',0,'POINT')}">0</span>₫</div>
+                <div class="col right"><span th:text="${#numbers.formatDecimal(it.lineTotal,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <div class="col center">
-                    <a class="btn danger remove-btn" th:href="@{'/cart/remove'(productId=${it.product.productId})}"
-                        th:attr="data-product-id=${it.product.productId}">Xóa</a>
+                    <a class="btn danger remove-btn" th:href="@{'/cart/remove'(productId=${it.product.productId})}" th:attr="data-product-id=${it.product.productId}">Xóa</a>
                 </div>
             </div>
-            <div th:if="${items == null or #lists.isEmpty(items)}" class="col" style="color:#6b7280;text-align:center">
-                Giỏ hàng trống.</div>
+            <div th:if="${items == null or #lists.isEmpty(items)}" class="col" style="color:#6b7280;text-align:center">Giỏ hàng trống.</div>
         </div>
         <script>
-            (function () {
-                function fmt(n) { try { return new Intl.NumberFormat('vi-VN').format(n) } catch (e) { return n } }
-                const inputs = document.querySelectorAll('.qty-input');
-                const totalEl = document.querySelector('.total span');
-                function recomputeTotals() {
-                    let sum = 0;
-                    document.querySelectorAll('.cart-row').forEach(function (row) {
-                        const priceText = row.querySelector('.col.center span')?.textContent?.replace(/\D/g, '') || '0';
-                        const qtyInput = row.querySelector('.qty-input');
-                        const price = parseInt(priceText || '0', 10);
-                        const qty = parseInt(qtyInput?.value || '1', 10);
-                        sum += (price * qty);
-                        const lineEl = row.querySelector('.col.right span');
-                        if (lineEl) { try { lineEl.textContent = new Intl.NumberFormat('vi-VN').format(price * qty); } catch (_) { } }
-                    });
-                    if (totalEl) { try { totalEl.textContent = new Intl.NumberFormat('vi-VN').format(sum); } catch (_) { } }
-                }
-                function xsrf() { return ''; }
-                function xsrfHeader() { return 'X-XSRF-TOKEN'; }
-                inputs.forEach(inp => {
-                    inp.addEventListener('change', () => {
-                        const pid = inp.getAttribute('data-product-id');
-                        let val = parseInt(inp.value || '1', 10); if (!val || val < 1) val = 1;
-                        const hdr = { 'Content-Type': 'application/x-www-form-urlencoded' };
-                        fetch('/cart/update', {
-                            method: 'POST', headers: hdr,
-                            body: `productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
-                        }).then(r => {
-                            if (!r.ok) { if (r.status === 403) { alert('Phiên làm việc đã hết hạn. Vui lòng tải lại trang và thử lại.'); } throw new Error('bad'); }
-                            return r.json();
-                        }).then(d => {
-                            const err = document.getElementById('err-' + pid);
-                            if (d.over) { err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
-                            else { err.textContent = ''; }
-                            inp.value = d.appliedQty;
-                            // update qty badge
-                            const pill = inp.closest('.cart-row')?.querySelector('.qty-pill');
-                            if (pill) { pill.textContent = 'x' + d.appliedQty; }
-                            recomputeTotals();
-                        }).catch(() => { });
-                    });
+        (function(){
+            function fmt(n){try{return new Intl.NumberFormat('vi-VN').format(n)}catch(e){return n}}
+            const inputs = document.querySelectorAll('.qty-input');
+            inputs.forEach(inp=>{
+                inp.addEventListener('change', ()=>{
+                    const pid = inp.getAttribute('data-product-id');
+                    let val = parseInt(inp.value||'1',10); if(!val||val<1) val=1;
+                    fetch('/cart/update',{
+                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        body:`productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
+                    }).then(r=>r.json()).then(d=>{
+                        const err = document.getElementById('err-'+pid);
+                        if(d.over){ err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
+                        else { err.textContent=''; }
+                        inp.value = d.appliedQty;
+                        // reload to reflect totals quickly (simple way)
+                        location.reload();
+                    }).catch(()=>{});
                 });
+            });
 
-                // remove buttons
-                document.querySelectorAll('.remove-btn').forEach(a => {
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const pid = a.getAttribute('data-product-id');
-                        const href = a.getAttribute('href') || ('/cart/remove?productId=' + encodeURIComponent(pid));
-                        const hdr2 = { 'Content-Type': 'application/x-www-form-urlencoded' };
-                        fetch('/cart/remove', {
-                            method: 'POST', headers: hdr2,
-                            body: `productId=${encodeURIComponent(pid)}`
-                        }).then(r => { if (!r.ok) throw new Error('bad'); return r.json(); })
-                            .then(() => { a.closest('.cart-row')?.remove(); recomputeTotals(); })
-                            .catch(() => { window.location.href = href; });
-                    });
+            // remove buttons
+            document.querySelectorAll('.remove-btn').forEach(a=>{
+                a.addEventListener('click', (e)=>{
+                    e.preventDefault();
+                    const pid = a.getAttribute('data-product-id');
+                    const href = a.getAttribute('href') || ('/cart/remove?productId=' + encodeURIComponent(pid));
+                    fetch('/cart/remove',{
+                        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        body:`productId=${encodeURIComponent(pid)}`
+                    }).then(r=>{ if(!r.ok) throw new Error('bad'); return r.json(); })
+                    .then(()=> location.reload())
+                    .catch(()=>{ window.location.href = href; });
                 });
-                recomputeTotals();
-            })();
+            });
+        })();
         </script>
-        <form class="summary" method="post" action="/cart/checkout-wallet">
-            <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫
-            </div>
+        <form class="summary" method="post" action="/cart/checkout-demo">
+            <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
             <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
-            <button class="btn primary" type="submit">Thanh toán bằng số dư</button>
+            <button class="btn primary" type="submit">Mua hàng (demo)</button>
         </form>
     </div>
-    <script>
-        (function () {
-            const params = new URLSearchParams(window.location.search);
-            const pay = params.get('pay');
-            if (!pay) return;
-            const toast = document.getElementById('toast');
-            if (!toast) return;
-            const show = (msg, bg) => { toast.textContent = msg; toast.style.background = bg; toast.style.display = 'block'; setTimeout(() => { toast.style.display = 'none'; }, 3500); };
-            if (pay === 'success') show('Thanh toán thành công bằng số dư.', '#065f46');
-            else if (pay === 'insufficient') show('Số dư không đủ. Vui lòng nạp tiền.', '#991b1b');
-            else if (pay === 'empty') show('Giỏ hàng trống hoặc không hợp lệ.', '#b45309');
-            else if (pay === 'auth') show('Vui lòng đăng nhập lại.', '#1f2937');
-        })();
-    </script>
 </body>
-
 </html>
+
+

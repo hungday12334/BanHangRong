@@ -4,25 +4,15 @@
     <div class="header profile-header" style="flex-direction:column;align-items:center;gap:0;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;">
         <div class="avatar-edit-wrap">
-          <span class="avatar lg profile-avatar-center"
-            style="position:relative;display:flex;justify-content:center;align-items:center;">
-            <img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="${user.avatarUrl}"
-              src="/img/avatar_default.jpg" alt="Avatar" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
-              width="120" height="120" fetchpriority="high" decoding="async"
-              style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
-            <img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}"
-              th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar" width="120" height="120"
-              loading="lazy" decoding="async"
-              style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
-            <button id="btnEditAvatar" class="avatar-edit-btn" title="Change avatar" type="button"
-              style="display:none;position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;padding:6px;cursor:pointer;"><i
-                class="ti ti-camera" style="color:#fff;font-size:18px;"></i></button>
+          <span class="avatar lg profile-avatar-center" style="position:relative;display:flex;justify-content:center;align-items:center;">
+            <img th:if="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="${user.avatarUrl}" src="/img/avatar_default.jpg" alt="Avatar" onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" width="120" height="120" fetchpriority="high" decoding="async" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
+            <img th:unless="${user != null and !#strings.isEmpty(#strings.trim(user.avatarUrl))}" th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Avatar" width="120" height="120" loading="lazy" decoding="async" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:50%;" />
+            <button id="btnEditAvatar" class="avatar-edit-btn" title="Change avatar" type="button" style="display:none;position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;padding:6px;cursor:pointer;"><i class="ti ti-camera" style="color:#fff;font-size:18px;"></i></button>
           </span>
         </div>
         <div class="profile-titles" style="text-align:center;">
           <h2 style="margin-bottom:2px;">Profile</h2>
-          <div class="footer-note">Seller ID: <b id="profileSellerId" th:text="${sellerId}">-</b> • <span class="chip"
-              th:text="${user != null ? user.userType : 'SELLER'}">SELLER</span></div>
+          <div class="footer-note">Seller ID: <b id="profileSellerId" th:text="${sellerId}">-</b> • <span class="chip" th:text="${user != null ? user.userType : 'SELLER'}">SELLER</span></div>
         </div>
       </div>
     </div>
@@ -30,44 +20,35 @@
       <div class="profile-grid" style="gap:10px;">
         <div class="profile-col">
           <div class="label">Name</div>
-          <div id="profile_username" class="value" style="font-weight:400;"
-            th:text="${user != null and user.username != null ? user.username : '-'}">-</div>
+          <div id="profile_username" class="value" style="font-weight:400;" th:text="${user != null and user.username != null ? user.username : '-'}">-</div>
           <div class="label">Email</div>
-          <div id="profile_email" class="value" style="font-weight:400;"
-            th:text="${user != null and user.email != null ? user.email : '-'}">-</div>
+          <div id="profile_email" class="value" style="font-weight:400;" th:text="${user != null and user.email != null ? user.email : '-'}">-</div>
         </div>
         <div class="profile-col">
           <div class="label">Phone</div>
-          <div id="profile_phone" class="value" style="font-weight:400;"
-            th:text="${user != null and user.phoneNumber != null ? user.phoneNumber : '-'}">-</div>
+          <div id="profile_phone" class="value" style="font-weight:400;" th:text="${user != null and user.phoneNumber != null ? user.phoneNumber : '-'}">-</div>
           <div class="label">Gender</div>
-          <div id="profile_gender" class="value" style="font-weight:400;"
-            th:text="${user != null and user.gender != null ? user.gender : '-'}">-</div>
+          <div id="profile_gender" class="value" style="font-weight:400;" th:text="${user != null and user.gender != null ? user.gender : '-'}">-</div>
           <div class="label">Date of birth</div>
-          <div id="profile_dob" class="value" style="font-weight:400;"
-            th:text="${(user != null and user.birthDate != null) ? #temporals.format(user.birthDate, 'dd/MM/yyyy') : '-'}">
-            -</div>
+          <div id="profile_dob" class="value" style="font-weight:400;" th:text="${(user != null and user.birthDate != null) ? #temporals.format(user.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
         </div>
       </div>
     </div>
-    <div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:center;">
-      <button id="btnBackToDashboard" type="button" class="btn"><i class="ti ti-arrow-left"
-          style="margin-right:6px;"></i>Back</button>
-      <button id="btnOpenEditProfile" type="button" class="btn primary"><i class="ti ti-edit"
-          style="margin-right:6px;"></i>Edit</button>
+      <div class="modal-actions" style="padding:12px;display:flex;gap:8px;justify-content:center;">
+      <button id="btnBackToDashboard" type="button" class="btn"><i class="ti ti-arrow-left" style="margin-right:6px;"></i>Back</button>
+      <button id="btnOpenEditProfile" type="button" class="btn primary"><i class="ti ti-edit" style="margin-right:6px;"></i>Edit</button>
     </div>
   </section>
   <section id="ordersPanel" class="card section-card" hidden data-panel="orders">
     <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
-      <div style="font-weight:700;flex:1;min-width:180px;">Orders</div>
+  <div style="font-weight:700;flex:1;min-width:180px;">Orders</div>
       <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-        <input id="ord_search" type="text" placeholder="Search (#ID / username)" class="input"
-          style="min-width:160px;" />
+  <input id="ord_search" type="text" placeholder="Search (#ID / username)" class="input" style="min-width:160px;" />
         <input id="ord_from" type="datetime-local" class="input" />
         <input id="ord_to" type="datetime-local" class="input" />
-        <button id="ord_btnFilter" type="button" class="btn">Filter</button>
-        <button id="ord_btnReset" type="button" class="btn" title="Clear filters"><i class="ti ti-restore"></i></button>
-        <button id="ord_btnExport" type="button" class="btn" title="Export CSV"><i class="ti ti-download"></i></button>
+  <button id="ord_btnFilter" type="button" class="btn">Filter</button>
+  <button id="ord_btnReset" type="button" class="btn" title="Clear filters"><i class="ti ti-restore"></i></button>
+  <button id="ord_btnExport" type="button" class="btn" title="Export CSV"><i class="ti ti-download"></i></button>
       </div>
     </div>
     <div class="body" style="overflow:auto;">
@@ -75,10 +56,10 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Created At</th>
-            <th>Buyer</th>
-            <th>Qty (yours)</th>
-            <th>Revenue (yours)</th>
+        <th>Created At</th>
+          <th>Buyer</th>
+          <th>Qty (yours)</th>
+          <th>Revenue (yours)</th>
           </tr>
         </thead>
         <tbody id="tbSellerOrders"></tbody>
@@ -88,19 +69,13 @@
   </section>
   <section id="keysPanel" class="card section-card" hidden data-panel="keys">
     <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
-      <div style="font-weight:700;flex:1;min-width:140px;">Licenses</div>
+  <div style="font-weight:700;flex:1;min-width:140px;">Licenses</div>
       <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-        <select id="key_product" class="input" style="min-width:140px;">
-          <option value="">Product</option>
-        </select>
-        <select id="key_active" class="input">
-          <option value="">Status</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select>
-        <input id="key_search" class="input" type="text" placeholder="Search key" style="min-width:120px;" />
-        <button id="key_btnFilter" class="btn" type="button">Filter</button>
-        <button id="key_btnReset" class="btn" type="button" title="Clear filters"><i class="ti ti-restore"></i></button>
+  <select id="key_product" class="input" style="min-width:140px;"><option value="">Product</option></select>
+  <select id="key_active" class="input"><option value="">Status</option><option value="true">Active</option><option value="false">Inactive</option></select>
+  <input id="key_search" class="input" type="text" placeholder="Search key" style="min-width:120px;" />
+  <button id="key_btnFilter" class="btn" type="button">Filter</button>
+  <button id="key_btnReset" class="btn" type="button" title="Clear filters"><i class="ti ti-restore"></i></button>
       </div>
     </div>
     <div class="body" style="overflow:auto;">
@@ -112,7 +87,6 @@
             <th>Product</th>
             <th>Order</th>
             <th>Active</th>
-            <th>Expire date</th>
             <th>Activated At</th>
             <th>Device</th>
           </tr>
@@ -128,92 +102,33 @@
       <div style="font-weight:700;flex:1;min-width:160px;">Generate license keys</div>
     </div>
     <div class="body">
-      <form id="genKeyForm" class="form">
-        <div class="gen-grid">
-          <!-- Left: Product list -->
-          <div>
-            <label class="label">Product (PUBLIC only)</label>
-            <input type="hidden" id="gk_product" name="gk_product" />
-            <div id="gk_product_table_wrap" class="panel-table-wrap">
-              <table id="gk_product_table" class="table slim panel-table" style="width:100%;min-width:220px;">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- JS will render product rows here -->
-                </tbody>
-              </table>
-            </div>
-            <div id="gk_product_selected" style="margin-top:8px;color:var(--accent);font-weight:600;"></div>
-          </div>
-
-          <!-- Center: User search and pager -->
-          <div>
-            <label class="label">Assign to user (optional)</label>
-            <input type="hidden" id="gk_user" name="gk_user" />
-            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
-              <input id="gk_user_q" class="input" type="text" placeholder="Search name or email"
-                style="flex:1;min-width:160px;" />
-              <select id="gk_user_type" class="input" style="width:120px;">
-                <option value="">All types</option>
-                <option value="CUSTOMER">Customer</option>
-                <option value="SELLER">Seller</option>
-                <option value="ADMIN">Admin</option>
-              </select>
-              <button id="gk_user_search" type="button" class="btn">Search</button>
-            </div>
-            <div id="gk_user_table_wrap" class="panel-table-wrap">
-              <table id="gk_user_table" class="table slim panel-table" style="width:100%;min-width:360px;">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Type</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-            <div id="pgGenUsers" class="pager" style="margin-top:8px;"></div>
-            <div id="gk_user_selected" style="margin-top:8px;color:var(--accent);font-weight:600;"></div>
-          </div>
-
-          <!-- Right: Controls and action -->
-          <div class="gen-controls">
-            <div>
-              <label class="label" for="gk_expire">Expire date</label>
-              <input id="gk_expire" type="date" class="input" />
-            </div>
-            <div>
-              <label class="label" for="gk_qty">Quantity</label>
-              <input id="gk_qty" type="number" min="1" step="1" value="1" class="input" />
-            </div>
-            <div class="action-row">
-              <button id="gk_submit" type="submit" class="btn primary">Generate</button>
-            </div>
-            <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved
-              immediately.</div>
-          </div>
+      <form id="genKeyForm" class="form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:end;">
+        <div>
+          <label class="label" for="gk_product">Product (PUBLIC only)</label>
+          <select id="gk_product" class="input"><option value="">Select product</option></select>
+        </div>
+        <div>
+          <label class="label" for="gk_expire">Expire date</label>
+          <input id="gk_expire" type="date" class="input" />
+        </div>
+        <div>
+          <label class="label" for="gk_qty">Quantity</label>
+          <input id="gk_qty" type="number" min="1" step="1" value="1" class="input" />
+        </div>
+        <div>
+          <button id="gk_submit" type="submit" class="btn primary">Generate</button>
         </div>
       </form>
+      <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved immediately.</div>
     </div>
   </section>
   <section id="productsPanel" class="card section-card" hidden data-panel="products">
     <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
-      <div style="font-weight:700;flex:1;min-width:160px;">Products</div>
+  <div style="font-weight:700;flex:1;min-width:160px;">Products</div>
       <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-        <input id="prd_search" type="text" placeholder="Search by name/description" class="input"
-          style="min-width:180px;" />
-        <select id="prd_category" class="input" style="min-width:160px;">
-          <option value="">All categories</option>
-        </select>
-        <select id="prd_rating" class="input" title="Minimum rating">
+  <input id="prd_search" type="text" placeholder="Search by name/description" class="input" style="min-width:180px;" />
+  <select id="prd_category" class="input" style="min-width:160px;"><option value="">All categories</option></select>
+  <select id="prd_rating" class="input" title="Minimum rating">
           <option value="">Rating (min)</option>
           <option value="1">1+</option>
           <option value="2">2+</option>
@@ -235,67 +150,17 @@
           <option value="500">500+</option>
           <option value="1000">1000+</option>
         </select>
-        <button id="prd_btnFilter" type="button" class="btn">Filter</button>
-        <button id="prd_btnReset" type="button" class="btn" title="Clear filters"><i class="ti ti-restore"></i></button>
+  <button id="prd_btnFilter" type="button" class="btn">Filter</button>
+  <button id="prd_btnReset" type="button" class="btn" title="Clear filters"><i class="ti ti-restore"></i></button>
       </div>
     </div>
     <div class="body" style="overflow:visible;">
-      <div id="prdGrid" class="cards-grid"
-        style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;align-items:stretch;">
-      </div>
-      <div id="pgProducts" class="pager"
-        style="margin-top:12px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
-    </div>
-  </section>
-  <section id="vouchersPanel" class="card section-card" hidden data-panel="vouchers" aria-hidden="true">
-    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
-      <div style="font-weight:700;flex:1;min-width:160px;">Vouchers</div>
-      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-        <input id="vc_search" type="text" class="input" placeholder="Search code…" style="min-width:160px;" />
-        <select id="vc_product" class="input" style="min-width:180px;">
-          <option value="">Select product</option>
-        </select>
-        <select id="vc_status" class="input" title="Status">
-          <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <!-- <option value="expired">Expired</option> -->
-        </select>
-        <button id="vc_btnNew" type="button" class="btn primary">New voucher</button>
-        <button id="vc_btnRefresh" type="button" class="btn" title="Reload"><i class="ti ti-refresh"></i></button>
-      </div>
-    </div>
-    <div class="body paged">
-      <div class="table-wrap">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Type</th>
-              <th>Value</th>
-              <th class="hide-md">Period</th>
-              <th>Uses</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tbVouchers">
-            <tr class="footer-note">
-              <td colspan="7">Select a product to manage vouchers.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="pagination" id="pgVouchers"></div>
+      <div id="prdGrid" class="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;align-items:stretch;"></div>
+      <div id="pgProducts" class="pager" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
     </div>
   </section>
   <section id="profileSettingsPanel" class="card section-card" hidden data-panel="profile-settings">
-    <div class="header">
-      <div style="font-weight:700">Profile settings</div>
-    </div>
-    <div class="body">
-      <div class="footer-note">Use the "Edit profile" button in the Profile panel. Profile settings contain advanced
-        options (2FA, security, etc.).</div>
-    </div>
+  <div class="header"><div style="font-weight:700">Profile settings</div></div>
+  <div class="body"><div class="footer-note">Use the "Edit profile" button in the Profile panel. Profile settings contain advanced options (2FA, security, etc.).</div></div>
   </section>
 </section>

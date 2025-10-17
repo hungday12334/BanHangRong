@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,7 +47,7 @@
             width: 60px;
             border-radius: 50%;
             object-fit: cover;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
         }
 
         .app-title {
@@ -217,30 +216,29 @@
             .login-container {
                 padding: 30px 20px;
             }
-
+            
             .form-group {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 8px;
             }
-
+            
             .form-group label {
                 min-width: auto;
             }
-
+            
             .form-actions {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 15px;
             }
-
+            
             .app-title {
                 font-size: 2rem;
             }
         }
     </style>
 </head>
-
 <body>
     <div class="login-container">
         <div class="brand-section">
@@ -249,13 +247,13 @@
             </div>
             <h1 class="app-title">BanHangRong</h1>
         </div>
-
+        
         <form id="loginForm" class="form" action="/perform-login" method="post">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
             </div>
-
+            
             <div class="form-group">
                 <label for="password">Password</label>
                 <div class="password-input-container">
@@ -263,29 +261,29 @@
                     <i class="fas fa-eye password-toggle" id="togglePassword"></i>
                 </div>
             </div>
-
+            
             <!-- CAPTCHA -->
             <div class="captcha-container">
                 <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
             </div>
-
+            
             <div class="form-actions">
                 <a href="/forgot-password" class="forgot-link">Forget password ?</a>
                 <button type="submit" class="login-btn" id="loginBtn">Login</button>
             </div>
         </form>
-
+        
         <div class="signup-section">
             <div class="signup-text">New to BanHangRong?</div>
             <a href="/register" class="signup-link">Sign up</a>
         </div>
-
+        
         <!-- Messages -->
         <div id="errorMessage" class="error-message">
             <i class="fas fa-exclamation-circle"></i>
             <span id="errorText"></span>
         </div>
-
+        
         <div id="successMessage" class="success-message">
             <i class="fas fa-check-circle"></i>
             <span>Login successful!</span>
@@ -294,10 +292,10 @@
 
     <script>
         // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function () {
+        document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
             const icon = this;
-
+            
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -323,5 +321,4 @@
         }
     </script>
 </body>
-
 </html>

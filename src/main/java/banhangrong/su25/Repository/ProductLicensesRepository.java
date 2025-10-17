@@ -74,10 +74,10 @@ public interface ProductLicensesRepository extends JpaRepository<ProductLicenses
                                          Pageable pageable);
 
   // Count licenses already issued for a product through completed order items
-  @Query(value = "SELECT COUNT(*) FROM product_licenses l JOIN order_items oi ON l.order_item_id = oi.order_item_id WHERE oi.product_id = :productId AND (oi.quantity IS NULL OR oi.quantity > 0)", nativeQuery = true)
+  @Query(value = "SELECT COUNT(*) FROM product_licenses l JOIN order_items oi ON l.order_item_id = oi.order_item_id WHERE oi.product_id = :productId", nativeQuery = true)
   long countByProductViaOrders(@Param("productId") Long productId);
 
-  // Count licenses attached to a specific order_item (used for placeholder pre-generated items)
-  @Query(value = "SELECT COUNT(*) FROM product_licenses l WHERE l.order_item_id = :orderItemId", nativeQuery = true)
-  long countByOrderItemId(@Param("orderItemId") Long orderItemId);
+  // Count pre-generated licenses (not tied to order_item_id) that belong to a product by key prefix pattern
+  @Query(value = "SELECT COUNT(*) FROM product_licenses l WHERE l.order_item_id IS NULL AND l.license_key LIKE CONCAT('PRD', :productId, '-%')", nativeQuery = true)
+  long countPreGeneratedForProduct(@Param("productId") Long productId);
 }

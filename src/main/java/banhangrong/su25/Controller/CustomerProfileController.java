@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Controller
 public class CustomerProfileController {
@@ -25,17 +24,14 @@ public class CustomerProfileController {
     private final ShoppingCartRepository shoppingCartRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailService emailService;
-    private final PasswordEncoder passwordEncoder;
 
     public CustomerProfileController(UsersRepository usersRepository, ShoppingCartRepository shoppingCartRepository,
                                      EmailVerificationTokenRepository emailVerificationTokenRepository,
-                                     EmailService emailService,
-                                     PasswordEncoder passwordEncoder) {
+                                     EmailService emailService) {
         this.usersRepository = usersRepository;
         this.shoppingCartRepository = shoppingCartRepository;
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
         this.emailService = emailService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/customer/profile/{username}")
@@ -59,33 +55,6 @@ public class CustomerProfileController {
         }
 
         model.addAttribute("profileUser", profileUser);
-
-        // Masked values for display like Shopee
-        try {
-            String email = profileUser.getEmail();
-            if (email != null && email.contains("@")) {
-                String[] parts = email.split("@", 2);
-                String local = parts[0];
-                String domain = parts[1];
-                String prefix = local.length() <= 2 ? local : local.substring(0, 2);
-                String stars = "*".repeat(Math.max(0, Math.max(1, local.length() - prefix.length())));
-                model.addAttribute("maskedEmail", prefix + stars + "@" + domain);
-            }
-        } catch (Exception ignored) {}
-        try {
-            String phone = profileUser.getPhoneNumber();
-            if (phone != null && phone.length() >= 2) {
-                String last2 = phone.substring(phone.length() - 2);
-                String stars = "*".repeat(Math.max(0, phone.length() - 2));
-                model.addAttribute("maskedPhone", stars + last2);
-            }
-        } catch (Exception ignored) {}
-        try {
-            java.time.LocalDate bd = profileUser.getBirthDate();
-            if (bd != null) {
-                model.addAttribute("maskedBirth", "**/**/" + String.format("%04d", bd.getYear()));
-            }
-        } catch (Exception ignored) {}
         return "customer/profile";
     }
 
@@ -109,7 +78,6 @@ public class CustomerProfileController {
     @PostMapping("/customer/profile/{username}/edit")
     public String editProfileSubmit(@PathVariable("username") String username,
                                     @RequestParam(name = "avatarUrl", required = false) String avatarUrl,
-                                    @RequestParam(name = "fullName", required = false) String fullName,
                                     @RequestParam(name = "email", required = false) String email,
                                     @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
                                     @RequestParam(name = "gender", required = false) String gender,
@@ -126,7 +94,6 @@ public class CustomerProfileController {
 
         // Update allowed fields only
         if (avatarUrl != null) currentUser.setAvatarUrl(avatarUrl.trim());
-        if (fullName != null) currentUser.setFullName(fullName.trim());
         if (email != null && !email.trim().isEmpty() && !email.trim().equalsIgnoreCase(currentUser.getEmail())) {
             String newEmail = email.trim();
             // Validate duplicate email (belongs to another user)
@@ -172,8 +139,6 @@ public class CustomerProfileController {
                 currentUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
             } catch (Exception ignored) {}
         }
-
-        // Password change moved to separate endpoint
         try { usersRepository.saveAndFlush(currentUser); } catch (Exception e) {
             try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
             model.addAttribute("user", currentUser);
@@ -182,67 +147,6 @@ public class CustomerProfileController {
             return "customer/profile-edit";
         }
         return "redirect:/customer/profile/" + currentUser.getUsername() + "?updated=1";
-    }
-
-    @GetMapping("/customer/profile/{username}/change-password")
-    public String changePasswordForm(@PathVariable("username") String username, Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Users currentUser = null;
-        if (auth != null && auth.isAuthenticated()) {
-            currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
-        }
-        if (currentUser == null || !username.equalsIgnoreCase(currentUser.getUsername())) {
-            return "redirect:/customer/profile/" + username;
-        }
-        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-        model.addAttribute("user", currentUser);
-        return "customer/change-password";
-    }
-
-    @PostMapping("/customer/profile/{username}/change-password")
-    public String changePasswordSubmit(@PathVariable("username") String username,
-                                       @RequestParam(name = "currentPassword") String currentPassword,
-                                       @RequestParam(name = "newPassword") String newPassword,
-                                       @RequestParam(name = "confirmPassword") String confirmPassword,
-                                       Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Users currentUser = null;
-        if (auth != null && auth.isAuthenticated()) {
-            currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
-        }
-        if (currentUser == null || !username.equalsIgnoreCase(currentUser.getUsername())) {
-            return "redirect:/customer/profile/" + username;
-        }
-        // validations
-        if (currentPassword == null || newPassword == null || confirmPassword == null
-                || currentPassword.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
-            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-            model.addAttribute("user", currentUser);
-            model.addAttribute("pwdError", "Vui lòng nhập đủ thông tin.");
-            return "customer/change-password";
-        }
-        if (!passwordEncoder.matches(currentPassword, currentUser.getPassword())) {
-            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-            model.addAttribute("user", currentUser);
-            model.addAttribute("pwdError", "Mật khẩu hiện tại không đúng.");
-            return "customer/change-password";
-        }
-        if (newPassword.length() < 6) {
-            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-            model.addAttribute("user", currentUser);
-            model.addAttribute("pwdError", "Mật khẩu mới phải có ít nhất 6 ký tự.");
-            return "customer/change-password";
-        }
-        if (!newPassword.equals(confirmPassword)) {
-            try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
-            model.addAttribute("user", currentUser);
-            model.addAttribute("pwdError", "Xác nhận mật khẩu không khớp.");
-            return "customer/change-password";
-        }
-
-        currentUser.setPassword(passwordEncoder.encode(newPassword));
-        usersRepository.saveAndFlush(currentUser);
-        return "redirect:/customer/profile/" + currentUser.getUsername() + "?pwdUpdated=1";
     }
 
     @GetMapping("/customer/verify-code")

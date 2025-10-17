@@ -1,8 +1,12 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.UsersRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +22,12 @@ public class PageController {
 
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
+    private final UsersRepository usersRepository;
 
-    public PageController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository) {
+    public PageController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, UsersRepository usersRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
+        this.usersRepository = usersRepository;
     }
 
     @GetMapping("/")
@@ -29,6 +35,30 @@ public class PageController {
                        @RequestParam(name = "size", required = false, defaultValue = "15") int size,
                        @RequestParam(name = "search", required = false) String search,
                        Model model) {
+        
+        // Check if user is already authenticated and redirect to appropriate dashboard
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth.getPrincipal() instanceof String)) {
+            try {
+                String username = auth.getName();
+                Users user = usersRepository.findByUsername(username).orElse(null);
+                if (user != null) {
+                    if ("ADMIN".equals(user.getUserType())) {
+                        return "redirect:/admin/dashboard";
+                    } else if ("SELLER".equals(user.getUserType())) {
+                        return "redirect:/seller/dashboard";
+                    } else if ("CUSTOMER".equals(user.getUserType())) {
+                        if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
+                            return "redirect:/customer/dashboard";
+                        } else {
+                            return "redirect:/verify-email-required";
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // If there's any error, continue to show homepage
+            }
+        }
         
         // Lấy sản phẩm có status = "Public" với phân trang và search
         PageRequest pageable = PageRequest.of(Math.max(page,0), Math.max(size,1),

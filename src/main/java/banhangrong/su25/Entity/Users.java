@@ -14,8 +14,6 @@ public class Users {
     private Long userId;
 
     private String username;
-    @Column(name = "full_name")
-    private String fullName;
     private String email;
     private String password;
     @Column(name = "user_type")
@@ -54,14 +52,6 @@ public class Users {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
     }
 
     public String getEmail() {

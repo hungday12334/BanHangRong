@@ -63,15 +63,12 @@ public class ProductSearchController {
             @RequestParam(name = "size", defaultValue = "18") int size,
             @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "categoryId", required = false) Long categoryId,
-        @RequestParam(name = "sellerId", required = false) Long sellerId,
         @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "minRating", required = false) Double minRating,
             @RequestParam(name = "minDownloads", required = false) Integer minDownloads
     ) {
-        // Start with seller's products if sellerId provided; otherwise all products
-        List<Products> all = (sellerId != null)
-                ? productsRepository.findBySellerId(sellerId)
-                : productsRepository.findAll();
+        // Start with all products (seller scope can be added later if needed)
+    List<Products> all = productsRepository.findAll();
         // Text filter
         if (search != null && !search.trim().isEmpty()) {
             String s = search.trim().toLowerCase();
@@ -128,7 +125,7 @@ public class ProductSearchController {
         List<Products> slice = from < to ? all.subList(from, to) : Collections.emptyList();
 
         // Build category name mapping (best-effort: leave blank as we don't have a direct relation entity loaded here)
-        Map<Long,String> catName = categoryNameByProduct;
+    Map<Long,String> catName = categoryNameByProduct;
         List<ProductListItem> content = slice.stream()
                 .map(p -> map(p, catName.getOrDefault(p.getProductId(), null)))
                 .collect(Collectors.toList());

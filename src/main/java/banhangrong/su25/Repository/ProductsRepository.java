@@ -48,13 +48,11 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "WHERE p.seller_id = :sellerId", nativeQuery = true)
     Long totalUnitsSoldBySeller(@Param("sellerId") Long sellerId);
 
-    @Query(value = "SELECT CAST(o.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
-            "FROM orders o\n" +
-            "JOIN order_items oi ON oi.order_id = o.order_id\n" +
-            "JOIN products p ON p.product_id = oi.product_id\n" +
-            "WHERE p.seller_id = :sellerId AND o.created_at >= :fromDate\n" +
-            "GROUP BY CAST(o.created_at AS DATE)\n" +
-            "ORDER BY CAST(o.created_at AS DATE)", nativeQuery = true)
+    @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue\n" +
+            "FROM order_items oi JOIN products p ON p.product_id = oi.product_id\n" +
+            "WHERE p.seller_id = :sellerId AND oi.created_at >= :fromDate\n" +
+            "GROUP BY CAST(oi.created_at AS DATE)\n" +
+            "ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
     List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDateTime fromDate);
 
     @Query(value = "SELECT COUNT(DISTINCT oi.order_id)\n" +
@@ -109,21 +107,12 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             "LIMIT 10", nativeQuery = true)
     List<Object[]> topSellers();
 
-    // Rank (1-based) of a seller by revenue across all sellers (MySQL-compatible without window functions)
-    @Query(value = "SELECT 1 + (\n" +
-            "  SELECT COUNT(*) FROM (\n" +
-            "    SELECT p2.seller_id, COALESCE(SUM(oi2.price_at_time * oi2.quantity),0) AS revenue\n" +
-            "    FROM products p2\n" +
-            "    LEFT JOIN order_items oi2 ON oi2.product_id = p2.product_id\n" +
-            "    GROUP BY p2.seller_id\n" +
-            "  ) t\n" +
-            "  WHERE t.revenue > (\n" +
-            "    SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0)\n" +
-            "    FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
-            "    WHERE p.seller_id = :sellerId\n" +
-            "  )\n" +
-            ")",
-            nativeQuery = true)
+    // Rank (1-based) of a seller by revenue across all sellers
+    @Query(value = "SELECT r.rank FROM (\n" +
+            "  SELECT p.seller_id, DENSE_RANK() OVER (ORDER BY COALESCE(SUM(oi.price_at_time * oi.quantity),0) DESC) AS rank\n" +
+            "  FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id\n" +
+            "  GROUP BY p.seller_id\n" +
+            ") r WHERE r.seller_id = :sellerId", nativeQuery = true)
     Integer sellerRevenueRank(@Param("sellerId") Long sellerId);
 
     // Total distinct sellers having at least one product

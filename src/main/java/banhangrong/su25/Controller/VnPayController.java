@@ -1,9 +1,13 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.ShoppingCart;
+import banhangrong.su25.Entity.Orders;
+import banhangrong.su25.Entity.OrderItems;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Repository.OrdersRepository;
+import banhangrong.su25.Repository.OrderItemsRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import banhangrong.su25.Entity.Products;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 // imports cleaned after refactor
 import java.util.*;
 import banhangrong.su25.Util.VnPayConfig;
@@ -28,14 +33,18 @@ public class VnPayController {
     private final ShoppingCartRepository cartRepository;
     private final ProductsRepository productsRepository;
     private final UsersRepository usersRepository;
+    private final OrdersRepository ordersRepository;
+    private final OrderItemsRepository orderItemsRepository;
 
     // Deprecated hardcoded values; kept for reference. Use VnPayConfig instead.
     // legacy constants removed; use values from VnPayConfig
 
-    public VnPayController(ShoppingCartRepository cartRepository, ProductsRepository productsRepository, UsersRepository usersRepository) {
+    public VnPayController(ShoppingCartRepository cartRepository, ProductsRepository productsRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.usersRepository = usersRepository;
+        this.ordersRepository = ordersRepository;
+        this.orderItemsRepository = orderItemsRepository;
     }
 
     private Long getCurrentUserId() {
@@ -241,7 +250,7 @@ public class VnPayController {
         System.out.println("[VNPay] return-signData=" + signData);
         System.out.println("[VNPay] return-receivedHash=" + receivedHash);
         System.out.println("[VNPay] return-calcHash=" + calcHash);
-        boolean valid = calcHash.equalsIgnoreCase(receivedHash);
+        // boolean valid = calcHash.equalsIgnoreCase(receivedHash); // Not used currently
         String respCode = vnp.getOrDefault("vnp_ResponseCode","99");
         // Sandbox: treat ResponseCode=00 as success to avoid false negatives from encoding differences
         boolean success = "00".equals(respCode);
@@ -276,9 +285,77 @@ public class VnPayController {
             }
         } else {
         if (success) {
-            // on success: subtract stock and clear cart (same as demo checkout)
+            // on success: subtract stock, deduct money from wallet, and clear cart
             Long uid = getCurrentUserId();
             List<ShoppingCart> items = cartRepository.findByUserId(uid);
+            
+            // Calculate total amount to deduct from wallet
+            final BigDecimal totalAmount = items.stream()
+                .map(it -> {
+                    Products p = productsRepository.findById(it.getProductId()).orElse(null);
+                    if (p != null) {
+                        BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                        int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                        return unitPrice.multiply(BigDecimal.valueOf(qty));
+                    }
+                    return BigDecimal.ZERO;
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            // Deduct money from user's wallet
+            boolean paymentSuccess = false;
+            for (banhangrong.su25.Entity.Users user : usersRepository.findAll()) {
+                if (user.getUserId().equals(uid)) {
+                    BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+                    if (currentBalance.compareTo(totalAmount) >= 0) {
+                        BigDecimal newBalance = currentBalance.subtract(totalAmount);
+                        user.setBalance(newBalance);
+                        usersRepository.save(user);
+                        paymentSuccess = true;
+                        System.out.println("[VNPay] Payment success: deducted " + totalAmount + " from user " + uid + ", new balance: " + newBalance);
+                        break;
+                    } else {
+                        System.out.println("[VNPay] Payment failed: insufficient balance for user " + uid);
+                        return "customer/vnpay-result";
+                    }
+                }
+            }
+            
+            if (!paymentSuccess) {
+                System.out.println("[VNPay] Payment failed: user not found");
+                return "customer/vnpay-result";
+            }
+            
+            // Create order
+            Orders order = new Orders();
+            order.setUserId(uid);
+            order.setTotalAmount(totalAmount);
+            order.setStatus("completed"); // VNPay payment is completed
+            order.setCreatedAt(LocalDateTime.now());
+            order.setUpdatedAt(LocalDateTime.now());
+            
+            // For demo: assume all products are from the same seller (sellerId = 1)
+            order.setSellerId(1L);
+            
+            Orders savedOrder = ordersRepository.save(order);
+            System.out.println("[VNPay] Created order: " + savedOrder.getOrderId());
+            
+            // Create order items
+            for (ShoppingCart it : items) {
+                Products product = productsRepository.findById(it.getProductId()).orElse(null);
+                if (product != null) {
+                    OrderItems orderItem = new OrderItems();
+                    orderItem.setOrderId(savedOrder.getOrderId());
+                    orderItem.setProductId(it.getProductId());
+                    orderItem.setQuantity(it.getQuantity());
+                    orderItem.setPriceAtTime(product.getSalePrice() != null ? product.getSalePrice() : product.getPrice());
+                    orderItem.setCreatedAt(LocalDateTime.now());
+                    orderItemsRepository.save(orderItem);
+                    System.out.println("[VNPay] Created order item: " + orderItem.getOrderItemId());
+                }
+            }
+            
+            // Update product stock and sales
             for (ShoppingCart it : items) {
                 productsRepository.findById(it.getProductId()).ifPresent(p -> {
                     int stock = p.getQuantity() != null ? p.getQuantity() : 0;
@@ -292,6 +369,7 @@ public class VnPayController {
                     }
                 });
             }
+            // Clear cart
             for (ShoppingCart it : items) { try { cartRepository.delete(it); } catch (Exception ignored) {} }
         }
         return "customer/vnpay-result";
@@ -320,5 +398,4 @@ public class VnPayController {
         }
     }
 }
-
 

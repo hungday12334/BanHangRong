@@ -38,7 +38,7 @@ public class SecurityConfig {
             
             // Cấu hình session management
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
             )
@@ -50,8 +50,6 @@ public class SecurityConfig {
                     .requestMatchers("/api/database/**").permitAll()
                     .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
-                    // VNPay callback and payment endpoints must be public
-                    .requestMatchers("/payment/**").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
                     // Guest-browsable catalog
                     .requestMatchers("/categories", "/category/**", "/product/**").permitAll()
@@ -83,7 +81,7 @@ public class SecurityConfig {
             // Cấu hình logout
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()

@@ -89,25 +89,49 @@ public class SellerDashboardController {
         BigDecimal monthRev = Optional.ofNullable(productsRepository.thisMonthRevenue(sellerId))
                 .orElse(BigDecimal.ZERO);
 
-        // Daily revenue for last 14 days (aggregate by order date from SellerOrderRepository to match Recent orders)
+        // Daily revenue for last 14 days
         LocalDateTime from = LocalDateTime.now().minus(14, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
-        LocalDateTime to = LocalDateTime.now();
+        List<Object[]> raw = productsRepository.dailyRevenueFrom(sellerId, from);
         // Build date -> revenue map covering all days
         LinkedHashMap<String, BigDecimal> series = new LinkedHashMap<>();
         for (int i = 14; i >= 0; i--) {
             LocalDateTime d = LocalDateTime.now().minus(i, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
             series.put(d.toLocalDate().toString(), BigDecimal.ZERO);
         }
-        var pageableAll = org.springframework.data.domain.PageRequest.of(0, 10000,
-                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "createdAt"));
-        var pageAll = sellerOrderRepository.findSellerOrders(sellerId, from, to, null, pageableAll);
-        for (SellerOrderRepository.SellerOrderSummary s : pageAll.getContent()) {
-            LocalDateTime ldt = s.getCreatedAt();
-            if (ldt == null) continue;
-            String key = ldt.toLocalDate().toString();
-            BigDecimal amt = Optional.ofNullable(s.getSellerAmount()).orElse(BigDecimal.ZERO);
-            if (series.containsKey(key)) {
-                series.put(key, series.get(key).add(amt));
+        for (Object[] row : raw) {
+            // Normalize various date types returned by native query into yyyy-MM-dd strings
+            Object dObj = row[0];
+            String dateKey = null;
+            try {
+                if (dObj instanceof java.sql.Date) {
+                    dateKey = ((java.sql.Date) dObj).toLocalDate().toString();
+                } else if (dObj instanceof java.sql.Timestamp) {
+                    dateKey = ((java.sql.Timestamp) dObj).toLocalDateTime().toLocalDate().toString();
+                } else if (dObj instanceof java.time.LocalDate) {
+                    dateKey = dObj.toString();
+                } else if (dObj instanceof java.time.LocalDateTime) {
+                    dateKey = ((java.time.LocalDateTime) dObj).toLocalDate().toString();
+                } else {
+                    String s = Objects.toString(dObj, "");
+                    // If the DB driver returns a datetime string like "2025-09-28 00:00:00",
+                    // take the first 10 chars which correspond to yyyy-MM-dd
+                    if (s.length() >= 10) dateKey = s.substring(0, 10);
+                    else dateKey = s;
+                }
+            } catch (Exception ex) {
+                dateKey = Objects.toString(dObj, "");
+            }
+            if (dateKey == null) continue;
+            BigDecimal rev = BigDecimal.ZERO;
+            if (row.length > 1 && row[1] != null) {
+                if (row[1] instanceof BigDecimal) rev = (BigDecimal) row[1];
+                else {
+                    try { rev = new BigDecimal(row[1].toString()); } catch (Exception e) { rev = BigDecimal.ZERO; }
+                }
+            }
+            // Only put into the series if the dateKey exists (guards against formatting mismatches)
+            if (series.containsKey(dateKey)) {
+                series.put(dateKey, rev);
             }
         }
 

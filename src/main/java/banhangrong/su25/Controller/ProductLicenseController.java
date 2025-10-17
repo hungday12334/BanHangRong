@@ -3,10 +3,8 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
-import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Entity.ProductLicenses;
 import banhangrong.su25.Entity.OrderItems;
-import banhangrong.su25.Entity.Orders;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,16 +25,13 @@ public class ProductLicenseController {
     private final ProductLicensesRepository licensesRepository;
     private final ProductsRepository productsRepository;
     private final OrderItemsRepository orderItemsRepository;
-    private final OrdersRepository ordersRepository;
 
     public ProductLicenseController(ProductLicensesRepository licensesRepository,
                                     ProductsRepository productsRepository,
-                                    OrderItemsRepository orderItemsRepository,
-                                    OrdersRepository ordersRepository) {
+                                    OrderItemsRepository orderItemsRepository) {
         this.licensesRepository = licensesRepository;
         this.productsRepository = productsRepository;
         this.orderItemsRepository = orderItemsRepository;
-        this.ordersRepository = ordersRepository;
     }
 
     @GetMapping("/api/seller/{sellerId}/licenses")
@@ -128,7 +123,6 @@ public class ProductLicenseController {
         Object pidObj = body.get("productId");
         Object qtyObj = body.get("quantity");
         Object expObj = body.get("expireDate"); // yyyyMMdd or null
-        Object uidObj = body.get("userId"); // optional: generate for a specific user
         if (pidObj == null || qtyObj == null) return ResponseEntity.badRequest().body("productId and quantity are required");
         long productId;
         int requestQty;
@@ -141,9 +135,13 @@ public class ProductLicenseController {
         var p = productOpt.get();
         if (p.getSellerId() == null || !p.getSellerId().equals(sellerId)) return ResponseEntity.status(403).body("product does not belong to seller");
         if (p.getStatus() == null || !"public".equalsIgnoreCase(p.getStatus().trim())) return ResponseEntity.badRequest().body("product must be PUBLIC");
-    int capacity = p.getQuantity() != null ? p.getQuantity() : 0;
-    // existing = sold licenses tied to orders (quantity > 0) + pre-generated stock attached to placeholder item
-    long sold = licensesRepository.countByProductViaOrders(productId);
+        int capacity = p.getQuantity() != null ? p.getQuantity() : 0;
+        // existing = sold licenses tied to orders + pre-generated stock for this product
+        long sold = licensesRepository.countByProductViaOrders(productId);
+        long pre = licensesRepository.countPreGeneratedForProduct(productId);
+        long remaining = Math.max(0, (long)capacity - sold - pre);
+        if (remaining <= 0) return ResponseEntity.badRequest().body("no capacity left to generate more keys");
+        if (requestQty > remaining) requestQty = (int) remaining;
 
         String expStr = null;
         if (expObj != null && !expObj.toString().isBlank()) {
@@ -159,49 +157,13 @@ public class ProductLicenseController {
             expStr = "N/A";
         }
 
-        // If userId provided, validate it exists; if not provided but DB requires non-null, we can fallback to product owner or reject
-        Long targetUserId = null;
-        if (uidObj != null && !uidObj.toString().isBlank()) {
-            try { targetUserId = Long.parseLong(uidObj.toString()); } catch (Exception e) { return ResponseEntity.badRequest().body("invalid userId"); }
-        }
-
-        // Ensure a reusable placeholder order and order_item exist so order_item_id is never NULL (DB constraint)
-        // Order: user_id = sellerId, total_amount = 0
-        Orders placeholderOrder = ordersRepository.findTopByUserIdAndTotalAmountOrderByCreatedAtDesc(p.getSellerId(), java.math.BigDecimal.ZERO);
-        if (placeholderOrder == null) {
-            placeholderOrder = new Orders();
-            placeholderOrder.setUserId(p.getSellerId());
-            placeholderOrder.setTotalAmount(java.math.BigDecimal.ZERO);
-            placeholderOrder.setCreatedAt(java.time.LocalDateTime.now());
-            placeholderOrder.setUpdatedAt(java.time.LocalDateTime.now());
-            placeholderOrder = ordersRepository.save(placeholderOrder);
-        }
-        OrderItems placeholderItem = orderItemsRepository.findTopByOrderIdAndProductIdOrderByCreatedAtDesc(placeholderOrder.getOrderId(), productId);
-        if (placeholderItem == null) {
-            placeholderItem = new OrderItems();
-            placeholderItem.setOrderId(placeholderOrder.getOrderId());
-            placeholderItem.setProductId(productId);
-            placeholderItem.setQuantity(0);
-            placeholderItem.setPriceAtTime(java.math.BigDecimal.ZERO);
-            placeholderItem.setCreatedAt(java.time.LocalDateTime.now());
-            placeholderItem = orderItemsRepository.save(placeholderItem);
-        }
-    long pre = licensesRepository.countByOrderItemId(placeholderItem.getOrderItemId());
-    long remaining = Math.max(0, (long)capacity - sold - pre);
-    if (remaining <= 0) return ResponseEntity.badRequest().body("no capacity left to generate more keys");
-    if (requestQty > remaining) requestQty = (int) remaining;
-
         LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < requestQty; i++) {
             String random = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12).toUpperCase();
             String key = "PRD" + productId + '-' + expStr + '-' + random;
             ProductLicenses lic = new ProductLicenses();
-            lic.setOrderItemId(placeholderItem.getOrderItemId()); // attach to placeholder item to satisfy NOT NULL
-            if (targetUserId != null) {
-                lic.setUserId(targetUserId);
-            } else {
-                lic.setUserId(p.getSellerId()); // fallback an existing non-null id to satisfy DB constraint
-            }
+            lic.setOrderItemId(null); // pre-generated stock
+            lic.setUserId(null);
             lic.setLicenseKey(key);
             lic.setIsActive(true);
             lic.setActivationDate(null);
