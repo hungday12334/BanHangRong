@@ -4,8 +4,11 @@ import banhangrong.su25.Entity.VoucherRedemptions;
 import banhangrong.su25.Entity.Vouchers;
 import banhangrong.su25.Repository.VoucherRedemptionsRepository;
 import banhangrong.su25.Repository.VouchersRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -13,8 +16,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Manages all API endpoints for seller vouchers.
+ * This is the single source of truth for voucher API logic.
+ */
 @RestController
-@RequestMapping("/api/seller/{sellerId}/products/{productId}/vouchers")
+@RequestMapping("/api/seller/vouchers")
 public class VouchersApiController {
 
     private final VouchersRepository vouchersRepository;
@@ -25,139 +32,170 @@ public class VouchersApiController {
         this.redemptionsRepository = redemptionsRepository;
     }
 
-    public static class VoucherDto {
-        public Long voucherId;
-        public String code;
-        public String discountType; // PERCENT | AMOUNT
-        public BigDecimal discountValue;
-        public BigDecimal minOrder;
-        public LocalDateTime startAt;
-        public LocalDateTime endAt;
-        public Integer maxUses;
-        public Integer maxUsesPerUser;
-        public Integer usedCount;
-        public String status;
+    private Long getCurrentSellerId(Authentication authentication) {
+        // This is a placeholder. You must implement your own logic to get the seller ID.
+        return 1L;
     }
 
-    private static VoucherDto toDto(Vouchers v) {
-        VoucherDto d = new VoucherDto();
-        d.voucherId = v.getVoucherId();
-        d.code = v.getCode();
-        d.discountType = v.getDiscountType();
-        d.discountValue = v.getDiscountValue();
-        d.minOrder = v.getMinOrder();
-        d.startAt = v.getStartAt();
-        d.endAt = v.getEndAt();
-        d.maxUses = v.getMaxUses();
-        d.maxUsesPerUser = v.getMaxUsesPerUser();
-        d.usedCount = v.getUsedCount();
-        d.status = v.getStatus();
-        return d;
+    // DTO for Vouchers
+    public static class VoucherDto { 
+        private Long voucherId, productId;
+        private String code, discountType, status;
+        private BigDecimal discountValue, minOrder;
+        private LocalDateTime startAt, endAt;
+        private Integer maxUses, maxUsesPerUser, usedCount;
+
+        // Getters & Setters
+        public Long getVoucherId() { return voucherId; }
+        public void setVoucherId(Long id) { this.voucherId = id; }
+        public Long getProductId() { return productId; }
+        public void setProductId(Long id) { this.productId = id; }
+        public String getCode() { return code; }
+        public void setCode(String code) { this.code = code; }
+        public String getDiscountType() { return discountType; }
+        public void setDiscountType(String type) { this.discountType = type; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public BigDecimal getDiscountValue() { return discountValue; }
+        public void setDiscountValue(BigDecimal value) { this.discountValue = value; }
+        public BigDecimal getMinOrder() { return minOrder; }
+        public void setMinOrder(BigDecimal value) { this.minOrder = value; }
+        public LocalDateTime getStartAt() { return startAt; }
+        public void setStartAt(LocalDateTime at) { this.startAt = at; }
+        public LocalDateTime getEndAt() { return endAt; }
+        public void setEndAt(LocalDateTime at) { this.endAt = at; }
+        public Integer getMaxUses() { return maxUses; }
+        public void setMaxUses(Integer n) { this.maxUses = n; }
+        public Integer getMaxUsesPerUser() { return maxUsesPerUser; }
+        public void setMaxUsesPerUser(Integer n) { this.maxUsesPerUser = n; }
+        public Integer getUsedCount() { return usedCount; }
+        public void setUsedCount(Integer n) { this.usedCount = n; }
+     }
+
+    private VoucherDto toDto(Vouchers v) {
+        VoucherDto dto = new VoucherDto();
+        dto.setVoucherId(v.getVoucherId());
+        dto.setProductId(v.getProductId());
+        dto.setCode(v.getCode());
+        dto.setDiscountType(v.getDiscountType());
+        dto.setDiscountValue(v.getDiscountValue());
+        dto.setMinOrder(v.getMinOrder());
+        dto.setStartAt(v.getStartAt());
+        dto.setEndAt(v.getEndAt());
+        dto.setMaxUses(v.getMaxUses());
+        dto.setMaxUsesPerUser(v.getMaxUsesPerUser());
+        dto.setUsedCount(v.getUsedCount());
+        dto.setStatus(v.getStatus());
+        return dto;
     }
 
     @GetMapping
-    public List<VoucherDto> list(@PathVariable Long sellerId, @PathVariable Long productId,
-                                 @RequestParam(name = "q", required = false) String q) {
-        List<Vouchers> base;
-        if (q != null && !q.isBlank()) {
-            base = vouchersRepository.findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByUpdatedAtDesc(sellerId, productId, q.trim());
-        } else {
-            base = vouchersRepository.findBySellerIdAndProductIdOrderByUpdatedAtDesc(sellerId, productId);
-        }
-        // Deduplicate by voucher code (case-insensitive). Keep the latest (list already ordered by updatedAt desc).
-        java.util.LinkedHashMap<String, Vouchers> byCode = new java.util.LinkedHashMap<>();
-        for (Vouchers v : base) {
-            String key = v.getCode() == null ? "" : v.getCode().trim().toUpperCase();
-            // only keep first occurrence (newest) per code
-            byCode.putIfAbsent(key, v);
-        }
-        return byCode.values().stream().map(VouchersApiController::toDto).toList();
+    public ResponseEntity<Page<VoucherDto>> getVouchers(
+            @RequestParam Long productId,
+            @RequestParam(required = false) String status,
+            Pageable pageable,
+            Authentication authentication) {
+        Long sellerId = getCurrentSellerId(authentication);
+        Page<Vouchers> vouchersPage = (status != null && !status.isBlank())
+                ? vouchersRepository.findBySellerIdAndProductIdAndStatus(sellerId, productId, status, pageable)
+                : vouchersRepository.findBySellerIdAndProductId(sellerId, productId, pageable);
+        return ResponseEntity.ok(vouchersPage.map(this::toDto));
+    }
+
+    @GetMapping("/{voucherId}")
+    public ResponseEntity<VoucherDto> getVoucherById(@PathVariable Long voucherId, Authentication authentication) {
+        Long sellerId = getCurrentSellerId(authentication);
+        return vouchersRepository.findById(voucherId)
+                .filter(v -> v.getSellerId().equals(sellerId))
+                .map(v -> ResponseEntity.ok(toDto(v)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable Long sellerId, @PathVariable Long productId, @RequestBody VoucherDto body) {
-        if (body.code == null || body.code.isBlank()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("code is required");
-        if (vouchersRepository.existsBySellerIdAndProductIdAndCodeIgnoreCase(sellerId, productId, body.code)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("duplicate code");
+    public ResponseEntity<?> saveVoucher(@RequestBody VoucherDto dto, Authentication authentication) {
+        if (dto.getVoucherId() == null) {
+            return createVoucher(dto, authentication);
+        } else {
+            return updateVoucher(dto, authentication);
         }
-        Vouchers v = new Vouchers();
-        v.setSellerId(sellerId);
-        v.setProductId(productId);
-        v.setCode(body.code.trim());
-        v.setDiscountType(Objects.toString(body.discountType, "PERCENT").toUpperCase());
-        v.setDiscountValue(body.discountValue != null ? body.discountValue : BigDecimal.ZERO);
-        v.setMinOrder(body.minOrder);
-        v.setStartAt(body.startAt);
-        v.setEndAt(body.endAt);
-        v.setMaxUses(body.maxUses);
-        v.setMaxUsesPerUser(body.maxUsesPerUser);
-        v.setStatus(Objects.toString(body.status, "active"));
-        Vouchers saved = vouchersRepository.save(v);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved));
     }
 
-    @PutMapping("/{voucherId}")
-    public ResponseEntity<?> update(@PathVariable Long sellerId, @PathVariable Long productId, @PathVariable Long voucherId, @RequestBody VoucherDto body) {
-        return vouchersRepository.findById(voucherId).map(v -> {
-            if (!Objects.equals(v.getSellerId(), sellerId) || !Objects.equals(v.getProductId(), productId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden");
+    private ResponseEntity<?> createVoucher(VoucherDto dto, Authentication authentication) {
+        Long sellerId = getCurrentSellerId(authentication);
+
+        if (dto.getProductId() == null) return ResponseEntity.badRequest().body("Product ID is required.");
+        if (dto.getCode() == null || dto.getCode().isBlank()) return ResponseEntity.badRequest().body("Voucher code is required.");
+
+        if (vouchersRepository.existsBySellerIdAndProductIdAndCodeIgnoreCase(sellerId, dto.getProductId(), dto.getCode())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Voucher code already exists.");
+        }
+
+        Vouchers newVoucher = new Vouchers();
+        newVoucher.setSellerId(sellerId);
+        newVoucher.setProductId(dto.getProductId());
+        newVoucher.setCode(dto.getCode());
+        newVoucher.setDiscountType(Objects.toString(dto.getDiscountType(), "PERCENT"));
+        newVoucher.setDiscountValue(Objects.requireNonNullElse(dto.getDiscountValue(), BigDecimal.ZERO));
+        newVoucher.setStatus(Objects.toString(dto.getStatus(), "active"));
+        newVoucher.setMinOrder(dto.getMinOrder());
+        newVoucher.setStartAt(dto.getStartAt());
+        newVoucher.setEndAt(dto.getEndAt());
+        newVoucher.setMaxUses(dto.getMaxUses());
+        newVoucher.setMaxUsesPerUser(dto.getMaxUsesPerUser());
+        
+        Vouchers savedVoucher = vouchersRepository.save(newVoucher);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(savedVoucher));
+    }
+
+    private ResponseEntity<?> updateVoucher(VoucherDto dto, Authentication authentication) {
+        Long sellerId = getCurrentSellerId(authentication);
+
+        Vouchers existingVoucher = vouchersRepository.findById(dto.getVoucherId()).orElse(null);
+        if (existingVoucher == null) return ResponseEntity.notFound().build();
+        if (!existingVoucher.getSellerId().equals(sellerId)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+        // Safely update code: only if it's provided and different
+        if (dto.getCode() != null && !dto.getCode().isBlank() && !dto.getCode().equalsIgnoreCase(existingVoucher.getCode())) {
+            if (vouchersRepository.existsBySellerIdAndProductIdAndCodeIgnoreCase(sellerId, existingVoucher.getProductId(), dto.getCode())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Voucher code already exists.");
             }
-            if (body.code != null && !body.code.isBlank() && !body.code.equalsIgnoreCase(v.getCode())) {
-                if (vouchersRepository.existsBySellerIdAndProductIdAndCodeIgnoreCase(sellerId, productId, body.code)) {
-                    return ResponseEntity.status(HttpStatus.CONFLICT).body("duplicate code");
-                }
-                v.setCode(body.code.trim());
-            }
-            if (body.discountType != null) v.setDiscountType(body.discountType.toUpperCase());
-            if (body.discountValue != null) v.setDiscountValue(body.discountValue);
-            v.setMinOrder(body.minOrder);
-            v.setStartAt(body.startAt);
-            v.setEndAt(body.endAt);
-            v.setMaxUses(body.maxUses);
-            v.setMaxUsesPerUser(body.maxUsesPerUser);
-            if (body.status != null) v.setStatus(body.status);
-            Vouchers saved = vouchersRepository.save(v);
-            return ResponseEntity.ok(toDto(saved));
-        }).orElse(ResponseEntity.notFound().build());
+            existingVoucher.setCode(dto.getCode());
+        }
+
+        // Update other fields only if they are provided in the DTO
+        if (dto.getDiscountType() != null) existingVoucher.setDiscountType(dto.getDiscountType());
+        if (dto.getDiscountValue() != null) existingVoucher.setDiscountValue(dto.getDiscountValue());
+        if (dto.getStatus() != null) existingVoucher.setStatus(dto.getStatus());
+        
+        // These fields can be intentionally set to null
+        existingVoucher.setMinOrder(dto.getMinOrder());
+        existingVoucher.setStartAt(dto.getStartAt());
+        existingVoucher.setEndAt(dto.getEndAt());
+        existingVoucher.setMaxUses(dto.getMaxUses());
+        existingVoucher.setMaxUsesPerUser(dto.getMaxUsesPerUser());
+
+        Vouchers updatedVoucher = vouchersRepository.save(existingVoucher);
+        return ResponseEntity.ok(toDto(updatedVoucher));
     }
 
     @DeleteMapping("/{voucherId}")
-    public ResponseEntity<?> delete(@PathVariable Long sellerId, @PathVariable Long productId, @PathVariable Long voucherId) {
-        return vouchersRepository.findById(voucherId).map(v -> {
-            if (!Objects.equals(v.getSellerId(), sellerId) || !Objects.equals(v.getProductId(), productId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden");
-            }
-            vouchersRepository.deleteById(voucherId);
-            return ResponseEntity.noContent().build();
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Void> deleteVoucher(@PathVariable Long voucherId, Authentication authentication) {
+        Long sellerId = getCurrentSellerId(authentication);
+        return vouchersRepository.findById(voucherId)
+                .filter(v -> v.getSellerId().equals(sellerId))
+                .map(v -> {
+                    vouchersRepository.delete(v);
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    public static class RedemptionDto {
-        public Long redeemId;
-        public Long orderId;
-        public Long userId;
-        public BigDecimal discountAmount;
-        public LocalDateTime createdAt;
-    }
-
-    private static RedemptionDto toDto(VoucherRedemptions r) {
-        RedemptionDto d = new RedemptionDto();
-        d.redeemId = r.getRedeemId();
-        d.orderId = r.getOrderId();
-        d.userId = r.getUserId();
-        d.discountAmount = r.getDiscountAmount();
-        d.createdAt = r.getCreatedAt();
-        return d;
-    }
-
-    @GetMapping("/{voucherId}/usage")
-    public ResponseEntity<?> usage(@PathVariable Long sellerId, @PathVariable Long productId, @PathVariable Long voucherId) {
-        return vouchersRepository.findById(voucherId).map(v -> {
-            if (!Objects.equals(v.getSellerId(), sellerId) || !Objects.equals(v.getProductId(), productId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden");
-            }
-            List<RedemptionDto> list = redemptionsRepository.findByVoucherId(voucherId).stream().map(VouchersApiController::toDto).toList();
-            return ResponseEntity.ok(list);
-        }).orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{voucherId}/redemptions")
+    public ResponseEntity<List<VoucherRedemptions>> getVoucherRedemptions(@PathVariable Long voucherId, Authentication authentication) {
+        Long sellerId = getCurrentSellerId(authentication);
+        return vouchersRepository.findById(voucherId)
+                .filter(v -> v.getSellerId().equals(sellerId))
+                .map(v -> ResponseEntity.ok(redemptionsRepository.findByVoucherId(v.getVoucherId())))
+                .orElse(ResponseEntity.notFound().build());
     }
 }
