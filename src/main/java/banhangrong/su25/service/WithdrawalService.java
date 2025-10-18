@@ -34,6 +34,18 @@ public class WithdrawalService {
     public List<BankAccount> listBankAccounts(Long userId) {
         return bankRepo.findByUserId(userId);
     }
+    
+        public org.springframework.data.domain.Page<WithdrawalRequest> search(
+                Long userId,
+                String status,
+                LocalDateTime fromTime,
+                LocalDateTime toTime,
+                BigDecimal minAmount,
+                BigDecimal maxAmount,
+                org.springframework.data.domain.Pageable pageable
+        ) {
+            return withdrawalRepo.search(userId, status, fromTime, toTime, minAmount, maxAmount, pageable);
+        }
 
     public Optional<BankAccount> getDefaultBank(Long userId) {
         return bankRepo.findFirstByUserIdAndIsDefaultTrue(userId);

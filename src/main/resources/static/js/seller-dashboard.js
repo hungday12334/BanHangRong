@@ -1014,6 +1014,17 @@
       if (!res.ok) throw new Error('Cannot load withdraw summary');
       return await res.json();
     }
+    function buildWithdrawSearchURL(params){
+      const url = new URL('/seller/withdraw/search', window.location.origin);
+      Object.entries(params).forEach(([k,v])=>{ if (v !== undefined && v !== null && String(v).trim() !== '') url.searchParams.set(k, v); });
+      return url.toString();
+    }
+    async function searchWithdrawals({ status, fromDate, toDate, minAmount, maxAmount, page = 0, size = 10 }){
+      const url = buildWithdrawSearchURL({ status, fromDate, toDate, minAmount, maxAmount, page, size });
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Cannot load withdraw list');
+      return await res.json();
+    }
     async function createWithdrawal(payload) {
       const res = await fetch('/seller/withdraw', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
       if (!res.ok) throw new Error(await res.text());
@@ -1026,7 +1037,14 @@
     }
     function renderWithdrawUI(data) {
       const bankSel = document.getElementById('wd_bank');
-      const histBody = document.getElementById('wd_history');
+  const histBody = document.getElementById('wd_history');
+  const pager = document.getElementById('wd_pager');
+  const fromEl = document.getElementById('wd_from');
+  const toEl = document.getElementById('wd_to');
+  const minEl = document.getElementById('wd_min');
+  const maxEl = document.getElementById('wd_max');
+  const statusEl = document.getElementById('wd_status');
+  const applyBtn = document.getElementById('wd_apply_filters');
       const amountWrap = document.getElementById('wd_amount_wrap');
       const allChk = document.getElementById('wd_all');
       const summary = document.getElementById('wd_summary');
@@ -1037,12 +1055,39 @@
         const opt = document.createElement('option');
         opt.value = b.bankAccountId; opt.textContent = `${b.bankName} - ${b.accountNumber}`; bankSel.appendChild(opt);
       });
-      histBody.innerHTML = '';
-      (data.history || []).forEach(w => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${w.withdrawalId}</td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString() : ''}</td><td>${w.amount}</td><td>${w.feeAmount}</td><td>${w.netAmount}</td><td><span class="chip">${w.status}</span></td>`;
-        histBody.appendChild(tr);
-      });
+      async function applyFilters(page=0){
+        const status = statusEl?.value || '';
+        const fromDate = fromEl?.value || '';
+        const toDate = toEl?.value || '';
+        const minAmount = minEl?.value || '';
+        const maxAmount = maxEl?.value || '';
+        const resp = await searchWithdrawals({ status, fromDate, toDate, minAmount, maxAmount, page, size: 10 });
+        const content = Array.isArray(resp.content) ? resp.content : (Array.isArray(resp) ? resp : []);
+        histBody.innerHTML = '';
+        content.forEach(w => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${w.withdrawalId}</td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString() : ''}</td><td>${w.amount}</td><td>${w.feeAmount}</td><td>${w.netAmount}</td><td><span class="chip">${w.status}</span></td>`;
+          histBody.appendChild(tr);
+        });
+        // render pager
+        if (pager) {
+          pager.innerHTML = '';
+          const totalPages = typeof resp.totalPages === 'number' ? resp.totalPages : 1;
+          const number = typeof resp.number === 'number' ? resp.number : 0;
+          if (totalPages > 1) {
+            const mk = (label, p, disabled, active) => {
+              const b = document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=!!disabled; if (active) b.classList.add('active');
+              b.addEventListener('click', ()=> applyFilters(p)); return b;
+            };
+            pager.appendChild(mk('Prev', Math.max(0, number-1), number<=0));
+            for(let i=0;i<totalPages;i++){ pager.appendChild(mk(String(i+1), i, false, i===number)); }
+            pager.appendChild(mk('Next', Math.min(totalPages-1, number+1), number>=totalPages-1));
+          }
+        }
+      }
+      applyBtn?.addEventListener('click', ()=> applyFilters(0));
+      // initial load with no filters shows recent page 0
+      applyFilters(0);
       if (!data.accounts || data.accounts.length === 0) {
         // quick inline add minimal bank UI
         const wrap = document.createElement('div');

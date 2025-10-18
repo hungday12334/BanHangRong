@@ -13,6 +13,12 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/seller/withdraw")
@@ -88,5 +94,26 @@ public class WithdrawalController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    public ResponseEntity<?> search(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Optional<Users> userOpt = securityUtil.getCurrentUser();
+        if (userOpt.isEmpty()) return ResponseEntity.status(401).body("Unauthorized");
+        Users user = userOpt.get();
+        LocalDateTime fromTime = fromDate != null ? fromDate.atStartOfDay() : null;
+        LocalDateTime toTime = toDate != null ? toDate.atTime(23, 59, 59) : null;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<WithdrawalRequest> res = withdrawalService.search(user.getUserId(), status, fromTime, toTime, minAmount, maxAmount, pageable);
+        return ResponseEntity.ok(res);
     }
 }
