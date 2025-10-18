@@ -951,6 +951,7 @@
       '#products': 'productsPanel',
       '#gen-keys': 'generateKeysPanel',
       '#vouchers': 'vouchersPanel',
+      '#withdraw': 'withdrawPanel',
       '#profile-settings': 'profileSettingsPanel'
     };
     function showPanelByHash(hash) {
@@ -990,6 +991,8 @@
           loadProductsPanel(true);
         } else if (hash === '#vouchers' && typeof loadVouchersPanel === 'function') {
           loadVouchersPanel(true);
+        } else if (hash === '#withdraw') {
+          if (typeof loadWithdrawPanel === 'function') loadWithdrawPanel();
         }
       } catch (_) { /* ignore */ }
     }
@@ -1005,6 +1008,86 @@
 
     // === Profile edit modal ===
     // ===== Vouchers panel logic =====
+    // ===== Withdraw panel logic =====
+    async function loadWithdrawSummary() {
+      const res = await fetch('/seller/withdraw/summary');
+      if (!res.ok) throw new Error('Cannot load withdraw summary');
+      return await res.json();
+    }
+    async function createWithdrawal(payload) {
+      const res = await fetch('/seller/withdraw', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json();
+    }
+    async function addBankAccount(payload) {
+      const res = await fetch('/seller/withdraw/bank-account', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json();
+    }
+    function renderWithdrawUI(data) {
+      const bankSel = document.getElementById('wd_bank');
+      const histBody = document.getElementById('wd_history');
+      const amountWrap = document.getElementById('wd_amount_wrap');
+      const allChk = document.getElementById('wd_all');
+      const summary = document.getElementById('wd_summary');
+      if (!bankSel || !histBody) return;
+      summary.textContent = `Balance: ${Number(data.balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} • Fee: ${data.feePercent}%`;
+      bankSel.innerHTML = '';
+      (data.accounts || []).forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.bankAccountId; opt.textContent = `${b.bankName} - ${b.accountNumber}`; bankSel.appendChild(opt);
+      });
+      histBody.innerHTML = '';
+      (data.history || []).forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${w.withdrawalId}</td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString() : ''}</td><td>${w.amount}</td><td>${w.feeAmount}</td><td>${w.netAmount}</td><td><span class="chip">${w.status}</span></td>`;
+        histBody.appendChild(tr);
+      });
+      if (!data.accounts || data.accounts.length === 0) {
+        // quick inline add minimal bank UI
+        const wrap = document.createElement('div');
+        wrap.className = 'footer-note';
+        wrap.style.marginTop = '8px';
+        wrap.innerHTML = `No bank accounts. <button id="wd_add_bank_btn" class="btn">Add bank</button>`;
+        bankSel.parentElement.appendChild(wrap);
+        document.getElementById('wd_add_bank_btn')?.addEventListener('click', async () => {
+          const bankName = prompt('Bank name');
+          if (!bankName) return;
+          const accountNumber = prompt('Account number');
+          if (!accountNumber) return;
+          const accountHolderName = prompt('Account holder name');
+          if (!accountHolderName) return;
+          try {
+            await addBankAccount({ bankName, bankCode:'', accountNumber, accountHolderName, branch:'', makeDefault:true });
+            showToast('Bank saved', 'success');
+            const data2 = await loadWithdrawSummary();
+            renderWithdrawUI(data2);
+          } catch(e){ showToast(String(e), 'error'); }
+        });
+      }
+      function toggleAmount(){ amountWrap.style.display = allChk.checked ? 'none' : 'block'; }
+      allChk?.addEventListener('change', toggleAmount); toggleAmount();
+    }
+    async function loadWithdrawPanel(){
+      const panel = document.getElementById('withdrawPanel');
+      await withPanelLoading(panel, async () => {
+        const data = await loadWithdrawSummary();
+        renderWithdrawUI(data);
+      }, 'Cannot load withdraw data');
+    }
+    document.getElementById('wd_form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const bankAccountId = Number(document.getElementById('wd_bank').value);
+        const withdrawAll = document.getElementById('wd_all').checked;
+        const amountEl = document.getElementById('wd_amount');
+        const amount = withdrawAll ? null : Number(amountEl.value);
+        const res = await createWithdrawal({ bankAccountId, amount, withdrawAll });
+        showToast(`Created. Fee: ${res.fee}, Net: ${res.net}`, 'success');
+        const data = await loadWithdrawSummary();
+        renderWithdrawUI(data);
+      } catch(err) { showToast(String(err), 'error'); }
+    });
     async function fetchSellerProductsLite(sellerId) {
       const res = await fetch(`/api/products-lite?sellerId=${sellerId}`);
       if (!res.ok) return [];

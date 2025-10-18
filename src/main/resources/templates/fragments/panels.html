@@ -298,4 +298,40 @@
         options (2FA, security, etc.).</div>
     </div>
   </section>
-</section>
+  <section id="withdrawPanel" class="card section-card" hidden data-panel="withdraw">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:160px;">Withdraw</div>
+    </div>
+    <div class="body">
+      <div id="wd_summary" class="footer-note" style="margin-bottom:10px;">Fee: 2%. Choose bank account and amount.</div>
+      <form id="wd_form" class="form">
+        <div class="withdraw-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label class="label">Bank account</label>
+            <select id="wd_bank" class="input" required></select>
+          </div>
+          <div>
+            <label class="label">Fee</label>
+            <div class="value">2%</div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <label><input id="wd_all" type="checkbox" /> Withdraw all balance</label>
+        </div>
+        <div id="wd_amount_wrap" style="margin-top:8px">
+          <label class="label">Amount</label>
+          <input id="wd_amount" class="input" type="number" min="0" step="0.01" placeholder="Enter amount" />
+        </div>
+        <div style="margin-top:12px">
+          <button id="wd_submit" type="submit" class="btn primary">Create withdrawal</button>
+        </div>
+      </form>
+      <div class="table-wrap" style="margin-top:16px">
+        <table class="table slim">
+          <thead><tr><th>ID</th><th>Time</th><th>Amount</th><th>Fee</th><th>Net</th><th>Status</th></tr></thead>
+          <tbody id="wd_history"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  </section>
