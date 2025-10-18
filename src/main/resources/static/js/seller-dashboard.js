@@ -1772,11 +1772,16 @@
     }
 
     // ==== Generate Keys Panel: Custom Product Table ====
+    const gkProductsState = { all: [], filtered: [], page: 0, size: 5, q: '' };
+
     async function renderProductTableForGenKey() {
       const table = document.getElementById('gk_product_table');
       const tbody = table?.querySelector('tbody');
       const selectedDiv = document.getElementById('gk_product_selected');
       const input = document.getElementById('gk_product');
+      const pager = document.getElementById('pgGenProducts');
+      const qInput = document.getElementById('gk_product_q');
+      const qBtn = document.getElementById('gk_product_search');
       if (!tbody || !input) return;
       tbody.innerHTML = '<tr><td colspan="4">Đang tải sản phẩm...</td></tr>';
       selectedDiv.textContent = '';
@@ -1789,22 +1794,47 @@
         const res = await fetch(`/api/products?sellerId=${sellerId}`);
         if (!res.ok) { tbody.innerHTML = '<tr><td colspan="4">Không thể tải sản phẩm</td></tr>'; return; }
         const list = await res.json();
-        const products = Array.isArray(list) ? list.filter(p => (p.status||'').toLowerCase()==='public') : [];
-        if (!products.length) { tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm PUBLIC</td></tr>'; return; }
-        tbody.innerHTML = '';
-        products.forEach(p => {
-          const tr = document.createElement('tr');
-          tr.className = 'clickable';
-          tr.innerHTML = `<td>${p.productId}</td><td>${p.name}</td><td>${p.categoryName||''}</td><td>${p.status}</td>`;
-          tr.addEventListener('click', () => {
-            input.value = p.productId;
-            selectedDiv.textContent = `Đã chọn: #${p.productId} • ${p.name}`;
-            // Highlight row
-            tbody.querySelectorAll('tr').forEach(row => row.classList.remove('selected'));
-            tr.classList.add('selected');
+        gkProductsState.all = Array.isArray(list) ? list.filter(p => (p.status||'').toLowerCase()==='public') : [];
+        const applyFilter = () => {
+          const q = (gkProductsState.q || '').toLowerCase();
+          gkProductsState.filtered = gkProductsState.all.filter(p => !q || (p.name||'').toLowerCase().includes(q));
+          gkProductsState.page = 0;
+          renderPage();
+        };
+        const renderPage = () => {
+          tbody.innerHTML = '';
+          if (!gkProductsState.filtered.length) { tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm PUBLIC</td></tr>'; if (pager) pager.innerHTML=''; return; }
+          const start = gkProductsState.page * gkProductsState.size;
+          const end = Math.min(start + gkProductsState.size, gkProductsState.filtered.length);
+          const pageItems = gkProductsState.filtered.slice(start, end);
+          pageItems.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.className = 'clickable';
+            tr.innerHTML = `<td>${p.productId}</td><td>${p.name}</td><td>${p.categoryName||''}</td><td>${p.status}</td>`;
+            tr.addEventListener('click', () => {
+              input.value = p.productId;
+              selectedDiv.textContent = `Đã chọn: #${p.productId} • ${p.name}`;
+              tbody.querySelectorAll('tr').forEach(row => row.classList.remove('selected'));
+              tr.classList.add('selected');
+            });
+            tbody.appendChild(tr);
           });
-          tbody.appendChild(tr);
-        });
+          if (pager) {
+            pager.innerHTML = '';
+            const totalPages = Math.max(1, Math.ceil(gkProductsState.filtered.length / gkProductsState.size));
+            if (totalPages > 1) {
+              const mk = (label, p, disabled, active) => { const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=!!disabled; if(active) b.classList.add('active'); b.addEventListener('click', ()=>{ gkProductsState.page=p; renderPage(); }); return b; };
+              pager.appendChild(mk('«', Math.max(0, gkProductsState.page-1), gkProductsState.page===0, false));
+              for (let i=0;i<totalPages;i++){ pager.appendChild(mk(String(i+1), i, false, i===gkProductsState.page)); }
+              pager.appendChild(mk('»', Math.min(totalPages-1, gkProductsState.page+1), gkProductsState.page>=totalPages-1, false));
+            }
+          }
+        };
+        // Hook search events
+        if (qBtn) qBtn.addEventListener('click', () => { gkProductsState.q = (qInput?.value||'').trim(); applyFilter(); });
+        if (qInput) qInput.addEventListener('keydown', (e) => { if (e.key==='Enter') { e.preventDefault(); gkProductsState.q = (qInput.value||'').trim(); applyFilter(); } });
+        // First render
+        applyFilter();
       } catch (e) {
         tbody.innerHTML = '<tr><td colspan="4">Lỗi tải sản phẩm</td></tr>';
       }

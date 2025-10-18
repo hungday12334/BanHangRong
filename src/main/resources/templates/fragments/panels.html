@@ -134,6 +134,10 @@
           <div>
             <label class="label">Product (PUBLIC only)</label>
             <input type="hidden" id="gk_product" name="gk_product" />
+            <div style="display:flex;gap:8px;margin:6px 0;align-items:center;flex-wrap:wrap;">
+              <input id="gk_product_q" class="input" type="text" placeholder="Search product name" style="flex:1;min-width:200px;" />
+              <button id="gk_product_search" type="button" class="btn">Search</button>
+            </div>
             <div id="gk_product_table_wrap" class="panel-table-wrap">
               <table id="gk_product_table" class="table slim panel-table" style="width:100%;min-width:220px;">
                 <thead>
@@ -149,6 +153,7 @@
                 </tbody>
               </table>
             </div>
+            <div id="pgGenProducts" class="pager" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;"></div>
             <div id="gk_product_selected" style="margin-top:8px;color:var(--accent);font-weight:600;"></div>
           </div>
 
