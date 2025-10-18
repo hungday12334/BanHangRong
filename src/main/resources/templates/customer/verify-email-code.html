@@ -1,23 +1,89 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Email</title>
     <link rel="stylesheet" href="/css/styles.min.css">
     <style>
-        :root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --line:#eaeef4; }
-        body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
-        .container { max-width:480px; margin:60px auto; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; }
-        .title { font-weight:700; font-size:20px; margin:0 0 12px; }
-        .desc { color:var(--muted); margin-bottom:16px; }
-        .notice { color:#dc2626; background:#fef2f2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; margin-bottom:12px; }
-        input[type=text] { width:100%; height:44px; border:1px solid var(--line); border-radius:8px; padding:0 12px; }
-        .actions { margin-top:14px; display:flex; gap:10px; justify-content:space-between; align-items:center; }
-        .btn { padding:10px 16px; border-radius:10px; border:1px solid var(--line); background:#fff; cursor:pointer; }
-        .btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #0ea5e9;
+            --line: #eaeef4;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 60px auto;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .title {
+            font-weight: 700;
+            font-size: 20px;
+            margin: 0 0 12px;
+        }
+
+        .desc {
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        .notice {
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        input[type=text] {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 0 12px;
+        }
+
+        .actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            background: var(--brand);
+            color: #fff;
+            border-color: var(--brand);
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="title">Xác thực email</div>
@@ -27,11 +93,11 @@
             <input type="text" name="code" placeholder="Nhập mã 6 số" maxlength="6" pattern="[0-9]{6}" required>
             <div class="actions">
                 <div>
-                    <form method="post" action="/customer/verify-code/resend" style="display:inline;">
-                        <button id="resendBtn" type="submit" class="btn" th:disabled="${remainingSeconds != null and remainingSeconds > 0}">
-                            Gửi lại mã <span id="countdown" th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
-                        </button>
-                    </form>
+                    <button id="resendBtn" type="button" class="btn"
+                        th:disabled="${remainingSeconds != null and remainingSeconds > 0}" onclick="resendCode()">
+                        Gửi lại mã <span id="countdown"
+                            th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
+                    </button>
                 </div>
                 <div style="display:flex;gap:10px;">
                     <button type="button" class="btn" onclick="history.back()">Hủy</button>
@@ -40,21 +106,26 @@
             </div>
         </form>
         <script>
-            (function(){
+            (function () {
                 var rem = parseInt(new URLSearchParams(window.location.search).get('remaining') || '0');
-                if(!isNaN(rem) && rem>0){
+                if (!isNaN(rem) && rem > 0) {
                     var el = document.getElementById('countdown');
                     var btn = document.getElementById('resendBtn');
                     btn.disabled = true;
-                    var iv = setInterval(function(){
-                        rem--; el.textContent = '('+rem+'s)';
-                        if(rem<=0){ clearInterval(iv); btn.disabled = false; el.textContent=''; }
-                    },1000);
+                    var iv = setInterval(function () {
+                        rem--; el.textContent = '(' + rem + 's)';
+                        if (rem <= 0) { clearInterval(iv); btn.disabled = false; el.textContent = ''; }
+                    }, 1000);
                 }
             })();
+
+            function resendCode() {
+                fetch('/customer/verify-code/resend', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                    .then(function () { window.location.search = '?remaining=60'; })
+                    .catch(function () { window.location.href = '/customer/verify-code/resend'; });
+            }
         </script>
     </div>
 </body>
+
 </html>
-
-
