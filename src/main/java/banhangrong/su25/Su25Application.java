@@ -7,5 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Su25Application {
     public static void main(String[] args) {
         SpringApplication.run(Su25Application.class, args);
+        System.out.println("Website is running at http://localhost:8080");
     }
 }
