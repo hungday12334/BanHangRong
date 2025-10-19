@@ -2307,3 +2307,23 @@ body.theme-switching {
 }
 
 /* End compact overrides */
+
+/* Collapsible menu-group styles */
+.menu-group .menu-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+.menu-group .menu-group-title .caret { font-size: 12px; opacity: .7; transition: transform .15s ease; }
+.menu-group .menu-items { margin-top: 6px; display: block; }
+.menu-group .menu-items a.item { display: block; }
+.menu-group .menu-group-title[aria-expanded="false"] .caret { transform: rotate(-90deg); }
+.menu-group .menu-group-title[aria-expanded="false"] + .menu-items { display: none; }

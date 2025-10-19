@@ -1942,5 +1942,38 @@
 
     if (window.location.hash === '#gen-keys') setTimeout(() => initGenerateKeys(), 120);
     window.addEventListener('hashchange', () => { if (window.location.hash === '#gen-keys') initGenerateKeys(); });
+
+    // Initialize collapsible menu groups: turns .menu-group > .menu-group-title into toggles
+    (function initMenuGroupToggles(){
+      try {
+        const groups = Array.from(document.querySelectorAll('.menu-group'));
+        groups.forEach(g => {
+          const title = g.querySelector('.menu-group-title');
+          if (!title) return;
+          // wrap links into container for easier hide/show
+          let items = g.querySelector('.menu-items');
+          if (!items) {
+            items = document.createElement('div');
+            items.className = 'menu-items';
+            // move all anchor.item children into items
+            Array.from(g.querySelectorAll('a.item')).forEach(a => items.appendChild(a));
+            g.appendChild(items);
+          }
+          // make title button-like and add aria attributes
+          title.setAttribute('role','button');
+          title.setAttribute('tabindex','0');
+          title.setAttribute('aria-expanded', String(true));
+          title.classList.add('menu-group-toggle');
+
+          const toggle = () => {
+            const expanded = title.getAttribute('aria-expanded') === 'true';
+            title.setAttribute('aria-expanded', String(!expanded));
+            items.style.display = expanded ? 'none' : '';
+          };
+          title.addEventListener('click', toggle);
+          title.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+        });
+      } catch (e) { console.debug('menu-group init error', e); }
+    })();
   });
 })();
