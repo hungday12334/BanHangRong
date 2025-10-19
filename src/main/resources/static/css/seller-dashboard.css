@@ -2239,3 +2239,71 @@ body.theme-switching {
     transform: none;
   }
 }
+
+/* ---------- Compact sidebar overrides ---------- */
+/* Add class `compact` to the sidebar element to apply a tighter layout */
+
+/* Reduce sidebar width on larger screens to make it appear smaller and remove empty gutters */
+@media (min-width: 800px) {
+  .page {
+    grid-template-columns: 220px 1fr; /* narrowed from 260px */
+  }
+}
+
+/* Brand adjustments */
+.sidebar.compact .brand-with-logo {
+  gap: 8px;
+  padding: 6px 4px 8px 4px;
+}
+
+/* Menu tighter spacing */
+.sidebar.compact .menu {
+  margin-top: 8px;
+  gap: 2px;
+}
+
+.sidebar.compact .menu .item {
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.sidebar.compact .menu .item .ti {
+  font-size: 16px;
+  width: 18px;
+}
+
+/* Footer compact */
+.sidebar.compact .sidebar-footer {
+  padding-top: 6px;
+}
+
+.sidebar.compact .sidebar-footer .footer-actions {
+  gap: 8px;
+}
+
+.sidebar.compact .sidebar-footer .logout-btn {
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+/* When compact reduce brand text size slightly to help fit */
+.sidebar.compact .brand-with-logo .brand-text {
+  font-size: 18px;
+}
+
+/* make theme toggle smaller in compact mode */
+.sidebar.compact .theme-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+/* make logout icon and text a bit smaller */
+.sidebar.compact .logout-btn,
+.sidebar.compact .logout-btn .ti {
+  font-size: 14px;
+}
+
+/* End compact overrides */
