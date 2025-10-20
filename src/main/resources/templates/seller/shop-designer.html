@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết Kế Cửa Hàng - BanHangRong</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}">
+    <link rel="stylesheet" th:href="@{/css/seller-dashboard.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
+
+    <style>
+        /* Shop Designer Styles */
+        .shop-designer-container {
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: 100%;
+            gap: 1px;
+            background: #e9ecef;
+        }
+
+        /* Components Panel */
+        .components-panel {
+            background: white;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+
+        .components-categories {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .category-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .components-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .component-item {
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .component-item:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+        }
+
+        .component-item:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+        }
+
+        .component-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        /* Preview Area */
+        .preview-area {
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .device-preview {
+            display: flex;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .device-btn {
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .device-btn.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.25rem;
+        }
+
+        .zoom-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .zoom-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .preview-container {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .shop-preview {
+            min-height: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .preview-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: #6c757d;
+        }
+
+        .placeholder-content {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .placeholder-content i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .placeholder-content h3 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .placeholder-content p {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        /* Shop Sections in Preview */
+        .shop-section {
+            margin: 1.5rem;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .shop-section:hover {
+            border-color: #007bff;
+        }
+
+        .shop-section.dragover {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .shop-section.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px 6px 0 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .shop-section:hover .section-actions {
+            opacity: 1;
+        }
+
+        .btn-section {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-section:hover {
+            background: #f8f9fa;
+            border-color: #6c757d;
+        }
+
+        .btn-section.delete:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .section-content {
+            padding: 1rem;
+            min-height: 100px;
+        }
+
+        .section-products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .product-preview {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .product-preview img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Properties Panel */
+        .properties-panel {
+            background: white;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .properties-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: #6c757d;
+            padding: 3rem 1rem;
+        }
+
+        .no-selection i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .property-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .property-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .property-field {
+            margin-bottom: 1rem;
+        }
+
+        .property-field label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-range-fields {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .range-separator {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background: white;
+            border-top: 1px solid #dee2e6;
+            padding: 1rem;
+        }
+
+        .action-bar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-info {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Setup Templates */
+        .setup-templates {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .template-card {
+            padding: 1.5rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .template-card.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .template-preview {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .template-preview i {
+            font-size: 1.5rem;
+            color: #495057;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .designer-layout {
+                grid-template-columns: 250px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .designer-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .components-panel,
+            .properties-panel {
+                height: 200px;
+            }
+        }
+
+        /* Thêm vào shop-designer.css */
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: calc(100vh - 300px); /* Chiều cao cố định */
+            gap: 1px;
+            background: #e9ecef;
+            overflow: hidden; /* Quan trọng: không cho scroll layout */
+        }
+
+        .components-panel,
+        .preview-area,
+        .properties-panel {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .components-categories,
+        .preview-container,
+        .properties-content {
+            flex: 1;
+            overflow-y: auto; /* Cho phép scroll nội dung */
+        }
+
+        /* Custom scrollbar */
+        .components-categories::-webkit-scrollbar,
+        .preview-container::-webkit-scrollbar,
+        .properties-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .components-categories::-webkit-scrollbar-track,
+        .preview-container::-webkit-scrollbar-track,
+        .properties-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb,
+        .preview-container::-webkit-scrollbar-thumb,
+        .properties-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb:hover,
+        .preview-container::-webkit-scrollbar-thumb:hover,
+        .properties-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* CẬP NHẬT CSS CHO SCROLL ĐỘC LẬP */
+        .shop-designer-container {
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: 100%;
+            gap: 1px;
+            background: #e9ecef;
+            overflow: hidden; /* Quan trọng: không cho scroll toàn bộ layout */
+        }
+
+        /* MỖI PANEL SCROLL ĐỘC LẬP */
+        .components-panel {
+            background: white;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden; /* Quan trọng */
+        }
+
+        .preview-area {
+            background: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden; /* Quan trọng */
+        }
+
+        .properties-panel {
+            background: white;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden; /* Quan trọng */
+        }
+
+        /* PHẦN NỘI DUNG CÓ THỂ SCROLL */
+        .components-categories {
+            flex: 1;
+            overflow-y: auto; /* Scroll độc lập */
+            padding: 1rem;
+        }
+
+        .preview-container {
+            flex: 1;
+            overflow-y: auto; /* Scroll độc lập */
+            padding: 2rem;
+        }
+
+        .properties-content {
+            flex: 1;
+            overflow-y: auto; /* Scroll độc lập */
+            padding: 1rem;
+        }
+
+        /* CUSTOM SCROLLBAR ĐẸP HƠN */
+        .components-categories::-webkit-scrollbar,
+        .preview-container::-webkit-scrollbar,
+        .properties-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .components-categories::-webkit-scrollbar-track,
+        .preview-container::-webkit-scrollbar-track,
+        .properties-content::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb,
+        .preview-container::-webkit-scrollbar-thumb,
+        .properties-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+            border: 2px solid #f8f9fa;
+        }
+
+        .components-categories::-webkit-scrollbar-thumb:hover,
+        .preview-container::-webkit-scrollbar-thumb:hover,
+        .properties-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* ĐẢM BẢO HEADER KHÔNG SCROLL */
+        .panel-header,
+        .preview-header {
+            flex-shrink: 0; /* Không bị co lại khi scroll */
+        }
+
+        /* ACTION BAR CỐ ĐỊNH Ở DƯỚI */
+        .action-bar {
+            flex-shrink: 0; /* Không scroll */
+            background: white;
+            border-top: 1px solid #dee2e6;
+            padding: 1rem;
+        }
+
+        .components-categories,
+        .preview-container,
+        .properties-content {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Cho mobile */
+        }
+
+        /* Ẩn scrollbar nhưng vẫn scroll được (tuỳ chọn) */
+        .components-categories {
+            scrollbar-width: thin; /* Firefox */
+        }
+
+        .preview-container {
+            scrollbar-width: thin;
+        }
+
+        .properties-content {
+            scrollbar-width: thin;
+        }
+
+        @media (max-width: 768px) {
+            .designer-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: 200px 1fr 250px;
+            }
+
+            .components-categories,
+            .preview-container,
+            .properties-content {
+                overflow-y: auto;
+                height: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="dashboard-layout">
+<!-- Sidebar -->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="content-wrapper">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="header-content">
+                <div class="header-title-section">
+                    <h1 class="page-title">
+                        <i class="ti ti-palette me-2"></i>
+                        Thiết Kế Cửa Hàng
+                    </h1>
+                    <p class="page-subtitle">Tùy chỉnh bố cục và sắp xếp sản phẩm trong cửa hàng của bạn</p>
+                </div>
+                <div class="header-actions">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="helpBtn">
+                            <i class="ti ti-help"></i>
+                            Hướng dẫn
+                        </button>
+                        <button class="btn btn-outline-secondary" id="viewShopBtn">
+                            <i class="ti ti-external-link"></i>
+                            Xem cửa hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="ti ti-layout-grid"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="activeSectionsCount">0</span>
+                    <span class="stat-label">Khu vực đang hoạt động</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="ti ti-box"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalProductsCount">0</span>
+                    <span class="stat-label">Sản phẩm hiển thị</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="ti ti-eye"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="lastSaved">--</span>
+                    <span class="stat-label">Lần cuối cập nhật</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Designer Area -->
+        <div class="shop-designer-container">
+            <div class="designer-layout">
+                <!-- Left Panel: Components Library -->
+                <div class="components-panel">
+                    <div class="panel-header">
+                        <h3><i class="ti ti-toolbox me-2"></i>Thành Phần</h3>
+                        <div class="panel-actions">
+                            <button class="btn-icon" title="Tìm kiếm">
+                                <i class="ti ti-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="components-categories">
+                        <div class="category-section">
+                            <h4 class="category-title">Khu Vực Sản Phẩm</h4>
+                            <div class="components-list" id="productSections">
+                                <!-- Product sections will be populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="category-section">
+                            <h4 class="category-title">Khu Vực Đặc Biệt</h4>
+                            <div class="components-list" id="specialSections">
+                                <!-- Special sections will be populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center: Preview & Design Area -->
+                <div class="preview-area">
+                    <div class="preview-header">
+                        <div class="preview-controls">
+                            <div class="device-preview">
+                                <button class="device-btn active" data-device="desktop">
+                                    <i class="ti ti-device-desktop"></i>
+                                </button>
+                                <button class="device-btn" data-device="tablet">
+                                    <i class="ti ti-device-tablet"></i>
+                                </button>
+                                <button class="device-btn" data-device="mobile">
+                                    <i class="ti ti-device-mobile"></i>
+                                </button>
+                            </div>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" data-zoom="out">
+                                    <i class="ti ti-zoom-out"></i>
+                                </button>
+                                <span class="zoom-level">100%</span>
+                                <button class="zoom-btn" data-zoom="in">
+                                    <i class="ti ti-zoom-in"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-sm btn-outline-secondary" id="resetViewBtn">
+                                <i class="ti ti-refresh"></i>
+                                Đặt lại chế độ xem
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="preview-container">
+                        <div class="shop-preview" id="shopPreview">
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <div class="placeholder-content">
+                                    <i class="ti ti-layout-kanban"></i>
+                                    <h3>Bắt đầu thiết kế cửa hàng</h3>
+                                    <p>Kéo các thành phần từ bên trái vào đây để xây dựng cửa hàng của bạn</p>
+                                    <button class="btn btn-primary mt-3" id="quickStartBtn">
+                                        <i class="ti ti-rocket"></i>
+                                        Thiết lập nhanh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Settings & Properties -->
+                <div class="properties-panel">
+                    <div class="panel-header">
+                        <h3><i class="ti ti-settings me-2"></i>Thuộc Tính</h3>
+                        <div class="panel-actions">
+                            <button class="btn-icon" title="Đóng">
+                                <i class="ti ti-x"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="properties-content">
+                        <div class="no-selection" id="noSelection">
+                            <i class="ti ti-click"></i>
+                            <p>Chọn một thành phần để chỉnh sửa thuộc tính</p>
+                        </div>
+
+                        <div class="section-properties" id="sectionProperties" style="display: none;">
+                            <div class="property-group">
+                                <h4 class="property-title">Thông tin cơ bản</h4>
+                                <div class="property-field">
+                                    <label>Tiêu đề hiển thị</label>
+                                    <input type="text" class="form-control" id="sectionTitle" placeholder="Nhập tiêu đề...">
+                                </div>
+                                <div class="property-field">
+                                    <label>Mô tả</label>
+                                    <textarea class="form-control" id="sectionDescription" rows="2" placeholder="Mô tả ngắn..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="property-group">
+                                <h4 class="property-title">Hiển thị</h4>
+                                <div class="property-field">
+                                    <label>Số lượng sản phẩm</label>
+                                    <input type="number" class="form-control" id="sectionLimit" min="1" max="20" value="6">
+                                </div>
+                                <div class="property-field">
+                                    <label>Bố cục hiển thị</label>
+                                    <select class="form-control" id="sectionLayout">
+                                        <option value="grid">Lưới</option>
+                                        <option value="list">Danh sách</option>
+                                        <option value="carousel">Carousel</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="property-group" id="filterSettings">
+                                <h4 class="property-title">Bộ lọc</h4>
+                                <div class="property-field">
+                                    <label>Danh mục</label>
+                                    <select class="form-control" id="sectionCategory">
+                                        <option value="">Tất cả danh mục</option>
+                                    </select>
+                                </div>
+                                <div class="property-field">
+                                    <label>Khoảng giá</label>
+                                    <div class="price-range-fields">
+                                        <input type="number" class="form-control" id="priceMin" placeholder="Tối thiểu">
+                                        <span class="range-separator">-</span>
+                                        <input type="number" class="form-control" id="priceMax" placeholder="Tối đa">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="property-group">
+                                <h4 class="property-title">Trạng thái</h4>
+                                <div class="property-field">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="sectionActive" checked>
+                                        <label class="form-check-label" for="sectionActive">Hiển thị trên cửa hàng</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Action Bar -->
+            <div class="action-bar">
+                <div class="action-bar-content">
+                    <div class="action-info">
+                        <span id="actionMessage">Sẵn sàng thiết kế</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline-secondary" id="previewBtn">
+                            <i class="ti ti-eye"></i>
+                            Xem trước
+                        </button>
+                        <button class="btn btn-success" id="saveBtn">
+                            <i class="ti ti-device-floppy"></i>
+                            Lưu thay đổi
+                        </button>
+                        <button class="btn btn-primary" id="publishBtn">
+                            <i class="ti ti-world"></i>
+                            Xuất bản
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Quick Setup Modal -->
+<div class="modal fade" id="quickSetupModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="ti ti-rocket me-2"></i>
+                    Thiết lập nhanh
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="setup-templates">
+                    <div class="template-card" data-template="featured">
+                        <div class="template-preview">
+                            <i class="ti ti-star"></i>
+                        </div>
+                        <h5>Nổi bật</h5>
+                        <p>Hiển thị sản phẩm đặc biệt</p>
+                    </div>
+                    <div class="template-card" data-template="bestseller">
+                        <div class="template-preview">
+                            <i class="ti ti-trending-up"></i>
+                        </div>
+                        <h5>Bán chạy</h5>
+                        <p>Sản phẩm bán chạy nhất</p>
+                    </div>
+                    <div class="template-card" data-template="newarrivals">
+                        <div class="template-preview">
+                            <i class="ti ti-new-section"></i>
+                        </div>
+                        <h5>Mới về</h5>
+                        <p>Sản phẩm mới nhất</p>
+                    </div>
+                    <div class="template-card" data-template="categories">
+                        <div class="template-preview">
+                            <i class="ti ti-category"></i>
+                        </div>
+                        <h5>Danh mục</h5>
+                        <p>Phân loại sản phẩm</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="applyTemplateBtn">Áp dụng mẫu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p>Đang xử lý...</p>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script th:src="@{/js/home.js}"></script>
+<script th:src="@{/js/seller-dashboard.js}"></script>
+
+<script>
+    // Shop Designer JavaScript
+    class ShopDesigner {
+
+        // Trong ShopDesigner class - sửa preview và view shop
+        previewLayout() {
+            this.showMessage('👁️ Đang mở xem trước...', 'info');
+
+            // Mở preview trong tab mới
+            const previewUrl = `/shop/preview/${this.sellerId}`;
+            console.log('Opening preview:', previewUrl);
+
+            const newWindow = window.open(previewUrl, '_blank');
+            if (!newWindow) {
+                this.showMessage('❌ Popup bị chặn. Vui lòng cho phép popup.', 'error');
+            }
+        }
+
+        viewShop() {
+            this.showMessage('🛍️ Đang mở cửa hàng...', 'info');
+
+            // Mở cửa hàng thật trong tab mới
+            const shopUrl = `/shop/${this.sellerId}`;
+            console.log('Opening shop:', shopUrl);
+
+            const newWindow = window.open(shopUrl, '_blank');
+            if (!newWindow) {
+                this.showMessage('❌ Popup bị chặn. Vui lòng cho phép popup.', 'error');
+            }
+        }
+
+// Test method để debug
+        async testShopEndpoints() {
+            try {
+                console.log('🧪 Testing shop endpoints...');
+
+                // Test preview
+                const previewResponse = await fetch(`/shop/preview/${this.sellerId}`);
+                console.log('Preview status:', previewResponse.status);
+
+                // Test shop
+                const shopResponse = await fetch(`/shop/${this.sellerId}`);
+                console.log('Shop status:', shopResponse.status);
+
+                // Test API
+                const apiResponse = await fetch(`/api/shop/${this.sellerId}/data`);
+                const apiData = await apiResponse.json();
+                console.log('API response:', apiData);
+
+            } catch (error) {
+                console.error('Test failed:', error);
+            }
+        }
+
+
+        constructor() {
+            this.sections = [];
+            this.currentSection = null;
+            this.selectedTemplate = null;
+            this.sellerId = 1;
+            this.availableProducts = [];
+            this.currentDevice = 'desktop';
+            this.currentZoom = 100;
+            this.init();
+        }
+
+        init() {
+            this.loadComponents();
+            this.setupEventListeners();
+            this.setupDragAndDrop();
+            this.loadExistingLayout();
+            this.loadRealProducts();
+            this.setupDevicePreview();
+            this.setupZoomControls();
+        }
+
+        setupDevicePreview() {
+            document.querySelectorAll('.device-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    this.currentDevice = e.target.dataset.device;
+                    this.updateDevicePreview();
+                });
+            });
+        }
+
+        setupZoomControls() {
+            document.querySelectorAll('.zoom-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const action = e.target.closest('.zoom-btn').dataset.zoom;
+                    if (action === 'in') {
+                        this.currentZoom = Math.min(this.currentZoom + 25, 200);
+                    } else {
+                        this.currentZoom = Math.max(this.currentZoom - 25, 50);
+                    }
+                    this.updateZoomDisplay();
+                });
+            });
+        }
+
+        updateDevicePreview() {
+            const preview = document.getElementById('shopPreview');
+            preview.className = 'shop-preview';
+            preview.classList.add(`device-${this.currentDevice}`);
+        }
+
+        updateZoomDisplay() {
+            document.querySelector('.zoom-level').textContent = `${this.currentZoom}%`;
+            document.getElementById('shopPreview').style.transform = `scale(${this.currentZoom / 100})`;
+        }
+
+
+
+        loadComponents() {
+            const productSections = [
+                { type: 'featured', title: '⭐ Sản phẩm nổi bật', icon: 'ti-star', description: 'Chọn sản phẩm hiển thị nổi bật' },
+                { type: 'bestseller', title: '🔥 Bán chạy nhất', icon: 'ti-trending-up', description: 'Tự động hiển thị sản phẩm bán chạy' },
+                { type: 'toprated', title: '💎 Đánh giá cao', icon: 'ti-award', description: 'Sản phẩm được đánh giá tốt nhất' },
+                { type: 'newarrivals', title: '🆕 Sản phẩm mới', icon: 'ti-new-section', description: 'Sản phẩm mới được thêm vào' }
+            ];
+
+            const specialSections = [
+                { type: 'categories', title: '📂 Danh mục', icon: 'ti-category', description: 'Hiển thị danh mục sản phẩm' },
+                { type: 'custom', title: '🎛️ Khu vực tùy chỉnh', icon: 'ti-settings', description: 'Tùy chỉnh bộ lọc theo nhu cầu' }
+            ];
+
+            this.renderComponents('productSections', productSections);
+            this.renderComponents('specialSections', specialSections);
+        }
+
+        renderComponents(containerId, components) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = components.map(comp => `
+                <div class="component-item" draggable="true" data-type="${comp.type}">
+                    <div class="d-flex align-items-center">
+                        <i class="ti ${comp.icon} me-2"></i>
+                        <div>
+                            <div class="fw-medium">${comp.title}</div>
+                            <small class="text-muted">${comp.description}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        setupEventListeners() {
+            // Quick setup modal
+            document.getElementById('quickStartBtn').addEventListener('click', () => {
+                this.showQuickSetupModal();
+            });
+
+            // Template selection
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    this.selectedTemplate = card.dataset.template;
+                });
+            });
+
+            // Apply template
+            document.getElementById('applyTemplateBtn').addEventListener('click', () => {
+                this.applyTemplate(this.selectedTemplate);
+                bootstrap.Modal.getInstance(document.getElementById('quickSetupModal')).hide();
+            });
+
+            // Save button
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                this.saveLayout();
+            });
+
+            // Publish button
+            document.getElementById('publishBtn').addEventListener('click', () => {
+                this.publishLayout();
+            });
+
+            // Preview button
+            document.getElementById('previewBtn').addEventListener('click', () => {
+                this.previewLayout();
+            });
+
+            // Reset view button
+            document.getElementById('resetViewBtn').addEventListener('click', () => {
+                this.resetView();
+            });
+
+            // View shop button
+            document.getElementById('viewShopBtn').addEventListener('click', () => {
+                this.viewShop();
+            });
+
+            // Help button
+            document.getElementById('helpBtn').addEventListener('click', () => {
+                this.showHelp();
+            });
+
+            // Property changes
+            document.getElementById('sectionTitle').addEventListener('input', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.title = e.target.value;
+                    this.updateSectionHeader(this.currentSection);
+                }
+            });
+
+            document.getElementById('sectionDescription').addEventListener('input', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.description = e.target.value;
+                }
+            });
+
+            document.getElementById('sectionLimit').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.limit = parseInt(e.target.value);
+                    this.updateSectionPreview(this.currentSection);
+                }
+            });
+
+            document.getElementById('sectionLayout').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.layout = e.target.value;
+                    this.updateSectionPreview(this.currentSection);
+                }
+            });
+
+            document.getElementById('sectionActive').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.isActive = e.target.checked;
+                    this.toggleSectionVisibility(this.currentSection);
+                }
+            });
+
+            // Filter settings
+            document.getElementById('priceMin').addEventListener('input', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.filters = this.currentSection.filters || {};
+                    this.currentSection.filters.minPrice = e.target.value;
+                }
+            });
+
+            document.getElementById('priceMax').addEventListener('input', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.filters = this.currentSection.filters || {};
+                    this.currentSection.filters.maxPrice = e.target.value;
+                }
+            });
+
+            document.getElementById('sectionCategory').addEventListener('change', (e) => {
+                if (this.currentSection) {
+                    this.currentSection.filters = this.currentSection.filters || {};
+                    this.currentSection.filters.categoryId = e.target.value;
+                }
+            });
+        }
+
+        resetView() {
+            this.currentDevice = 'desktop';
+            this.currentZoom = 100;
+            document.querySelectorAll('.device-btn').forEach((btn, index) => {
+                btn.classList.toggle('active', index === 0);
+            });
+            this.updateDevicePreview();
+            this.updateZoomDisplay();
+            this.showMessage('✅ Đã đặt lại chế độ xem', 'success');
+        }
+
+        viewShop() {
+            window.open(`/shop/${this.sellerId}`, '_blank');
+        }
+
+        showHelp() {
+            const helpContent = `
+Hướng dẫn sử dụng Shop Designer:
+
+🏗️ THIẾT KẾ:
+• Kéo thành phần từ bên trái vào khu vực preview
+• Click vào section để chỉnh sửa thuộc tính
+• Sắp xếp thứ tự bằng cách kéo section
+
+⚙️ TÙY CHỈNH:
+• Thay đổi tiêu đề, số lượng sản phẩm
+• Chọn bố cục hiển thị (lưới, danh sách, carousel)
+• Thiết lập bộ lọc cho khu vực tùy chỉnh
+
+🚀 HÀNH ĐỘNG:
+• Lưu thay đổi: Lưu bản nháp
+• Xuất bản: Áp dụng lên cửa hàng thật
+• Xem trước: Xem cửa hàng trước khi xuất bản
+
+💡 MẸO:
+• Dùng "Thiết lập nhanh" để bắt đầu nhanh chóng
+• Kiểm tra trên nhiều thiết bị (desktop/tablet/mobile)
+        `;
+            alert(helpContent);
+        }
+
+        toggleSectionVisibility(section) {
+            const sectionElement = document.querySelector(`[data-section-id="${section.id}"]`);
+            if (sectionElement) {
+                sectionElement.style.opacity = section.isActive ? '1' : '0.5';
+            }
+        }
+
+        updateSectionPreview(section) {
+            const sectionElement = document.querySelector(`[data-section-id="${section.id}"] .section-products`);
+            if (sectionElement) {
+                sectionElement.innerHTML = this.renderRealProducts(section);
+            }
+        }
+
+
+        setupDragAndDrop() {
+            const dropZone = document.getElementById('shopPreview');
+
+            // Drag start
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('component-item')) {
+                    e.target.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', e.target.dataset.type);
+                }
+            });
+
+            // Drag end
+            document.addEventListener('dragend', (e) => {
+                if (e.target.classList.contains('component-item')) {
+                    e.target.classList.remove('dragging');
+                }
+            });
+
+            // Drag over
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            // Drag leave
+            dropZone.addEventListener('dragleave', (e) => {
+                if (!dropZone.contains(e.relatedTarget)) {
+                    dropZone.classList.remove('dragover');
+                }
+            });
+
+            // Drop
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+
+                const sectionType = e.dataTransfer.getData('text/plain');
+                this.addNewSection(sectionType);
+            });
+        }
+
+        addNewSection(type) {
+            const section = {
+                id: Date.now(),
+                type: type,
+                title: this.getDefaultTitle(type),
+                description: '',
+                limit: 6,
+                layout: 'grid',
+                isActive: true,
+                filters: {},
+                sortOrder: this.sections.length
+            };
+
+            this.sections.push(section);
+            this.renderSection(section);
+            this.updateStats();
+            this.hidePlaceholder();
+        }
+
+        getDefaultTitle(type) {
+            const titles = {
+                'featured': 'Sản phẩm nổi bật',
+                'bestseller': 'Bán chạy nhất',
+                'toprated': 'Đánh giá cao nhất',
+                'newarrivals': 'Sản phẩm mới về',
+                'categories': 'Danh mục sản phẩm',
+                'custom': 'Khu vực tùy chỉnh'
+            };
+            return titles[type] || 'Khu vực sản phẩm';
+        }
+
+        renderSection(section) {
+            const sectionHTML = `
+                <div class="shop-section" data-section-id="${section.id}">
+                    <div class="section-header">
+                        <span class="fw-medium">${section.title}</span>
+                        <div class="section-actions">
+                            <button class="btn-section edit" onclick="designer.editSection(${section.id})">
+                                <i class="ti ti-edit"></i>
+                            </button>
+                            <button class="btn-section delete" onclick="designer.deleteSection(${section.id})">
+                                <i class="ti ti-trash"></i>
+                            </button>
+                            <button class="btn-section move">
+                                <i class="ti ti-grip-vertical"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="section-products">
+                            ${this.getSectionPreview(section)}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('shopPreview').insertAdjacentHTML('beforeend', sectionHTML);
+        }
+
+        getSectionPreview(section) {
+            // Hiển thị preview sản phẩm mẫu
+            return `
+                <div class="product-preview">
+                    <div class="bg-light rounded p-3 mb-2">
+                        <i class="ti ti-box"></i>
+                    </div>
+                    <small>Sản phẩm mẫu</small>
+                </div>
+            `.repeat(3);
+        }
+
+        editSection(sectionId) {
+            this.currentSection = this.sections.find(s => s.id === sectionId);
+            this.showPropertiesPanel();
+
+            // Highlight section selected
+            document.querySelectorAll('.shop-section').forEach(section => {
+                section.classList.remove('selected');
+            });
+            document.querySelector(`[data-section-id="${sectionId}"]`).classList.add('selected');
+        }
+
+        showPropertiesPanel() {
+            document.getElementById('noSelection').style.display = 'none';
+            document.getElementById('sectionProperties').style.display = 'block';
+
+            // Fill form với section data
+            document.getElementById('sectionTitle').value = this.currentSection.title;
+            document.getElementById('sectionDescription').value = this.currentSection.description;
+            document.getElementById('sectionLimit').value = this.currentSection.limit;
+            document.getElementById('sectionLayout').value = this.currentSection.layout;
+            document.getElementById('sectionActive').checked = this.currentSection.isActive;
+
+            // Hiển thị filter settings cho custom section
+            this.toggleFilterSettings(this.currentSection.type === 'custom');
+        }
+
+        toggleFilterSettings(show) {
+            document.getElementById('filterSettings').style.display = show ? 'block' : 'none';
+        }
+
+        updateSectionHeader(section) {
+            const sectionElement = document.querySelector(`[data-section-id="${section.id}"]`);
+            if (sectionElement) {
+                const header = sectionElement.querySelector('.section-header span');
+                header.textContent = section.title;
+            }
+        }
+
+        deleteSection(sectionId) {
+            if (confirm('Bạn có chắc muốn xóa khu vực này?')) {
+                this.sections = this.sections.filter(s => s.id !== sectionId);
+                document.querySelector(`[data-section-id="${sectionId}"]`).remove();
+                this.updateStats();
+
+                if (this.currentSection && this.currentSection.id === sectionId) {
+                    this.hidePropertiesPanel();
+                }
+            }
+        }
+
+        hidePropertiesPanel() {
+            document.getElementById('noSelection').style.display = 'block';
+            document.getElementById('sectionProperties').style.display = 'none';
+            this.currentSection = null;
+
+            document.querySelectorAll('.shop-section').forEach(section => {
+                section.classList.remove('selected');
+            });
+        }
+
+        hidePlaceholder() {
+            document.getElementById('previewPlaceholder').style.display = 'none';
+        }
+
+        updateStats() {
+            document.getElementById('activeSectionsCount').textContent = this.sections.length;
+            document.getElementById('totalProductsCount').textContent = this.sections.reduce((total, section) => total + section.limit, 0);
+            document.getElementById('lastSaved').textContent = new Date().toLocaleTimeString('vi-VN');
+        }
+
+        showQuickSetupModal() {
+            const modal = new bootstrap.Modal(document.getElementById('quickSetupModal'));
+            modal.show();
+        }
+
+        applyTemplate(template) {
+            // Áp dụng template mẫu
+            const templates = {
+                'featured': ['featured', 'bestseller', 'newarrivals'],
+                'bestseller': ['bestseller', 'toprated', 'categories'],
+                'newarrivals': ['newarrivals', 'featured', 'bestseller'],
+                'categories': ['categories', 'featured', 'bestseller', 'newarrivals']
+            };
+
+            // Xóa sections hiện tại
+            this.sections = [];
+            document.getElementById('shopPreview').innerHTML = '';
+
+            // Thêm sections theo template
+            templates[template]?.forEach(type => {
+                this.addNewSection(type);
+            });
+
+            this.hidePlaceholder();
+        }
+
+        async saveLayout() {
+            this.showLoading();
+
+            try {
+                const response = await fetch(`/api/seller/shop-design/layout?sellerId=${this.sellerId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.sections)
+                });
+
+                if (response.ok) {
+                    this.showMessage('✅ Đã lưu thiết kế cửa hàng!', 'success');
+                    this.updateStats();
+                } else {
+                    throw new Error('Lỗi khi lưu layout');
+                }
+            } catch (error) {
+                this.showMessage('❌ Lỗi khi lưu thiết kế: ' + error.message, 'error');
+            } finally {
+                this.hideLoading();
+            }
+        }
+
+        async publishLayout() {
+            if (confirm('Xuất bản thiết kế này lên cửa hàng công khai?')) {
+                await this.saveLayout();
+                this.showMessage('🚀 Đã xuất bản cửa hàng!', 'success');
+            }
+        }
+
+        previewLayout() {
+            this.showMessage('👁️ Đang mở xem trước...', 'info');
+            // Mở cửa hàng preview trong tab mới
+            window.open(`/shop/preview/${this.sellerId}`, '_blank');
+        }
+
+        async loadExistingLayout() {
+            try {
+                const response = await fetch(`/api/seller/shop-design/sections?sellerId=${this.sellerId}`);
+                if (response.ok) {
+                    const existingSections = await response.json();
+                    if (existingSections.length > 0) {
+                        this.sections = existingSections;
+                        this.renderExistingSections();
+                        this.hidePlaceholder();
+                        this.updateStats();
+                    }
+                }
+            } catch (error) {
+                console.log('Không có layout cũ hoặc lỗi khi tải:', error);
+            }
+        }
+
+        renderExistingSections() {
+            this.sections.forEach(section => {
+                this.renderSection(section);
+            });
+        }
+
+        showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        showMessage(message, type = 'info') {
+            const actionMessage = document.getElementById('actionMessage');
+            actionMessage.textContent = message;
+            actionMessage.className = `action-message ${type}`;
+
+            setTimeout(() => {
+                actionMessage.textContent = 'Sẵn sàng thiết kế';
+                actionMessage.className = 'action-message';
+            }, 3000);
+        }
+
+        async loadRealProducts() {
+            try {
+                this.showLoading();
+                // ✅ SỬA URL - dùng endpoint mới
+                const response = await fetch(`/api/products/seller/${this.sellerId}/active`);
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.availableProducts = data.products;
+                        this.updateProductSelection();
+                        this.showMessage(`✅ Đã tải ${data.count} sản phẩm`, 'success');
+                        this.updateProductStats();
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } else {
+                    throw new Error('Lỗi kết nối server');
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải sản phẩm:', error);
+                this.showMessage('❌ Không thể tải sản phẩm: ' + error.message, 'error');
+                this.availableProducts = this.getMockProducts();
+                this.updateProductSelection();
+            } finally {
+                this.hideLoading();
+            }
+        }
+
+        renderRealProducts(section) {
+            if (!this.availableProducts || this.availableProducts.length === 0) {
+                return '<div class="text-muted text-center p-3">Chưa có sản phẩm nào</div>';
+            }
+
+            let productsToShow = [];
+
+            switch(section.type) {
+                case 'featured':
+                    // Lấy 3 sản phẩm đầu tiên cho featured (có thể cải tiến sau)
+                    productsToShow = this.availableProducts.slice(0, Math.min(section.limit || 3, 3));
+                    break;
+                case 'bestseller':
+                    productsToShow = [...this.availableProducts]
+                        .sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                case 'toprated':
+                    productsToShow = [...this.availableProducts]
+                        .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                case 'newarrivals':
+                    productsToShow = this.availableProducts
+                        .slice(0, section.limit || 6);
+                    break;
+                default:
+                    productsToShow = this.availableProducts.slice(0, section.limit || 6);
+            }
+
+            if (productsToShow.length === 0) {
+                return '<div class="text-muted text-center p-3">Không có sản phẩm phù hợp</div>';
+            }
+
+            return productsToShow.map(product => `
+        <div class="product-preview">
+            <div class="product-image bg-light rounded p-3 mb-2 text-center">
+                <i class="ti ti-box" style="font-size: 2rem; color: #6c757d;"></i>
+            </div>
+            <h6 class="product-name mb-1" title="${product.name}">${this.truncateText(product.name, 20)}</h6>
+            <small class="text-primary fw-bold d-block">$${product.price}</small>
+            ${product.totalSales ? `<small class="text-success">🛒 ${product.totalSales}</small>` : ''}
+            ${product.averageRating ? `<small class="text-warning">⭐ ${product.averageRating}</small>` : ''}
+        </div>
+    `).join('');
+        }
+
+        truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        updateProductStats() {
+            const totalProducts = this.availableProducts.length;
+            const totalValue = this.availableProducts.reduce((sum, product) => sum + parseFloat(product.price), 0);
+
+            document.getElementById('totalProductsCount').textContent = totalProducts;
+            document.getElementById('actionMessage').textContent = `📦 ${totalProducts} sản phẩm có sẵn`;
+        }
+
+        getMockProducts() {
+            return [
+                {
+                    productId: 1,
+                    name: "E-Book X",
+                    description: "Cuốn sách hướng dẫn nâng cao",
+                    price: 19.99,
+                    totalSales: 10,
+                    averageRating: 4.5,
+                    isActive: true
+                },
+                {
+                    productId: 2,
+                    name: "Music Pack Vol.1",
+                    description: "Bộ sample âm nhạc đa thể loại",
+                    price: 9.99,
+                    totalSales: 25,
+                    averageRating: 4.2,
+                    isActive: true
+                },
+                {
+                    productId: 3,
+                    name: "Software Pro",
+                    description: "Tiện ích chuyên nghiệp cho công việc",
+                    price: 49.00,
+                    totalSales: 5,
+                    averageRating: 4.8,
+                    isActive: true
+                },
+                {
+                    productId: 4,
+                    name: "Antivirus Pro Plus",
+                    description: "Bảo vệ máy tính toàn diện",
+                    price: 59.00,
+                    totalSales: 18,
+                    averageRating: 4.6,
+                    isActive: true
+                }
+            ];
+        }
+
+        updateProductSelection() {
+            const container = document.getElementById('productSelection');
+            if (!container) return;
+
+            container.innerHTML = this.availableProducts.map(product => `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                       value="${product.productId}"
+                       id="product-${product.productId}">
+                <label class="form-check-label" for="product-${product.productId}">
+                    ${product.name} - $${product.price}
+                </label>
+            </div>
+        `).join('');
+        }
+
+        getSelectedProducts() {
+            const checkboxes = document.querySelectorAll('#productSelection input:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+        }
+
+        // Hiển thị sản phẩm thật trong preview
+        renderRealProducts(section) {
+            if (!this.availableProducts || this.availableProducts.length === 0) {
+                return this.getSectionPreview(section); // Fallback to mock data
+            }
+
+            // Lấy sản phẩm theo loại section
+            let productsToShow = [];
+            switch(section.type) {
+                case 'featured':
+                    // Hiển thị selected products hoặc 3 sản phẩm đầu
+                    const selected = this.getSelectedProducts();
+                    productsToShow = this.availableProducts
+                        .filter(p => selected.includes(p.productId))
+                        .slice(0, section.limit || 3);
+                    break;
+                case 'bestseller':
+                    productsToShow = this.availableProducts
+                        .sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                case 'toprated':
+                    productsToShow = this.availableProducts
+                        .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+                        .slice(0, section.limit || 6);
+                    break;
+                default:
+                    productsToShow = this.availableProducts.slice(0, section.limit || 6);
+            }
+
+            return productsToShow.map(product => `
+            <div class="product-preview">
+                <div class="bg-light rounded p-3 mb-2 text-center">
+                    <i class="ti ti-box" style="font-size: 2rem;"></i>
+                </div>
+                <h6 class="mb-1">${product.name}</h6>
+                <small class="text-muted d-block">$${product.price}</small>
+                <small class="text-success">Đã bán: ${product.totalSales || 0}</small>
+            </div>
+        `).join('');
+        }
+    }
+
+
+
+
+
+    // Khởi tạo khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        window.designer = new ShopDesigner();
+    });
+</script>
+
+</body>
+</html>
