@@ -80,9 +80,9 @@
             <tbody id="tbLowStock">
               <tr th:each="p: ${lowStock}" th:attr="data-product-id=${p.productId}" class="clickable">
                 <td th:text="${p.name}">Product name</td>
-                <td class="hide-md" th:text="${p.quantity}">3</td>
-                <td><span th:classappend="${p.quantity} &lt;= 2 ? 'pill warn' : 'pill good'"
-                    th:text="${p.quantity} &lt;= 2 ? 'Restock needed' : 'OK'">OK</span></td>
+                <td class="hide-md" th:text="${p.remaining}">3</td>
+                <td><span th:classappend="${p.remaining} &lt;= 2 ? 'pill warn' : 'pill good'"
+                    th:text="${p.remaining} &lt;= 2 ? 'Restock needed' : 'OK'">OK</span></td>
               </tr>
               <tr th:if="${#lists.isEmpty(lowStock)}">
                 <td colspan="3" class="footer-note">No low-stock products.</td>

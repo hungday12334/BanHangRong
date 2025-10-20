@@ -130,9 +130,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<!-- <configuration>
+				<configuration>
 					<profiles>simple</profiles>
-				</configuration> -->
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

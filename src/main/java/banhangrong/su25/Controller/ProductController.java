@@ -20,15 +20,34 @@ import java.util.Optional;
 public class ProductController {
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
+    private final banhangrong.su25.Repository.ProductLicensesRepository productLicensesRepository;
 
-    public ProductController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository) {
+    public ProductController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, banhangrong.su25.Repository.ProductLicensesRepository productLicensesRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
+        this.productLicensesRepository = productLicensesRepository;
     }
 
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(name = "sellerId", required = false) Long sellerId) {
-        if (sellerId != null) return ResponseEntity.ok(productsRepository.findBySellerId(sellerId));
+        if (sellerId != null) {
+            var list = productsRepository.findBySellerId(sellerId);
+            // Compute remaining keys for each product and set as quantity so frontend shows remaining
+            java.util.List<Products> out = new java.util.ArrayList<>();
+            for (var p : list) {
+                Integer cap = p.getQuantity() != null ? p.getQuantity() : 0;
+                long sold = 0L;
+                long pre = 0L;
+                try {
+                    sold = productLicensesRepository.countByProductViaOrders(p.getProductId());
+                    pre = productLicensesRepository.countPreGeneratedForProduct(p.getProductId());
+                } catch (Exception ignored) {}
+                long remaining = Math.max(0L, (long) cap - sold - pre);
+                p.setQuantity((int) Math.min(remaining, Integer.MAX_VALUE));
+                out.add(p);
+            }
+            return ResponseEntity.ok(out);
+        }
         return ResponseEntity.ok(productsRepository.findAll());
     }
 
