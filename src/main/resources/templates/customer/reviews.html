@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đánh giá của tôi</title>
+    <title>My Reviews</title>
     <link rel="stylesheet" href="/css/styles.min.css">
     <style>
         .reviews-container {
@@ -170,8 +170,8 @@
 <body>
     <div class="reviews-container">
         <div class="reviews-header">
-            <h1 class="reviews-title">Đánh giá của tôi</h1>
-            <p class="reviews-subtitle">Xem và quản lý các đánh giá bạn đã viết</p>
+            <h1 class="reviews-title">My Reviews</h1>
+            <p class="reviews-subtitle">View and manage reviews you've written</p>
         </div>
         
         <!-- Reviews List -->
@@ -183,7 +183,7 @@
                         <img src="/img/product-placeholder.jpg" alt="Product" class="product-image">
                         <div class="product-details">
                             <h3>Microsoft Office 2021</h3>
-                            <p>Đã mua ngày 15/10/2024</p>
+                            <p>Purchased on 15/10/2024</p>
                         </div>
                     </div>
                     <div class="rating">
@@ -199,13 +199,13 @@
                 </div>
                 <div class="review-content">
                     <p class="review-text">
-                        Sản phẩm rất tốt, dễ sử dụng và giá cả hợp lý. Tôi rất hài lòng với việc mua sắm tại đây.
+                        Great product, easy to use and reasonably priced. I'm very satisfied with my purchase here.
                     </p>
-                    <p class="review-date">Đánh giá ngày 16/10/2024</p>
+                    <p class="review-date">Reviewed on 16/10/2024</p>
                 </div>
                 <div class="review-actions">
-                    <button class="btn btn-primary" onclick="editReview(1)">Chỉnh sửa</button>
-                    <button class="btn btn-secondary" onclick="deleteReview(1)">Xóa</button>
+                    <button class="btn btn-primary" onclick="editReview(1)">Edit</button>
+                    <button class="btn btn-secondary" onclick="deleteReview(1)">Delete</button>
                 </div>
             </div>
         </div>
@@ -213,20 +213,20 @@
         <!-- Empty state (hidden by default) -->
         <div class="empty-reviews" id="emptyReviews" style="display: none;">
             <div class="empty-icon">⭐</div>
-            <h2 class="empty-title">Chưa có đánh giá nào</h2>
-            <p class="empty-message">Bạn chưa viết đánh giá nào cho sản phẩm.</p>
-            <a href="/customer/dashboard" class="btn-explore">Mua sắm ngay</a>
+            <h2 class="empty-title">No Reviews Yet</h2>
+            <p class="empty-message">You haven't written any product reviews yet.</p>
+            <a href="/customer/dashboard" class="btn-explore">Start Shopping</a>
         </div>
     </div>
     
     <script>
         function editReview(reviewId) {
             // TODO: Implement edit review functionality
-            alert('Chức năng chỉnh sửa đánh giá đang được phát triển!');
+            alert('Edit review functionality is under development!');
         }
         
         function deleteReview(reviewId) {
-            if (confirm('Bạn có chắc muốn xóa đánh giá này?')) {
+            if (confirm('Are you sure you want to delete this review?')) {
                 // TODO: Implement delete review functionality
                 const item = event.target.closest('.review-item');
                 item.remove();

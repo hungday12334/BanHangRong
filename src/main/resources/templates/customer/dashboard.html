@@ -363,10 +363,10 @@
 			<div class="brand">BanHangRong</div>
 			<nav class="nav" aria-label="Main">
 				<a href="/customer/dashboard">Home</a>
-				<a href="/categories">Category</a>
-				<a href="#">License Software</a>
+				<a href="/categories">Categories</a>
+				<a href="#">Software Licenses</a>
 				<a href="#">Game Keys</a>
-				<a href="#">Voucher</a>
+				<a href="#">Vouchers</a>
 				<a href="/customer/support">Support</a>
 			</nav>
 			<div class="top-actions">
@@ -384,27 +384,26 @@
 					</button>
 					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
 						<a class="item" th:if="${user != null}" th:href="@{'/customer/profile/' + ${user.username}}"
-							role="menuitem">Tài khoản của tôi</a>
-						<a class="item" th:if="${user == null}" href="/login" role="menuitem">Đăng nhập</a>
-						<a class="item" href="/customer/notifications" role="menuitem">🔔 Thông báo</a>
-						<a class="item" href="/customer/wishlist" role="menuitem">💝 Danh sách yêu thích</a>
-						<a class="item" href="/customer/reviews" role="menuitem">⭐ Đánh giá của tôi</a>
-						<a class="item" href="/customer/settings" role="menuitem">⚙️ Cài đặt</a>
+							role="menuitem">My Account</a>
+						<a class="item" th:if="${user == null}" href="/login" role="menuitem">Login</a>
+						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
 						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
 							style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
 							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
 								th:value="${_csrf.token}" />
 							<input type="hidden" name="amount" id="topupAmountInput" />
-							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền
+							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
 								(VNPay)</button>
 						</form>
-						<a class="item" href="/orderhistory" role="menuitem">Đơn mua</a>
+						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
 						<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
 							style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
-							Applied to become a seller</a>
+							Become a Seller</a>
 						<a class="item" href="#" role="menuitem"
-							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng
-							xuất</a>
+							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
 					</div>
 					<form id="logoutForm" method="post" action="/logout" style="display:none;">
 					</form>

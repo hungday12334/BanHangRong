@@ -342,13 +342,13 @@
                 <form th:action="@{'/customer/profile/' + ${user.username} + '/edit'}" method="post">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>Tên đăng nhập</label>
+                            <label>Username</label>
                             <input type="text" th:value="${profileUser.username}" readonly>
                         </div>
                         <div class="form-group">
-                            <label>Tên</label>
+                            <label>Full Name</label>
                             <input type="text" name="fullName" value=""
-                                placeholder="Họ và tên" disabled>
+                                placeholder="Full name" disabled>
                         </div>
                         <div class="form-group">
                             <label>Email</label>
@@ -359,16 +359,16 @@
                             <input type="text" name="phoneNumber" th:value="${profileUser.phoneNumber}">
                         </div>
                         <div class="form-group">
-                            <label>Giới tính</label>
+                            <label>Gender</label>
                             <select name="gender">
                                 <option value="">--</option>
-                                <option value="male" th:selected="${profileUser.gender == 'male'}">Nam</option>
-                                <option value="female" th:selected="${profileUser.gender == 'female'}">Nữ</option>
-                                <option value="other" th:selected="${profileUser.gender == 'other'}">Khác</option>
+                                <option value="male" th:selected="${profileUser.gender == 'male'}">Male</option>
+                                <option value="female" th:selected="${profileUser.gender == 'female'}">Female</option>
+                                <option value="other" th:selected="${profileUser.gender == 'other'}">Other</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Ngày sinh</label>
+                            <label>Birth Date</label>
                             <input type="date" name="birthDate" 
                                    th:value="${profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'yyyy-MM-dd') : ''}">
                         </div>

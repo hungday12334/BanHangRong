@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách yêu thích</title>
+    <title>Wishlist</title>
     <link rel="stylesheet" href="/css/styles.min.css">
     <style>
         .wishlist-container {
@@ -135,8 +135,8 @@
 <body>
     <div class="wishlist-container">
         <div class="wishlist-header">
-            <h1 class="wishlist-title">Danh sách yêu thích</h1>
-            <p class="wishlist-subtitle">Các sản phẩm bạn đã lưu để xem sau</p>
+            <h1 class="wishlist-title">Wishlist</h1>
+            <p class="wishlist-subtitle">Products you've saved to view later</p>
         </div>
         
         <!-- Wishlist Items -->
@@ -147,8 +147,8 @@
                 <h3 class="product-title">Microsoft Office 2021</h3>
                 <div class="product-price">299,000 VND</div>
                 <div class="product-actions">
-                    <button class="btn btn-primary" onclick="addToCart(1)">Thêm vào giỏ</button>
-                    <button class="btn btn-danger" onclick="removeFromWishlist(1)">Xóa</button>
+                    <button class="btn btn-primary" onclick="addToCart(1)">Add to Cart</button>
+                    <button class="btn btn-danger" onclick="removeFromWishlist(1)">Remove</button>
                 </div>
             </div>
             
@@ -157,8 +157,8 @@
                 <h3 class="product-title">Adobe Photoshop 2024</h3>
                 <div class="product-price">599,000 VND</div>
                 <div class="product-actions">
-                    <button class="btn btn-primary" onclick="addToCart(2)">Thêm vào giỏ</button>
-                    <button class="btn btn-danger" onclick="removeFromWishlist(2)">Xóa</button>
+                    <button class="btn btn-primary" onclick="addToCart(2)">Add to Cart</button>
+                    <button class="btn btn-danger" onclick="removeFromWishlist(2)">Remove</button>
                 </div>
             </div>
         </div>
@@ -166,20 +166,20 @@
         <!-- Empty state (hidden by default) -->
         <div class="empty-wishlist" id="emptyWishlist" style="display: none;">
             <div class="empty-icon">💝</div>
-            <h2 class="empty-title">Danh sách yêu thích trống</h2>
-            <p class="empty-message">Bạn chưa có sản phẩm nào trong danh sách yêu thích.</p>
-            <a href="/customer/dashboard" class="btn-explore">Khám phá sản phẩm</a>
+            <h2 class="empty-title">Wishlist is Empty</h2>
+            <p class="empty-message">You don't have any products in your wishlist yet.</p>
+            <a href="/customer/dashboard" class="btn-explore">Explore Products</a>
         </div>
     </div>
     
     <script>
         function addToCart(productId) {
             // TODO: Implement add to cart functionality
-            alert('Đã thêm sản phẩm vào giỏ hàng!');
+            alert('Product added to cart!');
         }
         
         function removeFromWishlist(productId) {
-            if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi danh sách yêu thích?')) {
+            if (confirm('Are you sure you want to remove this product from your wishlist?')) {
                 // TODO: Implement remove from wishlist functionality
                 const item = event.target.closest('.wishlist-item');
                 item.remove();
