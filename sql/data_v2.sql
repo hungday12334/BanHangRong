@@ -2,6 +2,32 @@
 CREATE DATABASE IF NOT EXISTS wap;
 USE wap;
 
+-- DROP existing tables to allow a clean re-create (safe to re-run)
+-- Disable foreign key checks to drop tables in any order, then re-enable
+SET FOREIGN_KEY_CHECKS = 0;
+-- Drop tables if they exist (order doesn't matter because FK checks are off)
+DROP TABLE IF EXISTS voucher_redemptions;
+DROP TABLE IF EXISTS vouchers;
+DROP TABLE IF EXISTS withdrawal_requests;
+DROP TABLE IF EXISTS bank_accounts;
+DROP TABLE IF EXISTS product_licenses;
+DROP TABLE IF EXISTS product_reviews;
+DROP TABLE IF EXISTS payment_transactions;
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS shopping_cart;
+DROP TABLE IF EXISTS product_images;
+DROP TABLE IF EXISTS categories_products;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS email_verification_tokens;
+DROP TABLE IF EXISTS password_reset_tokens;
+DROP TABLE IF EXISTS user_social_auth;
+DROP TABLE IF EXISTS user_sessions;
+DROP TABLE IF EXISTS users;
+SET FOREIGN_KEY_CHECKS = 1;
+
+
 -- Users
 CREATE TABLE IF NOT EXISTS users (
                                      user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -155,10 +181,11 @@ CREATE TABLE IF NOT EXISTS product_reviews (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Licenses (license_key centralized here)
+-- Allow order_item_id and user_id to be NULL for pre-generated licenses (not yet sold)
 CREATE TABLE IF NOT EXISTS product_licenses (
                                                 license_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-                                                order_item_id BIGINT NOT NULL,
-                                                user_id BIGINT NOT NULL,
+                                                order_item_id BIGINT,
+                                                user_id BIGINT,
                                                 license_key VARCHAR(255) UNIQUE NOT NULL,
                                                 is_active BOOLEAN DEFAULT TRUE,
                                                 activation_date DATETIME,
