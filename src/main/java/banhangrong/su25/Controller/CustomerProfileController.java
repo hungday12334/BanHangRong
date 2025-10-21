@@ -57,6 +57,10 @@ public class CustomerProfileController {
             if (usersRepository.count() == 0) {
                 System.out.println("No users in database, creating default user...");
                 profileUser = createDefaultUser(username);
+                if (profileUser == null) {
+                    System.out.println("❌ Failed to create default user");
+                    return "redirect:/customer/dashboard";
+                }
             } else {
                 // Fallback: if not found, redirect to dashboard
                 return "redirect:/customer/dashboard";
@@ -358,11 +362,17 @@ public class CustomerProfileController {
             defaultUser.setUserType("customer");
             defaultUser.setIsActive(true);
             defaultUser.setIsEmailVerified(false);
+            defaultUser.setPhoneNumber("0123456789");
+            defaultUser.setGender("other");
+            defaultUser.setBalance(java.math.BigDecimal.ZERO);
             defaultUser.setCreatedAt(java.time.LocalDateTime.now());
             defaultUser.setUpdatedAt(java.time.LocalDateTime.now());
             
             Users savedUser = usersRepository.save(defaultUser);
             System.out.println("✅ Default user created successfully: " + savedUser.getUsername());
+            System.out.println("User ID: " + savedUser.getUserId());
+            System.out.println("Email: " + savedUser.getEmail());
+            System.out.println("Phone: " + savedUser.getPhoneNumber());
             return savedUser;
             
         } catch (Exception e) {
