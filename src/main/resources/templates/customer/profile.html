@@ -295,14 +295,21 @@
             <div class="card">
                 <h2 style="margin:0 0 8px 0">Hồ Sơ Của Tôi</h2>
                 <div style="color:#6b7280;margin-bottom:16px">Quản lý thông tin hồ sơ để bảo mật tài khoản</div>
+                
+                <!-- DEBUG INFO -->
+                <div style="background:#f0f0f0;padding:10px;margin:10px 0;border-radius:5px;font-size:12px;">
+                    <strong>DEBUG INFO:</strong><br/>
+                    Profile User: <span th:text="${profileUser != null ? profileUser.username : 'NULL'}">NULL</span><br/>
+                    Current User: <span th:text="${user != null ? user.username : 'NULL'}">NULL</span><br/>
+                    Profile User Email: <span th:text="${profileUser != null ? profileUser.email : 'NULL'}">NULL</span>
+                </div>
                 <div style="display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:center">
                     <div class="label">Tên đăng nhập</div>
                     <div class="value" th:text="${profileUser.username}">datbautroi11</div>
                     <div></div>
 
                     <div class="label">Tên</div>
-                    <div class="value" th:text="${profileUser.fullName != null ? profileUser.fullName : '-'}">Đặng Tuấn
-                        Đạt</div>
+                    <div class="value" th:text="'-'">-</div>
                     <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn"
                             style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
 
