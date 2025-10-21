@@ -418,7 +418,7 @@
 							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
 						th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
 		</div>
@@ -447,7 +447,7 @@
 						data-total-sales=${p.totalSales},
 						data-average-rating=${p.averageRating}">
 				<div class="thumb">
-					<span th:if="${p.quantity != null and p.quantity <= 0}" class="badge-out">Hết hàng</span>
+					<span th:if="${p.quantity != null and p.quantity <= 0}" class="badge-out">Out of Stock</span>
 					<span th:if="${p.salePrice != null}" class="badge-sale">SALE</span>
 					<img th:if="${primaryImageByProduct != null and primaryImageByProduct[p.productId] != null}"
 						th:src="${primaryImageByProduct[p.productId]}" th:alt="${p.name}"
@@ -461,7 +461,7 @@
 						<span class="rating">⭐ <span
 								th:text="${p.averageRating != null ? #numbers.formatDecimal(p.averageRating,1,'COMMA',1,'POINT') : '0.0'}">4.5</span></span>
 						<span class="sales">•</span>
-						<span class="sales">Đã bán: <span th:text="${p.totalSales}">0</span></span>
+						<span class="sales">Sold: <span th:text="${p.totalSales}">0</span></span>
 					</div>
 					<div class="price">
 						<span th:if="${p.salePrice != null}">
@@ -480,7 +480,7 @@
 				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
 				<div class="body">
 					<div class="title">Microsoft Office 2021 Pro Plus</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 520</span></div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 520</span></div>
 					<div class="price">1,250,000₫</div>
 				</div>
 			</div>
@@ -488,7 +488,7 @@
 				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
 				<div class="body">
 					<div class="title">Adobe Creative Cloud All Apps</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 450</span></div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 450</span></div>
 					<div class="price">850,000₫</div>
 				</div>
 			</div>
@@ -496,7 +496,7 @@
 				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
 				<div class="body">
 					<div class="title">Norton 360 Deluxe 2023</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đá bán: 410</span></div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 410</span></div>
 					<div class="price">650,000₫</div>
 				</div>
 			</div>
@@ -504,7 +504,7 @@
 				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
 				<div class="body">
 					<div class="title">FIFA 23 - Steam Key</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 280</span></div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 280</span></div>
 					<div class="price">1,100,000₫</div>
 				</div>
 			</div>
@@ -512,7 +512,7 @@
 				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
 				<div class="body">
 					<div class="title">Windows 11 Pro OEM</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Đã bán: 380</span></div>
+					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 380</span></div>
 					<div class="price">900,000₫</div>
 				</div>
 			</div>
@@ -524,7 +524,7 @@
 			<a th:if="${totalPages > 1 and page > 0}"
 				th:href="@{'/customer/dashboard'(page=${page - 1}, size=${size}, search=${search})}"
 				style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">«
-				Trước</a>
+					Previous</a>
 			<span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
 				<a th:href="@{'/customer/dashboard'(page=${i}, size=${size}, search=${search})}" th:text="${i + 1}"
 					th:classappend="${i} == ${page} ? ' active' : ''"
@@ -545,14 +545,14 @@
 				<div id="topupIcon"
 					style="width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:6px auto 12px auto;border:2px solid #10b981;color:#10b981;font-size:34px">
 					✓</div>
-				<h3 id="topupTitle" style="margin:0 0 6px 0;color:#111827;font-size:18px">Nạp tiền thành công</h3>
-				<div id="topupMsg" style="color:#6b7280;font-size:14px">Số tiền đã được cộng vào ví của bạn.</div>
+				<h3 id="topupTitle" style="margin:0 0 6px 0;color:#111827;font-size:18px">Top Up Successful</h3>
+				<div id="topupMsg" style="color:#6b7280;font-size:14px">Amount has been added to your wallet.</div>
 				<div style="margin-top:14px;display:flex;gap:8px;justify-content:center">
 					<a href="/cart" class="btn"
-						style="background:#111827;color:#fff;border:none;padding:8px 12px;border-radius:10px">Về giỏ
-						hàng</a>
+						style="background:#111827;color:#fff;border:none;padding:8px 12px;border-radius:10px">Back to
+						Cart</a>
 					<button type="button" id="topupClose" class="btn"
-						style="padding:8px 12px;border-radius:10px">Đóng</button>
+						style="padding:8px 12px;border-radius:10px">Close</button>
 				</div>
 			</div>
 		</div>
@@ -562,16 +562,16 @@
 			style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
 			<div
 				style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
-				<h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">Nạp tiền VNPay</h3>
-				<div style="color:#6b7280;font-size:14px;margin-bottom:8px">Nhập số tiền muốn nạp (VND)</div>
+				<h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">VNPay Top Up</h3>
+				<div style="color:#6b7280;font-size:14px;margin-bottom:8px">Enter amount to top up (VND)</div>
 				<input id="topupAmountField" type="text" inputmode="numeric" placeholder="200000"
 					style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;font-weight:600" />
 				<div id="topupErr" style="color:#ef4444;font-size:12px;height:16px;margin-top:6px"></div>
 				<div style="margin-top:10px;display:flex;gap:8px;justify-content:center">
 					<button type="button" id="topupCancelBtn" class="btn"
-						style="padding:8px 12px;border-radius:10px">Hủy</button>
+						style="padding:8px 12px;border-radius:10px">Cancel</button>
 					<button type="button" id="topupConfirmBtn" class="btn"
-						style="background:#0ea5e9;color:#fff;border:none;padding:8px 12px;border-radius:10px">Nạp</button>
+						style="background:#0ea5e9;color:#fff;border:none;padding:8px 12px;border-radius:10px">Top Up</button>
 				</div>
 			</div>
 		</div>
@@ -598,7 +598,7 @@
 				function confirm() {
 					const v = field.value || '';
 					const clean = v.replace(/[^0-9]/g, '');
-					if (!clean) { err.textContent = 'Số tiền không hợp lệ'; return; }
+					if (!clean) { err.textContent = 'Invalid amount'; return; }
 					document.getElementById('topupAmountInput').value = clean;
 					ask.style.display = 'none';
 					__topupForm.submit();
@@ -628,13 +628,13 @@
 				closeBtn && closeBtn.addEventListener('click', hide);
 				if (topup === 'success') {
 					if (icon) { icon.style.borderColor = '#10b981'; icon.style.color = '#10b981'; icon.textContent = '✓'; }
-					if (title) title.textContent = 'Nạp tiền thành công';
-					if (msg) msg.textContent = 'Đã cộng ' + (amount ? Number(amount).toLocaleString('vi-VN') + '₫' : 'số tiền') + ' vào ví của bạn.';
+					if (title) title.textContent = 'Top Up Successful';
+					if (msg) msg.textContent = 'Added ' + (amount ? Number(amount).toLocaleString('en-US') + '₫' : 'amount') + ' to your wallet.';
 					show();
 				} else {
 					if (icon) { icon.style.borderColor = '#ef4444'; icon.style.color = '#ef4444'; icon.textContent = '!'; }
-					if (title) title.textContent = 'Nạp tiền thất bại';
-					if (msg) msg.textContent = 'Mã lỗi: ' + (params.get('code') || '');
+					if (title) title.textContent = 'Top Up Failed';
+					if (msg) msg.textContent = 'Error code: ' + (params.get('code') || '');
 					show();
 				}
 			})();
