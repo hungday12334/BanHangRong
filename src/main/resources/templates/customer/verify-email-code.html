@@ -86,22 +86,22 @@
 
 <body>
     <div class="container">
-        <div class="title">Xác thực email</div>
-        <div class="desc">Nhập mã 6 chữ số đã được gửi đến email của bạn.</div>
-        <div th:if="${error != null}" class="notice" th:text="${error}">Mã không hợp lệ</div>
+        <div class="title">Email Verification</div>
+        <div class="desc">Enter the 6-digit code sent to your email.</div>
+        <div th:if="${error != null}" class="notice" th:text="${error}">Invalid code</div>
         <form method="post" action="/customer/verify-code">
-            <input type="text" name="code" placeholder="Nhập mã 6 số" maxlength="6" pattern="[0-9]{6}" required>
+            <input type="text" name="code" placeholder="Enter 6-digit code" maxlength="6" pattern="[0-9]{6}" required>
             <div class="actions">
                 <div>
                     <button id="resendBtn" type="button" class="btn"
                         th:disabled="${remainingSeconds != null and remainingSeconds > 0}" onclick="resendCode()">
-                        Gửi lại mã <span id="countdown"
+                        Resend Code <span id="countdown"
                             th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
                     </button>
                 </div>
                 <div style="display:flex;gap:10px;">
-                    <button type="button" class="btn" onclick="history.back()">Hủy</button>
-                    <button type="submit" class="btn primary">Xác nhận</button>
+                    <button type="button" class="btn" onclick="history.back()">Cancel</button>
+                    <button type="submit" class="btn primary">Confirm</button>
                 </div>
             </div>
         </form>

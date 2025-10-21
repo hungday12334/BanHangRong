@@ -46,10 +46,10 @@
 
 <body>
     <div class="wrap">
-        <h2>Kết quả thanh toán</h2>
-        <div th:if="${success}" class="ok">Thanh toán thành công!</div>
-        <div th:unless="${success}" class="bad">Thanh toán thất bại. Mã: <span th:text="${code}">99</span></div>
-        <a href="/cart" class="btn">Quay lại giỏ hàng</a>
+        <h2>Payment Result</h2>
+        <div th:if="${success}" class="ok">Payment successful!</div>
+        <div th:unless="${success}" class="bad">Payment failed. Code: <span th:text="${code}">99</span></div>
+        <a href="/cart" class="btn">Back to Cart</a>
     </div>
 </body>
 

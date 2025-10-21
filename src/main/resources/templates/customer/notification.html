@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông báo - BanHangRong</title>
+    <title>Notifications - BanHangRong</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -425,7 +425,7 @@
                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                     </form>
                 </div>
-                <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
             </div>
         </div>
 
@@ -433,18 +433,18 @@
         <div class="notification-content">
             <!-- Page Header -->
             <div class="page-header">
-                <h1 class="page-title">Thông báo</h1>
-                <p class="page-subtitle">Quản lý và xem tất cả thông báo của bạn</p>
+                <h1 class="page-title">Notifications</h1>
+                <p class="page-subtitle">Manage and view all your notifications</p>
             </div>
 
             <!-- Notification Filters -->
             <div class="notification-filters">
                 <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterNotifications('all')">Tất cả</button>
-                    <button class="filter-btn" onclick="filterNotifications('unread')">Chưa đọc</button>
-                    <button class="filter-btn" onclick="filterNotifications('orders')">Đơn hàng</button>
-                    <button class="filter-btn" onclick="filterNotifications('promotions')">Khuyến mãi</button>
-                    <button class="filter-btn" onclick="filterNotifications('system')">Hệ thống</button>
+                    <button class="filter-btn active" onclick="filterNotifications('all')">All</button>
+                    <button class="filter-btn" onclick="filterNotifications('unread')">Unread</button>
+                    <button class="filter-btn" onclick="filterNotifications('orders')">Orders</button>
+                    <button class="filter-btn" onclick="filterNotifications('promotions')">Promotions</button>
+                    <button class="filter-btn" onclick="filterNotifications('system')">System</button>
                 </div>
             </div>
 
@@ -454,12 +454,12 @@
                 <div class="notification-item unread" data-category="orders">
                     <div class="notification-icon info">📦</div>
                     <div class="notification-content-item">
-                        <h3 class="notification-title">Đơn hàng #12345 đã được xác nhận</h3>
-                        <p class="notification-message">Đơn hàng của bạn đã được xác nhận và đang được chuẩn bị. Bạn sẽ nhận được thông báo khi đơn hàng được giao.</p>
-                        <div class="notification-time">2 giờ trước</div>
+                        <h3 class="notification-title">Order #12345 has been confirmed</h3>
+                        <p class="notification-message">Your order has been confirmed and is being prepared. You will receive a notification when the order is delivered.</p>
+                        <div class="notification-time">2 hours ago</div>
                         <div class="notification-actions">
-                            <button class="notification-action-btn primary" onclick="viewOrder('12345')">Xem đơn hàng</button>
-                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                            <button class="notification-action-btn primary" onclick="viewOrder('12345')">View Order</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Mark as Read</button>
                         </div>
                     </div>
                 </div>
@@ -467,12 +467,12 @@
                 <div class="notification-item" data-category="promotions">
                     <div class="notification-icon success">🎉</div>
                     <div class="notification-content-item">
-                        <h3 class="notification-title">Khuyến mãi mới - Giảm 20% tất cả sản phẩm</h3>
-                        <p class="notification-message">Chương trình khuyến mãi đặc biệt dành cho khách hàng VIP. Áp dụng mã giảm giá VIP20 để nhận ưu đãi.</p>
-                        <div class="notification-time">1 ngày trước</div>
+                        <h3 class="notification-title">New Promotion - 20% off all products</h3>
+                        <p class="notification-message">Special promotion for VIP customers. Use discount code VIP20 to get the offer.</p>
+                        <div class="notification-time">1 day ago</div>
                         <div class="notification-actions">
-                            <button class="notification-action-btn primary" onclick="viewPromotion()">Xem khuyến mãi</button>
-                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                            <button class="notification-action-btn primary" onclick="viewPromotion()">View Promotion</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Mark as Read</button>
                         </div>
                     </div>
                 </div>
@@ -480,12 +480,12 @@
                 <div class="notification-item" data-category="system">
                     <div class="notification-icon warning">⚠️</div>
                     <div class="notification-content-item">
-                        <h3 class="notification-title">Cập nhật bảo mật tài khoản</h3>
-                        <p class="notification-message">Chúng tôi khuyến nghị bạn cập nhật mật khẩu để tăng cường bảo mật tài khoản. Mật khẩu hiện tại của bạn đã được sử dụng hơn 90 ngày.</p>
-                        <div class="notification-time">3 ngày trước</div>
+                        <h3 class="notification-title">Account Security Update</h3>
+                        <p class="notification-message">We recommend updating your password to enhance account security. Your current password has been used for more than 90 days.</p>
+                        <div class="notification-time">3 days ago</div>
                         <div class="notification-actions">
-                            <button class="notification-action-btn primary" onclick="updatePassword()">Cập nhật mật khẩu</button>
-                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                            <button class="notification-action-btn primary" onclick="updatePassword()">Update Password</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Mark as Read</button>
                         </div>
                     </div>
                 </div>
@@ -493,12 +493,12 @@
                 <div class="notification-item" data-category="orders">
                     <div class="notification-icon success">✅</div>
                     <div class="notification-content-item">
-                        <h3 class="notification-title">Đơn hàng #12340 đã được giao thành công</h3>
-                        <p class="notification-message">Đơn hàng của bạn đã được giao thành công. Cảm ơn bạn đã mua sắm tại BanHangRong!</p>
-                        <div class="notification-time">5 ngày trước</div>
+                        <h3 class="notification-title">Order #12340 delivered successfully</h3>
+                        <p class="notification-message">Your order has been delivered successfully. Thank you for shopping at BanHangRong!</p>
+                        <div class="notification-time">5 days ago</div>
                         <div class="notification-actions">
-                            <button class="notification-action-btn primary" onclick="viewOrder('12340')">Xem đơn hàng</button>
-                            <button class="notification-action-btn" onclick="rateOrder()">Đánh giá</button>
+                            <button class="notification-action-btn primary" onclick="viewOrder('12340')">View Order</button>
+                            <button class="notification-action-btn" onclick="rateOrder()">Rate</button>
                         </div>
                     </div>
                 </div>
@@ -506,12 +506,12 @@
                 <div class="notification-item" data-category="system">
                     <div class="notification-icon info">ℹ️</div>
                     <div class="notification-content-item">
-                        <h3 class="notification-title">Chào mừng bạn đến với BanHangRong!</h3>
-                        <p class="notification-message">Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá các sản phẩm tuyệt vời và tận hưởng trải nghiệm mua sắm tốt nhất.</p>
-                        <div class="notification-time">1 tuần trước</div>
+                        <h3 class="notification-title">Welcome to BanHangRong!</h3>
+                        <p class="notification-message">Thank you for registering an account. Explore our great products and enjoy the best shopping experience.</p>
+                        <div class="notification-time">1 week ago</div>
                         <div class="notification-actions">
-                            <button class="notification-action-btn primary" onclick="exploreProducts()">Khám phá ngay</button>
-                            <button class="notification-action-btn" onclick="markAsRead(this)">Đánh dấu đã đọc</button>
+                            <button class="notification-action-btn primary" onclick="exploreProducts()">Explore Now</button>
+                            <button class="notification-action-btn" onclick="markAsRead(this)">Mark as Read</button>
                         </div>
                     </div>
                 </div>
@@ -520,9 +520,9 @@
             <!-- Empty State (Hidden by default) -->
             <div class="empty-state" id="emptyState" style="display: none;">
                 <div class="empty-state-icon">🔔</div>
-                <h3 class="empty-state-title">Không có thông báo nào</h3>
-                <p class="empty-state-message">Bạn chưa có thông báo nào trong danh mục này.</p>
-                <a href="/customer/dashboard" class="empty-state-btn">Quay về trang chủ</a>
+                <h3 class="empty-state-title">No Notifications</h3>
+                <p class="empty-state-message">You have no notifications in this category.</p>
+                <a href="/customer/dashboard" class="empty-state-btn">Back to Home</a>
             </div>
         </div>
     </div>
@@ -584,26 +584,26 @@
         function markAsRead(button) {
             const notification = button.closest('.notification-item');
             notification.classList.remove('unread');
-            button.textContent = 'Đã đọc';
+            button.textContent = 'Read';
             button.disabled = true;
             button.style.opacity = '0.5';
         }
 
         // Action handlers
         function viewOrder(orderId) {
-            alert('Xem đơn hàng #' + orderId + '\nChức năng đang được phát triển!');
+            alert('View Order #' + orderId + '\nFeature is under development!');
         }
 
         function viewPromotion() {
-            alert('Xem khuyến mãi\nChức năng đang được phát triển!');
+            alert('View Promotion\nFeature is under development!');
         }
 
         function updatePassword() {
-            alert('Cập nhật mật khẩu\nChức năng đang được phát triển!');
+            alert('Update Password\nFeature is under development!');
         }
 
         function rateOrder() {
-            alert('Đánh giá đơn hàng\nChức năng đang được phát triển!');
+            alert('Rate Order\nFeature is under development!');
         }
 
         function exploreProducts() {

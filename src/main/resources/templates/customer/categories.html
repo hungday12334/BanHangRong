@@ -322,15 +322,13 @@
                         </svg>
                     </button>
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản
-                            của tôi</a>
-                        <a class="item" href="#" role="menuitem">Đơn mua</a>
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="#" role="menuitem">My Orders</a>
                         <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
                             style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
                             Applied to become a seller</a>
                         <a class="item" href="#" role="menuitem"
-                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng
-                            xuất</a>
+                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
                     </div>
                     <form id="logoutForm" method="post" action="/logout" style="display:none;">
                     </form>
@@ -345,7 +343,7 @@
                             style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                     </form>
                 </div>
-                <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
                         th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
             </div>
         </div>

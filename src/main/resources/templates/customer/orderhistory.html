@@ -264,7 +264,7 @@ body {
                         <a class="item" href="/orderhistory" role="menuitem">Order History</a>
                         <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
                             <input type="hidden" name="amount" id="topupAmountInput" />
-                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up (VNPay)</button>
                         </form>
                         <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
                         <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
@@ -279,7 +279,7 @@ body {
 						<button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
 		</div>
 
@@ -318,24 +318,24 @@ body {
                             <div class="product-name" th:if="${productNamesMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
             <div th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Quantities: ' + ${orderItemsMap[order.orderId][0].quantity}">Quantities: 1</div>
             <!-- Product Description -->
-            <div class="product-description" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="${productsMap[orderItemsMap[order.orderId][0].productId].description}">Bảo vệ toàn diện: Antivirus, VPN, Password Manager. 5 devices, 12 tháng.</div>
+            <div class="product-description" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="${productsMap[orderItemsMap[order.orderId][0].productId].description}">Comprehensive protection: Antivirus, VPN, Password Manager. 5 devices, 12 months.</div>
             
             <div class="price-info" style="margin-top: 8px;">
               <span th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
-                <span class="sale-price" style="color: #ef4444; font-weight: 600;" th:text="'Giá khuyến mãi: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].salePrice, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá khuyến mãi: 1,100,000₫</span>
+                <span class="sale-price" style="color: #ef4444; font-weight: 600;" th:text="'Sale Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].salePrice, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Sale Price: 1,100,000₫</span>
                 <br>
-                <span class="original-price" style="color: #6b7280; text-decoration: line-through; font-size: 14px;" th:text="'Giá gốc: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá gốc: 1,250,000₫</span>
+                <span class="original-price" style="color: #6b7280; text-decoration: line-through; font-size: 14px;" th:text="'Original Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Original Price: 1,250,000₫</span>
               </span>
               <span th:unless="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
-                <span class="regular-price" style="color: #111827; font-weight: 600;" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="'Giá: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Giá: 1,250,000₫</span>
+                <span class="regular-price" style="color: #111827; font-weight: 600;" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="'Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Price: 1,250,000₫</span>
               </span>
               <br>
-              <span class="price-at-time" style="color: #059669; font-weight: 500; font-size: 14px;" th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Đã mua với giá: ' + ${#numbers.formatDecimal(orderItemsMap[order.orderId][0].priceAtTime, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Đã mua với giá: 1,100,000₫</span>
+              <span class="price-at-time" style="color: #059669; font-weight: 500; font-size: 14px;" th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Purchased at: ' + ${#numbers.formatDecimal(orderItemsMap[order.orderId][0].priceAtTime, 0, 0, 'COMMA', 0, 'POINT')} + '₫'">Purchased at: 1,100,000₫</span>
             </div>
                         </div>
                     </div>
                     <div class="order-bottom">
-          <div th:text="'Tổng đơn hàng: ' + ${#numbers.formatDecimal(order.totalAmount, 0, 0, 'COMMA', 0, 'POINT')} + '₫'" style="font-weight: 600; color: #111827;">Tổng đơn hàng: 1,100,000₫</div>
+          <div th:text="'Order Total: ' + ${#numbers.formatDecimal(order.totalAmount, 0, 0, 'COMMA', 0, 'POINT')} + '₫'" style="font-weight: 600; color: #111827;">Order Total: 1,100,000₫</div>
           <div class="order-actions">
             <button class="rate-btn">Rate</button>
             <button class="contact-btn">Contact Seller</button>
@@ -442,10 +442,10 @@ body {
         // VNPay topup function
         function topupPrompt(e){
             e.preventDefault();
-            const v = prompt('Nhập số tiền muốn nạp (VND):', '200000');
+            const v = prompt('Enter amount to top up (VND):', '200000');
             if(!v) return false;
             const clean = v.replace(/[^0-9]/g,'');
-            if(!clean){ alert('Số tiền không hợp lệ'); return false; }
+            if(!clean){ alert('Invalid amount'); return false; }
             document.getElementById('topupAmountInput').value = clean;
             e.target.submit();
             return true;

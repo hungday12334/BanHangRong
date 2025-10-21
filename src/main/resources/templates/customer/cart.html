@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giỏ hàng</title>
+    <title>Shopping Cart</title>
     <link rel="stylesheet" href="/css/styles.min.css">
     <style>
         .wrap {
@@ -154,18 +154,18 @@
 
 <body>
     <div class="wrap">
-        <h2>Giỏ hàng</h2>
+        <h2>Shopping Cart</h2>
         <div id="toast"
             style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999">
         </div>
         <div class="cart-card">
             <div class="cart-header">
                 <div class="col center"><input type="checkbox" disabled></div>
-                <div class="col">Sản phẩm</div>
-                <div class="col center">Đơn giá</div>
-                <div class="col center">Số lượng</div>
-                <div class="col right">Số tiền</div>
-                <div class="col center">Thao tác</div>
+                <div class="col">Product</div>
+                <div class="col center">Unit Price</div>
+                <div class="col center">Quantity</div>
+                <div class="col right">Amount</div>
+                <div class="col center">Actions</div>
             </div>
             <div class="cart-row" th:each="it : ${items}">
                 <div class="col center"><input type="checkbox" checked></div>
@@ -178,8 +178,8 @@
                                 <div class="name" th:text="${it.product.name}">Tên</div>
                                 <span class="qty-pill" th:text="${'x' + it.quantity}">x1</span>
                             </div>
-                            <div class="muted">Còn lại trong kho: <b th:text="${it.stock}">0</b></div>
-                            <div class="muted">Mã: <span th:text="${it.product.productId}">1</span></div>
+                            <div class="muted">Stock: <b th:text="${it.stock}">0</b></div>
+                            <div class="muted">Code: <span th:text="${it.product.productId}">1</span></div>
                         </div>
                     </div>
                 </div>
@@ -196,11 +196,11 @@
                         th:text="${#numbers.formatDecimal(it.lineTotal,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <div class="col center">
                     <a class="btn danger remove-btn" th:href="@{'/cart/remove'(productId=${it.product.productId})}"
-                        th:attr="data-product-id=${it.product.productId}">Xóa</a>
+                        th:attr="data-product-id=${it.product.productId}">Remove</a>
                 </div>
             </div>
             <div th:if="${items == null or #lists.isEmpty(items)}" class="col" style="color:#6b7280;text-align:center">
-                Giỏ hàng trống.</div>
+                Cart is empty.</div>
         </div>
         <script>
             (function () {
@@ -231,11 +231,11 @@
                             method: 'POST', headers: hdr,
                             body: `productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
                         }).then(r => {
-                            if (!r.ok) { if (r.status === 403) { alert('Phiên làm việc đã hết hạn. Vui lòng tải lại trang và thử lại.'); } throw new Error('bad'); }
+                            if (!r.ok) { if (r.status === 403) { alert('Session expired. Please refresh the page and try again.'); } throw new Error('bad'); }
                             return r.json();
                         }).then(d => {
                             const err = document.getElementById('err-' + pid);
-                            if (d.over) { err.textContent = `Vượt tồn kho (${d.stock}). Đã đặt về ${d.appliedQty}.`; }
+                            if (d.over) { err.textContent = `Exceeds stock (${d.stock}). Set to ${d.appliedQty}.`; }
                             else { err.textContent = ''; }
                             inp.value = d.appliedQty;
                             // update qty badge
@@ -265,10 +265,10 @@
             })();
         </script>
         <form class="summary" method="post" action="/cart/checkout-wallet">
-            <div class="total">Tổng cộng: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫
+            <div class="total">Total: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫
             </div>
-            <a href="/customer/dashboard" class="btn">Tiếp tục mua sắm</a>
-            <button class="btn primary" type="submit">Thanh toán bằng số dư</button>
+            <a href="/customer/dashboard" class="btn">Continue Shopping</a>
+            <button class="btn primary" type="submit">Pay with Balance</button>
         </form>
     </div>
     <script>
@@ -279,10 +279,10 @@
             const toast = document.getElementById('toast');
             if (!toast) return;
             const show = (msg, bg) => { toast.textContent = msg; toast.style.background = bg; toast.style.display = 'block'; setTimeout(() => { toast.style.display = 'none'; }, 3500); };
-            if (pay === 'success') show('Thanh toán thành công bằng số dư.', '#065f46');
-            else if (pay === 'insufficient') show('Số dư không đủ. Vui lòng nạp tiền.', '#991b1b');
-            else if (pay === 'empty') show('Giỏ hàng trống hoặc không hợp lệ.', '#b45309');
-            else if (pay === 'auth') show('Vui lòng đăng nhập lại.', '#1f2937');
+            if (pay === 'success') show('Payment successful with balance.', '#065f46');
+            else if (pay === 'insufficient') show('Insufficient balance. Please top up.', '#991b1b');
+            else if (pay === 'empty') show('Cart is empty or invalid.', '#b45309');
+            else if (pay === 'auth') show('Please login again.', '#1f2937');
         })();
     </script>
 </body>

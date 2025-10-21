@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trung tâm trợ giúp - BanHangRong</title>
+    <title>Help Center - BanHangRong</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -384,20 +384,20 @@
                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                     </form>
                 </div>
-                <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
             </div>
         </div>
 
         <!-- Support Hero Section -->
         <section class="support-hero">
-            <h1>Xin chào, BanHangRong có thể giúp gì cho bạn?</h1>
-            <p>Chúng tôi luôn sẵn sàng hỗ trợ bạn trong mọi vấn đề</p>
+            <h1>Hello, how can BanHangRong help you?</h1>
+            <p>We are always ready to support you with any issues</p>
             <div class="support-search">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <input type="text" placeholder="Nhập từ khóa hoặc nội dung cần tìm" id="supportSearch">
-                <button class="search-btn" onclick="searchSupport()">Tìm kiếm</button>
+                <input type="text" placeholder="Enter keywords or content to search" id="supportSearch">
+                <button class="search-btn" onclick="searchSupport()">Search</button>
             </div>
         </section>
 
@@ -405,79 +405,79 @@
         <div class="support-content">
             <!-- Categories Section -->
             <section class="categories-section">
-                <h2 class="section-title">Danh mục</h2>
+                <h2 class="section-title">Categories</h2>
                 <div class="categories-grid">
                     <a href="#" class="category-card" onclick="showCategory('shopping')">
                         <div class="category-icon">🛒</div>
-                        <div class="category-title">Mua Sắm Cùng BanHangRong</div>
-                        <div class="category-desc">Hướng dẫn mua hàng, tìm kiếm sản phẩm và thanh toán</div>
+                        <div class="category-title">Shopping with BanHangRong</div>
+                        <div class="category-desc">Shopping guide, product search and payment</div>
                     </a>
                     <a href="#" class="category-card" onclick="showCategory('promotions')">
                         <div class="category-icon">🏷️</div>
-                        <div class="category-title">Khuyến Mãi & Ưu Đãi</div>
-                        <div class="category-desc">Thông tin về các chương trình khuyến mãi và mã giảm giá</div>
+                        <div class="category-title">Promotions & Offers</div>
+                        <div class="category-desc">Information about promotional programs and discount codes</div>
                     </a>
                     <a href="#" class="category-card" onclick="showCategory('payment')">
                         <div class="category-icon">💳</div>
-                        <div class="category-title">Thanh Toán</div>
-                        <div class="category-desc">Hướng dẫn thanh toán và quản lý ví điện tử</div>
+                        <div class="category-title">Payment</div>
+                        <div class="category-desc">Payment guide and e-wallet management</div>
                     </a>
                     <a href="#" class="category-card" onclick="showCategory('orders')">
                         <div class="category-icon">📦</div>
-                        <div class="category-title">Đơn Hàng & Vận Chuyển</div>
-                        <div class="category-desc">Theo dõi đơn hàng và thông tin vận chuyển</div>
+                        <div class="category-title">Orders & Shipping</div>
+                        <div class="category-desc">Order tracking and shipping information</div>
                     </a>
                     <a href="#" class="category-card" onclick="showCategory('returns')">
                         <div class="category-icon">🔄</div>
-                        <div class="category-title">Trả Hàng & Hoàn Tiền</div>
-                        <div class="category-desc">Chính sách trả hàng và hoàn tiền</div>
+                        <div class="category-title">Returns & Refunds</div>
+                        <div class="category-desc">Return and refund policy</div>
                     </a>
                     <a href="#" class="category-card" onclick="showCategory('general')">
                         <div class="category-icon">❓</div>
-                        <div class="category-title">Thông Tin Chung</div>
-                        <div class="category-desc">Câu hỏi thường gặp và thông tin chung</div>
+                        <div class="category-title">General Information</div>
+                        <div class="category-desc">Frequently asked questions and general information</div>
                     </a>
                 </div>
             </section>
 
             <!-- FAQ Section -->
             <section class="faq-section">
-                <h2 class="section-title">Câu hỏi thường gặp</h2>
+                <h2 class="section-title">Frequently Asked Questions</h2>
                 <div class="faq-list">
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>[Cảnh báo lừa đảo] Mua sắm an toàn cùng BanHangRong</span>
+                            <span>[Fraud Warning] Safe Shopping with BanHangRong</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            BanHangRong cam kết bảo vệ thông tin cá nhân và giao dịch của bạn. Luôn kiểm tra thông tin người bán, đọc kỹ mô tả sản phẩm và sử dụng hệ thống thanh toán an toàn của chúng tôi.
+                            BanHangRong is committed to protecting your personal information and transactions. Always check seller information, read product descriptions carefully and use our secure payment system.
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>[Dịch vụ] Cách liên hệ Chăm sóc khách hàng, Hotline, Tổng đài BanHangRong</span>
+                            <span>[Service] How to contact Customer Care, Hotline, BanHangRong Call Center</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            Bạn có thể liên hệ với chúng tôi qua: Email: support@banhangrong.com, Hotline: 1900-xxxx, hoặc sử dụng chức năng chat trực tuyến trên website.
+                            You can contact us via: Email: support@banhangrong.com, Hotline: 1900-xxxx, or use the online chat feature on the website.
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>Làm thế nào để đăng ký tài khoản BanHangRong?</span>
+                            <span>How to register a BanHangRong account?</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            Bạn có thể đăng ký tài khoản bằng cách nhấn nút "Đăng ký" ở góc phải màn hình, điền đầy đủ thông tin và xác thực email để hoàn tất đăng ký.
+                            You can register an account by clicking the "Register" button in the top right corner of the screen, filling in all information and verifying your email to complete registration.
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>Làm sao để trở thành người bán trên BanHangRong?</span>
+                            <span>How to become a seller on BanHangRong?</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            Để trở thành người bán, bạn cần đăng ký tài khoản, xác thực danh tính, cung cấp thông tin kinh doanh và chờ phê duyệt từ đội ngũ BanHangRong.
+                            To become a seller, you need to register an account, verify your identity, provide business information and wait for approval from the BanHangRong team.
                         </div>
                     </div>
                 </div>
@@ -485,11 +485,11 @@
 
             <!-- Contact Section -->
             <section class="contact-section">
-                <h3 class="contact-title">Bạn có muốn tìm thêm thông tin gì không?</h3>
-                <p class="contact-desc">Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ bạn</p>
+                <h3 class="contact-title">Do you want to find more information?</h3>
+                <p class="contact-desc">Our support team is always ready to help you</p>
                 <a href="#" class="contact-btn" onclick="contactSupport()">
                     <span>📞</span>
-                    <span>Liên hệ BanHangRong</span>
+                    <span>Contact BanHangRong</span>
                 </a>
             </section>
         </div>
@@ -536,26 +536,26 @@
         function searchSupport() {
             const searchTerm = document.getElementById('supportSearch').value;
             if (searchTerm.trim()) {
-                alert('Tìm kiếm: ' + searchTerm + '\nChức năng tìm kiếm đang được phát triển!');
+                alert('Search: ' + searchTerm + '\nSearch feature is under development!');
             }
         }
 
         // Category functionality
         function showCategory(category) {
             const categoryNames = {
-                'shopping': 'Mua Sắm Cùng BanHangRong',
-                'promotions': 'Khuyến Mãi & Ưu Đãi',
-                'payment': 'Thanh Toán',
-                'orders': 'Đơn Hàng & Vận Chuyển',
-                'returns': 'Trả Hàng & Hoàn Tiền',
-                'general': 'Thông Tin Chung'
+                'shopping': 'Shopping with BanHangRong',
+                'promotions': 'Promotions & Offers',
+                'payment': 'Payment',
+                'orders': 'Orders & Shipping',
+                'returns': 'Returns & Refunds',
+                'general': 'General Information'
             };
-            alert('Chọn danh mục: ' + categoryNames[category] + '\nChức năng đang được phát triển!');
+            alert('Selected category: ' + categoryNames[category] + '\nFeature is under development!');
         }
 
         // Contact functionality
         function contactSupport() {
-            alert('Liên hệ hỗ trợ:\n📧 Email: support@banhangrong.com\n📞 Hotline: 1900-xxxx\n💬 Chat trực tuyến: Đang phát triển');
+            alert('Contact Support:\n📧 Email: support@banhangrong.com\n📞 Hotline: 1900-xxxx\n💬 Online Chat: Under development');
         }
 
         // Search on Enter key

@@ -91,7 +91,7 @@
 
 <body>
 	<div class="container">
-		<div class="breadcrumb"><a href="/customer/dashboard">← Quay lại danh sách</a></div>
+		<div class="breadcrumb"><a href="/customer/dashboard">← Back to List</a></div>
 		<div class="detail">
 			<div class="gallery">
 				<img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images.get(0).imageUrl}"
@@ -101,13 +101,13 @@
 			</div>
 			<div class="info">
 				<div class="title" th:text="${product.name}">Tên sản phẩm</div>
-				<div style="color:#6b7280">Đã bán: <b th:text="${product.totalSales}">0</b> • ⭐ <b
-						th:text="${#numbers.formatDecimal(product.averageRating,1,'COMMA',1,'POINT')}">0</b></div>
+				<div style="color:#6b7280">Sold: <b th:text="${product.totalSales}">0</b> • ⭐ <b
+					th:text="${#numbers.formatDecimal(product.averageRating,1,'COMMA',1,'POINT')}">0</b></div>
 				<div style="color:#374151;margin-top:4px">
-					Còn lại trong kho: <b th:text="${product.quantity}">0</b>
+					Stock: <b th:text="${product.quantity}">0</b>
 					<span th:if="${product.quantity != null and product.quantity <= 0}"
-						style="background:#6b7280;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px;font-size:12px;">Hết
-						hàng</span>
+						style="background:#6b7280;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px;font-size:12px;">Out of
+						Stock</span>
 				</div>
 				<div class="section">
 					<span class="price" th:if="${product.salePrice != null}"
@@ -117,22 +117,22 @@
 					<span class="price" th:if="${product.salePrice == null}"
 						th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
 				</div>
-				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Mô
-					tả...</div>
+				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Product
+					description...</div>
 				<div class="section">
 					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center">
 						<input type="hidden" name="productId" th:value="${product.productId}" />
 						<input type="number" name="quantity" min="1" value="1" th:attr="max=${product.quantity}"
 							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
-						<button class="btn primary" type="submit"
-							th:disabled="${product.quantity == null or product.quantity <= 0}">Thêm vào giỏ</button>
+					<button class="btn primary" type="submit"
+						th:disabled="${product.quantity == null or product.quantity <= 0}">Add to Cart</button>
 					</form>
 				</div>
 			</div>
 		</div>
 
 		<div class="section" style="margin-top:24px">
-			<h3 style="margin:0 0 8px">Đánh giá từ khách hàng</h3>
+			<h3 style="margin:0 0 8px">Customer Reviews</h3>
 			<div th:if="${reviews != null and !#lists.isEmpty(reviews)}">
 				<div class="review" th:each="rv : ${reviews}">
 					<div style="font-weight:600">⭐ <span th:text="${rv.rating}">5</span> • <span style="color:#6b7280"
@@ -140,8 +140,8 @@
 					<div th:text="${rv.comment}">Nội dung bình luận...</div>
 				</div>
 			</div>
-			<div class="review" th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280">Chưa có đánh
-				giá nào.</div>
+				<div class="review" th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280">No reviews
+					yet.</div>
 		</div>
 	</div>
 </body>
