@@ -1009,6 +1009,27 @@
     // === Profile edit modal ===
     // ===== Vouchers panel logic =====
     // ===== Withdraw panel logic =====
+    // Common Vietnam bank list (code + display name)
+    const BANKS = [
+      { code: 'VCB', name: 'Vietcombank' },
+      { code: 'CTG', name: 'VietinBank' },
+      { code: 'BIDV', name: 'BIDV' },
+      { code: 'TCB', name: 'Techcombank' },
+      { code: 'MB', name: 'MB Bank' },
+      { code: 'AGRIBANK', name: 'Agribank' },
+      { code: 'ACB', name: 'ACB' },
+      { code: 'VPB', name: 'VPBank' },
+      { code: 'STB', name: 'Sacombank' },
+      { code: 'HDB', name: 'HDBank' },
+      { code: 'SCB', name: 'SCB' },
+      { code: 'OCB', name: 'OCB' },
+      { code: 'VIB', name: 'VIB' },
+      { code: 'SHB', name: 'SHB' },
+      { code: 'MSB', name: 'MSB' },
+      { code: 'EIB', name: 'Eximbank' },
+      { code: 'TPB', name: 'TPBank' },
+      { code: 'HSBC', name: 'HSBC Vietnam' }
+    ];
     async function loadWithdrawSummary() {
       const res = await fetch('/seller/withdraw/summary');
       if (!res.ok) throw new Error('Cannot load withdraw summary');
@@ -1048,6 +1069,8 @@
       const amountWrap = document.getElementById('wd_amount_wrap');
       const allChk = document.getElementById('wd_all');
       const summary = document.getElementById('wd_summary');
+      const netPreview = document.getElementById('wd_net_preview');
+      const addBankBtn = document.getElementById('wd_add_bank');
       if (!bankSel || !histBody) return;
       summary.textContent = `Balance: ${Number(data.balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} • Fee: ${data.feePercent}%`;
       bankSel.innerHTML = '';
@@ -1055,6 +1078,11 @@
         const opt = document.createElement('option');
         opt.value = b.bankAccountId; opt.textContent = `${b.bankName} - ${b.accountNumber}`; bankSel.appendChild(opt);
       });
+      // wire add bank button (bind once)
+      if (addBankBtn && !addBankBtn.dataset.bound) {
+        addBankBtn.addEventListener('click', () => openBankAccountModal());
+        addBankBtn.dataset.bound = '1';
+      }
       async function applyFilters(page=0){
         const status = statusEl?.value || '';
         const fromDate = fromEl?.value || '';
@@ -1089,29 +1117,31 @@
       // initial load with no filters shows recent page 0
       applyFilters(0);
       if (!data.accounts || data.accounts.length === 0) {
-        // quick inline add minimal bank UI
+        // inline hint when no accounts
         const wrap = document.createElement('div');
         wrap.className = 'footer-note';
         wrap.style.marginTop = '8px';
-        wrap.innerHTML = `No bank accounts. <button id="wd_add_bank_btn" class="btn">Add bank</button>`;
+        wrap.textContent = 'No bank accounts yet. Click “+” to add one.';
         bankSel.parentElement.appendChild(wrap);
-        document.getElementById('wd_add_bank_btn')?.addEventListener('click', async () => {
-          const bankName = prompt('Bank name');
-          if (!bankName) return;
-          const accountNumber = prompt('Account number');
-          if (!accountNumber) return;
-          const accountHolderName = prompt('Account holder name');
-          if (!accountHolderName) return;
-          try {
-            await addBankAccount({ bankName, bankCode:'', accountNumber, accountHolderName, branch:'', makeDefault:true });
-            showToast('Bank saved', 'success');
-            const data2 = await loadWithdrawSummary();
-            renderWithdrawUI(data2);
-          } catch(e){ showToast(String(e), 'error'); }
-        });
       }
-      function toggleAmount(){ amountWrap.style.display = allChk.checked ? 'none' : 'block'; }
+      function toggleAmount(){ amountWrap.style.display = allChk.checked ? 'none' : 'block'; updateNetPreview(); }
       allChk?.addEventListener('change', toggleAmount); toggleAmount();
+      function updateNetPreview(){
+        if (!netPreview) return;
+        const feePct = Number(data.feePercent || 0);
+        const withdrawAll = allChk?.checked;
+        let amountVal = 0;
+        if (withdrawAll) amountVal = Number(data.balance || 0);
+        else {
+          const v = Number(document.getElementById('wd_amount')?.value || 0);
+          amountVal = isNaN(v) ? 0 : v;
+        }
+        const fee = amountVal * (feePct/100);
+        const net = Math.max(0, amountVal - fee);
+        netPreview.textContent = `Net after ${feePct}% fee: ${net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+      document.getElementById('wd_amount')?.addEventListener('input', updateNetPreview);
+      updateNetPreview();
     }
     async function loadWithdrawPanel(){
       const panel = document.getElementById('withdrawPanel');
@@ -1133,6 +1163,133 @@
         renderWithdrawUI(data);
       } catch(err) { showToast(String(err), 'error'); }
     });
+
+    // ===== Bank account modal =====
+    function openBankAccountModal() {
+      const dlg = document.getElementById('bankAccountModal');
+      if (!dlg) return;
+      const form = dlg.querySelector('#bankAccountForm');
+      // reset fields
+      form.reset?.();
+      // populate bank select once
+      const sel = dlg.querySelector('#ba_bankSelect');
+      const codeInput = dlg.querySelector('#ba_bankCode');
+      const logoWrap = dlg.querySelector('#ba_bankLogo');
+      const logoImg = logoWrap ? logoWrap.querySelector('img') : null;
+      const logoFallback = logoWrap ? logoWrap.querySelector('.fallback') : null;
+      const browseBtn = dlg.querySelector('#ba_browseBanks');
+      const listBox = dlg.querySelector('#ba_bankList');
+      function updateBankPreview(code){
+        if (!logoWrap || !logoImg || !logoFallback) return;
+        if (!code) {
+          logoImg.style.display = 'none';
+          logoFallback.style.display = '';
+          logoFallback.textContent = '';
+          return;
+        }
+        const urlPng = `/img/banks/${code}.png`;
+        const urlSvg = `/img/banks/${code}.svg`;
+        let triedSvg = false;
+        function toFallback(){
+          logoImg.style.display = 'none';
+          logoFallback.style.display = '';
+          logoFallback.textContent = code.slice(0,3).toUpperCase();
+        }
+        logoImg.onerror = () => {
+          if (!triedSvg) { triedSvg = true; logoImg.src = urlSvg; }
+          else { toFallback(); }
+        };
+        logoImg.onload = () => { logoImg.style.display = ''; logoFallback.style.display = 'none'; };
+        logoImg.src = urlPng;
+      }
+      if (sel && !sel.dataset.bound) {
+        // clear current options except first placeholder
+        while (sel.options.length > 1) sel.remove(1);
+        BANKS.forEach(b => {
+          const opt = document.createElement('option');
+          opt.value = b.code; opt.textContent = `${b.name} (${b.code})`;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', () => {
+          codeInput.value = sel.value || '';
+          updateBankPreview(sel.value || '');
+        });
+        sel.dataset.bound = '1';
+      } else if (sel) {
+        sel.value = '';
+      }
+      if (codeInput) codeInput.value = '';
+      updateBankPreview('');
+      // Image-rich browse dropdown
+      function closeBankList(){ if (listBox) { listBox.hidden = true; dlg.__bankListOpen = false; browseBtn?.setAttribute('aria-expanded', 'false'); } }
+      function openBankList(){
+        if (!listBox) return;
+        listBox.innerHTML = '';
+        BANKS.forEach(b => {
+          const row = document.createElement('div');
+          row.className = 'bank-option';
+          row.setAttribute('role','option');
+          row.innerHTML = `<span class="logo"><img alt="${b.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='';" /><span class="fallback" style="display:none">${b.code}</span></span><span class="name">${b.name}</span><span class="code">${b.code}</span>`;
+          const img = row.querySelector('img');
+          if (img) img.src = `/img/banks/${b.code}.png`;
+          row.addEventListener('click', () => {
+            if (sel) sel.value = b.code;
+            if (codeInput) codeInput.value = b.code;
+            updateBankPreview(b.code);
+            closeBankList();
+          });
+          listBox.appendChild(row);
+        });
+        listBox.hidden = false;
+        dlg.__bankListOpen = true;
+        browseBtn?.setAttribute('aria-expanded', 'true');
+      }
+      if (browseBtn && !browseBtn.dataset.bound) {
+        browseBtn.addEventListener('click', () => {
+          if (dlg.__bankListOpen) closeBankList(); else openBankList();
+        });
+        browseBtn.dataset.bound = '1';
+      }
+      // close when clicking outside list
+      const onDocClick = (ev) => {
+        if (!dlg.__bankListOpen) return;
+        if (!listBox.contains(ev.target) && !browseBtn.contains(ev.target)) closeBankList();
+      };
+      document.addEventListener('click', onDocClick, { once: true });
+      dlg.querySelector('#ba_accountNumber').value = '';
+      dlg.querySelector('#ba_holderName').value = '';
+      dlg.querySelector('#ba_branch').value = '';
+      const def = dlg.querySelector('#ba_default');
+      if (def) def.checked = true;
+
+      dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(dlg); }, { once: true });
+      dlg.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(dlg), { once: true }));
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const bankCode = (dlg.querySelector('#ba_bankSelect').value || '').trim();
+        if (!bankCode) { showToast('Please select a bank', 'error'); return; }
+        const bank = BANKS.find(b => b.code === bankCode);
+        const bankName = bank ? bank.name : bankCode;
+        const accountNumber = dlg.querySelector('#ba_accountNumber').value.trim();
+        const accountHolderName = dlg.querySelector('#ba_holderName').value.trim();
+        const branch = dlg.querySelector('#ba_branch').value.trim();
+        const makeDefault = !!dlg.querySelector('#ba_default').checked;
+        if (!accountNumber || !accountHolderName) {
+          showToast('Please fill required fields', 'error');
+          return;
+        }
+        try {
+          await addBankAccount({ bankName, bankCode, accountNumber, accountHolderName, branch, makeDefault });
+          closeModal(dlg);
+          showToast('Bank saved', 'success');
+          const data2 = await loadWithdrawSummary();
+          renderWithdrawUI(data2);
+        } catch (e) {
+          showToast(String(e), 'error');
+        }
+      };
+      openModal(dlg);
+    }
     async function fetchSellerProductsLite(sellerId) {
       const res = await fetch(`/api/products-lite?sellerId=${sellerId}`);
       if (!res.ok) return [];
@@ -1919,8 +2076,15 @@
       const pid = prodInput?.value ? Number(prodInput.value) : null;
       const exp = document.getElementById('gk_expire')?.value || '';
       let qty = document.getElementById('gk_qty')?.value ? parseInt(document.getElementById('gk_qty').value,10) : 0;
+      const selUser = document.getElementById('gk_user')?.value ? Number(document.getElementById('gk_user').value) : undefined;
+      const orderItemInput = document.getElementById('gk_order_item')?.value ? Number(document.getElementById('gk_order_item').value) : undefined;
       if (!pid) { showToast('Vui lòng chọn sản phẩm PUBLIC', 'error'); return; }
       if (!qty || qty <= 0) { showToast('Số lượng phải > 0', 'error'); return; }
+      // If no order item is provided, require a user so backend can auto-create order
+      if (!orderItemInput && !selUser) {
+        showToast('Không có Order Item ID: hãy chọn User để hệ thống tự tạo đơn hàng', 'error');
+        return;
+      }
       try {
         const res = await fetch('/api/seller/' + (document.getElementById('userId')?.textContent?.trim()||document.getElementById('sellerId')?.textContent?.trim()) + '/licenses/generate', {
           method: 'POST', headers: {'Content-Type':'application/json'},
@@ -1928,7 +2092,8 @@
             productId: pid,
             expireDate: exp,
             quantity: qty,
-            userId: (document.getElementById('gk_user')?.value ? Number(document.getElementById('gk_user').value) : undefined)
+            userId: selUser,
+            orderItemId: orderItemInput
           })
         });
   if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }

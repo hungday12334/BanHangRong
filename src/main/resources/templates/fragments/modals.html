@@ -172,5 +172,39 @@
     </div>
     <form method="dialog"><button value="close" hidden>Close</button></form>
   </dialog>
+  <dialog id="bankAccountModal" class="modal" aria-label="Add bank account" data-modal="bank-account">
+    <form method="dialog" class="modal-body" id="bankAccountForm">
+      <div class="modal-header">
+        <h3>Add bank account</h3>
+        <button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+      </div>
+      <div class="form-grid">
+        <label>Bank
+          <div class="bank-select-wrap" style="display:flex;gap:8px;align-items:center;">
+            <span id="ba_bankLogo" class="bank-logo" aria-hidden="true" style="width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--bg-soft);overflow:hidden;">
+              <img alt="" style="width:100%;height:100%;object-fit:cover;display:none;" />
+              <span class="fallback" style="font-size:12px;color:var(--muted);display:none;"></span>
+            </span>
+            <select id="ba_bankSelect" class="input" required style="flex:1;">
+              <option value="">Select bank</option>
+            </select>
+            <button type="button" id="ba_browseBanks" class="btn" title="Browse banks"><i class="ti ti-caret-down"></i></button>
+          </div>
+        </label>
+        <div id="ba_bankList" class="bank-list" hidden role="listbox" aria-label="Choose bank"></div>
+        <label>Bank code
+          <input id="ba_bankCode" class="input" placeholder="Auto" readonly />
+        </label>
+        <label>Account number<input id="ba_accountNumber" required /></label>
+        <label>Account holder<input id="ba_holderName" required /></label>
+        <label class="span-2">Branch<input id="ba_branch" placeholder="(optional)" /></label>
+        <label class="span-2" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <input id="ba_default" type="checkbox" /> Set as default
+        </label>
+      </div>
+      <div class="modal-actions"><button type="submit" class="btn primary" id="ba_save">Save</button></div>
+    </form>
+    <form method="dialog"><button value="close" hidden>Close</button></form>
+  </dialog>
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true" data-block="toast-root"></div>
 </section>

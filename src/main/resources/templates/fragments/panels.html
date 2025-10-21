@@ -199,11 +199,15 @@
               <label class="label" for="gk_qty">Quantity</label>
               <input id="gk_qty" type="number" min="1" step="1" value="1" class="input" />
             </div>
+            <div>
+              <label class="label" for="gk_order_item">Order Item ID (optional)</label>
+              <input id="gk_order_item" type="number" min="1" step="1" placeholder="e.g. 123" class="input" />
+            </div>
             <div class="action-row">
               <button id="gk_submit" type="submit" class="btn primary">Generate</button>
             </div>
             <div class="footer-note" id="gk_hint">Format: PRD&lt;productId&gt;-yyyyMMdd-random. Keys are saved
-              immediately.</div>
+              immediately. If Order Item ID is left blank and a User is selected, the system will auto-create a new order and link the generated keys to it.</div>
           </div>
         </div>
       </form>
@@ -344,7 +348,11 @@
         <div class="withdraw-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div>
             <label class="label">Bank account</label>
-            <select id="wd_bank" class="input" required></select>
+            <div class="bank-select-row" style="display:flex;gap:8px;align-items:center;">
+              <select id="wd_bank" class="input" required style="flex:1;"></select>
+              <button id="wd_add_bank" type="button" class="btn" title="Add bank account"><i class="ti ti-plus"></i></button>
+            </div>
+            <div class="footer-note" style="margin-top:6px;">You can add multiple bank accounts and set one as default.</div>
           </div>
           <div>
             <label class="label">Fee</label>
@@ -357,6 +365,7 @@
         <div id="wd_amount_wrap" style="margin-top:8px">
           <label class="label">Amount</label>
           <input id="wd_amount" class="input" type="number" min="0" step="0.01" placeholder="Enter amount" />
+          <div id="wd_net_preview" class="footer-note" style="margin-top:6px;">Net after fee: -</div>
         </div>
         <div style="margin-top:12px">
           <button id="wd_submit" type="submit" class="btn primary">Create withdrawal</button>

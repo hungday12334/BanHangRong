@@ -10,51 +10,54 @@
     </div>
   </div>
   <nav class="menu" data-block="nav">
-   <a href="/" class="item" data-nav="home" title="Trang chủ" aria-label="Trang chủ"
+   <a href="/" class="item" data-nav="home" title="Home" aria-label="Home"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI == '/' ? ' active' : ''}">
-      <i class="ti ti-home"></i><span class="lbl">Trang chủ</span></a>
+      <i class="ti ti-home"></i><span class="lbl">Home</span></a>
 
-   <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Quản lý" aria-label="Quản lý"
+   <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Dashboard" aria-label="Dashboard"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/dashboard') ? ' active' : ''}">
-      <i class="ti ti-dashboard"></i><span class="lbl">Quản lý</span></a>
+      <i class="ti ti-dashboard"></i><span class="lbl">Dashboard</span></a>
 
-   <a href="/seller/profile" class="item" data-nav="profile" title="Trang cá nhân" aria-label="Trang cá nhân"
+   <a href="/seller/profile" class="item" data-nav="profile" title="Profile" aria-label="Profile"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/profile') ? ' active' : ''}">
-      <i class="ti ti-user"></i><span class="lbl">Trang cá nhân</span></a>
+      <i class="ti ti-user"></i><span class="lbl">Profile</span></a>
 
-    <a href="#orders" class="item" data-nav="orders" title="Quản lý đơn hàng" aria-label="Quản lý đơn hàng">
-      <i class="ti ti-receipt"></i><span class="lbl">Quản lý đơn hàng</span></a>
+    <a href="#orders" class="item" data-nav="orders" title="Orders" aria-label="Orders">
+      <i class="ti ti-receipt"></i><span class="lbl">Orders</span></a>
 
-    <a href="#keys" class="item" data-nav="keys" title="Quản lý key" aria-label="Quản lý key">
-      <i class="ti ti-key"></i><span class="lbl">Quản lý key</span></a>
+    <a href="#keys" class="item" data-nav="keys" title="Licenses" aria-label="Licenses">
+      <i class="ti ti-key"></i><span class="lbl">Licenses</span></a>
 
-    <a href="#products" class="item" data-nav="products" title="Sản phẩm" aria-label="Sản phẩm">
-      <i class="ti ti-packages"></i><span class="lbl">Sản phẩm</span></a>
+    <a href="#products" class="item" data-nav="products" title="Products" aria-label="Products">
+      <i class="ti ti-packages"></i><span class="lbl">Products</span></a>
 
-    <a href="#gen-keys" class="item" data-nav="gen-keys" title="Tạo key" aria-label="Tạo key">
-      <i class="ti ti-keyboard"></i><span class="lbl">Tạo key</span></a>
+    <a href="#gen-keys" class="item" data-nav="gen-keys" title="Generate keys" aria-label="Generate keys">
+      <i class="ti ti-keyboard"></i><span class="lbl">Generate keys</span></a>
 
-   <a href="/seller/chat" class="item" data-nav="chat" title="Chat với khách hàng" aria-label="Chat với khách hàng"
+    <a href="#withdraw" class="item" data-nav="withdraw" title="Withdraw" aria-label="Withdraw">
+      <i class="ti ti-wallet"></i><span class="lbl">Withdraw</span></a>
+
+   <a href="/seller/chat" class="item" data-nav="chat" title="Support chat" aria-label="Support chat"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/chat') ? ' active' : ''}">
       <i class="ti ti-messages"></i>
-      <span class="lbl">Chat hỗ trợ</span>
+      <span class="lbl">Support chat</span>
       <span class="badge bg-danger" id="unreadChatCount" style="display: none;">0</span>
     </a>
 
-   <a href="/seller/reviews" class="item" data-nav="reviews" title="Đánh giá sản phẩm" aria-label="Đánh giá sản phẩm"
+   <a href="/seller/reviews" class="item" data-nav="reviews" title="Reviews" aria-label="Reviews"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/reviews') ? ' active' : ''}">
       <i class="ti ti-star"></i>
-      <span class="lbl">Đánh giá & Phản hồi</span>
+      <span class="lbl">Reviews & Feedback</span>
       <span class="badge bg-warning" id="unansweredReviewCount" style="display: none;">0</span>
     </a>
 
-   <a href="/seller/categories" class="item" data-nav="categories" title="Quản lý Danh mục" aria-label="Quản lý Danh mục"
+   <a href="/seller/categories" class="item" data-nav="categories" title="Categories" aria-label="Categories"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/categories') ? ' active' : ''}">
-      <i class="ti ti-folder"></i><span class="lbl">Quản lý Danh mục</span></a>
+      <i class="ti ti-folder"></i><span class="lbl">Categories</span></a>
 
-   <a href="/seller/shop-designer" class="item" data-nav="shop-designer" title="Thiết kế cửa hàng" aria-label="Thiết kế cửa hàng"
+   <a href="/seller/shop-designer" class="item" data-nav="shop-designer" title="Shop designer" aria-label="Shop designer"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/shop-designer') ? ' active' : ''}">
-      <i class="ti ti-palette"></i><span class="lbl">Thiết kế cửa hàng</span></a>
+      <i class="ti ti-palette"></i><span class="lbl">Shop designer</span></a>
 
    <a href="/seller/voucher" class="item" data-nav="vouchers" title="Vouchers" aria-label="Vouchers"
      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/voucher') ? ' active' : ''}">
@@ -62,10 +65,10 @@
   </nav>
   <div class="sidebar-footer" data-block="logout">
     <div class="footer-actions">
-      <button id="themeToggle" class="theme-toggle" aria-label="Chuyển giao diện" title="Chuyển giao diện" type="button">
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme" type="button">
         <i class="ti ti-sun"></i>
       </button>
-      <a href="/logout" class="logout-btn" title="Đăng xuất" aria-label="Đăng xuất"><i class="ti ti-logout"></i><span>Đăng xuất</span></a>
+      <a href="/logout" class="logout-btn" title="Logout" aria-label="Logout"><i class="ti ti-logout"></i><span>Logout</span></a>
     </div>
   </div>
 </section>

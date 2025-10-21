@@ -2141,6 +2141,32 @@ dialog.modal[open] {
   }
 }
 
+/* ===== Bank chooser styles ===== */
+.bank-list {
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elev);
+  max-height: 240px;
+  overflow: auto;
+  box-shadow: 0 10px 28px rgba(0,0,0,.25);
+}
+.bank-list .bank-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.bank-list .bank-option:hover { background: color-mix(in oklab, var(--accent) 10%, transparent); }
+.bank-list .bank-option .logo {
+  width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; display:inline-flex; align-items:center; justify-content:center; background: var(--bg-soft);
+}
+.bank-list .bank-option .logo img { width:100%; height:100%; object-fit: cover; display:block; }
+.bank-list .bank-option .logo .fallback { font-size: 12px; color: var(--muted); }
+.bank-list .bank-option .name { font-weight: 500; }
+.bank-list .bank-option .code { color: var(--muted); font-size: 12px; margin-left: auto; }
+
 body.enhanced-dashboard ::-webkit-scrollbar {
   width: 12px;
 }
@@ -2327,3 +2353,9 @@ body.theme-switching {
 .menu-group .menu-items a.item { display: block; }
 .menu-group .menu-group-title[aria-expanded="false"] .caret { transform: rotate(-90deg); }
 .menu-group .menu-group-title[aria-expanded="false"] + .menu-items { display: none; }
+
+/* ---- Withdraw panel polish ---- */
+#withdrawPanel .bank-select-row .btn { min-width: 44px; padding: 8px 10px; }
+#withdrawPanel .bank-select-row .btn .ti { font-size: 16px; }
+#withdrawPanel .footer-note { color: var(--muted); }
+#withdrawPanel #wd_net_preview { color: var(--muted); }
