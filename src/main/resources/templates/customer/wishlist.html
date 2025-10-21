@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách yêu thích</title>
+    <link rel="stylesheet" href="/css/styles.min.css">
+    <style>
+        .wishlist-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .wishlist-header {
+            margin-bottom: 30px;
+        }
+        
+        .wishlist-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .wishlist-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .wishlist-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .wishlist-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .product-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #059669;
+            margin-bottom: 15px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .empty-wishlist {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .empty-message {
+            margin-bottom: 30px;
+        }
+        
+        .btn-explore {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="wishlist-container">
+        <div class="wishlist-header">
+            <h1 class="wishlist-title">Danh sách yêu thích</h1>
+            <p class="wishlist-subtitle">Các sản phẩm bạn đã lưu để xem sau</p>
+        </div>
+        
+        <!-- Wishlist Items -->
+        <div class="wishlist-grid" id="wishlistGrid">
+            <!-- Sample wishlist items -->
+            <div class="wishlist-item">
+                <img src="/img/product-placeholder.jpg" alt="Product" class="product-image">
+                <h3 class="product-title">Microsoft Office 2021</h3>
+                <div class="product-price">299,000 VND</div>
+                <div class="product-actions">
+                    <button class="btn btn-primary" onclick="addToCart(1)">Thêm vào giỏ</button>
+                    <button class="btn btn-danger" onclick="removeFromWishlist(1)">Xóa</button>
+                </div>
+            </div>
+            
+            <div class="wishlist-item">
+                <img src="/img/product-placeholder.jpg" alt="Product" class="product-image">
+                <h3 class="product-title">Adobe Photoshop 2024</h3>
+                <div class="product-price">599,000 VND</div>
+                <div class="product-actions">
+                    <button class="btn btn-primary" onclick="addToCart(2)">Thêm vào giỏ</button>
+                    <button class="btn btn-danger" onclick="removeFromWishlist(2)">Xóa</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty state (hidden by default) -->
+        <div class="empty-wishlist" id="emptyWishlist" style="display: none;">
+            <div class="empty-icon">💝</div>
+            <h2 class="empty-title">Danh sách yêu thích trống</h2>
+            <p class="empty-message">Bạn chưa có sản phẩm nào trong danh sách yêu thích.</p>
+            <a href="/customer/dashboard" class="btn-explore">Khám phá sản phẩm</a>
+        </div>
+    </div>
+    
+    <script>
+        function addToCart(productId) {
+            // TODO: Implement add to cart functionality
+            alert('Đã thêm sản phẩm vào giỏ hàng!');
+        }
+        
+        function removeFromWishlist(productId) {
+            if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi danh sách yêu thích?')) {
+                // TODO: Implement remove from wishlist functionality
+                const item = event.target.closest('.wishlist-item');
+                item.remove();
+                
+                // Check if wishlist is empty
+                const grid = document.getElementById('wishlistGrid');
+                if (grid.children.length === 0) {
+                    document.getElementById('emptyWishlist').style.display = 'block';
+                }
+            }
+        }
+        
+        // Check if wishlist is empty on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const grid = document.getElementById('wishlistGrid');
+            if (grid.children.length === 0) {
+                document.getElementById('emptyWishlist').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

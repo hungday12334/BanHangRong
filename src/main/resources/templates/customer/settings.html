@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài đặt tài khoản</title>
+    <link rel="stylesheet" href="/css/styles.min.css">
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .settings-header {
+            margin-bottom: 30px;
+        }
+        
+        .settings-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .settings-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .settings-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .checkbox-label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1 class="settings-title">Cài đặt tài khoản</h1>
+            <p class="settings-subtitle">Quản lý thông tin và tùy chọn tài khoản của bạn</p>
+        </div>
+        
+        <!-- Success/Error Messages -->
+        <div class="success-message" id="successMessage">
+            Cài đặt đã được lưu thành công!
+        </div>
+        <div class="error-message" id="errorMessage">
+            Có lỗi xảy ra khi lưu cài đặt. Vui lòng thử lại.
+        </div>
+        
+        <!-- Account Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">Thông tin tài khoản</h2>
+            <form id="accountForm">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-input" 
+                           value="user@example.com" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="phone">Số điện thoại</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" 
+                           value="0123456789">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="language">Ngôn ngữ</label>
+                    <select id="language" name="language" class="form-select">
+                        <option value="vi" selected>Tiếng Việt</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="timezone">Múi giờ</label>
+                    <select id="timezone" name="timezone" class="form-select">
+                        <option value="Asia/Ho_Chi_Minh" selected>Asia/Ho_Chi_Minh (GMT+7)</option>
+                        <option value="UTC">UTC (GMT+0)</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    <button type="button" class="btn btn-secondary">Hủy</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Notification Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">Cài đặt thông báo</h2>
+            <form id="notificationForm">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="emailNotifications" name="emailNotifications" class="checkbox" checked>
+                    <label class="checkbox-label" for="emailNotifications">Nhận thông báo qua email</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="smsNotifications" name="smsNotifications" class="checkbox">
+                    <label class="checkbox-label" for="smsNotifications">Nhận thông báo qua SMS</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="pushNotifications" name="pushNotifications" class="checkbox" checked>
+                    <label class="checkbox-label" for="pushNotifications">Nhận thông báo đẩy</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="orderUpdates" name="orderUpdates" class="checkbox" checked>
+                    <label class="checkbox-label" for="orderUpdates">Cập nhật đơn hàng</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="promotions" name="promotions" class="checkbox" checked>
+                    <label class="checkbox-label" for="promotions">Khuyến mãi và ưu đãi</label>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Privacy Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">Bảo mật và quyền riêng tư</h2>
+            <form id="privacyForm">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="profilePublic" name="profilePublic" class="checkbox">
+                    <label class="checkbox-label" for="profilePublic">Hiển thị hồ sơ công khai</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showEmail" name="showEmail" class="checkbox">
+                    <label class="checkbox-label" for="showEmail">Hiển thị email trong hồ sơ</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showPhone" name="showPhone" class="checkbox">
+                    <label class="checkbox-label" for="showPhone">Hiển thị số điện thoại</label>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="settings-section">
+            <h2 class="section-title" style="color: #ef4444;">Vùng nguy hiểm</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">
+                Các hành động này không thể hoàn tác. Vui lòng cẩn thận.
+            </p>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-danger" onclick="deleteAccount()">
+                    Xóa tài khoản
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Form submission handlers
+        document.getElementById('accountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // TODO: Implement account settings update
+            showSuccessMessage();
+        });
+        
+        document.getElementById('notificationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // TODO: Implement notification settings update
+            showSuccessMessage();
+        });
+        
+        document.getElementById('privacyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // TODO: Implement privacy settings update
+            showSuccessMessage();
+        });
+        
+        function showSuccessMessage() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showErrorMessage() {
+            const errorMsg = document.getElementById('errorMessage');
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 3000);
+        }
+        
+        function deleteAccount() {
+            if (confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
+                if (confirm('Nhập "DELETE" để xác nhận xóa tài khoản:')) {
+                    // TODO: Implement account deletion
+                    alert('Chức năng xóa tài khoản đang được phát triển!');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

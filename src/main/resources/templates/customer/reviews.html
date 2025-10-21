@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh giá của tôi</title>
+    <link rel="stylesheet" href="/css/styles.min.css">
+    <style>
+        .reviews-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .reviews-header {
+            margin-bottom: 30px;
+        }
+        
+        .reviews-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .reviews-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .review-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .product-details h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #1f2937;
+        }
+        
+        .product-details p {
+            margin: 5px 0 0 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .star {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+        
+        .star.empty {
+            color: #d1d5db;
+        }
+        
+        .review-content {
+            margin-top: 15px;
+        }
+        
+        .review-text {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .review-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .review-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .empty-reviews {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .empty-message {
+            margin-bottom: 30px;
+        }
+        
+        .btn-explore {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="reviews-container">
+        <div class="reviews-header">
+            <h1 class="reviews-title">Đánh giá của tôi</h1>
+            <p class="reviews-subtitle">Xem và quản lý các đánh giá bạn đã viết</p>
+        </div>
+        
+        <!-- Reviews List -->
+        <div id="reviewsList">
+            <!-- Sample review -->
+            <div class="review-item">
+                <div class="review-header">
+                    <div class="product-info">
+                        <img src="/img/product-placeholder.jpg" alt="Product" class="product-image">
+                        <div class="product-details">
+                            <h3>Microsoft Office 2021</h3>
+                            <p>Đã mua ngày 15/10/2024</p>
+                        </div>
+                    </div>
+                    <div class="rating">
+                        <div class="stars">
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                        </div>
+                        <span>5.0</span>
+                    </div>
+                </div>
+                <div class="review-content">
+                    <p class="review-text">
+                        Sản phẩm rất tốt, dễ sử dụng và giá cả hợp lý. Tôi rất hài lòng với việc mua sắm tại đây.
+                    </p>
+                    <p class="review-date">Đánh giá ngày 16/10/2024</p>
+                </div>
+                <div class="review-actions">
+                    <button class="btn btn-primary" onclick="editReview(1)">Chỉnh sửa</button>
+                    <button class="btn btn-secondary" onclick="deleteReview(1)">Xóa</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty state (hidden by default) -->
+        <div class="empty-reviews" id="emptyReviews" style="display: none;">
+            <div class="empty-icon">⭐</div>
+            <h2 class="empty-title">Chưa có đánh giá nào</h2>
+            <p class="empty-message">Bạn chưa viết đánh giá nào cho sản phẩm.</p>
+            <a href="/customer/dashboard" class="btn-explore">Mua sắm ngay</a>
+        </div>
+    </div>
+    
+    <script>
+        function editReview(reviewId) {
+            // TODO: Implement edit review functionality
+            alert('Chức năng chỉnh sửa đánh giá đang được phát triển!');
+        }
+        
+        function deleteReview(reviewId) {
+            if (confirm('Bạn có chắc muốn xóa đánh giá này?')) {
+                // TODO: Implement delete review functionality
+                const item = event.target.closest('.review-item');
+                item.remove();
+                
+                // Check if reviews list is empty
+                const list = document.getElementById('reviewsList');
+                if (list.children.length === 0) {
+                    document.getElementById('emptyReviews').style.display = 'block';
+                }
+            }
+        }
+        
+        // Check if reviews list is empty on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const list = document.getElementById('reviewsList');
+            if (list.children.length === 0) {
+                document.getElementById('emptyReviews').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
