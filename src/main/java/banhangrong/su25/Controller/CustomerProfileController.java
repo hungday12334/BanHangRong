@@ -9,12 +9,14 @@ import banhangrong.su25.email.EmailService;
 import banhangrong.su25.Repository.UsersRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class CustomerProfileController {
@@ -24,29 +26,40 @@ public class CustomerProfileController {
     private final ShoppingCartRepository shoppingCartRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     public CustomerProfileController(UsersRepository usersRepository, ShoppingCartRepository shoppingCartRepository,
                                      EmailVerificationTokenRepository emailVerificationTokenRepository,
-                                     EmailService emailService) {
+                                     EmailService emailService, PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
         this.shoppingCartRepository = shoppingCartRepository;
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/customer/profile/{username}")
     public String profile(@PathVariable("username") String username, Model model) {
+        System.out.println("=== CUSTOMER PROFILE LOADING ===");
+        System.out.println("Requested username: " + username);
+        
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Users currentUser = null;
         if (auth != null && auth.isAuthenticated()) {
             currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+            System.out.println("Current user: " + (currentUser != null ? currentUser.getUsername() : "null"));
         }
 
         Users profileUser = usersRepository.findByUsername(username).orElse(null);
         if (profileUser == null) {
+            System.out.println("❌ Profile user not found: " + username);
             // Fallback: if not found, redirect to dashboard
             return "redirect:/customer/dashboard";
         }
+
+        System.out.println("✅ Profile user found: " + profileUser.getUsername());
+        System.out.println("Email: " + profileUser.getEmail());
+        System.out.println("Full name: " + profileUser.getFullName());
 
         // Header data
         if (currentUser != null) {
@@ -256,6 +269,72 @@ public class CustomerProfileController {
         } catch (Exception ignored) {}
 
         return "redirect:/customer/verify-code?sent=1&remaining=" + VERIFY_CODE_COOLDOWN_SECONDS;
+    }
+
+    // === THÊM METHODS XỬ LÝ ĐỔI MẬT KHẨU ===
+    @GetMapping("/customer/profile/{username}/change-password")
+    public String showChangePasswordForm(@PathVariable("username") String username, Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Users currentUser = null;
+        if (auth != null && auth.isAuthenticated()) {
+            currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        }
+        if (currentUser == null || !username.equalsIgnoreCase(currentUser.getUsername())) {
+            return "redirect:/customer/profile/" + username;
+        }
+
+        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+        model.addAttribute("user", currentUser);
+        return "customer/change-password";
+    }
+
+    @PostMapping("/customer/profile/{username}/change-password")
+    public String changePassword(@PathVariable("username") String username,
+                                @RequestParam String currentPassword,
+                                @RequestParam String newPassword,
+                                @RequestParam String confirmPassword,
+                                Model model,
+                                RedirectAttributes redirectAttributes) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Users currentUser = null;
+        if (auth != null && auth.isAuthenticated()) {
+            currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+        }
+        if (currentUser == null || !username.equalsIgnoreCase(currentUser.getUsername())) {
+            return "redirect:/customer/profile/" + username;
+        }
+
+        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+        model.addAttribute("user", currentUser);
+
+        // Validate passwords
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("pwdError", "Mật khẩu mới và xác nhận mật khẩu không khớp");
+            return "customer/change-password";
+        }
+
+        if (newPassword.length() < 6) {
+            model.addAttribute("pwdError", "Mật khẩu mới phải có ít nhất 6 ký tự");
+            return "customer/change-password";
+        }
+
+        // Verify current password
+        if (!passwordEncoder.matches(currentPassword, currentUser.getPassword())) {
+            model.addAttribute("pwdError", "Mật khẩu hiện tại không đúng");
+            return "customer/change-password";
+        }
+
+        // Update password
+        try {
+            String encryptedPassword = passwordEncoder.encode(newPassword);
+            currentUser.setPassword(encryptedPassword);
+            usersRepository.save(currentUser);
+            redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
+            return "redirect:/customer/profile/" + username + "?passwordChanged=1";
+        } catch (Exception e) {
+            model.addAttribute("pwdError", "Lỗi khi đổi mật khẩu: " + e.getMessage());
+            return "customer/change-password";
+        }
     }
 }
 
