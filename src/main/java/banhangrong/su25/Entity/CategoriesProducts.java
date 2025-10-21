@@ -51,4 +51,18 @@ class CategoriesProductsId implements java.io.Serializable {
     public void setProductId(Long productId) {
         this.productId = productId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CategoriesProductsId that = (CategoriesProductsId) o;
+        return java.util.Objects.equals(categoryId, that.categoryId) &&
+               java.util.Objects.equals(productId, that.productId);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(categoryId, productId);
+    }
 }

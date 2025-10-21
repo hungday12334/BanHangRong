@@ -1299,7 +1299,7 @@
                 <div class="avatar-edit-wrap">
                     <div class="avatar">
                         <!-- SỬA: Hiển thị avatar từ user data, nếu không có thì dùng default -->
-                        <img th:src="${user?.avatarUrl != null} ? ${user.avatarUrl} : '/img/avatar_default.jpg'"
+                        <img th:src="${user?.avatarUrl != null and user.avatarUrl != ''} ? ${user.avatarUrl} : '/img/avatar_default.jpg'"
                              src="/img/avatar_default.jpg"
                              alt="Avatar"
                              id="profileAvatar">
@@ -1336,15 +1336,15 @@
                         <label for="phone">Số điện thoại:</label>
                         <!-- SỬA: Hiển thị số điện thoại từ user data -->
                         <input type="tel" id="phone" name="phoneNumber"
-                               th:value="${user?.phoneNumber}"
-                               value="0900000000" readonly>
+                               th:value="${user?.phoneNumber != null} ? ${user.phoneNumber} : ''"
+                               value="" readonly>
                     </div>
 
                     <div class="form-group">
                         <label for="gender">Giới tính:</label>
                         <!-- SỬA: Hiển thị giới tính từ user data -->
                         <select id="gender" name="gender" disabled>
-                            <option value="other" th:selected="${user?.gender == 'other'}">Khác</option>
+                            <option value="other" th:selected="${user?.gender == 'other' or user?.gender == null}">Khác</option>
                             <option value="male" th:selected="${user?.gender == 'male'}">Nam</option>
                             <option value="female" th:selected="${user?.gender == 'female'}">Nữ</option>
                         </select>
@@ -1354,7 +1354,7 @@
                         <label for="birthday">Ngày sinh:</label>
                         <!-- SỬA: Hiển thị ngày sinh từ user data -->
                         <input type="date" id="birthday" name="birthDate"
-                               th:value="${user?.birthDate}"
+                               th:value="${user?.birthDate != null} ? ${#temporals.format(user.birthDate, 'yyyy-MM-dd')} : ''"
                                value="" readonly>
                     </div>
 
@@ -1659,40 +1659,27 @@
                 body: formData
             })
                 .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response redirected:', response.redirected);
+                    
                     if (response.redirected) {
                         // Nếu server redirect, chuyển hướng trang
                         window.location.href = response.url;
                         return;
                     }
                     if (response.ok) {
-                        return response.text();
+                        // Reload trang để hiển thị dữ liệu mới
+                        window.location.reload();
+                        return;
                     }
                     throw new Error('Save failed with status: ' + response.status);
                 })
-                .then(data => {
+                .catch(error => {
+                    console.error('Error saving profile:', error);
                     // Đóng toast loading
                     document.querySelectorAll('.toast').forEach(toast => toast.remove());
-
-                    // Khóa tất cả input và select
-                    formInputs.forEach(input => {
-                        input.readOnly = true;
-                        if (input.id === 'gender') {
-                            input.disabled = true;
-                        }
-                    });
-
-                    // Ẩn nút camera
-                    if (avatarWrap) {
-                        avatarWrap.classList.remove('editing');
-                        console.log("Removed editing class from avatar wrap");
-                    }
-
-                    // Đổi nút thành "Chỉnh sửa"
-                    editBtn.innerHTML = '<i class="ti ti-edit"></i>Chính sửa';
-                    editBtn.classList.remove('btn-success');
-                    editBtn.classList.add('btn-primary');
-
-                    showToast('Cập nhật thông tin thành công!', 'success');
+                    showToast('Lỗi khi lưu thông tin: ' + error.message, 'error');
+                });
 
                     // Reload trang để cập nhật dữ liệu mới
                     setTimeout(() => {
@@ -1819,10 +1806,19 @@
                     body: formData
                 })
                     .then(response => {
-                        if (response.ok) {
-                            return response;
+                        console.log('Avatar upload response status:', response.status);
+                        console.log('Avatar upload response redirected:', response.redirected);
+                        
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                            return;
                         }
-                        throw new Error('Upload failed');
+                        if (response.ok) {
+                            // Reload trang để hiển thị avatar mới
+                            window.location.reload();
+                            return;
+                        }
+                        throw new Error('Upload failed with status: ' + response.status);
                     })
                     .then(() => {
                         // Đóng toast loading
@@ -2036,12 +2032,17 @@
             body: formData
         })
             .then(response => {
+                console.log('Password change response status:', response.status);
+                console.log('Password change response redirected:', response.redirected);
+                
                 if (response.redirected) {
                     window.location.href = response.url;
                     return;
                 }
                 if (response.ok) {
-                    return response.text();
+                    // Reload trang để đảm bảo session được cập nhật
+                    window.location.reload();
+                    return;
                 }
                 throw new Error('Password change failed with status: ' + response.status);
             })

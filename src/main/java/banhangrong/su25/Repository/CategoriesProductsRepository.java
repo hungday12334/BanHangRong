@@ -12,9 +12,9 @@ import java.util.List;
 @Repository
 public interface CategoriesProductsRepository extends JpaRepository<CategoriesProducts, Long> {
 
-    @Query("SELECT cp.category FROM CategoriesProducts cp WHERE cp.product.productId = :productId")
+    @Query("SELECT c FROM Categories c WHERE c.categoryId IN (SELECT cp.id.categoryId FROM CategoriesProducts cp WHERE cp.id.productId = :productId)")
     List<Categories> findCategoriesByProductId(@Param("productId") Long productId);
 
-    @Query("SELECT COUNT(cp) > 0 FROM CategoriesProducts cp WHERE cp.category.categoryId = :categoryId")
+    @Query("SELECT COUNT(cp) > 0 FROM CategoriesProducts cp WHERE cp.id.categoryId = :categoryId")
     boolean existsByCategoryId(@Param("categoryId") Long categoryId);
 }
