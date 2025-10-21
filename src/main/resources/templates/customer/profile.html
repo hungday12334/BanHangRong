@@ -295,39 +295,36 @@
             <div class="card">
                 <h2 style="margin:0 0 8px 0">Hồ Sơ Của Tôi</h2>
                 <div style="color:#6b7280;margin-bottom:16px">Quản lý thông tin hồ sơ để bảo mật tài khoản</div>
-                <div style="display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:center">
+                <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;align-items:center">
                     <div class="label">Tên đăng nhập</div>
                     <div class="value" th:text="${profileUser.username}">datbautroi11</div>
-                    <div></div>
 
                     <div class="label">Tên</div>
                     <div class="value" th:text="'-'">-</div>
-                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn"
-                            style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
 
                     <div class="label">Email</div>
                     <div class="value" th:text="${maskedEmail != null ? maskedEmail : profileUser.email}">
                         td*********@gmail.com</div>
-                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn"
-                            style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
 
                     <div class="label">Số điện thoại</div>
                     <div class="value"
                         th:text="${maskedPhone != null ? maskedPhone : (profileUser.phoneNumber != null ? profileUser.phoneNumber : '-')}">
                         *********15</div>
-                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn"
-                            style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
 
                     <div class="label">Giới tính</div>
                     <div class="value" th:text="${profileUser.gender != null ? profileUser.gender : '-'}">Nam</div>
-                    <div></div>
 
                     <div class="label">Ngày sinh</div>
                     <div class="value"
                         th:text="${maskedBirth != null ? maskedBirth : (profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'dd/MM/yyyy') : '-')}">
                         **/**/2004</div>
-                    <div><a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn"
-                            style="padding:6px 10px;border-radius:8px">Thay đổi</a></div>
+                </div>
+                
+                <div style="margin-top:20px;text-align:center;">
+                    <a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn primary"
+                       style="padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;">
+                        Thay đổi thông tin
+                    </a>
                 </div>
             </div>
     </div>
