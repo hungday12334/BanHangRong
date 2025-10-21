@@ -10,16 +10,16 @@
     </div>
   </div>
   <nav class="menu" data-block="nav">
-   <a href="/" class="item" data-nav="home" title="Home" aria-label="Home"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI == '/' ? ' active' : ''}">
+    <a href="/" class="item" data-nav="home" title="Home" aria-label="Home"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI == '/' ? ' active' : ''}">
       <i class="ti ti-home"></i><span class="lbl">Home</span></a>
 
-   <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Dashboard" aria-label="Dashboard"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/dashboard') ? ' active' : ''}">
+    <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Dashboard" aria-label="Dashboard"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/dashboard') ? ' active' : ''}">
       <i class="ti ti-dashboard"></i><span class="lbl">Dashboard</span></a>
 
-   <a href="/seller/profile" class="item" data-nav="profile" title="Profile" aria-label="Profile"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/profile') ? ' active' : ''}">
+    <a href="/seller/profile" class="item" data-nav="profile" title="Profile" aria-label="Profile"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/profile') ? ' active' : ''}">
       <i class="ti ti-user"></i><span class="lbl">Profile</span></a>
 
     <a href="#orders" class="item" data-nav="orders" title="Orders" aria-label="Orders">
@@ -37,38 +37,59 @@
     <a href="#withdraw" class="item" data-nav="withdraw" title="Withdraw" aria-label="Withdraw">
       <i class="ti ti-wallet"></i><span class="lbl">Withdraw</span></a>
 
-   <a href="/seller/chat" class="item" data-nav="chat" title="Support chat" aria-label="Support chat"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/chat') ? ' active' : ''}">
+    <a href="/seller/chat" class="item" data-nav="chat" title="Support chat" aria-label="Support chat"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/chat') ? ' active' : ''}">
       <i class="ti ti-messages"></i>
       <span class="lbl">Support chat</span>
       <span class="badge bg-danger" id="unreadChatCount" style="display: none;">0</span>
     </a>
 
-   <a href="/seller/reviews" class="item" data-nav="reviews" title="Reviews" aria-label="Reviews"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/reviews') ? ' active' : ''}">
+    <a href="/seller/reviews" class="item" data-nav="reviews" title="Reviews" aria-label="Reviews"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/reviews') ? ' active' : ''}">
       <i class="ti ti-star"></i>
       <span class="lbl">Reviews & Feedback</span>
       <span class="badge bg-warning" id="unansweredReviewCount" style="display: none;">0</span>
     </a>
 
-   <a href="/seller/categories" class="item" data-nav="categories" title="Categories" aria-label="Categories"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/categories') ? ' active' : ''}">
+    <a href="/seller/categories" class="item" data-nav="categories" title="Categories" aria-label="Categories"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/categories') ? ' active' : ''}">
       <i class="ti ti-folder"></i><span class="lbl">Categories</span></a>
 
-   <a href="/seller/shop-designer" class="item" data-nav="shop-designer" title="Shop designer" aria-label="Shop designer"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/shop-designer') ? ' active' : ''}">
+    <a href="/seller/shop-designer" class="item" data-nav="shop-designer" title="Shop designer"
+      aria-label="Shop designer"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/shop-designer') ? ' active' : ''}">
       <i class="ti ti-palette"></i><span class="lbl">Shop designer</span></a>
 
-   <a href="/seller/voucher" class="item" data-nav="vouchers" title="Vouchers" aria-label="Vouchers"
-     th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/voucher') ? ' active' : ''}">
+    <a href="#vouchers" class="item" data-nav="vouchers" title="Vouchers" aria-label="Vouchers"
+      th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/voucher') ? ' active' : ''}">
       <i class="ti ti-ticket"></i><span class="lbl">Vouchers</span></a>
   </nav>
   <div class="sidebar-footer" data-block="logout">
     <div class="footer-actions">
+
+
       <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme" type="button">
         <i class="ti ti-sun"></i>
       </button>
-      <a href="/logout" class="logout-btn" title="Logout" aria-label="Logout"><i class="ti ti-logout"></i><span>Logout</span></a>
+      <!-- Logged-in user summary -->
+      <div class="user-card" aria-label="Signed-in user">
+        <div class="avatar-wrap">
+          <img class="avatar" alt="User avatar"
+            th:src="${(user != null and user.avatarUrl != null and user.avatarUrl != '') ? user.avatarUrl : '/img/avatar_default.jpg'}"
+            src="/img/avatar_default.jpg" width="44" height="44" loading="eager" decoding="async" />
+        </div>
+        <div class="meta">
+          <div class="name"
+            th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : (user != null and user.username != null ? user.username : 'User')}">
+            User</div>
+          <div class="email" th:text="${user != null and user.email != null ? user.email : ''}">user@example.com</div>
+        </div>
+        <div class="actions">
+          <a href="/logout" class="btn-icon logout-mini" title="Logout" aria-label="Logout">
+            <i class="ti ti-logout"></i>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </section>

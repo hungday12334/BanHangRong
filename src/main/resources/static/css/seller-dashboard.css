@@ -639,6 +639,102 @@ a {
   align-items: stretch;
 }
 
+/* Signed-in user compact card in sidebar footer */
+.sidebar-footer .user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(155deg,
+    color-mix(in oklab, var(--bg-elev) 90%, #fff 0%) 0%,
+    color-mix(in oklab, var(--bg-soft) 94%, #000 0%) 100%);
+  box-shadow: 0 4px 14px -8px rgba(0,0,0,.45), 0 0 0 1px color-mix(in oklab, var(--accent) 14%, transparent) inset;
+  justify-content: space-between;
+}
+
+.sidebar-footer .user-card .avatar-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--bg) 92%, transparent);
+  box-shadow: 0 2px 10px -6px rgba(0,0,0,.45) inset;
+}
+
+.sidebar-footer .user-card .avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sidebar-footer .user-card .meta {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.sidebar-footer .user-card .name {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.sidebar-footer .user-card .email {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.sidebar-footer .user-card .actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 6px;
+}
+
+.sidebar-footer .user-card .btn-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: linear-gradient(155deg, color-mix(in oklab, var(--bg-elev) 88%, #fff 0%), color-mix(in oklab, var(--bg-soft) 92%, #000 0%));
+  color: var(--text);
+  box-shadow: 0 3px 10px -6px rgba(0,0,0,.5), 0 0 0 1px color-mix(in oklab, var(--accent) 12%, transparent) inset;
+  transition: transform .25s ease, box-shadow .25s ease, background .35s ease;
+}
+
+.sidebar-footer .user-card .btn-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px -6px rgba(0,0,0,.55), 0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent) inset;
+}
+
+.sidebar-footer .user-card .btn-icon:active {
+  transform: translateY(0) scale(.96);
+}
+
+/* Red variant for logout */
+.sidebar-footer .user-card .logout-mini {
+  background: linear-gradient(135deg, color-mix(in oklab, var(--bad) 18%, transparent), color-mix(in oklab, var(--bad) 8%, transparent));
+  border: 1px solid color-mix(in oklab, var(--bad) 35%, transparent);
+  color: #ffd9d9;
+}
+
+.theme-light .sidebar-footer .user-card .logout-mini {
+  color: #7a1212;
+  background: color-mix(in oklab, var(--bad) 8%, transparent);
+}
+
 .sidebar-footer .logout-btn {
   display: flex;
   align-items: center;

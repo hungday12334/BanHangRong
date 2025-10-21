@@ -4,7 +4,7 @@
     <span class="accent"></span>
     <h1 style="margin-bottom:0;">Welcome back,
       <span class="chip you" id="userName"
-        th:text="${userName != null and userName != '' ? userName : (user != null and user.username != null ? user.username : (sellerId != null ? 'Seller #' + sellerId : 'Seller'))}">
+        th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : (userName != null and userName != '' ? userName : (user != null and user.username != null ? user.username : (sellerId != null ? 'Seller #' + sellerId : 'Seller')))}">
         Seller
       </span>!
     </h1>
