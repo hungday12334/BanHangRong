@@ -53,18 +53,27 @@ public class CustomerProfileController {
         Users profileUser = usersRepository.findByUsername(username).orElse(null);
         if (profileUser == null) {
             System.out.println("❌ Profile user not found: " + username);
-            // Fallback: if not found, redirect to dashboard
-            return "redirect:/customer/dashboard";
+            // Try to create a default user if none exists
+            if (usersRepository.count() == 0) {
+                System.out.println("No users in database, creating default user...");
+                profileUser = createDefaultUser(username);
+            } else {
+                // Fallback: if not found, redirect to dashboard
+                return "redirect:/customer/dashboard";
+            }
         }
 
         System.out.println("✅ Profile user found: " + profileUser.getUsername());
         System.out.println("Email: " + profileUser.getEmail());
-        System.out.println("Full name: " + profileUser.getFullName());
+        System.out.println("User type: " + profileUser.getUserType());
 
         // Header data
         if (currentUser != null) {
             try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
             model.addAttribute("user", currentUser);
+        } else {
+            // Fallback: use profileUser as current user if no authentication
+            model.addAttribute("user", profileUser);
         }
 
         model.addAttribute("profileUser", profileUser);
@@ -334,6 +343,32 @@ public class CustomerProfileController {
         } catch (Exception e) {
             model.addAttribute("pwdError", "Lỗi khi đổi mật khẩu: " + e.getMessage());
             return "customer/change-password";
+        }
+    }
+
+    // === THÊM METHOD TẠO USER MẶC ĐỊNH ===
+    private Users createDefaultUser(String username) {
+        try {
+            System.out.println("Creating default user with username: " + username);
+            
+            Users defaultUser = new Users();
+            defaultUser.setUsername(username);
+            defaultUser.setEmail(username + "@example.com");
+            defaultUser.setPassword(passwordEncoder.encode("123456")); // Default password
+            defaultUser.setUserType("customer");
+            defaultUser.setIsActive(true);
+            defaultUser.setIsEmailVerified(false);
+            defaultUser.setCreatedAt(java.time.LocalDateTime.now());
+            defaultUser.setUpdatedAt(java.time.LocalDateTime.now());
+            
+            Users savedUser = usersRepository.save(defaultUser);
+            System.out.println("✅ Default user created successfully: " + savedUser.getUsername());
+            return savedUser;
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error creating default user: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
     }
 }
