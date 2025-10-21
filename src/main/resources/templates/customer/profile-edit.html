@@ -347,8 +347,8 @@
                         </div>
                         <div class="form-group">
                             <label>Tên</label>
-                            <input type="text" name="fullName" th:value="${profileUser.fullName}"
-                                placeholder="Họ và tên">
+                            <input type="text" name="fullName" value=""
+                                placeholder="Họ và tên" disabled>
                         </div>
                         <div class="form-group">
                             <label>Email</label>
@@ -360,16 +360,17 @@
                         </div>
                         <div class="form-group">
                             <label>Giới tính</label>
-                            <select name="gender" th:value="${profileUser.gender}">
+                            <select name="gender">
                                 <option value="">--</option>
-                                <option value="Male" th:selected="${profileUser.gender == 'Male'}">Male</option>
-                                <option value="Female" th:selected="${profileUser.gender == 'Female'}">Female</option>
-                                <option value="Other" th:selected="${profileUser.gender == 'Other'}">Other</option>
+                                <option value="male" th:selected="${profileUser.gender == 'male'}">Nam</option>
+                                <option value="female" th:selected="${profileUser.gender == 'female'}">Nữ</option>
+                                <option value="other" th:selected="${profileUser.gender == 'other'}">Khác</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Ngày sinh</label>
-                            <input type="date" name="birthDate" th:value="${profileUser.birthDate}">
+                            <input type="date" name="birthDate" 
+                                   th:value="${profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'yyyy-MM-dd') : ''}">
                         </div>
                         <div class="form-group">
                             <label>Avatar URL</label>
@@ -384,6 +385,35 @@
                         <button type="submit" class="btn primary">Save</button>
                     </div>
                 </form>
+                
+                <script>
+                    function goBack() {
+                        window.history.back();
+                    }
+                    
+                    // Handle form submission
+                    document.querySelector('form').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(this);
+                        
+                        fetch(this.action, {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = response.url;
+                            } else {
+                                throw new Error('Save failed');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Lỗi khi lưu thông tin: ' + error.message);
+                        });
+                    });
+                </script>
             </section>
         </div>
     </div>
