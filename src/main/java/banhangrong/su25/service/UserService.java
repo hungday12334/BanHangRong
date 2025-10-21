@@ -16,4 +16,5 @@ public interface UserService {
     public Long count();
     public Long countByUserType(String userType);
     public void setExpireSessionByUsername( String username);
+    public void deactiveUserById(Users user);
 }

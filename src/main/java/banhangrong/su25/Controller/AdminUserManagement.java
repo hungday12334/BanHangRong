@@ -26,8 +26,6 @@ public class AdminUserManagement {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private AdminProductService adminProductService;
 
     @GetMapping("/create")
     public String showCreateScreen(Model model) {
@@ -272,16 +270,7 @@ public class AdminUserManagement {
             if (user == null) {
                 redirectAttributes.addFlashAttribute("error", "User not found");
             } else {
-                userService.setExpireSessionByUsername(user.getUsername());
-                user.setIsActive(false);
-                if(user.getUserType().equalsIgnoreCase("SELLER")){
-                    List<Products> listProduct= adminProductService.findBySellerIdAndStatusIgnoreCase(user.getUserId(),"public");
-                    for(Products p:listProduct){
-                        p.setStatus("Cancelled");
-                        adminProductService.save(p);
-                    }
-                }
-                userService.save(user);
+                userService.deactiveUserById(user);
                 redirectAttributes.addFlashAttribute("success", "Deactivated user successfully");
 
             }
