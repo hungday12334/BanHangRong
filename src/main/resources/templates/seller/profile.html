@@ -361,6 +361,21 @@
             cursor: not-allowed;
         }
 
+        /* Style đặc biệt cho trường name và email - luôn bị khóa */
+        .form-group input#name:disabled,
+        .form-group input#email:disabled {
+            background-color: color-mix(in oklab, var(--bg) 98%, transparent);
+            color: var(--muted);
+            cursor: not-allowed;
+            opacity: 0.7;
+            border-color: color-mix(in oklab, var(--border) 50%, transparent);
+        }
+
+        .form-group input#name:disabled::placeholder,
+        .form-group input#email:disabled::placeholder {
+            color: color-mix(in oklab, var(--muted) 60%, transparent);
+        }
+
         .form-actions {
             grid-column: 1 / -1;
             display: flex;
@@ -1318,18 +1333,18 @@
                 <form class="profile-form" id="profileForm">
                     <div class="form-group">
                         <label for="name">Tên:</label>
-                        <!-- SỬA: Hiển thị tên từ user data -->
+                        <!-- SỬA: Hiển thị tên từ user data - KHÔNG THỂ SỬA -->
                         <input type="text" id="name" name="username"
                                th:value="${user?.username}"
-                               value="Minh" readonly>
+                               value="Minh" readonly disabled>
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <!-- SỬA: Hiển thị email từ user data -->
+                        <!-- SỬA: Hiển thị email từ user data - KHÔNG THỂ SỬA -->
                         <input type="email" id="email" name="email"
                                th:value="${user?.email}"
-                               value="seller@example.com" readonly>
+                               value="seller@example.com" readonly disabled>
                     </div>
 
                     <div class="form-group">
@@ -1586,6 +1601,19 @@
         console.log("Form inputs:", formInputs.length);
         console.log("Avatar edit button:", editAvatarBtn);
 
+        // ===== XỬ LÝ FLASH MESSAGES TỪ SERVER =====
+        // Check for success message
+        const successMessage = /*[[${successMessage}]]*/ null;
+        if (successMessage) {
+            showToast(successMessage, 'success');
+        }
+
+        // Check for error message
+        const errorMessage = /*[[${errorMessage}]]*/ null;
+        if (errorMessage) {
+            showToast(errorMessage, 'error');
+        }
+
         // Initialize theme
         initTheme();
         initPasswordToggles();
@@ -1603,6 +1631,8 @@
 
         // === SỬA LẠI PHẦN XỬ LÝ NÚT CHỈNH SỬA ===
         if (editBtn) {
+            let isSaving = false; // Prevent multiple submissions
+
             editBtn.addEventListener('click', function() {
                 console.log("Edit button clicked");
 
@@ -1613,6 +1643,12 @@
                     // === BẬT CHẾ ĐỘ CHỈNH SỬA - HIỆN NÚT CAMERA ===
                     console.log("Enabling edit mode");
                     formInputs.forEach(input => {
+                        // KHÔNG CHO PHÉP SỬA TÊN VÀ EMAIL
+                        if (input.id === 'name' || input.id === 'email') {
+                            input.readOnly = true;
+                            input.disabled = true;
+                            return; // Bỏ qua, giữ nguyên trạng thái disabled
+                        }
                         input.readOnly = false;
                         input.disabled = false;
                     });
@@ -1629,10 +1665,31 @@
                     showToast('Bạn đang ở chế độ chỉnh sửa', 'info', { duration: 2000 });
                 } else {
                     // === TẮT CHẾ ĐỘ CHỈNH SỬA VÀ GỬI DỮ LIỆU LÊN SERVER ===
+
+                    // ===== PREVENT MULTIPLE RAPID CLICKS =====
+                    if (isSaving) {
+                        showToast('Đang lưu, vui lòng đợi...', 'info');
+                        return;
+                    }
+
                     console.log("Disabling edit mode and saving data");
+                    isSaving = true;
+
+                    // Disable button temporarily
+                    editBtn.disabled = true;
+                    editBtn.style.opacity = '0.6';
+                    editBtn.style.cursor = 'not-allowed';
 
                     // Gửi dữ liệu lên server
                     saveProfileData();
+
+                    // Re-enable after 2 seconds (safety timeout)
+                    setTimeout(() => {
+                        isSaving = false;
+                        editBtn.disabled = false;
+                        editBtn.style.opacity = '1';
+                        editBtn.style.cursor = 'pointer';
+                    }, 2000);
                 }
             });
         } else {
@@ -1644,11 +1701,66 @@
             console.log("Saving profile data to server...");
 
             // Lấy dữ liệu từ form
+            const phone = document.getElementById('phone').value;
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
+
+            // ===== CLIENT-SIDE VALIDATION =====
+
+            // Validate: Phone number
+            if (!phone || phone.trim() === '') {
+                showToast('Vui lòng nhập số điện thoại', 'error');
+                return;
+            }
+
+            // Validate: Phone format (Vietnamese: 10-11 digits, starts with 0)
+            const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+            if (!/^0\d{9,10}$/.test(cleanPhone)) {
+                showToast('Số điện thoại không hợp lệ! Phải là 10-11 số, bắt đầu bằng 0', 'error');
+                return;
+            }
+
+            // Validate: Gender
+            if (!gender || (gender !== 'male' && gender !== 'female' && gender !== 'other')) {
+                showToast('Vui lòng chọn giới tính', 'error');
+                return;
+            }
+
+            // Validate: Birthday (if provided)
+            if (birthday && birthday.trim() !== '') {
+                const birthDate = new Date(birthday);
+                const today = new Date();
+                const minDate = new Date();
+                minDate.setFullYear(today.getFullYear() - 120);
+                const maxDate = new Date();
+                maxDate.setFullYear(today.getFullYear() - 13);
+
+                // Check if date is in the future
+                if (birthDate > today) {
+                    showToast('Ngày sinh không được ở tương lai!', 'error');
+                    return;
+                }
+
+                // Check minimum age (13 years old)
+                if (birthDate > maxDate) {
+                    showToast('Bạn phải từ 13 tuổi trở lên!', 'error');
+                    return;
+                }
+
+                // Check maximum age (120 years)
+                if (birthDate < minDate) {
+                    showToast('Ngày sinh không hợp lệ!', 'error');
+                    return;
+                }
+            }
+
             const formData = new FormData();
-            formData.append('username', document.getElementById('name').value);
-            formData.append('phoneNumber', document.getElementById('phone').value);
-            formData.append('gender', document.getElementById('gender').value);
-            formData.append('birthDate', document.getElementById('birthday').value);
+            // ⚠️ SECURITY: KHÔNG GỬI username và email - chúng bị khóa
+            formData.append('phoneNumber', cleanPhone);
+            formData.append('gender', gender);
+            if (birthday && birthday.trim() !== '') {
+                formData.append('birthDate', birthday);
+            }
 
             // Hiển thị loading
             showToast('Đang lưu thông tin...', 'info', { duration: 0 });
@@ -1662,21 +1774,24 @@
                     if (response.redirected) {
                         // Nếu server redirect, chuyển hướng trang
                         window.location.href = response.url;
-                        return;
+                        return null;
                     }
                     if (response.ok) {
                         return response.text();
                     }
-                    throw new Error('Save failed with status: ' + response.status);
+                    throw new Error('Save failed');
                 })
                 .then(data => {
+                    if (data === null) return; // Đã redirect
+
                     // Đóng toast loading
                     document.querySelectorAll('.toast').forEach(toast => toast.remove());
 
                     // Khóa tất cả input và select
                     formInputs.forEach(input => {
                         input.readOnly = true;
-                        if (input.id === 'gender') {
+                        // Đảm bảo name, email và gender luôn bị disabled
+                        if (input.id === 'gender' || input.id === 'name' || input.id === 'email') {
                             input.disabled = true;
                         }
                     });
@@ -1703,12 +1818,13 @@
                 .catch(error => {
                     console.error('Error:', error);
                     document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                    showToast('Lỗi khi lưu thông tin: ' + error.message, 'error');
+                    showToast('Lỗi khi lưu thông tin. Vui lòng thử lại!', 'error');
 
                     // Vẫn thoát chế độ chỉnh sửa dù có lỗi
                     formInputs.forEach(input => {
                         input.readOnly = true;
-                        if (input.id === 'gender') {
+                        // Đảm bảo name, email và gender luôn bị disabled
+                        if (input.id === 'gender' || input.id === 'name' || input.id === 'email') {
                             input.disabled = true;
                         }
                     });
@@ -1767,48 +1883,116 @@
             cancelUpload.addEventListener('click', closeAvatarModal);
         }
 
-        // Preview avatar khi chọn file
+        // Preview avatar khi chọn file với validation
         if (avatarFileInput) {
             avatarFileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        if (avatarPreview) {
-                            avatarPreview.src = e.target.result;
-                        }
-                    }
-                    reader.readAsDataURL(file);
+                if (!file) {
+                    return;
                 }
+
+                // ===== CLIENT-SIDE VALIDATION =====
+
+                // Validate: File type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    showToast('Chỉ được upload file ảnh (JPEG, PNG, GIF)', 'error');
+                    this.value = ''; // Clear input
+                    return;
+                }
+
+                // Validate: File size (max 5MB)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    showToast(`File quá lớn (${sizeMB}MB). Tối đa 5MB`, 'error');
+                    this.value = ''; // Clear input
+                    return;
+                }
+
+                // Validate: File extension
+                const fileName = file.name.toLowerCase();
+                const validExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+                const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+                if (!hasValidExtension) {
+                    showToast('File phải có đuôi .jpg, .jpeg, .png hoặc .gif', 'error');
+                    this.value = ''; // Clear input
+                    return;
+                }
+
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarPreview) {
+                        avatarPreview.src = e.target.result;
+                    }
+                }
+                reader.onerror = function() {
+                    showToast('Lỗi khi đọc file', 'error');
+                };
+                reader.readAsDataURL(file);
             });
         }
 
         // Xử lý submit form upload avatar
         if (avatarUploadForm) {
+            let isUploading = false; // Prevent multiple submissions
+
             avatarUploadForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 console.log("Avatar upload form submitted");
 
+                // ===== PREVENT MULTIPLE RAPID CLICKS =====
+                if (isUploading) {
+                    showToast('Đang tải lên, vui lòng đợi...', 'info');
+                    return;
+                }
+
                 const file = avatarFileInput ? avatarFileInput.files[0] : null;
+
+                // ===== VALIDATION: Check if file selected =====
                 if (!file) {
                     showToast('Vui lòng chọn file ảnh', 'error');
                     return;
                 }
 
-                // Validate file type
-                if (!file.type.startsWith('image/')) {
+                // ===== VALIDATION: Check file type =====
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
                     showToast('Chỉ được upload file ảnh (JPEG, PNG, GIF)', 'error');
                     return;
                 }
 
-                // Validate file size (5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    showToast('Kích thước file không được vượt quá 5MB', 'error');
+                // ===== VALIDATION: Check file size (max 5MB) =====
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    showToast(`Kích thước file quá lớn (${sizeMB}MB). Tối đa 5MB`, 'error');
+                    return;
+                }
+
+                // ===== VALIDATION: Check file extension =====
+                const fileName = file.name.toLowerCase();
+                const validExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+                const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+                if (!hasValidExtension) {
+                    showToast('File phải có đuôi .jpg, .jpeg, .png hoặc .gif', 'error');
                     return;
                 }
 
                 const formData = new FormData();
                 formData.append('avatarFile', file);
+
+                // Set uploading flag
+                isUploading = true;
+
+                // Disable submit button
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.6';
+                    submitBtn.style.cursor = 'not-allowed';
+                }
 
                 // Hiển thị loading
                 showToast('Đang tải lên avatar...', 'info', { duration: 0 });
@@ -1819,25 +2003,25 @@
                     body: formData
                 })
                     .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                            return null;
+                        }
                         if (response.ok) {
-                            return response;
+                            return response.text();
                         }
                         throw new Error('Upload failed');
                     })
-                    .then(() => {
+                    .then(data => {
+                        if (data === null) return; // Đã redirect
+
                         // Đóng toast loading
                         document.querySelectorAll('.toast').forEach(toast => toast.remove());
 
                         showToast('Cập nhật avatar thành công!', 'success');
                         closeAvatarModal();
 
-                        // Cập nhật avatar hiển thị và thêm timestamp để tránh cache
-                        if (profileAvatar && avatarPreview) {
-                            const timestamp = new Date().getTime();
-                            profileAvatar.src = avatarPreview.src + (avatarPreview.src.includes('?') ? '&' : '?') + 't=' + timestamp;
-                        }
-
-                        // Reload trang để cập nhật dữ liệu mới
+                        // Reload trang để cập nhật avatar mới
                         setTimeout(() => {
                             window.location.reload();
                         }, 1000);
@@ -1845,7 +2029,18 @@
                     .catch(error => {
                         console.error('Error:', error);
                         document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                        showToast('Lỗi khi upload avatar: ' + error.message, 'error');
+                        showToast('Lỗi khi upload avatar. Vui lòng thử lại!', 'error');
+                    })
+                    .finally(() => {
+                        // Reset uploading flag
+                        isUploading = false;
+
+                        // Re-enable submit button
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.style.opacity = '1';
+                            submitBtn.style.cursor = 'pointer';
+                        }
                     });
             });
         }
@@ -2000,32 +2195,50 @@
             const newPassword = newPasswordInput.value;
             const confirmPassword = confirmPasswordInput.value;
 
-            // Validate form
+            // ===== CLIENT-SIDE VALIDATION =====
+
+            // Validate: Empty fields
             if (!currentPassword || !newPassword || !confirmPassword) {
                 showToast('Vui lòng điền đầy đủ thông tin', 'error');
                 return;
             }
 
+            // Validate: Password length minimum
             if (newPassword.length < 6) {
                 showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
                 return;
             }
 
+            // Validate: Password length maximum
+            if (newPassword.length > 100) {
+                showToast('Mật khẩu không được vượt quá 100 ký tự', 'error');
+                return;
+            }
+
+            // Validate: Password confirmation match
             if (newPassword !== confirmPassword) {
                 showToast('Mật khẩu xác nhận không khớp', 'error');
+                confirmPasswordInput.style.borderColor = 'var(--bad)';
+                return;
+            }
+
+            // Validate: New password different from current
+            if (currentPassword === newPassword) {
+                showToast('Mật khẩu mới phải khác mật khẩu hiện tại', 'error');
                 return;
             }
 
             // Gửi request đổi mật khẩu
-            changePassword(currentPassword, newPassword);
+            changePassword(currentPassword, newPassword, confirmPassword);
         });
     }
 
     // === HÀM GỬI REQUEST ĐỔI MẬT KHẨU ===
-    function changePassword(currentPassword, newPassword) {
+    function changePassword(currentPassword, newPassword, confirmPassword) {
         const formData = new FormData();
         formData.append('currentPassword', currentPassword);
         formData.append('newPassword', newPassword);
+        formData.append('confirmPassword', confirmPassword);
 
         // Hiển thị loading
         showToast('Đang đổi mật khẩu...', 'info', { duration: 0 });
@@ -2038,33 +2251,32 @@
             .then(response => {
                 if (response.redirected) {
                     window.location.href = response.url;
-                    return;
+                    return null;
                 }
                 if (response.ok) {
                     return response.text();
                 }
-                throw new Error('Password change failed with status: ' + response.status);
+                throw new Error('Password change failed');
             })
             .then(data => {
+                if (data === null) return; // Đã redirect
+
                 // Đóng toast loading
                 document.querySelectorAll('.toast').forEach(toast => toast.remove());
 
                 showToast('Đổi mật khẩu thành công!', 'success');
                 closePasswordModalFunc();
 
-                // Đăng xuất sau 2 giây (tuỳ chọn)
+                // Reload trang để hiển thị flash message
                 setTimeout(() => {
-                    showToast('Vui lòng đăng nhập lại với mật khẩu mới', 'info');
-                    setTimeout(() => {
-                        window.location.href = '/logout';
-                    }, 2000);
+                    window.location.reload();
                 }, 1000);
 
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                showToast('Lỗi khi đổi mật khẩu: ' + error.message, 'error');
+                showToast('Lỗi khi đổi mật khẩu. Vui lòng thử lại!', 'error');
             });
     }
 
