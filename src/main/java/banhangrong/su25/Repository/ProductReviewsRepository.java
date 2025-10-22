@@ -1,6 +1,8 @@
 package banhangrong.su25.Repository;
 
 import banhangrong.su25.Entity.ProductReviews;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,9 +16,17 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
     @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId ORDER BY pr.createdAt DESC")
     List<ProductReviews> findBySellerId(@Param("sellerId") Long sellerId);
 
+    // PERF-01: Pagination cho findBySellerId
+    @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId")
+    Page<ProductReviews> findBySellerId(@Param("sellerId") Long sellerId, Pageable pageable);
+
     // Tìm review chưa được phản hồi
     @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId AND pr.sellerResponse IS NULL ORDER BY pr.createdAt DESC")
     List<ProductReviews> findUnansweredReviews(@Param("sellerId") Long sellerId);
+
+    // PERF-01: Pagination cho findUnansweredReviews
+    @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId AND pr.sellerResponse IS NULL")
+    Page<ProductReviews> findUnansweredReviews(@Param("sellerId") Long sellerId, Pageable pageable);
 
     // Đếm số review chưa phản hồi
     @Query("SELECT COUNT(pr) FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId AND pr.sellerResponse IS NULL")
@@ -27,6 +37,10 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
 
     // Tìm review theo userId
     List<ProductReviews> findByUserId(Long userId);
+
+    // FIX SEC-03: Check xem review có thuộc về seller này không
+    @Query("SELECT CASE WHEN COUNT(pr) > 0 THEN true ELSE false END FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE pr.reviewId = :reviewId AND p.sellerId = :sellerId")
+    boolean existsByReviewIdAndSellerId(@Param("reviewId") Long reviewId, @Param("sellerId") Long sellerId);
 }
 
 

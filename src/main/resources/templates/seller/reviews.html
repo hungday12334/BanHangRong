@@ -111,7 +111,7 @@
                     <!-- Response form -->
                     <form th:attr="data-reviewid=${review.reviewId}" class="response-form" style="margin-top: 12px;">
                         <div style="margin-bottom: 12px;">
-                                <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="500" required
+                                <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="1000" required
                                           style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--bg) 94%, transparent); color: var(--text); resize: vertical; font-family: inherit;"></textarea>
                         </div>
                         <button class="btn primary" type="submit" style="margin-top: 8px;">
@@ -119,6 +119,42 @@
                         </button>
                     </form>
                 </div>
+            </div>
+
+            <!-- Pagination for Unanswered Reviews -->
+            <div th:if="${unansweredReviewsPage.totalPages > 1}" class="pagination-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; flex-wrap: wrap;">
+                <a th:href="@{/seller/reviews(unansweredPage=${unansweredReviewsPage.number - 1}, page=${currentPage})}"
+                   th:classappend="${unansweredReviewsPage.first} ? 'disabled' : ''"
+                   class="pagination-btn"
+                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="ti ti-chevron-left"></i> Trước
+                </a>
+
+                <div style="display: flex; gap: 4px;">
+                    <th:block th:each="i : ${#numbers.sequence(0, unansweredReviewsPage.totalPages - 1)}">
+                        <a th:if="${i == unansweredReviewsPage.number || (i >= unansweredReviewsPage.number - 2 && i <= unansweredReviewsPage.number + 2) || i == 0 || i == unansweredReviewsPage.totalPages - 1}"
+                           th:href="@{/seller/reviews(unansweredPage=${i}, page=${currentPage})}"
+                           th:text="${i + 1}"
+                           th:classappend="${i == unansweredReviewsPage.number} ? 'active' : ''"
+                           class="pagination-btn"
+                           style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; min-width: 40px; text-align: center;">
+                        </a>
+                        <span th:if="${i == 1 && unansweredReviewsPage.number > 3}" style="padding: 8px; color: var(--muted);">...</span>
+                        <span th:if="${i == unansweredReviewsPage.totalPages - 2 && unansweredReviewsPage.number < unansweredReviewsPage.totalPages - 4}" style="padding: 8px; color: var(--muted);">...</span>
+                    </th:block>
+                </div>
+
+                <a th:href="@{/seller/reviews(unansweredPage=${unansweredReviewsPage.number + 1}, page=${currentPage})}"
+                   th:classappend="${unansweredReviewsPage.last} ? 'disabled' : ''"
+                   class="pagination-btn"
+                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
+                    Sau <i class="ti ti-chevron-right"></i>
+                </a>
+
+                <span style="padding: 8px 12px; color: var(--muted); font-size: 14px;">
+                    Trang <b th:text="${unansweredReviewsPage.number + 1}">1</b> / <b th:text="${unansweredReviewsPage.totalPages}">1</b>
+                    (<span th:text="${unansweredReviewsPage.totalElements}">0</span> đánh giá)
+                </span>
             </div>
         </div>
 
@@ -161,16 +197,52 @@
                     </div>
 
                     <!-- Response form (if not responded) -->
-                    <div th:if="${review.sellerResponse == null}" class="response-form" style="margin-top: 12px;">
+                    <form th:if="${review.sellerResponse == null}" th:attr="data-reviewid=${review.reviewId}" class="response-form" style="margin-top: 12px;">
                         <div style="margin-bottom: 12px;">
-                                <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="500" required
+                                <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="1000" required
                                           style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--bg) 94%, transparent); color: var(--text); resize: vertical; font-family: inherit;"></textarea>
                         </div>
                         <button class="btn primary" type="submit" style="margin-top: 8px;">
                             <i class="ti ti-send"></i> Gửi phản hồi
                         </button>
-                    </div>
+                    </form>
                 </div>
+            </div>
+
+            <!-- Pagination for All Reviews -->
+            <div th:if="${allReviewsPage.totalPages > 1}" class="pagination-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; flex-wrap: wrap;">
+                <a th:href="@{/seller/reviews(page=${allReviewsPage.number - 1}, unansweredPage=${currentUnansweredPage})}"
+                   th:classappend="${allReviewsPage.first} ? 'disabled' : ''"
+                   class="pagination-btn"
+                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="ti ti-chevron-left"></i> Trước
+                </a>
+
+                <div style="display: flex; gap: 4px;">
+                    <th:block th:each="i : ${#numbers.sequence(0, allReviewsPage.totalPages - 1)}">
+                        <a th:if="${i == allReviewsPage.number || (i >= allReviewsPage.number - 2 && i <= allReviewsPage.number + 2) || i == 0 || i == allReviewsPage.totalPages - 1}"
+                           th:href="@{/seller/reviews(page=${i}, unansweredPage=${currentUnansweredPage})}"
+                           th:text="${i + 1}"
+                           th:classappend="${i == allReviewsPage.number} ? 'active' : ''"
+                           class="pagination-btn"
+                           style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; min-width: 40px; text-align: center;">
+                        </a>
+                        <span th:if="${i == 1 && allReviewsPage.number > 3}" style="padding: 8px; color: var(--muted);">...</span>
+                        <span th:if="${i == allReviewsPage.totalPages - 2 && allReviewsPage.number < allReviewsPage.totalPages - 4}" style="padding: 8px; color: var(--muted);">...</span>
+                    </th:block>
+                </div>
+
+                <a th:href="@{/seller/reviews(page=${allReviewsPage.number + 1}, unansweredPage=${currentUnansweredPage})}"
+                   th:classappend="${allReviewsPage.last} ? 'disabled' : ''"
+                   class="pagination-btn"
+                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
+                    Sau <i class="ti ti-chevron-right"></i>
+                </a>
+
+                <span style="padding: 8px 12px; color: var(--muted); font-size: 14px;">
+                    Trang <b th:text="${allReviewsPage.number + 1}">1</b> / <b th:text="${allReviewsPage.totalPages}">1</b>
+                    (<span th:text="${allReviewsPage.totalElements}">0</span> đánh giá)
+                </span>
             </div>
         </div>
     </main>
@@ -178,6 +250,50 @@
 
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
+
+<style>
+    .pagination-btn {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-elev);
+        color: var(--text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+
+    .pagination-btn:hover:not(.disabled) {
+        background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev));
+        border-color: var(--accent);
+        transform: translateY(-1px);
+    }
+
+    .pagination-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        font-weight: 600;
+    }
+
+    .pagination-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+</style>
 
 <script src="/js/seller-dashboard.js"></script>
 <script>
