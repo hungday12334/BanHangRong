@@ -1636,7 +1636,9 @@
             editBtn.addEventListener('click', function() {
                 console.log("Edit button clicked");
 
-                const isReadOnly = formInputs[0] && formInputs[0].readOnly;
+                // Check readonly state using phone field (not name/email which are always disabled)
+                const phoneInput = document.getElementById('phone');
+                const isReadOnly = phoneInput && phoneInput.readOnly;
                 console.log("Is read only:", isReadOnly);
 
                 if (isReadOnly) {
