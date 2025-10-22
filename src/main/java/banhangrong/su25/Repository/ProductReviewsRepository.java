@@ -32,6 +32,30 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
     @Query("SELECT COUNT(pr) FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId AND pr.sellerResponse IS NULL")
     Long countUnansweredReviews(@Param("sellerId") Long sellerId);
 
+    // Đếm tổng số review của seller
+    @Query("SELECT COUNT(pr) FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId")
+    Long countBySellerId(@Param("sellerId") Long sellerId);
+
+    // Filter reviews với nhiều điều kiện
+    @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId " +
+           "WHERE p.sellerId = :sellerId " +
+           "AND (:status IS NULL OR " +
+           "     (:status = 'unanswered' AND pr.sellerResponse IS NULL) OR " +
+           "     (:status = 'answered' AND pr.sellerResponse IS NOT NULL)) " +
+           "AND (:rating IS NULL OR pr.rating = :rating) " +
+           "AND (:fromDate IS NULL OR pr.createdAt >= CAST(:fromDate AS timestamp)) " +
+           "AND (:toDate IS NULL OR pr.createdAt <= CAST(:toDate AS timestamp)) " +
+           "AND (:productId IS NULL OR pr.productId = :productId) " +
+           "AND (:userId IS NULL OR pr.userId = :userId)")
+    Page<ProductReviews> findByFilters(@Param("sellerId") Long sellerId,
+                                        @Param("status") String status,
+                                        @Param("rating") Integer rating,
+                                        @Param("fromDate") String fromDate,
+                                        @Param("toDate") String toDate,
+                                        @Param("productId") Long productId,
+                                        @Param("userId") Long userId,
+                                        Pageable pageable);
+
     // Tìm review theo productId
     List<ProductReviews> findByProductId(Long productId);
 

@@ -40,6 +40,20 @@ public class ProductReviewService {
         return productReviewsRepository.countUnansweredReviews(sellerId);
     }
 
+    public Long getTotalReviewCount(Long sellerId) {
+        return productReviewsRepository.countBySellerId(sellerId);
+    }
+
+    /**
+     * Filter reviews với nhiều tiêu chí
+     */
+    public Page<ProductReviews> getFilteredReviews(Long sellerId, String status, Integer rating,
+                                                     String fromDate, String toDate, Long productId,
+                                                     Long userId, Pageable pageable) {
+        return productReviewsRepository.findByFilters(sellerId, status, rating, fromDate, toDate,
+                                                       productId, userId, pageable);
+    }
+
     public Optional<ProductReviews> getReviewById(Long reviewId) {
         return productReviewsRepository.findById(reviewId);
     }

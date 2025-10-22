@@ -29,7 +29,12 @@ public class SellerReviewController {
     @GetMapping
     public String reviewsDashboard(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "0") int unansweredPage,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) Long userId,
             Model model,
             HttpSession session) {
         // FIX SEC-01: Lấy seller ID từ session thay vì hardcode
@@ -37,10 +42,9 @@ public class SellerReviewController {
         String userRole = (String) session.getAttribute("userRole");
 
         // DEMO MODE: Nếu chưa có session authentication, dùng seller ID = 1 để test
-        // TODO: Remove this when authentication is implemented
         if (sellerId == null) {
-            sellerId = 1L; // Demo seller ID
-            userRole = "SELLER"; // Demo role
+            sellerId = 1L;
+            userRole = "SELLER";
             System.out.println("⚠️ DEMO MODE: Using seller ID = 1 (no session authentication)");
         }
 
@@ -49,24 +53,34 @@ public class SellerReviewController {
             return "redirect:/login?error=unauthorized";
         }
 
-        // Pagination for all reviews
-        Pageable allPageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
-        Page<ProductReviews> allReviewsPage = productReviewService.getSellerReviews(sellerId, allPageable);
+        // Pagination
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        // Pagination for unanswered reviews
-        Pageable unansweredPageable = PageRequest.of(unansweredPage, PAGE_SIZE, Sort.by("createdAt").descending());
-        Page<ProductReviews> unansweredReviewsPage = productReviewService.getUnansweredReviews(sellerId, unansweredPageable);
+        // Filter reviews based on parameters
+        Page<ProductReviews> reviewsPage = productReviewService.getFilteredReviews(
+            sellerId, status, rating, fromDate, toDate, productId, userId, pageable
+        );
 
+        // Get counts for KPI cards
+        Long totalCount = productReviewService.getTotalReviewCount(sellerId);
         Long unansweredCount = productReviewService.getUnansweredReviewCount(sellerId);
+        Long answeredCount = totalCount - unansweredCount;
 
-        model.addAttribute("allReviews", allReviewsPage.getContent());
-        model.addAttribute("allReviewsPage", allReviewsPage);
-        model.addAttribute("unansweredReviews", unansweredReviewsPage.getContent());
-        model.addAttribute("unansweredReviewsPage", unansweredReviewsPage);
+        model.addAttribute("reviews", reviewsPage.getContent());
+        model.addAttribute("reviewsPage", reviewsPage);
+        model.addAttribute("totalCount", totalCount);
         model.addAttribute("unansweredCount", unansweredCount);
+        model.addAttribute("answeredCount", answeredCount);
         model.addAttribute("sellerId", sellerId);
         model.addAttribute("currentPage", page);
-        model.addAttribute("currentUnansweredPage", unansweredPage);
+
+        // Pass filter params back to view
+        model.addAttribute("filterStatus", status);
+        model.addAttribute("filterRating", rating);
+        model.addAttribute("filterFromDate", fromDate);
+        model.addAttribute("filterToDate", toDate);
+        model.addAttribute("filterProductId", productId);
+        model.addAttribute("filterUserId", userId);
 
         return "seller/reviews";
     }

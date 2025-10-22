@@ -46,131 +46,147 @@
             <span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
         </header>
 
-        <!-- KPI Cards -->
+        <!-- KPI Cards - Clickable Filters -->
         <section class="grid kpi" data-block="kpi">
-            <div class="card" data-kpi="reviews-total">
+            <a href="#" class="card filter-card" data-filter="all" th:classappend="${filterStatus == null} ? 'active' : ''">
                 <div class="label">Tổng đánh giá</div>
-                <div class="value"><span data-count th:attr="data-count=${allReviews.size()}" th:text="${allReviews.size()}">0</span></div>
+                <div class="value"><span data-count th:attr="data-count=${totalCount}" th:text="${totalCount}">0</span></div>
                 <div class="delta pill">Tất cả đánh giá nhận được</div>
                 <div class="orb one"></div><div class="orb two"></div>
-            </div>
-            <div class="card" data-kpi="reviews-unanswered">
+            </a>
+            <a href="#" class="card filter-card" data-filter="unanswered" th:classappend="${filterStatus == 'unanswered'} ? 'active' : ''">
                 <div class="label">Chờ phản hồi</div>
                 <div class="value"><span data-count th:attr="data-count=${unansweredCount}" th:text="${unansweredCount}">0</span></div>
                 <div class="delta pill warn">Cần xử lý ngay</div>
-            </div>
-            <div class="card" data-kpi="reviews-answered">
+            </a>
+            <a href="#" class="card filter-card" data-filter="answered" th:classappend="${filterStatus == 'answered'} ? 'active' : ''">
                 <div class="label">Đã phản hồi</div>
-                <div class="value"><span data-count th:attr="data-count=${allReviews.size() - unansweredCount}" th:text="${allReviews.size() - unansweredCount}">0</span></div>
+                <div class="value"><span data-count th:attr="data-count=${answeredCount}" th:text="${answeredCount}">0</span></div>
                 <div class="delta pill good">Đã hoàn thành</div>
-            </div>
+            </a>
         </section>
 
-        <!-- Tab Navigation -->
-        <div style="display: flex; gap: 8px; margin: 24px 0 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-            <a href="#" class="tab active" data-tab="unanswered" style="padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 8px; background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev)); color: var(--text);">
-                <i class="ti ti-clock"></i>
-                Chờ phản hồi
-                <span class="badge bg-warning" th:text="${unansweredCount}">0</span>
-            </a>
-            <a href="#" class="tab" data-tab="all" style="padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 8px;">
-                <i class="ti ti-list"></i>
-                Tất cả đánh giá
-            </a>
-        </div>
+        <!-- Advanced Filters -->
+        <div class="card" style="margin: 24px 0;">
+            <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="ti ti-filter"></i> Bộ lọc nâng cao
+                    </h3>
+                    <button class="btn" id="toggleFilters" style="padding: 8px 16px;">
+                        <i class="ti ti-chevron-down"></i> <span>Hiện</span>
+                    </button>
+                </div>
 
-        <!-- Tab: Chờ phản hồi -->
-        <div class="tab-content active" id="unanswered">
-            <div th:if="${unansweredReviews.isEmpty()}" class="empty-state" style="text-align: center; padding: 40px 20px; color: var(--muted);">
-                <i class="ti ti-check" style="font-size: 48px; opacity: 0.5;"></i>
-                <h5>Không có đánh giá nào chờ phản hồi</h5>
-                <p>Tất cả đánh giá đã được phản hồi!</p>
-            </div>
-
-            <div th:each="review : ${unansweredReviews}" class="card" style="margin-bottom: 16px;">
-                <div class="card-body">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <form id="filterForm" style="display: none;">
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <!-- Rating Filter -->
                         <div>
-                            <h4 style="margin: 0 0 8px 0; color: var(--muted); font-size: 14px;">Review #<span th:text="${review.reviewId}">ID</span></h4>
-                            <div style="color: #ffc107; margin-bottom: 8px;">
-                                <i th:each="i : ${#numbers.sequence(1, review.rating)}" class="ti ti-star-filled"></i>
-                                <i th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" class="ti ti-star"></i>
-                            </div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                <i class="ti ti-star"></i> Đánh giá
+                            </label>
+                            <select name="rating" class="form-control" th:value="${filterRating}">
+                                <option value="">Tất cả rating</option>
+                                <option value="5" th:selected="${filterRating == 5}">⭐⭐⭐⭐⭐ (5 sao)</option>
+                                <option value="4" th:selected="${filterRating == 4}">⭐⭐⭐⭐ (4 sao)</option>
+                                <option value="3" th:selected="${filterRating == 3}">⭐⭐⭐ (3 sao)</option>
+                                <option value="2" th:selected="${filterRating == 2}">⭐⭐ (2 sao)</option>
+                                <option value="1" th:selected="${filterRating == 1}">⭐ (1 sao)</option>
+                            </select>
                         </div>
-                        <span class="badge bg-warning">Chờ phản hồi</span>
+
+                        <!-- Date From -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                <i class="ti ti-calendar"></i> Từ ngày
+                            </label>
+                            <input type="date" name="fromDate" class="form-control" th:value="${filterFromDate}">
+                        </div>
+
+                        <!-- Date To -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                <i class="ti ti-calendar"></i> Đến ngày
+                            </label>
+                            <input type="date" name="toDate" class="form-control" th:value="${filterToDate}">
+                        </div>
+
+                        <!-- Product ID -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                <i class="ti ti-package"></i> Product ID
+                            </label>
+                            <input type="number" name="productId" class="form-control" placeholder="Nhập Product ID" th:value="${filterProductId}">
+                        </div>
+
+                        <!-- User ID -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                <i class="ti ti-user"></i> User ID
+                            </label>
+                            <input type="number" name="userId" class="form-control" placeholder="Nhập User ID" th:value="${filterUserId}">
+                        </div>
                     </div>
 
-                    <div style="margin-bottom: 12px; line-height: 1.5;" th:text="${review.comment}">Comment content</div>
-
-                    <div style="color: var(--muted); font-size: 12px; margin-bottom: 12px;">
-                        User ID: <span th:text="${review.userId}">User</span> •
-                        Product ID: <span th:text="${review.productId}">Product</span> •
-                        <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">Date</span>
-                    </div>
-
-                    <!-- Response form -->
-                    <form th:attr="data-reviewid=${review.reviewId}" class="response-form" style="margin-top: 12px;">
-                        <div style="margin-bottom: 12px;">
-                                <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="1000" required
-                                          style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--bg) 94%, transparent); color: var(--text); resize: vertical; font-family: inherit;"></textarea>
-                        </div>
-                        <button class="btn primary" type="submit" style="margin-top: 8px;">
-                            <i class="ti ti-send"></i> Gửi phản hồi
+                    <div style="display: flex; gap: 12px; margin-top: 16px;">
+                        <button type="submit" class="btn primary">
+                            <i class="ti ti-search"></i> Áp dụng bộ lọc
                         </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Pagination for Unanswered Reviews -->
-            <div th:if="${unansweredReviewsPage.totalPages > 1}" class="pagination-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; flex-wrap: wrap;">
-                <a th:href="@{/seller/reviews(unansweredPage=${unansweredReviewsPage.number - 1}, page=${currentPage})}"
-                   th:classappend="${unansweredReviewsPage.first} ? 'disabled' : ''"
-                   class="pagination-btn"
-                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
-                    <i class="ti ti-chevron-left"></i> Trước
-                </a>
-
-                <div style="display: flex; gap: 4px;">
-                    <th:block th:each="i : ${#numbers.sequence(0, unansweredReviewsPage.totalPages - 1)}">
-                        <a th:if="${i == unansweredReviewsPage.number || (i >= unansweredReviewsPage.number - 2 && i <= unansweredReviewsPage.number + 2) || i == 0 || i == unansweredReviewsPage.totalPages - 1}"
-                           th:href="@{/seller/reviews(unansweredPage=${i}, page=${currentPage})}"
-                           th:text="${i + 1}"
-                           th:classappend="${i == unansweredReviewsPage.number} ? 'active' : ''"
-                           class="pagination-btn"
-                           style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; min-width: 40px; text-align: center;">
-                        </a>
-                        <span th:if="${i == 1 && unansweredReviewsPage.number > 3}" style="padding: 8px; color: var(--muted);">...</span>
-                        <span th:if="${i == unansweredReviewsPage.totalPages - 2 && unansweredReviewsPage.number < unansweredReviewsPage.totalPages - 4}" style="padding: 8px; color: var(--muted);">...</span>
-                    </th:block>
-                </div>
-
-                <a th:href="@{/seller/reviews(unansweredPage=${unansweredReviewsPage.number + 1}, page=${currentPage})}"
-                   th:classappend="${unansweredReviewsPage.last} ? 'disabled' : ''"
-                   class="pagination-btn"
-                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
-                    Sau <i class="ti ti-chevron-right"></i>
-                </a>
-
-                <span style="padding: 8px 12px; color: var(--muted); font-size: 14px;">
-                    Trang <b th:text="${unansweredReviewsPage.number + 1}">1</b> / <b th:text="${unansweredReviewsPage.totalPages}">1</b>
-                    (<span th:text="${unansweredReviewsPage.totalElements}">0</span> đánh giá)
-                </span>
+                        <button type="button" class="btn" id="clearFilters">
+                            <i class="ti ti-x"></i> Xóa bộ lọc
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <!-- Tab: Tất cả đánh giá -->
-        <div class="tab-content" id="all" style="display: none;">
-            <div th:if="${allReviews.isEmpty()}" class="empty-state" style="text-align: center; padding: 40px 20px; color: var(--muted);">
-                <i class="ti ti-message-circle" style="font-size: 48px; opacity: 0.5;"></i>
-                <h5>Chưa có đánh giá nào</h5>
-                <p>Khách hàng sẽ đánh giá sau khi mua sản phẩm của bạn.</p>
+        <!-- Filter Status Display -->
+        <div th:if="${filterStatus != null || filterRating != null || filterFromDate != null || filterToDate != null || filterProductId != null || filterUserId != null}"
+             class="card" style="margin-bottom: 16px; background: color-mix(in oklab, var(--accent) 8%, var(--bg-elev));">
+            <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <i class="ti ti-filter" style="font-size: 20px;"></i>
+                    <span style="font-weight: 500;">Đang lọc:</span>
+                    <span th:if="${filterStatus == 'unanswered'}" class="badge bg-warning">Chờ phản hồi</span>
+                    <span th:if="${filterStatus == 'answered'}" class="badge bg-success">Đã phản hồi</span>
+                    <span th:if="${filterRating != null}" class="badge">Rating: <span th:text="${filterRating}">5</span>⭐</span>
+                    <span th:if="${filterFromDate != null}" class="badge">Từ: <span th:text="${filterFromDate}">date</span></span>
+                    <span th:if="${filterToDate != null}" class="badge">Đến: <span th:text="${filterToDate}">date</span></span>
+                    <span th:if="${filterProductId != null}" class="badge">Product ID: <span th:text="${filterProductId}">0</span></span>
+                    <span th:if="${filterUserId != null}" class="badge">User ID: <span th:text="${filterUserId}">0</span></span>
+                </div>
+                <a href="/seller/reviews" class="btn" style="padding: 8px 16px;">
+                    <i class="ti ti-x"></i> Xóa filter
+                </a>
+            </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div id="reviewsList">
+            <div th:if="${reviews.isEmpty()}" class="empty-state card" style="text-align: center; padding: 60px 20px;">
+                <i class="ti ti-search-off" style="font-size: 64px; opacity: 0.3; margin-bottom: 16px;"></i>
+                <h4>Không tìm thấy đánh giá nào</h4>
+                <p style="color: var(--muted); margin-bottom: 16px;">
+                    <span th:if="${filterStatus != null || filterRating != null}">
+                        Thử thay đổi bộ lọc để xem thêm kết quả
+                    </span>
+                    <span th:if="${filterStatus == null && filterRating == null}">
+                        Chưa có đánh giá nào cho sản phẩm của bạn
+                    </span>
+                </p>
+                <a href="/seller/reviews" class="btn primary">
+                    <i class="ti ti-refresh"></i> Xem tất cả
+                </a>
             </div>
 
-            <div th:each="review : ${allReviews}" class="card" style="margin-bottom: 16px;">
+            <div th:each="review : ${reviews}" class="card" style="margin-bottom: 16px;">
                 <div class="card-body">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                         <div>
-                            <h4 style="margin: 0 0 8px 0; color: var(--muted); font-size: 14px;">Review #<span th:text="${review.reviewId}">ID</span> - Product ID: <span th:text="${review.productId}">Product</span></h4>
+                            <h4 style="margin: 0 0 8px 0; color: var(--muted); font-size: 14px;">
+                                Review #<span th:text="${review.reviewId}">ID</span> -
+                                Product ID: <span th:text="${review.productId}">Product</span>
+                            </h4>
                             <div style="color: #ffc107; margin-bottom: 8px;">
                                 <i th:each="i : ${#numbers.sequence(1, review.rating)}" class="ti ti-star-filled"></i>
                                 <i th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" class="ti ti-star"></i>
@@ -188,7 +204,8 @@
                     </div>
 
                     <!-- Seller response -->
-                    <div th:if="${review.sellerResponse != null}" style="background: color-mix(in oklab, var(--bg-soft) 96%, transparent); border-left: 4px solid var(--accent); padding: 12px; border-radius: 0 8px 8px 0; margin-top: 12px;">
+                    <div th:if="${review.sellerResponse != null}"
+                         style="background: color-mix(in oklab, var(--bg-soft) 96%, transparent); border-left: 4px solid var(--accent); padding: 12px; border-radius: 0 8px 8px 0; margin-top: 12px;">
                         <strong>Phản hồi của bạn:</strong>
                         <p style="margin: 8px 0;" th:text="${review.sellerResponse}">Seller response</p>
                         <div style="color: var(--muted); font-size: 12px;" th:if="${review.sellerResponseAt != null}">
@@ -197,10 +214,13 @@
                     </div>
 
                     <!-- Response form (if not responded) -->
-                    <form th:if="${review.sellerResponse == null}" th:attr="data-reviewid=${review.reviewId}" class="response-form" style="margin-top: 12px;">
+                    <form th:if="${review.sellerResponse == null}"
+                          th:attr="data-reviewid=${review.reviewId}"
+                          class="response-form"
+                          style="margin-top: 12px;">
                         <div style="margin-bottom: 12px;">
-                                <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="1000" required
-                                          style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--bg) 94%, transparent); color: var(--text); resize: vertical; font-family: inherit;"></textarea>
+                            <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="1000" required
+                                      style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--bg) 94%, transparent); color: var(--text); resize: vertical; font-family: inherit;"></textarea>
                         </div>
                         <button class="btn primary" type="submit" style="margin-top: 8px;">
                             <i class="ti ti-send"></i> Gửi phản hồi
@@ -209,39 +229,35 @@
                 </div>
             </div>
 
-            <!-- Pagination for All Reviews -->
-            <div th:if="${allReviewsPage.totalPages > 1}" class="pagination-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; flex-wrap: wrap;">
-                <a th:href="@{/seller/reviews(page=${allReviewsPage.number - 1}, unansweredPage=${currentUnansweredPage})}"
-                   th:classappend="${allReviewsPage.first} ? 'disabled' : ''"
-                   class="pagination-btn"
-                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
+            <!-- Pagination -->
+            <div th:if="${reviewsPage.totalPages > 1}" class="pagination-wrapper">
+                <!-- Previous Button -->
+                <a class="pagination-btn prev-btn" th:classappend="${reviewsPage.first} ? 'disabled' : ''">
                     <i class="ti ti-chevron-left"></i> Trước
                 </a>
 
+                <!-- Page Numbers -->
                 <div style="display: flex; gap: 4px;">
-                    <th:block th:each="i : ${#numbers.sequence(0, allReviewsPage.totalPages - 1)}">
-                        <a th:if="${i == allReviewsPage.number || (i >= allReviewsPage.number - 2 && i <= allReviewsPage.number + 2) || i == 0 || i == allReviewsPage.totalPages - 1}"
-                           th:href="@{/seller/reviews(page=${i}, unansweredPage=${currentUnansweredPage})}"
+                    <th:block th:each="i : ${#numbers.sequence(0, reviewsPage.totalPages - 1)}">
+                        <a th:if="${i == reviewsPage.number || (i >= reviewsPage.number - 2 && i <= reviewsPage.number + 2) || i == 0 || i == reviewsPage.totalPages - 1}"
+                           class="pagination-btn page-num-btn"
+                           th:attr="data-page=${i}"
                            th:text="${i + 1}"
-                           th:classappend="${i == allReviewsPage.number} ? 'active' : ''"
-                           class="pagination-btn"
-                           style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; min-width: 40px; text-align: center;">
+                           th:classappend="${i == reviewsPage.number} ? 'active' : ''">
                         </a>
-                        <span th:if="${i == 1 && allReviewsPage.number > 3}" style="padding: 8px; color: var(--muted);">...</span>
-                        <span th:if="${i == allReviewsPage.totalPages - 2 && allReviewsPage.number < allReviewsPage.totalPages - 4}" style="padding: 8px; color: var(--muted);">...</span>
+                        <span th:if="${i == 1 && reviewsPage.number > 3}" style="padding: 8px; color: var(--muted);">...</span>
+                        <span th:if="${i == reviewsPage.totalPages - 2 && reviewsPage.number < reviewsPage.totalPages - 4}" style="padding: 8px; color: var(--muted);">...</span>
                     </th:block>
                 </div>
 
-                <a th:href="@{/seller/reviews(page=${allReviewsPage.number + 1}, unansweredPage=${currentUnansweredPage})}"
-                   th:classappend="${allReviewsPage.last} ? 'disabled' : ''"
-                   class="pagination-btn"
-                   style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); color: var(--text); text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
+                <!-- Next Button -->
+                <a class="pagination-btn next-btn" th:classappend="${reviewsPage.last} ? 'disabled' : ''">
                     Sau <i class="ti ti-chevron-right"></i>
                 </a>
 
                 <span style="padding: 8px 12px; color: var(--muted); font-size: 14px;">
-                    Trang <b th:text="${allReviewsPage.number + 1}">1</b> / <b th:text="${allReviewsPage.totalPages}">1</b>
-                    (<span th:text="${allReviewsPage.totalElements}">0</span> đánh giá)
+                    Trang <b th:text="${reviewsPage.number + 1}">1</b> / <b th:text="${reviewsPage.totalPages}">1</b>
+                    (<span th:text="${reviewsPage.totalElements}">0</span> đánh giá)
                 </span>
             </div>
         </div>
@@ -252,6 +268,43 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <style>
+    /* Filter Card Styles */
+    .filter-card {
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .filter-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .filter-card.active {
+        border: 2px solid var(--accent);
+        box-shadow: 0 4px 20px color-mix(in oklab, var(--accent) 30%, transparent);
+    }
+
+    .filter-card.active::before {
+        content: '✓';
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 24px;
+        height: 24px;
+        background: var(--accent);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    /* Pagination Styles */
     .pagination-btn {
         padding: 8px 12px;
         border: 1px solid var(--border);
@@ -293,37 +346,151 @@
         margin-top: 24px;
         flex-wrap: wrap;
     }
+
+    /* Form Control Styles */
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 10%, transparent);
+    }
+
+    /* Badge Styles */
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        background: var(--bg-soft);
+        color: var(--text);
+    }
 </style>
 
 <script src="/js/seller-dashboard.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Tab functionality
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function(e) {
+        // KPI Filter Cards Click Handler
+        const filterCards = document.querySelectorAll('.filter-card');
+        filterCards.forEach(card => {
+            card.addEventListener('click', function(e) {
                 e.preventDefault();
+                const filter = this.getAttribute('data-filter');
 
-                // Remove active class from all tabs and contents
-                tabs.forEach(t => {
-                    t.style.background = '';
-                    t.style.color = 'var(--muted)';
-                });
-                tabContents.forEach(c => c.style.display = 'none');
+                // Build URL with filter
+                let url = '/seller/reviews?';
+                if (filter !== 'all') {
+                    url += 'status=' + filter;
+                }
 
-                // Add active class to clicked tab and corresponding content
-                this.style.background = 'color-mix(in oklab, var(--accent) 12%, var(--bg-elev))';
-                this.style.color = 'var(--text)';
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId).style.display = 'block';
+                // Preserve other filters if exist
+                const urlParams = new URLSearchParams(window.location.search);
+                const rating = urlParams.get('rating');
+                const fromDate = urlParams.get('fromDate');
+                const toDate = urlParams.get('toDate');
+                const productId = urlParams.get('productId');
+                const userId = urlParams.get('userId');
+
+                if (rating) url += '&rating=' + rating;
+                if (fromDate) url += '&fromDate=' + fromDate;
+                if (toDate) url += '&toDate=' + toDate;
+                if (productId) url += '&productId=' + productId;
+                if (userId) url += '&userId=' + userId;
+
+                window.location.href = url;
             });
         });
 
+        // Toggle Advanced Filters
+        const toggleFiltersBtn = document.getElementById('toggleFilters');
+        const filterForm = document.getElementById('filterForm');
+
+        if (toggleFiltersBtn && filterForm) {
+            toggleFiltersBtn.addEventListener('click', function() {
+                const isHidden = filterForm.style.display === 'none';
+                filterForm.style.display = isHidden ? 'block' : 'none';
+                const icon = this.querySelector('i');
+                const text = this.querySelector('span');
+
+                if (isHidden) {
+                    icon.className = 'ti ti-chevron-up';
+                    text.textContent = 'Ẩn';
+                } else {
+                    icon.className = 'ti ti-chevron-down';
+                    text.textContent = 'Hiện';
+                }
+            });
+        }
+
+        // Advanced Filter Form Submit
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Validate date range
+                const fromDateInput = this.querySelector('input[name="fromDate"]');
+                const toDateInput = this.querySelector('input[name="toDate"]');
+
+                if (fromDateInput.value && toDateInput.value) {
+                    const fromDate = new Date(fromDateInput.value);
+                    const toDate = new Date(toDateInput.value);
+
+                    if (fromDate > toDate) {
+                        if (typeof showToast === 'function') {
+                            showToast('Từ ngày phải nhỏ hơn hoặc bằng Đến ngày', 'error', 3000);
+                        } else {
+                            alert('Từ ngày phải nhỏ hơn hoặc bằng Đến ngày');
+                        }
+                        fromDateInput.focus();
+                        return;
+                    }
+                }
+
+                const formData = new FormData(this);
+                let url = '/seller/reviews?';
+                const params = [];
+
+                // Get current status filter from KPI cards
+                const activeCard = document.querySelector('.filter-card.active');
+                if (activeCard) {
+                    const statusFilter = activeCard.getAttribute('data-filter');
+                    if (statusFilter !== 'all') {
+                        params.push('status=' + statusFilter);
+                    }
+                }
+
+                // Add form filters
+                for (let [key, value] of formData.entries()) {
+                    if (value) {
+                        params.push(key + '=' + encodeURIComponent(value));
+                    }
+                }
+
+                url += params.join('&');
+                window.location.href = url;
+            });
+        }
+
+        // Clear Filters Button
+        const clearFiltersBtn = document.getElementById('clearFilters');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', function() {
+                window.location.href = '/seller/reviews';
+            });
+        }
+
         // Handle response forms
         const responseForms = document.querySelectorAll('.response-form');
-
         responseForms.forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -335,6 +502,8 @@
                 if (!response) {
                     if (typeof showToast === 'function') {
                         showToast('Vui lòng nhập nội dung phản hồi', 'error', 3000);
+                    } else {
+                        alert('Vui lòng nhập nội dung phản hồi');
                     }
                     return;
                 }
@@ -355,117 +524,168 @@
                         response: response
                     })
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            if (typeof showToast === 'function') {
-                                showToast('Đã gửi phản hồi thành công!', 'success', 3000);
-                            }
-
-                            // Update UI without reloading
-                            const reviewCard = this.closest('.card');
-                            const badge = reviewCard.querySelector('.badge');
-
-                            if (badge) {
-                                badge.textContent = 'Đã phản hồi';
-                                badge.className = 'badge bg-success';
-                            }
-
-                            // Add response box
-                            const responseBox = document.createElement('div');
-                            responseBox.style.background = 'color-mix(in oklab, var(--bg-soft) 96%, transparent)';
-                            responseBox.style.borderLeft = '4px solid var(--accent)';
-                            responseBox.style.padding = '12px';
-                            responseBox.style.borderRadius = '0 8px 8px 0';
-                            responseBox.style.marginTop = '12px';
-                            responseBox.innerHTML = `
-                                <strong>Phản hồi của bạn:</strong>
-                                <p style="margin: 8px 0;">${response}</p>
-                                <div style="color: var(--muted); font-size: 12px;">
-                                    Phản hồi lúc: ${new Date().toLocaleString('vi-VN')}
-                                </div>
-                            `;
-
-                            // Remove the form and add response box
-                            this.remove();
-                            reviewCard.querySelector('.card-body').appendChild(responseBox);
-
-                            // Update unanswered count in sidebar and tabs
-                            updateUnansweredCount(-1);
-
-                        } else {
-                            if (typeof showToast === 'function') {
-                                showToast('Lỗi: ' + data.message, 'error', 4000);
-                            }
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
                         if (typeof showToast === 'function') {
-                            showToast('Lỗi gửi phản hồi', 'error', 4000);
+                            showToast('Đã gửi phản hồi thành công!', 'success', 3000);
+                        } else {
+                            alert('Đã gửi phản hồi thành công!');
+                        }
+
+                        // Update UI without reloading
+                        const reviewCard = this.closest('.card');
+                        const badge = reviewCard.querySelector('.badge');
+
+                        if (badge) {
+                            badge.textContent = 'Đã phản hồi';
+                            badge.className = 'badge bg-success';
+                        }
+
+                        // Add response box
+                        const responseBox = document.createElement('div');
+                        responseBox.style.background = 'color-mix(in oklab, var(--bg-soft) 96%, transparent)';
+                        responseBox.style.borderLeft = '4px solid var(--accent)';
+                        responseBox.style.padding = '12px';
+                        responseBox.style.borderRadius = '0 8px 8px 0';
+                        responseBox.style.marginTop = '12px';
+
+                        // Escape HTML to prevent XSS
+                        const escapeHtml = (text) => {
+                            const div = document.createElement('div');
+                            div.textContent = text;
+                            return div.innerHTML;
+                        };
+
+                        responseBox.innerHTML = `
+                            <strong>Phản hồi của bạn:</strong>
+                            <p style="margin: 8px 0;">${escapeHtml(response)}</p>
+                            <div style="color: var(--muted); font-size: 12px;">
+                                Phản hồi lúc: ${new Date().toLocaleString('vi-VN')}
+                            </div>
+                        `;
+
+                        // Remove the form and add response box
+                        this.remove();
+                        reviewCard.querySelector('.card-body').appendChild(responseBox);
+
+                        // Update counts
+                        updateCounts();
+
+                    } else {
+                        if (typeof showToast === 'function') {
+                            showToast('Lỗi: ' + data.message, 'error', 4000);
+                        } else {
+                            alert('Lỗi: ' + data.message);
                         }
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
-                    });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (typeof showToast === 'function') {
+                        showToast('Lỗi gửi phản hồi', 'error', 4000);
+                    } else {
+                        alert('Lỗi gửi phản hồi');
+                    }
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
             });
         });
 
-        // Function to update unanswered count
-        function updateUnansweredCount(change) {
-            // Update sidebar badge
+        // Function to update counts after responding
+        function updateCounts() {
+            const unansweredCard = document.querySelector('[data-filter="unanswered"] .value span');
+            const answeredCard = document.querySelector('[data-filter="answered"] .value span');
+
+            if (unansweredCard) {
+                const current = parseInt(unansweredCard.textContent) || 0;
+                const newCount = Math.max(0, current - 1);
+                unansweredCard.textContent = newCount;
+                unansweredCard.setAttribute('data-count', newCount);
+            }
+
+            if (answeredCard) {
+                const current = parseInt(answeredCard.textContent) || 0;
+                answeredCard.textContent = current + 1;
+                answeredCard.setAttribute('data-count', current + 1);
+            }
+
+            // Update sidebar badge if exists
             const sidebarBadge = document.getElementById('unansweredReviewCount');
             if (sidebarBadge) {
-                const currentCount = parseInt(sidebarBadge.textContent) || 0;
-                const newCount = Math.max(0, currentCount + change);
+                const current = parseInt(sidebarBadge.textContent) || 0;
+                const newCount = Math.max(0, current - 1);
                 sidebarBadge.textContent = newCount;
-
-                // Hide badge if count is 0
                 if (newCount === 0) {
                     sidebarBadge.style.display = 'none';
-                } else {
-                    sidebarBadge.style.display = 'inline-block';
                 }
             }
+        }
 
-            // Update tab badge
-            const tabBadge = document.querySelector('.tab[data-tab="unanswered"] .badge');
-            if (tabBadge) {
-                const currentCount = parseInt(tabBadge.textContent) || 0;
-                const newCount = Math.max(0, currentCount + change);
-                tabBadge.textContent = newCount;
+        // Helper function to build URL with active filters only
+        function buildUrlWithFilters(page) {
+            let url = '/seller/reviews?page=' + page;
+            const urlParams = new URLSearchParams(window.location.search);
 
-                // Hide badge if count is 0
-                if (newCount === 0) {
-                    tabBadge.style.display = 'none';
-                } else {
-                    tabBadge.style.display = 'inline-block';
-                }
+            // Only add filters that have actual values
+            const status = urlParams.get('status');
+            const rating = urlParams.get('rating');
+            const fromDate = urlParams.get('fromDate');
+            const toDate = urlParams.get('toDate');
+            const productId = urlParams.get('productId');
+            const userId = urlParams.get('userId');
+
+            if (status && status !== '' && status !== 'null') {
+                url += '&status=' + encodeURIComponent(status);
+            }
+            if (rating && rating !== '' && rating !== 'null') {
+                url += '&rating=' + encodeURIComponent(rating);
+            }
+            if (fromDate && fromDate !== '' && fromDate !== 'null') {
+                url += '&fromDate=' + encodeURIComponent(fromDate);
+            }
+            if (toDate && toDate !== '' && toDate !== 'null') {
+                url += '&toDate=' + encodeURIComponent(toDate);
+            }
+            if (productId && productId !== '' && productId !== 'null') {
+                url += '&productId=' + encodeURIComponent(productId);
+            }
+            if (userId && userId !== '' && userId !== 'null') {
+                url += '&userId=' + encodeURIComponent(userId);
             }
 
-            // Update KPI cards
-            const unansweredKpi = document.querySelector('[data-kpi="reviews-unanswered"] .value span');
-            if (unansweredKpi) {
-                const currentCount = parseInt(unansweredKpi.textContent) || 0;
-                const newCount = Math.max(0, currentCount + change);
-                unansweredKpi.textContent = newCount;
-                unansweredKpi.setAttribute('data-count', newCount);
-            }
+            return url;
+        }
 
-            const respondedKpi = document.querySelector('[data-kpi="reviews-answered"] .value span');
-            if (respondedKpi) {
-                const totalReviews = parseInt(document.querySelector('[data-kpi="reviews-total"] .value span').textContent) || 0;
-                const unanswered = parseInt(document.querySelector('[data-kpi="reviews-unanswered"] .value span').textContent) || 0;
-                const newResponded = totalReviews - unanswered;
-                respondedKpi.textContent = newResponded;
-                respondedKpi.setAttribute('data-count', newResponded);
-            }
+        // Handle pagination clicks
+        const pageNumBtns = document.querySelectorAll('.page-num-btn');
+        pageNumBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = parseInt(this.getAttribute('data-page'));
+                window.location.href = buildUrlWithFilters(page);
+            });
+        });
 
-            // Trigger count animation if available
-            if (typeof animateCount === 'function') {
-                document.querySelectorAll('[data-count]').forEach(animateCount);
-            }
+        const prevBtn = document.querySelector('.prev-btn');
+        if (prevBtn && !prevBtn.classList.contains('disabled')) {
+            prevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 0;
+                window.location.href = buildUrlWithFilters(currentPage - 1);
+            });
+        }
+
+        const nextBtn = document.querySelector('.next-btn');
+        if (nextBtn && !nextBtn.classList.contains('disabled')) {
+            nextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 0;
+                window.location.href = buildUrlWithFilters(currentPage + 1);
+            });
         }
     });
 </script>

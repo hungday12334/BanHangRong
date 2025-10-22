@@ -4,16 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="enhance seller profile security and validation; prevent username/email changes, add input sanitization, and improve file upload checks">
-      <change afterPath="$PROJECT_DIR$/FIX_LOGIN_REDIRECT_ISSUE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PAGINATION_IMPLEMENTATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SELLER_REVIEW_FIXES_COMPLETED.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SELLER_REVIEW_TEST_CASES.md" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="implement pagination for seller reviews; add validation checks and demo mode fallback for authentication">
+      <change afterPath="$PROJECT_DIR$/FILTER_IMPLEMENTATION.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerReviewController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/email/Email.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/email/Email.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductReviewService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/reviews.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/reviews.html" afterDir="false" />
     </list>
@@ -389,7 +384,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761150927693</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="implement pagination for seller reviews; add validation checks and demo mode fallback for authentication">
+      <option name="closed" value="true" />
+      <created>1761155127440</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1761155127440</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -438,6 +441,7 @@
     <MESSAGE value="fix error seller edit store" />
     <MESSAGE value="voucher update" />
     <MESSAGE value="enhance seller profile security and validation; prevent username/email changes, add input sanitization, and improve file upload checks" />
-    <option name="LAST_COMMIT_MESSAGE" value="enhance seller profile security and validation; prevent username/email changes, add input sanitization, and improve file upload checks" />
+    <MESSAGE value="implement pagination for seller reviews; add validation checks and demo mode fallback for authentication" />
+    <option name="LAST_COMMIT_MESSAGE" value="implement pagination for seller reviews; add validation checks and demo mode fallback for authentication" />
   </component>
 </project>
