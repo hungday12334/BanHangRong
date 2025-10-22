@@ -4,23 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="enhance category management; add case-insensitive category name check, bulk delete functionality, and product statistics">
-      <change afterPath="$PROJECT_DIR$/CATEGORY_FIXES_APPLIED.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CATEGORY_MANAGEMENT_FEATURES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CATEGORY_MANAGEMENT_TEST_CASES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SHOP_LICENSE_MANAGEMENT_FEATURE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/create_shop_licenses_table.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerLicenseController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ShopLicenses.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ShopLicensesRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/static/js/category-pagination.js" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -410,7 +396,23 @@
       <option name="project" value="LOCAL" />
       <updated>1761156701114</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="enhance category management; add case-insensitive category name check, bulk delete functionality, and product statistics">
+      <option name="closed" value="true" />
+      <created>1761169291677</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1761169291677</updated>
+    </task>
+    <task id="LOCAL-00031" summary="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository">
+      <option name="closed" value="true" />
+      <created>1761169318423</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1761169318423</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -462,6 +464,7 @@
     <MESSAGE value="implement pagination for seller reviews; add validation checks and demo mode fallback for authentication" />
     <MESSAGE value="implement advanced filtering for seller reviews; add total review count and pagination support" />
     <MESSAGE value="enhance category management; add case-insensitive category name check, bulk delete functionality, and product statistics" />
-    <option name="LAST_COMMIT_MESSAGE" value="enhance category management; add case-insensitive category name check, bulk delete functionality, and product statistics" />
+    <MESSAGE value="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository" />
+    <option name="LAST_COMMIT_MESSAGE" value="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository" />
   </component>
 </project>
