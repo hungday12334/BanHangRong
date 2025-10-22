@@ -82,6 +82,14 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     @Query("SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
     Long countByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status);
 
+    // Count all products by category (any status)
+    @Query("SELECT COUNT(p) FROM Products p WHERE EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    Long countByCategoryId(@Param("categoryId") Long categoryId);
+
+    // Find all products by category (any status)
+    @Query("SELECT p FROM Products p WHERE EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    List<Products> findByCategoryId(@Param("categoryId") Long categoryId);
+
 
     // ========================= CÁC HÀM MỚI CHO SHOP DESIGN =========================
 
