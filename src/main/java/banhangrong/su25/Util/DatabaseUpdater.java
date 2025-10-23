@@ -5,6 +5,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @Component
 public class DatabaseUpdater implements CommandLineRunner {
 
@@ -14,52 +18,33 @@ public class DatabaseUpdater implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         try {
-            // Kiểm tra xem cột order_item_id đã tồn tại chưa
-            String checkColumnQuery = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
-                    "WHERE TABLE_NAME = 'product_reviews' AND COLUMN_NAME = 'order_item_id'";
+            System.out.println("Setting up complete review system database...");
             
-            Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class);
+            // Đọc script SQL từ file sql/review_system_complete.sql
+            String sqlScript = new String(Files.readAllBytes(Paths.get("sql/review_system_complete.sql")));
             
-            if (columnExists == null || columnExists == 0) {
-                System.out.println("Updating database schema for review system...");
-                
-                // Thêm cột order_item_id
-                jdbcTemplate.execute("ALTER TABLE product_reviews ADD COLUMN order_item_id BIGINT");
-                System.out.println("Added order_item_id column");
-                
-                // Thêm foreign key constraint
-                jdbcTemplate.execute("ALTER TABLE product_reviews ADD CONSTRAINT fk_reviews_order_item " +
-                        "FOREIGN KEY (order_item_id) REFERENCES order_items(order_item_id)");
-                System.out.println("Added foreign key constraint");
-                
-                // Thêm index
-                jdbcTemplate.execute("CREATE INDEX idx_reviews_order_item ON product_reviews(order_item_id)");
-                System.out.println("Added index for order_item_id");
-                
-                // Thêm index cho product và created_at
-                jdbcTemplate.execute("CREATE INDEX idx_reviews_product_created ON product_reviews(product_id, created_at)");
-                System.out.println("Added index for product_id and created_at");
-                
-                // Xóa constraint cũ nếu tồn tại
-                try {
-                    jdbcTemplate.execute("ALTER TABLE product_reviews DROP CONSTRAINT ux_reviews_user_product");
-                    System.out.println("Removed old unique constraint");
-                } catch (Exception e) {
-                    System.out.println("Old constraint not found or already removed");
+            // Chia script thành các câu lệnh riêng biệt
+            String[] statements = sqlScript.split(";");
+            
+            for (String statement : statements) {
+                statement = statement.trim();
+                if (!statement.isEmpty() && !statement.startsWith("--") && !statement.startsWith("/*")) {
+                    try {
+                        jdbcTemplate.execute(statement);
+                        System.out.println("Executed: " + statement.substring(0, Math.min(50, statement.length())) + "...");
+                    } catch (Exception e) {
+                        System.out.println("Skipped (already exists or error): " + statement.substring(0, Math.min(50, statement.length())) + "...");
+                    }
                 }
-                
-                // Thêm constraint mới
-                jdbcTemplate.execute("ALTER TABLE product_reviews ADD CONSTRAINT ux_reviews_order_item " +
-                        "UNIQUE (order_item_id)");
-                System.out.println("Added new unique constraint for order_item_id");
-                
-                System.out.println("Database schema updated successfully!");
-            } else {
-                System.out.println("Database schema already up to date");
             }
             
+            System.out.println("Complete review system database setup completed successfully!");
+            
+        } catch (IOException e) {
+            System.err.println("Error reading SQL file: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("Error updating database schema: " + e.getMessage());
+            System.err.println("Error setting up review system database: " + e.getMessage());
             e.printStackTrace();
         }
     }

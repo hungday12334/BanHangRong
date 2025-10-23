@@ -90,6 +90,13 @@ public class RatingController {
                 return ResponseEntity.badRequest().body(response);
             }
             
+            // Kiểm tra xem user đã review sản phẩm này chưa (fallback cho constraint cũ)
+            if (productReviewsRepository.existsByUserIdAndProductId(user.getUserId(), orderItem.getProductId())) {
+                response.put("success", false);
+                response.put("message", "You have already reviewed this product");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
             // Lấy product từ order item
             Products product = productsRepository.findById(orderItem.getProductId()).orElse(null);
             if (product == null) {
@@ -132,7 +139,23 @@ public class RatingController {
             review.setCreatedAt(LocalDateTime.now());
             review.setUpdatedAt(LocalDateTime.now());
             
-            productReviewsRepository.save(review);
+            // Lưu review với xử lý lỗi constraint
+            try {
+                productReviewsRepository.save(review);
+            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                // Xử lý lỗi constraint violation
+                if (e.getMessage().contains("ux_reviews_user_product")) {
+                    response.put("success", false);
+                    response.put("message", "You have already reviewed this product");
+                    return ResponseEntity.badRequest().body(response);
+                } else if (e.getMessage().contains("ux_reviews_order_item")) {
+                    response.put("success", false);
+                    response.put("message", "Review already exists for this order item");
+                    return ResponseEntity.badRequest().body(response);
+                } else {
+                    throw e; // Re-throw nếu là lỗi khác
+                }
+            }
             
             // Cập nhật rating trung bình của product
             ratingCalculationService.updateProductAverageRating(orderItem.getProductId());
