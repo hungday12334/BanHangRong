@@ -92,4 +92,8 @@ public class SecurityConfig {
 
         return http.build();
     }
+    @Bean
+    SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
 }
