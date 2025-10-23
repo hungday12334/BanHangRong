@@ -29,26 +29,3 @@ public class CategoriesProducts {
     }
 }
 
-@Embeddable
-class CategoriesProductsId implements java.io.Serializable {
-    @Column(name = "category_id")
-    private Long categoryId;
-    @Column(name = "product_id")
-    private Long productId;
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-}

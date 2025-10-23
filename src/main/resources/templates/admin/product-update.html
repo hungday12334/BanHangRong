@@ -5,15 +5,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Product Detail</title>
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
-    <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
     <style>
         /* Căn chỉnh phần nội dung chính để không bị sidebar che */
         .content-wrapper {
-            margin-left: 260px; /* Đẩy sang phải bằng độ rộng sidebar */
+            margin-left: 260px;
+            /* Đẩy sang phải bằng độ rộng sidebar */
             padding: 30px;
             background-color: #f8f9fa;
             min-height: 100vh;
@@ -36,7 +35,8 @@
             text-align: center;
         }
 
-        td, th {
+        td,
+        th {
             padding: 10px;
             vertical-align: middle;
         }
@@ -120,7 +120,8 @@
         }
 
         /* Màu cho ô readonly */
-        input[readonly],textarea[readonly],
+        input[readonly],
+        textarea[readonly],
         select[readonly] {
             background-color: #e9ecef;
             font-weight: bold;
@@ -130,14 +131,16 @@
         /* Cả hai nút chung */
         .submit-btn,
         .cancel-btn {
-            padding: 12px 28px; /* to hơn */
+            padding: 12px 28px;
+            /* to hơn */
             font-size: 16px;
             font-weight: 600;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.25s ease;
             background-color: #fff;
-            min-width: 130px; /* cho 2 nút đều nhau */
+            min-width: 130px;
+            /* cho 2 nút đều nhau */
         }
 
         /* Approve button (xanh lá) */
@@ -145,11 +148,13 @@
             color: #28a745;
             border: 2px solid #1e7e34;
         }
+
         .submit-btn:hover {
             color: #fff;
             background-color: #28a745;
             border-color: #1e7e34;
-            transform: scale(1.05); /* phóng nhẹ khi hover */
+            transform: scale(1.05);
+            /* phóng nhẹ khi hover */
             box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
         }
 
@@ -158,6 +163,7 @@
             color: #d9534f;
             border: 2px solid #b52b27;
         }
+
         .cancel-btn:hover {
             color: #fff;
             background-color: #d9534f;
@@ -165,54 +171,131 @@
             transform: scale(1.05);
             box-shadow: 0 0 8px rgba(217, 83, 79, 0.4);
         }
+
         .form-container {
             display: flex;
-            justify-content: center; /* căn giữa ngang */
+            justify-content: center;
+            /* căn giữa ngang */
             align-items: center;
-            gap: 35px; /* khoảng cách giữa hai form */
+            gap: 35px;
+            /* khoảng cách giữa hai form */
             margin-top: 20px;
-        }
-        .sidebar-item { position: relative; list-style: none; }
-        .sidebar-item > ul {
-            display: none;
-            margin-left: 1.5rem;
-        }
-        .sidebar-item:hover > ul {
-            display: block;
-        }
-        .badge {
-            background-color: #dc3545;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 0.8rem;
         }
     </style>
 </head>
 
 <body>
-<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
-    <!-- Sidebar Start -->
-    <div th:replace="~{admin/sidebar::sidebar}"></div>
-    <!-- Sidebar End -->
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar">
+            <div>
+                <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
+                    <a th:href="@{/admin/index}" class="text-center">
+                        <img th:src="@{/img/favicon.png}" alt="LOGO"
+                            style="width: 80px; height: auto; display: block; margin: 0 auto;">
+                        <span
+                            style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
+                    </a>
+                    <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
+                        <i class="ti ti-x fs-6"></i>
+                    </div>
+                </div>
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Lists</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/index}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
+                                    <span class="hide-menu">DASHBOARD</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" th:href="@{/admin/user}" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                <span class="hide-menu">USER MANAGEMENT</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/product}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-key-fill"></i></span>
+                                    <span class="hide-menu">Product MANAGEMENT</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-patch-question-fill"></i></span>
+                                    <span class="hide-menu">HELP</span>
+                                </div>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">REPORT</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">APPLY TO SELLER</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
+                                    <span class="hide-menu">SETTING</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
+                                    <span class="hide-menu">LOGOUT</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!-- Sidebar End -->
 
-    <!-- ListUser Section -->
-    <div class="content-wrapper">
-        <div th:if="${error}"
-             class="alert alert-danger alert-dismissible fade show"
-             role="alert">
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <!-- ListUser Section -->
+        <div class="content-wrapper">
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
 
-        <!-- Thông báo thành công -->
-        <div th:if="${success}"
-             class="alert alert-success alert-dismissible fade show"
-             role="alert">
-            <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <h2>Update</h2>
+            <!-- Thông báo thành công -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <h2>Update</h2>
 
 
             <div class="form-group">
@@ -232,17 +315,20 @@
 
             <div class="form-group">
                 <label>Description:</label>
-                <textarea readonly name="description" rows="3" th:text="${product != null ? product.description : ''}"></textarea>
+                <textarea readonly name="description" rows="3"
+                    th:text="${product != null ? product.description : ''}"></textarea>
             </div>
 
             <div class="form-group">
                 <label>Price:</label>
-                <input readonly type="number" step="0.01" name="price" th:value="${product != null ? product.price : ''}">
+                <input readonly type="number" step="0.01" name="price"
+                    th:value="${product != null ? product.price : ''}">
             </div>
 
             <div class="form-group">
                 <label>Sale Price:</label>
-                <input readonly type="number" step="0.01" name="salePrice" th:value="${product != null ? product.salePrice : ''}">
+                <input readonly type="number" step="0.01" name="salePrice"
+                    th:value="${product != null ? product.salePrice : ''}">
             </div>
 
             <div class="form-group">
@@ -262,15 +348,22 @@
 
             <div class="form-group">
                 <label>Average Rating:</label>
-                <input readonly type="number" step="0.1" name="averageRating" th:value="${product != null ? product.averageRating : ''}">
+                <input readonly type="number" step="0.1" name="averageRating"
+                    th:value="${product != null ? product.averageRating : ''}">
             </div>
 
             <div class="form-group">
                 <label>Status:</label>
                 <select readonly name="status" class="form-control">
-                    <option value="public" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'public')}">Public</option>
-                    <option value="pending" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'pending')}">Pending</option>
-                    <option value="hidden" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'hidden')}">Hidden</option>
+                    <option value="public"
+                        th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'public')}">Public
+                    </option>
+                    <option value="pending"
+                        th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'pending')}">Pending
+                    </option>
+                    <option value="hidden"
+                        th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'hidden')}">Hidden
+                    </option>
                 </select>
 
             </div>
@@ -278,39 +371,41 @@
             <div class="form-group">
                 <label>Created At:</label>
                 <input readonly type="text" name="createdAt"
-                       th:value="${product != null ? #temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm') : ''}">
+                    th:value="${product != null ? #temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm') : ''}">
             </div>
 
             <div class="form-group">
                 <label>Updated At:</label>
                 <input readonly type="text" name="updatedAt"
-                       th:value="${product != null ? #temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm') : ''}">
+                    th:value="${product != null ? #temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm') : ''}">
             </div>
-        <div class="form-container">
-            <form  action="/admin/product/update" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="productId" th:value="${product.productId}">
-                <div class="form-actions">
+            <div class="form-container">
+                <form action="/admin/product/update" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="productId" th:value="${product.productId}">
+                    <div class="form-actions">
 
-                    <button type="submit"  class="submit-btn" onclick="return confirm('Do you really want to approve this product?')">Approve</button>
-                </div>
+                        <button type="submit" class="submit-btn"
+                            onclick="return confirm('Do you really want to approve this product?')">Approve</button>
+                    </div>
 
-            </form>
-            <form action="/admin/product/cancel" method="post" style="text-align:center;">
-                <input type="hidden" name="productId" th:value="${product.productId}">
-                <div class="form-actions">
-                    <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')">Cancel</button>
-                </div>
-            </form>
+                </form>
+                <form action="/admin/product/cancel" method="post" style="text-align:center;">
+                    <input type="hidden" name="productId" th:value="${product.productId}">
+                    <div class="form-actions">
+                        <button type="submit" class="cancel-btn"
+                            onclick="return confirm('Do you really want to cancel this product?')">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
-<script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-<script src="../assets/libs/simplebar/dist/simplebar.js"></script>
-<script src="../assets/js/dashboard.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
+    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

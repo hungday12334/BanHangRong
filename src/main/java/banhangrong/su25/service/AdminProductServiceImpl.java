@@ -2,7 +2,6 @@ package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.AdminProductsRepository;
-import banhangrong.su25.Repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

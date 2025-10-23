@@ -1,9 +1,14 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.Orders;
+import banhangrong.su25.Entity.OrderItems;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Repository.OrdersRepository;
+import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import org.springframework.security.core.Authentication;
@@ -17,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class CustomerDashboardController {
@@ -25,12 +31,18 @@ public class CustomerDashboardController {
     private final ProductImagesRepository productImagesRepository;
     private final ShoppingCartRepository shoppingCartRepository;
     private final UsersRepository usersRepository;
+    private final OrdersRepository ordersRepository;
+    private final OrderItemsRepository orderItemsRepository;
+    private final ProductReviewsRepository productReviewsRepository;
 
-    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository, UsersRepository usersRepository) {
+    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository, ProductReviewsRepository productReviewsRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.shoppingCartRepository = shoppingCartRepository;
         this.usersRepository = usersRepository;
+        this.ordersRepository = ordersRepository;
+        this.orderItemsRepository = orderItemsRepository;
+        this.productReviewsRepository = productReviewsRepository;
     }
 
     @GetMapping("/customer/dashboard")
@@ -40,9 +52,10 @@ public class CustomerDashboardController {
                                     Model model) {
         // Kiểm tra email verified cho CUSTOMER
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Users currentUser = null;
         if (auth != null && auth.isAuthenticated()) {
             String username = auth.getName();
-            Users currentUser = usersRepository.findByUsername(username).orElse(null);
+            currentUser = usersRepository.findByUsername(username).orElse(null);
             if (currentUser != null && "CUSTOMER".equals(currentUser.getUserType())) {
                 if (!Boolean.TRUE.equals(currentUser.getIsEmailVerified())) {
                     return "redirect:/verify-email-required";
@@ -68,20 +81,18 @@ public class CustomerDashboardController {
         java.util.Map<Long, String> primaryImageByProduct = new java.util.HashMap<>();
         for (Products p : featured) {
             String url = null;
-            var imgs = p.getImages();
-            if (imgs != null && !imgs.isEmpty()) {
-                for (var im : imgs) { if (Boolean.TRUE.equals(im.getIsPrimary())) { url = im.getImageUrl(); break; } }
-                if (url == null) url = imgs.get(0).getImageUrl();
-            }
-            // Fallback: direct repository lookup in case relation isn't populated
-            if (url == null || url.isBlank()) {
+            // Try repository lookups for primary image first, then any image
+            try {
                 var primary = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
-                if (primary != null && !primary.isEmpty()) url = primary.get(0).getImageUrl();
-                if (url == null || url.isBlank()) {
+                if (primary != null && !primary.isEmpty()) {
+                    url = primary.get(0).getImageUrl();
+                } else {
                     var any = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(p.getProductId());
-                    if (any != null && !any.isEmpty()) url = any.get(0).getImageUrl();
+                    if (any != null && !any.isEmpty()) {
+                        url = any.get(0).getImageUrl();
+                    }
                 }
-            }
+            } catch (Exception ignored) {}
             if (url != null && !url.isBlank()) primaryImageByProduct.put(p.getProductId(), url);
         }
         model.addAttribute("featuredProducts", featured);
@@ -90,15 +101,126 @@ public class CustomerDashboardController {
         model.addAttribute("size", featuredPage.getSize());
         model.addAttribute("primaryImageByProduct", primaryImageByProduct);
         model.addAttribute("search", search);
-        // demo userId=2, show cart count in topbar
-        try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(2L)); } catch (Exception ignored) {}
+        // Use logged-in user info for header
         try {
-            Users currentUser = usersRepository.findAll().stream()
-                    .sorted((a,b)-> Long.compare(a.getUserId(), b.getUserId()))
-                    .findFirst().orElse(null);
-            model.addAttribute("user", currentUser);
+            if (currentUser != null) {
+                model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+                model.addAttribute("user", currentUser);
+            }
         } catch (Exception ignored) {}
         return "customer/dashboard";
+    }
+
+    @GetMapping("/rating-history")
+    public String ratingHistory() {
+        // Redirect to the unified My Reviews page
+        return "redirect:/customer/reviews";
+    }
+
+    @GetMapping("/orderhistory")
+    public String orderHistory(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                               @RequestParam(name = "size", required = false, defaultValue = "3") int size,
+                               @RequestParam(name = "search", required = false) String search,
+                               @RequestParam(name = "status", required = false) String status,
+                               Model model) {
+        try {
+            // Kiểm tra authentication
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Users currentUser = null;
+            if (auth != null && auth.isAuthenticated()) {
+                String username = auth.getName();
+                currentUser = usersRepository.findByUsername(username).orElse(null);
+                if (currentUser == null) {
+                    return "redirect:/login";
+                }
+            } else {
+                return "redirect:/login";
+            }
+
+        // Lấy danh sách orders của user hiện tại với search và filter
+        PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
+                Sort.by(Sort.Order.desc("createdAt")));
+        
+        Page<Orders> ordersPage;
+        List<Orders> orders;
+        
+        // Apply search and filter logic
+        if (search != null && !search.trim().isEmpty()) {
+            // Search by product name or seller ID
+            ordersPage = ordersRepository.findByUserIdAndSearchTerm(currentUser.getUserId(), search.trim(), pageable);
+        } else if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
+            // Filter by status
+            ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
+        } else {
+            // Default: get all orders
+            ordersPage = ordersRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+        }
+        
+        orders = ordersPage.getContent();
+
+        // Lấy order items cho mỗi order
+        java.util.Map<Long, List<OrderItems>> orderItemsMap = new java.util.HashMap<>();
+        java.util.Map<Long, String> productNamesMap = new java.util.HashMap<>();
+        java.util.Map<Long, Products> productsMap = new java.util.HashMap<>();
+        
+        for (Orders order : orders) {
+            List<OrderItems> items = orderItemsRepository.findByOrderId(order.getOrderId());
+            orderItemsMap.put(order.getOrderId(), items);
+            
+            // Lấy tên sản phẩm và thông tin sản phẩm
+            for (OrderItems item : items) {
+                if (item.getProductId() != null) {
+                    productsRepository.findById(item.getProductId()).ifPresent(product -> {
+                        productNamesMap.put(item.getProductId(), product.getName());
+                        productsMap.put(item.getProductId(), product);
+                    });
+                }
+            }
+        }
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("orderItemsMap", orderItemsMap);
+        model.addAttribute("productNamesMap", productNamesMap);
+        model.addAttribute("productsMap", productsMap);
+        model.addAttribute("page", ordersPage.getNumber());
+        model.addAttribute("totalPages", ordersPage.getTotalPages());
+        model.addAttribute("size", ordersPage.getSize());
+        model.addAttribute("user", currentUser);
+        model.addAttribute("search", search);
+        model.addAttribute("status", status);
+        
+        // Cart count
+        try {
+            model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+        } catch (Exception ignored) {}
+
+        return "customer/orderhistory";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/customer/dashboard?error=orderhistory_error";
+        }
+    }
+
+
+    @GetMapping("/notification")
+    public String notification(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        Optional<Users> userOptional = usersRepository.findByUsername(username);
+        
+        if (userOptional.isEmpty()) {
+            return "redirect:/login";
+        }
+        
+        Users user = userOptional.get();
+        
+        // Get cart count
+        Long cartCount = shoppingCartRepository.countByUserId(user.getUserId());
+        
+        model.addAttribute("user", user);
+        model.addAttribute("cartCount", cartCount);
+        
+        return "customer/notification";
     }
 }
 

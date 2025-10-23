@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+<title>History Order - BanHangRong</title>
+	<style>
+:root {
+  --bg:#f5f7fb; --card:#ffffff; --line:#e5e7eb;
+  --muted:#6b7280; --brand:#0ea5e9;
+}
+body {
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  margin:0;
+}
+.wrapper{display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--card);flex-wrap:nowrap}
+.brand{font-weight:800;letter-spacing:.2px;display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;color:inherit}
+.brand:hover{color:var(--brand)}
+.logo{height:32px;width:auto}
+.nav{display:flex;gap:16px;margin:0 12px;flex:1;overflow:auto;white-space:nowrap}
+.nav a{text-decoration:none;color:#111827;font-weight:500;padding:8px 10px;border-radius:8px}
+.nav a:hover{background:#f3f4f6}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:12px;position:relative;flex-wrap:nowrap}
+.lang,.notif,.user{font-size:14px;color:var(--muted)}
+.user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
+.search{position:relative}
+.search input{height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none}
+
+/* ---------- HISTORY SECTION ---------- */
+.order-history-container {
+  max-width:1100px;margin:30px auto;padding:0 20px;
+}
+.page-title{font-size:28px;font-weight:700;margin-bottom:20px;text-align:center}
+
+/* Search + Tabs inline */
+        .filter-section {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px 24px;
+  margin-bottom:24px;
+  gap:20px;
+}
+.search-box {
+  position:relative;
+  flex-shrink:0;
+}
+.search-box svg {
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:1;
+  width:16px;
+  height:16px;
+}
+.search-box input {
+  padding:10px 12px 10px 40px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  width:280px;
+  font-size:16px;
+  outline:none;
+}
+.search-box input:focus {
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+.tab-buttons {
+  display:flex;
+  gap:12px;
+  flex:1;
+  justify-content:flex-end;
+}
+.tab-btn {
+  border:1px solid var(--line);
+  background:#fff;
+  padding:10px 24px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:500;
+  font-size:16px;
+  transition:all 0.2s;
+  min-width:100px;
+}
+.tab-btn:hover {
+  background:#f3f4f6;
+  border-color:#9ca3af;
+}
+.tab-btn.active {
+  background:var(--brand);
+  color:#fff;
+  border-color:var(--brand);
+}
+
+/* ---------- ORDER CARD ---------- */
+.order-card {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:18px;
+}
+        .order-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+        .seller-info {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.seller-info input {
+  width:130px;
+  padding:6px;
+  border:1px solid var(--line);
+  border-radius:6px;
+}
+        .action-btn {
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:6px 12px;
+  cursor:pointer;
+}
+.chat-btn {background:#3b82f6;color:#fff;border-color:#3b82f6}
+.view-seller-btn {background:#ef4444;color:#fff;border-color:#ef4444}
+.status {
+  font-weight:600;
+  color:#ef4444;
+}
+.status.completed {color:#059669}
+.status.cancelled {color:#dc2626}
+
+/* product part */
+.product-line {
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-top:10px;
+}
+        .product-image {
+  width:80px;height:80px;
+  background:#f3f4f6;
+  border:1px solid var(--line);
+  border-radius:8px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+}
+.product-info {
+  flex:1;
+}
+        .product-name {
+  font-weight:600;
+  margin-bottom:6px;
+}
+        .order-bottom {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:14px;
+}
+        .order-actions {
+  display:flex;
+  gap:10px;
+        }
+        .rate-btn {
+  background:#ef4444;color:#fff;border:1px solid #ef4444;
+  border-radius:8px;padding:8px 14px;
+}
+.contact-btn, .buy-again-btn {
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  padding:8px 14px;
+  cursor:pointer;
+}
+.contact-btn:hover, .buy-again-btn:hover {
+  background:#f3f4f6;
+}
+
+/* Product description styles */
+.product-description {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* Price display styles */
+.price-info {
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.sale-price {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 16px;
+}
+.original-price {
+  color: #6b7280;
+  text-decoration: line-through;
+  font-size: 14px;
+}
+.regular-price {
+  color: #111827;
+  font-weight: 600;
+  font-size: 16px;
+}
+.price-at-time {
+  color: #059669;
+  font-weight: 500;
+  font-size: 14px;
+  background: #f0fdf4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* Additional styles for new elements */
+.user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
+.user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
+.user-menu .item:hover{background:#f3f4f6}
+.cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
+.cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #111827;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.product-info-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.product-image-placeholder {
+  width: 60px;
+  height: 60px;
+  background: #f3f4f6;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.placeholder-icon {
+  font-size: 24px;
+}
+
+.product-details input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 16px;
+  background: #f9fafb;
+}
+
+.rating-section, .service-rating-section {
+  margin-bottom: 24px;
+}
+
+.rating-label, .service-label {
+  display: block;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.service-sub-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star {
+  font-size: 24px;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: color 0.2s;
+  user-select: none;
+}
+
+.star:hover,
+.star.active {
+  color: #fbbf24;
+}
+
+.rating-text {
+  margin-left: 12px;
+  font-weight: 600;
+  color: #f59e0b;
+  font-size: 14px;
+}
+
+.review-section {
+  margin-bottom: 24px;
+}
+
+.review-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  margin-bottom: 12px;
+}
+
+.review-section textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.media-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.media-btn {
+  background: #f3f4f6;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: all 0.2s;
+}
+
+.media-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--line);
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.submit-btn {
+  background: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Pagination Styles */
+.pagination-container {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.pagination-btn:hover:not(.disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.pagination-btn.disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+.page-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.page-number:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.page-number.active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: white;
+}
+
+.page-number.active:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+}
+
+.ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.page-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.page-info span:first-child {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .page-numbers {
+    margin: 0 4px;
+  }
+  
+  .pagination-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .page-number {
+    min-width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+  
+  .ellipsis {
+    min-width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+}
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<!-- Header từ layout chung -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
+            <nav class="nav" aria-label="Main">
+                <a href="/customer/dashboard">Home</a>
+                <a href="/categories">Category</a>
+                <a href="#">License Software</a>
+                <a href="#">Game Keys</a>
+                <a href="#">Voucher</a>
+                <a href="#">Support</a>
+            </nav>
+            <div class="top-actions">
+                <div class="notif">Notification</div>
+                <div class="user" style="position:relative">
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+                        <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+                        <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+                        <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+                            style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                                th:value="${_csrf.token}" />
+                            <input type="hidden" name="amount" id="topupAmountInput" />
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+                                (VNPay)</button>
+                        </form>
+                        <a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+                            style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+                            Become a Seller</a>
+                        <a class="item" href="#" role="menuitem"
+                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+                <div class="search">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+                        <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
+                            style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                        <button type="submit"
+                            style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                        <a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
+                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+                    </form>
+                </div>
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
+                        th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+            </div>
+        </div>
+
+        <div class="order-history-container">
+                <h1 class="page-title">History Order</h1>
+
+            <div class="filter-section">
+                    <div class="search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <input type="text" placeholder="search" id="searchInput" th:value="${search}">
+                    </div>
+      <div class="tab-buttons">
+        <button class="tab-btn" th:class="${status == null or status == '' or status == 'all' ? 'tab-btn active' : 'tab-btn'}">All</button>
+        <button class="tab-btn" th:class="${status == 'completed' ? 'tab-btn active' : 'tab-btn'}">Completed</button>
+        <button class="tab-btn" th:class="${status == 'cancelled' ? 'tab-btn active' : 'tab-btn'}">Cancelled</button>
+                </div>
+            </div>
+
+    <!-- Dynamic Order Cards -->
+            <div th:if="${orders != null and !orders.empty}">
+      <div th:each="order : ${orders}" class="order-card" th:if="${orderItemsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}">
+                    <div class="order-top">
+                        <div class="seller-info">
+            <span>Seller:</span>
+            <input type="text" th:value="${order.sellerId}" readonly>
+                            <button class="action-btn chat-btn">Chat</button>
+                            <button class="action-btn view-seller-btn">View seller</button>
+                        </div>
+          <div class="status" th:class="${'status ' + order.status.toLowerCase()}" th:text="'Status: ' + ${order.status}">Status: Completed</div>
+                        </div>
+        <div class="product-line">
+          <div class="product-image">📦</div>
+          <div class="product-info">
+                            <div class="product-name" th:if="${productNamesMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
+            <div th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Quantities: ' + ${orderItemsMap[order.orderId][0].quantity}">Quantities: 1</div>
+            <!-- Product Description -->
+            <div class="product-description" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="${productsMap[orderItemsMap[order.orderId][0].productId].description}">Comprehensive protection: Antivirus, VPN, Password Manager. 5 devices, 12 months.</div>
+            
+            <div class="price-info" style="margin-top: 8px;">
+              <span th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
+                <span class="sale-price" style="color: #ef4444; font-weight: 600;" th:text="'Sale Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].salePrice, 0, 'COMMA', 0, 'POINT')} + '₫'">Sale Price: 1,100,000₫</span>
+                <br>
+                <span class="original-price" style="color: #6b7280; text-decoration: line-through; font-size: 14px;" th:text="'Original Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 'COMMA', 0, 'POINT')} + '₫'">Original Price: 1,250,000₫</span>
+              </span>
+              <span th:unless="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
+                <span class="regular-price" style="color: #111827; font-weight: 600;" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="'Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 'COMMA', 0, 'POINT')} + '₫'">Price: 1,250,000₫</span>
+              </span>
+              <br>
+              <span class="price-at-time" style="color: #059669; font-weight: 500; font-size: 14px;" th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Purchased at: ' + ${#numbers.formatDecimal(orderItemsMap[order.orderId][0].priceAtTime, 0, 'COMMA', 0, 'POINT')} + '₫'">Purchased at: 1,100,000₫</span>
+            </div>
+                        </div>
+                    </div>
+                    <div class="order-bottom">
+          <div th:text="'Order Total: ' + ${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'" style="font-weight: 600; color: #111827;">Order Total: 1,100,000₫</div>
+          <div class="order-actions">
+            <button class="rate-btn" th:attr="data-order-item-id=${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty ? orderItemsMap[order.orderId][0].orderItemId : 1}" onclick="openRateModal(this)">Rate</button>
+            <button class="contact-btn">Contact Seller</button>
+            <button class="buy-again-btn">Buy again</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+    <!-- Empty State -->
+    <div th:if="${orders == null or orders.empty}" class="order-card" style="text-align: center; padding: 40px;">
+                <h3>No orders found</h3>
+                <p>You haven't placed any orders yet.</p>
+      <a href="/customer/dashboard" class="rate-btn" style="text-decoration: none; display: inline-block; margin-top: 20px;">Start Shopping</a>
+            </div>
+
+    <!-- Pagination -->
+    <div th:if="${orders != null and !orders.empty and totalPages > 1}" class="pagination-container">
+        <div class="pagination">
+            <!-- Previous Button -->
+            <a th:if="${page > 0}" 
+               th:href="@{/orderhistory(page=${page - 1}, size=${size}, search=${search}, status=${status})}" 
+               class="pagination-btn prev-btn">
+                <span>←</span>
+                <span>Previous</span>
+            </a>
+            <span th:unless="${page > 0}" class="pagination-btn prev-btn disabled">
+                <span>←</span>
+                <span>Previous</span>
+            </span>
+
+            <!-- Page Numbers -->
+            <div class="page-numbers">
+                <th:block th:if="${totalPages <= 7}">
+                    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                       th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                       th:class="${'page-number' + (i == page ? ' active' : '')}"
+                       th:text="${i + 1}">1</a>
+                </th:block>
+                
+                <th:block th:if="${totalPages > 7}">
+                    <!-- First page -->
+                    <a th:href="@{/orderhistory(page=0, size=${size}, search=${search}, status=${status})}"
+                       th:class="${'page-number' + (page == 0 ? ' active' : '')}"
+                       th:text="1">1</a>
+                    
+                    <!-- Ellipsis if needed -->
+                    <span th:if="${page > 3}" class="ellipsis">...</span>
+                    
+                    <!-- Middle pages -->
+                    <th:block th:if="${page <= 3}">
+                        <a th:each="i : ${#numbers.sequence(1, 4)}"
+                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                           th:class="${'page-number' + (i == page ? ' active' : '')}"
+                           th:text="${i + 1}">2</a>
+                    </th:block>
+                    
+                    <th:block th:if="${page > 3 and page < totalPages - 4}">
+                        <a th:each="i : ${#numbers.sequence(page - 1, page + 1)}"
+                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                           th:class="${'page-number' + (i == page ? ' active' : '')}"
+                           th:text="${i + 1}">5</a>
+                    </th:block>
+                    
+                    <th:block th:if="${page >= totalPages - 4}">
+                        <a th:each="i : ${#numbers.sequence(totalPages - 5, totalPages - 2)}"
+                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                           th:class="${'page-number' + (i == page ? ' active' : '')}"
+                           th:text="${i + 1}">6</a>
+                    </th:block>
+                    
+                    <!-- Ellipsis if needed -->
+                    <span th:if="${page < totalPages - 4}" class="ellipsis">...</span>
+                    
+                    <!-- Last page -->
+                    <a th:if="${totalPages > 1}"
+                       th:href="@{/orderhistory(page=${totalPages - 1}, size=${size}, search=${search}, status=${status})}"
+                       th:class="${'page-number' + (page == totalPages - 1 ? ' active' : '')}"
+                       th:text="${totalPages}">10</a>
+                </th:block>
+            </div>
+
+            <!-- Next Button -->
+            <a th:if="${page < totalPages - 1}" 
+               th:href="@{/orderhistory(page=${page + 1}, size=${size}, search=${search}, status=${status})}" 
+               class="pagination-btn next-btn">
+                <span>Next</span>
+                <span>→</span>
+            </a>
+            <span th:unless="${page < totalPages - 1}" class="pagination-btn next-btn disabled">
+                <span>Next</span>
+                <span>→</span>
+            </span>
+        </div>
+        
+        <!-- Page Info -->
+        <div class="page-info">
+            <span th:text="'Page ' + ${page + 1} + ' of ' + ${totalPages}">Page 1 of 5</span>
+            <span th:text="'(' + ${orders.size()} + ' orders on this page)'">(3 orders on this page)</span>
+        </div>
+    </div>
+        </div>
+    </div>
+
+    <!-- Rate Product Modal -->
+    <div id="rateModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Rate License</h2>
+                <button class="close-btn" onclick="closeRateModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Product Information -->
+                <div class="product-info-section">
+                    <div class="product-image-placeholder">
+                        <div class="placeholder-icon">📦</div>
+                    </div>
+                    <div class="product-details">
+                        <input type="text" id="productNameInput" placeholder="Name tools" readonly>
+                        <input type="hidden" id="orderItemIdInput" value="">
+                    </div>
+                </div>
+
+                <!-- Product Quality Rating -->
+                <div class="rating-section">
+                    <label class="rating-label">Product Quality</label>
+                    <div class="star-rating" id="productQualityRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                        <span class="rating-text" id="productQualityText">Amazing</span>
+                    </div>
+                </div>
+
+                <!-- Review Text Area -->
+                <div class="review-section">
+                    <textarea id="reviewText" placeholder="Write about this product&#10;Share more thoughts to help other buyer" rows="4"></textarea>
+                    <div class="media-buttons">
+                        <input type="file" id="mediaFiles" multiple accept="image/*,video/*" style="display: none;">
+                        <button class="media-btn" onclick="document.getElementById('mediaFiles').click()">Add photo/video</button>
+                    </div>
+                </div>
+
+                <!-- Service Rating -->
+                <div class="service-rating-section">
+                    <label class="service-label">About Service</label>
+                    <div class="service-sub-label">Seller service</div>
+                    <div class="star-rating" id="serviceRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                        <span class="rating-text" id="serviceRatingText">Amazing</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeRateModal()">Cancel</button>
+                <button class="submit-btn" id="submitRatingBtn" onclick="submitRating()">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Notification Popup -->
+    <div id="notificationPopup" class="notification-popup" style="display: none;">
+        <div class="notification-content">
+            <div class="notification-icon">
+                <span id="notificationIcon">✓</span>
+            </div>
+            <div class="notification-message">
+                <h4 id="notificationTitle">Success</h4>
+                <p id="notificationText">Operation completed successfully</p>
+            </div>
+            <button class="notification-close" onclick="closeNotification()">&times;</button>
+        </div>
+    </div>
+
+    <style>
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            min-width: 350px;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid #10b981;
+        }
+
+        .notification-popup.error {
+            border-left-color: #ef4444;
+        }
+
+        .notification-popup.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .notification-popup.error .notification-icon {
+            background: #ef4444;
+        }
+
+        .notification-popup.warning .notification-icon {
+            background: #f59e0b;
+        }
+
+        .notification-message {
+            flex: 1;
+        }
+
+        .notification-message h4 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .notification-message p {
+            margin: 0;
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .notification-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <script>
+        // Notification functions
+        function showNotification(title, message, type = 'success') {
+            const popup = document.getElementById('notificationPopup');
+            const icon = document.getElementById('notificationIcon');
+            const titleEl = document.getElementById('notificationTitle');
+            const textEl = document.getElementById('notificationText');
+            
+            // Set content
+            titleEl.textContent = title;
+            textEl.textContent = message;
+            
+            // Set type and icon
+            popup.className = `notification-popup ${type}`;
+            if (type === 'success') {
+                icon.textContent = '✓';
+            } else if (type === 'error') {
+                icon.textContent = '✕';
+            } else if (type === 'warning') {
+                icon.textContent = '⚠';
+            }
+            
+            // Show popup
+            popup.style.display = 'block';
+            popup.style.animation = 'slideInRight 0.3s ease-out';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                closeNotification();
+            }, 5000);
+        }
+        
+        function closeNotification() {
+            const popup = document.getElementById('notificationPopup');
+            popup.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
+
+        // User dropdown functionality
+        document.getElementById('userMenuBtn').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            this.setAttribute('aria-expanded', !isExpanded);
+            dropdown.style.display = isExpanded ? 'none' : 'block';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userMenu.contains(event.target)) {
+                dropdown.style.display = 'none';
+                document.getElementById('userMenuBtn').setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Filter functionality
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+      const status = this.textContent.toLowerCase();
+                filterOrders(status);
+            });
+        });
+
+        // Search functionality - redirect to search with pagination
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            if (searchTerm.length > 0) {
+                // Redirect to search with pagination
+                const url = new URL(window.location);
+                url.searchParams.set('search', searchTerm);
+                url.searchParams.set('page', '0'); // Reset to first page
+                window.location.href = url.toString();
+            } else {
+                // Clear search
+                const url = new URL(window.location);
+                url.searchParams.delete('search');
+                url.searchParams.set('page', '0');
+                window.location.href = url.toString();
+            }
+        });
+
+        function filterOrders(status) {
+            // Redirect to filter with pagination
+            const url = new URL(window.location);
+            if (status === 'all') {
+                url.searchParams.delete('status');
+            } else {
+                url.searchParams.set('status', status);
+            }
+            url.searchParams.set('page', '0'); // Reset to first page
+            window.location.href = url.toString();
+        }
+
+        function searchOrders(searchTerm) {
+            // This function is now handled by server-side search
+            // Keep for backward compatibility but redirect to server search
+            if (searchTerm.length > 0) {
+                const url = new URL(window.location);
+                url.searchParams.set('search', searchTerm);
+                url.searchParams.set('page', '0');
+                window.location.href = url.toString();
+            }
+        }
+
+        // Action button handlers
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('chat-btn')) {
+                showNotification('Coming Soon', 'Chat functionality coming soon!', 'warning');
+            } else if (event.target.classList.contains('view-seller-btn')) {
+                showNotification('Coming Soon', 'View seller functionality coming soon!', 'warning');
+            } else if (event.target.classList.contains('rate-btn')) {
+                openRateModal(event.target);
+            } else if (event.target.classList.contains('contact-btn')) {
+                showNotification('Coming Soon', 'Contact seller functionality coming soon!', 'warning');
+            } else if (event.target.classList.contains('buy-again-btn')) {
+                showNotification('Coming Soon', 'Buy again functionality coming soon!', 'warning');
+            }
+        });
+
+        // VNPay topup function
+        function topupPrompt(e){
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if(!v) return false;
+            const clean = v.replace(/[^0-9]/g,'');
+            if(!clean){ 
+                showNotification('Invalid Input', 'Please enter a valid amount', 'error');
+                return false; 
+            }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+
+        // Rate Modal Functions
+        let currentOrderCard = null;
+
+        function openRateModal(rateButton) {
+            currentOrderCard = rateButton.closest('.order-card');
+            const productName = currentOrderCard.querySelector('.product-name').textContent;
+            const orderItemId = rateButton.getAttribute('data-order-item-id') || '1';
+            
+            // Set product name and order item ID in modal
+            document.getElementById('productNameInput').value = productName;
+            document.getElementById('orderItemIdInput').value = orderItemId;
+            
+            // Reset ratings
+            resetRatings();
+            
+            // Show modal
+            document.getElementById('rateModal').style.display = 'flex';
+        }
+
+        function closeRateModal() {
+            document.getElementById('rateModal').style.display = 'none';
+            currentOrderCard = null;
+        }
+
+        function resetRatings() {
+            // Reset product quality rating
+            const productStars = document.querySelectorAll('#productQualityRating .star');
+            productStars.forEach(star => star.classList.remove('active'));
+            document.getElementById('productQualityText').textContent = '';
+            
+            // Reset service rating
+            const serviceStars = document.querySelectorAll('#serviceRating .star');
+            serviceStars.forEach(star => star.classList.remove('active'));
+            document.getElementById('serviceRatingText').textContent = '';
+            
+            // Clear review text
+            document.getElementById('reviewText').value = '';
+        }
+
+        // Star rating functionality
+        function initializeStarRatings() {
+            const ratingContainers = document.querySelectorAll('.star-rating');
+            
+            ratingContainers.forEach(container => {
+                const stars = container.querySelectorAll('.star');
+                const ratingText = container.querySelector('.rating-text');
+                
+                stars.forEach((star, index) => {
+                    star.addEventListener('click', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        
+                        // Update visual state
+                        stars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                        
+                        // Update rating text
+                        const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Amazing'];
+                        ratingText.textContent = ratingTexts[rating];
+                    });
+                    
+                    star.addEventListener('mouseenter', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        stars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.style.color = '#fbbf24';
+                            } else {
+                                s.style.color = '#d1d5db';
+                            }
+                        });
+                    });
+                });
+                
+                container.addEventListener('mouseleave', function() {
+                    stars.forEach(star => {
+                        if (star.classList.contains('active')) {
+                            star.style.color = '#fbbf24';
+                        } else {
+                            star.style.color = '#d1d5db';
+                        }
+                    });
+                });
+            });
+        }
+
+        function addPhoto() {
+            showNotification('Coming Soon', 'Add photo functionality coming soon!', 'warning');
+        }
+
+        function addVideo() {
+            showNotification('Coming Soon', 'Add video functionality coming soon!', 'warning');
+        }
+
+        function submitRating() {
+            const orderItemId = document.getElementById('orderItemIdInput').value;
+            const productQuality = getRatingValue('productQualityRating');
+            const serviceRating = getRatingValue('serviceRating');
+            const reviewText = document.getElementById('reviewText').value;
+            const mediaFiles = document.getElementById('mediaFiles').files;
+            
+            if (productQuality === 0) {
+                showNotification('Validation Error', 'Please rate the product quality', 'warning');
+                return;
+            }
+            
+            if (serviceRating === 0) {
+                showNotification('Validation Error', 'Please rate the seller service', 'warning');
+                return;
+            }
+            
+            if (reviewText.trim() === '') {
+                showNotification('Validation Error', 'Please write a review', 'warning');
+                return;
+            }
+            
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('orderItemId', orderItemId);
+            formData.append('productRating', productQuality);
+            formData.append('serviceRating', serviceRating);
+            formData.append('comment', reviewText);
+            
+            // Add media files
+            for (let i = 0; i < mediaFiles.length; i++) {
+                formData.append('mediaFiles', mediaFiles[i]);
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitRatingBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            
+            // Send to backend
+            fetch('/api/rating/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Success!', 'Thank you for your rating!', 'success');
+                    closeRateModal();
+                    // Optionally refresh the page or update UI
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error', 'An error occurred while submitting your rating', 'error');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        function getRatingValue(ratingId) {
+            const container = document.getElementById(ratingId);
+            const activeStars = container.querySelectorAll('.star.active');
+            return activeStars.length;
+        }
+
+        // Initialize star ratings when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeStarRatings();
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('rateModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRateModal();
+            }
+        });
+    </script>
+    
+    <script>
+        // User menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+
+        // VNPay topup function
+        function topupPrompt(e) {
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if (!v) return false;
+            const clean = v.replace(/[^0-9]/g, '');
+            if (!clean) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+    </script>
+</body>
+</html>

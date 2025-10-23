@@ -2,31 +2,45 @@
 <section th:fragment="dashboard" id="dashboardContent" data-section="dashboard">
   <header class="title" data-block="dashboard-header">
     <span class="accent"></span>
-    <h1>Seller Dashboard</h1>
-    <span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
+    <h1 style="margin-bottom:0;">Welcome back,
+      <span class="chip you" id="userName"
+        th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : (userName != null and userName != '' ? userName : (user != null and user.username != null ? user.username : (sellerId != null ? 'Seller #' + sellerId : 'Seller')))}">
+        Seller
+      </span>!
+    </h1>
+    <!-- Keep sellerId hidden for client-side scripts that depend on it -->
+    <span style="display:none"><b id="sellerId" th:text="${sellerId}"></b></span>
+    <!-- Expose userId explicitly for client-side code to prefer (falls back to sellerId) -->
+    <span style="display:none"><b id="userId" th:text="${userId}"></b></span>
     <!-- Live clock for sellers -->
-    <div id="sellerClock" class="chip" aria-live="polite" title="Thời gian hiện tại">--:--:--</div>
-    <button id="btnAddProduct" class="btn primary" type="button" title="Thêm sản phẩm">+ Thêm sản phẩm</button>
+    <div id="sellerClock" class="chip" aria-live="polite" title="Current time">--:--:--</div>
+    <button id="btnAddProduct" class="btn primary" type="button" title="Add product">+ Add product</button>
   </header>
   <section class="grid kpi" data-block="kpi">
     <div class="card" data-kpi="revenue-total">
-      <div class="label">Tổng doanh thu</div>
-      <div class="value">$<span data-count th:attr="data-count=${totalRevenue}" th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
-      <div class="delta pill good">Hôm nay: $<span th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',2,'POINT')}">0</span></div>
-      <div class="orb one"></div><div class="orb two"></div>
+      <div class="label">Total revenue</div>
+      <div class="value">$<span data-count th:attr="data-count=${totalRevenue}"
+          th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
+      <div class="delta pill good">Today: $<span
+          th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+      <div class="orb one"></div>
+      <div class="orb two"></div>
     </div>
     <div class="card" data-kpi="orders-total">
-      <div class="label">Đơn hàng</div>
+      <div class="label">Orders</div>
       <div class="value"><span data-count th:attr="data-count=${totalOrders}" th:text="${totalOrders}">0</span></div>
-      <div class="delta badge">Tháng này: $<span th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+      <div class="delta badge">This month: $<span
+          th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',2,'POINT')}">0</span></div>
     </div>
     <div class="card" data-kpi="products-active">
-      <div class="label">Sản phẩm đang bán</div>
-      <div class="value"><span data-count th:attr="data-count=${activeProducts}" th:text="${activeProducts}">0</span></div>
-      <div class="delta chip">Đánh giá TB: <b th:text="${#numbers.formatDecimal(avgRating,1,'COMMA',1,'POINT')}">0</b>/5</div>
+      <div class="label">Products on sale</div>
+      <div class="value"><span data-count th:attr="data-count=${activeProducts}" th:text="${activeProducts}">0</span>
+      </div>
+      <div class="delta chip">Avg rating: <b th:text="${#numbers.formatDecimal(avgRating,1,'COMMA',1,'POINT')}">0</b>/5
+      </div>
     </div>
     <div class="card" data-kpi="units-sold">
-      <div class="label">Số key đã bán</div>
+      <div class="label">Keys sold</div>
       <div class="value"><span data-count th:attr="data-count=${totalUnits}" th:text="${totalUnits}">0</span></div>
       <div class="progress"><span th:style="'width:' + (${totalUnits} % 100) + '%' "></span></div>
     </div>
@@ -35,29 +49,44 @@
     <div class="card" data-block="revenue-chart">
       <div class="header">
         <div style="display:flex;align-items:center;gap:10px">
-          <span class="avatar"><img th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg" alt="Seller Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" width="40" height="40" fetchpriority="high" decoding="async" /></span>
-          <div><div style="font-weight:700">Doanh thu 15 ngày gần nhất</div><div class="footer-note">Theo ngày (USD)</div></div>
+          <span class="avatar"><img th:src="@{/img/avatar_default.jpg}" src="/img/avatar_default.jpg"
+              alt="Seller Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" width="40"
+              height="40" fetchpriority="high" decoding="async" /></span>
+          <div>
+            <div style="font-weight:700">Revenue (last 15 days)</div>
+            <div class="footer-note">By day (USD)</div>
+          </div>
         </div>
-        <div class="chip hide-md">Dải: 15 ngày</div>
+        <div class="chip hide-md">Range: 15 days</div>
       </div>
-      <div class="body"><canvas id="revenueChart" class="sparkline" th:attr="data-labels=${dailyRevenueLabels},data-data=${dailyRevenueData}"></canvas></div>
+      <div class="body"><canvas id="revenueChart" class="sparkline"
+          th:attr="data-labels=${dailyRevenueLabels},data-data=${dailyRevenueData}"></canvas></div>
     </div>
     <div class="card" data-block="low-stock">
       <div class="header">
-        <div style="font-weight:700">Sắp hết hàng</div>
-        <div class="chip" th:text="${#lists.size(lowStock)} + ' sản phẩm'">0 sản phẩm</div>
+        <div style="font-weight:700">Low stock</div>
+        <div class="chip" th:text="${#lists.size(lowStock)} + ' products'">0 products</div>
       </div>
       <div class="body paged">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>Sản phẩm</th><th class="hide-md">Còn lại</th><th>Trạng thái</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th class="hide-md">Remaining</th>
+                <th>Status</th>
+              </tr>
+            </thead>
             <tbody id="tbLowStock">
               <tr th:each="p: ${lowStock}" th:attr="data-product-id=${p.productId}" class="clickable">
-                <td th:text="${p.name}">Tên sản phẩm</td>
-                <td class="hide-md" th:text="${p.quantity}">3</td>
-                <td><span th:classappend="${p.quantity} &lt;= 2 ? 'pill warn' : 'pill good'" th:text="${p.quantity} &lt;= 2 ? 'Cần nhập' : 'Ổn'">Ổn</span></td>
+                <td th:text="${p.name}">Product name</td>
+                <td class="hide-md" th:text="${p.remaining}">3</td>
+                <td><span th:classappend="${p.remaining} &lt;= 2 ? 'pill warn' : 'pill good'"
+                    th:text="${p.remaining} &lt;= 2 ? 'Restock needed' : 'OK'">OK</span></td>
               </tr>
-              <tr th:if="${#lists.isEmpty(lowStock)}"><td colspan="3" class="footer-note">Không có sản phẩm sắp hết hàng.</td></tr>
+              <tr th:if="${#lists.isEmpty(lowStock)}">
+                <td colspan="3" class="footer-note">No low-stock products.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -67,12 +96,27 @@
   </section>
   <section class="grid one" style="margin-top:16px" id="sectionMyProducts" data-block="my-products">
     <div class="card">
-      <div class="header"><div style="font-weight:700">Sản phẩm của tôi</div><div class="chip" id="myProductsCount">0</div></div>
+      <div class="header">
+        <div style="font-weight:700">My products</div>
+        <div class="chip" id="myProductsCount">0</div>
+      </div>
       <div class="body paged">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>ID</th><th>Tên</th><th>Giá</th><th class="hide-md">SL</th><th>Trạng thái</th></tr></thead>
-            <tbody id="tbMyProducts"><tr class="footer-note"><td colspan="5">Đang tải...</td></tr></tbody>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th class="hide-md">Qty</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbMyProducts">
+              <tr class="footer-note">
+                <td colspan="5">Loading...</td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <div class="pagination" id="pgMyProducts"></div>
@@ -82,28 +126,47 @@
   <!-- Seller Ranking Section (compact left panel + list) -->
   <section class="rank-grid" style="margin-top:16px" id="sectionSellerRank" data-block="seller-rank">
     <div class="card" data-block="my-rank">
-      <div class="header"><div style="font-weight:700">Xếp hạng của tôi</div></div>
+      <div class="header">
+        <div style="font-weight:700">My ranking</div>
+      </div>
       <div class="body">
-  <p style="margin:4px 0 10px">Hạng hiện tại: <span class="pill" th:text="${myRank > 0 ? '#' + myRank : 'N/A'}"></span> / <b th:text="${totalSellers}">0</b> seller</p>
+        <p style="margin:4px 0 10px">Current rank: <span class="pill"
+            th:text="${myRank > 0 ? '#' + myRank : 'N/A'}"></span> / <b th:text="${totalSellers}">0</b> seller</p>
         <div style="margin-top:8px">
-          <div class="footer-note" style="margin-bottom:4px">Percentile: <span th:text="${#numbers.formatDecimal(rankPercentile,1,'COMMA',1,'POINT') + '%'}">0%</span></div>
-          <div class="progress" style="height:14px; background:rgba(255,255,255,0.08); border-radius:20px; overflow:hidden">
-            <span th:style="${'width:' + rankPercentile + '%'}" style="display:block; height:100%; background:linear-gradient(90deg,#fbbf24,#f59e0b,#ef4444); transition:width .8s ease"></span>
+          <div class="footer-note" style="margin-bottom:4px">Percentile: <span
+              th:text="${#numbers.formatDecimal(rankPercentile,1,'COMMA',1,'POINT') + '%'}">0%</span></div>
+          <div class="progress"
+            style="height:14px; background:rgba(255,255,255,0.08); border-radius:20px; overflow:hidden">
+            <span th:style="${'width:' + rankPercentile + '%'}"
+              style="display:block; height:100%; background:linear-gradient(90deg,#fbbf24,#f59e0b,#ef4444); transition:width .8s ease"></span>
           </div>
         </div>
-        <div class="footer-note" style="margin-top:10px">Dựa trên tổng doanh thu tích lũy.</div>
+        <div class="footer-note" style="margin-top:10px">Based on cumulative revenue.</div>
       </div>
     </div>
     <div class="card" data-block="top-sellers">
-      <div class="header"><div style="font-weight:700">Top Sellers</div><div class="chip" th:text="${#lists.size(topSellers)} + ' hiển thị'">0 hiển thị</div></div>
+      <div class="header">
+        <div style="font-weight:700">Top Sellers</div>
+        <div class="chip" th:text="${#lists.size(topSellers)} + ' shown'">0 shown</div>
+      </div>
       <div class="body paged">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>Hạng</th><th>Seller</th><th>Doanh thu</th><th class="hide-md">Đã bán</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Seller</th>
+                <th>Revenue</th>
+                <th class="hide-md">Units sold</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr th:each="s,iter : ${topSellers}" th:class="${'rank-row rank-' + (iter.index + 1) + (s.sellerId == sellerId ? ' active' : '')}">
+              <tr th:each="s,iter : ${topSellers}"
+                th:class="${'rank-row rank-' + (iter.index + 1) + (s.sellerId == sellerId ? ' active' : '')}">
                 <td class="rank-cell">
-                  <div th:class="${'rank-badge ' + (iter.index==0? 'gold' : (iter.index==1? 'silver' : (iter.index==2? 'bronze' : '')))}" th:attr="data-rank=${iter.index+1}">
+                  <div
+                    th:class="${'rank-badge ' + (iter.index==0? 'gold' : (iter.index==1? 'silver' : (iter.index==2? 'bronze' : '')))}"
+                    th:attr="data-rank=${iter.index+1}">
                     <span th:text="${'#' + (iter.index + 1)}">#1</span>
                     <i class="flare" th:if="${iter.index < 2}"></i>
                     <i class="glow" th:if="${iter.index == 0}"></i>
@@ -112,7 +175,7 @@
                 <td>
                   <div class="seller-cell">
                     <span class="seller-name" th:text="${s.username}">seller01</span>
-                    <span th:if="${s.sellerId == sellerId}" class="chip you">Bạn</span>
+                    <span th:if="${s.sellerId == sellerId}" class="chip you">You</span>
                   </div>
                 </td>
                 <td>
@@ -120,7 +183,9 @@
                 </td>
                 <td class="hide-md"><span th:text="${s.units}">0</span></td>
               </tr>
-              <tr th:if="${#lists.isEmpty(topSellers)}"><td colspan="4" class="footer-note">Chưa có dữ liệu xếp hạng.</td></tr>
+              <tr th:if="${#lists.isEmpty(topSellers)}">
+                <td colspan="4" class="footer-note">Ranking data not available.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -129,20 +194,32 @@
   </section>
   <section class="grid two" style="margin-top:16px" id="sectionTopAndRecent" data-block="top-and-recent">
     <div class="card" data-block="top-products">
-      <div class="header"><div style="font-weight:700">Top sản phẩm</div></div>
+      <div class="header">
+        <div style="font-weight:700">Top products</div>
+      </div>
       <div class="body paged">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>#</th><th>Tên</th><th>Đã bán</th><th class="hide-md">Đánh giá</th><th>Doanh thu</th></tr></thead>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Units sold</th>
+                <th class="hide-md">Rating</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
             <tbody id="tbTopProducts">
               <tr th:each="p, iStat : ${topProducts}" th:attr="data-product-id=${p.productId}" class="clickable">
                 <td th:text="${iStat.index + 1}">1</td>
-                <td th:text="${p.name}">Tên</td>
+                <td th:text="${p.name}">Name</td>
                 <td th:text="${p.units}">0</td>
                 <td class="hide-md" th:text="${#numbers.formatDecimal(p.rating,1,'COMMA',1,'POINT')}">0</td>
                 <td>$<span th:text="${#numbers.formatDecimal(p.revenue,1,'COMMA',2,'POINT')}">0</span></td>
               </tr>
-              <tr th:if="${#lists.isEmpty(topProducts)}"><td colspan="5" class="footer-note">Chưa có sản phẩm nào được bán.</td></tr>
+              <tr th:if="${#lists.isEmpty(topProducts)}">
+                <td colspan="5" class="footer-note">No products sold yet.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -150,11 +227,20 @@
       </div>
     </div>
     <div class="card" data-block="recent-orders">
-      <div class="header"><div style="font-weight:700">Đơn hàng gần đây</div></div>
+      <div class="header">
+        <div style="font-weight:700">Recent orders</div>
+      </div>
       <div class="body paged">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>Mã</th><th>Ngày</th><th class="hide-md">Số lượng</th><th>Thành tiền</th></tr></thead>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th class="hide-md">Items</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
             <tbody id="tbRecentOrders">
               <tr th:each="o: ${recentOrders}" th:attr="data-order-id=${o.orderId}" class="clickable">
                 <td th:text="${o.orderId}">1001</td>
@@ -162,7 +248,9 @@
                 <td class="hide-md" th:text="${o.items}">0</td>
                 <td>$<span th:text="${#numbers.formatDecimal(o.amount,1,'COMMA',2,'POINT')}">0</span></td>
               </tr>
-              <tr th:if="${#lists.isEmpty(recentOrders)}"><td colspan="4" class="footer-note">Chưa có đơn hàng.</td></tr>
+              <tr th:if="${#lists.isEmpty(recentOrders)}">
+                <td colspan="4" class="footer-note">No recent orders.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -170,5 +258,6 @@
       </div>
     </div>
   </section>
-  <footer class="footer-note" data-block="dashboard-footer" style="margin-top:16px">Mẹo: Nhấn Ctrl+D để bookmark trang dashboard. Cần đăng nhập người bán để lấy sellerId tự động.</footer>
+  <footer class="footer-note" data-block="dashboard-footer" style="margin-top:16px">Tip: Press Ctrl+D to bookmark the
+    dashboard. Seller login required to auto-detect sellerId.</footer>
 </section>

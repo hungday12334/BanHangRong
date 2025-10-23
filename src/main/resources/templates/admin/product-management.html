@@ -5,14 +5,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Product Manage</title>
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
-    <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* Căn chỉnh phần nội dung chính để không bị sidebar che */
         .content-wrapper {
-            margin-left: 260px; /* Đẩy sang phải bằng độ rộng sidebar */
+            margin-left: 260px;
+            /* Đẩy sang phải bằng độ rộng sidebar */
             padding: 30px;
             background-color: #f8f9fa;
             min-height: 100vh;
@@ -44,7 +45,8 @@
             text-align: center;
         }
 
-        td, th {
+        td,
+        th {
             padding: 10px;
             vertical-align: middle;
         }
@@ -80,13 +82,15 @@
         }
 
         .sidebar-link .hide-menu {
-            margin-left: -8px; /* giảm khoảng cách chữ */
+            margin-left: -8px;
+            /* giảm khoảng cách chữ */
         }
 
         /* Nút hành động tự custom */
         .action-btns {
             display: flex;
-            flex-direction: column; /* icon xếp dọc */
+            flex-direction: column;
+            /* icon xếp dọc */
             align-items: center;
             gap: 6px;
         }
@@ -107,7 +111,8 @@
 
         /* Nút Update */
         .action-btns a {
-            background-color: #4e73df; /* xanh dương */
+            background-color: #4e73df;
+            /* xanh dương */
         }
 
         .action-btns a i {
@@ -117,7 +122,8 @@
 
         /* Nút Delete */
         .action-btns button {
-            background-color: #e74a3b; /* đỏ cam */
+            background-color: #e74a3b;
+            /* đỏ cam */
         }
 
         .action-btns button i {
@@ -166,232 +172,203 @@
             background-color: #dc3545;
             color: white;
         }
-
-        .sidebar-item {
-            position: relative;
-            list-style: none;
-        }
-
-        .sidebar-item > ul {
-            display: none;
-            margin-left: 1.5rem;
-        }
-
-        .sidebar-item:hover > ul {
-            display: block;
-        }
-
-        .badge {
-            background-color: #dc3545;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-        /*filter*/
-        .filter-bar {
-            gap: 10px;
-            align-items: flex-end;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .filter-bar input {
-            border-color: #0b1020;
-        }
-        .filter-bar select {
-            flex: 1;
-            min-width: 120px;
-            border-color: #0b1020;
-        }
-
-        .date-field {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .date-field label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 3px;
-        }
     </style>
 </head>
 
 <body>
-<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
-    <!-- Sidebar Start -->
-    <div th:replace="~{admin/sidebar::sidebar}"></div>
-    <!-- Sidebar End -->
-
-    <!-- ListUser Section -->
-    <div class="content-wrapper">
-<!--        //Filter-->
-        <div class="user-header">
-            <div class="d-flex filter-bar">
-                <input type="text" id="search" class="form-control" placeholder="ID, Name">
-                <input type="text" id="sellerId" class="form-control" placeholder="SellerID">
-                <input type="number" id="priceMin" class="form-control" placeholder="Price Min">
-                <input type="number" id="priceMax" class="form-control" placeholder="Price Max">
-                <select id="status" class="form-select">
-                    <option value="ALL">STATUS</option>
-                    <option value="HIDDEN">HIDDEN</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="PUBLIC">PUBLIC</option>
-                    <option value="CANCELLED">CANCELLED</option>
-                </select>
-                <div class="date-field">
-                    <label for="createAt">Create At</label>
-                    <input type="date" id="createAt" class="form-control">
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar">
+            <div>
+                <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
+                    <a th:href="@{/admin/index}" class="text-center">
+                        <img th:src="@{/img/favicon.png}" alt="LOGO"
+                            style="width: 80px; height: auto; display: block; margin: 0 auto;">
+                        <span
+                            style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">BanHangRong</span>
+                    </a>
+                    <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
+                        <i class="ti ti-x fs-6"></i>
+                    </div>
                 </div>
-
-                <div class="date-field">
-                    <label for="updateAt">Update At</label>
-                    <input type="date" id="updateAt" class="form-control">
-                </div>
-            </div>
-        </div>
-
-        <div class="table-responsive">
-            <!-- Thông báo lỗi -->
-            <div th:if="${error}"
-                 class="alert alert-danger alert-dismissible fade show"
-                 role="alert">
-                <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-
-            <!-- Thông báo thành công -->
-            <div th:if="${success}"
-                 class="alert alert-success alert-dismissible fade show"
-                 role="alert">
-                <span th:text="${success}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-
-            <table id="productTable" class="table table-bordered text-center align-middle shadow-sm">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>ID</th>
-                    <th>Seller ID</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total Sales</th>
-                    <th>Average Rating</th>
-                    <th>Status</th>
-                    <th>Create At</th>
-                    <th>Update At</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="p : ${productsList}">
-                    <td>
-                        <div class="action-btns">
-                            <form action="/admin/product/cancel" method="post" style="text-align:center;">
-                                <input type="hidden" name="productId" th:value="${p.productId}">
-                                <div class="form-actions">
-                                    <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')"><i class="bi bi-trash"></i></button>
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Lists</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/index}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
+                                    <span class="hide-menu">DASHBOARD</span>
                                 </div>
-                            </form>
-                        </div>
-                    </td>
-                    <td th:text="${p.productId}"></td>
-                    <td th:text="${p.sellerId}"></td>
-                    <td>
-                        <img th:src="@{${p.images}}" alt="Product Image" style="width: 100px; height: 100px; object-fit: cover;">
-                    </td>
-                    <td th:text="${p.name}"></td>
-                    <td th:text="${p.description}"></td>
-                    <td th:text="${p.price}"></td>
-                    <td th:text="${p.quantity}"></td>
-                    <td th:text="${p.totalSales}"></td>
-                    <td th:text="${p.averageRating}"></td>
-                    <td>
-                        <span th:text="${p.status}"
-                              th:class="'status-badge ' +
-                                  (${p.status.equalsIgnoreCase('public')} ? 'status-public' :
-                                  (${p.status.equalsIgnoreCase('pending')} ? 'status-pending' :
-                                  (${p.status.equalsIgnoreCase('cancelled')} ? 'status-cancelled' : '')))">
-                        </span>
-                    </td>
-                    <td th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${#temporals.format(p.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                </tr>
-                </tbody>
-            </table>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" th:href="@{/admin/user}" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                <span class="hide-menu">USER MANAGEMENT</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/product}"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-key-fill"></i></span>
+                                    <span class="hide-menu">PRODUCT MANAGEMENT</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                                aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-patch-question-fill"></i></span>
+                                    <span class="hide-menu">HELP</span>
+                                </div>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">REPORT</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link justify-content-between" href="#">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-circle"></i>
+                                            </div>
+                                            <span class="hide-menu">APPLY TO SELLER</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
+                                    <span class="hide-menu">SETTING</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
+                                    <span class="hide-menu">LOGOUT</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!-- Sidebar End -->
+
+        <!-- ListUser Section -->
+        <div class="content-wrapper">
+            <div class="user-header">
+                <form class="d-flex">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search users">
+                    <button type="button" class="btn btn-outline-primary">Search</button>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <!-- Thông báo lỗi -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Thông báo thành công -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <table class="table table-bordered text-center align-middle shadow-sm">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Seller ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total Sales</th>
+                            <th>Average Rating</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${productsListPending}">
+                            <td>
+                                <div class="action-btns">
+                                    <a th:href="@{'/admin/product/update?id=' + ${p.productId}}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            <td th:text="${p.productId}"></td>
+                            <td th:text="${p.sellerId}"></td>
+                            <td th:text="${p.name}"></td>
+                            <td th:text="${p.description}"></td>
+                            <td th:text="${p.price}"></td>
+                            <td th:text="${p.quantity}"></td>
+                            <td th:text="${p.totalSales}"></td>
+                            <td th:text="${p.averageRating}"></td>
+                            <td>
+                                <span th:text="${p.status}" th:class="'status-badge ' +
+                                  (#strings.equalsIgnoreCase(p.status,'public') ? 'status-public' :
+                                  (#strings.equalsIgnoreCase(p.status,'pending') ? 'status-pending' :
+                                  (#strings.equalsIgnoreCase(p.status,'cancelled') ? 'status-cancelled' : '')))">
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.getElementById('search');
-        const sellerIdInput = document.getElementById('sellerId');
-        const priceMinInput = document.getElementById('priceMin');
-        const priceMaxInput = document.getElementById('priceMax');
-        const statusSelect = document.getElementById('status');
-        const createAtInput = document.getElementById('createAt');
-        const updateAtInput = document.getElementById('updateAt');
-        const rows = document.querySelectorAll('#productTable tbody tr');
-
-        function filterTable() {
-            const search = searchInput.value.trim().toLowerCase();
-            const sellerId = sellerIdInput.value.trim().toLowerCase();
-            const priceMin = parseFloat(priceMinInput.value) || 0;
-            const priceMax = parseFloat(priceMaxInput.value) || Infinity;
-            const status = statusSelect.value.trim().toLowerCase();
-            const createAt = createAtInput.value.trim();
-            const updateAt = updateAtInput.value.trim();
+    <script>
+        document.getElementById("searchInput").addEventListener("keyup", function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll("table tbody tr");
 
             rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const idCell = cells[1].textContent.trim().toLowerCase();
-                const sellerIdCell = cells[2].textContent.trim().toLowerCase();
-                const nameCell = cells[4].textContent.trim().toLowerCase();
-                const priceCell = parseFloat(cells[6].textContent.trim()) || 0;
-                const statusCell = cells[10].textContent.trim().toLowerCase();
-                const createAtCell = cells[11].textContent.trim();
-                const updateAtCell = cells[12].textContent.trim();
+                const cells = row.querySelectorAll("td");
+                let match = false;
 
-                const matchSearch = idCell.includes(search) || nameCell.includes(search);
-                const matchSellerId = sellerIdCell.includes(sellerId);
-                const matchPrice = priceCell >= priceMin && priceCell <= priceMax;
-                const matchStatus = status === 'all' || statusCell === status;
-                const matchCreateAt = !createAt || createAtCell.startsWith(createAt);
-                const matchUpdateAt = !updateAt || updateAtCell.startsWith(updateAt);
+                // duyệt qua tất cả các cột trừ 3 cột thời gian cuối
+                for (let i = 0; i < cells.length; i++) {
+                    if (cells[i].innerText.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
 
-                row.style.display = (matchSearch && matchSellerId && matchPrice && matchStatus && matchCreateAt && matchUpdateAt)
-                    ? ''
-                    : 'none';
+                row.style.display = match ? "" : "none";
             });
-        }
-
-        let typingTimer;
-        searchInput.addEventListener("input", () => {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(filterTable, 300);
         });
-
-        [sellerIdInput, priceMinInput, priceMaxInput, statusSelect, createAtInput, updateAtInput].forEach(el => {
-            el.addEventListener("input", filterTable);
-            el.addEventListener("change", filterTable);
-        });
-    });
-
-</script>
-<script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
-<script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-<script src="../assets/libs/simplebar/dist/simplebar.js"></script>
-<script src="../assets/js/dashboard.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </script>
+    <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
+    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

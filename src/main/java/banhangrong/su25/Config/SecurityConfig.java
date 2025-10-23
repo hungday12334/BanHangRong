@@ -39,8 +39,7 @@ public class SecurityConfig {
 
             // Cấu hình session management
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                    .invalidSessionUrl("/login?expired=true")
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false).expiredUrl("/login?expired=true")
                     .sessionRegistry(sessionRegistry)
@@ -54,16 +53,18 @@ public class SecurityConfig {
                     .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
+                    // Guest-browsable catalog
+                    .requestMatchers("/categories", "/category/**", "/product/**").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()
 
                 // Customer pages - cho phép tất cả authenticated users
-                .requestMatchers("/customer/**", "/product/**", "/cart/**").authenticated()
-
+                .requestMatchers("/customer/**", "/cart/**").authenticated()
+                
                 // Role-based access
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers("/api/user/**").hasAnyRole("USER", "SELLER", "ADMIN")
-
+                .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "SELLER", "ADMIN")
+                
                 // Default: require authentication
                 .anyRequest().authenticated()
             )
@@ -82,7 +83,7 @@ public class SecurityConfig {
             // Cấu hình logout
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()

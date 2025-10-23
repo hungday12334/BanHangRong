@@ -97,7 +97,7 @@ public class AuthService {
         newUser.setPhoneNumber(registerRequest.getPhoneNumber());
         newUser.setGender(registerRequest.getGender());
         newUser.setBirthDate(registerRequest.getBirthDate());
-        newUser.setUserType("USER");
+        newUser.setUserType("CUSTOMER");
         newUser.setBalance(new BigDecimal("0.00")); // Khởi tạo balance = 0
         newUser.setIsActive(true);
         newUser.setIsEmailVerified(false);

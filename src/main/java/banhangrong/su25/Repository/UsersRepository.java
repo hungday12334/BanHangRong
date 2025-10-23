@@ -3,6 +3,12 @@ package banhangrong.su25.Repository;
 import banhangrong.su25.Entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -13,4 +19,13 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     Long countByUserType(String userType);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Users u SET u.email = :email, u.isEmailVerified = false WHERE u.userId = :userId")
+    int updateEmailAndUnverify(@Param("userId") Long userId, @Param("email") String email);
+
+    // Search users with optional type and keyword across username/email/phone
+    @Query("SELECT u FROM Users u WHERE (:type IS NULL OR u.userType = :type) AND (:q IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(COALESCE(u.phoneNumber, '')) LIKE LOWER(CONCAT('%', :q, '%'))) ORDER BY u.createdAt DESC")
+    Page<Users> searchUsers(@Param("type") String type, @Param("q") String q, Pageable pageable);
 }

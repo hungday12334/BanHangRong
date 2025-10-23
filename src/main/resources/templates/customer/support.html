@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center - BanHangRong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg:#f5f7fb; 
+            --card:#ffffff; 
+            --ink:#0f172a; 
+            --muted:#6b7280; 
+            --brand:#0ea5e9; 
+            --line:#eaeef4;
+            --gray:#6b7280;
+            --gray-light:#f3f4f6;
+            --gray-dark:#374151;
+        }
+        * { box-sizing:border-box; }
+        html,body { height:100%; }
+        body { 
+            margin:0; 
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+            color:var(--ink); 
+            background:var(--bg); 
+        }
+        .wrapper { min-height:100%; display:flex; flex-direction:column; }
+        
+        /* Header */
+        .topbar { 
+            display:flex; 
+            align-items:center; 
+            gap:14px; 
+            padding:10px 16px; 
+            border-bottom:1px solid var(--line); 
+            background:var(--card); 
+            flex-wrap:nowrap; 
+        }
+        .brand { 
+            font-weight:800; 
+            letter-spacing:.2px; 
+            display:flex; 
+            align-items:center; 
+            gap:8px; 
+            cursor:pointer; 
+            text-decoration:none; 
+            color:inherit; 
+        }
+        .brand:hover { color:var(--brand); }
+        .logo { height:32px; width:auto; }
+        .nav { 
+            display:flex; 
+            gap:16px; 
+            margin:0 12px; 
+            flex:1; 
+            overflow:auto; 
+            white-space:nowrap; 
+        }
+        .nav a { 
+            text-decoration:none; 
+            color:#111827; 
+            font-weight:500; 
+            padding:8px 10px; 
+            border-radius:8px; 
+        }
+        .nav a:hover { background:#f3f4f6; }
+        .top-actions { 
+            margin-left:auto; 
+            display:flex; 
+            align-items:center; 
+            gap:12px; 
+            position:relative; 
+        }
+        .lang, .notif, .user { font-size:14px; color:var(--muted); }
+        .user-btn{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            cursor:pointer;
+            color:#111827;
+            border:1px solid var(--line);
+            padding:6px 10px;
+            border-radius:8px;
+            background:#fff
+        }
+        .user-menu{
+            position:absolute; 
+            right:0; 
+            top:48px; 
+            background:#fff; 
+            border:1px solid var(--line); 
+            border-radius:10px; 
+            box-shadow:0 10px 25px rgba(0,0,0,.08); 
+            width:200px; 
+            display:none; 
+            z-index:5
+        }
+        .user-menu .item{
+            display:block; 
+            padding:10px 12px; 
+            color:#111827; 
+            text-decoration:none
+        }
+        .user-menu .item:hover{background:#f3f4f6}
+        .search { position:relative; }
+        .search input { 
+            height:34px; 
+            width:220px; 
+            padding:0 12px; 
+            border:1px solid var(--line); 
+            border-radius:8px; 
+            outline:none; 
+        }
+        .cart {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cart:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .cart .badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Support Hero Section */
+        .support-hero {
+            background: linear-gradient(135deg, var(--brand), #0284c7);
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+        }
+        .support-hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+        }
+        .support-hero p {
+            font-size: 18px;
+            margin: 0 0 40px 0;
+            opacity: 0.9;
+        }
+        .support-search {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .support-search input {
+            width: 100%;
+            height: 56px;
+            padding: 0 20px 0 60px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .support-search .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: var(--muted);
+        }
+        .support-search .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--brand);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .support-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Categories Section */
+        .categories-section {
+            margin-bottom: 60px;
+        }
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .category-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: var(--brand);
+            background: var(--gray-light);
+        }
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            background: var(--brand);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+        .category-desc {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            margin-bottom: 60px;
+        }
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .faq-item {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .faq-question {
+            padding: 20px;
+            font-weight: 600;
+            color: var(--ink);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .faq-question:hover {
+            background: var(--gray-light);
+        }
+        .faq-answer {
+            padding: 0 20px 20px;
+            color: var(--muted);
+            line-height: 1.6;
+            display: none;
+        }
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            text-align: center;
+            background: var(--gray-light);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 40px;
+        }
+        .contact-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 16px;
+        }
+        .contact-desc {
+            font-size: 16px;
+            color: var(--muted);
+            margin-bottom: 30px;
+        }
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--brand);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .contact-btn:hover {
+            background: var(--gray-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .support-hero h1 { font-size: 28px; }
+            .support-hero p { font-size: 16px; }
+            .categories-grid { grid-template-columns: 1fr; }
+            .support-content { padding: 20px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Header -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
+            <nav class="nav" aria-label="Main">
+                <a href="/categories">Category</a>
+                <a href="#">License Software</a>
+                <a href="#">Game Keys</a>
+                <a href="#">Voucher</a>
+                <a href="/customer/support" style="color: var(--brand); font-weight: 600;">Support</a>
+            </nav>
+            <div class="top-actions">
+                <div class="notif">Notification</div>
+                <div class="user" style="position:relative">
+                    <!-- Wallet Balance Display -->
+                    <div class="wallet-balance" style="margin-right: 12px; padding: 6px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; color: #0ea5e9; font-weight: 600; font-size: 14px;">
+                        💰 <span th:text="${user != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') : '0'}">0</span>₫
+                    </div>
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+                        <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+                        <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+                        <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+                            style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                                th:value="${_csrf.token}" />
+                            <input type="hidden" name="amount" id="topupAmountInput" />
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+                                (VNPay)</button>
+                        </form>
+                        <a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+                            style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+                            Become a Seller</a>
+                        <a class="item" href="#" role="menuitem"
+                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+                <div class="search">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+                        <input type="search" name="search" placeholder="search" aria-label="Search" 
+                               th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                        <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                        <a th:if="${search != null and !search.trim().isEmpty()}" 
+                           th:href="@{/customer/dashboard}" 
+                           style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+                    </form>
+                </div>
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">
+                    🛒
+                    <span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Support Hero Section -->
+        <section class="support-hero">
+            <h1>Hello, how can BanHangRong help you?</h1>
+            <p>We are always ready to support you with any issues</p>
+            <div class="support-search">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input type="text" placeholder="Enter keywords or content to search" id="supportSearch">
+                <button class="search-btn" onclick="searchSupport()">Search</button>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <div class="support-content">
+            <!-- Categories Section -->
+            <section class="categories-section">
+                <h2 class="section-title">Categories</h2>
+                <div class="categories-grid">
+                    <a href="#" class="category-card" onclick="showCategory('shopping')">
+                        <div class="category-icon">🛒</div>
+                        <div class="category-title">Shopping with BanHangRong</div>
+                        <div class="category-desc">Shopping guide, product search and payment</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('promotions')">
+                        <div class="category-icon">🏷️</div>
+                        <div class="category-title">Promotions & Offers</div>
+                        <div class="category-desc">Information about promotional programs and discount codes</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('payment')">
+                        <div class="category-icon">💳</div>
+                        <div class="category-title">Payment</div>
+                        <div class="category-desc">Payment guide and e-wallet management</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('orders')">
+                        <div class="category-icon">📦</div>
+                        <div class="category-title">Orders & Shipping</div>
+                        <div class="category-desc">Order tracking and shipping information</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('returns')">
+                        <div class="category-icon">🔄</div>
+                        <div class="category-title">Returns & Refunds</div>
+                        <div class="category-desc">Return and refund policy</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('general')">
+                        <div class="category-icon">❓</div>
+                        <div class="category-title">General Information</div>
+                        <div class="category-desc">Frequently asked questions and general information</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="faq-section">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>[Fraud Warning] Safe Shopping with BanHangRong</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            BanHangRong is committed to protecting your personal information and transactions. Always check seller information, read product descriptions carefully and use our secure payment system.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>[Service] How to contact Customer Care, Hotline, BanHangRong Call Center</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            You can contact us via: Email: support@banhangrong.com, Hotline: 1900-xxxx, or use the online chat feature on the website.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>How to register a BanHangRong account?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            You can register an account by clicking the "Register" button in the top right corner of the screen, filling in all information and verifying your email to complete registration.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>How to become a seller on BanHangRong?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            To become a seller, you need to register an account, verify your identity, provide business information and wait for approval from the BanHangRong team.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section class="contact-section">
+                <h3 class="contact-title">Do you want to find more information?</h3>
+                <p class="contact-desc">Our support team is always ready to help you</p>
+                <a href="#" class="contact-btn" onclick="contactSupport()">
+                    <span>📞</span>
+                    <span>Contact BanHangRong</span>
+                </a>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // User dropdown functionality
+        document.getElementById('userMenuBtn').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            this.setAttribute('aria-expanded', !isExpanded);
+            dropdown.style.display = isExpanded ? 'none' : 'block';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userMenu.contains(event.target)) {
+                dropdown.style.display = 'none';
+                document.getElementById('userMenuBtn').setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // FAQ functionality
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Toggle current item
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Search functionality
+        function searchSupport() {
+            const searchTerm = document.getElementById('supportSearch').value;
+            if (searchTerm.trim()) {
+                alert('Search: ' + searchTerm + '\nSearch feature is under development!');
+            }
+        }
+
+        // Category functionality
+        function showCategory(category) {
+            const categoryNames = {
+                'shopping': 'Shopping with BanHangRong',
+                'promotions': 'Promotions & Offers',
+                'payment': 'Payment',
+                'orders': 'Orders & Shipping',
+                'returns': 'Returns & Refunds',
+                'general': 'General Information'
+            };
+            alert('Selected category: ' + categoryNames[category] + '\nFeature is under development!');
+        }
+
+        // Contact functionality
+        function contactSupport() {
+            alert('Contact Support:\n📧 Email: support@banhangrong.com\n📞 Hotline: 1900-xxxx\n💬 Online Chat: Under development');
+        }
+
+        // Search on Enter key
+        document.getElementById('supportSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchSupport();
+            }
+        });
+
+        // User menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+
+        // VNPay topup function
+        function topupPrompt(e) {
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if (!v) return false;
+            const clean = v.replace(/[^0-9]/g, '');
+            if (!clean) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+    </script>
+    
+</body>
+</html>

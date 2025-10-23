@@ -16,6 +16,8 @@ public class Users {
     private String username;
     private String email;
     private String password;
+    @Column(name = "full_name")
+    private String fullName;
     @Column(name = "user_type")
     private String userType;
     @Column(name = "avatar_url")
@@ -68,6 +70,14 @@ public class Users {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getUserType() {
