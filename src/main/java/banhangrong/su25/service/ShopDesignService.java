@@ -6,7 +6,6 @@ import banhangrong.su25.Repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,7 +96,7 @@ public class ShopDesignService {
 
         List<Products> products = new ArrayList<>();
         for (SellerFeaturedProducts fp : featured) {
-            if (fp.getProduct() != null && "public".equals(fp.getProduct().getStatus())) {
+            if (fp.getProduct() != null && fp.getProduct().getIsActive()) {
                 products.add(fp.getProduct());
             }
         }
@@ -105,51 +104,28 @@ public class ShopDesignService {
     }
 
     private List<Products> getBestSellerProducts(SellerShopSections section) {
-        List<Products> allProducts = productsRepository.findBySellerId(section.getSellerId());
-        // Sort by total sales descending
-        allProducts.sort((a, b) -> {
-            Integer salesA = a.getTotalSales() != null ? a.getTotalSales() : 0;
-            Integer salesB = b.getTotalSales() != null ? b.getTotalSales() : 0;
-            return salesB.compareTo(salesA);
-        });
+        List<Products> allProducts = productsRepository.findTopBySellerIdOrderByTotalSalesDesc(section.getSellerId());
         return limitProducts(allProducts, section.getMaxItems());
     }
 
     private List<Products> getTopRatedProducts(SellerShopSections section) {
-        List<Products> allProducts = productsRepository.findBySellerId(section.getSellerId());
-        // Sort by average rating descending
-        allProducts.sort((a, b) -> {
-            BigDecimal ratingA = a.getAverageRating() != null ? a.getAverageRating() : BigDecimal.ZERO;
-            BigDecimal ratingB = b.getAverageRating() != null ? b.getAverageRating() : BigDecimal.ZERO;
-            return ratingB.compareTo(ratingA);
-        });
+        List<Products> allProducts = productsRepository.findTopBySellerIdOrderByAverageRatingDesc(section.getSellerId());
         return limitProducts(allProducts, section.getMaxItems());
     }
 
     private List<Products> getNewArrivalsProducts(SellerShopSections section) {
-        List<Products> allProducts = productsRepository.findBySellerId(section.getSellerId());
-        // Sort by created date descending
-        allProducts.sort((a, b) -> {
-            if (a.getCreatedAt() == null && b.getCreatedAt() == null) return 0;
-            if (a.getCreatedAt() == null) return 1;
-            if (b.getCreatedAt() == null) return -1;
-            return b.getCreatedAt().compareTo(a.getCreatedAt());
-        });
+        List<Products> allProducts = productsRepository.findTopBySellerIdOrderByCreatedAtDesc(section.getSellerId());
         return limitProducts(allProducts, section.getMaxItems());
     }
 
     private List<Products> getCustomFilteredProducts(SellerShopSections section) {
-        List<Products> allProducts = productsRepository.findBySellerId(section.getSellerId());
-        // Apply custom filters manually (simplified version)
-        return allProducts.stream()
-                .filter(product -> section.getFilterPriceMin() == null || 
-                        product.getPrice() != null && 
-                        product.getPrice().compareTo(section.getFilterPriceMin()) >= 0)
-                .filter(product -> section.getFilterPriceMax() == null || 
-                        product.getPrice() != null && 
-                        product.getPrice().compareTo(section.getFilterPriceMax()) <= 0)
-                .limit(section.getMaxItems() != null ? section.getMaxItems() : 6)
-                .toList();
+        List<Products> filteredProducts = productsRepository.findWithCustomFilters(
+                section.getSellerId(),
+                section.getFilterCategoryId(),
+                section.getFilterPriceMin(),
+                section.getFilterPriceMax()
+        );
+        return limitProducts(filteredProducts, section.getMaxItems());
     }
 
     private List<Products> limitProducts(List<Products> products, Integer maxItems) {

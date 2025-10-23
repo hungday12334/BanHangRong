@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="HTML File" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Hungnv" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;hungday12334&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
+    &quot;accountId&quot;: &quot;efd5b86f-5509-426a-a183-1d6d3c55d639&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="33VwQF5xNjK8G25Up2AO92hyo8L" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;MinhHQ&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/resources/templates&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
+    ]
+  }
+}</component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/templates" />
+      <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/templates/seller" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="banhangrong.su25.service" />
+      <recent name="banhangrong.su25.Repository" />
+      <recent name="banhangrong.su25.Entity" />
+      <recent name="banhangrong.su25.Controller" />
+      <recent name="banhangrong.su25.WebSocket" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.Su25Application">
+    <configuration name="data_v2.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/data_v2.sql" />
+      <script-mode>FILE</script-mode>
+      <method v="2" />
+    </configuration>
+    <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="su25" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Database Script.data_v2.sql" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="" />
+      <created>1759415528443</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759415528443</updated>
+      <workItem from="1759415529847" duration="973000" />
+      <workItem from="1759854439361" duration="7629000" />
+      <workItem from="1759887937257" duration="14526000" />
+      <workItem from="1759915487604" duration="32000" />
+      <workItem from="1759915643459" duration="4057000" />
+      <workItem from="1760282719443" duration="1246000" />
+      <workItem from="1760335861930" duration="2498000" />
+      <workItem from="1760342118902" duration="8292000" />
+      <workItem from="1760759139319" duration="16468000" />
+      <workItem from="1760974881001" duration="1350000" />
+      <workItem from="1761034335179" duration="1389000" />
+      <workItem from="1761146113217" duration="2062000" />
+    </task>
+    <task id="LOCAL-00001" summary="AdminIndex_Final1">
+      <option name="closed" value="true" />
+      <created>1759416475096</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1759416475096</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Admin UserManagement Create">
+      <option name="closed" value="true" />
+      <created>1759892863475</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1759892863475</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Admin User Update&amp;Delete">
+      <option name="closed" value="true" />
+      <created>1759911171115</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1759911171115</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Admin Product Approve||Cancel">
+      <option name="closed" value="true" />
+      <created>1760004702614</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1760004702615</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix: fix error approve Products.">
+      <option name="closed" value="true" />
+      <created>1760059391483</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1760059391483</updated>
+    </task>
+    <task id="LOCAL-00006" summary="update edit profile">
+      <option name="closed" value="true" />
+      <created>1760462655721</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1760462655721</updated>
+    </task>
+    <task id="LOCAL-00007" summary="update edit profile">
+      <option name="closed" value="true" />
+      <created>1760462722642</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1760462722642</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Merge remote-tracking branch 'origin/MinhHQ' into MinhHQ">
+      <option name="closed" value="true" />
+      <created>1760463236114</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1760463236114</updated>
+    </task>
+    <task id="LOCAL-00009" summary="upadte function seller profile">
+      <option name="closed" value="true" />
+      <created>1760473571488</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1760473571488</updated>
+    </task>
+    <task id="LOCAL-00010" summary="upadte function seller profile">
+      <option name="closed" value="true" />
+      <created>1760474941023</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1760474941024</updated>
+    </task>
+    <task id="LOCAL-00011" summary="update change password">
+      <option name="closed" value="true" />
+      <created>1760479395088</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1760479395088</updated>
+    </task>
+    <task id="LOCAL-00012" summary="update change password">
+      <option name="closed" value="true" />
+      <created>1760479564273</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1760479564273</updated>
+    </task>
+    <task id="LOCAL-00013" summary="update product review">
+      <option name="closed" value="true" />
+      <created>1760480378920</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1760480378920</updated>
+    </task>
+    <task id="LOCAL-00014" summary="update product review">
+      <option name="closed" value="true" />
+      <created>1760504117604</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1760504117604</updated>
+    </task>
+    <task id="LOCAL-00015" summary="update product review">
+      <option name="closed" value="true" />
+      <created>1760504260249</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1760504260249</updated>
+    </task>
+    <task id="LOCAL-00016" summary="update change password">
+      <option name="closed" value="true" />
+      <created>1760505944538</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1760505944538</updated>
+    </task>
+    <task id="LOCAL-00017" summary="update chat message and chat room">
+      <option name="closed" value="true" />
+      <created>1760506737462</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1760506737462</updated>
+    </task>
+    <task id="LOCAL-00018" summary="update chat message and chat room">
+      <option name="closed" value="true" />
+      <created>1760506816286</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1760506816286</updated>
+    </task>
+    <task id="LOCAL-00019" summary="update category management">
+      <option name="closed" value="true" />
+      <created>1760514350230</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1760514350232</updated>
+    </task>
+    <task id="LOCAL-00020" summary="update seller edit strore">
+      <option name="closed" value="true" />
+      <created>1760628659239</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1760628659239</updated>
+    </task>
+    <task id="LOCAL-00021" summary="update seller edit store">
+      <option name="closed" value="true" />
+      <created>1760643216382</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1760643216382</updated>
+    </task>
+    <task id="LOCAL-00022" summary="fix error seller edit store">
+      <option name="closed" value="true" />
+      <created>1760674941193</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1760674941193</updated>
+    </task>
+    <task id="LOCAL-00023" summary="fix error seller edit store">
+      <option name="closed" value="true" />
+      <created>1760689052873</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1760689052874</updated>
+    </task>
+    <task id="LOCAL-00024" summary="voucher">
+      <option name="closed" value="true" />
+      <created>1760770404419</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1760770404419</updated>
+    </task>
+    <task id="LOCAL-00025" summary="voucher update">
+      <option name="closed" value="true" />
+      <created>1760778997201</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1760778997201</updated>
+    </task>
+    <task id="LOCAL-00026" summary="voucher update">
+      <option name="closed" value="true" />
+      <created>1760784811294</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1760784811294</updated>
+    </task>
+    <task id="LOCAL-00027" summary="enhance seller profile security and validation; prevent username/email changes, add input sanitization, and improve file upload checks">
+      <option name="closed" value="true" />
+      <created>1761150927693</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1761150927693</updated>
+    </task>
+    <task id="LOCAL-00028" summary="implement pagination for seller reviews; add validation checks and demo mode fallback for authentication">
+      <option name="closed" value="true" />
+      <created>1761155127440</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1761155127440</updated>
+    </task>
+    <task id="LOCAL-00029" summary="implement advanced filtering for seller reviews; add total review count and pagination support">
+      <option name="closed" value="true" />
+      <created>1761156701114</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1761156701114</updated>
+    </task>
+    <task id="LOCAL-00030" summary="enhance category management; add case-insensitive category name check, bulk delete functionality, and product statistics">
+      <option name="closed" value="true" />
+      <created>1761169291677</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1761169291677</updated>
+    </task>
+    <task id="LOCAL-00031" summary="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository">
+      <option name="closed" value="true" />
+      <created>1761169318423</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1761169318423</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/hungnt" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="AdminIndex_Final1" />
+    <MESSAGE value="Admin UserManagement Create" />
+    <MESSAGE value="Admin User Update&amp;Delete" />
+    <MESSAGE value="Admin Product Approve||Cancel" />
+    <MESSAGE value="fix: fix error approve Products." />
+    <MESSAGE value="fix(seller_dashboard): update loading text for improved clarity" />
+    <MESSAGE value="fix(seller_dashboard): correct loading text for better user experience" />
+    <MESSAGE value="update edit profile" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/MinhHQ' into MinhHQ" />
+    <MESSAGE value="upadte function seller profile" />
+    <MESSAGE value="update product review" />
+    <MESSAGE value="update change password" />
+    <MESSAGE value="update chat message and chat room" />
+    <MESSAGE value="update category management" />
+    <MESSAGE value="update seller edit strore" />
+    <MESSAGE value="update seller edit store" />
+    <MESSAGE value="fix error seller edit store" />
+    <MESSAGE value="voucher update" />
+    <MESSAGE value="enhance seller profile security and validation; prevent username/email changes, add input sanitization, and improve file upload checks" />
+    <MESSAGE value="implement pagination for seller reviews; add validation checks and demo mode fallback for authentication" />
+    <MESSAGE value="implement advanced filtering for seller reviews; add total review count and pagination support" />
+    <MESSAGE value="enhance category management; add case-insensitive category name check, bulk delete functionality, and product statistics" />
+    <MESSAGE value="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository" />
+    <option name="LAST_COMMIT_MESSAGE" value="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository" />
+  </component>
+</project>

@@ -2,6 +2,8 @@ package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.ProductReviews;
 import banhangrong.su25.Repository.ProductReviewsRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,15 +19,39 @@ public class ProductReviewService {
     }
 
     public List<ProductReviews> getSellerReviews(Long sellerId) {
-        return productReviewsRepository.findAll(); // Simplified - get all reviews
+        return productReviewsRepository.findBySellerId(sellerId);
+    }
+
+    // PERF-01: Pagination support cho all reviews
+    public Page<ProductReviews> getSellerReviews(Long sellerId, Pageable pageable) {
+        return productReviewsRepository.findBySellerId(sellerId, pageable);
     }
 
     public List<ProductReviews> getUnansweredReviews(Long sellerId) {
-        return productReviewsRepository.findAll(); // Simplified - get all reviews
+        return productReviewsRepository.findUnansweredReviews(sellerId);
+    }
+
+    // PERF-01: Pagination support cho unanswered reviews
+    public Page<ProductReviews> getUnansweredReviews(Long sellerId, Pageable pageable) {
+        return productReviewsRepository.findUnansweredReviews(sellerId, pageable);
     }
 
     public Long getUnansweredReviewCount(Long sellerId) {
-        return (long) productReviewsRepository.findAll().size(); // Simplified - count all reviews
+        return productReviewsRepository.countUnansweredReviews(sellerId);
+    }
+
+    public Long getTotalReviewCount(Long sellerId) {
+        return productReviewsRepository.countBySellerId(sellerId);
+    }
+
+    /**
+     * Filter reviews với nhiều tiêu chí
+     */
+    public Page<ProductReviews> getFilteredReviews(Long sellerId, String status, Integer rating,
+                                                     String fromDate, String toDate, Long productId,
+                                                     Long userId, Pageable pageable) {
+        return productReviewsRepository.findByFilters(sellerId, status, rating, fromDate, toDate,
+                                                       productId, userId, pageable);
     }
 
     public Optional<ProductReviews> getReviewById(Long reviewId) {
@@ -36,9 +62,19 @@ public class ProductReviewService {
         Optional<ProductReviews> reviewOpt = productReviewsRepository.findById(reviewId);
         if (reviewOpt.isPresent()) {
             ProductReviews review = reviewOpt.get();
-            // Note: setSellerResponse method may not exist, this is a simplified version
+            review.setSellerResponse(response);
             return productReviewsRepository.save(review);
         }
-        throw new RuntimeException("Review not found with id: " + reviewId);
+        throw new IllegalArgumentException("Review not found with id: " + reviewId);
+    }
+
+    /**
+     * FIX SEC-03: Validate xem review có thuộc về seller này không
+     * @param reviewId ID của review
+     * @param sellerId ID của seller
+     * @return true nếu review thuộc về seller này
+     */
+    public boolean isReviewOwnedBySeller(Long reviewId, Long sellerId) {
+        return productReviewsRepository.existsByReviewIdAndSellerId(reviewId, sellerId);
     }
 }

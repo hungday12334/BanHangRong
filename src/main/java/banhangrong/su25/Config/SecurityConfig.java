@@ -89,10 +89,10 @@ public class SecurityConfig {
                 .permitAll()
             );
 
+
         return http.build();
+
     }
-    @Bean
-    SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
+
+
 }
