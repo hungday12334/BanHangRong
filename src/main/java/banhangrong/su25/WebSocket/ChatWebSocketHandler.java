@@ -51,12 +51,14 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.debug("Chat WebSocket closed: {} ({})", session.getId(), status.getCode());
     }
 
+    @SuppressWarnings("unused")
     private void joinRoom(WebSocketSession session, Long roomId) {
         roomSessions.computeIfAbsent(roomId, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
                 .add(session);
         log.debug("Session {} joined room {}", session.getId(), roomId);
     }
 
+    @SuppressWarnings("unused")
     private void leaveRoom(WebSocketSession session, Long roomId) {
         Set<WebSocketSession> sessions = roomSessions.get(roomId);
         if (sessions != null) {

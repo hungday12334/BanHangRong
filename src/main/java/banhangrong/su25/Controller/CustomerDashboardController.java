@@ -8,6 +8,7 @@ import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import org.springframework.security.core.Authentication;
@@ -32,14 +33,16 @@ public class CustomerDashboardController {
     private final UsersRepository usersRepository;
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
+    private final ProductReviewsRepository productReviewsRepository;
 
-    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository) {
+    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository, ProductReviewsRepository productReviewsRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.shoppingCartRepository = shoppingCartRepository;
         this.usersRepository = usersRepository;
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
+        this.productReviewsRepository = productReviewsRepository;
     }
 
     @GetMapping("/customer/dashboard")
@@ -108,29 +111,52 @@ public class CustomerDashboardController {
         return "customer/dashboard";
     }
 
+    @GetMapping("/rating-history")
+    public String ratingHistory() {
+        // Redirect to the unified My Reviews page
+        return "redirect:/customer/reviews";
+    }
+
     @GetMapping("/orderhistory")
     public String orderHistory(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                              @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-                              Model model) {
-        // Kiểm tra authentication
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Users currentUser = null;
-        if (auth != null && auth.isAuthenticated()) {
-            String username = auth.getName();
-            currentUser = usersRepository.findByUsername(username).orElse(null);
-            if (currentUser == null) {
+                               @RequestParam(name = "size", required = false, defaultValue = "3") int size,
+                               @RequestParam(name = "search", required = false) String search,
+                               @RequestParam(name = "status", required = false) String status,
+                               Model model) {
+        try {
+            // Kiểm tra authentication
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Users currentUser = null;
+            if (auth != null && auth.isAuthenticated()) {
+                String username = auth.getName();
+                currentUser = usersRepository.findByUsername(username).orElse(null);
+                if (currentUser == null) {
+                    return "redirect:/login";
+                }
+            } else {
                 return "redirect:/login";
             }
-        } else {
-            return "redirect:/login";
-        }
 
-        // Lấy danh sách orders của user hiện tại
+        // Lấy danh sách orders của user hiện tại với search và filter
         PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
                 Sort.by(Sort.Order.desc("createdAt")));
         
-        Page<Orders> ordersPage = ordersRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
-        List<Orders> orders = ordersPage.getContent();
+        Page<Orders> ordersPage;
+        List<Orders> orders;
+        
+        // Apply search and filter logic
+        if (search != null && !search.trim().isEmpty()) {
+            // Search by product name or seller ID
+            ordersPage = ordersRepository.findByUserIdAndSearchTerm(currentUser.getUserId(), search.trim(), pageable);
+        } else if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
+            // Filter by status
+            ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
+        } else {
+            // Default: get all orders
+            ordersPage = ordersRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+        }
+        
+        orders = ordersPage.getContent();
 
         // Lấy order items cho mỗi order
         java.util.Map<Long, List<OrderItems>> orderItemsMap = new java.util.HashMap<>();
@@ -160,6 +186,8 @@ public class CustomerDashboardController {
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("size", ordersPage.getSize());
         model.addAttribute("user", currentUser);
+        model.addAttribute("search", search);
+        model.addAttribute("status", status);
         
         // Cart count
         try {
@@ -167,28 +195,12 @@ public class CustomerDashboardController {
         } catch (Exception ignored) {}
 
         return "customer/orderhistory";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/customer/dashboard?error=orderhistory_error";
+        }
     }
 
-    @GetMapping("/support")
-    public String support(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        Optional<Users> userOptional = usersRepository.findByUsername(username);
-        
-        if (userOptional.isEmpty()) {
-            return "redirect:/login";
-        }
-        
-        Users user = userOptional.get();
-        
-        // Get cart count
-        Long cartCount = shoppingCartRepository.countByUserId(user.getUserId());
-        
-        model.addAttribute("user", user);
-        model.addAttribute("cartCount", cartCount);
-        
-        return "customer/support";
-    }
 
     @GetMapping("/notification")
     public String notification(Model model) {

@@ -12,7 +12,8 @@ public class WebConfig implements WebMvcConfigurer {
         public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/")
-                .setCachePeriod(3600);
+                .setCachePeriod(3600)
+                .setCacheControl(org.springframework.http.CacheControl.maxAge(1, java.util.concurrent.TimeUnit.HOURS));
         
         registry.addResourceHandler("/js/**")
                 .addResourceLocations("classpath:/static/js/")

@@ -5,10 +5,39 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: add spring boot devtools">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/add_vouchers.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/add_vouchers.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerReviewsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerReviewsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VnPayController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VnPayController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/CategoriesProducts.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/CategoriesProducts.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesProductsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrderItemsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrderItemsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrdersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrdersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/ChatWebSocketHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/ChatWebSocketHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-simple.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-simple.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/change-password.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/change-password.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/notification.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/notification.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/orderhistory.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/orderhistory.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/reviews.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/reviews.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/support.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/support.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/verify-email-code.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/verify-email-code.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/vnpay-result.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/vnpay-result.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/wishlist.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/wishlist.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +70,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
-    &quot;accountId&quot;: &quot;43a70439-d014-4c57-b4ae-bf792be7baff&quot;
+    &quot;accountId&quot;: &quot;e0255c87-1891-4a10-ac00-ab7ed3312585&quot;
   }
 }</component>
   <component name="KubernetesApiPersistence">{}</component>
@@ -68,6 +97,12 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Database Script.add_sample_products.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_vouchers.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_withdrawals.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.data_v2.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.modify_review_system.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.set_password.sql.executor&quot;: &quot;Run&quot;,
     &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
     &quot;Maven.su25 [clean].executor&quot;: &quot;Run&quot;,
     &quot;Maven.su25 [package].executor&quot;: &quot;Run&quot;,
@@ -98,6 +133,9 @@
   &quot;keyToStringList&quot;: {
     &quot;DatabaseDriversLRU&quot;: [
       &quot;mysql&quot;
+    ],
+    &quot;RunConfigurationTargetLRU&quot;: [
+      &quot;53b38385-a361-4b09-b3fc-e28dbd7b3e5c&quot;
     ]
   }
 }</component>
@@ -106,7 +144,37 @@
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Spring Boot.Su25Application">
+    <configuration name="add_sample_products.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/add_sample_products.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="add_vouchers.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/add_vouchers.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="add_withdrawals.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/add_withdrawals.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="modify_review_system.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/modify_review_system.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="set_password.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/set_password.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
     <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="su25" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
@@ -114,12 +182,21 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Database Script.add_sample_products.sql" />
+        <item itemvalue="Database Script.add_vouchers.sql" />
+        <item itemvalue="Database Script.modify_review_system.sql" />
+        <item itemvalue="Database Script.set_password.sql" />
+        <item itemvalue="Database Script.add_withdrawals.sql" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
       </set>
     </attachedChunks>
   </component>
@@ -140,6 +217,9 @@
       <workItem from="1760342118902" duration="8292000" />
       <workItem from="1760599260103" duration="4017000" />
       <workItem from="1761027496036" duration="654000" />
+      <workItem from="1761166831022" duration="5765000" />
+      <workItem from="1761200442552" duration="8932000" />
+      <workItem from="1761225296373" duration="388000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />

@@ -4,8 +4,34 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
+	<style>
+		.brand {
+			font-weight: 800;
+			letter-spacing: .2px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			cursor: pointer;
+			text-decoration: none;
+			color: inherit;
+		}
+
+		.brand:hover {
+			color: var(--brand);
+		}
+
+		.logo {
+			height: 32px;
+			width: auto;
+		}
+	</style>
 	<style>
 		.container {
 			max-width: 1100px;
@@ -90,7 +116,71 @@
 </head>
 
 <body>
-	<div class="container">
+	<div class="wrapper">
+		<!-- Header từ layout chung -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
+			<nav class="nav" aria-label="Main">
+				<a href="/customer/dashboard">Home</a>
+				<a href="/categories">Category</a>
+				<a href="#">License Software</a>
+				<a href="#">Game Keys</a>
+				<a href="#">Voucher</a>
+				<a href="#">Support</a>
+			</nav>
+			<div class="top-actions">
+				<div class="notif">Notification</div>
+				<div class="user" style="position:relative">
+					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+						<span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round" />
+						</svg>
+					</button>
+					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+						<a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+							style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+								th:value="${_csrf.token}" />
+							<input type="hidden" name="amount" id="topupAmountInput" />
+							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+								(VNPay)</button>
+						</form>
+						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+						<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+							style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+							Become a Seller</a>
+						<a class="item" href="#" role="menuitem"
+							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+					</div>
+					<form id="logoutForm" method="post" action="/logout" style="display:none;">
+					</form>
+				</div>
+				<div class="search">
+					<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+						<input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
+							style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+						<button type="submit"
+							style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+						<a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
+							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+					</form>
+				</div>
+				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
+						th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+			</div>
+		</div>
+		
+		<div class="container">
 		<div class="breadcrumb"><a href="/customer/dashboard">← Back to List</a></div>
 		<div class="detail">
 			<div class="gallery">
@@ -132,17 +222,140 @@
 		</div>
 
 		<div class="section" style="margin-top:24px">
-			<h3 style="margin:0 0 8px">Customer Reviews</h3>
-			<div th:if="${reviews != null and !#lists.isEmpty(reviews)}">
-				<div class="review" th:each="rv : ${reviews}">
-					<div style="font-weight:600">⭐ <span th:text="${rv.rating}">5</span> • <span style="color:#6b7280"
-							th:text="${#temporals.format(rv.createdAt,'dd/MM/yyyy HH:mm')}">-</span></div>
-					<div th:text="${rv.comment}">Nội dung bình luận...</div>
+		<h3 style="margin:0 0 8px">Customer Reviews</h3>
+		
+		<!-- Rating Statistics -->
+		<div id="ratingStats" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-bottom:16px;">
+			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+				<div>
+					<span style="font-size:24px;font-weight:700;color:#111827" id="averageRatingDisplay">0.0</span>
+					<span style="color:#6b7280;margin-left:8px">out of 5</span>
+				</div>
+				<div style="text-align:right;">
+					<div style="font-size:14px;color:#6b7280">Based on</div>
+					<div style="font-size:18px;font-weight:600;color:#111827" id="totalReviewsDisplay">0</div>
+					<div style="font-size:14px;color:#6b7280">reviews</div>
 				</div>
 			</div>
-				<div class="review" th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280">No reviews
-					yet.</div>
+			<div id="ratingDistribution" style="display:flex;flex-direction:column;gap:4px;">
+				<!-- Rating distribution bars will be loaded here -->
+			</div>
 		</div>
+		
+		<div th:if="${reviews != null and !#lists.isEmpty(reviews)}">
+			<div class="review" th:each="rv : ${reviews}">
+				<div style="font-weight:600">⭐ <span th:text="${rv.rating}">5</span> • <span style="color:#6b7280"
+						th:text="${#temporals.format(rv.createdAt,'dd/MM/yyyy HH:mm')}">-</span></div>
+				<div th:text="${rv.comment}">Nội dung bình luận...</div>
+				<div th:if="${rv.mediaUrls != null and !rv.mediaUrls.isEmpty()}" style="margin-top:8px;">
+					<div style="display:flex;gap:8px;flex-wrap:wrap;">
+						<div th:each="mediaUrl : ${#strings.arraySplit(rv.mediaUrls, ',')}" style="width:60px;height:60px;border-radius:4px;overflow:hidden;border:1px solid #e5e7eb;">
+							<img th:if="${!#strings.contains(mediaUrl, '.mp4') and !#strings.contains(mediaUrl, '.avi') and !#strings.contains(mediaUrl, '.mov')}" 
+								 th:src="${mediaUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Review image">
+							<video th:if="${#strings.contains(mediaUrl, '.mp4') or #strings.contains(mediaUrl, '.avi') or #strings.contains(mediaUrl, '.mov')}" 
+								   style="width:100%;height:100%;object-fit:cover;" controls>
+								<source th:src="${mediaUrl}" type="video/mp4">
+							</video>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280;text-align:center;padding:20px">
+			No reviews yet
+		</div>
+		</div>
+	</div>
+
+	<script>
+		// Load rating statistics when page loads
+		document.addEventListener('DOMContentLoaded', function() {
+			const productId = window.location.pathname.split('/').pop();
+			loadRatingStats(productId);
+		});
+
+		function loadRatingStats(productId) {
+			fetch(`/api/rating/stats/${productId}`)
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						updateRatingDisplay(data);
+					}
+				})
+				.catch(error => {
+					console.error('Error loading rating stats:', error);
+				});
+		}
+
+		function updateRatingDisplay(data) {
+			// Update average rating
+			document.getElementById('averageRatingDisplay').textContent = data.averageRating;
+			
+			// Update total reviews
+			document.getElementById('totalReviewsDisplay').textContent = data.totalReviews;
+			
+			// Update rating distribution
+			const distribution = data.ratingDistribution;
+			const container = document.getElementById('ratingDistribution');
+			
+			let html = '';
+			for (let i = 4; i >= 0; i--) {
+				const rating = i + 1;
+				const count = distribution[i] || 0;
+				const percentage = data.totalReviews > 0 ? (count / data.totalReviews) * 100 : 0;
+				
+				html += `
+					<div style="display:flex;align-items:center;gap:8px;">
+						<span style="font-size:12px;color:#6b7280;min-width:20px;">${rating}</span>
+						<span style="color:#fbbf24;">★</span>
+						<div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
+							<div style="height:100%;background:#fbbf24;width:${percentage}%;transition:width 0.3s;"></div>
+						</div>
+						<span style="font-size:12px;color:#6b7280;min-width:30px;">${count}</span>
+					</div>
+				`;
+			}
+			
+			container.innerHTML = html;
+		}
+	</script>
+	
+	<script>
+		// User menu toggle
+		document.addEventListener('DOMContentLoaded', function() {
+			const userMenuBtn = document.getElementById('userMenuBtn');
+			const userDropdown = document.getElementById('userDropdown');
+			
+			if (userMenuBtn && userDropdown) {
+				userMenuBtn.addEventListener('click', function(e) {
+					e.stopPropagation();
+					userDropdown.classList.toggle('show');
+				});
+				
+				// Close menu when clicking outside
+				document.addEventListener('click', function(e) {
+					if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+						userDropdown.classList.remove('show');
+					}
+				});
+			}
+		});
+
+		// VNPay topup function
+		function topupPrompt(e) {
+			e.preventDefault();
+			const v = prompt('Enter amount to top up (VND):', '200000');
+			if (!v) return false;
+			const clean = v.replace(/[^0-9]/g, '');
+			if (!clean) {
+				alert('Please enter a valid amount');
+				return false;
+			}
+			document.getElementById('topupAmountInput').value = clean;
+			e.target.submit();
+			return true;
+		}
+	</script>
 	</div>
 </body>
 

@@ -1,4 +1,5 @@
 -- Vouchers feature tables (MySQL compatible)
+USE wap;
 
 CREATE TABLE IF NOT EXISTS vouchers (
   voucher_id BIGINT PRIMARY KEY AUTO_INCREMENT,

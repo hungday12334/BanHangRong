@@ -57,6 +57,21 @@
 		.brand {
 			font-weight: 800;
 			letter-spacing: .2px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			cursor: pointer;
+			text-decoration: none;
+			color: inherit;
+		}
+
+		.brand:hover {
+			color: var(--brand);
+		}
+
+		.logo {
+			height: 32px;
+			width: auto;
 		}
 
 		.top-actions {
@@ -121,6 +136,25 @@
 			border: 1px solid var(--line);
 			border-radius: 8px;
 			outline: none;
+		}
+
+		.search button {
+			padding: 8px 12px;
+			background: var(--brand);
+			color: #fff;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+		}
+
+		.search a {
+			padding: 8px 12px;
+			background: #6b7280;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
 		}
 
 		.cart {
@@ -359,33 +393,32 @@
 
 <body>
 	<div class="wrapper">
+		<!-- Header -->
 		<div class="topbar">
-			<div class="brand">BanHangRong</div>
+			<a href="/customer/dashboard" class="brand">
+				<img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+				BanHangRong
+			</a>
 			<nav class="nav" aria-label="Main">
 				<a href="/customer/dashboard">Home</a>
-				<a href="/categories">Categories</a>
-				<a href="#">Software Licenses</a>
+				<a href="/categories">Category</a>
+				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>
-				<a href="#">Vouchers</a>
-				<a href="/customer/support">Support</a>
+				<a href="#">Voucher</a>
+				<a href="#">Support</a>
 			</nav>
 			<div class="top-actions">
-				<a href="/customer/notifications" class="notif">🔔 Notification</a>
+				<div class="notif">Notification</div>
 				<div class="user" style="position:relative">
 					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
 						<span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
-						<span th:if="${user != null && user.balance != null}"
-							style="margin-left:8px;color:#10b981;font-weight:600"
-							th:text="${#numbers.formatDecimal(user.balance,0,'COMMA',0,'POINT') + '₫'}">0₫</span>
 						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
 								stroke-linejoin="round" />
 						</svg>
 					</button>
 					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-						<a class="item" th:if="${user != null}" th:href="@{'/customer/profile/' + ${user.username}}"
-							role="menuitem">My Account</a>
-						<a class="item" th:if="${user == null}" href="/login" role="menuitem">Login</a>
+						<a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
 						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
 						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
 						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
@@ -418,9 +451,14 @@
 							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
-						th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
+		</div>
+		
+		<!-- Cart button riêng cho dashboard -->
+		<div style="position: absolute; top: 10px; right: 20px; z-index: 10;">
+			<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 500;">
+				🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}" style="background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; margin-left: 4px;">0</span>
+			</a>
 		</div>
 
 		<section class="hero">
@@ -639,6 +677,44 @@
 				}
 			})();
 		</script>
+		
+		<script>
+			// User menu toggle
+			document.addEventListener('DOMContentLoaded', function() {
+				const userMenuBtn = document.getElementById('userMenuBtn');
+				const userDropdown = document.getElementById('userDropdown');
+				
+				if (userMenuBtn && userDropdown) {
+					userMenuBtn.addEventListener('click', function(e) {
+						e.stopPropagation();
+						userDropdown.classList.toggle('show');
+					});
+					
+					// Close menu when clicking outside
+					document.addEventListener('click', function(e) {
+						if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+							userDropdown.classList.remove('show');
+						}
+					});
+				}
+			});
+
+			// VNPay topup function
+			function topupPrompt(e) {
+				e.preventDefault();
+				const v = prompt('Enter amount to top up (VND):', '200000');
+				if (!v) return false;
+				const clean = v.replace(/[^0-9]/g, '');
+				if (!clean) {
+					alert('Please enter a valid amount');
+					return false;
+				}
+				document.getElementById('topupAmountInput').value = clean;
+				e.target.submit();
+				return true;
+			}
+		</script>
+		
 	</div>
 </body>
 

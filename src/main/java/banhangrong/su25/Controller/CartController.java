@@ -188,27 +188,21 @@ public class CartController {
         
         // Deduct money from user's wallet
         System.out.println("[Demo Checkout] Total amount: " + totalAmount);
-        boolean paymentSuccess = false;
-        for (Users user : usersRepository.findAll()) {
-            if (user.getUserId().equals(uid)) {
-                BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
-                if (currentBalance.compareTo(totalAmount) >= 0) {
-                    BigDecimal newBalance = currentBalance.subtract(totalAmount);
-                    user.setBalance(newBalance);
-                    usersRepository.save(user);
-                    paymentSuccess = true;
-                    System.out.println("[Demo Checkout] Payment success: deducted " + totalAmount + " from user " + uid + ", new balance: " + newBalance);
-                    break;
-                } else {
-                    System.out.println("[Demo Checkout] Payment failed: insufficient balance for user " + uid + ", current: " + currentBalance + ", required: " + totalAmount);
-                    return "redirect:/cart?error=insufficient_balance";
-                }
-            }
-        }
-        
-        if (!paymentSuccess) {
+        Users user = usersRepository.findById(uid).orElse(null);
+        if (user == null) {
             return "redirect:/cart?error=user_not_found";
         }
+        
+        BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+        if (currentBalance.compareTo(totalAmount) < 0) {
+            System.out.println("[Demo Checkout] Payment failed: insufficient balance for user " + uid + ", current: " + currentBalance + ", required: " + totalAmount);
+            return "redirect:/cart?error=insufficient_balance";
+        }
+        
+        BigDecimal newBalance = currentBalance.subtract(totalAmount);
+        user.setBalance(newBalance);
+        usersRepository.save(user);
+        System.out.println("[Demo Checkout] Payment success: deducted " + totalAmount + " from user " + uid + ", new balance: " + newBalance);
         
         // Create order
         Orders order = new Orders();
@@ -257,7 +251,7 @@ public class CartController {
         for (ShoppingCart it : items) {
             try { cartRepository.delete(it); } catch (Exception ignored) {}
         }
-        return "redirect:/cart";
+        return "redirect:/customer/dashboard?purchase=success";
     }
 }
 

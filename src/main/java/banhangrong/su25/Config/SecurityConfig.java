@@ -61,7 +61,7 @@ public class SecurityConfig {
                 // Role-based access
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers("/api/user/**").hasAnyRole("USER", "SELLER", "ADMIN")
+                .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "SELLER", "ADMIN")
                 
                 // Default: require authentication
                 .anyRequest().authenticated()

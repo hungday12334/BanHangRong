@@ -2,10 +2,15 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:text="${profileUser.username} + ' - Profile'">Profile</title>
-    <link rel="stylesheet" href="/css/styles.min.css">
     <style>
         :root {
             --bg: #f5f7fb;
@@ -51,6 +56,21 @@
         .brand {
             font-weight: 800;
             letter-spacing: .2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand:hover {
+            color: var(--brand);
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
         }
 
         .nav {
@@ -230,8 +250,12 @@
 
 <body>
     <div class="wrapper">
-        <div class="topbar" style="display:flex;align-items:center;gap:14px;">
-            <div class="brand">BanHangRong</div>
+        <!-- Header từ layout chung -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
             <nav class="nav" aria-label="Main">
                 <a href="/customer/dashboard">Home</a>
                 <a href="/categories">Category</a>
@@ -251,28 +275,31 @@
                         </svg>
                     </button>
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản
-                            của tôi</a>
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+                        <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+                        <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+                        <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
                         <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
                             style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                                th:value="${_csrf.token}" />
                             <input type="hidden" name="amount" id="topupAmountInput" />
-                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
                                 (VNPay)</button>
                         </form>
-                        <a class="item" href="#" role="menuitem">Đơn mua</a>
+                        <a class="item" href="/orderhistory" role="menuitem">My Orders</a>
                         <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
                             style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
-                            Applied to become a seller</a>
+                            Become a Seller</a>
                         <a class="item" href="#" role="menuitem"
-                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng
-                            xuất</a>
+                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
                     </div>
                     <form id="logoutForm" method="post" action="/logout" style="display:none;">
                     </form>
                 </div>
                 <div class="search">
-                    <form method="GET" action="/customer/dashboard"
-                        style="display:flex;gap:4px;flex-wrap:nowrap;align-items:center;">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
                         <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
                             style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
                         <button type="submit"
@@ -281,7 +308,7 @@
                             style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                     </form>
                 </div>
-                <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
                         th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
             </div>
         </div>
@@ -381,6 +408,43 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        // User menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+
+        // VNPay topup function
+        function topupPrompt(e) {
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if (!v) return false;
+            const clean = v.replace(/[^0-9]/g, '');
+            if (!clean) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+    </script>
 </body>
 
 </html>
