@@ -2,15 +2,24 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.ShoppingCart;
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.Orders;
+import banhangrong.su25.Entity.OrderItems;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Repository.OrdersRepository;
+import banhangrong.su25.Repository.OrderItemsRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
@@ -19,17 +28,34 @@ public class CartController {
     private final ShoppingCartRepository cartRepository;
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
+    private final UsersRepository usersRepository;
+    private final OrdersRepository ordersRepository;
+    private final OrderItemsRepository orderItemsRepository;
 
     public CartController(ShoppingCartRepository cartRepository,
                           ProductsRepository productsRepository,
-                          ProductImagesRepository productImagesRepository) {
+                          ProductImagesRepository productImagesRepository,
+                          UsersRepository usersRepository,
+                          OrdersRepository ordersRepository,
+                          OrderItemsRepository orderItemsRepository) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
+        this.usersRepository = usersRepository;
+        this.ordersRepository = ordersRepository;
+        this.orderItemsRepository = orderItemsRepository;
     }
 
-    // For demo: use fixed userId=2 (alice). In real app, read from session/auth
-    private Long getCurrentUserId() { return 2L; }
+    // Get current user ID from authentication
+    private Long getCurrentUserId() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && auth.getName() != null) {
+                return usersRepository.findByUsername(auth.getName()).map(Users::getUserId).orElse(2L);
+            }
+        } catch (Exception ignored) {}
+        return 2L; // fallback for demo
+    }
 
     @GetMapping("/cart")
     public String viewCart(Model model) {
@@ -140,12 +166,74 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // Demo checkout: subtract stock and clear cart
+    // Demo checkout: subtract stock, deduct money from wallet, and clear cart
     @PostMapping("/cart/checkout-demo")
     @Transactional
     public String checkoutDemo() {
         Long uid = getCurrentUserId();
         List<ShoppingCart> items = cartRepository.findByUserId(uid);
+        
+        // Calculate total amount to deduct from wallet
+        final BigDecimal totalAmount = items.stream()
+            .map(it -> {
+                Products p = productsRepository.findById(it.getProductId()).orElse(null);
+                if (p != null) {
+                    BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                    int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                    return unitPrice.multiply(BigDecimal.valueOf(qty));
+                }
+                return BigDecimal.ZERO;
+            })
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        // Deduct money from user's wallet
+        System.out.println("[Demo Checkout] Total amount: " + totalAmount);
+        Users user = usersRepository.findById(uid).orElse(null);
+        if (user == null) {
+            return "redirect:/cart?error=user_not_found";
+        }
+        
+        BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+        if (currentBalance.compareTo(totalAmount) < 0) {
+            System.out.println("[Demo Checkout] Payment failed: insufficient balance for user " + uid + ", current: " + currentBalance + ", required: " + totalAmount);
+            return "redirect:/cart?error=insufficient_balance";
+        }
+        
+        BigDecimal newBalance = currentBalance.subtract(totalAmount);
+        user.setBalance(newBalance);
+        usersRepository.save(user);
+        System.out.println("[Demo Checkout] Payment success: deducted " + totalAmount + " from user " + uid + ", new balance: " + newBalance);
+        
+        // Create order
+        Orders order = new Orders();
+        order.setUserId(uid);
+        order.setTotalAmount(totalAmount);
+        order.setStatus("completed"); // Demo checkout is immediately completed
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        
+        // For demo: assume all products are from the same seller (sellerId = 1)
+        // In real app, you might need to group by seller
+        order.setSellerId(1L);
+        
+        Orders savedOrder = ordersRepository.save(order);
+        System.out.println("[Demo Checkout] Created order: " + savedOrder.getOrderId());
+        
+        // Create order items
+        for (ShoppingCart it : items) {
+            Products product = productsRepository.findById(it.getProductId()).orElse(null);
+            if (product != null) {
+                OrderItems orderItem = new OrderItems();
+                orderItem.setOrderId(savedOrder.getOrderId());
+                orderItem.setProductId(it.getProductId());
+                orderItem.setQuantity(it.getQuantity());
+                orderItem.setPriceAtTime(product.getSalePrice() != null ? product.getSalePrice() : product.getPrice());
+                orderItem.setCreatedAt(LocalDateTime.now());
+                orderItemsRepository.save(orderItem);
+                System.out.println("[Demo Checkout] Created order item: " + orderItem.getOrderItemId());
+            }
+        }
+        
         for (ShoppingCart it : items) {
             productsRepository.findById(it.getProductId()).ifPresent(p -> {
                 int stock = p.getQuantity() != null ? p.getQuantity() : 0;
@@ -163,7 +251,7 @@ public class CartController {
         for (ShoppingCart it : items) {
             try { cartRepository.delete(it); } catch (Exception ignored) {}
         }
-        return "redirect:/cart";
+        return "redirect:/customer/dashboard?purchase=success";
     }
 }
 

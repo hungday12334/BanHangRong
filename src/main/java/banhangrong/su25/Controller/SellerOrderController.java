@@ -68,23 +68,21 @@ public class SellerOrderController {
         var summary = sellerOrderRepository.findSellerOrder(sellerId, orderId);
         if (summary == null) return ResponseEntity.notFound().build();
         // Filter items of this order to only items belonging to this seller
-    java.util.List<OrderItems> allItems = orderItemsRepository.findByOrderId(orderId);
+        var allItems = orderItemsRepository.findByOrderId(orderId);
         var involvedProductIds = allItems.stream().map(OrderItems::getProductId).filter(java.util.Objects::nonNull).distinct().toList();
         var productList = productsRepository.findAllById(involvedProductIds);
         var productNameMap = productList.stream().collect(java.util.stream.Collectors.toMap(Products::getProductId, Products::getName));
         var sellerProductIdSet = productList.stream().filter(p -> sellerId.equals(p.getSellerId())).map(Products::getProductId).collect(java.util.stream.Collectors.toSet());
         var sellerItems = new java.util.ArrayList<java.util.Map<String,Object>>();
-        if (allItems != null) {
-            for (OrderItems it : allItems) {
-                var pid = it.getProductId();
-                if (pid == null || !sellerProductIdSet.contains(pid)) continue;
-                var m = new java.util.LinkedHashMap<String,Object>();
-                m.put("productId", pid);
-                m.put("productName", productNameMap.get(pid));
-                m.put("quantity", it.getQuantity());
-                m.put("priceAtTime", it.getPriceAtTime());
-                sellerItems.add(m);
-            }
+        for (OrderItems it : allItems) {
+            var pid = it.getProductId();
+            if (pid == null || !sellerProductIdSet.contains(pid)) continue;
+            var m = new java.util.LinkedHashMap<String,Object>();
+            m.put("productId", pid);
+            m.put("productName", productNameMap.get(pid));
+            m.put("quantity", it.getQuantity());
+            m.put("priceAtTime", it.getPriceAtTime());
+            sellerItems.add(m);
         }
         var body = new java.util.LinkedHashMap<String,Object>();
         body.put("order", java.util.Map.of(

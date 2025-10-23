@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <title>Wishlist</title>
+    <style>
+        .wishlist-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .wishlist-header {
+            margin-bottom: 30px;
+        }
+        
+        .wishlist-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .wishlist-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .wishlist-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .wishlist-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .product-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #059669;
+            margin-bottom: 15px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .empty-wishlist {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .empty-message {
+            margin-bottom: 30px;
+        }
+        
+        .btn-explore {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #0ea5e9;
+            --chip: #e5e7eb;
+            --line: #eaeef4;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        .wrapper {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--line);
+            background: var(--card);
+            flex-wrap: nowrap;
+        }
+
+        .brand {
+            font-weight: 800;
+            letter-spacing: .2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand:hover {
+            color: var(--brand);
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            margin: 0 12px;
+            flex: 1;
+            overflow: auto;
+            white-space: nowrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #111827;
+            font-weight: 500;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+
+        .nav a:hover {
+            background: #f3f4f6;
+        }
+
+        .top-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #111827;
+            border: 1px solid var(--line);
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #fff
+        }
+
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: 48px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+            width: 200px;
+            display: none;
+            z-index: 5
+        }
+
+        .user-menu .item {
+            display: block;
+            padding: 10px 12px;
+            color: #111827;
+            text-decoration: none
+        }
+
+        .user-menu .item:hover {
+            background: #f3f4f6
+        }
+
+        .search {
+            position: relative;
+        }
+
+        .search input {
+            height: 34px;
+            width: 220px;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .cart {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cart:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .cart .badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Header -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
+            <nav class="nav" aria-label="Main">
+                <a href="/customer/dashboard">Home</a>
+                <a href="/categories">Category</a>
+                <a href="#">License Software</a>
+                <a href="#">Game Keys</a>
+                <a href="#">Voucher</a>
+                <a href="#">Support</a>
+            </nav>
+            <div class="top-actions">
+                <div class="notif">Notification</div>
+                <div class="user" style="position:relative">
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+                        <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+                        <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+                        <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+                            style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                                th:value="${_csrf.token}" />
+                            <input type="hidden" name="amount" id="topupAmountInput" />
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+                                (VNPay)</button>
+                        </form>
+                        <a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+                            style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+                            Become a Seller</a>
+                        <a class="item" href="#" role="menuitem"
+                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+                <!-- Wallet Balance Display -->
+                <div class="wallet-balance" style="padding: 6px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; color: #0ea5e9; font-weight: 600; font-size: 14px;">
+                    💰 <span th:text="${user != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') : '0'}">0</span>₫
+                </div>
+                <div class="search">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+                        <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
+                            style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                        <button type="submit"
+                            style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                        <a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
+                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+                    </form>
+                </div>
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">
+                    🛒
+                    <span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="wishlist-container">
+        <div class="wishlist-header">
+            <h1 class="wishlist-title">Wishlist</h1>
+            <p class="wishlist-subtitle">Products you've saved to view later</p>
+        </div>
+        
+        <!-- Wishlist Items -->
+        <div class="wishlist-grid" id="wishlistGrid">
+            <!-- Sample wishlist items -->
+            <div class="wishlist-item">
+                <img src="/img/product-placeholder.jpg" alt="Product" class="product-image">
+                <h3 class="product-title">Microsoft Office 2021</h3>
+                <div class="product-price">299,000 VND</div>
+                <div class="product-actions">
+                    <button class="btn btn-primary" onclick="addToCart(1)">Add to Cart</button>
+                    <button class="btn btn-danger" onclick="removeFromWishlist(1)">Remove</button>
+                </div>
+            </div>
+            
+            <div class="wishlist-item">
+                <img src="/img/product-placeholder.jpg" alt="Product" class="product-image">
+                <h3 class="product-title">Adobe Photoshop 2024</h3>
+                <div class="product-price">599,000 VND</div>
+                <div class="product-actions">
+                    <button class="btn btn-primary" onclick="addToCart(2)">Add to Cart</button>
+                    <button class="btn btn-danger" onclick="removeFromWishlist(2)">Remove</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty state (hidden by default) -->
+        <div class="empty-wishlist" id="emptyWishlist" style="display: none;">
+            <div class="empty-icon">💝</div>
+            <h2 class="empty-title">Wishlist is Empty</h2>
+            <p class="empty-message">You don't have any products in your wishlist yet.</p>
+            <a href="/customer/dashboard" class="btn-explore">Explore Products</a>
+        </div>
+    </div>
+    
+    <script>
+        function addToCart(productId) {
+            // TODO: Implement add to cart functionality
+            alert('Product added to cart!');
+        }
+        
+        function removeFromWishlist(productId) {
+            if (confirm('Are you sure you want to remove this product from your wishlist?')) {
+                // TODO: Implement remove from wishlist functionality
+                const item = event.target.closest('.wishlist-item');
+                item.remove();
+                
+                // Check if wishlist is empty
+                const grid = document.getElementById('wishlistGrid');
+                if (grid.children.length === 0) {
+                    document.getElementById('emptyWishlist').style.display = 'block';
+                }
+            }
+        }
+        
+        // Check if wishlist is empty on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const grid = document.getElementById('wishlistGrid');
+            if (grid.children.length === 0) {
+                document.getElementById('emptyWishlist').style.display = 'block';
+            }
+        });
+    </script>
+    
+    <script>
+        // User menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+
+        // VNPay topup function
+        function topupPrompt(e) {
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if (!v) return false;
+            const clean = v.replace(/[^0-9]/g, '');
+            if (!clean) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+    </script>
+    </div>
+</body>
+</html>

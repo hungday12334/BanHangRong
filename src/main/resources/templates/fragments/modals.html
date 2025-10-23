@@ -1,59 +1,209 @@
 <!-- Modals Fragment -->
 <section th:fragment="modals">
   <div id="modalOverlay" class="modal-overlay" hidden data-modal-overlay></div>
-  <dialog id="profileModal" class="modal" aria-label="Chỉnh sửa trang cá nhân" data-modal="profile-edit">
+  <dialog id="profileModal" class="modal" aria-label="Edit profile" data-modal="profile-edit">
     <form method="dialog" class="modal-body" id="profileForm">
-      <div class="modal-header"><h3>Chỉnh sửa trang cá nhân</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
+      <div class="modal-header">
+        <h3>Edit profile</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+      </div>
       <input type="hidden" id="pf_userId" />
       <div class="form-grid">
-        <label>Tên hiển thị<input id="pf_username" required /></label>
+        <label>Display name<input id="pf_username" required /></label>
         <label>Email<input id="pf_email" type="email" required /></label>
-        <label class="span-2">Điện thoại<input id="pf_phone" /></label>
-        <label class="span-2">Ảnh đại diện (URL)<input id="pf_avatarUrl" /></label>
+        <label class="span-2">Phone<input id="pf_phone" /></label>
+        <label class="span-2">Avatar URL<input id="pf_avatarUrl" /></label>
       </div>
-      <div class="modal-actions"><button type="submit" class="btn primary">Lưu</button></div>
+      <div class="modal-actions"><button type="submit" class="btn primary">Save</button></div>
     </form>
     <form method="dialog"><button value="close" hidden>Close</button></form>
   </dialog>
-  <dialog id="productModal" class="modal" aria-label="Chi tiết sản phẩm" data-modal="product-detail">
+  <dialog id="productModal" class="modal" aria-label="Product details" data-modal="product-detail">
     <form method="dialog" class="modal-body" id="productForm">
-      <div class="modal-header"><h3>Chi tiết sản phẩm</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
+      <div class="modal-header">
+        <h3>Product details</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+      </div>
       <input type="hidden" name="productId" id="pm_productId" />
       <div class="form-grid">
-        <label>Tên<input id="pm_name" name="name" required /></label>
-        <label>Giá<input id="pm_price" name="price" type="number" step="0.01" required /></label>
-        <label>Giá sale<input id="pm_salePrice" name="salePrice" type="number" step="0.01" /></label>
-        <label>Số lượng<input id="pm_quantity" name="quantity" type="number" min="0" /></label>
-        <label>URL tải<input id="pm_downloadUrl" name="downloadUrl" /></label>
-        <label class="span-2">Mô tả<textarea id="pm_description" name="description" rows="4"></textarea></label>
-        <div class="status">Trạng thái: <span id="pm_status" class="badge">Hidden</span></div>
+        <label>Name<input id="pm_name" name="name" required /></label>
+        <label>Price<input id="pm_price" name="price" type="number" step="0.01" required /></label>
+        <label>Sale price<input id="pm_salePrice" name="salePrice" type="number" step="0.01" /></label>
+        <label>Quantity<input id="pm_quantity" name="quantity" type="number" min="0" /></label>
+        <label>
+          Download URL
+          <input id="pm_downloadUrl" name="downloadUrl" />
+        </label>
+        <label>
+          Image URL
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input id="pm_imageUrl" name="imageUrl" style="flex:1;" />
+            <input id="pm_imageFile" type="file" accept="image/*" style="display:none" />
+            <button type="button" id="pm_genImage" class="btn" title="Upload image and fill image URL">Generate</button>
+          </div>
+          <div id="pm_imagePreview" style="margin-top:6px;display:none">
+            <img alt="Preview" style="max-width:100%;border-radius:8px;" />
+          </div>
+        </label>
+        <label class="span-2">Description<textarea id="pm_description" name="description" rows="4"></textarea></label>
+        <div class="status">Status: <span id="pm_status" class="badge">Hidden</span></div>
       </div>
       <div class="modal-actions">
-        <button type="button" id="pm_publish" class="btn">Duyệt/Publish</button>
-        <button type="submit" id="pm_save" class="btn primary">Lưu</button>
-        <button type="button" id="pm_delete" class="btn danger">Xóa</button>
+        <button type="button" id="pm_publish" class="btn">Approve/Publish</button>
+        <button type="submit" id="pm_save" class="btn primary">Save</button>
+        <button type="button" id="pm_delete" class="btn danger">Delete</button>
       </div>
     </form>
-    <div class="modal-footer note">Lưu ý: Sửa sản phẩm đang public sẽ tự động chuyển sang trạng thái ẩn chờ duyệt.</div>
+    <div class="modal-footer note">Note: Editing a public product will set it to hidden/pending for approval.</div>
     <form method="dialog"><button value="close" hidden>Close</button></form>
   </dialog>
-  <dialog id="orderModal" class="modal" aria-label="Chi tiết đơn hàng" data-modal="order-detail">
+  <dialog id="voucherModal" class="modal" aria-label="Voucher" data-modal="voucher">
+    <form method="dialog" class="modal-body" id="voucherForm">
+      <div class="modal-header">
+        <h3>Voucher</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-content"
+        style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+        <input type="hidden" id="vc_voucherId" />
+        <div>
+          <label class="label" for="vc_code">Code</label>
+          <input id="vc_code" class="input" placeholder="e.g. FALL25" required />
+        </div>
+        <div>
+          <label class="label" for="vc_type">Discount type</label>
+          <select id="vc_type" class="input">
+            <option value="PERCENT">Percent %</option>
+            <option value="AMOUNT">Amount</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="vc_value">Value</label>
+          <input id="vc_value" type="number" min="0" step="0.01" class="input" placeholder="10 or 10.00" />
+        </div>
+        <div>
+          <label class="label" for="vc_min">Min order</label>
+          <input id="vc_min" type="number" min="0" step="0.01" class="input" placeholder="0.00" />
+        </div>
+        <div>
+          <label class="label" for="vc_start">Start at</label>
+          <input id="vc_start" type="datetime-local" class="input" />
+        </div>
+        <div>
+          <label class="label" for="vc_end">End at</label>
+          <input id="vc_end" type="datetime-local" class="input" />
+        </div>
+        <div>
+          <label class="label" for="vc_maxUses">Max uses</label>
+          <input id="vc_maxUses" type="number" min="0" step="1" class="input" placeholder="(unlimited)" />
+        </div>
+        <div>
+          <label class="label" for="vc_maxPerUser">Max per user</label>
+          <input id="vc_maxPerUser" type="number" min="0" step="1" class="input" placeholder="(unlimited)" />
+        </div>
+        <div>
+          <label class="label" for="vc_status">Status</label>
+          <select id="vc_status" class="input">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions"><button type="submit" class="btn primary" id="vc_save">Save</button></div>
+    </form>
+    <div class="modal-footer note">Vouchers are scoped to a single product.</div>
+  </dialog>
+  <dialog id="orderModal" class="modal" aria-label="Order details" data-modal="order-detail">
     <div class="modal-body">
-      <div class="modal-header"><h3>Chi tiết đơn hàng</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button></div>
+      <div class="modal-header">
+        <h3>Order details</h3><button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+      </div>
       <div class="form-grid">
-        <div>Mã đơn: <b id="om_orderId"></b></div>
-        <div>Người dùng: <span id="om_userId"></span></div>
-        <div>Tổng tiền: $<span id="om_totalAmount"></span></div>
-        <div>Ngày tạo: <span id="om_createdAt"></span></div>
+        <div>Order ID: <b id="om_orderId"></b></div>
+        <div>User: <span id="om_userId"></span></div>
+        <div>Total: $<span id="om_totalAmount"></span></div>
+        <div>Created at: <span id="om_createdAt"></span></div>
       </div>
       <div style="margin-top:10px">
-        <div><b>Mặt hàng</b></div>
+        <div><b>Items</b></div>
         <table class="table">
-          <thead><tr><th>Product</th><th>SL</th><th>Giá</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Price</th>
+            </tr>
+          </thead>
           <tbody id="om_items"></tbody>
         </table>
       </div>
     </div>
+    <form method="dialog"><button value="close" hidden>Close</button></form>
+  </dialog>
+  <dialog id="voucherUsageModal" class="modal" aria-label="Voucher usage" data-modal="voucher-usage">
+    <div class="modal-body">
+      <div class="modal-header">
+        <h3>Voucher usage — <span id="vu_code"></span></h3><button type="button" class="icon-btn" data-close><i
+            class="ti ti-x"></i></button>
+      </div>
+      <div class="form-grid">
+        <div>Total uses: <b id="vu_used">0</b></div>
+        <div>Max uses: <b id="vu_max">∞</b></div>
+        <div>Remaining: <b id="vu_left">∞</b></div>
+      </div>
+      <div style="margin-top:10px">
+        <div><b>Redemptions</b></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Order</th>
+                <th>User</th>
+                <th>Discount</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="vu_table">
+              <tr class="footer-note">
+                <td colspan="5">No usage yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <form method="dialog"><button value="close" hidden>Close</button></form>
+  </dialog>
+  <dialog id="bankAccountModal" class="modal" aria-label="Add bank account" data-modal="bank-account">
+    <form method="dialog" class="modal-body" id="bankAccountForm">
+      <div class="modal-header">
+        <h3>Add bank account</h3>
+        <button type="button" class="icon-btn" data-close><i class="ti ti-x"></i></button>
+      </div>
+      <div class="form-grid">
+        <label>Bank
+          <div class="bank-select-wrap" style="display:flex;gap:8px;align-items:center;">
+            <span id="ba_bankLogo" class="bank-logo" aria-hidden="true" style="width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--bg-soft);overflow:hidden;">
+              <img alt="" style="width:100%;height:100%;object-fit:cover;display:none;" />
+              <span class="fallback" style="font-size:12px;color:var(--muted);display:none;"></span>
+            </span>
+            <select id="ba_bankSelect" class="input" required style="flex:1;">
+              <option value="">Select bank</option>
+            </select>
+            <button type="button" id="ba_browseBanks" class="btn" title="Browse banks"><i class="ti ti-caret-down"></i></button>
+          </div>
+        </label>
+        <div id="ba_bankList" class="bank-list" hidden role="listbox" aria-label="Choose bank"></div>
+        <label>Bank code
+          <input id="ba_bankCode" class="input" placeholder="Auto" readonly />
+        </label>
+        <label>Account number<input id="ba_accountNumber" required /></label>
+        <label>Account holder<input id="ba_holderName" required /></label>
+        <label class="span-2">Branch<input id="ba_branch" placeholder="(optional)" /></label>
+        <label class="span-2" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <input id="ba_default" type="checkbox" /> Set as default
+        </label>
+      </div>
+      <div class="modal-actions"><button type="submit" class="btn primary" id="ba_save">Save</button></div>
+    </form>
     <form method="dialog"><button value="close" hidden>Close</button></form>
   </dialog>
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true" data-block="toast-root"></div>

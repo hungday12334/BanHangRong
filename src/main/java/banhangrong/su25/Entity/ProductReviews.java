@@ -16,6 +16,12 @@ public class ProductReviews {
     private Long userId;
     private Integer rating;
     private String comment;
+    @Column(name = "media_urls")
+    private String mediaUrls;
+    @Column(name = "service_rating")
+    private Integer serviceRating;
+    @Column(name = "order_item_id")
+    private Long orderItemId;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -62,5 +68,23 @@ public class ProductReviews {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    public String getMediaUrls() {
+        return mediaUrls;
+    }
+    public void setMediaUrls(String mediaUrls) {
+        this.mediaUrls = mediaUrls;
+    }
+    public Integer getServiceRating() {
+        return serviceRating;
+    }
+    public void setServiceRating(Integer serviceRating) {
+        this.serviceRating = serviceRating;
+    }
+    public Long getOrderItemId() {
+        return orderItemId;
+    }
+    public void setOrderItemId(Long orderItemId) {
+        this.orderItemId = orderItemId;
     }
 }

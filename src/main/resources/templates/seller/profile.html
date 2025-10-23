@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bán Hàng Rong - Trang cá nhân</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        /* CSS từ seller-dashboard.css đã được tích hợp */
+        :root {
+            --bg: #0b1020;
+            --bg-soft: #111735;
+            --bg-elev: #141b3f;
+            --card: #18214d;
+            --text: #e7eaf6;
+            --muted: #a8b0d3;
+            --accent: #3b82f6;
+            --accent-2: #06b6d4;
+            --good: #22c55e;
+            --warn: #f59e0b;
+            --bad: #ef4444;
+            --border: rgba(255, 255, 255, 0.12);
+            --shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+            --radius: 14px;
+        }
+
+        /* Light theme variables */
+        :root.theme-light {
+            --bg: #f6f7fb;
+            --bg-soft: #ffffff;
+            --bg-elev: #ffffff;
+            --card: #ffffff;
+            --text: #101426;
+            --muted: #57607a;
+            --accent: #2563eb;
+            --accent-2: #0891b2;
+            --good: #15803d;
+            --warn: #b45309;
+            --bad: #b91c1c;
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: 0 8px 28px rgba(16, 20, 38, 0.08);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root:not(.theme-dark):not(.theme-light) {
+                --bg: #f6f7fb;
+                --bg-soft: #ffffff;
+                --bg-elev: #ffffff;
+                --card: #ffffff;
+                --text: #101426;
+                --muted: #57607a;
+                --accent: #2563eb;
+                --accent-2: #0891b2;
+                --good: #15803d;
+                --warn: #b45309;
+                --bad: #b91c1c;
+                --border: rgba(0, 0, 0, 0.08);
+                --shadow: 0 8px 28px rgba(16, 20, 38, 0.08);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            color: var(--text);
+            background:
+                    radial-gradient(1200px 800px at 15% -10%, color-mix(in oklab, var(--accent) 24%, transparent) 0%, transparent 50%),
+                    radial-gradient(1000px 700px at 120% 10%, color-mix(in oklab, var(--accent-2) 18%, transparent) 0%, transparent 60%),
+                    var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles - Điều chỉnh chữ lớn hơn nữa */
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            background: linear-gradient(180deg,
+            color-mix(in oklab, var(--bg-soft) 96%, transparent) 0%,
+            color-mix(in oklab, var(--bg) 96%, transparent) 100%);
+            border-right: 1px solid var(--border);
+            padding: 18px 14px 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .brand-with-logo {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 10px 4px 20px 4px;
+            position: relative;
+            overflow: visible;
+            flex-direction: column;
+            background: transparent;
+            border: none;
+        }
+
+        .app-logo {
+            margin: 0;
+            padding: 0;
+            width: 108px; /* Tăng từ 105px lên 108px */
+            height: 108px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 26px;
+            position: relative;
+            background: linear-gradient(160deg, color-mix(in oklab, var(--bg-soft) 96%, #fff 0%) 0%, color-mix(in oklab, var(--bg-elev) 92%, #000 0%) 100%);
+            box-shadow: 0 6px 26px -6px rgba(0, 0, 0, .65), 0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent);
+            overflow: hidden;
+        }
+
+        .app-logo-img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            position: relative;
+            white-space: nowrap;
+            font-size: 20px; /* Tăng từ 19px lên 20px */
+            font-weight: 800;
+            letter-spacing: .8px; /* Tăng letter-spacing */
+            line-height: 1.05;
+            color: var(--text);
+            text-shadow: 0 2px 4px rgba(0,0,0,.25), 0 4px 18px rgba(0,0,0,.28);
+        }
+
+        .theme-light .brand-text {
+            color: #121824;
+            text-shadow: 0 2px 4px rgba(0,0,0,.15), 0 6px 16px rgba(0,0,0,.07);
+        }
+
+        .menu {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .menu .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px; /* Tăng từ 9px lên 10px */
+            border-radius: 10px;
+            color: var(--muted);
+            text-decoration: none;
+            transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+        }
+
+        .menu .item .ti {
+            font-size: 18px; /* Tăng từ 17px lên 18px */
+            width: 20px; /* Tăng từ 19px lên 20px */
+            text-align: center;
+            color: color-mix(in oklab, var(--accent) 70%, #9fb1ff);
+        }
+
+        .menu .item .lbl {
+            font-size: 15px; /* Tăng từ 14px lên 15px */
+            font-weight: 500;
+        }
+
+        .menu .item:hover {
+            background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev));
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .menu .item.active {
+            background: color-mix(in oklab, var(--accent) 20%, var(--bg-elev));
+            color: var(--text);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 18px;
+        }
+
+        .footer-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .theme-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 54px; /* Tăng từ 52px lên 54px */
+            padding: 0;
+            border-radius: 18px;
+            border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+            background: linear-gradient(155deg, color-mix(in oklab, var(--bg-elev) 85%, #fff 0%) 0%, color-mix(in oklab, var(--bg-soft) 90%, #000 0%) 100%);
+            box-shadow: 0 4px 18px -6px rgba(0,0,0,.6), 0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent), 0 0 22px -6px color-mix(in oklab, var(--accent) 60%, transparent) inset;
+            cursor: pointer;
+            transition: background .5s ease, box-shadow .4s ease, transform .35s ease;
+            color: var(--text);
+        }
+
+        .theme-toggle .ti {
+            font-size: 24px; /* Tăng từ 23px lên 24px */
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 3px 8px rgba(0,0,0,.55));
+            transition: transform .6s cubic-bezier(.68,-0.4,.32,1.4);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            padding: 12px 12px; /* Tăng từ 11px lên 12px */
+            background: linear-gradient(135deg,color-mix(in oklab,var(--bad) 18%,transparent),color-mix(in oklab,var(--bad) 8%,transparent));
+            border: 1px solid color-mix(in oklab,var(--bad) 35%, transparent);
+            color: #ffd9d9;
+            font-weight: 600;
+            border-radius: 14px;
+            text-decoration: none;
+            transition: .35s ease background, .35s ease transform, .35s ease box-shadow;
+            font-size: 15px; /* Tăng từ 14px lên 15px */
+        }
+
+        .theme-light .logout-btn {
+            color: #7a1212;
+            background: color-mix(in oklab, var(--bad) 8%, transparent);
+        }
+
+        .logout-btn .ti {
+            font-size: 18px; /* Tăng từ 17px lên 18px */
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+        }
+
+        .profile-section {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .seller-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .seller-id {
+            background-color: color-mix(in oklab, var(--accent) 12%, transparent);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: color-mix(in oklab, var(--accent) 80%, #1d4ed8);
+            border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+        }
+
+        .seller-role {
+            background-color: color-mix(in oklab, var(--good) 12%, transparent);
+            color: color-mix(in oklab, var(--good) 65%, #a7f3d0);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid color-mix(in oklab, var(--good) 35%, transparent);
+        }
+
+        .profile-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.15s ease-in-out;
+            background-color: color-mix(in oklab, var(--bg) 94%, transparent);
+            color: var(--text);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent);
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        .form-group input:read-only, .form-group select:disabled {
+            background-color: color-mix(in oklab, var(--bg) 96%, transparent);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.25rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: color-mix(in oklab, var(--bg-elev) 90%, transparent);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev));
+        }
+
+        /* Avatar Styles */
+        .avatar-edit-wrap {
+            position: relative;
+            display: inline-flex;
+            margin-bottom: 1.5rem;
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--bg-soft);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-edit-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .avatar-edit-btn:hover {
+            background: var(--accent-2);
+            transform: scale(1.1);
+        }
+
+        /* Toast Styles - Góc dưới phải */
+        .toast-container {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            min-width: 280px;
+            max-width: 350px;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast .icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast .msg {
+            flex: 1;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .toast .close {
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            transition: color 0.2s ease;
+        }
+
+        .toast .close:hover {
+            color: var(--text);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--good);
+        }
+
+        .toast.success .icon {
+            color: var(--good);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--bad);
+        }
+
+        .toast.error .icon {
+            color: var(--bad);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--accent);
+        }
+
+        .toast.info .icon {
+            color: var(--accent);
+        }
+
+        /* Loader Styles */
+        #appLoader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            background:
+                    radial-gradient(900px 620px at 30% 35%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%),
+                    radial-gradient(1000px 700px at 80% 75%, color-mix(in oklab, var(--accent-2) 18%, transparent), transparent 75%),
+                    linear-gradient(140deg, color-mix(in oklab, var(--bg) 92%, #000 0%) 0%, var(--bg) 60%);
+            overflow: hidden;
+            transition: opacity .5s cubic-bezier(.4, .0, .2, 1);
+            opacity: 0;
+            pointer-events: none;
+            backdrop-filter: blur(2px) brightness(1.02);
+        }
+
+        #appLoader:before,
+        #appLoader:after {
+            content: "";
+            position: absolute;
+            width: 900px;
+            height: 900px;
+            background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 25%, transparent), transparent 70%);
+            opacity: .18;
+            animation: orbFloat 11s linear infinite;
+            filter: blur(40px);
+        }
+
+        #appLoader:after {
+            animation-direction: reverse;
+            animation-duration: 15s;
+            background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent-2) 22%, transparent), transparent 70%);
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate(-18%, -12%) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(12%, 6%) rotate(180deg);
+            }
+
+            100% {
+                transform: translate(-18%, -12%) rotate(360deg);
+            }
+        }
+
+        #appLoader .loader-core {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+            padding: 42px 54px 46px;
+            border-radius: 34px;
+            background: linear-gradient(160deg, color-mix(in oklab, var(--bg-elev) 82%, #ffffff 0%) 0%, color-mix(in oklab, var(--bg-soft) 84%, #000 0%) 100%);
+            box-shadow: 0 12px 42px -8px rgba(0, 0, 0, .45), 0 2px 4px -1px rgba(0, 0, 0, .35);
+            border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+            min-width: 310px;
+        }
+
+        /* Orbital nucleus */
+        #appLoader .orbital {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 4px 18px rgba(0, 0, 0, .55));
+        }
+
+        #appLoader .orbital .nucleus {
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(145deg, color-mix(in oklab, var(--accent) 60%, #ffffff 0%) 0%, color-mix(in oklab, var(--accent-2) 55%, #000 0%) 100%);
+            border-radius: 20px;
+            box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 25%, transparent), 0 0 22px -4px color-mix(in oklab, var(--accent-2) 70%, transparent), 0 0 34px -2px color-mix(in oklab, var(--accent) 60%, transparent);
+            animation: nucleusPulse 2.6s ease-in-out infinite;
+            position: absolute;
+            top: 31px;
+            left: 31px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #appLoader .orbital .nucleus:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .5), transparent 70%);
+            mix-blend-mode: overlay;
+            opacity: .85;
+        }
+
+        #appLoader .orbital .nucleus .loader-logo {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            z-index: 2;
+            filter: none;
+            mix-blend-mode: normal;
+            animation: logoFloat 3.5s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes nucleusPulse {
+
+            0%,
+            100% {
+                transform: scale(0.94);
+            }
+
+            50% {
+                transform: scale(1.07);
+            }
+        }
+
+        /* Orbits */
+        #appLoader .orbit {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        #appLoader .orbit span {
+            display: block;
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 40%, transparent), 0 0 12px 2px color-mix(in oklab, var(--accent) 70%, transparent);
+        }
+
+        #appLoader .orbit.orbit-a {
+            animation: orbitA 5.2s linear infinite;
+        }
+
+        #appLoader .orbit.orbit-b {
+            animation: orbitB 6.4s linear infinite;
+        }
+
+        #appLoader .orbit.orbit-c {
+            animation: orbitC 7.8s linear infinite;
+        }
+
+        @keyframes orbitA {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes orbitB {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        @keyframes orbitC {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Progress bar */
+        #appLoader .progress-wrap {
+            position: relative;
+            width: 240px;
+            height: 6px;
+            background: color-mix(in oklab, var(--accent) 18%, transparent);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent);
+        }
+
+        #appLoader .progress-bar {
+            position: absolute;
+            inset: 0;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            border-radius: inherit;
+            box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent), 0 0 14px -2px color-mix(in oklab, var(--accent-2) 70%, transparent);
+            animation: progressPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes progressPulse {
+            0% {
+                filter: brightness(.95);
+            }
+
+            100% {
+                filter: brightness(1.15);
+            }
+        }
+
+        #appLoader .load-text {
+            font-size: 15px;
+            letter-spacing: .35px;
+            color: color-mix(in oklab, var(--muted) 90%, #fff);
+            font-weight: 600;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+        }
+
+        /* Responsive */
+        @media (max-width: 820px) {
+            .page {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .profile-form {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 0.625rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .toast {
+                min-width: 250px;
+                max-width: 300px;
+            }
+        }
+
+        /* === THÊM STYLES CHO MODAL UPLOAD AVATAR === */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--card);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text);
+        }
+
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            background: var(--bg-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background: color-mix(in oklab, var(--bg) 94%, transparent);
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .file-input:hover {
+            border-color: var(--accent);
+        }
+
+        .file-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: color-mix(in oklab, var(--bg-elev) 90%, transparent);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-cancel:hover {
+            background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev));
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .upload-help {
+            font-size: 0.875rem;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* === THÊM STYLE CHO BUTTON SUCCESS === */
+        .btn-success {
+            background: linear-gradient(135deg, var(--good), #16a34a);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Ẩn nút camera mặc định */
+        .avatar-edit-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: none; /* === THÊM DÒNG NÀY: ẨN MẶC ĐỊNH === */
+        }
+
+        /* Hiện nút camera khi có class 'editing' */
+        .avatar-edit-wrap.editing .avatar-edit-btn {
+            display: flex; /* === HIỆN KHI Ở CHẾ ĐỘ CHỈNH SỬA === */
+        }
+
+        .avatar-edit-btn:hover {
+            background: var(--accent-2);
+            transform: scale(1.1);
+        }
+
+        /* CSS cho modal upload avatar */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--card);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text);
+        }
+
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            background: var(--bg-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background: color-mix(in oklab, var(--bg) 94%, transparent);
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .file-input:hover {
+            border-color: var(--accent);
+        }
+
+        .file-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: color-mix(in oklab, var(--bg-elev) 90%, transparent);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-cancel:hover {
+            background: color-mix(in oklab, var(--accent) 12%, var(--bg-elev));
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .upload-help {
+            font-size: 0.875rem;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* CSS cho btn-success */
+        .btn-success {
+            background: linear-gradient(135deg, var(--good), #16a34a);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+
+        /* === THÊM CSS CHO MODAL MẬT KHẨU === */
+
+        /* Style cho password strength indicator */
+        .password-strength {
+            margin: 1rem 0;
+        }
+
+        .strength-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        /* Password strength levels */
+        .strength-weak .strength-fill {
+            background: var(--bad);
+            width: 33%;
+        }
+
+        .strength-medium .strength-fill {
+            background: var(--warn);
+            width: 66%;
+        }
+
+        .strength-strong .strength-fill {
+            background: var(--good);
+            width: 100%;
+        }
+
+        /* Style cho nút warning */
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warn), #eab308);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        /* === THÊM CSS CHO PASSWORD TOGGLE === */
+
+        .password-input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 45px; /* Tạo khoảng trống cho icon */
+            width: 100%;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .password-toggle:hover {
+            color: var(--text);
+            background: color-mix(in oklab, var(--accent) 12%, transparent);
+        }
+
+        .password-toggle .ti {
+            font-size: 16px;
+        }
+
+        /* Style khi password đang hiển thị */
+        .password-toggle.active {
+            color: var(--accent);
+        }
+
+        .password-toggle.active .ti-eye {
+            display: none;
+        }
+
+        .password-toggle.active .ti-eye-off {
+            display: block;
+        }
+
+        .password-toggle .ti-eye-off {
+            display: none;
+        }
+
+    </style>
+</head>
+<body class="loading">
+<!-- Global Loader -->
+<div id="appLoader">
+    <div class="loader-core">
+        <div class="orbital">
+            <div class="orbit orbit-a"><span></span></div>
+            <div class="orbit orbit-b"><span></span></div>
+            <div class="orbit orbit-c"><span></span></div>
+            <div class="nucleus">
+                <img src="/img/kua654ms.png" alt="Logo" class="loader-logo" data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png">
+            </div>
+        </div>
+        <div class="progress-wrap">
+            <div class="progress-bar" data-loader-progress></div>
+        </div>
+        <div class="load-text" data-loader-text>Đang khởi tạo...</div>
+    </div>
+</div>
+
+<div class="page">
+    <!-- Sidebar -->
+    <section class="sidebar">
+        <div class="brand-bar">
+            <div class="brand brand-with-logo">
+                <figure class="app-logo" role="img" aria-label="Logo">
+                    <img src="/img/kua654ms.png" alt="Logo" decoding="async" loading="eager"
+                         data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" class="app-logo-img" />
+                </figure>
+                <span class="brand-text" data-text="Bán Hàng Rong">Bán Hàng Rong</span>
+            </div>
+        </div>
+        <nav class="menu" data-block="nav">
+            <a href="/" class="item" data-nav="home" title="Trang chủ" aria-label="Trang chủ">
+                <i class="ti ti-home"></i><span class="lbl">Trang chủ</span>
+            </a>
+            <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Quản lý" aria-label="Quản lý">
+                <i class="ti ti-dashboard"></i><span class="lbl">Quản lý</span>
+            </a>
+            <a href="/seller/profile" class="item active" title="Trang cá nhân">
+                <i class="ti ti-user"></i>
+                <span class="lbl">Trang cá nhân</span>
+            </a>
+            <a href="#orders" class="item" data-nav="orders" title="Quản lý đơn hàng" aria-label="Quản lý đơn hàng">
+                <i class="ti ti-receipt"></i><span class="lbl">Quản lý đơn hàng</span>
+            </a>
+            <a href="#keys" class="item" data-nav="keys" title="Quản lý key" aria-label="Quản lý key">
+                <i class="ti ti-key"></i><span class="lbl">Quản lý key</span>
+            </a>
+            <a href="#profile-settings" class="item" data-nav="profile-settings" title="Quản lý profile" aria-label="Quản lý profile">
+                <i class="ti ti-settings"></i><span class="lbl">Quản lý profile</span>
+            </a>
+            <a href="/seller/chat" class="item" data-nav="chat" title="Chat với khách hàng" aria-label="Chat với khách hàng">
+                <i class="ti ti-messages"></i>
+                <span class="lbl">Chat hỗ trợ</span>
+                <span class="badge bg-danger" id="unreadChatCount" style="display: none;">0</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer" data-block="logout">
+            <div class="footer-actions">
+                <button id="themeToggle" class="theme-toggle" aria-label="Chuyển giao diện" title="Chuyển giao diện" type="button">
+                    <i class="ti ti-sun"></i>
+                </button>
+                <a href="/logout" class="logout-btn" title="Đăng xuất" aria-label="Đăng xuất">
+                    <i class="ti ti-logout"></i><span>Đăng xuất</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <section class="profile-section">
+                <h2 class="section-title">Trang cá nhân</h2>
+
+                <!-- Avatar Section -->
+                <div class="avatar-edit-wrap">
+                    <div class="avatar">
+                        <!-- SỬA: Hiển thị avatar từ user data, nếu không có thì dùng default -->
+                        <img th:src="${user?.avatarUrl != null and user.avatarUrl != ''} ? ${user.avatarUrl} : '/img/avatar_default.jpg'"
+                             src="/img/avatar_default.jpg"
+                             alt="Avatar"
+                             id="profileAvatar">
+                    </div>
+                    <button class="avatar-edit-btn" id="btnEditAvatar" title="Đổi avatar">
+                        <i class="ti ti-camera"></i>
+                    </button>
+                </div>
+
+                <div class="seller-info">
+                    <!-- SỬA: Hiển thị Seller ID thực tế -->
+                    <div class="seller-id">Seller ID: <span id="sellerId" th:text="${user?.userId}">1</span></div>
+                    <div class="seller-role">• SELLER</div>
+                </div>
+
+                <form class="profile-form" id="profileForm">
+                    <div class="form-group">
+                        <label for="name">Tên:</label>
+                        <!-- SỬA: Hiển thị tên từ user data -->
+                        <input type="text" id="name" name="username"
+                               th:value="${user?.username}"
+                               value="Minh" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <!-- SỬA: Hiển thị email từ user data -->
+                        <input type="email" id="email" name="email"
+                               th:value="${user?.email}"
+                               value="seller@example.com" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại:</label>
+                        <!-- SỬA: Hiển thị số điện thoại từ user data -->
+                        <input type="tel" id="phone" name="phoneNumber"
+                               th:value="${user?.phoneNumber != null} ? ${user.phoneNumber} : ''"
+                               value="" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Giới tính:</label>
+                        <!-- SỬA: Hiển thị giới tính từ user data -->
+                        <select id="gender" name="gender" disabled>
+                            <option value="other" th:selected="${user?.gender == 'other' or user?.gender == null}">Khác</option>
+                            <option value="male" th:selected="${user?.gender == 'male'}">Nam</option>
+                            <option value="female" th:selected="${user?.gender == 'female'}">Nữ</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthday">Ngày sinh:</label>
+                        <!-- SỬA: Hiển thị ngày sinh từ user data -->
+                        <input type="date" id="birthday" name="birthDate"
+                               th:value="${user?.birthDate != null} ? ${#temporals.format(user.birthDate, 'yyyy-MM-dd')} : ''"
+                               value="" readonly>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="aboutUsBtn">
+                            <i class="ti ti-info-circle"></i>Chúng tôi
+                        </button>
+
+                        <!-- === THÊM NÚT ĐỔI MẬT KHẨU === -->
+                        <button type="button" class="btn btn-warning" id="changePasswordBtn">
+                            <i class="ti ti-lock"></i>Đổi mật khẩu
+                        </button>
+
+                        <button type="button" class="btn btn-primary" id="editBtn">
+                            <i class="ti ti-edit"></i>Chính sửa
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- === THÊM MODAL UPLOAD AVATAR - ĐẶT Ở CUỐI FILE TRƯỚC TOAST CONTAINER === -->
+<div id="avatarModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Đổi Avatar</h3>
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+
+        <form id="avatarUploadForm" enctype="multipart/form-data">
+            <div class="avatar-preview">
+                <img id="avatarPreview" src="/img/avatar_default.jpg" alt="Avatar preview">
+            </div>
+
+            <div class="file-input-wrapper">
+                <input type="file" id="avatarFile" name="avatarFile" accept="image/*" class="file-input" required>
+            </div>
+
+            <p class="upload-help">Chọn file ảnh (JPEG, PNG, GIF). Tối đa 5MB.</p>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-cancel" id="cancelUpload">Hủy</button>
+                <button type="submit" class="btn btn-upload">
+                    <i class="ti ti-upload"></i>Tải lên
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- === THÊM MODAL ĐỔI MẬT KHẨU === -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Đổi Mật Khẩu</h3>
+            <button class="close-modal" id="closePasswordModal">&times;</button>
+        </div>
+
+        <form id="passwordChangeForm">
+            <div class="form-group password-input-group">
+                <label for="currentPassword">Mật khẩu hiện tại:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+                    <button type="button" class="password-toggle" data-target="currentPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group password-input-group">
+                <label for="newPassword">Mật khẩu mới:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="6">
+                    <button type="button" class="password-toggle" data-target="newPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group password-input-group">
+                <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                    <button type="button" class="password-toggle" data-target="confirmPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="password-strength" id="passwordStrength" style="display: none;">
+                <div class="strength-bar">
+                    <div class="strength-fill" id="strengthFill"></div>
+                </div>
+                <div class="strength-text" id="strengthText"></div>
+            </div>
+
+            <p class="upload-help">Mật khẩu phải có ít nhất 6 ký tự</p>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-cancel" id="cancelPasswordChange">Hủy</button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="ti ti-key"></i>Đổi mật khẩu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script>
+
+    // Theme management
+    function applyTheme(theme) {
+        const root = document.documentElement;
+        root.classList.remove('theme-dark', 'theme-light');
+
+        if (theme === 'dark') {
+            root.classList.add('theme-dark');
+        } else if (theme === 'light') {
+            root.classList.add('theme-light');
+        }
+
+        // Update theme toggle icon
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.innerHTML = theme === 'light' ? '<i class="ti ti-moon"></i>' : '<i class="ti ti-sun"></i>';
+        }
+
+        // Update logo based on theme
+        const logoImg = document.querySelector('.app-logo-img');
+        const loaderLogo = document.querySelector('.loader-logo');
+
+        if (logoImg) {
+            const lightSrc = logoImg.getAttribute('data-logo-light');
+            const darkSrc = logoImg.getAttribute('data-logo-dark');
+            if (theme === 'dark' && darkSrc) {
+                logoImg.src = darkSrc;
+            } else if (lightSrc) {
+                logoImg.src = lightSrc;
+            }
+        }
+
+        if (loaderLogo) {
+            const lightSrc = loaderLogo.getAttribute('data-logo-light');
+            const darkSrc = loaderLogo.getAttribute('data-logo-dark');
+            if (theme === 'dark' && darkSrc) {
+                loaderLogo.src = darkSrc;
+            } else if (lightSrc) {
+                loaderLogo.src = lightSrc;
+            }
+        }
+
+        // Save to localStorage
+        localStorage.setItem('theme', theme);
+    }
+
+    // Initialize theme
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(systemPrefersDark ? 'dark' : 'light');
+        }
+    }
+
+    // Toast function
+    function showToast(message, type = 'info', opts = {}) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
+        toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><button class="close" aria-label="Đóng">✕</button>`;
+        container.appendChild(toast);
+
+        void toast.offsetWidth;
+        toast.classList.add('show');
+
+        const close = () => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        };
+
+        toast.querySelector('.close').addEventListener('click', close);
+        const delay = opts.duration ?? (type === 'error' ? 5000 : 3000);
+        if (delay !== 0) setTimeout(close, delay);
+    }
+
+    // Finish loading function
+    function finishGlobalLoad() {
+        document.body.classList.remove('loading');
+        document.body.classList.add('ready');
+        const appLoader = document.getElementById('appLoader');
+        if (appLoader) {
+            appLoader.style.opacity = '0';
+            setTimeout(() => appLoader.remove(), 600);
+        }
+    }
+
+    // === PHẦN XỬ LÝ CHÍNH - ĐƠN GIẢN HÓA ===
+    // === THAY THẾ PHẦN NÀY TRONG JAVASCRIPT ===
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("=== TRANG ĐÃ LOAD ===");
+
+        const editBtn = document.getElementById('editBtn');
+        const aboutUsBtn = document.getElementById('aboutUsBtn');
+        const formInputs = document.querySelectorAll('#profileForm input, #profileForm select');
+        const themeToggle = document.getElementById('themeToggle');
+        const editAvatarBtn = document.getElementById('btnEditAvatar');
+        const avatarWrap = document.querySelector('.avatar-edit-wrap');
+
+        // === THÊM BIẾN CHO MODAL AVATAR ===
+        const avatarModal = document.getElementById('avatarModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelUpload = document.getElementById('cancelUpload');
+        const avatarUploadForm = document.getElementById('avatarUploadForm');
+        const avatarFileInput = document.getElementById('avatarFile');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const profileAvatar = document.getElementById('profileAvatar');
+
+        console.log("Edit button:", editBtn);
+        console.log("Form inputs:", formInputs.length);
+        console.log("Avatar edit button:", editAvatarBtn);
+
+        // Initialize theme
+        initTheme();
+        initPasswordToggles();
+
+        // Theme toggle event
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                console.log("Theme toggle clicked");
+                const isLight = document.documentElement.classList.contains('theme-light');
+                const nextTheme = isLight ? 'dark' : 'light';
+                applyTheme(nextTheme);
+                showToast(`Đã chuyển sang giao diện ${nextTheme === 'light' ? 'sáng' : 'tối'}`, 'info', { duration: 1500 });
+            });
+        }
+
+        // === SỬA LẠI PHẦN XỬ LÝ NÚT CHỈNH SỬA ===
+        if (editBtn) {
+            editBtn.addEventListener('click', function() {
+                console.log("Edit button clicked");
+
+                const isReadOnly = formInputs[0] && formInputs[0].readOnly;
+                console.log("Is read only:", isReadOnly);
+
+                if (isReadOnly) {
+                    // === BẬT CHẾ ĐỘ CHỈNH SỬA - HIỆN NÚT CAMERA ===
+                    console.log("Enabling edit mode");
+                    formInputs.forEach(input => {
+                        input.readOnly = false;
+                        input.disabled = false;
+                    });
+
+                    // Hiện nút camera
+                    if (avatarWrap) {
+                        avatarWrap.classList.add('editing');
+                        console.log("Added editing class to avatar wrap");
+                    }
+
+                    editBtn.innerHTML = '<i class="ti ti-check"></i>Lưu thay đổi';
+                    editBtn.classList.remove('btn-primary');
+                    editBtn.classList.add('btn-success');
+                    showToast('Bạn đang ở chế độ chỉnh sửa', 'info', { duration: 2000 });
+                } else {
+                    // === TẮT CHẾ ĐỘ CHỈNH SỬA VÀ GỬI DỮ LIỆU LÊN SERVER ===
+                    console.log("Disabling edit mode and saving data");
+
+                    // Gửi dữ liệu lên server
+                    saveProfileData();
+                }
+            });
+        } else {
+            console.error("Edit button not found!");
+        }
+
+// === THÊM HÀM GỬI DỮ LIỆU PROFILE LÊN SERVER ===
+        function saveProfileData() {
+            console.log("Saving profile data to server...");
+
+            // Lấy dữ liệu từ form
+            const formData = new FormData();
+            formData.append('username', document.getElementById('name').value);
+            formData.append('phoneNumber', document.getElementById('phone').value);
+            formData.append('gender', document.getElementById('gender').value);
+            formData.append('birthDate', document.getElementById('birthday').value);
+
+            // Hiển thị loading
+            showToast('Đang lưu thông tin...', 'info', { duration: 0 });
+
+            // Gửi request đến server
+            fetch('/seller/profile/update', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response redirected:', response.redirected);
+                    
+                    if (response.redirected) {
+                        // Nếu server redirect, chuyển hướng trang
+                        window.location.href = response.url;
+                        return;
+                    }
+                    if (response.ok) {
+                        // Reload trang để hiển thị dữ liệu mới
+                        window.location.reload();
+                        return;
+                    }
+                    throw new Error('Save failed with status: ' + response.status);
+                })
+                .catch(error => {
+                    console.error('Error saving profile:', error);
+                    // Đóng toast loading
+                    document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                    showToast('Lỗi khi lưu thông tin: ' + error.message, 'error');
+                });
+
+                    // Reload trang để cập nhật dữ liệu mới
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                    showToast('Lỗi khi lưu thông tin: ' + error.message, 'error');
+
+                    // Vẫn thoát chế độ chỉnh sửa dù có lỗi
+                    formInputs.forEach(input => {
+                        input.readOnly = true;
+                        if (input.id === 'gender') {
+                            input.disabled = true;
+                        }
+                    });
+
+                    if (avatarWrap) {
+                        avatarWrap.classList.remove('editing');
+                    }
+
+                    editBtn.innerHTML = '<i class="ti ti-edit"></i>Chính sửa';
+                    editBtn.classList.remove('btn-success');
+                    editBtn.classList.add('btn-primary');
+                });
+        }
+
+
+        // About us button event
+        if (aboutUsBtn) {
+            aboutUsBtn.addEventListener('click', function() {
+                showToast('Thông tin về chúng tôi sẽ được hiển thị tại đây.', 'info');
+            });
+        }
+
+        // === XỬ LÝ NÚT CAMERA - MỞ MODAL UPLOAD ===
+        if (editAvatarBtn) {
+            editAvatarBtn.addEventListener('click', function() {
+                console.log("Avatar edit button clicked");
+                if (avatarModal) {
+                    avatarModal.style.display = 'block';
+                    console.log("Opened avatar modal");
+                }
+            });
+        }
+
+        // === XỬ LÝ MODAL UPLOAD AVATAR ===
+
+        // Đóng modal
+        function closeAvatarModal() {
+            if (avatarModal) {
+                avatarModal.style.display = 'none';
+                console.log("Closed avatar modal");
+            }
+            if (avatarUploadForm) {
+                avatarUploadForm.reset();
+            }
+            // Reset preview về avatar hiện tại
+            if (avatarPreview && profileAvatar) {
+                avatarPreview.src = profileAvatar.src;
+            }
+        }
+
+        if (closeModal) {
+            closeModal.addEventListener('click', closeAvatarModal);
+        }
+
+        if (cancelUpload) {
+            cancelUpload.addEventListener('click', closeAvatarModal);
+        }
+
+        // Preview avatar khi chọn file
+        if (avatarFileInput) {
+            avatarFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (avatarPreview) {
+                            avatarPreview.src = e.target.result;
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Xử lý submit form upload avatar
+        if (avatarUploadForm) {
+            avatarUploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log("Avatar upload form submitted");
+
+                const file = avatarFileInput ? avatarFileInput.files[0] : null;
+                if (!file) {
+                    showToast('Vui lòng chọn file ảnh', 'error');
+                    return;
+                }
+
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showToast('Chỉ được upload file ảnh (JPEG, PNG, GIF)', 'error');
+                    return;
+                }
+
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('Kích thước file không được vượt quá 5MB', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('avatarFile', file);
+
+                // Hiển thị loading
+                showToast('Đang tải lên avatar...', 'info', { duration: 0 });
+
+                // Gửi request upload
+                fetch('/seller/profile/upload-avatar', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        console.log('Avatar upload response status:', response.status);
+                        console.log('Avatar upload response redirected:', response.redirected);
+                        
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                            return;
+                        }
+                        if (response.ok) {
+                            // Reload trang để hiển thị avatar mới
+                            window.location.reload();
+                            return;
+                        }
+                        throw new Error('Upload failed with status: ' + response.status);
+                    })
+                    .then(() => {
+                        // Đóng toast loading
+                        document.querySelectorAll('.toast').forEach(toast => toast.remove());
+
+                        showToast('Cập nhật avatar thành công!', 'success');
+                        closeAvatarModal();
+
+                        // Cập nhật avatar hiển thị và thêm timestamp để tránh cache
+                        if (profileAvatar && avatarPreview) {
+                            const timestamp = new Date().getTime();
+                            profileAvatar.src = avatarPreview.src + (avatarPreview.src.includes('?') ? '&' : '?') + 't=' + timestamp;
+                        }
+
+                        // Reload trang để cập nhật dữ liệu mới
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                        showToast('Lỗi khi upload avatar: ' + error.message, 'error');
+                    });
+            });
+        }
+
+        // Đóng modal khi click bên ngoài
+        window.addEventListener('click', function(e) {
+            if (e.target === avatarModal) {
+                closeAvatarModal();
+            }
+        });
+
+        // Finish loading after delay
+        setTimeout(() => {
+            finishGlobalLoad();
+        }, 1500);
+    });
+
+
+    // === THÊM BIẾN CHO MODAL MẬT KHẨU ===
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const passwordModal = document.getElementById('passwordModal');
+    const closePasswordModal = document.getElementById('closePasswordModal');
+    const cancelPasswordChange = document.getElementById('cancelPasswordChange');
+    const passwordChangeForm = document.getElementById('passwordChangeForm');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+
+    // === XỬ LÝ NÚT ĐỔI MẬT KHẨU ===
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', function() {
+            console.log("Change password button clicked");
+            if (passwordModal) {
+                passwordModal.style.display = 'block';
+                console.log("Opened password modal");
+            }
+        });
+    }
+
+    // === XỬ LÝ MODAL MẬT KHẨU ===
+
+    // Đóng modal mật khẩu
+    function closePasswordModalFunc() {
+        if (passwordModal) {
+            passwordModal.style.display = 'none';
+            console.log("Closed password modal");
+        }
+        if (passwordChangeForm) {
+            passwordChangeForm.reset();
+        }
+        // Reset password strength indicator
+        if (passwordStrength) {
+            passwordStrength.style.display = 'none';
+        }
+
+        const passwordInputs = document.querySelectorAll('.password-wrapper input[type="text"]');
+        const toggleButtons = document.querySelectorAll('.password-toggle');
+
+        passwordInputs.forEach(input => {
+            input.type = 'password';
+        });
+
+        toggleButtons.forEach(button => {
+            button.classList.remove('active');
+            button.innerHTML = '<i class="ti ti-eye"></i>';
+        });
+    }
+
+    if (closePasswordModal) {
+        closePasswordModal.addEventListener('click', closePasswordModalFunc);
+    }
+
+    if (cancelPasswordChange) {
+        cancelPasswordChange.addEventListener('click', closePasswordModalFunc);
+    }
+
+    // === KIỂM TRA ĐỘ MẠNH MẬT KHẨU ===
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+        });
+    }
+
+    function checkPasswordStrength(password) {
+        if (!passwordStrength || !strengthFill || !strengthText) return;
+
+        if (password.length === 0) {
+            passwordStrength.style.display = 'none';
+            return;
+        }
+
+        passwordStrength.style.display = 'block';
+
+        let strength = 0;
+        let text = '';
+        let className = '';
+
+        // Kiểm tra độ dài
+        if (password.length >= 6) strength += 1;
+        if (password.length >= 8) strength += 1;
+
+        // Kiểm tra ký tự đặc biệt
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 1;
+
+        // Kiểm tra số
+        if (/[0-9]/.test(password)) strength += 1;
+
+        // Kiểm tra chữ hoa và thường
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+
+        // Xác định độ mạnh
+        if (strength <= 2) {
+            text = 'Yếu';
+            className = 'strength-weak';
+        } else if (strength <= 4) {
+            text = 'Trung bình';
+            className = 'strength-medium';
+        } else {
+            text = 'Mạnh';
+            className = 'strength-strong';
+        }
+
+        strengthFill.className = 'strength-fill';
+        strengthFill.classList.add(className.split('-')[1]);
+        strengthText.textContent = text;
+        passwordStrength.className = 'password-strength ' + className;
+    }
+
+    // === KIỂM TRA XÁC NHẬN MẬT KHẨU ===
+    if (confirmPasswordInput && newPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = this.value;
+
+            if (confirmPassword && newPassword !== confirmPassword) {
+                this.style.borderColor = 'var(--bad)';
+            } else {
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // === XỬ LÝ SUBMIT FORM ĐỔI MẬT KHẨU ===
+    if (passwordChangeForm) {
+        passwordChangeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log("Password change form submitted");
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validate form
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast('Mật khẩu xác nhận không khớp', 'error');
+                return;
+            }
+
+            // Gửi request đổi mật khẩu
+            changePassword(currentPassword, newPassword);
+        });
+    }
+
+    // === HÀM GỬI REQUEST ĐỔI MẬT KHẨU ===
+    function changePassword(currentPassword, newPassword) {
+        const formData = new FormData();
+        formData.append('currentPassword', currentPassword);
+        formData.append('newPassword', newPassword);
+
+        // Hiển thị loading
+        showToast('Đang đổi mật khẩu...', 'info', { duration: 0 });
+
+        // Gửi request đến server
+        fetch('/seller/profile/change-password', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                console.log('Password change response status:', response.status);
+                console.log('Password change response redirected:', response.redirected);
+                
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                if (response.ok) {
+                    // Reload trang để đảm bảo session được cập nhật
+                    window.location.reload();
+                    return;
+                }
+                throw new Error('Password change failed with status: ' + response.status);
+            })
+            .then(data => {
+                // Đóng toast loading
+                document.querySelectorAll('.toast').forEach(toast => toast.remove());
+
+                showToast('Đổi mật khẩu thành công!', 'success');
+                closePasswordModalFunc();
+
+                // Đăng xuất sau 2 giây (tuỳ chọn)
+                setTimeout(() => {
+                    showToast('Vui lòng đăng nhập lại với mật khẩu mới', 'info');
+                    setTimeout(() => {
+                        window.location.href = '/logout';
+                    }, 2000);
+                }, 1000);
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                showToast('Lỗi khi đổi mật khẩu: ' + error.message, 'error');
+            });
+    }
+
+    // Đóng modal khi click bên ngoài (cho cả 2 modal)
+    window.addEventListener('click', function(e) {
+        if (e.target === avatarModal) {
+            closeAvatarModal();
+        }
+        if (e.target === passwordModal) {
+            closePasswordModalFunc();
+        }
+    });
+
+    // Xử lý toggle password visibility
+    function initPasswordToggles() {
+        const toggleButtons = document.querySelectorAll('.password-toggle');
+
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+
+                if (passwordInput) {
+                    // Chuyển đổi giữa type password và text
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        this.classList.add('active');
+                        // Đổi icon thành eye-off
+                        this.innerHTML = '<i class="ti ti-eye-off"></i>';
+                    } else {
+                        passwordInput.type = 'password';
+                        this.classList.remove('active');
+                        // Đổi icon thành eye
+                        this.innerHTML = '<i class="ti ti-eye"></i>';
+                    }
+                }
+            });
+        });
+    }
+
+</script>
+</body>
+</html>

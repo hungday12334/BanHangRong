@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <title>Account Settings</title>
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .settings-header {
+            margin-bottom: 30px;
+        }
+        
+        .settings-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .settings-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .settings-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .checkbox-label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #0ea5e9;
+            --chip: #e5e7eb;
+            --line: #eaeef4;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        .wrapper {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--line);
+            background: var(--card);
+            flex-wrap: nowrap;
+        }
+
+        .brand {
+            font-weight: 800;
+            letter-spacing: .2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand:hover {
+            color: var(--brand);
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            margin: 0 12px;
+            flex: 1;
+            overflow: auto;
+            white-space: nowrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #111827;
+            font-weight: 500;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+
+        .nav a:hover {
+            background: #f3f4f6;
+        }
+
+        .top-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #111827;
+            border: 1px solid var(--line);
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #fff
+        }
+
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: 48px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+            width: 200px;
+            display: none;
+            z-index: 5
+        }
+
+        .user-menu .item {
+            display: block;
+            padding: 10px 12px;
+            color: #111827;
+            text-decoration: none
+        }
+
+        .user-menu .item:hover {
+            background: #f3f4f6
+        }
+
+        .search {
+            position: relative;
+        }
+
+        .search input {
+            height: 34px;
+            width: 220px;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .cart {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cart:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .cart .badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Header -->
+        <div class="topbar">
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
+            <nav class="nav" aria-label="Main">
+                <a href="/customer/dashboard">Home</a>
+                <a href="/categories">Category</a>
+                <a href="#">License Software</a>
+                <a href="#">Game Keys</a>
+                <a href="#">Voucher</a>
+                <a href="#">Support</a>
+            </nav>
+            <div class="top-actions">
+                <div class="notif">Notification</div>
+                <div class="user" style="position:relative">
+                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+                        <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+                        <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+                        <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+                            style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                                th:value="${_csrf.token}" />
+                            <input type="hidden" name="amount" id="topupAmountInput" />
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+                                (VNPay)</button>
+                        </form>
+                        <a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+                            style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+                            Become a Seller</a>
+                        <a class="item" href="#" role="menuitem"
+                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                    </div>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    </form>
+                </div>
+                <!-- Wallet Balance Display -->
+                <div class="wallet-balance" style="padding: 6px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; color: #0ea5e9; font-weight: 600; font-size: 14px;">
+                    💰 <span th:text="${user != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') : '0'}">0</span>₫
+                </div>
+                <div class="search">
+                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+                        <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
+                            style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                        <button type="submit"
+                            style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+                        <a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
+                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+                    </form>
+                </div>
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">
+                    🛒
+                    <span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="settings-container">
+        <div class="settings-header">
+            <h1 class="settings-title">Account Settings</h1>
+            <p class="settings-subtitle">Manage your account information and preferences</p>
+        </div>
+        
+        <!-- Success/Error Messages -->
+        <div class="success-message" id="successMessage">
+            Settings saved successfully!
+        </div>
+        <div class="error-message" id="errorMessage">
+            An error occurred while saving settings. Please try again.
+        </div>
+        
+        <!-- Account Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">Account Information</h2>
+            <form id="accountForm">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-input" 
+                           value="user@example.com" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" 
+                           value="0123456789">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="language">Language</label>
+                    <select id="language" name="language" class="form-select">
+                        <option value="vi">Tiếng Việt</option>
+                        <option value="en" selected>English</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="timezone">Timezone</label>
+                    <select id="timezone" name="timezone" class="form-select">
+                        <option value="Asia/Ho_Chi_Minh" selected>Asia/Ho_Chi_Minh (GMT+7)</option>
+                        <option value="UTC">UTC (GMT+0)</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Notification Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">Cài đặt thông báo</h2>
+            <form id="notificationForm">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="emailNotifications" name="emailNotifications" class="checkbox" checked>
+                    <label class="checkbox-label" for="emailNotifications">Nhận thông báo qua email</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="smsNotifications" name="smsNotifications" class="checkbox">
+                    <label class="checkbox-label" for="smsNotifications">Nhận thông báo qua SMS</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="pushNotifications" name="pushNotifications" class="checkbox" checked>
+                    <label class="checkbox-label" for="pushNotifications">Nhận thông báo đẩy</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="orderUpdates" name="orderUpdates" class="checkbox" checked>
+                    <label class="checkbox-label" for="orderUpdates">Cập nhật đơn hàng</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="promotions" name="promotions" class="checkbox" checked>
+                    <label class="checkbox-label" for="promotions">Khuyến mãi và ưu đãi</label>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Privacy Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">Bảo mật và quyền riêng tư</h2>
+            <form id="privacyForm">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="profilePublic" name="profilePublic" class="checkbox">
+                    <label class="checkbox-label" for="profilePublic">Hiển thị hồ sơ công khai</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showEmail" name="showEmail" class="checkbox">
+                    <label class="checkbox-label" for="showEmail">Hiển thị email trong hồ sơ</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showPhone" name="showPhone" class="checkbox">
+                    <label class="checkbox-label" for="showPhone">Hiển thị số điện thoại</label>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="settings-section">
+            <h2 class="section-title" style="color: #ef4444;">Vùng nguy hiểm</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">
+                Các hành động này không thể hoàn tác. Vui lòng cẩn thận.
+            </p>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-danger" onclick="deleteAccount()">
+                    Xóa tài khoản
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Form submission handlers
+        document.getElementById('accountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // TODO: Implement account settings update
+            showSuccessMessage();
+        });
+        
+        document.getElementById('notificationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // TODO: Implement notification settings update
+            showSuccessMessage();
+        });
+        
+        document.getElementById('privacyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // TODO: Implement privacy settings update
+            showSuccessMessage();
+        });
+        
+        function showSuccessMessage() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showErrorMessage() {
+            const errorMsg = document.getElementById('errorMessage');
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 3000);
+        }
+        
+        function deleteAccount() {
+            if (confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
+                if (confirm('Nhập "DELETE" để xác nhận xóa tài khoản:')) {
+                    // TODO: Implement account deletion
+                    alert('Chức năng xóa tài khoản đang được phát triển!');
+                }
+            }
+        }
+    </script>
+    
+    <script>
+        // User menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+
+        // VNPay topup function
+        function topupPrompt(e) {
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if (!v) return false;
+            const clean = v.replace(/[^0-9]/g, '');
+            if (!clean) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+    </script>
+    </div>
+</body>
+</html>
