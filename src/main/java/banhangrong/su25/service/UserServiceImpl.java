@@ -1,8 +1,13 @@
 package banhangrong.su25.service;
 
+import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,6 +15,10 @@ import java.util.List;
 public class UserServiceImpl implements UserService{
     @Autowired
     private UsersRepository usersRepository;
+    @Autowired
+    private SessionRegistry sessionRegistry;
+    @Autowired
+    private AdminProductService adminProductService;
     @Override
     public List<Users> findAll() {
         return usersRepository.findAll();
@@ -54,4 +63,32 @@ public class UserServiceImpl implements UserService{
     public Long countByUserType(String userType) {
         return usersRepository.countByUserType(userType);
     }
+
+    @Override
+    public void setExpireSessionByUsername(String username) {
+        for(Object principal : sessionRegistry.getAllPrincipals()){
+            if(principal instanceof UserDetails user && user.getUsername().equals(username)){
+                for(SessionInformation infor : sessionRegistry.getAllSessions(user, false)){
+                    infor.expireNow();
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void deactiveUserById(Users user ) {
+        setExpireSessionByUsername(user.getUsername());
+        user.setIsActive(false);
+        if(user.getUserType().equalsIgnoreCase("SELLER")){
+            List<Products> listProduct= adminProductService.findBySellerIdAndStatusIgnoreCase(user.getUserId(),"public");
+            for(Products p:listProduct){
+                p.setStatus("Cancelled");
+                adminProductService.save(p);
+            }
+        }
+        usersRepository.save(user);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.Users;
+import org.springframework.security.core.session.SessionRegistry;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface UserService {
     public boolean existsByEmail(String email);
     public Long count();
     public Long countByUserType(String userType);
+    public void setExpireSessionByUsername( String username);
+    public void deactiveUserById(Users user);
 }
