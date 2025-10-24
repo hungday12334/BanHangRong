@@ -6,16 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: add spring boot devtools">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/modify_review_system.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/RatingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/RatingController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/DatabaseUpdater.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/DatabaseUpdater.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/reviews.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/reviews.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/support.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/support.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/wishlist.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/wishlist.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,53 +65,53 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Database Script.add_sample_products.sql.executor": "Run",
-    "Database Script.add_vouchers.sql.executor": "Run",
-    "Database Script.add_withdrawals.sql.executor": "Run",
-    "Database Script.data_v2.sql.executor": "Run",
-    "Database Script.fix_old_constraint.sql.executor": "Run",
-    "Database Script.fix_review_constraint.sql.executor": "Run",
-    "Database Script.modify_review_system.sql.executor": "Run",
-    "Database Script.review_system_complete.sql.executor": "Run",
-    "Database Script.set_password.sql.executor": "Run",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Maven.su25 [clean].executor": "Run",
-    "Maven.su25 [package].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
-    "Spring Boot.Su25Application.executor": "Run",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Database Script.add_sample_products.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_vouchers.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_withdrawals.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.data_v2.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_old_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_review_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.modify_review_system.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.review_system_complete.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.set_password.sql.executor&quot;: &quot;Run&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Maven.su25 [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.su25 [package].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ],
-    "RunConfigurationTargetLRU": [
-      "53b38385-a361-4b09-b3fc-e28dbd7b3e5c"
+    &quot;RunConfigurationTargetLRU&quot;: [
+      &quot;53b38385-a361-4b09-b3fc-e28dbd7b3e5c&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
@@ -132,10 +124,9 @@
       <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
       <method v="2" />
     </configuration>
-    <configuration name="add_vouchers.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
-      <script-file value="$PROJECT_DIR$/sql/add_vouchers.sql" />
+    <configuration name="data_v2.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/data_v2.sql" />
       <script-mode>FILE</script-mode>
-      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
       <method v="2" />
     </configuration>
     <configuration name="fix_old_constraint.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
@@ -165,19 +156,19 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Database Script.data_v2.sql" />
         <item itemvalue="Database Script.fix_old_constraint.sql" />
         <item itemvalue="Database Script.review_system_complete.sql" />
         <item itemvalue="Database Script.fix_review_constraint.sql" />
         <item itemvalue="Database Script.add_sample_products.sql" />
-        <item itemvalue="Database Script.add_vouchers.sql" />
       </list>
     </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
       </set>
     </attachedChunks>
   </component>
@@ -201,6 +192,7 @@
       <workItem from="1761166831022" duration="5765000" />
       <workItem from="1761200442552" duration="8932000" />
       <workItem from="1761225296373" duration="388000" />
+      <workItem from="1761288445557" duration="1184000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
