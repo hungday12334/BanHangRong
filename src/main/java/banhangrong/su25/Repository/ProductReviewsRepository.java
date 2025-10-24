@@ -63,9 +63,16 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
     // Tìm review theo userId
     List<ProductReviews> findByUserId(Long userId);
 
+    // Tìm review theo userId và sắp xếp theo thời gian tạo giảm dần
+    List<ProductReviews> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    // Kiểm tra sự tồn tại của review theo order item
+    boolean existsByOrderItemId(Long orderItemId);
+
+    // Kiểm tra sự tồn tại của review theo user và product
+    boolean existsByUserIdAndProductId(Long userId, Long productId);
+
     // FIX SEC-03: Check xem review có thuộc về seller này không
     @Query("SELECT CASE WHEN COUNT(pr) > 0 THEN true ELSE false END FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE pr.reviewId = :reviewId AND p.sellerId = :sellerId")
     boolean existsByReviewIdAndSellerId(@Param("reviewId") Long reviewId, @Param("sellerId") Long sellerId);
 }
-
-

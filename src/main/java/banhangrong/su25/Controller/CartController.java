@@ -2,6 +2,9 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.ShoppingCart;
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.Orders;
+import banhangrong.su25.Entity.OrderItems;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
@@ -251,5 +254,3 @@ public class CartController {
         return "redirect:/customer/dashboard?purchase=success";
     }
 }
-
-

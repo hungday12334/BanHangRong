@@ -6,7 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="implement shop license management; create shop_licenses table, add SellerLicenseController, and define ShopLicenses entity and repository">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/shop-designer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductLicenseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductLicenseController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,9 +28,22 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/MinhHQ" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Hungnv" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -163,6 +181,9 @@
       <workItem from="1760974881001" duration="1350000" />
       <workItem from="1761034335179" duration="1389000" />
       <workItem from="1761146113217" duration="2062000" />
+      <workItem from="1761234370513" duration="405000" />
+      <workItem from="1761287483120" duration="105000" />
+      <workItem from="1761287600056" duration="1590000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />

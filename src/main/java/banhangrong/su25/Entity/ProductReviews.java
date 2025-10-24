@@ -17,6 +17,9 @@ public class ProductReviews {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "order_item_id")
+    private Long orderItemId; // new: link to order item (nullable)
+
     private Integer rating;
     private String comment;
 
@@ -26,6 +29,12 @@ public class ProductReviews {
 
     @Column(name = "seller_response_at")
     private LocalDateTime sellerResponseAt;
+
+    @Column(name = "media_urls", columnDefinition = "TEXT")
+    private String mediaUrls; // new: comma separated media URLs
+
+    @Column(name = "service_rating")
+    private Integer serviceRating; // new: optional service rating
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -49,6 +58,31 @@ public class ProductReviews {
 
     public void setSellerResponseAt(LocalDateTime sellerResponseAt) {
         this.sellerResponseAt = sellerResponseAt;
+    }
+
+    // New getters/setters
+    public Long getOrderItemId() {
+        return orderItemId;
+    }
+
+    public void setOrderItemId(Long orderItemId) {
+        this.orderItemId = orderItemId;
+    }
+
+    public String getMediaUrls() {
+        return mediaUrls;
+    }
+
+    public void setMediaUrls(String mediaUrls) {
+        this.mediaUrls = mediaUrls;
+    }
+
+    public Integer getServiceRating() {
+        return serviceRating;
+    }
+
+    public void setServiceRating(Integer serviceRating) {
+        this.serviceRating = serviceRating;
     }
 
     // Các getters và setters cũ giữ nguyên
