@@ -941,7 +941,17 @@
       // Wire status filter change to refresh list
       const myProductsFilter = document.getElementById('myProductsStatusFilter');
       if (myProductsFilter) {
-        myProductsFilter.addEventListener('change', () => refreshMyProducts(false));
+        myProductsFilter.addEventListener('change', () => {
+          const panel = document.getElementById('sectionMyProducts');
+          // prefer to attach overlay to the inner .card so it only covers the card area
+          const card = panel ? panel.querySelector('.card') : null;
+          const target = card || panel;
+          if (target && typeof withPanelLoading === 'function') {
+            withPanelLoading(target, () => refreshMyProducts(false), 'Failed to load products');
+          } else {
+            refreshMyProducts(false);
+          }
+        });
       }
 
     // initial load
