@@ -892,6 +892,34 @@
       // View-only: no save/delete handlers for orders
     }
 
+    // Sort state for My Products table
+    let myProductsSort = { key: 'productId', dir: 'asc' };
+
+    // Attach click handlers to sortable headers in My Products card
+    function initMyProductsSorting() {
+      const panel = document.getElementById('sectionMyProducts');
+      if (!panel) return;
+      panel.querySelectorAll('th.sortable').forEach(th => {
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+          const key = th.getAttribute('data-sort');
+          if (!key) return;
+          if (myProductsSort.key === key) {
+            myProductsSort.dir = (myProductsSort.dir === 'asc') ? 'desc' : 'asc';
+          } else {
+            myProductsSort.key = key;
+            myProductsSort.dir = 'asc';
+          }
+          // update UI indicators
+          panel.querySelectorAll('th.sortable .sort-indicator').forEach(si => si.textContent = '');
+          const ind = th.querySelector('.sort-indicator');
+          if (ind) ind.textContent = myProductsSort.dir === 'asc' ? ' ▲' : ' ▼';
+          // re-fetch/render with new sort
+          withPanelLoading(panel.querySelector('.card') || panel, () => refreshMyProducts(false), 'Failed to sort products');
+        });
+      });
+    }
+
     // Load "My Products" list (reusable for refresh after CRUD)
     async function refreshMyProducts(showToastMsg = true) {
       const sellerIdEl = document.getElementById('sellerId');
@@ -907,6 +935,26 @@
         const statusFilter = statusSel ? (statusSel.value || 'all') : 'all';
         if (statusFilter && statusFilter !== 'all') {
           list = list.filter(p => ((p.status || '').toString().toLowerCase() === statusFilter));
+        }
+      } catch (e) { /* non-blocking */ }
+
+      // Apply sorting (client-side)
+      try {
+        const key = myProductsSort.key;
+        const dir = myProductsSort.dir === 'asc' ? 1 : -1;
+        if (key) {
+          list.sort((a, b) => {
+            const va = (a[key] == null) ? '' : a[key];
+            const vb = (b[key] == null) ? '' : b[key];
+            // numeric compare for known numeric fields
+            if (key === 'productId' || key === 'quantity' || key === 'price') {
+              const na = Number(va) || 0;
+              const nb = Number(vb) || 0;
+              return (na - nb) * dir;
+            }
+            // fallback string compare
+            return String(va).toLowerCase().localeCompare(String(vb).toLowerCase()) * dir;
+          });
         }
       } catch (e) { /* non-blocking */ }
       const tbody = document.getElementById('tbMyProducts');
@@ -937,6 +985,9 @@
       if (pager) paginateTable(tbody, pager, 5);
       if (showToastMsg) showToast(`Loaded ${list.length} of your products`, 'info', { duration: 2000 });
     }
+
+    // initialize sorting after DOM is ready for the panel
+    initMyProductsSorting();
 
       // Wire status filter change to refresh list
       const myProductsFilter = document.getElementById('myProductsStatusFilter');
