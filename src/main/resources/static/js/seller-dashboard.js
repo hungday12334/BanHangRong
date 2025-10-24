@@ -918,6 +918,13 @@
           withPanelLoading(panel.querySelector('.card') || panel, () => refreshMyProducts(false), 'Failed to sort products');
         });
       });
+      // set initial indicator
+      try {
+        const cur = panel.querySelector('th.sortable[data-sort="' + keysSort.key + '"]');
+        if (cur) {
+          const ind = cur.querySelector('.sort-indicator'); if (ind) ind.textContent = keysSort.dir === 'asc' ? ' ▲' : ' ▼';
+        }
+      } catch (e) { }
     }
 
     // Load "My Products" list (reusable for refresh after CRUD)
@@ -1841,6 +1848,27 @@
     const keysTbody = document.getElementById('tbSellerKeys');
     const keysPager = document.getElementById('pgSellerKeys');
     let keysPageState = { page: 0, size: 10, totalPages: 0 };
+    // sort state for keys panel
+    let keysSort = { key: 'licenseId', dir: 'asc' };
+
+    function initKeysSorting() {
+      const panel = document.getElementById('keysPanel');
+      if (!panel) return;
+      panel.querySelectorAll('th.sortable').forEach(th => {
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+          const key = th.getAttribute('data-sort');
+          if (!key) return;
+          if (keysSort.key === key) keysSort.dir = (keysSort.dir === 'asc') ? 'desc' : 'asc';
+          else { keysSort.key = key; keysSort.dir = 'asc'; }
+          // update UI indicators
+          panel.querySelectorAll('th.sortable .sort-indicator').forEach(si => si.textContent = '');
+          const ind = th.querySelector('.sort-indicator'); if (ind) ind.textContent = keysSort.dir === 'asc' ? ' ▲' : ' ▼';
+          // reload current page and re-render (will sort client-side the page content)
+          withPanelLoading(panel.querySelector('.card') || panel, () => loadSellerKeys(false), 'Failed to sort keys');
+        });
+      });
+    }
 
     async function loadSellerKeys(resetPage = false) {
       if (!sellerIdVal || !keysTbody) return;
@@ -1854,6 +1882,34 @@
       if (!res.ok) { showToast('Failed to load keys', 'error'); return; }
       const data = await res.json(); keysPageState.totalPages = data.totalPages;
       keysTbody.innerHTML = '';
+      // Apply client-side sorting for the currently fetched page
+      try {
+        const k = keysSort.key;
+        const dir = keysSort.dir === 'asc' ? 1 : -1;
+        if (k) {
+          data.content.sort((a, b) => {
+            let va, vb;
+            if (k === 'expireDate') {
+              // try extract yyyymmdd from licenseKey (same logic used below to render expireText)
+              const extract = (it) => { try { const parts = (it.licenseKey || '').split('-'); if (parts.length >= 3 && /^\d{8}$/.test(parts[1])) return Number(parts[1]); } catch (e) {} return 0; };
+              va = extract(a); vb = extract(b);
+              return (va - vb) * dir;
+            }
+            if (k === 'activationDate' || k === 'licenseId' || k === 'orderId') {
+              va = a[k] == null ? 0 : (k === 'activationDate' ? Date.parse(a.activationDate || '') || 0 : Number(a[k]) || 0);
+              vb = b[k] == null ? 0 : (k === 'activationDate' ? Date.parse(b.activationDate || '') || 0 : Number(b[k]) || 0);
+              return (va - vb) * dir;
+            }
+            if (k === 'isActive') {
+              va = a.isActive ? 1 : 0; vb = b.isActive ? 1 : 0; return (va - vb) * dir;
+            }
+            // fallback string compare for licenseKey/productName
+            va = (a[k] == null) ? '' : String(a[k]); vb = (b[k] == null) ? '' : String(b[k]);
+            return va.toLowerCase().localeCompare(vb.toLowerCase()) * dir;
+          });
+        }
+      } catch (e) { /* non-blocking */ }
+
       data.content.forEach(l => {
         const tr = document.createElement('tr');
         const activeBadge = l.isActive
@@ -1944,6 +2000,9 @@
         list.forEach(p => { const o = document.createElement('option'); o.value = p.productId; o.textContent = p.name || ('#' + p.productId); sel.appendChild(o); });
       } catch (_) { }
     })();
+
+    // initialize keys sorting UI
+    initKeysSorting();
 
     if (window.location.hash === '#keys') setTimeout(() => loadSellerKeys(true), 120);
     window.addEventListener('hashchange', () => { if (window.location.hash === '#keys') loadSellerKeys(false); });
