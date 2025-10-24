@@ -27,9 +27,9 @@ public class AdminIndex {
         long sellerCount = userService.countByUserType("SELLER");
         long adminCount = userService.countByUserType("ADMIN");
         long totalProducts = adminProductService.count();
-    long publicCount = adminProductService.countByStatus("public");
-    long pendingCount = adminProductService.countByStatus("pending");
-    long cancelledCount = adminProductService.countByStatus("cancelled");
+        long publicCount = adminProductService.countByStatus("public");
+        long pendingCount = adminProductService.countByStatus("pending");
+        long cancelledCount = adminProductService.countByStatus("cancelled");
 
         model.addAttribute("totalUsers", totalUsers);
         model.addAttribute("customerCount", customerCount);
@@ -50,16 +50,23 @@ public class AdminIndex {
         return "admin/user-management"; // trả về file admin/user-management.html
     }
 
-    @GetMapping("/product")
-    public String manageProduct(Model model) {
+    @GetMapping("/products")
+    public String getAllProduct(Model model) {
         List<Products> productsList = adminProductService.findAll();
-    List<Products> productsListPening = adminProductService.findByStatus("pending");
-    List<Products> productsListPublic = adminProductService.findByStatus("public");
-    List<Products> productsListCancelled = adminProductService.findByStatus("cancelled");
+        List<Products> productsListPening = adminProductService.findByStatus("pending");
+        List<Products> productsListPublic = adminProductService.findByStatus("public");
+        List<Products> productsListCancelled = adminProductService.findByStatus("cancelled");
         model.addAttribute("productsList", productsList);
         model.addAttribute("productsListPublic", productsListPublic);
         model.addAttribute("productsListCancelled", productsListCancelled);
         model.addAttribute("productsListPending", productsListPening);
         return "admin/product-management";
+    }
+
+    @GetMapping("/pending-product")
+    public String getPendingProduct(Model model) {
+        List<Products> productsList = adminProductService.findByStatus("pending");
+        model.addAttribute("productsList", productsList);
+        return "admin/pendingproduct-management";
     }
 }

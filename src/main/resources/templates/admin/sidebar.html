@@ -1,0 +1,123 @@
+<!-- templates/fragments/sidebar.html -->
+<aside th:fragment="sidebar" class="left-sidebar">
+    <!-- Sidebar scroll-->
+    <div>
+        <div class="brand-logo d-flex flex-column align-items-center justify-content-center py-3">
+            <a th:href="@{/admin/index}" class="text-center">
+                <img th:src="@{/img/favicon.png}" alt="LOGO"
+                     style="width: 80px; height: auto; display: block; margin: 0 auto;">
+                <span style="display: block; margin-top: 8px; font-weight: 700; font-size: 18px; color: #333;">
+                    BanHangRong
+                </span>
+            </a>
+            <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-2" id="sidebarCollapse">
+                <i class="ti ti-x fs-6"></i>
+            </div>
+        </div>
+
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+            <ul id="sidebarnav">
+                <li class="nav-small-cap">
+                    <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                    <span class="hide-menu">Lists</span>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between" th:href="@{/admin/index}">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex"><i class="bi bi-house-door-fill"></i></span>
+                            <span class="hide-menu">DASHBOARD</span>
+                        </div>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link" th:href="@{/admin/user}">
+                        <i class="bi bi-person-circle"></i>
+                        <span class="hide-menu">USER MANAGEMENT</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link d-flex align-items-center justify-content-between" href="#">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-box-seam"></i>
+                            <span class="hide-menu">PRODUCT MANAGEMENT </span>
+                            <span class="badge" th:text="${pendingCount}">0</span>
+                        </div>
+                    </a>
+                    <ul>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/products}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="bi bi-key-fill"></i></span>
+                                    <span class="hide-menu">ALL PRODUCTS</span>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" th:href="@{/admin/pending-product}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex"><i class="fa-solid fa-hourglass-start"></i></span>
+                                    <span class="hide-menu">PENDING PRODUCTS </span>
+                                    <span class="badge" th:text="${pendingCount}">0</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+<!--                <li class="sidebar-item">-->
+<!--                    <a class="sidebar-link justify-content-between" th:href="@{/admin/apply-seller}">-->
+<!--                        <div class="d-flex align-items-center gap-3">-->
+<!--                            <span class="d-flex"><i class="fa-solid fa-shop"></i></span>-->
+<!--                            <span class="hide-menu">APPLY TO SELLER</span>-->
+<!--                        </div>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                <li class="sidebar-item">-->
+<!--                    <a class="sidebar-link justify-content-between" th:href="@{/admin/withdrawals}">-->
+<!--                        <div class="d-flex align-items-center gap-3">-->
+<!--                            <span class="d-flex"><i class="fa-solid fa-money-bill-transfer"></i></span>-->
+<!--                            <span class="hide-menu">WITHDRAWALS</span>-->
+<!--                        </div>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                <li class="sidebar-item">-->
+<!--                    <a class="sidebar-link justify-content-between" th:href="@{/admin/help}">-->
+<!--                        <div class="d-flex align-items-center gap-3">-->
+<!--                            <span class="d-flex"><i class="fa-brands fa-hire-a-helper"></i></span>-->
+<!--                            <span class="hide-menu">HELP</span>-->
+<!--                        </div>-->
+<!--                    </a>-->
+<!--                </li>-->
+
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between" href="#">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
+                            <span class="hide-menu">SETTING</span>
+                        </div>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="sidebar-link justify-content-between"
+                                style="background: none; border: none; width: 100%; text-align: left; padding: 0;">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="d-flex"><i class="bi bi-box-arrow-right"></i></span>
+                                <span class="hide-menu">LOGOUT</span>
+                            </div>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+        <!-- End Sidebar navigation -->
+    </div>
+    <!-- End Sidebar scroll-->
+</aside>

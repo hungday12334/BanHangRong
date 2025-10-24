@@ -12,4 +12,5 @@ public interface AdminProductService {
     public List<Products> findByStatus(String status);
     public Long count();
     public Long countByStatus(String status);
+    public List<Products> findBySellerIdAndStatusIgnoreCase(Long sellerId, String status);
 }
