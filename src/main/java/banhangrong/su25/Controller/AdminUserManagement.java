@@ -1,21 +1,29 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Util.ImageUploadUtil;
+import banhangrong.su25.Util.Validation;
+import banhangrong.su25.service.AdminProductService;
 import banhangrong.su25.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/user")
 public class AdminUserManagement {
+
     @Autowired
     private UserService userService;
 
@@ -25,30 +33,81 @@ public class AdminUserManagement {
     }
 
     @PostMapping("/create")
-    public String createUser(HttpServletRequest request, Model model) {
+    public String createUser(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
+        //Delare
+        ImageUploadUtil imageUploadUtil = new ImageUploadUtil();
+        Validation valid = new Validation();
         LocalDateTime now = LocalDateTime.now();
         Users user = new Users();
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+        //Get infor from font-end and set to entity
         user.setUsername(request.getParameter("username"));
         user.setEmail(request.getParameter("email"));
         user.setPassword(request.getParameter("password"));
         user.setUserType(request.getParameter("userType"));
         user.setPhoneNumber(request.getParameter("phoneNumber"));
-        user.setAvatarUrl(request.getParameter("avatarUrl"));
+        user.setAvatarUrl("");//Default null, if having image --> solving below
         user.setGender(request.getParameter("gender"));
         String birthDate = request.getParameter("birthDate");
         if (birthDate != null && !birthDate.isEmpty()) {
-            user.setBirthDate(LocalDate.parse(birthDate));
+            user.setBirthDate(LocalDate.parse(birthDate));//from yyyy-MM-dd to LocalDate
         }
-        user.setCreatedAt(now);
-        user.setUpdatedAt(now);
+        //Check valid username and email
         if (userService.existsByUsername(user.getUsername()) || userService.existsByEmail(user.getEmail())) {
-            model.addAttribute("errorExist", "Username or Email already exists");
+            model.addAttribute("error", "Username or Email already exists");
             model.addAttribute("user", user);
-        } else {
-            userService.save(user);
-            model.addAttribute("success", "User created successfully");
+            return "admin/user-creation";
         }
-        return "admin/user-creation";
+
+        //Check valid pasword
+        if (!valid.isPasswordValid(user.getPassword())) {
+            model.addAttribute("error", "Password must be at least 6 characters long");
+            model.addAttribute("user", user);
+            return "admin/user-creation";
+        }
+        //Check valid phone
+        if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
+            if (!valid.isPhoneValid(user.getPhoneNumber())) {
+                model.addAttribute("error", "Invalid phone number");
+                model.addAttribute("user", user);
+                return "admin/user-creation";
+            }
+        }
+        // Solving if having image
+        MultipartFile avatar = multipartRequest.getFile("avatarUrl");
+
+        if (avatar != null && !avatar.isEmpty()) {
+
+            // User entered an invalid file
+            if (!valid.isImageFileValid(avatar)) {
+                model.addAttribute("error", "This file is not an image");
+                model.addAttribute("user", user);
+                return "admin/user-creation";
+            }
+
+            // Save the image into static/img/avatar folder, naming follows role+id
+            try {
+                user.setAvatarUrl(imageUploadUtil.saveAvatar(avatar, user.getUsername()));
+            } catch (Exception e) {
+                model.addAttribute("error", "Upload failed");
+                model.addAttribute("user", user);
+                return "admin/user-creation";
+            }
+
+        }
+//         Save hashed password
+        user.setPassword(valid.hashPassword(user.getPassword()));
+        //Blance default 0
+        user.setBalance(BigDecimal.ZERO);
+        user.setIsEmailVerified(true);
+        user.setIsActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        userService.save(user);
+        redirectAttributes.addFlashAttribute("success", "User created successfully");
+        //redirect to user list page
+        return "redirect:/admin/user";
     }
 
     @GetMapping("/update")
@@ -77,6 +136,7 @@ public class AdminUserManagement {
     public String updateUser(HttpServletRequest request,
                              RedirectAttributes redirectAttributes,
                              Model model) {
+        //Check id valid  start
         String sId = request.getParameter("id");
         if (sId == null || sId.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "User not found");
@@ -96,44 +156,99 @@ public class AdminUserManagement {
             redirectAttributes.addFlashAttribute("error", "User not found");
             return "redirect:/admin/user";
         }
+        //Check id valid  end
 
-        // update fields (chỉ update những field được phép)
+        // Update fields (chỉ update những field được phép)
         try {
+            //Delare
+            ImageUploadUtil imageUploadUtil = new ImageUploadUtil();
+            Validation valid = new Validation();
+            LocalDateTime now = LocalDateTime.now();
+            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+            //Get infor from font-end
+            String email = request.getParameter("email");
             String password = request.getParameter("password");
-            if (password != null) user.setPassword(password);
-
-            String userType = request.getParameter("userType");
-            if (userType != null) user.setUserType(userType);
-
-            String phone = request.getParameter("phoneNumber");
-            if (phone != null) user.setPhoneNumber(phone);
-
-            String avatar = request.getParameter("avatarUrl");
-            if (avatar != null) user.setAvatarUrl(avatar);
-
+            String phoneNumber = request.getParameter("phoneNumber");
             String gender = request.getParameter("gender");
-            if (gender != null) user.setGender(gender);
-
             String birthDate = request.getParameter("birthDate");
-            if (birthDate != null && !birthDate.isEmpty()) {
-                try {
-                    user.setBirthDate(LocalDate.parse(birthDate)); // expects yyyy-MM-dd
-                } catch (DateTimeParseException dtpe) {
-                    // trả về lại form với thông báo, giữ user hiện tại (không redirect)
-                    model.addAttribute("error", "Invalid birth date format. Expected yyyy-MM-dd");
+            String balance = request.getParameter("balance");
+
+            //Check valid email
+            if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
+                //Kiem tra xem email da ton tai hay chua (Khong xet den email cu)
+                model.addAttribute("error", "Email already exists");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }
+
+            //Check valid pasword
+            if (!valid.isPasswordValid(password)) {
+                model.addAttribute("error", "Password must be at least 6 characters long");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }
+            //Check valid phone
+            if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
+                if (!valid.isPhoneValid(phoneNumber)) {
+                    model.addAttribute("error", "Invalid phone number");
                     model.addAttribute("user", user);
                     return "admin/user-update";
                 }
             }
+            //Check valid balance
+            BigDecimal balanceD = null;
+            if (balance != null && !balance.isEmpty()) {
+                try {
+                    balanceD = new BigDecimal(balance);
+                    if(balanceD.compareTo(BigDecimal.ZERO) < 0){
+                        model.addAttribute("error", "Please enter a positive number");
+                        model.addAttribute("user", user);
+                        return "admin/user-update";
+                    }
+                    if(balanceD.compareTo(user.getBalance()) > 0){}
+                } catch (Exception e) {
+                    model.addAttribute("error", "Invalid balance");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }
+            }else{
+                balanceD = BigDecimal.ZERO;
+            }
+            // Solving if having image
+            MultipartFile avatar = multipartRequest.getFile("avatarUrl");
 
+            if (avatar != null && !avatar.isEmpty()) {
+
+                // User entered an invalid file
+                if (!valid.isImageFileValid(avatar)) {
+                    model.addAttribute("error", "This file is not an image");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }
+
+                // Save the image into static/img/avatar folder, naming follows role+id
+                try {
+                    user.setAvatarUrl(imageUploadUtil.saveAvatar(avatar, user.getUsername()));
+                } catch (Exception e) {
+                    model.addAttribute("error", "Upload failed");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }
+            }
+            user.setEmail(email);
+//          Save hashed password
+            user.setPassword(valid.hashPassword(password));
+            user.setPhoneNumber(phoneNumber);
+            user.setGender(gender);
+            if (!birthDate.isEmpty()) {
+                user.setBirthDate(LocalDate.parse(birthDate));//from yyyy-MM-dd to LocalDate
+            }
+            user.setBalance(balanceD);
             user.setUpdatedAt(LocalDateTime.now());
-
-            // Lưu và lấy lại entity (nếu service trả về saved entity thì dùng kết quả)
             userService.save(user);
-            // user = userService.findById(id); // tuỳ service, có thể reload để chắc chắn
-
+            model.addAttribute("success", "User created successfully");
             model.addAttribute("user", user);
-            model.addAttribute("success", "Updated user successfully");
             return "admin/user-update";
 
         } catch (Exception e) {
@@ -144,8 +259,8 @@ public class AdminUserManagement {
         }
     }
 
-    @PostMapping("/delete")
-    public String deleteUser(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    @PostMapping("/deactive")
+    public String deactiveUser(HttpServletRequest request, RedirectAttributes redirectAttributes) {
         String sId = request.getParameter("id");
         if (sId == null || sId.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "User not found");
@@ -155,8 +270,8 @@ public class AdminUserManagement {
             if (user == null) {
                 redirectAttributes.addFlashAttribute("error", "User not found");
             } else {
-                userService.delete(id);
-                redirectAttributes.addFlashAttribute("success", "Removed user successfully");
+                userService.deactiveUserById(user);
+                redirectAttributes.addFlashAttribute("success", "Deactivated user successfully");
 
             }
         }

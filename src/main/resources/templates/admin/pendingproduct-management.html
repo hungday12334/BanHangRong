@@ -166,21 +166,14 @@
             background-color: #dc3545;
             color: white;
         }
-
-        .sidebar-item {
-            position: relative;
-            list-style: none;
-        }
-
+        .sidebar-item { position: relative; list-style: none; }
         .sidebar-item > ul {
             display: none;
             margin-left: 1.5rem;
         }
-
         .sidebar-item:hover > ul {
             display: block;
         }
-
         .badge {
             background-color: #dc3545;
             color: #fff;
@@ -229,20 +222,13 @@
 
     <!-- ListUser Section -->
     <div class="content-wrapper">
-        <!--        //Filter-->
+        <!--        Filter-->
         <div class="user-header">
             <div class="d-flex filter-bar">
                 <input type="text" id="search" class="form-control" placeholder="ID, Name">
                 <input type="text" id="sellerId" class="form-control" placeholder="SellerID">
                 <input type="number" id="priceMin" class="form-control" placeholder="Price Min">
                 <input type="number" id="priceMax" class="form-control" placeholder="Price Max">
-                <select id="status" class="form-select">
-                    <option value="ALL">STATUS</option>
-                    <option value="HIDDEN">HIDDEN</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="PUBLIC">PUBLIC</option>
-                    <option value="CANCELLED">CANCELLED</option>
-                </select>
                 <div class="date-field">
                     <label for="createAt">Create At</label>
                     <input type="date" id="createAt" class="form-control">
@@ -272,7 +258,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
-            <table id="productTable" class="table table-bordered text-center align-middle shadow-sm">
+            <table class="table table-bordered text-center align-middle shadow-sm">
                 <thead>
                 <tr>
                     <th></th>
@@ -294,18 +280,15 @@
                 <tr th:each="p : ${productsList}">
                     <td>
                         <div class="action-btns">
-                            <form action="/admin/product/cancel" method="post" style="text-align:center;">
-                                <input type="hidden" name="productId" th:value="${p.productId}">
-                                <div class="form-actions">
-                                    <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')"><i class="bi bi-trash"></i></button>
-                                </div>
-                            </form>
+                            <a th:href="@{'/admin/product/update?id=' + ${p.productId}}">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
                         </div>
                     </td>
                     <td th:text="${p.productId}"></td>
                     <td th:text="${p.sellerId}"></td>
                     <td>
-                        ảnh
+                        Ảnh
                     </td>
                     <td th:text="${p.name}"></td>
                     <td th:text="${p.description}"></td>
@@ -321,7 +304,7 @@
                                   (${p.status.equalsIgnoreCase('cancelled')} ? 'status-cancelled' : '')))">
                         </span>
                     </td>
-                    <td th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm:ss')}" ></td>
                     <td th:text="${#temporals.format(p.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
                 </tr>
                 </tbody>
@@ -335,7 +318,6 @@
         const sellerIdInput = document.getElementById('sellerId');
         const priceMinInput = document.getElementById('priceMin');
         const priceMaxInput = document.getElementById('priceMax');
-        const statusSelect = document.getElementById('status');
         const createAtInput = document.getElementById('createAt');
         const updateAtInput = document.getElementById('updateAt');
         const rows = document.querySelectorAll('#productTable tbody tr');
@@ -345,7 +327,6 @@
             const sellerId = sellerIdInput.value.trim().toLowerCase();
             const priceMin = parseFloat(priceMinInput.value) || 0;
             const priceMax = parseFloat(priceMaxInput.value) || Infinity;
-            const status = statusSelect.value.trim().toLowerCase();
             const createAt = createAtInput.value.trim();
             const updateAt = updateAtInput.value.trim();
 
@@ -362,7 +343,6 @@
                 const matchSearch = idCell.includes(search) || nameCell.includes(search);
                 const matchSellerId = sellerIdCell.includes(sellerId);
                 const matchPrice = priceCell >= priceMin && priceCell <= priceMax;
-                const matchStatus = status === 'all' || statusCell === status;
                 const matchCreateAt = !createAt || createAtCell.startsWith(createAt);
                 const matchUpdateAt = !updateAt || updateAtCell.startsWith(updateAt);
 
@@ -378,7 +358,7 @@
             typingTimer = setTimeout(filterTable, 300);
         });
 
-        [sellerIdInput, priceMinInput, priceMaxInput, statusSelect, createAtInput, updateAtInput].forEach(el => {
+        [sellerIdInput, priceMinInput, priceMaxInput, createAtInput, updateAtInput].forEach(el => {
             el.addEventListener("input", filterTable);
             el.addEventListener("change", filterTable);
         });

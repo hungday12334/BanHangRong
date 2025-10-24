@@ -59,4 +59,9 @@ public class AdminProductServiceImpl implements AdminProductService {
         return c;
     }
 
+    @Override
+    public List<Products> findBySellerIdAndStatusIgnoreCase(Long sellerId, String status) {
+        return adminProductsRepository.findBySellerIdAndStatusIgnoreCase(sellerId, status);
+    }
+
 }
