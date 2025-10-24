@@ -3,22 +3,25 @@ package banhangrong.su25.service;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.UsersRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Service
 public class UserServiceImpl implements UserService{
-    @Autowired
-    private UsersRepository usersRepository;
-    @Autowired
-    private SessionRegistry sessionRegistry;
-    @Autowired
-    private AdminProductService adminProductService;
+    private final UsersRepository usersRepository;
+    private final SessionRegistry sessionRegistry;
+    private final AdminProductService adminProductService;
+
+    public UserServiceImpl(UsersRepository usersRepository,
+                           SessionRegistry sessionRegistry,
+                           AdminProductService adminProductService) {
+        this.usersRepository = usersRepository;
+        this.sessionRegistry = sessionRegistry;
+        this.adminProductService = adminProductService;
+    }
     @Override
     public List<Users> findAll() {
         return usersRepository.findAll();

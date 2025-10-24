@@ -33,6 +33,12 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    // Provide SessionRegistry bean for session management and autowiring
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         http.csrf(csrf -> csrf.disable())
