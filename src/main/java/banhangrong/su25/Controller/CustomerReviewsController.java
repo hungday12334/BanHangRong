@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Controller
 public class CustomerReviewsController {
@@ -43,13 +47,9 @@ public class CustomerReviewsController {
     private ProductImagesRepository productImagesRepository;
 
     @GetMapping("/customer/reviews")
-    public String reviews(Model model,
-                         @RequestParam(required = false) Integer stars,
-                         @RequestParam(required = false) String date,
-                         @RequestParam(required = false) String sort,
-                         @RequestParam(required = false) String keyword,
-                         @RequestParam(defaultValue = "1") int page,
-                         @RequestParam(defaultValue = "10") int size) {
+    public String reviews(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                         @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                         Model model) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
@@ -61,64 +61,13 @@ public class CustomerReviewsController {
             
             Users user = userOptional.get();
             
-            // Lấy tất cả reviews của user hiện tại
-            List<ProductReviews> userReviews = productReviewsRepository.findByUserIdOrderByCreatedAtDesc(user.getUserId());
+            // Pagination setup
+            Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), 
+                                             Sort.by(Sort.Order.desc("createdAt")));
             
-            System.out.println("Total reviews: " + userReviews.size());
-            System.out.println("Filter - stars: " + stars + ", date: " + date + ", sort: " + sort + ", keyword: " + keyword);
-            
-            // Filter theo số sao
-            if (stars != null) {
-                userReviews = userReviews.stream()
-                    .filter(review -> review.getRating() != null && review.getRating().equals(stars))
-                    .collect(java.util.stream.Collectors.toList());
-                System.out.println("After star filter: " + userReviews.size());
-            }
-            
-            // Filter theo ngày
-            if (date != null && !date.isEmpty()) {
-                try {
-                    java.time.LocalDate filterDate = java.time.LocalDate.parse(date);
-                    userReviews = userReviews.stream()
-                        .filter(review -> review.getCreatedAt() != null && 
-                                review.getCreatedAt().toLocalDate().equals(filterDate))
-                        .collect(java.util.stream.Collectors.toList());
-                } catch (Exception e) {
-                    // Bỏ qua lỗi parse date
-                }
-            }
-            
-            // Filter theo keyword
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String lowerKeyword = keyword.toLowerCase();
-                userReviews = userReviews.stream()
-                    .filter(review -> {
-                        if (review.getComment() != null && 
-                            review.getComment().toLowerCase().contains(lowerKeyword)) {
-                            return true;
-                        }
-                        Products product = productsRepository.findById(review.getProductId()).orElse(null);
-                        return product != null && product.getName() != null && 
-                               product.getName().toLowerCase().contains(lowerKeyword);
-                    })
-                    .collect(java.util.stream.Collectors.toList());
-            }
-            
-            // Sắp xếp
-            if (sort != null) {
-                switch (sort) {
-                    case "oldest":
-                        userReviews.sort((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
-                        break;
-                    case "highest":
-                        userReviews.sort((a, b) -> b.getRating().compareTo(a.getRating()));
-                        break;
-                    case "lowest":
-                        userReviews.sort((a, b) -> a.getRating().compareTo(b.getRating()));
-                        break;
-                    // "latest" là mặc định
-                }
-            }
+            // Lấy reviews của user hiện tại với pagination
+            Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserId(user.getUserId(), pageable);
+            List<ProductReviews> userReviews = reviewsPage.getContent();
             
             // Lấy thông tin sản phẩm cho mỗi review
             Map<Long, Products> productsMap = new HashMap<>();
@@ -144,42 +93,20 @@ public class CustomerReviewsController {
                 }
             }
             
-            // Pagination
-            int totalReviews = userReviews.size();
-            int totalPages = totalReviews == 0 ? 1 : (int) Math.ceil((double) totalReviews / size);
-            
-            // Validate page number
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
-            
-            // Calculate pagination bounds
-            int startIndex = (page - 1) * size;
-            int endIndex = Math.min(startIndex + size, totalReviews);
-            
-            // Get paginated reviews (empty list if no reviews)
-            List<ProductReviews> paginatedReviews = totalReviews == 0 ? 
-                new ArrayList<>() : userReviews.subList(startIndex, endIndex);
-            
             // Get cart count
             Long cartCount = shoppingCartRepository.countByUserId(user.getUserId());
             
             model.addAttribute("user", user);
             model.addAttribute("cartCount", cartCount);
-            model.addAttribute("reviews", paginatedReviews);
+            model.addAttribute("reviews", userReviews);
             model.addAttribute("productsMap", productsMap);
             model.addAttribute("productImagesMap", productImagesMap);
             
-            // Add filter params to model
-            model.addAttribute("filterStars", stars);
-            model.addAttribute("filterDate", date);
-            model.addAttribute("filterSort", sort);
-            model.addAttribute("filterKeyword", keyword);
-            
-            // Add pagination info
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", totalPages);
-            model.addAttribute("pageSize", size);
-            model.addAttribute("totalReviews", totalReviews);
+            // Pagination attributes
+            model.addAttribute("page", reviewsPage.getNumber());
+            model.addAttribute("totalPages", reviewsPage.getTotalPages());
+            model.addAttribute("size", reviewsPage.getSize());
+            model.addAttribute("totalReviews", reviewsPage.getTotalElements());
             
             return "customer/reviews";
         } catch (Exception e) {
@@ -202,56 +129,5 @@ public class CustomerReviewsController {
                             @RequestParam String comment) {
         // TODO: Implement review editing
         return "redirect:/customer/reviews?edited=true";
-    }
-    
-    @org.springframework.web.bind.annotation.DeleteMapping("/customer/reviews/delete/{reviewId}")
-    @org.springframework.web.bind.annotation.ResponseBody
-    public org.springframework.http.ResponseEntity<Map<String, Object>> deleteReview(
-            @org.springframework.web.bind.annotation.PathVariable Long reviewId) {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String username = auth.getName();
-            Optional<Users> userOptional = usersRepository.findByUsername(username);
-            
-            if (userOptional.isEmpty()) {
-                response.put("success", false);
-                response.put("message", "User not found");
-                return org.springframework.http.ResponseEntity.status(401).body(response);
-            }
-            
-            Users user = userOptional.get();
-            
-            // Kiểm tra xem review có tồn tại và thuộc về user hiện tại không
-            Optional<ProductReviews> reviewOptional = productReviewsRepository.findById(reviewId);
-            
-            if (reviewOptional.isEmpty()) {
-                response.put("success", false);
-                response.put("message", "Review not found");
-                return org.springframework.http.ResponseEntity.status(404).body(response);
-            }
-            
-            ProductReviews review = reviewOptional.get();
-            
-            if (!review.getUserId().equals(user.getUserId())) {
-                response.put("success", false);
-                response.put("message", "Unauthorized to delete this review");
-                return org.springframework.http.ResponseEntity.status(403).body(response);
-            }
-            
-            // Xóa review
-            productReviewsRepository.delete(review);
-            
-            response.put("success", true);
-            response.put("message", "Review deleted successfully");
-            return org.springframework.http.ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("success", false);
-            response.put("message", "Error deleting review: " + e.getMessage());
-            return org.springframework.http.ResponseEntity.status(500).body(response);
-        }
     }
 }

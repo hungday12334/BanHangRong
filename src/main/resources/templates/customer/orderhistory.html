@@ -732,7 +732,7 @@ body {
           <div class="order-actions">
             <button class="rate-btn" th:attr="data-order-item-id=${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty ? orderItemsMap[order.orderId][0].orderItemId : 1}" onclick="openRateModal(this)">Rate</button>
             <button class="contact-btn">Contact Seller</button>
-            <button class="buy-again-btn">Buy again</button>
+            <button class="buy-again-btn" th:attr="data-product-id=${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty ? orderItemsMap[order.orderId][0].productId : 0}">Buy again</button>
                         </div>
                         </div>
                     </div>
@@ -1145,9 +1145,54 @@ body {
             } else if (event.target.classList.contains('contact-btn')) {
                 showNotification('Coming Soon', 'Contact seller functionality coming soon!', 'warning');
             } else if (event.target.classList.contains('buy-again-btn')) {
-                showNotification('Coming Soon', 'Buy again functionality coming soon!', 'warning');
+                buyAgain(event.target);
             }
         });
+
+        // Buy Again function
+        function buyAgain(button) {
+            const productId = button.getAttribute('data-product-id');
+            
+            if (!productId || productId === '0') {
+                showNotification('Error', 'Product information not available', 'error');
+                return;
+            }
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+            
+            // Show loading state
+            button.disabled = true;
+            button.textContent = 'Adding...';
+            
+            // Add to cart
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader]: csrfToken
+                },
+                body: `productId=${productId}&quantity=1`
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Success!', 'Product added to cart', 'success');
+                    // Redirect to cart after 1 second
+                    setTimeout(() => {
+                        window.location.href = '/cart';
+                    }, 1000);
+                } else {
+                    throw new Error('Failed to add product to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error', 'Failed to add product to cart', 'error');
+                button.disabled = false;
+                button.textContent = 'Buy again';
+            });
+        }
 
         // VNPay topup function
         function topupPrompt(e){

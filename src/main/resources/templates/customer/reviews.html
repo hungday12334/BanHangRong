@@ -350,7 +350,7 @@
     <p class="text-muted mb-3">
         Tổng số: <span th:text="${totalReviews != null ? totalReviews : 0}">0</span> đánh giá
         <span th:if="${totalPages != null and totalPages > 1}">
-            | Trang <span th:text="${currentPage}">1</span>/<span th:text="${totalPages}">1</span>
+            | Trang <span th:text="${page + 1}">1</span>/<span th:text="${totalPages}">1</span>
         </span>
     </p>
     
@@ -475,48 +475,54 @@
     <nav th:if="${totalPages != null and totalPages > 1}" aria-label="Reviews pagination" class="mt-4">
         <ul class="pagination justify-content-center">
             <!-- Previous button -->
-            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/customer/reviews(page=${currentPage - 1}, size=${pageSize}, stars=${filterStars}, date=${filterDate}, sort=${filterSort}, keyword=${filterKeyword})}" 
+            <li class="page-item" th:classappend="${page == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/customer/reviews(page=${page - 1}, size=${size})}" 
                    aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
 
             <!-- First page -->
-            <li th:if="${currentPage > 3}" class="page-item">
-                <a class="page-link" th:href="@{/customer/reviews(page=1, size=${pageSize}, stars=${filterStars}, date=${filterDate}, sort=${filterSort}, keyword=${filterKeyword})}">1</a>
+            <li th:if="${page > 2}" class="page-item">
+                <a class="page-link" th:href="@{/customer/reviews(page=0, size=${size})}">1</a>
             </li>
-            <li th:if="${currentPage > 4}" class="page-item disabled">
+            <li th:if="${page > 3}" class="page-item disabled">
                 <span class="page-link">...</span>
             </li>
 
             <!-- Page numbers around current page -->
-            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
-                <li th:if="${i >= currentPage - 2 and i <= currentPage + 2}" 
+            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <li th:if="${i >= page - 2 and i <= page + 2}" 
                     class="page-item" 
-                    th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" th:href="@{/customer/reviews(page=${i}, size=${pageSize}, stars=${filterStars}, date=${filterDate}, sort=${filterSort}, keyword=${filterKeyword})}" 
-                       th:text="${i}">1</a>
+                    th:classappend="${i == page} ? 'active'">
+                    <a class="page-link" th:href="@{/customer/reviews(page=${i}, size=${size})}" 
+                       th:text="${i + 1}">1</a>
                 </li>
             </th:block>
 
             <!-- Last page -->
-            <li th:if="${currentPage < totalPages - 3}" class="page-item disabled">
+            <li th:if="${page < totalPages - 4}" class="page-item disabled">
                 <span class="page-link">...</span>
             </li>
-            <li th:if="${currentPage < totalPages - 2}" class="page-item">
-                <a class="page-link" th:href="@{/customer/reviews(page=${totalPages}, size=${pageSize}, stars=${filterStars}, date=${filterDate}, sort=${filterSort}, keyword=${filterKeyword})}" 
+            <li th:if="${page < totalPages - 3}" class="page-item">
+                <a class="page-link" th:href="@{/customer/reviews(page=${totalPages - 1}, size=${size})}" 
                    th:text="${totalPages}">10</a>
             </li>
 
             <!-- Next button -->
-            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/customer/reviews(page=${currentPage + 1}, size=${pageSize}, stars=${filterStars}, date=${filterDate}, sort=${filterSort}, keyword=${filterKeyword})}" 
+            <li class="page-item" th:classappend="${page >= totalPages - 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/customer/reviews(page=${page + 1}, size=${size})}" 
                    aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
         </ul>
+        
+        <!-- Page info -->
+        <div class="text-center mt-3 text-muted">
+            <small>Trang <span th:text="${page + 1}">1</span> / <span th:text="${totalPages}">1</span> - 
+            Tổng <span th:text="${totalReviews}">0</span> đánh giá</small>
+        </div>
     </nav>
 </div>
 
