@@ -900,7 +900,15 @@
       if (!sellerId) return; // require seller
       const res = await fetch(`/api/products?sellerId=${sellerId}`);
       if (!res.ok) { showToast('Failed to load your product list', 'error'); return; }
-      const list = await res.json();
+      let list = await res.json();
+      // Apply status filter from UI if present
+      try {
+        const statusSel = document.getElementById('myProductsStatusFilter');
+        const statusFilter = statusSel ? (statusSel.value || 'all') : 'all';
+        if (statusFilter && statusFilter !== 'all') {
+          list = list.filter(p => ((p.status || '').toString().toLowerCase() === statusFilter));
+        }
+      } catch (e) { /* non-blocking */ }
       const tbody = document.getElementById('tbMyProducts');
       const counter = document.getElementById('myProductsCount');
       if (!tbody) return;
@@ -929,6 +937,12 @@
       if (pager) paginateTable(tbody, pager, 5);
       if (showToastMsg) showToast(`Loaded ${list.length} of your products`, 'info', { duration: 2000 });
     }
+
+      // Wire status filter change to refresh list
+      const myProductsFilter = document.getElementById('myProductsStatusFilter');
+      if (myProductsFilter) {
+        myProductsFilter.addEventListener('change', () => refreshMyProducts(false));
+      }
 
     // initial load
     refreshMyProducts(false);

@@ -109,7 +109,15 @@
     <div class="card">
       <div class="header">
         <div style="font-weight:700">My products</div>
-        <div class="chip" id="myProductsCount">0</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="chip" id="myProductsCount">0</div>
+          <select id="myProductsStatusFilter" class="input" style="min-width:140px;">
+            <option value="all">All statuses</option>
+            <option value="public">Public</option>
+            <option value="pending">Pending</option>
+            <option value="hidden">Hidden</option>
+          </select>
+        </div>
       </div>
       <div class="body paged">
         <div class="table-wrap">
