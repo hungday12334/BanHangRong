@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Seller Profile - BanHangRong</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+	<style>
+		:root {
+			--bg: #f5f7fb;
+			--card: #ffffff;
+			--ink: #0f172a;
+			--muted: #6b7280;
+			--brand: #0ea5e9;
+			--chip: #e5e7eb;
+			--line: #eaeef4;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			color: var(--ink);
+			background: var(--bg);
+		}
+
+		.wrapper {
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.topbar {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			padding: 10px 16px;
+			border-bottom: 1px solid var(--line);
+			background: var(--card);
+			flex-wrap: nowrap;
+		}
+
+		.brand {
+			font-weight: 800;
+			letter-spacing: .2px;
+		}
+
+		.top-actions {
+			margin-left: auto;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			position: relative;
+		}
+
+		.support-link {
+			font-size: 14px;
+			color: var(--muted);
+			text-decoration: none;
+			padding: 6px 10px;
+			border-radius: 8px;
+			transition: all 0.2s;
+		}
+
+		.support-link:hover {
+			background: #f3f4f6;
+			color: #111827;
+		}
+
+		.user-btn {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			cursor: pointer;
+			color: #111827;
+			border: 1px solid var(--line);
+			padding: 6px 10px;
+			border-radius: 8px;
+			background: #fff
+		}
+
+		.user-menu {
+			position: absolute;
+			right: 0;
+			top: 48px;
+			background: #fff;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+			width: 200px;
+			display: none;
+			z-index: 5
+		}
+
+		.user-menu .item {
+			display: block;
+			padding: 10px 12px;
+			color: #111827;
+			text-decoration: none
+		}
+
+		.user-menu .item:hover {
+			background: #f3f4f6
+		}
+
+		.search {
+			position: relative;
+		}
+
+		.search input {
+			height: 34px;
+			width: 220px;
+			padding: 0 12px;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			outline: none;
+		}
+
+		.cart {
+			position: relative;
+			width: 28px;
+			height: 28px;
+			display: grid;
+			place-items: center;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			text-decoration: none;
+			color: #111827;
+		}
+
+		.cart .badge {
+			position: absolute;
+			top: -6px;
+			right: -6px;
+			background: #ef4444;
+			color: #fff;
+			min-width: 18px;
+			height: 18px;
+			border-radius: 9px;
+			font-size: 11px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0 5px;
+		}
+
+		.nav {
+			display: flex;
+			gap: 16px;
+			margin: 0 12px;
+			flex: 1;
+			overflow: auto;
+			white-space: nowrap;
+		}
+
+		.nav a {
+			text-decoration: none;
+			color: #111827;
+			font-weight: 500;
+			padding: 8px 10px;
+			border-radius: 8px;
+		}
+
+		.nav a:hover {
+			background: #f3f4f6;
+		}
+
+		/* Seller Profile Styles */
+		.container {
+			max-width: 1200px;
+			margin: 30px auto;
+			padding: 0 20px;
+		}
+
+		.seller-header {
+			background: white;
+			border-radius: 12px;
+			padding: 30px;
+			margin-bottom: 24px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		}
+
+		.seller-info {
+			display: flex;
+			gap: 24px;
+			align-items: start;
+		}
+
+		.seller-avatar {
+			width: 120px;
+			height: 120px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 48px;
+			color: white;
+			font-weight: 700;
+			flex-shrink: 0;
+		}
+
+		.seller-details {
+			flex: 1;
+		}
+
+		.seller-name {
+			font-size: 28px;
+			font-weight: 700;
+			margin-bottom: 8px;
+			color: #111827;
+		}
+
+		.seller-stats {
+			display: flex;
+			gap: 24px;
+			margin: 16px 0;
+			flex-wrap: wrap;
+		}
+
+		.stat-item {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		.stat-value {
+			font-size: 24px;
+			font-weight: 700;
+			color: var(--brand);
+		}
+
+		.stat-label {
+			font-size: 14px;
+			color: var(--muted);
+		}
+
+		.seller-actions {
+			display: flex;
+			gap: 12px;
+			margin-top: 16px;
+		}
+
+		.btn {
+			padding: 10px 20px;
+			border-radius: 8px;
+			font-weight: 600;
+			text-decoration: none;
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			transition: all 0.2s;
+			border: none;
+			cursor: pointer;
+			font-size: 14px;
+		}
+
+		.btn-primary {
+			background: var(--brand);
+			color: white;
+		}
+
+		.btn-primary:hover {
+			background: #0284c7;
+		}
+
+		.btn-outline {
+			background: white;
+			color: #111827;
+			border: 1px solid var(--line);
+		}
+
+		.btn-outline:hover {
+			background: #f3f4f6;
+		}
+
+		.section-title {
+			font-size: 20px;
+			font-weight: 700;
+			margin-bottom: 16px;
+			color: #111827;
+		}
+
+		.products-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+			gap: 16px;
+			margin-bottom: 32px;
+		}
+
+		.product-card {
+			background: white;
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+			transition: transform 0.2s;
+			text-decoration: none;
+			color: inherit;
+		}
+
+		.product-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+		}
+
+		.product-image {
+			height: 160px;
+			background: #eef2f7;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 48px;
+			color: #94a3b8;
+		}
+
+		.product-image img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.product-info {
+			padding: 12px;
+		}
+
+		.product-name {
+			font-weight: 600;
+			margin-bottom: 8px;
+			color: #111827;
+			font-size: 14px;
+			min-height: 40px;
+			line-height: 1.4;
+		}
+
+		.product-price {
+			font-size: 18px;
+			font-weight: 700;
+			color: var(--brand);
+		}
+
+		.product-meta {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 8px;
+			font-size: 12px;
+			color: var(--muted);
+		}
+
+		.reviews-section {
+			background: white;
+			border-radius: 12px;
+			padding: 24px;
+			margin-top: 24px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		}
+
+		.review-item {
+			border-bottom: 1px solid var(--line);
+			padding: 16px 0;
+		}
+
+		.review-item:last-child {
+			border-bottom: none;
+		}
+
+		.review-header {
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 8px;
+		}
+
+		.review-author {
+			font-weight: 600;
+			color: #111827;
+		}
+
+		.review-rating {
+			color: #f59e0b;
+		}
+
+		.review-text {
+			color: #4b5563;
+			line-height: 1.6;
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: var(--muted);
+		}
+
+		.empty-state-icon {
+			font-size: 64px;
+			margin-bottom: 16px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="wrapper">
+		<!-- Header -->
+		<div class="topbar">
+			<div class="brand">BanHangRong</div>
+			<nav class="nav" aria-label="Main">
+				<a href="/customer/dashboard">Home</a>
+				<a href="/categories">Category</a>
+				<a href="#">License Software</a>
+				<a href="#">Game Keys</a>
+				<a href="#">Voucher</a>
+				<a href="/customer/support">Support</a>
+			</nav>
+			<div class="top-actions">
+				<a href="/customer/support" class="support-link">Support</a>
+				<div class="user" style="position:relative">
+					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+						<span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round" />
+						</svg>
+					</button>
+					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+						<a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+							style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+								th:value="${_csrf.token}" />
+							<input type="hidden" name="amount" id="topupAmountInput" />
+							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+								(VNPay)</button>
+						</form>
+						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+						<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+							style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+							Become a Seller</a>
+						<a class="item" href="#" role="menuitem"
+							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+					</div>
+					<form id="logoutForm" method="post" action="/logout" style="display:none;">
+					</form>
+				</div>
+				<div class="search">
+					<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+						<input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
+							style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+						<button type="submit"
+							style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+						<a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
+							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+					</form>
+				</div>
+				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+			</div>
+		</div>
+
+		<!-- Main Content -->
+		<div class="container">
+			<!-- Seller Header -->
+			<div class="seller-header">
+				<div class="seller-info">
+					<div class="seller-avatar" th:text="${seller != null ? seller.shopName.substring(0,1).toUpperCase() : 'S'}">S</div>
+					<div class="seller-details">
+						<h1 class="seller-name" th:text="${seller != null ? seller.shopName : 'Shop Name'}">Premium License Store</h1>
+						<p style="color: var(--muted); margin: 0;" th:text="${seller != null ? seller.description : 'Trusted seller of software licenses and digital products'}">
+							Trusted seller of software licenses and digital products
+						</p>
+						
+						<div class="seller-stats">
+							<div class="stat-item">
+								<div class="stat-value" th:text="${totalProducts != null ? totalProducts : '0'}">24</div>
+								<div class="stat-label">Products</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-value" th:text="${totalSales != null ? totalSales : '0'}">1,234</div>
+								<div class="stat-label">Sales</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-value">
+									<span>⭐</span>
+									<span th:text="${averageRating != null ? #numbers.formatDecimal(averageRating, 1, 'COMMA', 1, 'POINT') : '4.8'}">4.8</span>
+								</div>
+								<div class="stat-label">Rating</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-value" th:text="${totalReviews != null ? totalReviews : '0'}">567</div>
+								<div class="stat-label">Reviews</div>
+							</div>
+						</div>
+
+						<div class="seller-actions">
+							<button class="btn btn-primary" onclick="alert('Chat feature coming soon!')">💬 Chat with Seller</button>
+							<button class="btn btn-outline" onclick="alert('Follow feature coming soon!')">➕ Follow Shop</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Products Section -->
+			<div class="section-title">Seller's Products</div>
+			<div class="products-grid" th:if="${products != null and !products.empty}">
+				<a class="product-card" th:each="product : ${products}" th:href="@{'/product/' + ${product.productId}}">
+					<div class="product-image">
+						<img th:if="${productImages != null and productImages[product.productId] != null}" 
+						     th:src="${productImages[product.productId]}" 
+						     th:alt="${product.name}"
+						     onerror="this.style.display='none'; this.parentElement.innerHTML='📦';">
+						<span th:unless="${productImages != null and productImages[product.productId] != null}">📦</span>
+					</div>
+					<div class="product-info">
+						<div class="product-name" th:text="${product.name}">Microsoft Office 2021</div>
+						<div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">1,250,000₫</div>
+						<div class="product-meta">
+							<span>⭐ <span th:text="${product.averageRating != null ? #numbers.formatDecimal(product.averageRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">4.5</span></span>
+							<span>Sold: <span th:text="${product.totalSales != null ? product.totalSales : 0}">0</span></span>
+						</div>
+					</div>
+				</a>
+			</div>
+
+			<!-- Empty State for Products -->
+			<div class="empty-state" th:if="${products == null or products.empty}">
+				<div class="empty-state-icon">📦</div>
+				<h3>No products available</h3>
+				<p>This seller hasn't listed any products yet.</p>
+			</div>
+
+			<!-- Reviews Section -->
+			<div class="reviews-section">
+				<div class="section-title">Customer Reviews</div>
+				
+				<div th:if="${reviews != null and !reviews.empty}">
+					<div class="review-item" th:each="review : ${reviews}">
+						<div class="review-header">
+							<span class="review-author" th:text="${review.username != null ? review.username : 'Anonymous'}">Customer123</span>
+							<span class="review-rating">
+								<span th:each="i : ${#numbers.sequence(1, review.rating)}">⭐</span>
+							</span>
+						</div>
+						<p class="review-text" th:text="${review.comment}">Great seller! Fast delivery and excellent service.</p>
+						<small style="color: var(--muted);" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">24/10/2025 14:30</small>
+					</div>
+				</div>
+
+				<!-- Empty State for Reviews -->
+				<div class="empty-state" th:if="${reviews == null or reviews.empty}">
+					<div class="empty-state-icon">⭐</div>
+					<h3>No reviews yet</h3>
+					<p>Be the first to review products from this seller!</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// User menu toggle
+		(function () {
+			const btn = document.getElementById('userMenuBtn');
+			const menu = document.getElementById('userDropdown');
+			function close() { if (menu) { menu.style.display = 'none'; btn && btn.setAttribute('aria-expanded', 'false'); } }
+			function toggle() { if (!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block' : 'none'; btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false'); }
+			if (btn) { btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); }); }
+			document.addEventListener('click', close);
+			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+		})();
+
+		// Top-up prompt
+		function topupPrompt(event) {
+			event.preventDefault();
+			const amount = prompt('Nhập số tiền bạn muốn nạp (VND):');
+			if (amount && !isNaN(amount) && parseInt(amount) > 0) {
+				document.getElementById('topupAmountInput').value = amount;
+				event.target.submit();
+				return true;
+			}
+			alert('Vui lòng nhập số tiền hợp lệ');
+			return false;
+		}
+	</script>
+</body>
+
+</html>
+
