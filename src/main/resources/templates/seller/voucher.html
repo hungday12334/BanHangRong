@@ -39,7 +39,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="vouchersTableBody">
-                                    <tr class="footer-note"><td colspan="7">Select a product to see its vouchers.</td></tr>
+                                    <tr class="footer-note"><td colspan="7">No vouchers found.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -90,15 +90,18 @@
         }
 
         async function fetchVouchers(page = 0) {
-            currentProductId = productFilter.value;
-            if (!currentProductId) {
-                vouchersTableBody.innerHTML = `<tr class="footer-note"><td colspan="7">Select a product to see its vouchers.</td></tr>`;
-                paginationContainer.innerHTML = '';
-                return;
-            }
+            currentProductId = productFilter.value || null;
 
             const status = statusFilter.value;
-            const url = `${API_BASE}?productId=${currentProductId}&status=${status}&page=${page}&size=10&sort=createdAt,desc`;
+            // Build query params. If product is selected, include productId; otherwise fetch all vouchers.
+            const params = [];
+            if (currentProductId) params.push(`productId=${encodeURIComponent(currentProductId)}`);
+            if (status) params.push(`status=${encodeURIComponent(status)}`);
+            params.push(`page=${page}`);
+            params.push(`size=10`);
+            params.push(`sort=createdAt,desc`);
+            const url = `${API_BASE}?${params.join('&')}`;
+
             vouchersTableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Loading...</td></tr>`;
 
             try {
@@ -286,7 +289,9 @@
         statusFilter.addEventListener('change', () => fetchVouchers(0));
         refreshVouchersBtn.addEventListener('click', () => fetchVouchers(currentPage));
 
+        // Load product list and initial vouchers (all vouchers when no product selected)
         fetchProducts();
+        fetchVouchers(0);
     });
     </script>
 

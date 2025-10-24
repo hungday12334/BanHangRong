@@ -1348,10 +1348,29 @@
       async function render() {
         const pid = Number(selProduct.value || '0');
         tb.innerHTML = '';
-        if (!pid) { tb.innerHTML = '<tr class="footer-note"><td colspan="7">Select a product to manage vouchers.</td></tr>'; return; }
         const reqId = ++lastReq;
-        const list = await fetchVouchers(sellerId, pid, inpSearch?.value || '');
-        if (reqId !== lastReq) return; // ignore out-of-order responses (typing fast)
+
+        let list = [];
+        if (!pid) {
+          // No product selected: fetch vouchers for all products and merge
+          const prods = Array.from(selProduct.options).filter(o => o.value).map(o => Number(o.value));
+          const promises = prods.map(p => fetchVouchers(sellerId, p, inpSearch?.value || '').catch(() => []));
+          const results = await Promise.all(promises);
+          if (reqId !== lastReq) return; // ignore out-of-order
+          // flatten and deduplicate by code (case-insensitive), keep first occurrence
+          const combined = results.flat();
+          const byCode = {};
+          for (const v of combined) {
+            const key = (v.code || '').toString().trim().toUpperCase();
+            if (!byCode[key]) byCode[key] = v;
+          }
+          list = Object.values(byCode);
+        } else {
+          const reqIdLocal = reqId;
+          list = await fetchVouchers(sellerId, pid, inpSearch?.value || '');
+          if (reqIdLocal !== lastReq) return; // ignore out-of-order responses (typing fast)
+        }
+
         const statusFilter = (selStatus.value || '').toLowerCase();
         const filtered = list.filter(v => !statusFilter || (v.status || '').toLowerCase() === statusFilter);
         if (!filtered.length) {
