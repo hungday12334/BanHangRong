@@ -57,21 +57,6 @@
 		.brand {
 			font-weight: 800;
 			letter-spacing: .2px;
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			cursor: pointer;
-			text-decoration: none;
-			color: inherit;
-		}
-
-		.brand:hover {
-			color: var(--brand);
-		}
-
-		.logo {
-			height: 32px;
-			width: auto;
 		}
 
 		.top-actions {
@@ -82,11 +67,18 @@
 			position: relative;
 		}
 
-		.lang,
-		.notif,
-		.user {
+		.support-link {
 			font-size: 14px;
 			color: var(--muted);
+			text-decoration: none;
+			padding: 6px 10px;
+			border-radius: 8px;
+			transition: all 0.2s;
+		}
+
+		.support-link:hover {
+			background: #f3f4f6;
+			color: #111827;
 		}
 
 		.user-btn {
@@ -395,20 +387,17 @@
 	<div class="wrapper">
 		<!-- Header -->
 		<div class="topbar">
-			<a href="/customer/dashboard" class="brand">
-				<img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
-				BanHangRong
-			</a>
+			<div class="brand">BanHangRong</div>
 			<nav class="nav" aria-label="Main">
 				<a href="/customer/dashboard">Home</a>
 				<a href="/categories">Category</a>
 				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>
 				<a href="#">Voucher</a>
-				<a href="#">Support</a>
+				<a href="/customer/support">Support</a>
 			</nav>
 			<div class="top-actions">
-				<div class="notif">Notification</div>
+				<a href="/customer/support" class="support-link">Support</a>
 				<div class="user" style="position:relative">
 					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
 						<span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
@@ -451,14 +440,9 @@
 							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 					</form>
 				</div>
+				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
-		</div>
-		
-		<!-- Cart button riêng cho dashboard -->
-		<div style="position: absolute; top: 10px; right: 20px; z-index: 10;">
-			<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 500;">
-				🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}" style="background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; margin-left: 4px;">0</span>
-			</a>
 		</div>
 
 		<section class="hero">
