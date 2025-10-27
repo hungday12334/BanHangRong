@@ -1060,7 +1060,7 @@
       profilePanel.style.display = 'none';
       dashboardContent.style.display = '';
       // ALSO hide other sidebar panels (orders, keys, products, vouchers) to prevent residual content
-      ['ordersPanel', 'keysPanel', 'profileSettingsPanel', 'productsPanel', 'vouchersPanel'].forEach(id => {
+      ['ordersPanel', 'keysPanel', 'profileSettingsPanel', 'productsPanel', 'vouchersPanel', 'checkKeyPanel'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.hidden = true; el.style.display = 'none'; }
       });
@@ -1098,7 +1098,8 @@
     const panelMap = {
       '#profile': 'profilePanel',
       '#orders': 'ordersPanel',
-      '#keys': 'keysPanel',
+  '#keys': 'keysPanel',
+  '#check-key': 'checkKeyPanel',
       '#products': 'productsPanel',
       '#gen-keys': 'generateKeysPanel',
       '#vouchers': 'vouchersPanel',
@@ -1138,6 +1139,8 @@
           loadSellerKeys(true);
         } else if (hash === '#gen-keys' && typeof initGenerateKeys === 'function') {
           initGenerateKeys();
+        } else if (hash === '#check-key' && typeof loadCheckKeyPanel === 'function') {
+          loadCheckKeyPanel(true);
         } else if (hash === '#products' && typeof loadProductsPanel === 'function') {
           loadProductsPanel(true);
         } else if (hash === '#vouchers' && typeof loadVouchersPanel === 'function') {
@@ -1155,6 +1158,84 @@
     // If hash is one of our panels (other than #profile handled earlier), show it on load
     if (window.location.hash && panelMap[window.location.hash] && window.location.hash !== '#profile') {
       setTimeout(() => showPanelByHash(window.location.hash), 50);
+    }
+
+    /**
+     * Load and bind the Check Key panel UI. Uses endpoint /api/licenses/check?key=...
+     * Renders key details and usage history in-place without navigation.
+     */
+    async function loadCheckKeyPanel(forceReload) {
+      const panel = document.getElementById('checkKeyPanel');
+      await withPanelLoading(panel, async () => {
+        if (!panel) return;
+        // Bind controls once (or rebind if forceReload)
+        if (!panel.dataset.bound || forceReload) {
+          const input = document.getElementById('ck_key');
+          const btn = document.getElementById('ck_btnCheck');
+          const reset = document.getElementById('ck_btnReset');
+          const resWrap = document.getElementById('ck_result');
+          const details = document.getElementById('ck_details');
+          const histWrap = document.getElementById('ck_history_wrap');
+          const histBody = document.getElementById('ck_history');
+          const showError = (msg) => {
+            if (details) details.textContent = msg;
+            if (resWrap) resWrap.style.display = 'block';
+            if (histWrap) histWrap.style.display = 'none';
+          };
+          const doCheck = async () => {
+            const key = input?.value?.trim();
+            if (!key) { showError('Please enter a key'); return; }
+            try {
+              if (details) details.textContent = 'Loading...';
+              if (resWrap) resWrap.style.display = 'block';
+              if (histWrap) histWrap.style.display = 'none';
+              const url = `/api/licenses/check?key=${encodeURIComponent(key)}`;
+              const r = await fetch(url);
+              if (!r.ok) {
+                const t = await r.text();
+                showError('Error: ' + t);
+                return;
+              }
+              const data = await r.json();
+              // render details
+              const lines = [];
+              lines.push(`Key: ${data.licenseKey ?? key}`);
+              lines.push(`Product: ${data.productName ?? '-'}`);
+              lines.push(`Status: ${data.status ?? '-'}`);
+              if (data.expireDate) lines.push(`Expire: ${data.expireDate}`);
+              if (data.orderId) lines.push(`Order ID: ${data.orderId}`);
+              if (data.owner) lines.push(`Owner: ${data.owner}`);
+              if (details) details.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+              // render history
+              histBody.innerHTML = '';
+              const hist = Array.isArray(data.history) ? data.history : (Array.isArray(data.usages) ? data.usages : []);
+              if (hist.length) {
+                hist.forEach(h => {
+                  const tr = document.createElement('tr');
+                  const time = h.time ?? h.createdAt ?? '';
+                  tr.innerHTML = `<td>${time}</td><td>${h.action ?? ''}</td><td>${h.user ?? ''}</td><td>${h.ip ?? ''}</td><td>${h.device ?? ''}</td>`;
+                  histBody.appendChild(tr);
+                });
+                if (histWrap) histWrap.style.display = '';
+              } else {
+                histBody.innerHTML = '<tr class="footer-note"><td colspan="5">No history entries</td></tr>';
+                if (histWrap) histWrap.style.display = '';
+              }
+            } catch (e) {
+              showError('Cannot check key');
+            }
+          };
+          btn?.addEventListener('click', doCheck);
+          input?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doCheck(); } });
+          reset?.addEventListener('click', () => {
+            if (input) input.value = '';
+            if (details) details.textContent = 'No key checked yet.';
+            if (resWrap) resWrap.style.display = 'none';
+            if (histWrap) histWrap.style.display = 'none';
+          });
+          panel.dataset.bound = '1';
+        }
+      }, 'Cannot load key checker');
     }
 
     // === Profile edit modal ===

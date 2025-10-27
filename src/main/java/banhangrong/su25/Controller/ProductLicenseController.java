@@ -241,4 +241,62 @@ public class ProductLicenseController {
         resp.put("remaining", Math.max(0, remaining - requestQty));
         return ResponseEntity.ok(resp);
     }
+
+    /**
+     * Check license key details. Returns basic info and minimal history (activation/last-used) if available.
+     * Example: GET /api/licenses/check?key=PRD1-...
+     */
+    @GetMapping("/api/licenses/check")
+    public ResponseEntity<?> checkKey(@RequestParam(name = "key") String key) {
+        if (key == null || key.isBlank()) return ResponseEntity.badRequest().body("key is required");
+        var opt = licensesRepository.findByLicenseKey(key.trim());
+        if (opt.isEmpty()) return ResponseEntity.status(404).body("license not found");
+        var lic = opt.get();
+        Map<String, Object> out = new HashMap<>();
+        out.put("licenseId", lic.getLicenseId());
+        out.put("licenseKey", lic.getLicenseKey());
+        out.put("isActive", lic.getIsActive());
+        out.put("activationDate", lic.getActivationDate() != null ? lic.getActivationDate().toString() : null);
+        out.put("lastUsedDate", lic.getLastUsedDate() != null ? lic.getLastUsedDate().toString() : null);
+        out.put("deviceIdentifier", lic.getDeviceIdentifier());
+        out.put("orderItemId", lic.getOrderItemId());
+        out.put("userId", lic.getUserId());
+
+        // attempt to enrich with product/order info when possible
+        try {
+            if (lic.getOrderItemId() != null) {
+                var oiOpt = orderItemsRepository.findById(lic.getOrderItemId());
+                if (oiOpt.isPresent()) {
+                    var oi = oiOpt.get();
+                    out.put("productId", oi.getProductId());
+                    out.put("quantity", oi.getQuantity());
+                    if (oi.getOrderId() != null) {
+                        var ordOpt = ordersRepository.findById(oi.getOrderId());
+                        ordOpt.ifPresent(o -> out.put("orderId", o.getOrderId()));
+                    }
+                    if (oi.getProductId() != null) {
+                        var pOpt = productsRepository.findById(oi.getProductId());
+                        pOpt.ifPresent(p -> out.put("productName", p.getName()));
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // Minimal history array
+        var history = new java.util.ArrayList<Map<String, Object>>();
+        if (lic.getActivationDate() != null) {
+            var h = new HashMap<String, Object>();
+            h.put("time", lic.getActivationDate().toString());
+            h.put("action", "activated");
+            history.add(h);
+        }
+        if (lic.getLastUsedDate() != null) {
+            var h = new HashMap<String, Object>();
+            h.put("time", lic.getLastUsedDate().toString());
+            h.put("action", "used");
+            history.add(h);
+        }
+        out.put("history", history);
+        return ResponseEntity.ok(out);
+    }
 }

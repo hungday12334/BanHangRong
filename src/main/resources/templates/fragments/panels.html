@@ -380,4 +380,38 @@
       </div>
     </div>
   </section>
+  <!-- Check Key Panel -->
+  <section id="checkKeyPanel" class="card section-card" hidden data-panel="check-key">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:160px;">Check key</div>
+      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <input id="ck_key" type="text" class="input" placeholder="Enter license key" style="min-width:200px;" />
+        <button id="ck_btnCheck" type="button" class="btn primary">Check</button>
+        <button id="ck_btnReset" type="button" class="btn" title="Clear"><i class="ti ti-restore"></i></button>
+      </div>
+    </div>
+    <div class="body" style="overflow:auto;">
+      <div id="ck_result" style="margin-bottom:12px;display:none;">
+        <h3 style="margin:0 0 6px 0;">Key details</h3>
+        <div id="ck_details" class="panel-details footer-note">No key checked yet.</div>
+      </div>
+      <div id="ck_history_wrap" style="display:none;margin-top:8px;">
+        <h4 style="margin:0 0 6px 0;">Usage history</h4>
+        <div class="table-wrap">
+          <table class="table slim" style="width:100%;min-width:600px;">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Action</th>
+                <th>User</th>
+                <th>IP</th>
+                <th>Device</th>
+              </tr>
+            </thead>
+            <tbody id="ck_history"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="ck_helper" class="footer-note" style="margin-top:10px;">Enter a license key to view its status and usage history. This lookup does not navigate away from the dashboard.</div>
+    </div>
   </section>
