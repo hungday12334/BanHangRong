@@ -294,7 +294,7 @@
                 <tr th:each="p : ${productsList}">
                     <td>
                         <div class="action-btns">
-                            <form action="/admin/product/cancel" method="post" style="text-align:center;">
+                            <form th:action="@{/admin/product/cancel}" method="post" style="text-align:center;">
                                 <input type="hidden" name="productId" th:value="${p.productId}">
                                 <div class="form-actions">
                                     <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')"><i class="bi bi-trash"></i></button>
