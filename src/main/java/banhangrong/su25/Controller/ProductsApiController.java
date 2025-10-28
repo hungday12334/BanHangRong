@@ -3,6 +3,7 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductLicensesRepository;
+import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,13 @@ public class ProductsApiController {
 
     private final ProductsRepository productsRepository;
     private final ProductLicensesRepository productLicensesRepository;
+    private final ProductImagesRepository productImagesRepository;
 
-    public ProductsApiController(ProductsRepository productsRepository) {
+    public ProductsApiController(ProductsRepository productsRepository,
+                                 ProductImagesRepository productImagesRepository) {
         this.productsRepository = productsRepository;
         this.productLicensesRepository = null;
+        this.productImagesRepository = productImagesRepository;
     }
 
     // Lightweight DTO to avoid lazy recursion and reduce payload
@@ -32,9 +36,10 @@ public class ProductsApiController {
         public String description;
         public BigDecimal price;
         public BigDecimal salePrice;
-        public Integer quantity;
-        public String downloadUrl;
-        public String status;
+    public Integer quantity;
+    public String downloadUrl;
+    public String primaryImage;
+    public String status;
     }
 
     private ProductDto toDto(Products p) {
@@ -47,6 +52,18 @@ public class ProductsApiController {
         d.salePrice = p.getSalePrice();
         d.quantity = p.getQuantity();
         d.downloadUrl = p.getDownloadUrl();
+        // attempt to populate primaryImage from product_images if available
+        try {
+            if (this.productImagesRepository != null && p.getProductId() != null) {
+                var imgs = this.productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
+                if (imgs != null && !imgs.isEmpty()) {
+                    d.primaryImage = imgs.get(0).getImageUrl();
+                } else {
+                    var any = this.productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(p.getProductId());
+                    if (any != null && !any.isEmpty()) d.primaryImage = any.get(0).getImageUrl();
+                }
+            }
+        } catch (Exception ignored) {}
         d.status = p.getStatus();
         return d;
     }
@@ -98,6 +115,28 @@ public class ProductsApiController {
         return productsRepository.findById(id)
                 .map(p -> ResponseEntity.ok(toDto(p)))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // GET /api/products/{id}/images -> list of image URLs (primary first)
+    @GetMapping("/{id}/images")
+    public ResponseEntity<java.util.List<String>> getImages(@PathVariable("id") Long id) {
+        try {
+            if (this.productImagesRepository == null) return ResponseEntity.ok(java.util.List.of());
+            var imgs = this.productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id);
+            java.util.List<String> out = new java.util.ArrayList<>();
+            if (imgs != null && !imgs.isEmpty()) {
+                out.add(imgs.get(0).getImageUrl());
+            }
+            // also append the first image if primary wasn't present or to provide fallback
+            var any = this.productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(id);
+            if (any != null && !any.isEmpty()) {
+                String u = any.get(0).getImageUrl();
+                if (out.isEmpty() || !out.get(0).equals(u)) out.add(u);
+            }
+            return ResponseEntity.ok(out);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.List.of());
+        }
     }
 
     // Create product (sellerId must be provided via body or query)

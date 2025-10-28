@@ -1182,44 +1182,72 @@
             if (resWrap) resWrap.style.display = 'block';
             if (histWrap) histWrap.style.display = 'none';
           };
-          const doCheck = async () => {
-            const key = input?.value?.trim();
-            if (!key) { showError('Please enter a key'); return; }
+          let currentKey = null;
+          let currentPage = 0;
+          const pageSizeDefault = 10;
+
+          async function fetchHistoryPage(key, page) {
             try {
               if (details) details.textContent = 'Loading...';
               if (resWrap) resWrap.style.display = 'block';
               if (histWrap) histWrap.style.display = 'none';
-              const url = `/api/licenses/check?key=${encodeURIComponent(key)}`;
+              const url = `/api/licenses/check?key=${encodeURIComponent(key)}&page=${page}&size=${pageSizeDefault}`;
               const r = await fetch(url);
               if (!r.ok) {
                 const t = await r.text();
                 showError('Error: ' + t);
-                return;
+                return null;
               }
               const data = await r.json();
-              // render details
-              const lines = [];
-              lines.push(`Key: ${data.licenseKey ?? key}`);
-              lines.push(`Product: ${data.productName ?? '-'}`);
-              lines.push(`Status: ${data.isActive ? 'Active' : 'Inactive'}`);
-              if (data.activationDate) lines.push(`Activated: ${data.activationDate}`);
-              if (data.lastUsedDate) lines.push(`Last used: ${data.lastUsedDate}`);
-              if (data.orderId) lines.push(`Order ID: ${data.orderId}`);
-              if (data.userId) lines.push(`Owner ID: ${data.userId}`);
-              if (details) details.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+              return data;
+            } catch (e) {
+              showError('Cannot check key');
+              return null;
+            }
+          }
 
-              // product display (fetch full product if productId present)
-              const prodWrap = document.getElementById('ck_product_display');
-              if (prodWrap) prodWrap.innerHTML = '';
-              if (data.productId) {
-                try {
-                  const pres = await fetch(`/api/products-lite/${data.productId}`);
-                  if (pres.ok) {
-                    const p = await pres.json();
-                    if (prodWrap) {
-                      const price = (p.price ?? 0).toLocaleString('en-US');
-                      const img = (p.downloadUrl && p.downloadUrl.trim().length) ? p.downloadUrl : '/img/no-image.png';
-                      prodWrap.innerHTML = `
+          function renderDetails(data, key) {
+            const lines = [];
+            lines.push(`Key: ${data.licenseKey ?? key}`);
+            lines.push(`Product: ${data.productName ?? '-'}`);
+            lines.push(`Status: ${data.isActive ? 'Active' : 'Inactive'}`);
+            if (data.activationDate) lines.push(`Activated: ${data.activationDate}`);
+            if (data.lastUsedDate) lines.push(`Last used: ${data.lastUsedDate}`);
+            if (data.orderId) lines.push(`Order ID: ${data.orderId}`);
+            if (data.userId) lines.push(`Owner ID: ${data.userId}`);
+            if (details) details.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+          }
+
+          async function renderProductDisplay(data) {
+            const prodWrap = document.getElementById('ck_product_display');
+            if (prodWrap) prodWrap.innerHTML = '';
+            if (data.productId) {
+              try {
+                const pres = await fetch(`/api/products-lite/${data.productId}`);
+                if (pres.ok) {
+                  const p = await pres.json();
+                  if (prodWrap) {
+                    const price = (p.price ?? 0).toLocaleString('en-US');
+                    // Prefer primaryImage from product_images; fallback to downloadUrl then placeholder
+                    let img = (p.primaryImage && p.primaryImage.trim().length) ? p.primaryImage : ((p.downloadUrl && p.downloadUrl.trim().length) ? p.downloadUrl : '/img/no-image.png');
+                    // If the selected URL seems to point to a PDF or non-image, try fetching images endpoint for a real image
+                    const looksLikePdf = (typeof img === 'string' && img.toLowerCase().endsWith('.pdf'));
+                    const looksLikeNonImage = (typeof img === 'string' && !/\.(jpg|jpeg|png|gif|webp|avif)(\?.*)?$/.test(img.toLowerCase()));
+                    if (looksLikePdf || looksLikeNonImage) {
+                      try {
+                        const ires = await fetch(`/api/products-lite/${data.productId}/images`);
+                        if (ires.ok) {
+                          const imgs = await ires.json();
+                          if (Array.isArray(imgs) && imgs.length) {
+                            // pick first valid-looking image URL
+                            const found = imgs.find(u => /\.(jpg|jpeg|png|gif|webp|avif)(\?.*)?$/.test((u||'').toLowerCase()));
+                            if (found) img = found;
+                            else if (imgs[0]) img = imgs[0];
+                          }
+                        }
+                      } catch (e) { /* ignore image fetch errors */ }
+                    }
+                    prodWrap.innerHTML = `
                         <div class="product-card" style="padding:8px;">
                           <div class="thumb" style="width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:8px;background:#0e1430;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
                             <img src="${img}" alt="${p.name ?? ''}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;" />
@@ -1230,40 +1258,168 @@
                             <div style="color:#7c9eff;font-weight:700;">$${price}</div>
                           </div>
                         </div>`;
-                    }
                   }
-                } catch (e) { /* ignore product fetch errors */ }
+                }
+              } catch (e) { /* ignore product fetch errors */ }
+            }
+          }
+
+          function renderHistoryRows(hist) {
+            histBody.innerHTML = '';
+            if (Array.isArray(hist) && hist.length) {
+              hist.forEach(h => {
+                const tr = document.createElement('tr');
+                const time = h.time ?? h.createdAt ?? '';
+                tr.innerHTML = `<td>${time}</td><td>${h.action ?? ''}</td><td>${h.user ?? ''}</td><td>${h.ip ?? ''}</td><td>${h.device ?? ''}</td>`;
+                histBody.appendChild(tr);
+              });
+            } else {
+              histBody.innerHTML = '<tr class="footer-note"><td colspan="5">No history entries</td></tr>';
+            }
+            if (histWrap) histWrap.style.display = '';
+          }
+
+          function renderDeviceBox(data) {
+            const devInfo = document.getElementById('ck_device_info');
+            if (!devInfo) return;
+            if (!data.deviceIdentifier) {
+              devInfo.textContent = 'Đang sẵn sàng';
+              return;
+            }
+            try {
+              const raw = String(data.deviceIdentifier || '');
+              const parts = raw.split('|');
+              const devId = parts[0] || '';
+              const kv = parts[1] || '';
+              const extra = parts[2] || '';
+
+              const kvMap = {};
+              if (kv) {
+                kv.split(';').forEach(pair => {
+                  const idx = pair.indexOf('=');
+                  if (idx > 0) {
+                    const k = pair.substring(0, idx).trim();
+                    const v = pair.substring(idx + 1).trim();
+                    if (k) kvMap[k] = v;
+                  }
+                });
               }
 
-              // render history
-              histBody.innerHTML = '';
-              const hist = Array.isArray(data.history) ? data.history : (Array.isArray(data.usages) ? data.usages : []);
-              if (hist.length) {
-                hist.forEach(h => {
-                  const tr = document.createElement('tr');
-                  const time = h.time ?? h.createdAt ?? '';
-                  tr.innerHTML = `<td>${time}</td><td>${h.action ?? ''}</td><td>${h.user ?? ''}</td><td>${h.ip ?? ''}</td><td>${h.device ?? ''}</td>`;
-                  histBody.appendChild(tr);
-                });
-                if (histWrap) histWrap.style.display = '';
-              } else {
-                histBody.innerHTML = '<tr class="footer-note"><td colspan="5">No history entries</td></tr>';
-                if (histWrap) histWrap.style.display = '';
+              function fmtMem(m) {
+                if (!m) return '';
+                const s = String(m).trim();
+                // examples: 7894MB, 8GB
+                const mbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(mb)$/i);
+                const gbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(gb)$/i);
+                if (mbMatch) {
+                  const mb = parseFloat(mbMatch[1]);
+                  const gb = mb / 1024;
+                  return `${gb.toFixed(1)} GB (${mb} MB)`;
+                }
+                if (gbMatch) {
+                  const gb = parseFloat(gbMatch[1]);
+                  const mb = Math.round(gb * 1024);
+                  return `${gb} GB (${mb} MB)`;
+                }
+                // plain digits
+                const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
+                if (numMatch) return `${numMatch[1]} (${s.replace(numMatch[1], '').trim()})`;
+                return s;
               }
-              // render device box
-              const devInfo = document.getElementById('ck_device_info');
-              if (devInfo) {
-                if (data.deviceIdentifier) {
-                  devInfo.innerHTML = `<div><strong>ID:</strong> ${data.deviceIdentifier}</div>` +
-                                      (data.lastUsedDate ? `<div><strong>Last used:</strong> ${data.lastUsedDate}</div>` : '') +
-                                      (data.activationDate ? `<div><strong>Activated:</strong> ${data.activationDate}</div>` : '');
-                } else {
-                  devInfo.textContent = 'Đang sẵn sàng';
+
+              const host = kvMap['host'] || kvMap['hostname'] || '';
+              const plat = kvMap['plat'] || kvMap['platform'] || '';
+              const cpu = kvMap['cpu'] || '';
+              const cores = kvMap['cores'] || kvMap['cpu_cores'] || '';
+              const mem = kvMap['mem'] || kvMap['memory'] || '';
+
+              // build HTML
+              let html = '';
+              html += `<div style="font-weight:700;margin-bottom:6px;">Device</div>`;
+              html += `<div><strong>ID:</strong> ${devId}</div>`;
+              if (host) html += `<div><strong>Host:</strong> ${host}</div>`;
+              if (plat) html += `<div><strong>Platform:</strong> ${plat}</div>`;
+              if (cpu) html += `<div><strong>CPU:</strong> ${cpu}</div>`;
+              if (cores) html += `<div><strong>Cores:</strong> ${cores}</div>`;
+              if (mem) html += `<div><strong>Memory:</strong> ${fmtMem(mem)}</div>`;
+              if (extra) {
+                // show file path or URL if present
+                const e = extra.trim();
+                if (e) {
+                  const short = e.length > 80 ? e.substring(0, 77) + '...' : e;
+                  // if it's a file:// or http(s) URL, render as link
+                  if (/^file:\/\//i.test(e) || /^https?:\/\//i.test(e)) {
+                    html += `<div><strong>Path:</strong> <a href="${e}" target="_blank" rel="noopener noreferrer">${short}</a></div>`;
+                  } else {
+                    html += `<div><strong>Path:</strong> ${short}</div>`;
+                  }
                 }
               }
+              if (data.lastUsedDate) html += `<div style="margin-top:6px;"><strong>Last used:</strong> ${data.lastUsedDate}</div>`;
+              if (data.activationDate) html += `<div><strong>Activated:</strong> ${data.activationDate}</div>`;
+              devInfo.innerHTML = html;
             } catch (e) {
-              showError('Cannot check key');
+              // fallback to raw display
+              devInfo.innerHTML = `<div><strong>ID:</strong> ${data.deviceIdentifier}</div>` +
+                                  (data.lastUsedDate ? `<div><strong>Last used:</strong> ${data.lastUsedDate}</div>` : '') +
+                                  (data.activationDate ? `<div><strong>Activated:</strong> ${data.activationDate}</div>` : '');
             }
+          }
+
+          function renderPagerControls(resp) {
+            const pager = document.getElementById('ck_history_pager');
+            if (!pager) return;
+            pager.innerHTML = '';
+            const totalPages = resp.totalPages ?? 0;
+            const curPage = resp.page ?? 0;
+            if (totalPages <= 1) return; // no pager needed
+
+            // Prev button
+            const prev = document.createElement('button');
+            prev.textContent = 'Prev';
+            prev.disabled = curPage <= 0;
+            prev.addEventListener('click', () => loadPage(curPage - 1));
+            pager.appendChild(prev);
+
+            // simple numeric pages (limit displayed count)
+            const maxButtons = 9;
+            let start = Math.max(0, curPage - Math.floor(maxButtons / 2));
+            let end = Math.min(totalPages, start + maxButtons);
+            if (end - start < maxButtons) start = Math.max(0, end - maxButtons);
+            for (let i = start; i < end; i++) {
+              const b = document.createElement('button');
+              b.textContent = (i + 1).toString();
+              if (i === curPage) { b.disabled = true; b.style.fontWeight = '700'; }
+              b.addEventListener('click', () => loadPage(i));
+              pager.appendChild(b);
+            }
+
+            // Next button
+            const next = document.createElement('button');
+            next.textContent = 'Next';
+            next.disabled = curPage >= totalPages - 1;
+            next.addEventListener('click', () => loadPage(curPage + 1));
+            pager.appendChild(next);
+          }
+
+          async function loadPage(page) {
+            if (!currentKey) return;
+            currentPage = Math.max(0, page);
+            const data = await fetchHistoryPage(currentKey, currentPage);
+            if (!data) return;
+            renderDetails(data, currentKey);
+            await renderProductDisplay(data);
+            renderHistoryRows(Array.isArray(data.history) ? data.history : []);
+            renderDeviceBox(data);
+            renderPagerControls(data);
+          }
+
+          const doCheck = async () => {
+            const key = input?.value?.trim();
+            if (!key) { showError('Please enter a key'); return; }
+            currentKey = key;
+            currentPage = 0;
+            await loadPage(0);
           };
           btn?.addEventListener('click', doCheck);
           input?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doCheck(); } });
