@@ -393,7 +393,14 @@
     <div class="body" style="overflow:auto;">
       <div id="ck_result" style="margin-bottom:12px;display:none;">
         <h3 style="margin:0 0 6px 0;">Key details</h3>
-        <div id="ck_details" class="panel-details footer-note">No key checked yet.</div>
+        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+          <div id="ck_details" class="panel-details footer-note" style="flex:1;min-width:220px;">No key checked yet.</div>
+          <div id="ck_product_display" style="min-width:220px;max-width:320px;"></div>
+          <div id="ck_device_box" style="min-width:200px;max-width:260px;padding:10px;border-radius:8px;border:1px solid var(--muted);background:var(--surface);">
+            <div style="font-weight:700;margin-bottom:6px;">Device</div>
+            <div id="ck_device_info" class="footer-note">Đang sẵn sàng</div>
+          </div>
+        </div>
       </div>
       <div id="ck_history_wrap" style="display:none;margin-top:8px;">
         <h4 style="margin:0 0 6px 0;">Usage history</h4>

@@ -1201,11 +1201,40 @@
               const lines = [];
               lines.push(`Key: ${data.licenseKey ?? key}`);
               lines.push(`Product: ${data.productName ?? '-'}`);
-              lines.push(`Status: ${data.status ?? '-'}`);
-              if (data.expireDate) lines.push(`Expire: ${data.expireDate}`);
+              lines.push(`Status: ${data.isActive ? 'Active' : 'Inactive'}`);
+              if (data.activationDate) lines.push(`Activated: ${data.activationDate}`);
+              if (data.lastUsedDate) lines.push(`Last used: ${data.lastUsedDate}`);
               if (data.orderId) lines.push(`Order ID: ${data.orderId}`);
-              if (data.owner) lines.push(`Owner: ${data.owner}`);
+              if (data.userId) lines.push(`Owner ID: ${data.userId}`);
               if (details) details.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+
+              // product display (fetch full product if productId present)
+              const prodWrap = document.getElementById('ck_product_display');
+              if (prodWrap) prodWrap.innerHTML = '';
+              if (data.productId) {
+                try {
+                  const pres = await fetch(`/api/products-lite/${data.productId}`);
+                  if (pres.ok) {
+                    const p = await pres.json();
+                    if (prodWrap) {
+                      const price = (p.price ?? 0).toLocaleString('en-US');
+                      const img = (p.downloadUrl && p.downloadUrl.trim().length) ? p.downloadUrl : '/img/no-image.png';
+                      prodWrap.innerHTML = `
+                        <div class="product-card" style="padding:8px;">
+                          <div class="thumb" style="width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:8px;background:#0e1430;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                            <img src="${img}" alt="${p.name ?? ''}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;" />
+                          </div>
+                          <div style="font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
+                          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                            <div style="color:var(--muted);font-size:13px;">Status: ${p.status ?? '-'}</div>
+                            <div style="color:#7c9eff;font-weight:700;">$${price}</div>
+                          </div>
+                        </div>`;
+                    }
+                  }
+                } catch (e) { /* ignore product fetch errors */ }
+              }
+
               // render history
               histBody.innerHTML = '';
               const hist = Array.isArray(data.history) ? data.history : (Array.isArray(data.usages) ? data.usages : []);
@@ -1220,6 +1249,17 @@
               } else {
                 histBody.innerHTML = '<tr class="footer-note"><td colspan="5">No history entries</td></tr>';
                 if (histWrap) histWrap.style.display = '';
+              }
+              // render device box
+              const devInfo = document.getElementById('ck_device_info');
+              if (devInfo) {
+                if (data.deviceIdentifier) {
+                  devInfo.innerHTML = `<div><strong>ID:</strong> ${data.deviceIdentifier}</div>` +
+                                      (data.lastUsedDate ? `<div><strong>Last used:</strong> ${data.lastUsedDate}</div>` : '') +
+                                      (data.activationDate ? `<div><strong>Activated:</strong> ${data.activationDate}</div>` : '');
+                } else {
+                  devInfo.textContent = 'Đang sẵn sàng';
+                }
               }
             } catch (e) {
               showError('Cannot check key');
