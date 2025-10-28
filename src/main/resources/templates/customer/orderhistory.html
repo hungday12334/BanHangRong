@@ -701,7 +701,7 @@ body {
             <span>Seller:</span>
             <input type="text" th:value="${order.sellerId}" readonly>
                             <button class="action-btn chat-btn">Chat</button>
-                            <button class="action-btn view-seller-btn">View seller</button>
+                            <button class="action-btn view-seller-btn" th:attr="data-seller-id=${order.sellerId}">View seller</button>
                         </div>
           <div class="status" th:class="${'status ' + order.status.toLowerCase()}" th:text="'Status: ' + ${order.status}">Status: Completed</div>
                         </div>
@@ -1139,7 +1139,7 @@ body {
             if (event.target.classList.contains('chat-btn')) {
                 showNotification('Coming Soon', 'Chat functionality coming soon!', 'warning');
             } else if (event.target.classList.contains('view-seller-btn')) {
-                showNotification('Coming Soon', 'View seller functionality coming soon!', 'warning');
+                viewSeller(event.target);
             } else if (event.target.classList.contains('rate-btn')) {
                 openRateModal(event.target);
             } else if (event.target.classList.contains('contact-btn')) {
@@ -1148,6 +1148,19 @@ body {
                 buyAgain(event.target);
             }
         });
+
+        // View Seller function
+        function viewSeller(button) {
+            const sellerId = button.getAttribute('data-seller-id');
+            
+            if (!sellerId) {
+                showNotification('Error', 'Seller information not available', 'error');
+                return;
+            }
+            
+            // Redirect to seller profile page
+            window.location.href = '/customer/seller/' + sellerId;
+        }
 
         // Buy Again function
         function buyAgain(button) {

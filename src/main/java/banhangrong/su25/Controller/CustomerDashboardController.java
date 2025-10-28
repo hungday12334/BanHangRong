@@ -3,6 +3,7 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Orders;
 import banhangrong.su25.Entity.OrderItems;
+import banhangrong.su25.Entity.ProductReviews;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.UsersRepository;
@@ -16,13 +17,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class CustomerDashboardController {
@@ -221,6 +226,115 @@ public class CustomerDashboardController {
         model.addAttribute("cartCount", cartCount);
         
         return "customer/notification";
+    }
+
+    @GetMapping("/customer/seller/{sellerId}")
+    public String viewSeller(@PathVariable Long sellerId, Model model) {
+        try {
+            // Get current user for header
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Users currentUser = null;
+            if (auth != null && auth.isAuthenticated()) {
+                String username = auth.getName();
+                currentUser = usersRepository.findByUsername(username).orElse(null);
+            }
+            
+            // Get seller information
+            Optional<Users> sellerOptional = usersRepository.findById(sellerId);
+            if (sellerOptional.isEmpty()) {
+                return "redirect:/customer/dashboard?error=seller_not_found";
+            }
+            
+            Users seller = sellerOptional.get();
+            
+            // Get seller's products
+            List<Products> products = productsRepository.findBySellerId(sellerId);
+            
+            // Get product images
+            Map<Long, String> productImages = new HashMap<>();
+            for (Products product : products) {
+                try {
+                    var primary = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(product.getProductId());
+                    if (primary != null && !primary.isEmpty()) {
+                        productImages.put(product.getProductId(), primary.get(0).getImageUrl());
+                    } else {
+                        var any = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(product.getProductId());
+                        if (any != null && !any.isEmpty()) {
+                            productImages.put(product.getProductId(), any.get(0).getImageUrl());
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            
+            // Get seller statistics
+            Long totalProducts = (long) products.size();
+            Long totalSales = productsRepository.totalUnitsSoldBySeller(sellerId);
+            
+            // Get reviews for seller's products
+            List<ProductReviews> reviews = new java.util.ArrayList<>();
+            for (Products product : products) {
+                List<ProductReviews> productReviews = productReviewsRepository.findByProductIdOrderByCreatedAtDesc(product.getProductId());
+                for (ProductReviews review : productReviews) {
+                    // Get username for each review
+                    usersRepository.findById(review.getUserId()).ifPresent(user -> {
+                        review.setUsername(user.getUsername());
+                    });
+                }
+                reviews.addAll(productReviews);
+            }
+            Long totalReviews = (long) reviews.size();
+            
+            // Calculate separate averages for product rating and service rating
+            BigDecimal averageProductRating = BigDecimal.ZERO;
+            BigDecimal averageServiceRating = BigDecimal.ZERO;
+            
+            if (!reviews.isEmpty()) {
+                double productSum = reviews.stream()
+                    .filter(r -> r.getRating() != null)
+                    .mapToInt(ProductReviews::getRating)
+                    .average()
+                    .orElse(0.0);
+                averageProductRating = BigDecimal.valueOf(productSum);
+                
+                double serviceSum = reviews.stream()
+                    .filter(r -> r.getServiceRating() != null)
+                    .mapToInt(ProductReviews::getServiceRating)
+                    .average()
+                    .orElse(0.0);
+                averageServiceRating = BigDecimal.valueOf(serviceSum);
+            }
+            
+            // Sort reviews by created date descending and limit to 10
+            reviews.sort((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()));
+            if (reviews.size() > 10) {
+                reviews = reviews.subList(0, 10);
+            }
+            
+            // Add data to model
+            model.addAttribute("seller", seller);
+            model.addAttribute("products", products);
+            model.addAttribute("productImages", productImages);
+            model.addAttribute("totalProducts", totalProducts);
+            model.addAttribute("totalSales", totalSales);
+            model.addAttribute("averageProductRating", averageProductRating);
+            model.addAttribute("averageServiceRating", averageServiceRating);
+            model.addAttribute("totalReviews", totalReviews);
+            model.addAttribute("reviews", reviews);
+            
+            // Add current user data for header
+            if (currentUser != null) {
+                model.addAttribute("user", currentUser);
+                try {
+                    model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+                } catch (Exception ignored) {}
+            }
+            
+            return "customer/seller-profile";
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/customer/dashboard?error=seller_view_error";
+        }
     }
 }
 

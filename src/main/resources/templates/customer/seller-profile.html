@@ -189,20 +189,30 @@
 		.seller-header {
 			background: white;
 			border-radius: 12px;
-			padding: 30px;
+			padding: 40px;
 			margin-bottom: 24px;
 			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 		}
 
 		.seller-info {
+			display: grid;
+			grid-template-columns: 300px 1fr 250px;
+			gap: 40px;
+			align-items: center;
+		}
+
+		.seller-profile {
 			display: flex;
-			gap: 24px;
-			align-items: start;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			padding: 20px;
+			border-right: 1px solid var(--line);
 		}
 
 		.seller-avatar {
-			width: 120px;
-			height: 120px;
+			width: 100px;
+			height: 100px;
 			border-radius: 50%;
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 			display: flex;
@@ -211,48 +221,106 @@
 			font-size: 48px;
 			color: white;
 			font-weight: 700;
-			flex-shrink: 0;
-		}
-
-		.seller-details {
-			flex: 1;
+			margin-bottom: 16px;
 		}
 
 		.seller-name {
-			font-size: 28px;
+			font-size: 20px;
+			font-weight: 600;
+			color: #111827;
+			margin: 0;
+		}
+
+		.seller-ratings {
+			display: flex;
+			flex-direction: column;
+			gap: 24px;
+			padding: 0 20px;
+			border-right: 1px solid var(--line);
+		}
+
+		.rating-item {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.rating-label {
+			font-size: 15px;
+			color: #6b7280;
+			font-weight: 500;
+		}
+
+		.rating-stars {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.stars {
+			color: #fbbf24;
+			font-size: 18px;
+			letter-spacing: 2px;
+		}
+
+		.rating-value {
+			font-size: 18px;
 			font-weight: 700;
-			margin-bottom: 8px;
 			color: #111827;
 		}
 
-		.seller-stats {
-			display: flex;
-			gap: 24px;
-			margin: 16px 0;
-			flex-wrap: wrap;
-		}
-
-		.stat-item {
+		.seller-sales {
 			display: flex;
 			flex-direction: column;
-			gap: 4px;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			padding: 0 20px;
 		}
 
-		.stat-value {
-			font-size: 24px;
+		.sales-label {
+			font-size: 15px;
+			color: #6b7280;
+			font-weight: 500;
+			margin-bottom: 8px;
+		}
+
+		.sales-value {
+			font-size: 48px;
 			font-weight: 700;
 			color: var(--brand);
+			line-height: 1;
+			margin-bottom: 8px;
 		}
 
-		.stat-label {
-			font-size: 14px;
-			color: var(--muted);
+		.sales-unit {
+			font-size: 15px;
+			color: #6b7280;
+			font-weight: 500;
 		}
 
 		.seller-actions {
+			grid-column: 1 / -1;
 			display: flex;
 			gap: 12px;
-			margin-top: 16px;
+			justify-content: center;
+			margin-top: 24px;
+			padding-top: 24px;
+			border-top: 1px solid var(--line);
+		}
+
+		@media (max-width: 968px) {
+			.seller-info {
+				grid-template-columns: 1fr;
+				gap: 24px;
+			}
+			
+			.seller-profile,
+			.seller-ratings {
+				border-right: none;
+				border-bottom: 1px solid var(--line);
+				padding-bottom: 24px;
+			}
 		}
 
 		.btn {
@@ -477,39 +545,53 @@
 			<!-- Seller Header -->
 			<div class="seller-header">
 				<div class="seller-info">
-					<div class="seller-avatar" th:text="${seller != null ? seller.shopName.substring(0,1).toUpperCase() : 'S'}">S</div>
-					<div class="seller-details">
-						<h1 class="seller-name" th:text="${seller != null ? seller.shopName : 'Shop Name'}">Premium License Store</h1>
-						<p style="color: var(--muted); margin: 0;" th:text="${seller != null ? seller.description : 'Trusted seller of software licenses and digital products'}">
-							Trusted seller of software licenses and digital products
-						</p>
-						
-						<div class="seller-stats">
-							<div class="stat-item">
-								<div class="stat-value" th:text="${totalProducts != null ? totalProducts : '0'}">24</div>
-								<div class="stat-label">Products</div>
-							</div>
-							<div class="stat-item">
-								<div class="stat-value" th:text="${totalSales != null ? totalSales : '0'}">1,234</div>
-								<div class="stat-label">Sales</div>
-							</div>
-							<div class="stat-item">
-								<div class="stat-value">
-									<span>⭐</span>
-									<span th:text="${averageRating != null ? #numbers.formatDecimal(averageRating, 1, 'COMMA', 1, 'POINT') : '4.8'}">4.8</span>
-								</div>
-								<div class="stat-label">Rating</div>
-							</div>
-							<div class="stat-item">
-								<div class="stat-value" th:text="${totalReviews != null ? totalReviews : '0'}">567</div>
-								<div class="stat-label">Reviews</div>
-							</div>
-						</div>
+					<!-- Column 1: Seller Profile -->
+					<div class="seller-profile">
+						<div class="seller-avatar" th:text="${seller != null ? seller.username.substring(0,1).toUpperCase() : 'S'}">S</div>
+						<h1 class="seller-name" th:text="${seller != null ? seller.username : 'Seller name'}">Seller name</h1>
+					</div>
 
-						<div class="seller-actions">
-							<button class="btn btn-primary" onclick="alert('Chat feature coming soon!')">💬 Chat with Seller</button>
-							<button class="btn btn-outline" onclick="alert('Follow feature coming soon!')">➕ Follow Shop</button>
+					<!-- Column 2: Ratings -->
+					<div class="seller-ratings">
+						<div class="rating-item">
+							<div class="rating-label">Product Average Rating</div>
+							<div class="rating-stars">
+								<span class="stars" th:if="${averageProductRating != null and averageProductRating > 0}">
+									<th:block th:each="i : ${#numbers.sequence(1, 5)}">
+										<span th:if="${i <= averageProductRating}">★</span>
+										<span th:unless="${i <= averageProductRating}" style="color: #d1d5db;">★</span>
+									</th:block>
+								</span>
+								<span class="stars" th:unless="${averageProductRating != null and averageProductRating > 0}" style="color: #d1d5db;">★★★★★</span>
+								<span class="rating-value" th:text="${averageProductRating != null ? #numbers.formatDecimal(averageProductRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">0.0</span>
+							</div>
 						</div>
+						<div class="rating-item">
+							<div class="rating-label">Service Average Rating</div>
+							<div class="rating-stars">
+								<span class="stars" th:if="${averageServiceRating != null and averageServiceRating > 0}">
+									<th:block th:each="i : ${#numbers.sequence(1, 5)}">
+										<span th:if="${i <= averageServiceRating}">★</span>
+										<span th:unless="${i <= averageServiceRating}" style="color: #d1d5db;">★</span>
+									</th:block>
+								</span>
+								<span class="stars" th:unless="${averageServiceRating != null and averageServiceRating > 0}" style="color: #d1d5db;">★★★★★</span>
+								<span class="rating-value" th:text="${averageServiceRating != null ? #numbers.formatDecimal(averageServiceRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">0.0</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Column 3: Sales Stats -->
+					<div class="seller-sales">
+						<div class="sales-label">đã bán</div>
+						<div class="sales-value" th:text="${totalSales != null ? totalSales : '0'}">100</div>
+						<div class="sales-unit">product</div>
+					</div>
+
+					<!-- Actions row -->
+					<div class="seller-actions">
+						<button class="btn btn-primary" onclick="alert('Chat feature coming soon!')">💬 Chat with Seller</button>
+						<button class="btn btn-outline" onclick="alert('Follow feature coming soon!')">➕ Follow Shop</button>
 					</div>
 				</div>
 			</div>

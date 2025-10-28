@@ -26,6 +26,10 @@ public class ProductReviews {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    // Transient field for displaying username (not stored in database)
+    @Transient
+    private String username;
 
     public Long getReviewId() {
         return reviewId;
@@ -86,5 +90,11 @@ public class ProductReviews {
     }
     public void setOrderItemId(Long orderItemId) {
         this.orderItemId = orderItemId;
+    }
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
