@@ -8,15 +8,17 @@ DESCRIBE product_reviews;
 -- Kiểm tra constraints
 SELECT 'Checking constraints...' as status;
 SELECT 
-    CONSTRAINT_NAME,
-    CONSTRAINT_TYPE,
-    COLUMN_NAME
+    tc.CONSTRAINT_NAME,
+    tc.CONSTRAINT_TYPE,
+    kcu.COLUMN_NAME
 FROM information_schema.table_constraints tc
 JOIN information_schema.key_column_usage kcu 
-    ON tc.constraint_name = kcu.constraint_name 
-    AND tc.table_schema = kcu.table_schema
-WHERE tc.table_schema = 'wap' 
-AND tc.table_name = 'product_reviews';
+    ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+    AND tc.CONSTRAINT_SCHEMA = kcu.CONSTRAINT_SCHEMA
+    AND tc.TABLE_SCHEMA = kcu.TABLE_SCHEMA
+    AND tc.TABLE_NAME = kcu.TABLE_NAME
+WHERE tc.TABLE_SCHEMA = 'wap'
+AND tc.TABLE_NAME = 'product_reviews';
 
 -- Kiểm tra indexes
 SELECT 'Checking indexes...' as status;
@@ -25,8 +27,8 @@ SELECT
     COLUMN_NAME,
     NON_UNIQUE
 FROM information_schema.statistics 
-WHERE table_schema = 'wap' 
-AND table_name = 'product_reviews'
+WHERE TABLE_SCHEMA = 'wap'
+AND TABLE_NAME = 'product_reviews'
 ORDER BY INDEX_NAME, SEQ_IN_INDEX;
 
 -- Kiểm tra foreign keys
@@ -36,9 +38,9 @@ SELECT
     REFERENCED_TABLE_NAME,
     REFERENCED_COLUMN_NAME
 FROM information_schema.key_column_usage 
-WHERE table_schema = 'wap' 
-AND table_name = 'product_reviews' 
-AND referenced_table_name IS NOT NULL;
+WHERE TABLE_SCHEMA = 'wap'
+AND TABLE_NAME = 'product_reviews'
+AND REFERENCED_TABLE_NAME IS NOT NULL;
 
 -- Kiểm tra triggers
 SELECT 'Checking triggers...' as status;
@@ -47,8 +49,8 @@ SELECT
     EVENT_MANIPULATION,
     ACTION_TIMING
 FROM information_schema.triggers 
-WHERE table_schema = 'wap' 
-AND table_name = 'product_reviews';
+WHERE TRIGGER_SCHEMA = 'wap'
+AND EVENT_OBJECT_TABLE = 'product_reviews';
 
 -- Kiểm tra procedures
 SELECT 'Checking procedures...' as status;
@@ -56,8 +58,8 @@ SELECT
     ROUTINE_NAME,
     ROUTINE_TYPE
 FROM information_schema.routines 
-WHERE table_schema = 'wap' 
-AND ROUTINE_NAME LIKE '%review%' OR ROUTINE_NAME LIKE '%rating%';
+WHERE ROUTINE_SCHEMA = 'wap'
+AND (ROUTINE_NAME LIKE '%review%' OR ROUTINE_NAME LIKE '%rating%');
 
 -- Kiểm tra functions
 SELECT 'Checking functions...' as status;
@@ -65,8 +67,8 @@ SELECT
     ROUTINE_NAME,
     ROUTINE_TYPE
 FROM information_schema.routines 
-WHERE table_schema = 'wap' 
-AND ROUTINE_NAME LIKE '%Product%' OR ROUTINE_NAME LIKE '%Review%';
+WHERE ROUTINE_SCHEMA = 'wap'
+AND (ROUTINE_NAME LIKE '%Product%' OR ROUTINE_NAME LIKE '%Review%');
 
 -- Kiểm tra views
 SELECT 'Checking views...' as status;
@@ -74,8 +76,8 @@ SELECT
     TABLE_NAME,
     VIEW_DEFINITION
 FROM information_schema.views 
-WHERE table_schema = 'wap' 
-AND table_name LIKE '%review%' OR table_name LIKE '%rating%';
+WHERE TABLE_SCHEMA = 'wap'
+AND (TABLE_NAME LIKE '%review%' OR TABLE_NAME LIKE '%rating%');
 
 -- Kiểm tra cột rating trong products
 SELECT 'Checking products table for rating columns...' as status;
@@ -85,9 +87,9 @@ SELECT
     IS_NULLABLE,
     COLUMN_DEFAULT
 FROM information_schema.columns 
-WHERE table_schema = 'wap' 
-AND table_name = 'products' 
-AND (column_name LIKE '%rating%' OR column_name LIKE '%review%');
+WHERE TABLE_SCHEMA = 'wap'
+AND TABLE_NAME = 'products'
+AND (COLUMN_NAME LIKE '%rating%' OR COLUMN_NAME LIKE '%review%');
 
 -- Kiểm tra dữ liệu mẫu
 SELECT 'Checking sample data...' as status;

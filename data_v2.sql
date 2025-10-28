@@ -18,6 +18,7 @@ ALTER TABLE user_sessions CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unico
 CREATE TABLE IF NOT EXISTS users (
                                      user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                      username VARCHAR(50) NOT NULL,
+                                     full_name VARCHAR(100),
                                      email VARCHAR(100) NOT NULL,
                                      password VARCHAR(512) NOT NULL,
                                      user_type VARCHAR(20),
@@ -129,7 +130,7 @@ CREATE TABLE IF NOT EXISTS shopping_cart (
                                              CONSTRAINT ux_cart_user_product UNIQUE (user_id, product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Orders (payment fields removed; see payment_transactions)
+-- Orders
 CREATE TABLE IF NOT EXISTS orders (
                                       order_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                       user_id BIGINT NOT NULL,
@@ -139,7 +140,7 @@ CREATE TABLE IF NOT EXISTS orders (
                                       CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Order Items (license_key removed)
+-- Order Items
 CREATE TABLE IF NOT EXISTS order_items (
                                            order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                            order_id BIGINT NOT NULL,
@@ -165,11 +166,11 @@ CREATE TABLE IF NOT EXISTS product_reviews (
                                                CONSTRAINT ux_reviews_user_product UNIQUE (user_id, product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Product Licenses (license_key centralized here)
+-- Product Licenses
 CREATE TABLE IF NOT EXISTS product_licenses (
                                                 license_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-                                                order_item_id BIGINT NOT NULL,
-                                                user_id BIGINT NOT NULL,
+                                                order_item_id BIGINT,
+                                                user_id BIGINT,
                                                 license_key VARCHAR(255) UNIQUE NOT NULL,
                                                 is_active BOOLEAN DEFAULT TRUE,
                                                 activation_date DATETIME,
@@ -181,7 +182,7 @@ CREATE TABLE IF NOT EXISTS product_licenses (
                                                 CONSTRAINT fk_licenses_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- User Sessions (for device tracking)
+-- User Sessions
 CREATE TABLE IF NOT EXISTS user_sessions (
                                              session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                              user_id BIGINT NOT NULL,
@@ -193,7 +194,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
                                              CONSTRAINT fk_sessions_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Payment Transactions (holds payment provider/status/transaction)
+-- Payment Transactions
 CREATE TABLE IF NOT EXISTS payment_transactions (
                                                     transaction_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                                     order_id BIGINT NOT NULL,
@@ -205,6 +206,79 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
                                                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                                     CONSTRAINT fk_payments_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Vouchers
+CREATE TABLE IF NOT EXISTS vouchers (
+                                        voucher_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                        seller_id BIGINT NOT NULL,
+                                        product_id BIGINT NOT NULL,
+                                        code VARCHAR(64) NOT NULL,
+                                        discount_type VARCHAR(16) NOT NULL, -- PERCENT | AMOUNT
+                                        discount_value DECIMAL(12,2) NOT NULL DEFAULT 0,
+                                        min_order DECIMAL(12,2) DEFAULT NULL,
+                                        start_at DATETIME DEFAULT NULL,
+                                        end_at DATETIME DEFAULT NULL,
+                                        max_uses INT DEFAULT NULL,
+                                        max_uses_per_user INT DEFAULT NULL,
+                                        used_count INT NOT NULL DEFAULT 0,
+                                        status VARCHAR(16) NOT NULL DEFAULT 'active',
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                        CONSTRAINT ux_vouchers_seller_product_code UNIQUE (seller_id, product_id, code),
+                                        INDEX ix_vouchers_product (product_id, status),
+                                        CONSTRAINT fk_vouchers_seller FOREIGN KEY (seller_id) REFERENCES users(user_id),
+                                        CONSTRAINT fk_vouchers_product FOREIGN KEY (product_id) REFERENCES products(product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Voucher Redemptions
+CREATE TABLE IF NOT EXISTS voucher_redemptions (
+                                                   redeem_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                                   voucher_id BIGINT NOT NULL,
+                                                   order_id BIGINT DEFAULT NULL,
+                                                   user_id BIGINT DEFAULT NULL,
+                                                   discount_amount DECIMAL(12,2) DEFAULT NULL,
+                                                   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                   INDEX ix_voucher_redemptions_voucher (voucher_id, created_at),
+                                                   CONSTRAINT fk_redemptions_voucher FOREIGN KEY (voucher_id) REFERENCES vouchers(voucher_id),
+                                                   CONSTRAINT fk_redemptions_order FOREIGN KEY (order_id) REFERENCES orders(order_id),
+                                                   CONSTRAINT fk_redemptions_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Bank Accounts
+CREATE TABLE IF NOT EXISTS bank_accounts (
+                                             bank_account_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                             user_id BIGINT NOT NULL,
+                                             bank_name VARCHAR(100) NOT NULL,
+                                             bank_code VARCHAR(20),
+                                             account_number VARCHAR(64) NOT NULL,
+                                             account_holder_name VARCHAR(100) NOT NULL,
+                                             branch VARCHAR(100),
+                                             is_default BOOLEAN DEFAULT FALSE,
+                                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                             CONSTRAINT fk_bank_accounts_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+                                             CONSTRAINT ux_user_account UNIQUE (user_id, account_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Withdrawal Requests
+CREATE TABLE IF NOT EXISTS withdrawal_requests (
+                                                   withdrawal_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                                   user_id BIGINT NOT NULL,
+                                                   bank_account_id BIGINT NOT NULL,
+                                                   amount DECIMAL(15,2) NOT NULL,
+                                                   fee_percent DECIMAL(5,2) NOT NULL DEFAULT 2.00,
+                                                   fee_amount DECIMAL(15,2) NOT NULL,
+                                                   net_amount DECIMAL(15,2) NOT NULL,
+                                                   status VARCHAR(20) NOT NULL DEFAULT 'PENDING', -- PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED
+                                                   note VARCHAR(255),
+                                                   payout_provider VARCHAR(50),
+                                                   provider_reference VARCHAR(100),
+                                                   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                                   processed_at TIMESTAMP NULL,
+                                                   CONSTRAINT fk_withdraw_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+                                                   CONSTRAINT fk_withdraw_bank FOREIGN KEY (bank_account_id) REFERENCES bank_accounts(bank_account_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================
@@ -435,19 +509,19 @@ VALUES ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHE
        ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='alice' ORDER BY o.order_id DESC LIMIT 1),
         (SELECT product_id FROM products WHERE name='Music Pack Vol.1'), 1, 9.99, DATE_SUB(NOW(), INTERVAL 1 DAY));
 INSERT IGNORE INTO payment_transactions (order_id, payment_provider, provider_transaction_id, amount, status, payment_data, created_at)
-VALUES ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='alice' ORDER BY o.order_id DESC LIMIT 1),
+VALUES ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u user_id WHERE u.username='alice' ORDER BY o.order_id DESC LIMIT 1),
         'MoMo', 'MOMO-2025-2003', 24.98, 'PAID', JSON_OBJECT('method','wallet'), DATE_SUB(NOW(), INTERVAL 1 DAY));
 
 -- Today - dave buys Dev Toolkit Ultimate x1 (59.00) + PWM X x1 (19.00) total 78.00
 INSERT IGNORE INTO orders (user_id, total_amount, created_at)
 VALUES ((SELECT user_id FROM users WHERE username='dave'), 78.00, NOW());
 INSERT IGNORE INTO order_items (order_id, product_id, quantity, price_at_time, created_at)
-VALUES ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='dave' ORDER BY o.order_id DESC LIMIT 1),
+VALUES ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u user_id WHERE u.username='dave' ORDER BY o.order_id DESC LIMIT 1),
         (SELECT product_id FROM products WHERE name='Dev Toolkit Ultimate'), 1, 59.00, NOW()),
-       ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='dave' ORDER BY o.order_id DESC LIMIT 1),
+       ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u user_id WHERE u.username='dave' ORDER BY o.order_id DESC LIMIT 1),
         (SELECT product_id FROM products WHERE name='Password Manager X'), 1, 19.00, NOW());
 INSERT IGNORE INTO payment_transactions (order_id, payment_provider, provider_transaction_id, amount, status, payment_data, created_at)
-VALUES ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u.user_id WHERE u.username='dave' ORDER BY o.order_id DESC LIMIT 1),
+VALUES ((SELECT o.order_id FROM orders o JOIN users u ON o.user_id=u user_id WHERE u.username='dave' ORDER BY o.order_id DESC LIMIT 1),
         'VNPay', 'VNP-2025-1004', 78.00, 'PAID', JSON_OBJECT('method','card'), NOW());
 
 -- Reviews for the new products

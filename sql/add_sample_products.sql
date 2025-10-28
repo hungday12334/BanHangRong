@@ -4,6 +4,18 @@
 
 USE wap;
 
+-- Ensure users.full_name exists (add if missing) to avoid INSERT error
+SET @db := DATABASE();
+SELECT COUNT(*) INTO @has_full_name
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'users' AND COLUMN_NAME = 'full_name';
+SET @ddl := IF(@has_full_name = 0,
+               'ALTER TABLE users ADD COLUMN full_name VARCHAR(100) NULL AFTER username;',
+               'SELECT "users.full_name already exists" AS msg');
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- Thêm dữ liệu mẫu cho users (sellers)
 INSERT IGNORE INTO users (user_id, username, full_name, email, password, user_type, is_email_verified, is_active, balance) VALUES
 (1, 'seller1', 'Nguyễn Văn A', 'seller1@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'SELLER', TRUE, TRUE, 1000000.00),

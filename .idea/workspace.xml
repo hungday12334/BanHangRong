@@ -4,12 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: remove commented configuration from pom.xml and update recent branch name in workspace.xml">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: update database connection settings and refine pom.xml configurations">
+      <change afterPath="$PROJECT_DIR$/sql/fix_users_add_full_name.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-simple.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-simple.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_v2.sql" beforeDir="false" afterPath="$PROJECT_DIR$/data_v2.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/add_sample_products.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/add_sample_products.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/check_review_status.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/check_review_status.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/fix_database_add_status.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/fix_database_add_status.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/fix_old_constraint.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/fix_old_constraint.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/review_system_complete.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/review_system_complete.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/set_password.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/set_password.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,12 +45,12 @@
     &quot;assignee&quot;: &quot;hungday12334&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/hungday12334/BanHangRong.git",
-    "accountId": "efd5b86f-5509-426a-a183-1d6d3c55d639"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
+    &quot;accountId&quot;: &quot;efd5b86f-5509-426a-a183-1d6d3c55d639&quot;
   }
-}]]></component>
+}</component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -67,90 +73,66 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Database Script.add_sample_products.sql.executor": "Run",
-    "Database Script.add_vouchers.sql.executor": "Run",
-    "Database Script.add_withdrawals.sql.executor": "Run",
-    "Database Script.data_v2.sql.executor": "Run",
-    "Database Script.fix_old_constraint.sql.executor": "Run",
-    "Database Script.fix_review_constraint.sql.executor": "Run",
-    "Database Script.modify_review_system.sql.executor": "Run",
-    "Database Script.review_system_complete.sql.executor": "Run",
-    "Database Script.set_password.sql.executor": "Run",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Maven.su25 [clean].executor": "Run",
-    "Maven.su25 [package].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
-    "Spring Boot.Su25Application.executor": "Run",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "#6 on MinhHQ",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Database Script.add_sample_products.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_vouchers.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_withdrawals.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.data_v2.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_old_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_review_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.modify_review_system.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.review_system_complete.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.set_password.sql.executor&quot;: &quot;Run&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Maven.su25 [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.su25 [package].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#6 on MinhHQ&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ],
-    "RunConfigurationTargetLRU": [
-      "53b38385-a361-4b09-b3fc-e28dbd7b3e5c"
+    &quot;RunConfigurationTargetLRU&quot;: [
+      &quot;53b38385-a361-4b09-b3fc-e28dbd7b3e5c&quot;
+    ],
+    &quot;com.intellij.ide.scratch.LRUPopupBuilder$1/&quot;: [
+      &quot;MySQL&quot;,
+      &quot;Redshift&quot;,
+      &quot;SQL92&quot;,
+      &quot;MariaDB&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
   </component>
-  <component name="RunManager" selected="Spring Boot.Su25Application">
-    <configuration name="add_sample_products.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
-      <script-file value="$PROJECT_DIR$/sql/add_sample_products.sql" />
-      <script-mode>FILE</script-mode>
-      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
-      <method v="2" />
-    </configuration>
-    <configuration name="add_vouchers.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
-      <script-file value="$PROJECT_DIR$/sql/add_vouchers.sql" />
-      <script-mode>FILE</script-mode>
-      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
-      <method v="2" />
-    </configuration>
-    <configuration name="fix_old_constraint.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
-      <script-file value="$PROJECT_DIR$/sql/fix_old_constraint.sql" />
-      <script-mode>FILE</script-mode>
-      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
-      <method v="2" />
-    </configuration>
-    <configuration name="fix_review_constraint.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
-      <script-file value="$PROJECT_DIR$/sql/fix_review_constraint.sql" />
-      <script-mode>FILE</script-mode>
-      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
-      <method v="2" />
-    </configuration>
-    <configuration name="review_system_complete.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
-      <script-file value="$PROJECT_DIR$/sql/review_system_complete.sql" />
-      <script-mode>FILE</script-mode>
-      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager">
     <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="su25" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
@@ -158,15 +140,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Database Script.fix_old_constraint.sql" />
-        <item itemvalue="Database Script.review_system_complete.sql" />
-        <item itemvalue="Database Script.fix_review_constraint.sql" />
-        <item itemvalue="Database Script.add_sample_products.sql" />
-        <item itemvalue="Database Script.add_vouchers.sql" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -196,7 +169,12 @@
       <workItem from="1761166831022" duration="5765000" />
       <workItem from="1761200442552" duration="8932000" />
       <workItem from="1761225296373" duration="388000" />
-      <workItem from="1761292847069" duration="2035000" />
+      <workItem from="1761292847069" duration="3540000" />
+      <workItem from="1761410888616" duration="1263000" />
+      <workItem from="1761412175770" duration="6271000" />
+      <workItem from="1761639551108" duration="282000" />
+      <workItem from="1761639854195" duration="264000" />
+      <workItem from="1761642909841" duration="2000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -246,7 +224,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760599530481</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="fix: update database connection settings and refine pom.xml configurations">
+      <option name="closed" value="true" />
+      <created>1761298208210</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1761298208210</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -282,6 +268,7 @@
     <MESSAGE value="Admin Product Approve||Cancel" />
     <MESSAGE value="fix: fix error approve Products." />
     <MESSAGE value="update: add spring boot devtools" />
-    <option name="LAST_COMMIT_MESSAGE" value="update: add spring boot devtools" />
+    <MESSAGE value="fix: update database connection settings and refine pom.xml configurations" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: update database connection settings and refine pom.xml configurations" />
   </component>
 </project>
