@@ -295,3 +295,20 @@ CREATE TABLE IF NOT EXISTS withdrawal_requests (
     CONSTRAINT fk_withdraw_user FOREIGN KEY (user_id) REFERENCES users(user_id),
     CONSTRAINT fk_withdraw_bank FOREIGN KEY (bank_account_id) REFERENCES bank_accounts(bank_account_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Bảng license_usage_logs (Nhật ký sử dụng giấy phép)
+CREATE TABLE IF NOT EXISTS license_usage_logs (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  license_id BIGINT NOT NULL,
+  event_time DATETIME NOT NULL,
+  action VARCHAR(64) NOT NULL,
+  user_id BIGINT DEFAULT NULL,
+  ip VARCHAR(64) DEFAULT NULL,
+  device VARCHAR(255) DEFAULT NULL,
+  meta TEXT DEFAULT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_lul_license FOREIGN KEY (license_id) REFERENCES product_licenses(license_id) ON DELETE CASCADE
+);
+
+-- Gợi ý chỉ mục để tra cứu nhanh các nhật ký theo giấy phép
+CREATE INDEX idx_lul_license_time ON license_usage_logs(license_id, event_time);
