@@ -30,7 +30,11 @@ body {
 .nav a:hover{background:#f3f4f6}
 .top-actions{margin-left:auto;display:flex;align-items:center;gap:12px;position:relative;flex-wrap:nowrap}
 .lang,.notif,.user{font-size:14px;color:var(--muted)}
-.user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
+.user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff;white-space:nowrap}
+.user-btn .wallet-badge{margin-left:8px;padding:4px 8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;font-weight:600;color:#0369a1;font-size:12px}
+@media (max-width:768px){.user-btn .wallet-badge{display:none}}
+.support-link{font-size:14px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px;transition:all 0.2s}
+.support-link:hover{background:#f3f4f6;color:#111827}
 .search{position:relative}
 .search input{height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none}
 
@@ -628,10 +632,13 @@ body {
                 <a href="#">Support</a>
             </nav>
             <div class="top-actions">
-                <div class="notif">Notification</div>
+                <a href="/customer/support" class="support-link">Support</a>
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                         <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <span class="wallet-badge" th:if="${user != null}">
+                            💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
+                        </span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
