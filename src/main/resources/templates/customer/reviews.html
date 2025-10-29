@@ -2,15 +2,15 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Reviews - BanHangRong</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.min.css">
-    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <style>
         :root {
             --bg: #f5f7fb;
@@ -990,8 +990,8 @@
                                 <input type="text" name="search" class="form-control" 
                                        placeholder="Tên sản phẩm..." 
                                        th:value="${search}" />
-                            </div>
-
+            </div>
+            
                             <!-- Rating Filter -->
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
@@ -1005,7 +1005,7 @@
                                     <option value="2" th:selected="${filterRating == 2}">2 sao</option>
                                     <option value="1" th:selected="${filterRating == 1}">1 sao</option>
                                 </select>
-                            </div>
+                    </div>
 
                             <!-- Date From -->
                             <div>
@@ -1013,7 +1013,7 @@
                                     📅 Từ ngày
                                 </label>
                                 <input type="date" name="fromDate" class="form-control" th:value="${filterFromDate}">
-                            </div>
+                    </div>
 
                             <!-- Date To -->
                             <div>
@@ -1021,7 +1021,7 @@
                                     📅 Đến ngày
                                 </label>
                                 <input type="date" name="toDate" class="form-control" th:value="${filterToDate}">
-                            </div>
+                    </div>
 
                             <!-- Sort By -->
                             <div>
@@ -1034,21 +1034,11 @@
                                     <option value="rating_high" th:selected="${sortBy == 'rating_high'}">Rating cao → thấp</option>
                                     <option value="rating_low" th:selected="${sortBy == 'rating_low'}">Rating thấp → cao</option>
                                 </select>
-                            </div>
-
-                            <!-- Page Size -->
-                            <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
-                                    📄 Số/trang
-                                </label>
-                                <select name="size" class="form-control">
-                                    <option value="5" th:selected="${pageSize == 5}">5</option>
-                                    <option value="10" th:selected="${pageSize == 10}">10</option>
-                                    <option value="20" th:selected="${pageSize == 20}">20</option>
-                                    <option value="50" th:selected="${pageSize == 50}">50</option>
-                                </select>
-                            </div>
+                </div>
                         </div>
+                        
+                        <!-- Hidden size field to maintain default page size -->
+                        <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 10}" />
 
                         <div style="display: flex; gap: 12px; justify-content: center;">
                             <button type="submit" class="btn-primary">
@@ -1068,9 +1058,9 @@
                             (Trang <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>)
                         </span>
                     </h3>
-                </div>
-
-                <!-- Reviews List -->
+            </div>
+            
+            <!-- Reviews List -->
                 <div class="reviews-list">
                     <div th:each="review : ${reviews}" class="review-item"
                         th:data-stars="${review.rating}" 
@@ -1079,7 +1069,7 @@
                         <div class="review-product">
                             <img th:src="${productImagesMap.get(review.productId) != null ? productImagesMap.get(review.productId) : '/img/default-product.jpg'}"
                                 alt="Product" class="product-image" />
-                            <div class="product-info">
+                        <div class="product-info">
                                 <h4 th:text="${productsMap.get(review.productId) != null ? productsMap.get(review.productId).name : 'Product'}">
                                     Product Name</h4>
                                 <p th:text="${productsMap.get(review.productId) != null ? #numbers.formatDecimal(productsMap.get(review.productId).price, 0, 'COMMA', 0, 'POINT') + '₫' : ''}">
@@ -1104,8 +1094,8 @@
                             <div class="seller-response" th:if="${review.sellerResponse != null and !#strings.isEmpty(review.sellerResponse)}">
                                 <div class="seller-response-label">💬 Seller Response:</div>
                                 <p class="seller-response-text" th:text="${review.sellerResponse}">Thank you for your feedback!</p>
-                            </div>
                         </div>
+                    </div>
                         <div class="review-actions">
                             <button class="btn btn-outline-primary" 
                                 th:onclick="|editReview(${review.reviewId})|"
@@ -1246,22 +1236,22 @@
                     This action cannot be undone.
                 </p>
                 <input type="hidden" id="deleteReviewIdInput" value="">
-            </div>
+                    </div>
 
             <div class="modal-footer">
                 <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
                 <button class="submit-btn" id="confirmDeleteBtn" onclick="confirmDelete()" 
                     style="background: #ef4444; border-color: #ef4444;">Delete</button>
             </div>
-        </div>
-    </div>
-
+                    </div>
+                </div>
+                
     <!-- Notification Popup -->
     <div id="notificationPopup" class="notification-popup" style="display: none;">
         <div class="notification-content">
             <div class="notification-icon">
                 <span id="notificationIcon">✓</span>
-            </div>
+                </div>
             <div class="notification-message">
                 <h4 id="notificationTitle">Success</h4>
                 <p id="notificationText">Operation completed successfully</p>
