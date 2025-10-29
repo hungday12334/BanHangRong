@@ -20,7 +20,7 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     /**
-     * Tạo thông báo mới
+     * Create new notification
      */
     @Transactional
     public Notification createNotification(Long userId, String title, String message, String type, Long referenceId) {
@@ -36,27 +36,27 @@ public class NotificationService {
     }
 
     /**
-     * Tạo thông báo khi mua hàng thành công
+     * Create notification when order is placed successfully
      */
     @Transactional
     public void createOrderNotification(Long userId, Long orderId, String orderCode) {
-        String title = "Đặt hàng thành công";
-        String message = String.format("Đơn hàng #%s của bạn đã được đặt thành công. Vui lòng chờ người bán xác nhận.", orderCode);
+        String title = "Order Placed Successfully";
+        String message = String.format("Your order #%s has been placed successfully. Please wait for seller confirmation.", orderCode);
         createNotification(userId, title, message, "ORDER", orderId);
     }
 
     /**
-     * Tạo thông báo khi đánh giá thành công
+     * Create notification when review is submitted successfully
      */
     @Transactional
     public void createReviewNotification(Long userId, Long reviewId, String productName) {
-        String title = "Đánh giá thành công";
-        String message = String.format("Cảm ơn bạn đã đánh giá sản phẩm \"%s\". Đánh giá của bạn đã được ghi nhận.", productName);
+        String title = "Review Submitted Successfully";
+        String message = String.format("Thank you for reviewing product \"%s\". Your review has been recorded.", productName);
         createNotification(userId, title, message, "REVIEW", reviewId);
     }
 
     /**
-     * Lấy danh sách thông báo với bộ lọc
+     * Get notifications list with filters
      */
     public Page<Notification> getNotificationsWithFilters(
             Long userId, 
@@ -72,7 +72,7 @@ public class NotificationService {
         if ("oldest".equals(sortBy)) {
             sort = Sort.by("createdAt").ascending();
         } else {
-            sort = Sort.by("createdAt").descending(); // Mặc định mới nhất
+            sort = Sort.by("createdAt").descending(); // Default: newest first
         }
         
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -81,7 +81,7 @@ public class NotificationService {
     }
 
     /**
-     * Lấy tất cả thông báo của user
+     * Get all notifications for user
      */
     public Page<Notification> getUserNotifications(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -89,7 +89,7 @@ public class NotificationService {
     }
 
     /**
-     * Đánh dấu đã đọc
+     * Mark notification as read
      */
     @Transactional
     public boolean markAsRead(Long notificationId, Long userId) {
@@ -98,7 +98,7 @@ public class NotificationService {
         if (optNotification.isPresent()) {
             Notification notification = optNotification.get();
             
-            // Kiểm tra notification có thuộc về user không
+            // Check if notification belongs to user
             if (!notification.getUserId().equals(userId)) {
                 return false;
             }
@@ -113,7 +113,7 @@ public class NotificationService {
     }
 
     /**
-     * Đánh dấu tất cả đã đọc
+     * Mark all notifications as read
      */
     @Transactional
     public void markAllAsRead(Long userId) {
@@ -131,19 +131,19 @@ public class NotificationService {
     }
 
     /**
-     * Đếm số thông báo chưa đọc
+     * Count unread notifications
      */
     public Long countUnreadNotifications(Long userId) {
         return notificationRepository.countByUserIdAndIsRead(userId, false);
     }
 
     /**
-     * Lấy chi tiết notification
+     * Get notification details
      */
     public Optional<Notification> getNotificationById(Long notificationId, Long userId) {
         Optional<Notification> notification = notificationRepository.findById(notificationId);
         
-        // Kiểm tra notification có thuộc về user không
+        // Check if notification belongs to user
         if (notification.isPresent() && !notification.get().getUserId().equals(userId)) {
             return Optional.empty();
         }
@@ -152,7 +152,7 @@ public class NotificationService {
     }
 
     /**
-     * Xóa notification
+     * Delete notification
      */
     @Transactional
     public boolean deleteNotification(Long notificationId, Long userId) {

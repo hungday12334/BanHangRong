@@ -1,10 +1,10 @@
 -- =============================================
--- TẠO BẢNG NOTIFICATIONS
+-- CREATE NOTIFICATIONS TABLE
 -- =============================================
 
 USE smiledev_wap;
 
--- Tạo bảng notifications
+-- Create notifications table
 CREATE TABLE IF NOT EXISTS notifications (
     notification_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -22,12 +22,12 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tạo một số notification mẫu để test
+-- Create sample notifications for testing
 INSERT INTO notifications (user_id, title, message, type, reference_id, is_read, created_at)
 SELECT 
     u.user_id,
-    'Chào mừng bạn đến với BanHangRong!',
-    'Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá các sản phẩm tuyệt vời của chúng tôi!',
+    'Welcome to BanHangRong!',
+    'Thank you for registering your account. Explore our amazing products!',
     'SYSTEM',
     NULL,
     FALSE,
@@ -35,11 +35,11 @@ SELECT
 FROM users u
 WHERE u.user_type = 'CUSTOMER'
 AND NOT EXISTS (
-    SELECT 1 FROM notifications n WHERE n.user_id = u.user_id AND n.title = 'Chào mừng bạn đến với BanHangRong!'
+    SELECT 1 FROM notifications n WHERE n.user_id = u.user_id AND n.title = 'Welcome to BanHangRong!'
 )
 LIMIT 10;
 
--- Kiểm tra kết quả
+-- Check results
 SELECT 
     n.notification_id,
     n.user_id,
@@ -53,5 +53,5 @@ JOIN users u ON n.user_id = u.user_id
 ORDER BY n.created_at DESC
 LIMIT 10;
 
-SELECT 'BẢNG NOTIFICATIONS ĐÃ ĐƯỢC TẠO THÀNH CÔNG!' AS message;
+SELECT 'NOTIFICATIONS TABLE CREATED SUCCESSFULLY!' AS message;
 

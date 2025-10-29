@@ -37,18 +37,33 @@ public class NotificationInitializer implements CommandLineRunner {
                     .toList();
                 
                 if (!customers.isEmpty()) {
+                    int successCount = 0;
                     for (Users customer : customers) {
-                        // Tạo notification chào mừng
-                        Notification welcomeNotification = new Notification();
-                        welcomeNotification.setUserId(customer.getUserId());
-                        welcomeNotification.setTitle("Chào mừng bạn đến với BanHangRong!");
-                        welcomeNotification.setMessage("Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá các sản phẩm tuyệt vời của chúng tôi!");
-                        welcomeNotification.setType("SYSTEM");
-                        welcomeNotification.setIsRead(false);
-                        notificationRepository.save(welcomeNotification);
+                        try {
+                            // Tạo notification chào mừng
+                            Notification welcomeNotification = new Notification();
+                            welcomeNotification.setUserId(customer.getUserId());
+                            welcomeNotification.setTitle("Welcome to BanHangRong!");
+                            welcomeNotification.setMessage("Thank you for registering. Explore our amazing products!");
+                            welcomeNotification.setType("SYSTEM");
+                            welcomeNotification.setIsRead(false);
+                            notificationRepository.save(welcomeNotification);
+                            successCount++;
+                        } catch (Exception ex) {
+                            System.err.println("⚠ Failed to create notification for user " + customer.getUserId() + ": " + ex.getMessage());
+                            // Nếu lỗi là do encoding, thông báo cho admin
+                            if (ex.getMessage() != null && ex.getMessage().contains("Incorrect string value")) {
+                                System.err.println("⚠ DATABASE CHARSET ERROR: Please run sql/fix_notifications_charset.sql to fix UTF-8 encoding!");
+                                break; // Dừng vòng lặp vì tất cả sẽ lỗi
+                            }
+                        }
                     }
                     
-                    System.out.println("✓ Created " + customers.size() + " welcome notifications");
+                    if (successCount > 0) {
+                        System.out.println("✓ Created " + successCount + " welcome notifications");
+                    } else {
+                        System.out.println("⚠ Could not create notifications - please check database charset");
+                    }
                 } else {
                     System.out.println("⚠ No customers found to create sample notifications");
                 }
