@@ -10,27 +10,82 @@ public class ProductReviews {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_id")
     private Long reviewId;
+
     @Column(name = "product_id")
     private Long productId;
+
     @Column(name = "user_id")
     private Long userId;
+
+    @Column(name = "order_item_id")
+    private Long orderItemId; // new: link to order item (nullable)
+
     private Integer rating;
     private String comment;
-    @Column(name = "media_urls")
-    private String mediaUrls;
+
+    // THÊM 2 FIELD MỚI
+    @Column(name = "seller_response", columnDefinition = "TEXT")
+    private String sellerResponse;
+
+    @Column(name = "seller_response_at")
+    private LocalDateTime sellerResponseAt;
+
+    @Column(name = "media_urls", columnDefinition = "TEXT")
+    private String mediaUrls; // new: comma separated media URLs
+
     @Column(name = "service_rating")
-    private Integer serviceRating;
-    @Column(name = "order_item_id")
-    private Long orderItemId;
+    private Integer serviceRating; // new: optional service rating
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
-    // Transient field for displaying username (not stored in database)
-    @Transient
-    private String username;
 
+    // Thêm getters và setters cho 2 field mới
+    public String getSellerResponse() {
+        return sellerResponse;
+    }
+
+    public void setSellerResponse(String sellerResponse) {
+        this.sellerResponse = sellerResponse;
+        this.sellerResponseAt = LocalDateTime.now();
+    }
+
+    public LocalDateTime getSellerResponseAt() {
+        return sellerResponseAt;
+    }
+
+    public void setSellerResponseAt(LocalDateTime sellerResponseAt) {
+        this.sellerResponseAt = sellerResponseAt;
+    }
+
+    // New getters/setters
+    public Long getOrderItemId() {
+        return orderItemId;
+    }
+
+    public void setOrderItemId(Long orderItemId) {
+        this.orderItemId = orderItemId;
+    }
+
+    public String getMediaUrls() {
+        return mediaUrls;
+    }
+
+    public void setMediaUrls(String mediaUrls) {
+        this.mediaUrls = mediaUrls;
+    }
+
+    public Integer getServiceRating() {
+        return serviceRating;
+    }
+
+    public void setServiceRating(Integer serviceRating) {
+        this.serviceRating = serviceRating;
+    }
+
+    // Các getters và setters cũ giữ nguyên
     public Long getReviewId() {
         return reviewId;
     }
@@ -73,28 +128,9 @@ public class ProductReviews {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-    public String getMediaUrls() {
-        return mediaUrls;
-    }
-    public void setMediaUrls(String mediaUrls) {
-        this.mediaUrls = mediaUrls;
-    }
-    public Integer getServiceRating() {
-        return serviceRating;
-    }
-    public void setServiceRating(Integer serviceRating) {
-        this.serviceRating = serviceRating;
-    }
-    public Long getOrderItemId() {
-        return orderItemId;
-    }
-    public void setOrderItemId(Long orderItemId) {
-        this.orderItemId = orderItemId;
-    }
-    public String getUsername() {
-        return username;
-    }
-    public void setUsername(String username) {
-        this.username = username;
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

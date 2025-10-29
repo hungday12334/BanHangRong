@@ -1,302 +1,213 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đánh giá sản phẩm - BanHangRong</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <title>My Reviews - BanHangRong</title>
     <style>
         :root {
-			--bg: #f5f7fb;
-			--card: #ffffff;
-			--ink: #0f172a;
-			--muted: #6b7280;
-			--brand: #0ea5e9;
-			--chip: #e5e7eb;
-			--line: #eaeef4;
-		}
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #0ea5e9;
+            --chip: #e5e7eb;
+            --line: #eaeef4;
+        }
 
-		* {
-			box-sizing: border-box;
-		}
+        * {
+            box-sizing: border-box;
+        }
 
-		html,
-		body {
-			height: 100%;
-		}
+        html,
+        body {
+            height: 100%;
+        }
 
-		body {
-			margin: 0;
-			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-			color: var(--ink);
-			background: var(--bg);
-		}
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
 
-		.wrapper {
-			min-height: 100%;
-			display: flex;
-			flex-direction: column;
-		}
+        .wrapper {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
 
-		.topbar {
-			display: flex;
-			align-items: center;
-			gap: 14px;
-			padding: 10px 16px;
-			border-bottom: 1px solid var(--line);
-			background: var(--card);
-			flex-wrap: nowrap;
-		}
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--line);
+            background: var(--card);
+            flex-wrap: nowrap;
+        }
 
         .brand {
             font-weight: 800;
             letter-spacing: .2px;
-		}
-
-		.nav {
-			display: flex;
-			gap: 16px;
-			margin: 0 12px;
-			flex: 1;
-			overflow: auto;
-			white-space: nowrap;
-		}
-
-		.nav a {
-			text-decoration: none;
-			color: #111827;
-			font-weight: 500;
-			padding: 8px 10px;
-			border-radius: 8px;
-		}
-
-		.nav a:hover {
-			background: #f3f4f6;
-		}
-
-		.top-actions {
-			margin-left: auto;
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			position: relative;
-		}
-
-		.support-link {
-			font-size: 14px;
-			color: var(--muted);
-			text-decoration: none;
-			padding: 6px 10px;
-			border-radius: 8px;
-			transition: all 0.2s;
-		}
-
-		.support-link:hover {
-			background: #f3f4f6;
-			color: #111827;
-		}
-
-		.user-btn {
             display: flex;
             align-items: center;
-			gap: 6px;
+            gap: 8px;
             cursor: pointer;
-			color: #111827;
-			border: 1px solid var(--line);
-			padding: 6px 10px;
-			border-radius: 8px;
-			background: #fff
-		}
-
-		.user-menu {
-			position: absolute;
-			right: 0;
-			top: 48px;
-			background: #fff;
-			border: 1px solid var(--line);
-			border-radius: 10px;
-			box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
-			width: 200px;
-			display: none;
-			z-index: 5
-		}
-
-		.user-menu .item {
-			display: block;
-			padding: 10px 12px;
-			color: #111827;
-			text-decoration: none
-		}
-
-		.user-menu .item:hover {
-			background: #f3f4f6
-		}
-
-		.search {
-			position: relative;
-		}
-
-		.search input {
-			height: 34px;
-			width: 220px;
-			padding: 0 12px;
-			border: 1px solid var(--line);
-			border-radius: 8px;
-			outline: none;
-		}
-
-		.cart {
-			position: relative;
-			width: 28px;
-			height: 28px;
-			display: grid;
-			place-items: center;
-			border: 1px solid var(--line);
-			border-radius: 8px;
             text-decoration: none;
-			color: #111827;
-		}
-
-		.cart .badge {
-			position: absolute;
-			top: -6px;
-			right: -6px;
-			background: #ef4444;
-			color: #fff;
-			min-width: 18px;
-			height: 18px;
-			border-radius: 9px;
-			font-size: 11px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0 5px;
-		}
-
-        /* ---- REVIEWS ---- */
-        .filter-section {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
+            color: inherit;
         }
 
-        .review-card {
-            background: #fff;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-            transition: transform 0.2s ease;
-        }
-
-        .review-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-        .review-card h5 {
-            margin-bottom: 0.25rem;
-            color: #111827;
-            font-weight: 600;
-        }
-
-        .review-stars {
-            display: flex !important;
-            align-items: center;
-            gap: 4px;
-            font-size: 18px;
-        }
-
-        .review-stars span {
-            display: inline-flex;
-        }
-
-        .review-stars i.fa-star {
-            color: #ffc107 !important;
-            font-size: 18px !important;
-        }
-
-        .review-stars i.fa-regular {
-            color: #d1d5db !important;
-            font-size: 18px !important;
-        }
-        
-        .review-stars .fa-star:before {
-            content: "\f005" !important;
-        }
-        
-        .review-stars .fa-regular.fa-star:before {
-            content: "\f005" !important;
-        }
-        
-        .review-date {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-
-        /* Pagination styling */
-        .pagination {
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .pagination .page-link {
+        .brand:hover {
             color: var(--brand);
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            margin: 0 12px;
+            flex: 1;
+            overflow: auto;
+            white-space: nowrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #111827;
+            font-weight: 500;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+
+        .nav a:hover {
+            background: #f3f4f6;
+        }
+
+        .top-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #111827;
+            border: 1px solid var(--line);
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #fff
+        }
+
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: 48px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+            width: 200px;
+            display: none;
+            z-index: 5
+        }
+
+        .user-menu .item {
+            display: block;
+            padding: 10px 12px;
+            color: #111827;
+            text-decoration: none
+        }
+
+        .user-menu .item:hover {
+            background: #f3f4f6
+        }
+
+        .search {
+            position: relative;
+        }
+
+        .search input {
+            height: 34px;
+            width: 220px;
+            padding: 0 12px;
             border: 1px solid var(--line);
             border-radius: 8px;
-            margin: 0 4px;
-            padding: 8px 14px;
+            outline: none;
+        }
+
+        .cart {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
             font-weight: 500;
             transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
         }
 
-        .pagination .page-link:hover {
-            background: var(--brand);
-            color: white;
-            border-color: var(--brand);
+        .cart:hover {
+            background: #2563eb;
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
-        .pagination .page-item.active .page-link {
-            background: var(--brand);
-            border-color: var(--brand);
+        .cart .badge {
+            background: #ef4444;
             color: white;
-            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-        }
-
-        .pagination .page-item.disabled .page-link {
-            color: var(--muted);
-            background: var(--chip);
-            border-color: var(--line);
-            cursor: not-allowed;
-        }
-
-        .pagination .page-item.disabled .page-link:hover {
-            transform: none;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
-<body>
 
-<!-- Header -->
+<body>
+    <div class="wrapper">
+        <!-- Header -->
         <div class="topbar">
-    <div class="brand">BanHangRong</div>
+            <a href="/customer/dashboard" class="brand">
+                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
+                BanHangRong
+            </a>
             <nav class="nav" aria-label="Main">
                 <a href="/customer/dashboard">Home</a>
                 <a href="/categories">Category</a>
                 <a href="#">License Software</a>
                 <a href="#">Game Keys</a>
                 <a href="#">Voucher</a>
-        <a href="/customer/support">Support</a>
+                <a href="#">Support</a>
             </nav>
             <div class="top-actions">
-        <a href="/customer/support" class="support-link">Support</a>
+                <div class="notif">Notification</div>
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                         <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
@@ -329,6 +240,10 @@
                     <form id="logoutForm" method="post" action="/logout" style="display:none;">
                     </form>
                 </div>
+                <!-- Wallet Balance Display -->
+                <div class="wallet-balance" style="padding: 6px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; color: #0ea5e9; font-weight: 600; font-size: 14px;">
+                    💰 <span th:text="${user != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') : '0'}">0</span>₫
+                </div>
                 <div class="search">
                     <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
                         <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
@@ -339,251 +254,343 @@
                             style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
                     </form>
                 </div>
-        <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
-                        th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">
+                    🛒
+                    <span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span>
+                </a>
             </div>
         </div>
 
-<!-- ======= MAIN CONTENT ======= -->
-<div class="container mt-4">
-    <h2 class="mb-3">Đánh giá của tôi</h2>
-    <p class="text-muted mb-3">
-        Tổng số: <span th:text="${totalReviews != null ? totalReviews : 0}">0</span> đánh giá
-        <span th:if="${totalPages != null and totalPages > 1}">
-            | Trang <span th:text="${page + 1}">1</span>/<span th:text="${totalPages}">1</span>
-        </span>
-    </p>
-    
-    <div class="filter-section">
-        <form class="row g-2 align-items-end" th:action="@{/customer/reviews}" method="get" id="filterForm">
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Lọc theo số sao</label>
-                <select name="stars" class="form-select" th:value="${filterStars}">
-                    <option value="">Tất cả</option>
-                    <option value="5" th:selected="${filterStars != null and filterStars == 5}">⭐⭐⭐⭐⭐ 5 sao</option>
-                    <option value="4" th:selected="${filterStars != null and filterStars == 4}">⭐⭐⭐⭐ 4 sao</option>
-                    <option value="3" th:selected="${filterStars != null and filterStars == 3}">⭐⭐⭐ 3 sao</option>
-                    <option value="2" th:selected="${filterStars != null and filterStars == 2}">⭐⭐ 2 sao</option>
-                    <option value="1" th:selected="${filterStars != null and filterStars == 1}">⭐ 1 sao</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Lọc theo ngày</label>
-                <input type="date" name="date" class="form-control" th:value="${filterDate}">
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Sắp xếp</label>
-                <select name="sort" class="form-select">
-                    <option value="latest" th:selected="${filterSort == null or filterSort == 'latest'}">Mới nhất</option>
-                    <option value="oldest" th:selected="${filterSort == 'oldest'}">Cũ nhất</option>
-                    <option value="highest" th:selected="${filterSort == 'highest'}">Cao nhất</option>
-                    <option value="lowest" th:selected="${filterSort == 'lowest'}">Thấp nhất</option>
-                </select>
+        <div class="reviews-container">
+            <div class="reviews-header">
+                <h1 class="reviews-title">My Reviews</h1>
+                <p class="reviews-subtitle">View and manage reviews you've written</p>
             </div>
             
-            <div class="col-md-2">
-                <label class="form-label fw-semibold">Tìm kiếm</label>
-                <input type="text" name="keyword" class="form-control" placeholder="Từ khóa..." th:value="${filterKeyword}">
+            <!-- Rating Statistics -->
+            <div class="rating-stats" th:if="${reviews != null and !reviews.isEmpty()}">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" th:text="${reviews.size()}">0</div>
+                        <div class="stat-label">Total Reviews</div>
                     </div>
-
-            <div class="col-md-1">
-                <label class="form-label fw-semibold">Hiển thị</label>
-                <select name="size" class="form-select">
-                    <option value="5" th:selected="${pageSize == 5}">5</option>
-                    <option value="10" th:selected="${pageSize == null or pageSize == 10}">10</option>
-                    <option value="20" th:selected="${pageSize == 20}">20</option>
-                    <option value="50" th:selected="${pageSize == 50}">50</option>
-                </select>
+                    <div class="stat-item">
+                        <div class="stat-value">4.5</div>
+                        <div class="stat-label">Average Rating</div>
                     </div>
-            
-            <div class="col-md-12 mt-3">
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" type="submit">
-                        <i class="fa fa-filter"></i> Lọc
-                    </button>
-                    <a th:if="${filterStars != null or filterDate != null or filterSort != null or filterKeyword != null}" 
-                       href="/customer/reviews" 
-                       class="btn btn-outline-secondary">
-                        <i class="fa fa-times"></i> Xóa bộ lọc
-                    </a>
+                    <div class="stat-item">
+                        <div class="stat-value" th:text="${reviews.size()}">0</div>
+                        <div class="stat-label">5-Star Reviews</div>
                     </div>
                 </div>
-        </form>
             </div>
             
             <!-- Reviews List -->
-    <div th:each="review : ${reviews}" class="review-card">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-            <div class="d-flex align-items-center gap-3">
-                <img th:if="${productImagesMap.containsKey(review.productId)}" 
-                     th:src="${productImagesMap.get(review.productId)}" 
-                     alt="Product"
-                     style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
-                <div>
-                    <h5 class="mb-1" th:text="${productsMap.get(review.productId) != null ? productsMap.get(review.productId).name : 'Product'}">Product Name</h5>
-                    <span class="review-date" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">23/10/2025 14:30</span>
+            <div id="reviewsList">
+                <div th:if="${reviews != null and !reviews.isEmpty()}" th:each="review : ${reviews}" class="review-item">
+                    <div class="review-header">
+                        <div class="product-info">
+                            <img th:src="${productImagesMap[review.productId] ?: '/img/product-placeholder.jpg'}" 
+                                 alt="Product" class="product-image">
+                            <div class="product-details">
+                                <h3 th:text="${productsMap[review.productId]?.name ?: 'Unknown Product'}">Product Name</h3>
+                                <p th:if="${review.orderItemId != null}">Order Item ID: <span th:text="${review.orderItemId}">Order Item</span></p>
+                                <p th:if="${review.orderItemId == null}">Product ID: <span th:text="${review.productId}">Product</span></p>
                             </div>
                         </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-primary" th:onclick="'editReview(' + ${review.reviewId} + ')'">
-                    <i class="fa fa-edit"></i> Sửa
-                </button>
-                <button class="btn btn-sm btn-outline-danger" th:onclick="'deleteReview(' + ${review.reviewId} + ')'">
-                    <i class="fa fa-trash"></i> Xóa
-                </button>
+                        <div class="rating">
+                            <div class="stars">
+                                <span th:each="i : ${#numbers.sequence(1, review.rating)}" class="star">★</span>
+                                <span th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" class="star empty">★</span>
+                            </div>
+                            <span th:text="${review.rating} + '.0'">5.0</span>
+                        </div>
+                    </div>
+                    <div class="review-content">
+                        <p class="review-text" th:text="${review.comment ?: 'No comment provided'}">
+                            Review comment
+                        </p>
+                        <p class="review-date">
+                            Reviewed on <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">Date</span>
+                        </p>
+                    </div>
+                    <div class="review-actions">
+                        <button class="btn btn-primary" th:onclick="'editReview(' + ${review.reviewId} + ')'">Edit</button>
+                        <button class="btn btn-secondary" th:onclick="'deleteReview(' + ${review.reviewId} + ')'">Delete</button>
                     </div>
                 </div>
                 
-        <div class="review-stars mb-2">
-            <th:block th:if="${review.rating != null}">
-                <span th:each="i : ${#numbers.sequence(1, review.rating)}" style="color: #ffc107; font-size: 20px;">★</span>
-                <span th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" style="color: #d1d5db; font-size: 20px;">★</span>
-            </th:block>
-            <th:block th:if="${review.rating == null}">
-                <span th:each="i : ${#numbers.sequence(1, 5)}" style="color: #d1d5db; font-size: 20px;">★</span>
-            </th:block>
+                <!-- Show empty state if no reviews -->
+                <div th:if="${reviews == null or reviews.isEmpty()}" class="empty-reviews" id="emptyReviews">
+                    <div class="empty-icon">⭐</div>
+                    <h2 class="empty-title">No Reviews Yet</h2>
+                    <p class="empty-message">You haven't written any product reviews yet.</p>
+                    <a href="/customer/dashboard" class="btn-explore">Start Shopping</a>
                 </div>
-        
-        <div th:if="${review.serviceRating != null}" class="mb-2">
-            <small class="text-muted fw-semibold me-2">Đánh giá dịch vụ:</small>
-            <span th:each="i : ${#numbers.sequence(1, review.serviceRating)}" style="color: #28a745; font-size: 18px;">★</span>
-            <span th:each="i : ${#numbers.sequence(review.serviceRating + 1, 5)}" style="color: #d1d5db; font-size: 18px;">★</span>
             </div>
-        
-        <p class="mb-2" th:text="${review.comment ?: 'Không có nhận xét'}">Sản phẩm rất tốt, giao hàng nhanh.</p>
-        
-        <div th:if="${review.mediaUrls != null and !review.mediaUrls.isEmpty()}" class="d-flex gap-2 mt-2">
-            <img th:each="url : ${#strings.arraySplit(review.mediaUrls, ',')}" 
-                 th:src="${url}" 
-                 alt="Review media"
-                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
         </div>
     </div>
 
-    <!-- Khi không có đánh giá -->
-    <div th:if="${reviews == null or reviews.isEmpty()}" class="text-center text-muted py-5">
-        <i class="fa fa-comment-slash fa-3x mb-3"></i>
-        <p class="fs-5">Bạn chưa có đánh giá nào.</p>
-        <a href="/customer/dashboard" class="btn btn-primary mt-2">
-            <i class="fa fa-shopping-bag"></i> Tiếp tục mua sắm
-        </a>
-    </div>
-
-    <!-- Pagination -->
-    <nav th:if="${totalPages != null and totalPages > 1}" aria-label="Reviews pagination" class="mt-4">
-        <ul class="pagination justify-content-center">
-            <!-- Previous button -->
-            <li class="page-item" th:classappend="${page == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/customer/reviews(page=${page - 1}, size=${size})}" 
-                   aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-
-            <!-- First page -->
-            <li th:if="${page > 2}" class="page-item">
-                <a class="page-link" th:href="@{/customer/reviews(page=0, size=${size})}">1</a>
-            </li>
-            <li th:if="${page > 3}" class="page-item disabled">
-                <span class="page-link">...</span>
-            </li>
-
-            <!-- Page numbers around current page -->
-            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <li th:if="${i >= page - 2 and i <= page + 2}" 
-                    class="page-item" 
-                    th:classappend="${i == page} ? 'active'">
-                    <a class="page-link" th:href="@{/customer/reviews(page=${i}, size=${size})}" 
-                       th:text="${i + 1}">1</a>
-                </li>
-            </th:block>
-
-            <!-- Last page -->
-            <li th:if="${page < totalPages - 4}" class="page-item disabled">
-                <span class="page-link">...</span>
-            </li>
-            <li th:if="${page < totalPages - 3}" class="page-item">
-                <a class="page-link" th:href="@{/customer/reviews(page=${totalPages - 1}, size=${size})}" 
-                   th:text="${totalPages}">10</a>
-            </li>
-
-            <!-- Next button -->
-            <li class="page-item" th:classappend="${page >= totalPages - 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/customer/reviews(page=${page + 1}, size=${size})}" 
-                   aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
+    <style>
+        .reviews-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         
-        <!-- Page info -->
-        <div class="text-center mt-3 text-muted">
-            <small>Trang <span th:text="${page + 1}">1</span> / <span th:text="${totalPages}">1</span> - 
-            Tổng <span th:text="${totalReviews}">0</span> đánh giá</small>
-        </div>
-    </nav>
-</div>
+        .reviews-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .reviews-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .reviews-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+        }
+        
+        /* Rating Statistics */
+        .rating-stats {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ef4444;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .review-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .product-info {
+            display: flex;
+            gap: 16px;
+            flex: 1;
+        }
+        
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .product-details h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .product-details p {
+            margin: 4px 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .rating {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .star {
+            color: #fbbf24;
+            font-size: 18px;
+        }
+        
+        .star.empty {
+            color: #d1d5db;
+        }
+        
+        .rating span {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .review-content {
+            margin-bottom: 16px;
+        }
+        
+        .review-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .review-date {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .review-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .empty-reviews {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .empty-message {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        
+        .btn-explore {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // User menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
             const userMenuBtn = document.getElementById('userMenuBtn');
             const userDropdown = document.getElementById('userDropdown');
             
             if (userMenuBtn && userDropdown) {
                 userMenuBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-            userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
         });
-        
-        document.addEventListener('click', function() {
-            userDropdown.style.display = 'none';
-        });
-    }
-    
-    // Top-up prompt
-    function topupPrompt(event) {
-        event.preventDefault();
-        const amount = prompt('Nhập số tiền bạn muốn nạp (VND):');
-        if (amount && !isNaN(amount) && parseInt(amount) > 0) {
-            document.getElementById('topupAmountInput').value = amount;
-            event.target.submit();
-            return true;
-        }
-        alert('Vui lòng nhập số tiền hợp lệ');
+
+        // VNPay topup function
+        function topupPrompt(e) {
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if (!v) return false;
+            const clean = v.replace(/[^0-9]/g, '');
+            if (!clean) {
+                alert('Please enter a valid amount');
                 return false;
             }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+    </script>
     
-    // Edit review function
+    <script>
         function editReview(reviewId) {
-        window.location.href = '/customer/reviews/edit/' + reviewId;
+            alert('Edit review functionality coming soon!');
         }
         
-    // Delete review function
         function deleteReview(reviewId) {
-        if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
-            fetch('/customer/reviews/delete/' + reviewId, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Đã xóa đánh giá thành công!');
-                    window.location.reload();
-                } else {
-                    alert('Có lỗi xảy ra khi xóa đánh giá!');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi xóa đánh giá!');
-            });
+            if (confirm('Are you sure you want to delete this review?')) {
+                alert('Delete review functionality coming soon!');
             }
         }
     </script>
 </body>
+
 </html>
