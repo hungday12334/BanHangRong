@@ -58,6 +58,13 @@ public class SecurityConfig {
                     .requestMatchers("/categories", "/category/**", "/product/**").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()
 
+                // Chat endpoints - CHỈ CẦN AUTHENTICATED (không cần role cụ thể)
+                // Đặt TRƯỚC các rule khác để được ưu tiên
+                .requestMatchers("/chat", "/customer/chat", "/seller/chat").authenticated()
+                .requestMatchers("/api/conversation/**", "/api/conversations/**").authenticated()
+                .requestMatchers("/api/users/**", "/api/sellers/**").authenticated()
+                .requestMatchers("/ws/**").authenticated()
+                
                 // Customer pages - cho phép tất cả authenticated users
                 .requestMatchers("/customer/**", "/cart/**").authenticated()
                 
