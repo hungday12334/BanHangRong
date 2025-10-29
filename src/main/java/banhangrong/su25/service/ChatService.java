@@ -1,182 +1,216 @@
 package banhangrong.su25.service;
 
+
 import banhangrong.su25.Entity.ChatMessage;
-import banhangrong.su25.Entity.ChatRoom;
-import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.Conversation;
 import banhangrong.su25.Entity.Users;
-import banhangrong.su25.Repository.ChatMessageRepository;
-import banhangrong.su25.Repository.ChatRoomRepository;
-import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.ConversationRepository;
+import banhangrong.su25.Repository.MessageRepository;
 import banhangrong.su25.Repository.UsersRepository;
-import banhangrong.su25.WebSocket.ChatWebSocketHandler;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ChatService {
 
-    private final ChatRoomRepository chatRoomRepository;
-    private final ChatMessageRepository chatMessageRepository;
     private final UsersRepository usersRepository;
-    private final ProductsRepository productsRepository;
-    private final ChatWebSocketHandler chatWebSocketHandler;
+    private final ConversationRepository conversationRepository;
+    private final MessageRepository messageRepository;
 
-    public ChatService(ChatRoomRepository chatRoomRepository,
-                       ChatMessageRepository chatMessageRepository,
-                       UsersRepository usersRepository,
-                       ProductsRepository productsRepository,
-                       ChatWebSocketHandler chatWebSocketHandler) {
-        this.chatRoomRepository = chatRoomRepository;
-        this.chatMessageRepository = chatMessageRepository;
+    // Track online users in memory (in production, use Redis or similar)
+    private final Map<Long, Boolean> onlineUsers = new HashMap<>();
+
+    @Autowired
+    public ChatService(UsersRepository usersRepository,
+                      ConversationRepository conversationRepository,
+                      MessageRepository messageRepository) {
         this.usersRepository = usersRepository;
-        this.productsRepository = productsRepository;
-        this.chatWebSocketHandler = chatWebSocketHandler;
+        this.conversationRepository = conversationRepository;
+        this.messageRepository = messageRepository;
+    }
+
+    public Users getUser(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        return usersRepository.findById(userId).orElse(null);
+    }
+
+    public Users getUserByUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return null;
+        }
+        return usersRepository.findByUsername(username).orElse(null);
+    }
+
+    public List<Users> getSellers() {
+        // Get all users with SELLER user type
+        return usersRepository.findAll().stream()
+                .filter(u -> "SELLER".equalsIgnoreCase(u.getUserType()))
+                .toList();
     }
 
     @Transactional
-    public ChatRoom getOrCreateChatRoom(Long sellerId, Long customerId, Long productId) {
-        Users seller = usersRepository.findById(sellerId)
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
+    public void setUserOnlineStatus(Long userId, boolean online) {
+        if (userId != null) {
+            onlineUsers.put(userId, online);
+            // Also update last_login in database
+            usersRepository.findById(userId).ifPresent(user -> {
+                user.setLastLogin(LocalDateTime.now());
+                usersRepository.save(user);
+            });
+        }
+    }
+
+    public boolean isUserOnline(Long userId) {
+        return onlineUsers.getOrDefault(userId, false);
+    }
+
+    @Transactional
+    public Conversation getOrCreateConversation(Long customerId, Long sellerId) {
+        if (customerId == null) {
+            throw new IllegalArgumentException("Customer ID cannot be null");
+        }
+        if (sellerId == null) {
+            throw new IllegalArgumentException("Seller ID cannot be null");
+        }
+
         Users customer = usersRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + customerId));
+        Users seller = usersRepository.findById(sellerId)
+                .orElseThrow(() -> new IllegalArgumentException("Seller not found: " + sellerId));
 
-        Products product = null;
-        if (productId != null) {
-            product = productsRepository.findById(productId)
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+        if (!"SELLER".equalsIgnoreCase(seller.getUserType())) {
+            throw new IllegalArgumentException("User " + sellerId + " is not a seller");
         }
 
-        Optional<ChatRoom> existingRoom;
-        if (product != null) {
-            existingRoom = chatRoomRepository.findBySellerAndCustomerAndProduct(seller, customer, productId);
-        } else {
-            existingRoom = chatRoomRepository.findBySellerAndCustomer(seller, customer);
+        // Try to find existing conversation
+        Optional<Conversation> existing = conversationRepository.findByCustomerIdAndSellerId(customerId, sellerId);
+        if (existing.isPresent()) {
+            Conversation conv = existing.get();
+            // Load messages
+            conv.setMessages(messageRepository.findByConversationIdOrderByCreatedAtAsc(conv.getId()));
+            // Calculate unread count
+            conv.setUnreadCount((int) messageRepository.countUnreadMessages(conv.getId(), customerId));
+            return conv;
         }
 
-        if (existingRoom.isPresent()) {
-            return existingRoom.get();
+        // Create new conversation
+        String conversationId = generateConversationId(customerId, sellerId);
+        Conversation conv = new Conversation();
+        conv.setId(conversationId);
+        conv.setCustomerId(customerId);
+        conv.setSellerId(sellerId);
+        conv.setCustomerName(customer.getFullName() != null ? customer.getFullName() : customer.getUsername());
+        conv.setSellerName(seller.getFullName() != null ? seller.getFullName() : seller.getUsername());
+        conv.setMessages(new ArrayList<>());
+        conv.setUnreadCount(0);
+
+        return conversationRepository.save(conv);
+    }
+
+    public Conversation getConversation(String conversationId) {
+        if (conversationId == null || conversationId.trim().isEmpty()) {
+            return null;
         }
 
-        ChatRoom newRoom = new ChatRoom();
-        newRoom.setSeller(seller);
-        newRoom.setCustomer(customer);
-        newRoom.setProduct(product);
-        newRoom.setIsActive(true);
+        return conversationRepository.findById(conversationId).map(conv -> {
+            // Load messages
+            conv.setMessages(messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId));
+            return conv;
+        }).orElse(null);
+    }
 
-        return chatRoomRepository.save(newRoom);
+    public List<Conversation> getConversationsForUser(Long userId) {
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        Users user = usersRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return new ArrayList<>();
+        }
+
+        List<Conversation> conversations = conversationRepository.findConversationsByUserId(userId);
+
+        // Load unread counts for each conversation
+        conversations.forEach(conv -> {
+            long unreadCount = messageRepository.countUnreadMessages(conv.getId(), userId);
+            conv.setUnreadCount((int) unreadCount);
+        });
+
+        return conversations;
     }
 
     @Transactional
-    public ChatMessage sendMessage(Long roomId, Long senderId, String content, String messageType) {
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Chat room not found"));
-        Users sender = usersRepository.findById(senderId)
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
+    public ChatMessage addMessage(ChatMessage message) {
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
+        if (message.getConversationId() == null || message.getConversationId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Conversation ID cannot be empty");
+        }
+        if (message.getSenderId() == null) {
+            throw new IllegalArgumentException("Sender ID cannot be null");
+        }
+        if (message.getContent() == null || message.getContent().trim().isEmpty()) {
+            throw new IllegalArgumentException("Message content cannot be empty");
+        }
 
-        ChatMessage message = new ChatMessage();
-        message.setRoom(room);
-        message.setSender(sender);
-        message.setContent(content);
-        message.setMessageType(messageType != null ? messageType : "TEXT");
+        // Validate content length
+        if (message.getContent().length() > 5000) {
+            throw new IllegalArgumentException("Message too long (max 5000 characters)");
+        }
 
-        ChatMessage savedMessage = chatMessageRepository.save(message);
+        // Verify conversation exists
+        Conversation conversation = conversationRepository.findById(message.getConversationId())
+                .orElseThrow(() -> new IllegalStateException("Conversation not found: " + message.getConversationId()));
 
-        // Update room's updatedAt
-        room.setUpdatedAt(LocalDateTime.now());
-        chatRoomRepository.save(room);
+        // Verify sender is part of conversation
+        if (!message.getSenderId().equals(conversation.getCustomerId()) &&
+                !message.getSenderId().equals(conversation.getSellerId())) {
+            throw new IllegalArgumentException("Sender is not part of this conversation");
+        }
 
-        // Broadcast via WebSocket
-        chatWebSocketHandler.broadcastToRoom(roomId,
-                new ChatWebSocketHandler.ChatPayload("new_message", "Tin nhắn mới", savedMessage));
+        // Get sender info
+        Users sender = usersRepository.findById(message.getSenderId()).orElse(null);
+        if (sender != null) {
+            message.setSenderName(sender.getFullName() != null ? sender.getFullName() : sender.getUsername());
+            message.setSenderRole(sender.getUserType());
+        }
+
+        // Save message to database
+        ChatMessage savedMessage = messageRepository.save(message);
+
+        // Update conversation
+        conversation.setLastMessage(message.getContent());
+        conversation.setLastMessageTime(LocalDateTime.now());
+        conversationRepository.save(conversation);
 
         return savedMessage;
     }
 
-    public List<ChatMessage> getRoomMessages(Long roomId) {
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Chat room not found"));
-        return chatMessageRepository.findByRoomOrderByCreatedAtAsc(room);
-    }
-
-    public List<ChatRoom> getUserChatRooms(Long userId) {
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return chatRoomRepository.findByUser(user);
-    }
-
-    public List<ChatRoom> getSellerChatRooms(Long sellerId) {
-        Users seller = usersRepository.findById(sellerId)
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
-        return chatRoomRepository.findBySeller(seller);
-    }
-
     @Transactional
-    public void markMessagesAsRead(Long roomId, Long userId) {
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Chat room not found"));
-        chatMessageRepository.markMessagesAsRead(room, userId);
-    }
-
-    public Long getUnreadMessageCount(Long roomId, Long userId) {
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Chat room not found"));
-        return chatMessageRepository.countUnreadMessages(room, userId);
-    }
-
-    public Long getTotalUnreadCount(Long userId) {
-        List<ChatRoom> rooms = getUserChatRooms(userId);
-        return rooms.stream()
-                .mapToLong(room -> getUnreadMessageCount(room.getRoomId(), userId))
-                .sum();
-    }
-
-    // Thêm method này vào ChatService class
-    @Transactional
-    public ChatMessage sendMessageWithAI(Long roomId, Long senderId, String content, String messageType) {
-        ChatMessage userMessage = sendMessage(roomId, senderId, content, messageType);
-
-        // Auto-reply for common questions (basic AI)
-        String aiResponse = generateAIResponse(content, roomId);
-        if (aiResponse != null) {
-            // Send AI response as seller
-            Users seller = getRoomSeller(roomId);
-            sendMessage(roomId, seller.getUserId(), aiResponse, "TEXT");
+    public void markConversationAsRead(String conversationId, Long userId) {
+        if (conversationId == null || userId == null) {
+            return;
         }
 
-        return userMessage;
+        Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
+        if (conversation != null) {
+            // Only reset unread count if user is part of conversation
+            if (userId.equals(conversation.getCustomerId()) || userId.equals(conversation.getSellerId())) {
+                messageRepository.markConversationAsRead(conversationId, userId);
+            }
+        }
     }
 
-    private String generateAIResponse(String userMessage, Long roomId) {
-        String lowerMessage = userMessage.toLowerCase();
-
-        // Basic keyword matching for common questions
-        if (lowerMessage.contains("giá") || lowerMessage.contains("bao nhiêu")) {
-            return "Xin chào! Vui lòng kiểm tra giá sản phẩm trên trang chi tiết sản phẩm. Tôi có thể hỗ trợ thêm thông tin nếu bạn cần!";
-        }
-
-        if (lowerMessage.contains("tải") || lowerMessage.contains("download")) {
-            return "Sau khi thanh toán thành công, bạn sẽ nhận được link download và license key qua email và trong tài khoản cá nhân.";
-        }
-
-        if (lowerMessage.contains("license") || lowerMessage.contains("key")) {
-            return "License key sẽ được gửi tự động sau khi thanh toán. Mỗi key chỉ active được trên 1 thiết bị.";
-        }
-
-        if (lowerMessage.contains("cám ơn") || lowerMessage.contains("thanks")) {
-            return "Cám ơn bạn! Nếu có thắc mắc gì thêm, tôi sẵn sàng hỗ trợ 😊";
-        }
-
-        // Return null for no auto-response
-        return null;
-    }
-
-    private Users getRoomSeller(Long roomId) {
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Chat room not found"));
-        return room.getSeller();
+    private String generateConversationId(Long customerId, Long sellerId) {
+        return "conv_" + customerId + "_" + sellerId;
     }
 }
+
