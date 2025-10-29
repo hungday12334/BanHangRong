@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <!-- HEAD START -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seller Vouchers</title>
+  <title>Quản lý Voucher - Seller Dashboard</title>
   <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
   <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
   <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
@@ -13,10 +13,480 @@
   <link rel="shortcut icon" href="/img/kua654ms.png" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <meta name="theme-color" content="#0b1020" />
-  <style>/* fallback dev */</style>
-  <!-- HEAD END -->
+  <style>
+    /* Voucher Management Styles */
+    .voucher-container {
+      padding: 24px;
+    }
+
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-elev, #1a1d2e);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .stat-card.blue { border-left: 4px solid #3b82f6; }
+    .stat-card.green { border-left: 4px solid #10b981; }
+    .stat-card.yellow { border-left: 4px solid #f59e0b; }
+    .stat-card.red { border-left: 4px solid #ef4444; }
+
+    .stat-card-label {
+      font-size: 14px;
+      color: var(--muted, #94a3b8);
+      margin-bottom: 8px;
+    }
+
+    .stat-card-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .product-selector-section {
+      background: var(--bg-elev, #1a1d2e);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .product-selector-section h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .product-search-wrapper {
+      position: relative;
+      max-width: 600px;
+    }
+
+    .product-search-input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      border: 1px solid var(--border, #334155);
+      border-radius: 8px;
+      background: var(--bg, #0f1219);
+      color: var(--text, #f1f5f9);
+      font-size: 14px;
+    }
+
+    .product-search-input:focus {
+      outline: none;
+      border-color: var(--accent, #3b82f6);
+    }
+
+    .selected-product-display {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg, #0f1219);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .selected-product-display.active {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .selected-product-info {
+      flex: 1;
+    }
+
+    .selected-product-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .selected-product-meta {
+      font-size: 12px;
+      color: var(--muted, #94a3b8);
+    }
+
+    .voucher-list-section {
+      background: var(--bg-elev, #1a1d2e);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .voucher-toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent, #3b82f6);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-secondary {
+      background: var(--bg, #334155);
+      color: var(--text, #f1f5f9);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--border, #334155);
+      background: transparent;
+      color: var(--text, #f1f5f9);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: var(--accent, #3b82f6);
+      border-color: var(--accent, #3b82f6);
+      color: white;
+    }
+
+    .voucher-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .voucher-table thead {
+      background: var(--bg, #0f1219);
+    }
+
+    .voucher-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted, #94a3b8);
+    }
+
+    .voucher-table td {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border, #1e293b);
+    }
+
+    .voucher-code {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--accent, #3b82f6);
+    }
+
+    .voucher-type-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .voucher-type-percent {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    .voucher-type-amount {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    .status-inactive {
+      background: rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+    }
+
+    .status-expired {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border, #334155);
+      background: transparent;
+      color: var(--text, #f1f5f9);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: var(--bg, #1e293b);
+      border-color: var(--accent, #3b82f6);
+      color: var(--accent, #3b82f6);
+    }
+
+    .btn-action.btn-delete:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted, #94a3b8);
+    }
+
+    .empty-state i {
+      font-size: 64px;
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background: var(--bg-elev, #1a1d2e);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border, #1e293b);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border, #1e293b);
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border, #334155);
+      border-radius: 8px;
+      background: var(--bg, #0f1219);
+      color: var(--text, #f1f5f9);
+      font-size: 14px;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent, #3b82f6);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-text {
+      font-size: 12px;
+      color: var(--muted, #94a3b8);
+      margin-top: 4px;
+    }
+
+    .pagination-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding-top: 20px;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--border, #334155);
+      background: transparent;
+      color: var(--text, #f1f5f9);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .page-number {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border, #334155);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .page-number.active {
+      background: var(--accent, #3b82f6);
+      border-color: var(--accent, #3b82f6);
+      color: white;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+  </style>
 </head>
 
 <body class="loading enhanced-dashboard" th:attr="data-user-type=${userType}" data-app-root>
@@ -39,13 +509,24 @@
       <div class="progress-wrap" aria-hidden="true">
         <div class="progress-bar" data-loader-progress></div>
       </div>
-  <div class="load-text" data-loader-text>Initializing....</div>
+      <div class="load-text" data-loader-text>Đang khởi tạo...</div>
       <div class="load-tip" data-loader-tip></div>
     </div>
   </div>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader-core">
+      <div class="orbital">
+        <div class="nucleus">
+          <img class="loader-logo" src="/img/kua654ms.png" alt="Loading" />
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- APP WRAPPER START -->
   <div class="page">
-
     <!-- SIDEBAR START -->
     <aside th:replace="fragments/sidebar :: sidebar"></aside>
     <!-- SIDEBAR END -->
@@ -53,19 +534,271 @@
     <!-- MAIN START -->
     <main data-section="main">
       <div class="container">
+        <div class="voucher-container">
 
-        <h1>Voucher Management</h1>
-        <p>This is where you will manage your vouchers.</p>
+          <!-- Header -->
+          <div class="voucher-header">
+            <h1 class="section-title">
+              <i class="ti ti-ticket"></i> Quản lý Voucher
+            </h1>
+            <a href="/seller/dashboard" class="btn btn-secondary">
+              <i class="ti ti-arrow-left"></i> Quay lại Dashboard
+            </a>
+          </div>
 
+          <!-- Statistics Cards -->
+          <div class="stats-grid">
+            <div class="stat-card blue" onclick="filterVouchersByStatus('all')">
+              <div class="stat-card-label">Tổng Voucher</div>
+              <div class="stat-card-value" id="totalVouchers">0</div>
+            </div>
+            <div class="stat-card green" onclick="filterVouchersByStatus('active')">
+              <div class="stat-card-label">Đang hoạt động</div>
+              <div class="stat-card-value" id="activeVouchers">0</div>
+            </div>
+            <div class="stat-card yellow" onclick="filterVouchersByStatus('inactive')">
+              <div class="stat-card-label">Tạm dừng</div>
+              <div class="stat-card-value" id="inactiveVouchers">0</div>
+            </div>
+            <div class="stat-card red" onclick="filterVouchersByStatus('expired')">
+              <div class="stat-card-label">Hết hạn</div>
+              <div class="stat-card-value" id="expiredVouchers">0</div>
+            </div>
+          </div>
+
+          <!-- Product Selector -->
+          <div class="product-selector-section">
+            <h3>
+              <i class="ti ti-package"></i> Chọn sản phẩm để quản lý Voucher
+            </h3>
+            <div class="product-search-wrapper">
+              <input
+                type="text"
+                id="productSearchInput"
+                class="product-search-input"
+                placeholder="Nhập tên sản phẩm hoặc Product ID..."
+                onkeyup="searchProducts()"
+              />
+              <div id="productSearchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev); border-radius: 8px; margin-top: 4px; max-height: 300px; overflow-y: auto; display: none; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
+            </div>
+
+            <div class="selected-product-display" id="selectedProductDisplay">
+              <div class="selected-product-info">
+                <div class="selected-product-name" id="selectedProductName">Chưa chọn sản phẩm</div>
+                <div class="selected-product-meta">
+                  Product ID: <span id="selectedProductId">-</span> |
+                  Giá: <span id="selectedProductPrice">-</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary" onclick="clearProductSelection()">
+                <i class="ti ti-x"></i> Bỏ chọn
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert Messages -->
+          <div id="alertContainer"></div>
+
+          <!-- Voucher List -->
+          <div class="voucher-list-section">
+            <div class="voucher-toolbar">
+              <button class="btn btn-primary" onclick="openVoucherModal()">
+                <i class="ti ti-plus"></i> Tạo Voucher mới
+              </button>
+
+              <div class="filter-group">
+                <button class="filter-btn active" data-status="all" onclick="filterVouchersByStatus('all')">
+                  Tất cả
+                </button>
+                <button class="filter-btn" data-status="active" onclick="filterVouchersByStatus('active')">
+                  Hoạt động
+                </button>
+                <button class="filter-btn" data-status="inactive" onclick="filterVouchersByStatus('inactive')">
+                  Tạm dừng
+                </button>
+                <button class="filter-btn" data-status="expired" onclick="filterVouchersByStatus('expired')">
+                  Hết hạn
+                </button>
+              </div>
+            </div>
+
+            <div id="voucherListContent">
+              <div class="empty-state">
+                <i class="ti ti-ticket-off"></i>
+                <h3>Chọn sản phẩm để xem voucher</h3>
+                <p>Vui lòng chọn một sản phẩm từ danh sách để quản lý voucher</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </main>
     <!-- MAIN END -->
   </div>
   <!-- APP WRAPPER END -->
 
+  <!-- VOUCHER MODAL -->
+  <div class="modal" id="voucherModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">
+          <i class="ti ti-ticket"></i> Tạo Voucher mới
+        </h3>
+        <button class="btn-action" onclick="closeVoucherModal()">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <form id="voucherForm" onsubmit="saveVoucher(event)">
+        <div class="modal-body">
+          <input type="hidden" id="voucherId" name="voucherId">
+
+          <div class="form-group">
+            <label for="voucherCode">Mã Voucher <span style="color: #ef4444;">*</span></label>
+            <input
+              type="text"
+              id="voucherCode"
+              name="code"
+              class="form-control"
+              placeholder="VD: GIAM20K, SUMMER2024"
+              required
+              maxlength="64"
+            />
+            <div class="form-text">Mã voucher phải là duy nhất cho mỗi sản phẩm</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="discountType">Loại giảm giá <span style="color: #ef4444;">*</span></label>
+              <select id="discountType" name="discountType" class="form-control" required onchange="updateDiscountLabel()">
+                <option value="PERCENT">Phần trăm (%)</option>
+                <option value="AMOUNT">Số tiền cố định (VNĐ)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="discountValue">
+                <span id="discountValueLabel">Giá trị giảm (%)</span>
+                <span style="color: #ef4444;">*</span>
+              </label>
+              <input
+                type="number"
+                id="discountValue"
+                name="discountValue"
+                class="form-control"
+                placeholder="VD: 10"
+                required
+                min="0"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="minOrder">Giá trị đơn hàng tối thiểu (VNĐ)</label>
+            <input
+              type="number"
+              id="minOrder"
+              name="minOrder"
+              class="form-control"
+              placeholder="Để trống nếu không giới hạn"
+              min="0"
+              step="1000"
+            />
+            <div class="form-text">Đơn hàng phải đạt giá trị này mới áp dụng được voucher</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="startAt">Ngày bắt đầu</label>
+              <input
+                type="datetime-local"
+                id="startAt"
+                name="startAt"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="endAt">Ngày kết thúc</label>
+              <input
+                type="datetime-local"
+                id="endAt"
+                name="endAt"
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="maxUses">Số lần sử dụng tối đa</label>
+              <input
+                type="number"
+                id="maxUses"
+                name="maxUses"
+                class="form-control"
+                placeholder="Không giới hạn"
+                min="1"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="maxUsesPerUser">Giới hạn/người dùng</label>
+              <input
+                type="number"
+                id="maxUsesPerUser"
+                name="maxUsesPerUser"
+                class="form-control"
+                placeholder="Không giới hạn"
+                min="1"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Trạng thái</label>
+            <select id="status" name="status" class="form-control">
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Tạm dừng</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeVoucherModal()">
+            <i class="ti ti-x"></i> Hủy
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-check"></i> Lưu Voucher
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REDEMPTIONS MODAL -->
+  <div class="modal" id="redemptionsModal">
+    <div class="modal-dialog" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="ti ti-history"></i> Lịch sử sử dụng Voucher
+        </h3>
+        <button class="btn-action" onclick="closeRedemptionsModal()">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="redemptionsContent">
+        <div class="empty-state">
+          <i class="ti ti-loader"></i>
+          <p>Đang tải...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL LAYER START -->
   <div id="modalOverlay" class="modal-overlay" hidden data-modal-overlay></div>
-
   <section th:replace="fragments/modals :: modals"></section>
   <!-- MODAL LAYER END -->
 
@@ -75,6 +808,567 @@
 
   <!-- SCRIPTS START -->
   <section th:replace="fragments/scripts :: scripts"></section>
+
+  <script>
+    // Global variables
+    let selectedProductId = null;
+    let currentPage = 0;
+    let currentStatus = null;
+    let vouchers = [];
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load products for search
+      loadMyProducts();
+    });
+
+    // Product search functionality
+    let productsCache = [];
+
+    async function loadMyProducts() {
+      try {
+        // This would call your products API - adjust endpoint as needed
+        const response = await fetch('/api/seller/products');
+        if (response.ok) {
+          productsCache = await response.json();
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    }
+
+    function searchProducts() {
+      const searchTerm = document.getElementById('productSearchInput').value.toLowerCase();
+      const resultsDiv = document.getElementById('productSearchResults');
+
+      if (!searchTerm) {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+
+      const filtered = productsCache.filter(p =>
+        p.name.toLowerCase().includes(searchTerm) ||
+        p.productId.toString().includes(searchTerm)
+      );
+
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--muted);">Không tìm thấy sản phẩm</div>';
+        resultsDiv.style.display = 'block';
+        return;
+      }
+
+      resultsDiv.innerHTML = filtered.slice(0, 10).map(p => `
+        <div style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.2s;"
+             onmouseover="this.style.background='var(--bg)'"
+             onmouseout="this.style.background='transparent'"
+             onclick="selectProduct(${p.productId}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">
+          <div style="font-weight: 600; margin-bottom: 4px;">${p.name}</div>
+          <div style="font-size: 12px; color: var(--muted);">
+            ID: ${p.productId} | Giá: ${formatCurrency(p.price)}
+          </div>
+        </div>
+      `).join('');
+
+      resultsDiv.style.display = 'block';
+    }
+
+    function selectProduct(productId, productName, price) {
+      selectedProductId = productId;
+
+      document.getElementById('selectedProductName').textContent = productName;
+      document.getElementById('selectedProductId').textContent = productId;
+      document.getElementById('selectedProductPrice').textContent = formatCurrency(price);
+      document.getElementById('selectedProductDisplay').classList.add('active');
+      document.getElementById('productSearchResults').style.display = 'none';
+      document.getElementById('productSearchInput').value = productName;
+
+      // Load vouchers for this product
+      loadVouchers();
+    }
+
+    function clearProductSelection() {
+      selectedProductId = null;
+      document.getElementById('selectedProductDisplay').classList.remove('active');
+      document.getElementById('productSearchInput').value = '';
+      document.getElementById('voucherListContent').innerHTML = `
+        <div class="empty-state">
+          <i class="ti ti-ticket-off"></i>
+          <h3>Chọn sản phẩm để xem voucher</h3>
+          <p>Vui lòng chọn một sản phẩm từ danh sách để quản lý voucher</p>
+        </div>
+      `;
+    }
+
+    // Voucher CRUD operations
+    async function loadVouchers() {
+      if (!selectedProductId) {
+        showAlert('Vui lòng chọn sản phẩm trước', 'error');
+        return;
+      }
+
+      showLoading();
+
+      try {
+        const url = new URL('/api/seller/vouchers', window.location.origin);
+        url.searchParams.append('productId', selectedProductId);
+        url.searchParams.append('page', currentPage);
+        url.searchParams.append('size', 10);
+        if (currentStatus && currentStatus !== 'all') {
+          url.searchParams.append('status', currentStatus);
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to load vouchers');
+
+        const data = await response.json();
+        vouchers = data.content || [];
+
+        renderVouchers(data);
+        updateStatistics();
+      } catch (error) {
+        console.error('Error loading vouchers:', error);
+        showAlert('Không thể tải danh sách voucher', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function renderVouchers(data) {
+      const content = data.content || [];
+      const listDiv = document.getElementById('voucherListContent');
+
+      if (content.length === 0) {
+        listDiv.innerHTML = `
+          <div class="empty-state">
+            <i class="ti ti-ticket-off"></i>
+            <h3>Chưa có voucher nào</h3>
+            <p>Tạo voucher đầu tiên cho sản phẩm này</p>
+            <button class="btn btn-primary" onclick="openVoucherModal()">
+              <i class="ti ti-plus"></i> Tạo Voucher
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      listDiv.innerHTML = `
+        <table class="voucher-table">
+          <thead>
+            <tr>
+              <th>Mã Voucher</th>
+              <th>Loại</th>
+              <th>Giá trị</th>
+              <th>Đã dùng</th>
+              <th>Thời hạn</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${content.map(v => renderVoucherRow(v)).join('')}
+          </tbody>
+        </table>
+        ${renderPagination(data)}
+      `;
+    }
+
+    function renderVoucherRow(voucher) {
+      const typeClass = voucher.discountType === 'PERCENT' ? 'voucher-type-percent' : 'voucher-type-amount';
+      const typeLabel = voucher.discountType === 'PERCENT' ? 'Phần trăm' : 'Số tiền';
+      const discountDisplay = voucher.discountType === 'PERCENT'
+        ? `${voucher.discountValue}%`
+        : formatCurrency(voucher.discountValue);
+
+      const statusClass = `status-${voucher.status}`;
+      const statusLabel = {
+        'active': 'Hoạt động',
+        'inactive': 'Tạm dừng',
+        'expired': 'Hết hạn'
+      }[voucher.status] || voucher.status;
+
+      const startDate = voucher.startAt ? new Date(voucher.startAt).toLocaleDateString('vi-VN') : '-';
+      const endDate = voucher.endAt ? new Date(voucher.endAt).toLocaleDateString('vi-VN') : '-';
+
+      return `
+        <tr>
+          <td>
+            <div class="voucher-code">${voucher.code}</div>
+            ${voucher.minOrder ? `<div class="form-text">Đơn tối thiểu: ${formatCurrency(voucher.minOrder)}</div>` : ''}
+          </td>
+          <td>
+            <span class="voucher-type-badge ${typeClass}">${typeLabel}</span>
+          </td>
+          <td><strong>${discountDisplay}</strong></td>
+          <td>
+            <div>${voucher.usedCount || 0} / ${voucher.maxUses || '∞'}</div>
+            ${voucher.maxUsesPerUser ? `<div class="form-text">Giới hạn: ${voucher.maxUsesPerUser}/người</div>` : ''}
+          </td>
+          <td>
+            <div>${startDate}</div>
+            <div>${endDate}</div>
+          </td>
+          <td>
+            <span class="status-badge ${statusClass}">${statusLabel}</span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-action" onclick="editVoucher(${voucher.voucherId})" title="Chỉnh sửa">
+                <i class="ti ti-edit"></i>
+              </button>
+              <button class="btn-action" onclick="viewRedemptions(${voucher.voucherId})" title="Lịch sử sử dụng">
+                <i class="ti ti-history"></i>
+              </button>
+              <button class="btn-action btn-delete" onclick="deleteVoucher(${voucher.voucherId})" title="Xóa">
+                <i class="ti ti-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    function renderPagination(data) {
+      if (data.totalPages <= 1) return '';
+
+      const pages = [];
+      for (let i = 0; i < data.totalPages; i++) {
+        const active = i === currentPage ? 'active' : '';
+        pages.push(`
+          <div class="page-number ${active}" onclick="goToPage(${i})">
+            ${i + 1}
+          </div>
+        `);
+      }
+
+      return `
+        <div class="pagination-wrapper">
+          <button class="pagination-btn" ${currentPage === 0 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
+            <i class="ti ti-chevron-left"></i> Trước
+          </button>
+          ${pages.join('')}
+          <button class="pagination-btn" ${currentPage >= data.totalPages - 1 ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
+            Sau <i class="ti ti-chevron-right"></i>
+          </button>
+        </div>
+      `;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      loadVouchers();
+    }
+
+    function filterVouchersByStatus(status) {
+      currentStatus = status;
+      currentPage = 0;
+
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.status === status) {
+          btn.classList.add('active');
+        }
+      });
+
+      loadVouchers();
+    }
+
+    async function updateStatistics() {
+      if (!selectedProductId) return;
+
+      try {
+        const response = await fetch(`/api/seller/vouchers?productId=${selectedProductId}&size=1000`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const allVouchers = data.content || [];
+
+        const stats = {
+          total: allVouchers.length,
+          active: allVouchers.filter(v => v.status === 'active').length,
+          inactive: allVouchers.filter(v => v.status === 'inactive').length,
+          expired: allVouchers.filter(v => v.status === 'expired').length
+        };
+
+        document.getElementById('totalVouchers').textContent = stats.total;
+        document.getElementById('activeVouchers').textContent = stats.active;
+        document.getElementById('inactiveVouchers').textContent = stats.inactive;
+        document.getElementById('expiredVouchers').textContent = stats.expired;
+      } catch (error) {
+        console.error('Error updating statistics:', error);
+      }
+    }
+
+    // Modal functions
+    function openVoucherModal(voucherId = null) {
+      if (!selectedProductId) {
+        showAlert('Vui lòng chọn sản phẩm trước khi tạo voucher', 'error');
+        return;
+      }
+
+      const modal = document.getElementById('voucherModal');
+      const form = document.getElementById('voucherForm');
+
+      form.reset();
+      document.getElementById('voucherId').value = '';
+      document.getElementById('modalTitle').innerHTML = '<i class="ti ti-ticket"></i> Tạo Voucher mới';
+
+      modal.classList.add('active');
+    }
+
+    async function editVoucher(voucherId) {
+      showLoading();
+
+      try {
+        const response = await fetch(`/api/seller/vouchers/${voucherId}`);
+        if (!response.ok) throw new Error('Failed to load voucher');
+
+        const voucher = await response.json();
+
+        document.getElementById('voucherId').value = voucher.voucherId;
+        document.getElementById('voucherCode').value = voucher.code;
+        document.getElementById('discountType').value = voucher.discountType;
+        document.getElementById('discountValue').value = voucher.discountValue;
+        document.getElementById('minOrder').value = voucher.minOrder || '';
+        document.getElementById('maxUses').value = voucher.maxUses || '';
+        document.getElementById('maxUsesPerUser').value = voucher.maxUsesPerUser || '';
+        document.getElementById('status').value = voucher.status;
+
+        if (voucher.startAt) {
+          document.getElementById('startAt').value = formatDateTimeLocal(voucher.startAt);
+        }
+        if (voucher.endAt) {
+          document.getElementById('endAt').value = formatDateTimeLocal(voucher.endAt);
+        }
+
+        document.getElementById('modalTitle').innerHTML = '<i class="ti ti-edit"></i> Chỉnh sửa Voucher';
+        document.getElementById('voucherModal').classList.add('active');
+
+        updateDiscountLabel();
+      } catch (error) {
+        console.error('Error loading voucher:', error);
+        showAlert('Không thể tải thông tin voucher', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeVoucherModal() {
+      document.getElementById('voucherModal').classList.remove('active');
+    }
+
+    async function saveVoucher(event) {
+      event.preventDefault();
+
+      if (!selectedProductId) {
+        showAlert('Vui lòng chọn sản phẩm', 'error');
+        return;
+      }
+
+      showLoading();
+
+      const form = document.getElementById('voucherForm');
+      const formData = new FormData(form);
+
+      const voucherData = {
+        voucherId: formData.get('voucherId') || null,
+        productId: selectedProductId,
+        code: formData.get('code'),
+        discountType: formData.get('discountType'),
+        discountValue: parseFloat(formData.get('discountValue')),
+        minOrder: formData.get('minOrder') ? parseFloat(formData.get('minOrder')) : null,
+        startAt: formData.get('startAt') || null,
+        endAt: formData.get('endAt') || null,
+        maxUses: formData.get('maxUses') ? parseInt(formData.get('maxUses')) : null,
+        maxUsesPerUser: formData.get('maxUsesPerUser') ? parseInt(formData.get('maxUsesPerUser')) : null,
+        status: formData.get('status')
+      };
+
+      try {
+        const response = await fetch('/api/seller/vouchers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(voucherData)
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(error);
+        }
+
+        showAlert('Lưu voucher thành công!', 'success');
+        closeVoucherModal();
+        loadVouchers();
+      } catch (error) {
+        console.error('Error saving voucher:', error);
+        showAlert(error.message || 'Không thể lưu voucher', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function deleteVoucher(voucherId) {
+      if (!confirm('Bạn có chắc chắn muốn xóa voucher này?')) {
+        return;
+      }
+
+      showLoading();
+
+      try {
+        const response = await fetch(`/api/seller/vouchers/${voucherId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) throw new Error('Failed to delete voucher');
+
+        showAlert('Xóa voucher thành công!', 'success');
+        loadVouchers();
+      } catch (error) {
+        console.error('Error deleting voucher:', error);
+        showAlert('Không thể xóa voucher', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function viewRedemptions(voucherId) {
+      const modal = document.getElementById('redemptionsModal');
+      const content = document.getElementById('redemptionsContent');
+
+      content.innerHTML = `
+        <div class="empty-state">
+          <i class="ti ti-loader"></i>
+          <p>Đang tải...</p>
+        </div>
+      `;
+
+      modal.classList.add('active');
+
+      try {
+        const response = await fetch(`/api/seller/vouchers/${voucherId}/redemptions`);
+        if (!response.ok) throw new Error('Failed to load redemptions');
+
+        const redemptions = await response.json();
+
+        if (redemptions.length === 0) {
+          content.innerHTML = `
+            <div class="empty-state">
+              <i class="ti ti-ticket-off"></i>
+              <h3>Chưa có lượt sử dụng nào</h3>
+              <p>Voucher này chưa được sử dụng</p>
+            </div>
+          `;
+          return;
+        }
+
+        content.innerHTML = `
+          <table class="voucher-table">
+            <thead>
+              <tr>
+                <th>Mã đổi</th>
+                <th>Đơn hàng</th>
+                <th>Người dùng</th>
+                <th>Giảm giá</th>
+                <th>Ngày sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${redemptions.map(r => `
+                <tr>
+                  <td>#${r.redeemId}</td>
+                  <td>${r.orderId ? `#${r.orderId}` : '-'}</td>
+                  <td>${r.userId ? `User #${r.userId}` : '-'}</td>
+                  <td><strong>${formatCurrency(r.discountAmount || 0)}</strong></td>
+                  <td>${new Date(r.createdAt).toLocaleString('vi-VN')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (error) {
+        console.error('Error loading redemptions:', error);
+        content.innerHTML = `
+          <div class="empty-state">
+            <i class="ti ti-alert-circle"></i>
+            <h3>Lỗi</h3>
+            <p>Không thể tải lịch sử sử dụng</p>
+          </div>
+        `;
+      }
+    }
+
+    function closeRedemptionsModal() {
+      document.getElementById('redemptionsModal').classList.remove('active');
+    }
+
+    // Utility functions
+    function updateDiscountLabel() {
+      const type = document.getElementById('discountType').value;
+      const label = document.getElementById('discountValueLabel');
+
+      if (type === 'PERCENT') {
+        label.textContent = 'Giá trị giảm (%)';
+        document.getElementById('discountValue').setAttribute('max', '100');
+      } else {
+        label.textContent = 'Giá trị giảm (VNĐ)';
+        document.getElementById('discountValue').removeAttribute('max');
+      }
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+      }).format(amount);
+    }
+
+    function formatDateTimeLocal(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    function showAlert(message, type = 'success') {
+      const container = document.getElementById('alertContainer');
+      const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+      const icon = type === 'success' ? 'ti-check-circle' : 'ti-alert-circle';
+
+      const alertEl = document.createElement('div');
+      alertEl.className = `alert ${alertClass}`;
+      alertEl.innerHTML = `
+        <i class="ti ${icon}"></i>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(alertEl);
+
+      setTimeout(() => {
+        alertEl.style.opacity = '0';
+        setTimeout(() => alertEl.remove(), 300);
+      }, 3000);
+    }
+
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('active');
+      }
+    });
+  </script>
   <!-- SCRIPTS END -->
 </body>
 </html>

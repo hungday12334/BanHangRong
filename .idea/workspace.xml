@@ -4,18 +4,73 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: update database connection settings and refine pom.xml configurations">
-      <change afterPath="$PROJECT_DIR$/sql/fix_users_add_full_name.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: ensure 'full_name' column exists in users table and update related SQL scripts">
+      <change afterPath="$PROJECT_DIR$/CHAT_ACCESS_FIX.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_ACCESS_FIX_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_ANALYSIS_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FIXES_COMPLETED.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FIXES_README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FIXES_VISUAL.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FIX_QUICK_START.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FIX_README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FIX_VISUAL_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FLOW_TEST_CASES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_ISSUES_PRIORITY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_LINKS_ADDED.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_SYSTEM_DOCUMENTATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_SYSTEM_QUICK_SETUP.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_SYSTEM_STATUS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_VISUAL_FLOW.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_LOMBOK_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/HUONG_DAN_TEST_CHAT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_FIX_CHAT_ACCESS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_REFERENCE.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_START_CHAT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README_CHAT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TEST_CHAT_NHANH.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TOM_TAT_CHAT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VIDEO_DEMO_SCRIPT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_MANAGEMENT_FEATURE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_QUICK_START.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_TEST_CASES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_VISUAL_FLOW.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build-debug.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fix_and_build.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/load-env.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run-with-online-db.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/create_chat_tables.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/create_test_data_chat.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Conversation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/UserRole.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ConversationRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/MessageRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketEventListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test-chat-access.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test-chat-scenarios.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/verify-chat-fix.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/verify-chat-fixes.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_v2.sql" beforeDir="false" afterPath="$PROJECT_DIR$/data_v2.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/add_sample_products.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/add_sample_products.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/check_review_status.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/check_review_status.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/fix_database_add_status.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/fix_database_add_status.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/fix_old_constraint.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/fix_old_constraint.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/review_system_complete.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/review_system_complete.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/set_password.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/set_password.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ChatMessageRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ChatRoomRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/ChatWebSocketHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/shop-public.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/shop-public.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,8 +81,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
-        <option value="Class" />
         <option value="HTML File" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -131,6 +186,9 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="banhangrong.su25.Repository" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
@@ -175,6 +233,8 @@
       <workItem from="1761639551108" duration="282000" />
       <workItem from="1761639854195" duration="264000" />
       <workItem from="1761642909841" duration="2000" />
+      <workItem from="1761660496275" duration="6883000" />
+      <workItem from="1761680898817" duration="5345000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -232,7 +292,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761298208210</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="fix: ensure 'full_name' column exists in users table and update related SQL scripts">
+      <option name="closed" value="true" />
+      <created>1761660598700</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1761660598700</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -269,6 +337,7 @@
     <MESSAGE value="fix: fix error approve Products." />
     <MESSAGE value="update: add spring boot devtools" />
     <MESSAGE value="fix: update database connection settings and refine pom.xml configurations" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: update database connection settings and refine pom.xml configurations" />
+    <MESSAGE value="fix: ensure 'full_name' column exists in users table and update related SQL scripts" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: ensure 'full_name' column exists in users table and update related SQL scripts" />
   </component>
 </project>

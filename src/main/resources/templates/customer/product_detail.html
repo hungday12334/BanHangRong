@@ -129,6 +129,7 @@
 				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>
 				<a href="#">Voucher</a>
+				<a href="/customer/chat">💬 Chat</a>
 				<a href="#">Support</a>
 			</nav>
 			<div class="top-actions">
@@ -210,12 +211,21 @@
 				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Product
 					description...</div>
 				<div class="section">
-					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center">
+					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
 						<input type="hidden" name="productId" th:value="${product.productId}" />
 						<input type="number" name="quantity" min="1" value="1" th:attr="max=${product.quantity}"
 							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
 					<button class="btn primary" type="submit"
 						th:disabled="${product.quantity == null or product.quantity <= 0}">Add to Cart</button>
+					<a th:href="@{/customer/chat(sellerId=${product.sellerId})}"
+					   class="btn"
+					   style="background:#10b981;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px"
+					   title="Chat with seller">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+						</svg>
+						Chat với Shop
+					</a>
 					</form>
 				</div>
 			</div>

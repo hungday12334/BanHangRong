@@ -200,7 +200,7 @@ public class SellerCategoryController {
                 try {
                     var images = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(product.getProductId());
                     if (!images.isEmpty()) {
-                        data.put("imageUrl", images.getFirst().getImageUrl());
+                        data.put("imageUrl", images.get(0).getImageUrl());
                     } else {
                         data.put("imageUrl", null);
                     }

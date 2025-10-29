@@ -1,0 +1,218 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║                   🚀 CHAT SYSTEM QUICK REFERENCE                  ║
+║                         BanHangRong Project                       ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                         📋 SETUP STEPS                            ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  1. DATABASE                                                      ║
+║     mysql -u root -p banhangrong_db < sql/create_chat_tables.sql ║
+║     mysql -u root -p banhangrong_db < sql/create_test_data_chat.sql║
+║                                                                   ║
+║  2. RUN APP                                                       ║
+║     mvn clean spring-boot:run                                    ║
+║     Wait for: "Started Su25Application..."                       ║
+║                                                                   ║
+║  3. TEST                                                          ║
+║     Browser 1: http://localhost:8080/login                       ║
+║     Login: test_customer1 / 123456                               ║
+║     Go to: /customer/chat                                        ║
+║                                                                   ║
+║     Browser 2 (Incognito): http://localhost:8080/login          ║
+║     Login: test_seller1 / 123456                                 ║
+║     Go to: /seller/chat                                          ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                      🔑 TEST ACCOUNTS                             ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Username        │ Password │ Role     │ Name                    ║
+║  ────────────────┼──────────┼──────────┼──────────────────────── ║
+║  test_seller1    │ 123456   │ SELLER   │ Shop Điện Thoại ABC    ║
+║  test_customer1  │ 123456   │ CUSTOMER │ Nguyễn Văn An         ║
+║  test_customer2  │ 123456   │ CUSTOMER │ Trần Thị Bình         ║
+║  test_customer3  │ 123456   │ CUSTOMER │ Lê Minh Châu          ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                        🌐 IMPORTANT URLs                          ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Login:          http://localhost:8080/login                      ║
+║  Customer Chat:  http://localhost:8080/customer/chat              ║
+║  Seller Chat:    http://localhost:8080/seller/chat                ║
+║  General Chat:   http://localhost:8080/chat                       ║
+║  Health Check:   http://localhost:8080/actuator/health            ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                      ✅ SUCCESS CRITERIA                          ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  □ Customer gửi tin → Seller thấy ngay (< 2s)                    ║
+║  □ Seller trả lời → Customer thấy ngay (< 2s)                    ║
+║  □ Badge unread count hiện đúng                                   ║
+║  □ Click conversation → Badge = 0                                 ║
+║  □ Refresh page → Messages vẫn còn                                ║
+║  □ Top bar: "✓ Connected" (màu xanh)                             ║
+║  □ No errors in Console (F12)                                     ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                    🐛 TROUBLESHOOTING                             ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Problem                  │ Solution                              ║
+║  ─────────────────────────┼─────────────────────────────────────  ║
+║  Build Failed (Lombok)    │ ./fix_and_build.sh                   ║
+║  WebSocket Not Connect    │ Check: curl localhost:8080/health    ║
+║  No Conversations         │ Check: user_type in database         ║
+║  Tables Not Found         │ Re-run: create_chat_tables.sql       ║
+║  Messages Not Real-time   │ F12 → Console → Check WebSocket      ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                      📊 DATABASE CHECK                            ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  SELECT * FROM chat_conversations;                                ║
+║  SELECT * FROM chat_messages ORDER BY created_at DESC LIMIT 20;   ║
+║  SELECT COUNT(*) FROM chat_messages WHERE is_read = false;        ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                      📚 DOCUMENTATION                             ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Quick Test (5min):     TEST_CHAT_NHANH.md                       ║
+║  Full Test (30min):     HUONG_DAN_TEST_CHAT.md                   ║
+║  Overview:              README_CHAT.md                            ║
+║  Technical Details:     CHAT_SYSTEM_DOCUMENTATION.md              ║
+║  Video Demo Script:     VIDEO_DEMO_SCRIPT.md                      ║
+║  Summary:               TOM_TAT_CHAT.md                           ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                      🎯 TEST SCENARIOS                            ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  SCENARIO 1: Basic Chat (2 min)                                  ║
+║    1. Customer login → Send "Xin chào shop"                      ║
+║    2. Seller login → See message + unread badge                  ║
+║    3. Seller reply → "Chào bạn"                                  ║
+║    4. Customer see reply instantly                                ║
+║                                                                   ║
+║  SCENARIO 2: Multi-Customer (3 min)                              ║
+║    1. Customer1 send message                                      ║
+║    2. Customer2 send message (different browser)                  ║
+║    3. Customer3 send message (different browser)                  ║
+║    4. Seller sees 3 separate conversations                        ║
+║    5. Switch between them - no message mixing                     ║
+║                                                                   ║
+║  SCENARIO 3: Persistence (1 min)                                 ║
+║    1. Send 10 messages back and forth                             ║
+║    2. F5 refresh both browsers                                    ║
+║    3. All 10 messages still there                                 ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                   🔧 COMMANDS CHEAT SHEET                         ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Start App:        mvn spring-boot:run                            ║
+║  Build Jar:        mvn clean package -DskipTests                  ║
+║  Run Jar:          java -jar target/su25-0.0.1-SNAPSHOT.jar      ║
+║  Check Health:     curl http://localhost:8080/actuator/health    ║
+║  View Logs:        tail -f app.log | grep -i chat                ║
+║  MySQL Connect:    mysql -u root -p banhangrong_db               ║
+║  Check Tables:     SHOW TABLES LIKE 'chat_%';                    ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                    ⚡ KEYBOARD SHORTCUTS                          ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  F12                    - Open Developer Tools                    ║
+║  Ctrl+Shift+I          - Open Developer Tools                    ║
+║  Ctrl+Shift+N          - New Incognito Window                    ║
+║  Ctrl+R                - Refresh Page                             ║
+║  F5                     - Refresh Page                            ║
+║  Ctrl+Shift+R          - Hard Refresh (Clear Cache)              ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                   🎨 UI FEATURES TO CHECK                         ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  □ Avatar shows first 2 letters of name                          ║
+║  □ Customer avatar: Purple gradient                               ║
+║  □ Seller avatar: Pink gradient                                   ║
+║  □ Sent messages: Blue, right-aligned                             ║
+║  □ Received messages: Gray, left-aligned                          ║
+║  □ Unread badge: Blue circle with number                          ║
+║  □ Last message preview: Gray text, truncated                     ║
+║  □ Timestamp: "Just now", "2m ago", "1h ago"                     ║
+║  □ Connection status: Top banner (yellow/green/red)              ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                  📱 MOBILE TESTING (Optional)                     ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  1. Find your IP: ifconfig | grep "inet "                        ║
+║  2. Open on mobile: http://[YOUR-IP]:8080                        ║
+║  3. Test responsive layout                                        ║
+║  4. Test touch interactions                                       ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                    💡 QUICK TIPS                                  ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  • Always use 2 different browsers or 1 normal + 1 incognito    ║
+║  • Clear browser cache if UI doesn't update                       ║
+║  • Check browser console for errors (F12)                         ║
+║  • Verify database after each action                              ║
+║  • Take screenshots of success states                             ║
+║  • Record video for demo purposes                                 ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                   ⏱️ TIME ESTIMATES                               ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Database Setup:        2 minutes                                 ║
+║  App Startup:           1 minute                                  ║
+║  Basic Test:            2 minutes                                 ║
+║  Full Test Suite:       30 minutes                                ║
+║  Video Demo:            5 minutes                                 ║
+║  Bug Investigation:     10-30 minutes                             ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                  🎯 ACCEPTANCE CRITERIA                           ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  ✅ Real-time: Message delivery < 2 seconds                      ║
+║  ✅ Persistence: All messages saved to database                   ║
+║  ✅ Unread Count: Accurate tracking                               ║
+║  ✅ Multi-Conv: No message mixing                                 ║
+║  ✅ UI/UX: Clean, intuitive interface                            ║
+║  ✅ Stability: No crashes, auto-reconnect                        ║
+║  ✅ Security: XSS prevented, auth required                        ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                   🚨 CRITICAL CHECKS                              ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  BEFORE TEST:                                                     ║
+║    □ Database tables exist                                        ║
+║    □ Test accounts created                                        ║
+║    □ App started successfully                                     ║
+║    □ Port 8080 not blocked                                        ║
+║                                                                   ║
+║  DURING TEST:                                                     ║
+║    □ WebSocket status: Connected                                  ║
+║    □ No console errors                                            ║
+║    □ Messages appear instantly                                    ║
+║    □ Database updates in real-time                                ║
+║                                                                   ║
+║  AFTER TEST:                                                      ║
+║    □ All messages persisted                                       ║
+║    □ Unread counts correct                                        ║
+║    □ No memory leaks (check heap)                                 ║
+║    □ Logs show no errors                                          ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                     📞 SUPPORT                                    ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Issue? Check files in this order:                                ║
+║  1. TOM_TAT_CHAT.md       - Summary & overview                   ║
+║  2. TEST_CHAT_NHANH.md    - Quick test guide                     ║
+║  3. HUONG_DAN_TEST_CHAT.md - Detailed test guide                 ║
+║  4. CHAT_SYSTEM_DOCUMENTATION.md - Technical details              ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                  ✨ SUCCESS INDICATORS                            ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Customer Side:                                                   ║
+║    ✓ See seller in list                                          ║
+║    ✓ Can send message                                             ║
+║    ✓ Message appears immediately in chat                          ║
+║    ✓ Receive reply instantly                                      ║
+║                                                                   ║
+║  Seller Side:                                                     ║
+║    ✓ See conversation with customer                               ║
+║    ✓ Unread badge shows correct number                            ║
+║    ✓ Can read customer message                                    ║
+║    ✓ Can send reply                                               ║
+║    ✓ Reply appears immediately                                    ║
+║                                                                   ║
+║  Database:                                                        ║
+║    ✓ chat_conversations has entry                                 ║
+║    ✓ chat_messages has all messages                               ║
+║    ✓ is_read flag updates correctly                               ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                   🎉 CONGRATULATIONS!                             ║
+║                                                                   ║
+║  If all checks pass, your chat system is working perfectly! 🚀   ║
+║                                                                   ║
+║  Version: 1.0.0                                                   ║
+║  Date: October 28, 2025                                           ║
+║  Status: READY FOR PRODUCTION                                     ║
+╚═══════════════════════════════════════════════════════════════════╝
+

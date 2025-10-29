@@ -1,309 +1,926 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Hỗ Trợ Khách Hàng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <title>Chat - BanHangRong</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
+        :root {
+            --primary-color: #0084ff;
+            --secondary-color: #e4e6eb;
+            --background-color: #f0f2f5;
+            --text-primary: #050505;
+            --text-secondary: #65676b;
+            --border-color: #e4e6eb;
+            --message-bg-sent: #0084ff;
+            --message-bg-received: #e4e6eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+        }
+
         .chat-container {
             display: flex;
-            height: 70vh;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            display: none;
+        }
+
+        .connection-status.connecting { background: #ffc107; color: #000; display: block; }
+        .connection-status.connected { background: #28a745; color: white; display: block; }
+        .connection-status.disconnected { background: #dc3545; color: white; display: block; }
+
+        .sidebar {
+            width: 360px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
             background: white;
         }
-        .chat-sidebar {
-            width: 300px;
-            border-right: 1px solid #ddd;
-            background: #f8f9fa;
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .user-info {
+            padding: 15px 20px;
+            background: var(--secondary-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .avatar.seller {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .conversations-list {
+            flex: 1;
             overflow-y: auto;
         }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .conversation-item:hover {
+            background: var(--background-color);
+        }
+
+        .conversation-item.active {
+            background: var(--secondary-color);
+        }
+
+        .conversation-info {
+            flex: 1;
+            min-width: 0;
+            margin-left: 12px;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 15px;
+        }
+
+        .conversation-last-message {
+            color: var(--text-secondary);
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .unread-badge {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
         .chat-main {
             flex: 1;
             display: flex;
             flex-direction: column;
+            background: white;
         }
+
         .chat-header {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-            background: #007bff;
-            color: white;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
+
         .chat-messages {
             flex: 1;
-            padding: 15px;
             overflow-y: auto;
-            background: #f0f2f5;
-        }
-        .chat-input {
-            padding: 15px;
-            border-top: 1px solid #ddd;
+            padding: 20px;
             background: white;
         }
+
         .message {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            max-width: 70%;
+            display: flex;
+            margin-bottom: 16px;
+            align-items: flex-end;
+            animation: fadeIn 0.2s ease-in;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .message.sent {
-            background: #007bff;
-            color: white;
-            margin-left: auto;
+            flex-direction: row-reverse;
         }
-        .message.received {
-            background: white;
-            border: 1px solid #ddd;
-        }
-        .room-item {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .room-item:hover {
-            background: #e9ecef;
-        }
-        .room-item.active {
-            background: #007bff;
-            color: white;
-        }
-        .unread-badge {
-            background: #dc3545;
-            color: white;
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            padding: 2px 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-size: 12px;
-            margin-left: auto;
+            font-weight: 600;
+            margin: 0 8px;
+            flex-shrink: 0;
+        }
+
+        .message-avatar.seller {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .message-content {
+            max-width: 60%;
+        }
+
+        .message-bubble {
+            padding: 10px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            display: inline-block;
+        }
+
+        .message.received .message-bubble {
+            background: var(--message-bg-received);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.sent .message-bubble {
+            background: var(--message-bg-sent);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 0 12px;
+        }
+
+        .chat-input-container {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            background: white;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: var(--background-color);
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .btn-send {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-send:hover:not(:disabled) {
+            background: #006ee5;
+        }
+
+        .btn-send:disabled {
+            background: var(--secondary-color);
+            cursor: not-allowed;
+        }
+
+        .welcome-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .welcome-screen i {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-<div class="container-fluid mt-4">
-    <h2>💬 Chat Hỗ Trợ Khách Hàng</h2>
+<div id="connectionStatus" class="connection-status"></div>
 
-    <div class="chat-container">
-        <!-- Sidebar với danh sách phòng chat -->
-        <div class="chat-sidebar">
-            <div class="p-3 border-bottom">
-                <h5>Phòng Chat</h5>
-                <div class="text-muted small" id="totalUnread">
-                    <span th:text="${totalUnread}">0</span> tin nhắn chưa đọc
-                </div>
+<div class="chat-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-comments"></i> Messages</h2>
+        </div>
+        <div class="user-info">
+            <div class="avatar" id="currentUserAvatar">
+                <img th:if="${user != null && user.avatarUrl != null}"
+                     th:src="@{${user.avatarUrl}}" alt="Avatar" />
+                <span th:if="${user == null || user.avatarUrl == null}"
+                      th:text="${user != null ? (user.fullName != null ? #strings.substring(user.fullName, 0, 2) : #strings.substring(user.username, 0, 2)) : 'U'}">U</span>
             </div>
-            <div id="chatRooms">
-                <!-- Danh sách phòng chat -->
-                <div th:each="room : ${chatRooms}" class="room-item" th:attr="data-roomid=${room.roomId}">
-                    <div class="d-flex align-items-center">
-                        <strong th:text="${room.customer.username}">Customer</strong>
-                    </div>
-                    <small class="text-muted" th:if="${room.product != null}" th:text="${room.product.name}">Product Name</small>
-                    <small class="text-muted" th:text="${#temporals.format(room.updatedAt, 'dd/MM HH:mm')}">01/01 12:00</small>
-                </div>
+            <div style="flex: 1;">
+                <div class="conversation-name" th:text="${user != null ? (user.fullName != null ? user.fullName : user.username) : 'User'}">User</div>
+                <div class="conversation-last-message" th:text="${user != null ? user.userType : 'Guest'}">Guest</div>
+            </div>
+            <a href="/" class="btn btn-sm btn-outline-secondary" title="Back to Home">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+        <div class="conversations-list" id="conversationsList">
+            <!-- Conversations will be loaded here -->
+        </div>
+    </div>
 
-                <!-- SỬA LỖI: Dùng isEmpty() thay vì .empty -->
-                <div th:if="${chatRooms.isEmpty()}" class="p-3 text-center text-muted">
-                    <i class="bi bi-chat-dots" style="font-size: 48px;"></i>
-                    <p>Chưa có phòng chat nào</p>
-                    <small>Tạo dữ liệu test trong database</small>
-                </div>
-            </div>
+    <!-- Main Chat Area -->
+    <div class="chat-main">
+        <div id="welcomeScreen" class="welcome-screen">
+            <i class="fas fa-comment-dots"></i>
+            <h3>Welcome to Chat</h3>
+            <p>Select a conversation to start messaging</p>
         </div>
 
-        <!-- Main chat area -->
-        <div class="chat-main">
+        <div id="chatArea" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
             <div class="chat-header">
-                <h5 id="currentRoomTitle">Chọn một phòng chat để bắt đầu</h5>
+                <div class="avatar" id="chatHeaderAvatar"></div>
+                <div style="margin-left: 12px;">
+                    <div class="conversation-name" id="chatHeaderName"></div>
+                    <div class="conversation-last-message">Active</div>
+                </div>
             </div>
 
             <div class="chat-messages" id="chatMessages">
-                <div class="text-center text-muted mt-5">
-                    <i class="bi bi-chat-dots" style="font-size: 48px;"></i>
-                    <p>Chọn một cuộc trò chuyện để xem tin nhắn</p>
-                </div>
+                <!-- Messages will be loaded here -->
             </div>
 
-            <div class="chat-input" id="chatInput" style="display: none;">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="messageInput" placeholder="Nhập tin nhắn..." maxlength="1000">
-                    <button class="btn btn-primary" id="sendMessageBtn">
-                        <i class="bi bi-send"></i> Gửi
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input type="text" class="chat-input" id="messageInput"
+                           placeholder="Type a message..."
+                           maxlength="5000"
+                           oninput="updateCharCount()"
+                           onkeypress="handleKeyPress(event)">
+                    <span id="charCount" style="color: #999; font-size: 12px; margin-right: 10px; display: none;">0/5000</span>
+                    <button class="btn-send" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Test instructions -->
-    <div class="mt-4 card">
-        <div class="card-header bg-light">
-            <h6>🧪 Hướng dẫn Test</h6>
-        </div>
-        <div class="card-body">
-            <p class="small">Để test hệ thống chat, chạy các lệnh SQL sau trong database:</p>
-            <code class="small d-block p-2 bg-dark text-white rounded">
-                -- Tạo phòng chat<br>
-                INSERT INTO chat_rooms (seller_id, customer_id, product_id) VALUES (1, 2, 1);<br><br>
-                -- Tạo tin nhắn test<br>
-                INSERT INTO chat_messages (room_id, sender_id, content) VALUES <br>
-                (1, 2, 'Xin chào, tôi muốn hỏi về sản phẩm'),<br>
-                (1, 1, 'Chào bạn! Tôi có thể giúp gì?');
-            </code>
-            <a href="/seller/dashboard" class="btn btn-secondary mt-2">
-                <i class="bi bi-arrow-left"></i> Quay lại Dashboard
-            </a>
-        </div>
-    </div>
 </div>
 
-<script>
-    // JavaScript đơn giản để test
-    document.addEventListener('DOMContentLoaded', function() {
-        const roomItems = document.querySelectorAll('.room-item');
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const currentUser = /*[[${user}]]*/ null;
 
-        roomItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove active class from all items
-                roomItems.forEach(i => i.classList.remove('active'));
-                // Add active class to clicked item
-                this.classList.add('active');
+    if (!currentUser || !currentUser.userId) {
+        alert('Please login first');
+        window.location.href = '/login';
+    }
 
-                const roomId = this.getAttribute('data-roomid');
-                const customerName = this.querySelector('strong').textContent;
+    let stompClient = null;
+    let currentConversation = null;
+    let conversations = [];
+    let subscriptions = {};
+    let isConnected = false;
+    let messageQueue = [];
+    let lastMessageTime = 0;
+    const RATE_LIMIT_MS = 100;
+    const MAX_MESSAGE_LENGTH = 5000;
+    const LAST_CONVERSATION_KEY = 'lastConversationId_' + currentUser.userId;
 
-                // Update UI
-                document.getElementById('currentRoomTitle').textContent = 'Chat với ' + customerName;
-                document.getElementById('chatInput').style.display = 'block';
+    function updateConnectionStatus(status) {
+        const statusEl = document.getElementById('connectionStatus');
+        statusEl.className = 'connection-status ' + status;
+        switch(status) {
+            case 'connecting':
+                statusEl.textContent = '⚠️ Connecting...';
+                break;
+            case 'connected':
+                statusEl.textContent = '✅ Connected';
+                setTimeout(() => statusEl.classList.remove('connected'), 2000);
+                break;
+            case 'disconnected':
+                statusEl.textContent = '❌ Connection Lost - Trying to reconnect...';
+                break;
+        }
+        updateConnectionUI();
+    }
 
-                // Clear messages and show loading
-                const messagesContainer = document.getElementById('chatMessages');
-                messagesContainer.innerHTML =
-                    '<div class="text-center text-muted mt-5">' +
-                    '<div class="spinner-border" role="status">' +
-                    '<span class="visually-hidden">Loading...</span>' +
-                    '</div>' +
-                    '<p>Đang tải tin nhắn...</p>' +
-                    '</div>';
+    function updateConnectionUI() {
+        const sendBtn = document.getElementById('sendBtn');
+        const messageInput = document.getElementById('messageInput');
 
-                // Load messages via AJAX
-                fetch('/seller/chat/api/messages/' + roomId)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(messages => {
-                        displayMessages(messages);
-                    })
-                    .catch(error => {
-                        console.error('Error loading messages:', error);
-                        messagesContainer.innerHTML =
-                            '<div class="alert alert-danger">' +
-                            'Lỗi tải tin nhắn: ' + error.message +
-                            '</div>';
+        if (!isConnected) {
+            sendBtn.disabled = true;
+            sendBtn.style.opacity = '0.5';
+            sendBtn.style.cursor = 'not-allowed';
+            messageInput.placeholder = '⚠️ Disconnected - Reconnecting...';
+            messageInput.disabled = true;
+        } else {
+            sendBtn.disabled = false;
+            sendBtn.style.opacity = '1';
+            sendBtn.style.cursor = 'pointer';
+            messageInput.placeholder = 'Type a message...';
+            messageInput.disabled = false;
+        }
+    }
+
+    function connect() {
+        if (isConnected) return;
+        updateConnectionStatus('connecting');
+
+        const socket = new SockJS('/chat');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect(
+            { userId: currentUser.userId },
+            function(frame) {
+                console.log('Connected:', frame);
+                isConnected = true;
+                updateConnectionStatus('connected');
+
+                subscriptions.notifications = stompClient.subscribe(
+                    '/topic/user/' + currentUser.userId + '/notification',
+                    function(message) {
+                        const msg = JSON.parse(message.body);
+                        handleNewMessage(msg);
+                    }
+                );
+
+                stompClient.send('/app/user.connect', {}, JSON.stringify({
+                    userId: currentUser.userId
+                }));
+
+                // Send queued messages
+                if (messageQueue.length > 0) {
+                    showToast(`📤 Sending ${messageQueue.length} queued message${messageQueue.length > 1 ? 's' : ''}...`, 'info');
+                    messageQueue.forEach(msg => {
+                        stompClient.send('/app/sendMessage', {}, JSON.stringify(msg));
                     });
-            });
+                    messageQueue = [];
+                }
+            },
+            function(error) {
+                console.error('STOMP error:', error);
+                isConnected = false;
+                updateConnectionStatus('disconnected');
+                setTimeout(connect, 5000);
+            }
+        );
+    }
+
+    function loadConversations() {
+        const isSeller = currentUser.userType === 'SELLER';
+
+        return new Promise((resolve, reject) => {
+            if (isSeller) {
+                // Seller: load existing conversations
+                fetch(`/api/conversations/${currentUser.userId}`)
+                    .then(res => res.json())
+                    .then(convs => {
+                        conversations = convs;
+                        renderConversationsList();
+                        restoreLastConversation();
+                        resolve();
+                    })
+                    .catch(err => {
+                        console.error('Error loading conversations:', err);
+                        showToast('❌ Failed to load conversations', 'error');
+                        reject(err);
+                    });
+            } else {
+                // Customer: load sellers and create conversations
+                fetch('/api/sellers')
+                    .then(res => res.json())
+                    .then(sellers => {
+                        const promises = sellers.map(seller =>
+                            fetch(`/api/conversation?customerId=${currentUser.userId}&sellerId=${seller.userId}`, {
+                                method: 'POST'
+                            }).then(res => res.json())
+                        );
+                        return Promise.all(promises);
+                    })
+                    .then(convs => {
+                        conversations = convs;
+                        renderConversationsList();
+                        if (conversations.length > 0) {
+                            openConversation(conversations[0]);
+                        }
+                        resolve();
+                    })
+                    .catch(err => {
+                        console.error('Error loading sellers:', err);
+                        showToast('❌ Failed to load sellers', 'error');
+                        reject(err);
+                    });
+            }
         });
+    }
 
-        function displayMessages(messages) {
-            const container = document.getElementById('chatMessages');
-            container.innerHTML = '';
+    function renderConversationsList() {
+        const list = document.getElementById('conversationsList');
+        list.innerHTML = '';
 
-            if (messages.length === 0) {
-                container.innerHTML =
-                    '<div class="text-center text-muted mt-5">' +
-                    '<p>Chưa có tin nhắn nào</p>' +
-                    '<small>Hãy bắt đầu cuộc trò chuyện!</small>' +
-                    '</div>';
-                return;
+        conversations.forEach(conv => {
+            const isCustomer = currentUser.userType === 'CUSTOMER';
+            const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
+            const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
+
+            const item = document.createElement('div');
+            item.className = 'conversation-item';
+            if (currentConversation && currentConversation.id === conv.id) {
+                item.classList.add('active');
             }
 
-            messages.forEach(function(message) {
-                const messageEl = document.createElement('div');
-                const isSeller = message.sender.userId === 1; // Assuming seller ID is 1
+            item.innerHTML = `
+                <div class="avatar ${isCustomer ? 'seller' : ''}">${avatar}</div>
+                <div class="conversation-info">
+                    <div class="conversation-name">${escapeHtml(otherPartyName)}</div>
+                    <div class="conversation-last-message">${escapeHtml(conv.lastMessage || 'Start chatting')}</div>
+                </div>
+                ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount}</span>` : ''}
+            `;
 
-                messageEl.className = 'message ' + (isSeller ? 'sent' : 'received');
-                messageEl.innerHTML =
-                    '<div class="message-content">' + escapeHtml(message.content) + '</div>' +
-                    '<small class="message-time">' + new Date(message.createdAt).toLocaleTimeString() + '</small>';
-                container.appendChild(messageEl);
-            });
+            item.onclick = () => openConversation(conv);
+            list.appendChild(item);
+        });
+    }
 
-            // Scroll to bottom
-            container.scrollTop = container.scrollHeight;
+    function openConversation(conv) {
+        if (currentConversation && subscriptions.conversation) {
+            subscriptions.conversation.unsubscribe();
         }
 
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+        currentConversation = conv;
+
+        // Save to localStorage
+        localStorage.setItem(LAST_CONVERSATION_KEY, conv.id);
+
+        document.getElementById('welcomeScreen').classList.add('hidden');
+        document.getElementById('chatArea').classList.remove('hidden');
+
+        const isCustomer = currentUser.userType === 'CUSTOMER';
+        const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
+        const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
+
+        document.getElementById('chatHeaderName').textContent = otherPartyName;
+        document.getElementById('chatHeaderAvatar').textContent = avatar;
+        document.getElementById('chatHeaderAvatar').className = `avatar ${isCustomer ? 'seller' : ''}`;
+
+        if (stompClient && isConnected) {
+            subscriptions.conversation = stompClient.subscribe(
+                '/topic/conversation/' + conv.id,
+                function(message) {
+                    const msg = JSON.parse(message.body);
+                    if (msg.senderId !== currentUser.userId) {
+                        displayMessage(msg);
+                        markAsRead();
+                    }
+                }
+            );
         }
 
-        // Send message functionality
-        var sendMessageBtn = document.getElementById('sendMessageBtn');
-        var messageInput = document.getElementById('messageInput');
+        renderMessages();
+        markAsRead();
 
-        if (sendMessageBtn) {
-            sendMessageBtn.addEventListener('click', sendMessage);
+        // Focus input
+        document.getElementById('messageInput').focus();
+    }
+
+    function markAsRead() {
+        if (currentConversation) {
+            fetch(`/api/conversation/${currentConversation.id}/read?userId=${currentUser.userId}`, {
+                method: 'POST'
+            }).catch(err => console.error('Error marking as read:', err));
+        }
+    }
+
+    function renderMessages() {
+        const messagesContainer = document.getElementById('chatMessages');
+        messagesContainer.innerHTML = '';
+
+        if (currentConversation && currentConversation.messages) {
+            currentConversation.messages.forEach(msg => displayMessage(msg, false));
+        }
+        scrollToBottom();
+    }
+
+    function displayMessage(message, shouldScroll = true) {
+        const messagesContainer = document.getElementById('chatMessages');
+        const isSent = message.senderId === currentUser.userId;
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+
+        if (message.id && message.id.toString().startsWith('temp_')) {
+            messageDiv.setAttribute('data-temp-id', message.id);
         }
 
-        if (messageInput) {
-            messageInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
+        const avatarClass = message.senderRole === 'SELLER' ? 'seller' : '';
+        const avatar = message.senderName ? message.senderName.substring(0, 2).toUpperCase() : '?';
+
+        const statusIndicator = isSent ? `<span class="message-status" style="font-size: 10px; margin-left: 5px; color: #999;" title="${message.status || 'sent'}">${message.status === 'sending' ? '○' : message.status === 'queued' ? '⏳' : '✓'}</span>` : '';
+
+        messageDiv.innerHTML = `
+            <div class="message-avatar ${avatarClass}">${avatar}</div>
+            <div class="message-content">
+                <div class="message-bubble">${escapeHtml(message.content)}${statusIndicator}</div>
+                <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
+            </div>
+        `;
+
+        messagesContainer.appendChild(messageDiv);
+        if (shouldScroll) scrollToBottom();
+    }
+
+    function handleNewMessage(msg) {
+        if (currentConversation && msg.conversationId === currentConversation.id) {
+            displayMessage(msg);
+        }
+        loadConversations();
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+
+        // Validate empty message
+        if (!content || !currentConversation) return;
+
+        // Validate message length
+        if (content.length > MAX_MESSAGE_LENGTH) {
+            showToast(`❌ Message too long! Maximum ${MAX_MESSAGE_LENGTH} characters.`, 'error');
+            return;
+        }
+
+        // Rate limiting check
+        const now = Date.now();
+        if (lastMessageTime && (now - lastMessageTime) < RATE_LIMIT_MS) {
+            showToast('⚠️ Please slow down!', 'warning');
+            return;
+        }
+        lastMessageTime = now;
+
+        const tempId = 'temp_' + Date.now();
+        const message = {
+            id: tempId,
+            conversationId: currentConversation.id,
+            senderId: currentUser.userId,
+            senderName: currentUser.fullName || currentUser.username,
+            senderRole: currentUser.userType,
+            receiverId: currentUser.userType === 'CUSTOMER' ? currentConversation.sellerId : currentConversation.customerId,
+            content: content,
+            type: 'TEXT',
+            read: false,
+            status: 'sending'
+        };
+
+        // Display message immediately (optimistic UI)
+        displayMessage(message);
+        input.value = '';
+        updateCharCount();
+        scrollToBottom();
+
+        // Handle offline vs online
+        if (!isConnected) {
+            messageQueue.push(message);
+            showToast('⚠️ Offline - Message will be sent when reconnected', 'warning');
+            // Update message status to queued
+            updateMessageStatus(tempId, 'queued');
+        } else {
+            // Send via WebSocket
+            stompClient.send('/app/sendMessage', {}, JSON.stringify(message));
+            // Update status after short delay
+            setTimeout(() => {
+                updateMessageStatus(tempId, 'sent');
+            }, 500);
+        }
+    }
+
+    function updateMessageStatus(tempId, status) {
+        const msgElement = document.querySelector(`[data-temp-id="${tempId}"]`);
+        if (msgElement) {
+            const statusSpan = msgElement.querySelector('.message-status');
+            if (statusSpan) {
+                switch(status) {
+                    case 'sending':
+                        statusSpan.textContent = '○';
+                        statusSpan.title = 'Sending...';
+                        break;
+                    case 'sent':
+                        statusSpan.textContent = '✓';
+                        statusSpan.title = 'Sent';
+                        break;
+                    case 'queued':
+                        statusSpan.textContent = '⏳';
+                        statusSpan.title = 'Queued';
+                        break;
+                }
+            }
+        }
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function scrollToBottom() {
+        const messagesContainer = document.getElementById('chatMessages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatTime(timestamp) {
+        if (!timestamp) return '';
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now - date;
+
+        if (diff < 60000) return 'Just now';
+        if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+        if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+        return date.toLocaleDateString();
+    }
+
+    function updateCharCount() {
+        const input = document.getElementById('messageInput');
+        const charCount = document.getElementById('charCount');
+        const length = input.value.length;
+
+        if (length > 0) {
+            charCount.style.display = 'inline';
+            charCount.textContent = `${length}/${MAX_MESSAGE_LENGTH}`;
+
+            if (length > MAX_MESSAGE_LENGTH * 0.9) {
+                charCount.style.color = 'orange';
+            } else {
+                charCount.style.color = '#999';
+            }
+        } else {
+            charCount.style.display = 'none';
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            padding: 12px 20px;
+            background: ${type === 'warning' ? '#ffc107' : type === 'error' ? '#dc3545' : type === 'info' ? '#17a2b8' : '#28a745'};
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 9999;
+            font-size: 14px;
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function restoreLastConversation() {
+        const lastConvId = localStorage.getItem(LAST_CONVERSATION_KEY);
+        if (lastConvId && !targetConversationId && !targetSellerId) {
+            const conv = conversations.find(c => c.id === lastConvId);
+            if (conv) {
+                openConversation(conv);
+            }
+        }
+    }
+
+    // Initialize
+    connect();
+    loadConversations();
+
+    // Auto-open conversation if conversationId is provided
+    const targetConversationId = /*[[${conversationId}]]*/ null;
+    const targetSellerId = /*[[${targetSellerId}]]*/ null;
+
+    if (targetConversationId) {
+        // Wait for conversations to load, then open the target conversation
+        const checkAndOpen = setInterval(() => {
+            const conv = conversations.find(c => c.id === targetConversationId);
+            if (conv) {
+                clearInterval(checkAndOpen);
+                openConversation(conv);
+            }
+        }, 500);
+
+        // Clear interval after 10 seconds to prevent infinite loop
+        setTimeout(() => {
+            clearInterval(checkAndOpen);
+            if (!currentConversation) {
+                showToast('⚠️ Could not open conversation automatically', 'warning');
+            }
+        }, 10000);
+    } else if (targetSellerId && currentUser.userType === 'CUSTOMER') {
+        // For customer: if sellerId is provided, create/open conversation with that seller
+        fetch('/api/conversation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `customerId=${currentUser.userId}&sellerId=${targetSellerId}`
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.error || 'Failed to create conversation');
+                });
+            }
+            return response.json();
+        })
+        .then(conversation => {
+            // Reload conversations to include the new one
+            loadConversations().then(() => {
+                const conv = conversations.find(c => c.id === conversation.id);
+                if (conv) {
+                    openConversation(conv);
+                } else {
+                    showToast('⚠️ Conversation created but could not open', 'warning');
                 }
             });
+        })
+        .catch(error => {
+            console.error('Error creating conversation:', error);
+            showToast('❌ Cannot start chat: ' + error.message, 'error');
+            // Redirect back after 2 seconds
+            setTimeout(() => {
+                window.location.href = document.referrer || '/';
+            }, 2000);
+        });
+    }
+
+    window.onbeforeunload = function() {
+        if (stompClient && isConnected) {
+            stompClient.send('/app/user.disconnect', {}, JSON.stringify({
+                userId: currentUser.userId
+            }));
+            stompClient.disconnect();
         }
-
-        function sendMessage() {
-            var input = document.getElementById('messageInput');
-            var content = input.value.trim();
-            var roomItem = document.querySelector('.room-item.active');
-
-            if (!content || !roomItem) return;
-
-            var roomId = roomItem.getAttribute('data-roomid');
-
-            fetch('/seller/chat/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    roomId: roomId,
-                    senderId: 1, // Seller ID
-                    content: content,
-                    messageType: 'TEXT'
-                })
-            })
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    if (data.success) {
-                        input.value = '';
-                        // Reload messages
-                        var customerName = roomItem.querySelector('strong').textContent;
-                        roomItem.click(); // Simulate click to reload messages
-                    } else {
-                        alert('Lỗi gửi tin nhắn: ' + data.message);
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error sending message:', error);
-                    alert('Lỗi gửi tin nhắn');
-                });
-        }
-    });
+    };
+    /*]]>*/
 </script>
 </body>
 </html>
+

@@ -66,9 +66,15 @@
     <header class="text-center mb-5">
         <h1 class="display-4">🛍️ Cửa Hàng</h1>
         <p class="lead text-muted">Chào mừng đến với cửa hàng của chúng tôi</p>
-        <div class="text-muted">
+        <div class="text-muted mb-3">
             <small>Seller ID: <span th:text="${sellerId}">1</span></small>
         </div>
+        <a th:href="@{/customer/chat(sellerId=${sellerId})}"
+           class="btn btn-success btn-lg"
+           style="display:inline-flex;align-items:center;gap:8px">
+            <i class="ti ti-message-circle"></i>
+            Chat với Shop
+        </a>
     </header>
 
     <!-- Shop Sections -->
