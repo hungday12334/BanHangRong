@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -45,21 +46,31 @@ public class AdminIndex {
 
     @GetMapping("/user")
     public String manageUser(Model model) {
-        List<Users> userList = userService.findAll();
+        List<Users> userList;
+
+        // Kiểm tra an toàn: có filter và đúng kiểu không
+        Object filterObj = model.getAttribute("filter");
+        Boolean isFromFilter = Boolean.TRUE.equals((Boolean) model.getAttribute("isFromFilter"));
+
+        if (isFromFilter && filterObj instanceof List<?> filterList) {
+            // Ép kiểu an toàn với pattern matching (Java 14+)
+            userList = filterList.stream()
+                    .filter(user -> user instanceof Users)
+                    .map(object -> (Users) object)
+                    .toList();
+        } else {
+            userList = userService.findAll();
+        }
+
         model.addAttribute("userList", userList);
-        return "admin/user-management"; // trả về file admin/user-management.html
+        return "admin/user-management";
     }
+
 
     @GetMapping("/products")
     public String getAllProduct(Model model) {
         List<Products> productsList = adminProductService.findAll();
-        List<Products> productsListPening = adminProductService.findByStatus("pending");
-        List<Products> productsListPublic = adminProductService.findByStatus("public");
-        List<Products> productsListCancelled = adminProductService.findByStatus("cancelled");
         model.addAttribute("productsList", productsList);
-        model.addAttribute("productsListPublic", productsListPublic);
-        model.addAttribute("productsListCancelled", productsListCancelled);
-        model.addAttribute("productsListPending", productsListPening);
         return "admin/product-management";
     }
 
