@@ -1,30 +1,35 @@
 package banhangrong.su25.DTO;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 public class UserFilter {
+    private Long id;
     private String username;
     private String email;
     private String phoneNumber;
     private String gender;
     private String userType;
-    private String active;
-    private String verified;
-    private String minBalance;
-    private String maxBalance;
-    private String birthFrom;
-    private String birthTo;
-    private String lastLoginFrom;
-    private String lastLoginTo;
-    private String createdFrom;
-    private String createdTo;
-    private String updatedFrom;
-    private String updatedTo;
+    private Boolean active;
+    private Boolean verified;
+    private BigDecimal minBalance;
+    private BigDecimal maxBalance;
+    private LocalDate birthFrom;
+    private LocalDate birthTo;
+    private LocalDate lastLoginFrom;
+    private LocalDate lastLoginTo;
+    private LocalDate createdFrom;
+    private LocalDate createdTo;
+    private LocalDate updatedFrom;
+    private LocalDate updatedTo;
     private String sortBy;
     private String sortOrder;
 
     public UserFilter() {
     }
 
-    public UserFilter(String username, String email, String phoneNumber, String gender, String userType, String active, String verified, String minBalance, String maxBalance, String birthFrom, String birthTo, String lastLoginFrom, String lastLoginTo, String createdFrom, String createdTo, String updatedFrom, String updatedTo, String sortBy, String sortOrder) {
+    public UserFilter(Long id, String username, String email, String phoneNumber, String gender, String userType, Boolean active, Boolean verified, BigDecimal minBalance, BigDecimal maxBalance, LocalDate birthFrom, LocalDate birthTo, LocalDate lastLoginFrom, LocalDate lastLoginTo, LocalDate createdFrom, LocalDate createdTo, LocalDate updatedFrom, LocalDate updatedTo, String sortBy, String sortOrder) {
+        this.id = id;
         this.username = username;
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -44,6 +49,14 @@ public class UserFilter {
         this.updatedTo = updatedTo;
         this.sortBy = sortBy;
         this.sortOrder = sortOrder;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -86,99 +99,99 @@ public class UserFilter {
         this.userType = userType;
     }
 
-    public String getActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(String active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
-    public String getVerified() {
+    public Boolean getVerified() {
         return verified;
     }
 
-    public void setVerified(String verified) {
+    public void setVerified(Boolean verified) {
         this.verified = verified;
     }
 
-    public String getMinBalance() {
+    public BigDecimal getMinBalance() {
         return minBalance;
     }
 
-    public void setMinBalance(String minBalance) {
+    public void setMinBalance(BigDecimal minBalance) {
         this.minBalance = minBalance;
     }
 
-    public String getMaxBalance() {
+    public BigDecimal getMaxBalance() {
         return maxBalance;
     }
 
-    public void setMaxBalance(String maxBalance) {
+    public void setMaxBalance(BigDecimal maxBalance) {
         this.maxBalance = maxBalance;
     }
 
-    public String getBirthFrom() {
+    public LocalDate getBirthFrom() {
         return birthFrom;
     }
 
-    public void setBirthFrom(String birthFrom) {
+    public void setBirthFrom(LocalDate birthFrom) {
         this.birthFrom = birthFrom;
     }
 
-    public String getBirthTo() {
+    public LocalDate getBirthTo() {
         return birthTo;
     }
 
-    public void setBirthTo(String birthTo) {
+    public void setBirthTo(LocalDate birthTo) {
         this.birthTo = birthTo;
     }
 
-    public String getLastLoginFrom() {
+    public LocalDate getLastLoginFrom() {
         return lastLoginFrom;
     }
 
-    public void setLastLoginFrom(String lastLoginFrom) {
+    public void setLastLoginFrom(LocalDate lastLoginFrom) {
         this.lastLoginFrom = lastLoginFrom;
     }
 
-    public String getLastLoginTo() {
+    public LocalDate getLastLoginTo() {
         return lastLoginTo;
     }
 
-    public void setLastLoginTo(String lastLoginTo) {
+    public void setLastLoginTo(LocalDate lastLoginTo) {
         this.lastLoginTo = lastLoginTo;
     }
 
-    public String getCreatedFrom() {
+    public LocalDate getCreatedFrom() {
         return createdFrom;
     }
 
-    public void setCreatedFrom(String createdFrom) {
+    public void setCreatedFrom(LocalDate createdFrom) {
         this.createdFrom = createdFrom;
     }
 
-    public String getCreatedTo() {
+    public LocalDate getCreatedTo() {
         return createdTo;
     }
 
-    public void setCreatedTo(String createdTo) {
+    public void setCreatedTo(LocalDate createdTo) {
         this.createdTo = createdTo;
     }
 
-    public String getUpdatedFrom() {
+    public LocalDate getUpdatedFrom() {
         return updatedFrom;
     }
 
-    public void setUpdatedFrom(String updatedFrom) {
+    public void setUpdatedFrom(LocalDate updatedFrom) {
         this.updatedFrom = updatedFrom;
     }
 
-    public String getUpdatedTo() {
+    public LocalDate getUpdatedTo() {
         return updatedTo;
     }
 
-    public void setUpdatedTo(String updatedTo) {
+    public void setUpdatedTo(LocalDate updatedTo) {
         this.updatedTo = updatedTo;
     }
 
