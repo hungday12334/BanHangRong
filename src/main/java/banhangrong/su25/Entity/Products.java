@@ -31,6 +31,8 @@ public class Products {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    private Boolean isActive;
+    @Column(name = "created_at", updatable = false)
 
     public Long getProductId() {
         return productId;
@@ -97,6 +99,12 @@ public class Products {
     }
     public void setStatus(String status) {
         this.status = status;
+    }
+    public Boolean getIsActive() {
+        return isActive;
+    }
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     @PrePersist
