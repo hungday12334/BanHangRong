@@ -185,14 +185,21 @@
             background-color: #007bff; /* hoặc #0d6efd nếu bạn dùng tone Bootstrap 5 */
             color: white;
         }
-        .sidebar-item { position: relative; list-style: none; }
+
+        .sidebar-item {
+            position: relative;
+            list-style: none;
+        }
+
         .sidebar-item > ul {
             display: none;
             margin-left: 1.5rem;
         }
+
         .sidebar-item:hover > ul {
             display: block;
         }
+
         .badge {
             background-color: #dc3545;
             color: #fff;
@@ -200,7 +207,8 @@
             border-radius: 10px;
             font-size: 0.8rem;
         }
-        .submit-btn{
+
+        .submit-btn {
             padding: 12px 28px; /* to hơn */
             font-size: 16px;
             font-weight: 600;
@@ -216,12 +224,28 @@
             color: #28a745;
             border: 2px solid #1e7e34;
         }
+
         .submit-btn:hover {
             color: #fff;
             background-color: #28a745;
             border-color: #1e7e34;
             transform: scale(1.05); /* phóng nhẹ khi hover */
             box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+        }
+
+        .filter-bar select, .filter-bar input {
+            min-width: 160px;
+        }
+
+        .advanced-filter label {
+            font-weight: 500;
+        }
+        .filter-bar{
+            margin-left: 0; /* bỏ thụt trái */
+            padding-left: 0;
+        }
+        form.user-filter-form {
+            display: contents; /* cho phép phần tử con giữ layout cũ */
         }
     </style>
 </head>
@@ -232,40 +256,117 @@
     <div th:replace="~{admin/sidebar::sidebar}"></div>
     <!-- Sidebar End -->
 
-    <!-- ListUser Section -->
     <div class="content-wrapper">
-        <div class="user-header">
-            <div class="d-flex filter-bar">
-                <input type="text" id="searchInput" class="form-control" placeholder="ID, Username, Email, Phone">
-                <select id="role" class="form-select">
-                    <option value="ALL">ROLE</option>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="SELLER">SELLER</option>
-                    <option value="CUSTOMER">CUSTOMER</option>
-                </select>
-                <select id="gentle" class="form-select">
-                    <option value="ALL">GENDER</option>
-                    <option value="MALE">MALE</option>
-                    <option value="FEMALE">FEMALE</option>
-                    <option value="OTHERS">OTHERS</option>
-                </select>
-                <select id="Active" class="form-select">
-                    <option value="ALL">Active</option>
-                    <option value="TRUE">TRUE</option>
-                    <option value="FALSE">FALSE</option>
-                </select>
-                <div class="date-field">
-                    <label for="createAt">Create At</label>
-                    <input type="date" id="createAt" class="form-control">
+        <!-- Start Filter -->
+        <form th:action="@{/admin/user/search}" method="get" class="user-filter-form">
+            <div class="user-header">
+                <div class="filter-bar d-flex flex-wrap align-items-center gap-2">
+                    <!-- Quick selectors -->
+                    <select id="userType" class="form-select w-auto" name="userType">
+                        <option value="ALL">User Type</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="SELLER">Seller</option>
+                        <option value="CUSTOMER">Customer</option>
+                    </select>
+
+                    <select id="gender" class="form-select w-auto" name="gender">
+                        <option value="ALL">Gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHERS">Others</option>
+                    </select>
+
+                    <select id="active" class="form-select w-auto" name="active">
+                        <option value="ALL">Active</option>
+                        <option value="TRUE">True</option>
+                        <option value="FALSE">False</option>
+                    </select>
+                    <select id="verified" class="form-select w-auto" name="verified">
+                        <option value="ALL">Verifed</option>
+                        <option value="TRUE">True</option>
+                        <option value="FALSE">False</option>
+                    </select>
+
+                    <!-- Toggle advanced section -->
+                    <button type="button" class="btn btn-outline-primary" id="toggleAdvanced">
+                        <i class="bi bi-funnel"></i> Advanced Filter
+                    </button>
+
+                    <!-- Create user button -->
+                    <a th:href="@{/admin/user/create}" class="btn btn-success ms-auto">
+                        <i class="bi bi-plus-circle"></i> Create User
+                    </a>
                 </div>
 
-                <div class="date-field">
-                    <label for="updateAt">Update At</label>
-                    <input type="date" id="updateAt" class="form-control">
+                <!-- Advanced Filter Section (hidden by default) -->
+                <div id="advancedFilter" class="advanced-filter mt-3 border rounded p-3 bg-light" style="display: none;">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Id</label>
+                            <input type="number" class="form-control" id="id" placeholder="e.g. 1" name="id">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" placeholder="e.g. motaido" name="username">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Email</label>
+                            <input type="text" class="form-control" id="email" placeholder="e.g. abc@gmail.com" name="email">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="phone" placeholder="e.g. abc@gmail.com" name="phoneNumber" maxlength="10" minlength="10">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Balance (Min)</label>
+                            <input type="number" class="form-control" id="minBalance" placeholder="e.g. 0" name="minBalance">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Balance (Max)</label>
+                            <input type="number" class="form-control" id="maxBalance" placeholder="e.g. 10000" name="maxBalance">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Birth Date (From)</label>
+                            <input type="date" class="form-control" id="birthFrom" name="birthFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Birth Date (To)</label>
+                            <input type="date" class="form-control" id="birthTo" name="birthTo">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Last Login (From)</label>
+                            <input type="date" class="form-control" id="lastLoginFrom" name="lastLoginFrom" >
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Last Login (To)</label>
+                            <input type="date" class="form-control" id="lastLoginTo" name="lastLoginTo" >
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Created (From)</label>
+                            <input type="date" class="form-control" id="createdFrom" name="createdFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Created (To)</label>
+                            <input type="date" class="form-control" id="createdTo" name="createdTo">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Updated (From)</label>
+                            <input type="date" class="form-control" id="updatedFrom" name="updatedFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Updated (To)</label>
+                            <input type="date" class="form-control" id="updatedTo" name="updatedTo">
+                        </div>
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-secondary me-2" id="resetFilter">Reset</button>
+                            <button type="submit" class="btn btn-primary" id="applyFilter">Apply Filter</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <a th:href="@{/admin/user/create}" class="submit-btn">Create User</a>
-        </div>
+        </form>
+        <!-- End Filter -->
+        <!-- ListUser Section -->
         <div class="table-responsive">
             <!-- Thông báo lỗi -->
             <div th:if="${error}"
@@ -328,7 +429,6 @@
                               (#strings.equalsIgnoreCase(u.userType, 'customer') ? 'customer' : '')))}">
                       </span>
                     </td>
-
                     <td th:text="${u.phoneNumber}"></td>
                     <td th:text="${u.gender}"></td>
                     <td th:text="${u.birthDate}"></td>
@@ -345,74 +445,131 @@
     </div>
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const searchInput = document.getElementById("searchInput");
-        const roleSelect = document.getElementById("role");
-        const gentleSelect = document.getElementById("gentle");
-        const activeSelect = document.getElementById("Active");
-        const createAtInput = document.getElementById("createAt");
-        const updateAtInput = document.getElementById("updateAt");
-        const rows = document.querySelectorAll("#userTable tbody tr");
+    // document.addEventListener("DOMContentLoaded", () => {
+    //     const searchInput = document.getElementById("searchInput");
+    //     const roleSelect = document.getElementById("role");
+    //     const gentleSelect = document.getElementById("gentle");
+    //     const activeSelect = document.getElementById("Active");
+    //     const createAtInput = document.getElementById("createAt");
+    //     const updateAtInput = document.getElementById("updateAt");
+    //     const rows = document.querySelectorAll("#userTable tbody tr");
+    //
+    //     function filterTable() {
+    //         const search = searchInput.value.trim().toLowerCase();
+    //         const role = roleSelect.value.toLowerCase();
+    //         const gentle = gentleSelect.value.toLowerCase();
+    //         const active = activeSelect.value.toLowerCase();
+    //         const createAt = createAtInput.value.trim();
+    //         const updateAt = updateAtInput.value.trim();
+    //
+    //         rows.forEach(row => {
+    //             const cells = row.querySelectorAll("td");
+    //             if (cells.length < 14) return; // tránh lỗi nếu thiếu cột
+    //
+    //             const id = cells[1].textContent.toLowerCase();
+    //             const username = cells[2].textContent.toLowerCase();
+    //             const email = cells[3].textContent.toLowerCase();
+    //             const roleText = cells[4].textContent.trim().toLowerCase();
+    //             const phone = cells[5].textContent.toLowerCase();
+    //             const gentleText = cells[6].textContent.toLowerCase();
+    //             const activeText = cells[9].textContent.toLowerCase();
+    //             const createAtText = cells[12].textContent.trim();
+    //             const updateAtText = cells[13].textContent.trim();
+    //
+    //             // 🔍 Tìm kiếm (ID, Username, Email, Phone)
+    //             const matchSearch =
+    //                 !search ||
+    //                 id.includes(search) ||
+    //                 username.includes(search) ||
+    //                 email.includes(search) ||
+    //                 phone.includes(search);
+    //
+    //             // 🧩 Lọc role và gender (ignore case), active
+    //             const matchRole = (role === "all" || roleText === role);
+    //             const matchGentle = (gentle === "all" || gentleText === gentle);
+    //             const matchActive = (active === "all" || activeText === active);
+    //
+    //             // 📅 Lọc ngày (so sánh theo tiền tố yyyy-MM-dd)
+    //             const matchCreateAt = !createAt || createAtText.startsWith(createAt);
+    //             const matchUpdateAt = !updateAt || updateAtText.startsWith(updateAt);
+    //
+    //             // ✅ Nếu tất cả điều kiện đều đúng thì hiển thị
+    //             row.style.display = (matchSearch && matchRole && matchGentle && matchActive && matchCreateAt && matchUpdateAt)
+    //                 ? ""
+    //                 : "none";
+    //         });
+    //     }
+    // // ⏱ Gõ xong 300ms mới lọc (debounce)
+    //     let typingTimer;
+    //     searchInput.addEventListener("input", () => {
+    //         clearTimeout(typingTimer);
+    //         typingTimer = setTimeout(filterTable, 300);
+    //     });
+    //
+    //     // 🔁 Filter ngay khi thay đổi
+    //     [roleSelect, gentleSelect,activeSelect, createAtInput, updateAtInput].forEach(el => {
+    //         el.addEventListener("input", filterTable);
+    //         el.addEventListener("change", filterTable);
+    //     });
+    // });
+    // 🔍 Quick filter trực tiếp trong bảng
+    document.addEventListener("DOMContentLoaded", function() {
+        const advancedFilter = document.getElementById("advancedFilter");
+        const toggleAdvanced = document.getElementById("toggleAdvanced");
+        const resetFilter = document.getElementById("resetFilter");
+         advancedFilter.style.display = "none";
+         toggleAdvanced.addEventListener("click", function() {
+             if(advancedFilter.style.display === "none") {
+                 advancedFilter.style.display = "block";
+                 toggleAdvanced.innerHTML = '<i class="bi bi-x-circle"></i> Hide Advanced';
+             } else {
+                 advancedFilter.style.display = "none";
+                 toggleAdvanced.innerHTML = '<i class="bi bi-funnel"></i> Advanced Filter';
+
+             }
+         })
+
+        resetFilter.addEventListener("click", function() {
+            document.querySelectorAll("#advancedFilter input").forEach(el => el.value = "");
+        })
+
+        const roleSelect = document.getElementById("userType");
+        const genderSelect = document.getElementById("gender");
+        const activeSelect = document.getElementById("active");
+        const verifiedSelect = document.getElementById("verified");
 
         function filterTable() {
-            const search = searchInput.value.trim().toLowerCase();
-            const role = roleSelect.value.toLowerCase();
-            const gentle = gentleSelect.value.toLowerCase();
-            const active = activeSelect.value.toLowerCase();
-            const createAt = createAtInput.value.trim();
-            const updateAt = updateAtInput.value.trim();
 
-            rows.forEach(row => {
-                const cells = row.querySelectorAll("td");
-                if (cells.length < 14) return; // tránh lỗi nếu thiếu cột
+            const role = roleSelect.value;
+            const gender = genderSelect.value;
+            const active = activeSelect.value;
+            const verified = verifiedSelect.value;
 
-                const id = cells[1].textContent.toLowerCase();
-                const username = cells[2].textContent.toLowerCase();
-                const email = cells[3].textContent.toLowerCase();
-                const roleText = cells[4].textContent.trim().toLowerCase();
-                const phone = cells[5].textContent.toLowerCase();
-                const gentleText = cells[6].textContent.toLowerCase();
-                const activeText = cells[9].textContent.toLowerCase();
-                const createAtText = cells[12].textContent.trim();
-                const updateAtText = cells[13].textContent.trim();
+            document.querySelectorAll("#userTable tbody tr").forEach(row => {
+                const userType = row.children[4].textContent.toUpperCase().trim();
+                const rowGender = row.children[6].textContent.toUpperCase();
+                const rowActive = row.children[9].textContent.toUpperCase();
+                const rowVerified = row.children[10].textContent.toUpperCase();
+                const matchesRole = role === "ALL" || userType === role;
+                const matchesGender = gender === "ALL" || rowGender === gender;
+                const matchesActive = active === "ALL" || rowActive === active;
+                const matchesVerified = verified === "ALL" || rowVerified === verified;
 
-                // 🔍 Tìm kiếm (ID, Username, Email, Phone)
-                const matchSearch =
-                    !search ||
-                    id.includes(search) ||
-                    username.includes(search) ||
-                    email.includes(search) ||
-                    phone.includes(search);
-
-                // 🧩 Lọc role và gender (ignore case), active
-                const matchRole = (role === "all" || roleText === role);
-                const matchGentle = (gentle === "all" || gentleText === gentle);
-                const matchActive = (active === "all" || activeText === active);
-
-                // 📅 Lọc ngày (so sánh theo tiền tố yyyy-MM-dd)
-                const matchCreateAt = !createAt || createAtText.startsWith(createAt);
-                const matchUpdateAt = !updateAt || updateAtText.startsWith(updateAt);
-
-                // ✅ Nếu tất cả điều kiện đều đúng thì hiển thị
-                row.style.display = (matchSearch && matchRole && matchGentle && matchActive && matchCreateAt && matchUpdateAt)
-                    ? ""
-                    : "none";
+                if ( matchesVerified&& matchesRole && matchesGender && matchesActive) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
             });
         }
 
-        // ⏱ Gõ xong 300ms mới lọc (debounce)
-        let typingTimer;
-        searchInput.addEventListener("input", () => {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(filterTable, 300);
-        });
-
-        // 🔁 Filter ngay khi thay đổi
-        [roleSelect, gentleSelect,activeSelect, createAtInput, updateAtInput].forEach(el => {
+        // Gắn sự kiện realtime
+        [verifiedSelect, roleSelect, genderSelect, activeSelect].forEach(el => {
             el.addEventListener("input", filterTable);
             el.addEventListener("change", filterTable);
         });
-    });
+    })
+
 </script>
 
 
