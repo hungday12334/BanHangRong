@@ -10,11 +10,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     // Gửi email chung
     public void sendEmail(Email email) {
+        if (mailSender == null) {
+            System.err.println("Warning: JavaMailSender is not configured. Email not sent to: " + email.getToEmail());
+            return;
+        }
+        
         MimeMessage message = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
