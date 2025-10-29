@@ -1,5 +1,6 @@
 package banhangrong.su25.service;
 
+import banhangrong.su25.DTO.UserFilter;
 import banhangrong.su25.Entity.Users;
 import org.springframework.security.core.session.SessionRegistry;
 
@@ -17,4 +18,5 @@ public interface UserService {
     public Long countByUserType(String userType);
     public void setExpireSessionByUsername( String username);
     public void deactiveUserById(Users user);
+    public List<Users> filter(UserFilter filter);
 }

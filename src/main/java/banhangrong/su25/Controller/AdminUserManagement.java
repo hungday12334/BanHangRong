@@ -1,5 +1,6 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.DTO.UserFilter;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Util.ImageUploadUtil;
@@ -27,6 +28,13 @@ public class AdminUserManagement {
     @Autowired
     private UserService userService;
 
+    @GetMapping("filter")
+    public String filterUser(@ModelAttribute("filter") UserFilter userFilter, RedirectAttributes redirectAttributes) {
+        List<Users> listFilterUser = userService.filter(userFilter);
+        redirectAttributes.addFlashAttribute("filter", listFilterUser);
+        redirectAttributes.addFlashAttribute("isFromFilter", true);
+        return "redirect:/admin/user";
+    }
     @GetMapping("/create")
     public String showCreateScreen(Model model) {
         return "admin/user-creation";

@@ -258,31 +258,31 @@
 
     <div class="content-wrapper">
         <!-- Start Filter -->
-        <form th:action="@{/admin/user/search}" method="get" class="user-filter-form">
+        <form th:action="@{/admin/user/filter}" method="get" class="user-filter-form">
             <div class="user-header">
                 <div class="filter-bar d-flex flex-wrap align-items-center gap-2">
                     <!-- Quick selectors -->
                     <select id="userType" class="form-select w-auto" name="userType">
-                        <option value="ALL">User Type</option>
+                        <option value="">User Type</option>
                         <option value="ADMIN">Admin</option>
                         <option value="SELLER">Seller</option>
                         <option value="CUSTOMER">Customer</option>
                     </select>
 
                     <select id="gender" class="form-select w-auto" name="gender">
-                        <option value="ALL">Gender</option>
+                        <option value="">Gender</option>
                         <option value="MALE">Male</option>
                         <option value="FEMALE">Female</option>
                         <option value="OTHERS">Others</option>
                     </select>
 
                     <select id="active" class="form-select w-auto" name="active">
-                        <option value="ALL">Active</option>
+                        <option value="">Active</option>
                         <option value="TRUE">True</option>
                         <option value="FALSE">False</option>
                     </select>
                     <select id="verified" class="form-select w-auto" name="verified">
-                        <option value="ALL">Verifed</option>
+                        <option value="">Verifed</option>
                         <option value="TRUE">True</option>
                         <option value="FALSE">False</option>
                     </select>
@@ -315,15 +315,15 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Phone</label>
-                            <input type="text" class="form-control" id="phone" placeholder="e.g. abc@gmail.com" name="phoneNumber" maxlength="10" minlength="10">
+                            <input type="number" class="form-control" id="phone" placeholder="e.g. abc@gmail.com" name="phoneNumber" maxlength="10" minlength="10">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Balance (Min)</label>
-                            <input type="number" class="form-control" id="minBalance" placeholder="e.g. 0" name="minBalance">
+                            <input min="0"  type="number" class="form-control" id="minBalance" placeholder="e.g. 0" name="minBalance">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Balance (Max)</label>
-                            <input type="number" class="form-control" id="maxBalance" placeholder="e.g. 10000" name="maxBalance">
+                            <input min="0" type="number" class="form-control" id="maxBalance" placeholder="e.g. 10000" name="maxBalance">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Birth Date (From)</label>
@@ -356,6 +356,28 @@
                         <div class="col-md-3">
                             <label class="form-label">Updated (To)</label>
                             <input type="date" class="form-control" id="updatedTo" name="updatedTo">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sort By</label>
+                            <select id="sortBy" class="form-select w-auto" name="sortBy">
+                                <option value="userId">User ID</option>
+                                <option value="username">Username</option>
+                                <option value="email">Email</option>
+                                <option value="userType">User type</option>
+                                <option value="phoneNumber">Phone number</option>
+                                <option value="birthDate">Birth date</option>
+                                <option value="balance">Balance</option>
+                                <option value="lastLogin">Last login</option>
+                                <option value="createdAt">Created date</option>
+                                <option value="updatedAt">Updated date</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sort Order</label>
+                            <select id="sortOrder" class="form-select w-auto" name="sortOrder">
+                                <option value="ASC">Ascending</option>
+                                <option value="DESC">Descending</option>
+                            </select>
                         </div>
                         <div class="col-12 d-flex justify-content-end mt-3">
                             <button type="button" class="btn btn-secondary me-2" id="resetFilter">Reset</button>
@@ -550,10 +572,10 @@
                 const rowGender = row.children[6].textContent.toUpperCase();
                 const rowActive = row.children[9].textContent.toUpperCase();
                 const rowVerified = row.children[10].textContent.toUpperCase();
-                const matchesRole = role === "ALL" || userType === role;
-                const matchesGender = gender === "ALL" || rowGender === gender;
-                const matchesActive = active === "ALL" || rowActive === active;
-                const matchesVerified = verified === "ALL" || rowVerified === verified;
+                const matchesRole = role === "" || userType === role;
+                const matchesGender = gender === "" || rowGender === gender;
+                const matchesActive = active === "" || rowActive === active;
+                const matchesVerified = verified === "" || rowVerified === verified;
 
                 if ( matchesVerified&& matchesRole && matchesGender && matchesActive) {
                     row.style.display = "";
