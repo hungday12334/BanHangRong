@@ -10,6 +10,10 @@ import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -42,7 +46,11 @@ public class CustomerReviewsController {
     private ProductImagesRepository productImagesRepository;
 
     @GetMapping("/customer/reviews")
-    public String reviews(Model model) {
+    public String reviews(
+            @RequestParam(defaultValue = "newest") String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
@@ -54,8 +62,30 @@ public class CustomerReviewsController {
             
             Users user = userOptional.get();
             
-            // Lấy tất cả reviews của user hiện tại
-            List<ProductReviews> userReviews = productReviewsRepository.findByUserIdOrderByCreatedAtDesc(user.getUserId());
+            // Determine sorting
+            Sort sort;
+            switch (sortBy) {
+                case "oldest":
+                    sort = Sort.by("createdAt").ascending();
+                    break;
+                case "rating_high":
+                    sort = Sort.by("rating").descending().and(Sort.by("createdAt").descending());
+                    break;
+                case "rating_low":
+                    sort = Sort.by("rating").ascending().and(Sort.by("createdAt").descending());
+                    break;
+                case "newest":
+                default:
+                    sort = Sort.by("createdAt").descending();
+                    break;
+            }
+            
+            // Create pageable with sorting
+            Pageable pageable = PageRequest.of(page, size, sort);
+            
+            // Lấy reviews của user hiện tại với pagination
+            Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserId(user.getUserId(), pageable);
+            List<ProductReviews> userReviews = reviewsPage.getContent();
             
             // Lấy thông tin sản phẩm cho mỗi review
             Map<Long, Products> productsMap = new HashMap<>();
@@ -89,6 +119,13 @@ public class CustomerReviewsController {
             model.addAttribute("reviews", userReviews);
             model.addAttribute("productsMap", productsMap);
             model.addAttribute("productImagesMap", productImagesMap);
+            
+            // Pagination attributes
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", reviewsPage.getTotalPages());
+            model.addAttribute("totalItems", reviewsPage.getTotalElements());
+            model.addAttribute("pageSize", size);
+            model.addAttribute("sortBy", sortBy);
             
             return "customer/reviews";
         } catch (Exception e) {

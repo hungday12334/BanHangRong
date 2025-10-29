@@ -437,6 +437,65 @@
             margin: 0;
         }
 
+        /* Pagination Styles */
+        .pagination {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .page-btn {
+            min-width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: white;
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(.disabled):not(.active) {
+            background: var(--bg);
+            border-color: var(--brand);
+            color: var(--brand);
+        }
+
+        .page-btn.active {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .review-item {
@@ -536,33 +595,38 @@
                 <div class="reviews-header">
                     <h2>My Reviews</h2>
 
-                    <!-- Filters -->
+                    <!-- Filters & Sort -->
                     <div class="filters">
-                        <!-- Star Filter -->
-                        <select id="starFilter" class="form-select" style="width: 150px;">
-                            <option value="">All ratings</option>
-                            <option value="5">★★★★★ (5 stars)</option>
-                            <option value="4">★★★★☆ (4 stars)</option>
-                            <option value="3">★★★☆☆ (3 stars)</option>
-                            <option value="2">★★☆☆☆ (2 stars)</option>
-                            <option value="1">★☆☆☆☆ (1 star)</option>
-                        </select>
-
-                        <!-- Date Sort -->
-                        <select id="dateSort" class="form-select" style="width: 150px;">
-                            <option value="desc">Newest first</option>
-                            <option value="asc">Oldest first</option>
-                        </select>
-
-                        <!-- Search -->
-                        <input type="text" id="searchInput" placeholder="Search by product..." class="form-control"
-                            style="width: 200px;" />
+                        <form method="GET" action="/customer/reviews" style="display: flex; gap: 12px; align-items: center;">
+                            <!-- Sort By -->
+                            <select name="sortBy" class="form-select" style="width: 180px;" onchange="this.form.submit()">
+                                <option value="newest" th:selected="${sortBy == 'newest'}">📅 Mới nhất</option>
+                                <option value="oldest" th:selected="${sortBy == 'oldest'}">📅 Cũ nhất</option>
+                                <option value="rating_high" th:selected="${sortBy == 'rating_high'}">⭐ Đánh giá cao nhất</option>
+                                <option value="rating_low" th:selected="${sortBy == 'rating_low'}">⭐ Đánh giá thấp nhất</option>
+                            </select>
+                            
+                            <!-- Page Size -->
+                            <select name="size" class="form-select" style="width: 120px;" onchange="this.form.submit()">
+                                <option value="5" th:selected="${pageSize == 5}">5 / trang</option>
+                                <option value="10" th:selected="${pageSize == 10}">10 / trang</option>
+                                <option value="20" th:selected="${pageSize == 20}">20 / trang</option>
+                                <option value="50" th:selected="${pageSize == 50}">50 / trang</option>
+                            </select>
+                            
+                            <!-- Hidden field to preserve current page when changing filters -->
+                            <input type="hidden" name="page" th:value="${currentPage}" />
+                        </form>
                     </div>
                 </div>
 
                 <!-- Reviews Stats -->
                 <div class="reviews-summary" th:if="${reviews != null and !#lists.isEmpty(reviews)}">
-                    <h3>Total reviews: <span th:text="${#lists.size(reviews)}">0</span></h3>
+                    <h3>Tổng số đánh giá: <span th:text="${totalItems}">0</span> 
+                        <span style="color: var(--muted); font-size: 14px; font-weight: normal;">
+                            (Trang <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>)
+                        </span>
+                    </h3>
                 </div>
 
                 <!-- Reviews List -->
@@ -614,6 +678,47 @@
                 <div class="no-reviews" th:if="${reviews == null or #lists.isEmpty(reviews)}">
                     <p>📝 You haven't written any reviews yet.</p>
                 </div>
+                
+                <!-- Pagination -->
+                <div class="pagination" th:if="${reviews != null and !#lists.isEmpty(reviews) and totalPages > 1}">
+                    <div class="pagination-info">
+                        Hiển thị <span th:text="${#lists.size(reviews)}">0</span> trong tổng số <span th:text="${totalItems}">0</span> đánh giá
+                    </div>
+                    <div class="pagination-controls">
+                        <!-- First Page -->
+                        <a th:href="@{/customer/reviews(page=0, size=${pageSize}, sortBy=${sortBy})}" 
+                           th:classappend="${currentPage == 0} ? 'disabled' : ''"
+                           class="page-btn"
+                           title="Trang đầu">«</a>
+                        
+                        <!-- Previous Page -->
+                        <a th:href="@{/customer/reviews(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy})}" 
+                           th:classappend="${currentPage == 0} ? 'disabled' : ''"
+                           class="page-btn"
+                           title="Trang trước">‹</a>
+                        
+                        <!-- Page Numbers -->
+                        <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
+                              th:if="${pageNum >= (currentPage - 2 > 0 ? currentPage - 2 : 0) and pageNum <= (currentPage + 2 < totalPages - 1 ? currentPage + 2 : totalPages - 1)}">
+                            <a th:href="@{/customer/reviews(page=${pageNum}, size=${pageSize}, sortBy=${sortBy})}" 
+                               th:text="${pageNum + 1}"
+                               th:classappend="${pageNum == currentPage} ? 'active' : ''"
+                               class="page-btn">1</a>
+                        </span>
+                        
+                        <!-- Next Page -->
+                        <a th:href="@{/customer/reviews(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy})}" 
+                           th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+                           class="page-btn"
+                           title="Trang sau">›</a>
+                        
+                        <!-- Last Page -->
+                        <a th:href="@{/customer/reviews(page=${totalPages - 1}, size=${pageSize}, sortBy=${sortBy})}" 
+                           th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+                           class="page-btn"
+                           title="Trang cuối">»</a>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
@@ -654,49 +759,6 @@
             return true;
         }
 
-        // Reviews Filters
-        document.addEventListener('DOMContentLoaded', () => {
-            const starFilter = document.getElementById('starFilter');
-            const dateSort = document.getElementById('dateSort');
-            const searchInput = document.getElementById('searchInput');
-            const reviewItems = Array.from(document.querySelectorAll('.review-item'));
-
-            function applyFilters() {
-                const selectedStar = starFilter.value;
-                const searchQuery = searchInput.value.toLowerCase();
-
-                // Filter by stars + search
-                let filtered = reviewItems.filter(item => {
-                    const stars = item.getAttribute('data-stars');
-                    const name = item.getAttribute('data-name');
-                    return (!selectedStar || stars === selectedStar) && name.includes(searchQuery);
-                });
-
-                // Sort by date
-                const sorted = filtered.sort((a, b) => {
-                    const dateA = new Date(a.getAttribute('data-date'));
-                    const dateB = new Date(b.getAttribute('data-date'));
-                    return dateSort.value === 'asc' ? dateA - dateB : dateB - dateA;
-                });
-
-                // Update UI
-                const reviewsList = document.querySelector('.reviews-list');
-                reviewsList.innerHTML = '';
-                sorted.forEach(item => reviewsList.appendChild(item));
-
-                // Show/hide empty state
-                const noReviews = document.querySelector('.no-reviews');
-                if (noReviews) {
-                    noReviews.style.display = sorted.length === 0 ? 'block' : 'none';
-                }
-            }
-
-            if (starFilter && dateSort && searchInput) {
-                starFilter.addEventListener('change', applyFilters);
-                dateSort.addEventListener('change', applyFilters);
-                searchInput.addEventListener('input', applyFilters);
-            }
-        });
 
         // Edit Review
         function editReview(reviewId) {

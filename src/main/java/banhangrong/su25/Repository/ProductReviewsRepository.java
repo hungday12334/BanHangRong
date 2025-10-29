@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ProductReviewsRepository extends JpaRepository<ProductReviews, Long> {
     List<ProductReviews> findByProductIdOrderByCreatedAtDesc(Long productId);
@@ -62,6 +61,9 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
 
     // Tìm review theo userId
     List<ProductReviews> findByUserId(Long userId);
+    
+    // Tìm review theo userId với pagination và sorting
+    Page<ProductReviews> findByUserId(Long userId, Pageable pageable);
 
     // Tìm review theo userId và sắp xếp theo thời gian tạo giảm dần
     List<ProductReviews> findByUserIdOrderByCreatedAtDesc(Long userId);
