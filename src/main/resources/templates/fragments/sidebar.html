@@ -60,7 +60,7 @@
       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/shop-designer') ? ' active' : ''}">
       <i class="ti ti-palette"></i><span class="lbl">Shop designer</span></a>
 
-    <a href="#vouchers" class="item" data-nav="vouchers" title="Vouchers" aria-label="Vouchers"
+    <a href="/seller/voucher" class="item" data-nav="vouchers" title="Vouchers" aria-label="Vouchers"
       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/voucher') ? ' active' : ''}">
       <i class="ti ti-ticket"></i><span class="lbl">Vouchers</span></a>
   </nav>
