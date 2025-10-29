@@ -50,6 +50,10 @@ public class CustomerReviewsController {
             @RequestParam(defaultValue = "newest") String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
+            @RequestParam(required = false) String search,
             Model model) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -83,8 +87,15 @@ public class CustomerReviewsController {
             // Create pageable with sorting
             Pageable pageable = PageRequest.of(page, size, sort);
             
-            // Lấy reviews của user hiện tại với pagination
-            Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserId(user.getUserId(), pageable);
+            // Lấy reviews của user hiện tại với pagination và filters
+            Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserIdWithFilters(
+                user.getUserId(),
+                rating,
+                fromDate,
+                toDate,
+                search,
+                pageable
+            );
             List<ProductReviews> userReviews = reviewsPage.getContent();
             
             // Lấy thông tin sản phẩm cho mỗi review
@@ -126,6 +137,12 @@ public class CustomerReviewsController {
             model.addAttribute("totalItems", reviewsPage.getTotalElements());
             model.addAttribute("pageSize", size);
             model.addAttribute("sortBy", sortBy);
+            
+            // Filter attributes
+            model.addAttribute("filterRating", rating);
+            model.addAttribute("filterFromDate", fromDate);
+            model.addAttribute("filterToDate", toDate);
+            model.addAttribute("search", search);
             
             return "customer/reviews";
         } catch (Exception e) {

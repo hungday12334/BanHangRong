@@ -64,6 +64,21 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
     
     // Tìm review theo userId với pagination và sorting
     Page<ProductReviews> findByUserId(Long userId, Pageable pageable);
+    
+    // Custom query for customer reviews with filters including search
+    @Query("SELECT pr FROM ProductReviews pr " +
+           "LEFT JOIN Products p ON pr.productId = p.productId " +
+           "WHERE pr.userId = :userId " +
+           "AND (:rating IS NULL OR pr.rating = :rating) " +
+           "AND (:fromDate IS NULL OR pr.createdAt >= CAST(:fromDate AS timestamp)) " +
+           "AND (:toDate IS NULL OR pr.createdAt <= CAST(:toDate AS timestamp)) " +
+           "AND (:search IS NULL OR :search = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<ProductReviews> findByUserIdWithFilters(@Param("userId") Long userId,
+                                                   @Param("rating") Integer rating,
+                                                   @Param("fromDate") String fromDate,
+                                                   @Param("toDate") String toDate,
+                                                   @Param("search") String search,
+                                                   Pageable pageable);
 
     // Tìm review theo userId và sắp xếp theo thời gian tạo giảm dần
     List<ProductReviews> findByUserIdOrderByCreatedAtDesc(Long userId);
