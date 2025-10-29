@@ -2,298 +2,79 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Seller Vouchers</title>
-    <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
-    <link rel="icon" type="image/png" href="/img/kua654ms.png" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <!-- HEAD START -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Vouchers</title>
+  <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
+  <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+  <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
+  <link rel="icon" type="image/png" href="/img/kua654ms.png" />
+  <link rel="shortcut icon" href="/img/kua654ms.png" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <meta name="theme-color" content="#0b1020" />
+  <style>/* fallback dev */</style>
+  <!-- HEAD END -->
 </head>
 
-<body class="enhanced-dashboard" th:attr="data-user-type=${userType}" data-app-root>
-    <div class="page">
-        <aside th:replace="fragments/sidebar :: sidebar"></aside>
-
-        <main data-section="main">
-            <div class="container">
-                <section id="vouchersPanel" class="card section-card" data-panel="vouchers">
-                    <div class="header">
-                        <div style="font-weight:700;flex:1;">Vouchers</div>
-                        <div class="filter-row">
-                            <select id="productFilter" class="input"><option value="">Select a product</option></select>
-                            <select id="statusFilter" class="input">
-                                <option value="">All statuses</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                            <button id="newVoucherBtn" type="button" class="btn primary">New voucher</button>
-                            <button id="refreshVouchersBtn" type="button" class="btn" title="Reload"><i class="ti ti-refresh"></i></button>
-                        </div>
-                    </div>
-                    <div class="body paged">
-                        <div class="table-wrap">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Code</th><th>Type</th><th>Value</th><th class="hide-md">Period</th><th>Uses</th><th>Status</th><th></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="vouchersTableBody">
-                                    <tr class="footer-note"><td colspan="7">No vouchers found.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="pagination" id="vouchersPagination"></div>
-                    </div>
-                </section>
-            </div>
-        </main>
+<body class="loading enhanced-dashboard" th:attr="data-user-type=${userType}" data-app-root>
+  <!-- GLOBAL APP LOADER -->
+  <div id="appLoader" class="app-loader" role="status" aria-live="polite">
+    <div class="loader-core">
+      <div class="orbital" aria-hidden="true">
+        <div class="nucleus">
+          <img class="loader-logo" src="/img/kua654ms.png" alt="Logo" decoding="async" loading="eager" data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" />
+        </div>
+        <div class="orbit orbit-a"><span></span></div>
+        <div class="orbit orbit-b"><span></span></div>
+        <div class="orbit orbit-c"><span></span></div>
+        <div class="rings">
+          <div class="ring r1"></div>
+          <div class="ring r2"></div>
+          <div class="ring r3"></div>
+        </div>
+      </div>
+      <div class="progress-wrap" aria-hidden="true">
+        <div class="progress-bar" data-loader-progress></div>
+      </div>
+  <div class="load-text" data-loader-text>Initializing....</div>
+      <div class="load-tip" data-loader-tip></div>
     </div>
+  </div>
+  <!-- APP WRAPPER START -->
+  <div class="page">
 
-    <!-- Modals will be injected by Thymeleaf fragments -->
-    <div th:replace="~{fragments/modals :: voucherModal}"></div>
-    <div th:replace="~{fragments/modals :: voucherUsageModal}"></div>
+    <!-- SIDEBAR START -->
+    <aside th:replace="fragments/sidebar :: sidebar"></aside>
+    <!-- SIDEBAR END -->
 
-    <div id="toastContainer" class="toast-container"></div>
+    <!-- MAIN START -->
+    <main data-section="main">
+      <div class="container">
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const API_BASE = '/api/seller/vouchers';
-        const productFilter = document.getElementById('productFilter');
-        const statusFilter = document.getElementById('statusFilter');
-        const newVoucherBtn = document.getElementById('newVoucherBtn');
-        const refreshVouchersBtn = document.getElementById('refreshVouchersBtn');
-        const vouchersTableBody = document.getElementById('vouchersTableBody');
-        const paginationContainer = document.getElementById('vouchersPagination');
+        <h1>Voucher Management</h1>
+        <p>This is where you will manage your vouchers.</p>
 
-        const voucherModal = document.getElementById('voucherModal');
-        const voucherForm = document.getElementById('voucherForm');
-        const voucherUsageModal = document.getElementById('voucherUsageModal');
+      </div>
+    </main>
+    <!-- MAIN END -->
+  </div>
+  <!-- APP WRAPPER END -->
 
-        let currentPage = 0;
-        let currentProductId = null;
+  <!-- MODAL LAYER START -->
+  <div id="modalOverlay" class="modal-overlay" hidden data-modal-overlay></div>
 
-        // --- Data Fetching ---
-        async function fetchProducts() {
-            try {
-                const response = await fetch('/api/seller/products');
-                if (!response.ok) throw new Error('Failed to load products');
-                const products = await response.json();
-                productFilter.innerHTML = '<option value="">Select a product</option>';
-                products.forEach(p => {
-                    productFilter.add(new Option(p.name, p.productId));
-                });
-            } catch (error) {
-                console.error('Error fetching products:', error);
-                showToast('Could not load products.', 'error');
-            }
-        }
+  <section th:replace="fragments/modals :: modals"></section>
+  <!-- MODAL LAYER END -->
 
-        async function fetchVouchers(page = 0) {
-            currentProductId = productFilter.value || null;
+  <!-- TOAST CONTAINER START -->
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true" data-block="toast-root"></div>
+  <!-- TOAST CONTAINER END -->
 
-            const status = statusFilter.value;
-            // Build query params. If product is selected, include productId; otherwise fetch all vouchers.
-            const params = [];
-            if (currentProductId) params.push(`productId=${encodeURIComponent(currentProductId)}`);
-            if (status) params.push(`status=${encodeURIComponent(status)}`);
-            params.push(`page=${page}`);
-            params.push(`size=10`);
-            params.push(`sort=createdAt,desc`);
-            const url = `${API_BASE}?${params.join('&')}`;
-
-            vouchersTableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Loading...</td></tr>`;
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                renderVouchers(data.content);
-                renderPagination(data);
-                currentPage = page;
-            } catch (error) {
-                console.error('Error fetching vouchers:', error);
-                vouchersTableBody.innerHTML = `<tr class="footer-note"><td colspan="7">Error loading vouchers.</td></tr>`;
-                showToast('Could not load vouchers.', 'error');
-            }
-        }
-
-        // --- UI Rendering ---
-        function renderVouchers(vouchers) {
-            if (!vouchers || vouchers.length === 0) {
-                vouchersTableBody.innerHTML = `<tr class="footer-note"><td colspan="7">No vouchers found.</td></tr>`;
-                return;
-            }
-            vouchersTableBody.innerHTML = vouchers.map(v => `
-                <tr>
-                    <td><strong>${v.code}</strong></td>
-                    <td>${v.discountType}</td>
-                    <td>${v.discountType === 'PERCENT' ? `${v.discountValue}%` : `$${v.discountValue}`}</td>
-                    <td class="hide-md">${formatDate(v.startAt)} - ${formatDate(v.endAt)}</td>
-                    <td>${v.usedCount} / ${v.maxUses || '∞'}</td>
-                    <td><span class="badge ${v.status.toLowerCase()}">${v.status}</span></td>
-                    <td>
-                        <div class="actions">
-                            <button class="icon-btn" title="Edit" onclick="window.app.editVoucher(${v.voucherId})"><i class="ti ti-pencil"></i></button>
-                            <button class="icon-btn" title="Usage" onclick="window.app.showUsage(${v.voucherId}, '${v.code}')"><i class="ti ti-eye"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderPagination(page) {
-            paginationContainer.innerHTML = '';
-            if (page.totalPages <= 1) return;
-
-            if (!page.first) {
-                paginationContainer.appendChild(createPageButton('«', page.number - 1, 'Prev'));
-            }
-
-            for (let i = 0; i < page.totalPages; i++) {
-                if (i === page.number) {
-                    const currentBtn = createPageButton(i + 1, i, `Page ${i + 1}`);
-                    currentBtn.classList.add('active');
-                    paginationContainer.appendChild(currentBtn);
-                } else {
-                     paginationContainer.appendChild(createPageButton(i + 1, i, `Page ${i + 1}`));
-                }
-            }
-
-            if (!page.last) {
-                paginationContainer.appendChild(createPageButton('»', page.number + 1, 'Next'));
-            }
-        }
-        
-        function createPageButton(text, pageNumber, title) {
-            const button = document.createElement('button');
-            button.textContent = text;
-            button.title = title;
-            button.addEventListener('click', () => fetchVouchers(pageNumber));
-            return button;
-        }
-
-        // --- Actions & Event Handlers ---
-        window.app = {}; // Global app object for functions called from HTML
-
-        newVoucherBtn.addEventListener('click', () => {
-            if (!currentProductId) {
-                showToast('Please select a product first.', 'warn');
-                return;
-            }
-            voucherForm.reset();
-            document.getElementById('vc_voucherId').value = '';
-            voucherModal.showModal();
-        });
-
-        voucherForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('vc_voucherId').value;
-            const payload = {
-                voucherId: id ? parseInt(id) : null,
-                productId: currentProductId,
-                code: document.getElementById('vc_code').value,
-                discountType: document.getElementById('vc_type').value,
-                discountValue: parseFloat(document.getElementById('vc_value').value),
-                minOrder: parseFloat(document.getElementById('vc_min').value) || 0,
-                startAt: document.getElementById('vc_start').value ? new Date(document.getElementById('vc_start').value).toISOString() : null,
-                endAt: document.getElementById('vc_end').value ? new Date(document.getElementById('vc_end').value).toISOString() : null,
-                maxUses: document.getElementById('vc_maxUses').value ? parseInt(document.getElementById('vc_maxUses').value) : null,
-                maxUsesPerUser: document.getElementById('vc_maxPerUser').value ? parseInt(document.getElementById('vc_maxPerUser').value) : null,
-                status: document.getElementById('vc_status').value,
-            };
-
-            try {
-                const response = await fetch(API_BASE, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(await response.text());
-                showToast('Voucher saved successfully.', 'success');
-                voucherModal.close();
-                fetchVouchers(id ? currentPage : 0);
-            } catch (error) {
-                console.error('Save voucher error:', error);
-                showToast('Error saving voucher.', 'error');
-            }
-        });
-
-        window.app.editVoucher = async (voucherId) => {
-            try {
-                const response = await fetch(`${API_BASE}/${voucherId}`);
-                if (!response.ok) throw new Error('Voucher not found');
-                const v = await response.json();
-                document.getElementById('vc_voucherId').value = v.voucherId;
-                document.getElementById('vc_code').value = v.code;
-                document.getElementById('vc_type').value = v.discountType;
-                document.getElementById('vc_value').value = v.discountValue;
-                document.getElementById('vc_min').value = v.minOrder;
-                document.getElementById('vc_start').value = v.startAt ? v.startAt.substring(0, 16) : '';
-                document.getElementById('vc_end').value = v.endAt ? v.endAt.substring(0, 16) : '';
-                document.getElementById('vc_maxUses').value = v.maxUses;
-                document.getElementById('vc_maxPerUser').value = v.maxUsesPerUser;
-                document.getElementById('vc_status').value = v.status;
-                voucherModal.showModal();
-            } catch (error) {
-                showToast('Could not load voucher data.', 'error');
-            }
-        };
-
-        window.app.showUsage = async (voucherId, code) => {
-            document.getElementById('vu_code').textContent = code;
-            const tableBody = document.getElementById('vu_table');
-            tableBody.innerHTML = `<tr><td colspan="5" class="loading-row">Loading...</td></tr>`;
-            voucherUsageModal.showModal();
-
-            try {
-                const response = await fetch(`${API_BASE}/${voucherId}/redemptions`);
-                if (!response.ok) throw new Error('Could not fetch usage');
-                const redemptions = await response.json();
-
-                if (redemptions.length === 0) {
-                    tableBody.innerHTML = `<tr class="footer-note"><td colspan="5">No usage yet.</td></tr>`;
-                    return;
-                }
-
-                tableBody.innerHTML = redemptions.map((r, i) => `
-                    <tr>
-                        <td>${i + 1}</td>
-                        <td>${r.orderId}</td>
-                        <td>${r.userId}</td>
-                        <td>$${r.discountAmount}</td>
-                        <td>${new Date(r.redeemedAt).toLocaleString()}</td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                tableBody.innerHTML = `<tr class="footer-note"><td colspan="5">Error loading usage data.</td></tr>`;
-            }
-        };
-
-        // --- Utilities ---
-        function formatDate(dateString) {
-            return dateString ? new Date(dateString).toLocaleDateString() : 'N/A';
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // --- Initial Load & Event Listeners ---
-        productFilter.addEventListener('change', () => fetchVouchers(0));
-        statusFilter.addEventListener('change', () => fetchVouchers(0));
-        refreshVouchersBtn.addEventListener('click', () => fetchVouchers(currentPage));
-
-        // Load product list and initial vouchers (all vouchers when no product selected)
-        fetchProducts();
-        fetchVouchers(0);
-    });
-    </script>
-
+  <!-- SCRIPTS START -->
+  <section th:replace="fragments/scripts :: scripts"></section>
+  <!-- SCRIPTS END -->
 </body>
 </html>

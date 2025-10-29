@@ -4,10 +4,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-class SellerVoucherController {
+class SellerPageController {
 
     @GetMapping("/seller/voucher")
     public String voucherPage() {
         return "seller/voucher";
     }
 }
+
