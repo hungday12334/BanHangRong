@@ -533,8 +533,8 @@
                             <div class="product-info">
                                 <h4 th:text="${productsMap.get(review.productId) != null ? productsMap.get(review.productId).name : 'Product'}">
                                     Product Name</h4>
-                                <p th:text="${productsMap.get(review.productId) != null ? productsMap.get(review.productId).brand : ''}">
-                                    Brand</p>
+                                <p th:text="${productsMap.get(review.productId) != null ? #numbers.formatDecimal(productsMap.get(review.productId).price, 0, 'COMMA', 0, 'POINT') + '₫' : ''}">
+                                    Price</p>
                             </div>
                         </div>
                         <div class="review-details">
