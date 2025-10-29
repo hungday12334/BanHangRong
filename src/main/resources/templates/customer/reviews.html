@@ -2,15 +2,15 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="/css/styles.min.css">
-	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
-	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Reviews - BanHangRong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.min.css">
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <style>
         :root {
             --bg: #f5f7fb;
@@ -44,148 +44,389 @@
             flex-direction: column;
         }
 
+        /* Header Styles */
         .topbar {
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 10px 16px;
+            padding: 12px 20px;
+            background: #fff;
             border-bottom: 1px solid var(--line);
-            background: var(--card);
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
         }
 
         .brand {
-            font-weight: 800;
-            letter-spacing: .2px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--brand);
+            text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
         }
 
-        .brand:hover {
-            color: var(--brand);
-        }
-
-        .logo {
+        .brand .logo {
             height: 32px;
-            width: auto;
+            width: 32px;
+            object-fit: contain;
         }
 
         .nav {
             display: flex;
-            gap: 16px;
-            margin: 0 12px;
+            gap: 8px;
             flex: 1;
-            overflow: auto;
-            white-space: nowrap;
         }
 
         .nav a {
-            text-decoration: none;
-            color: #111827;
-            font-weight: 500;
-            padding: 8px 10px;
+            padding: 8px 14px;
             border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.2s;
         }
 
         .nav a:hover {
-            background: #f3f4f6;
+            background: var(--chip);
+            color: var(--ink);
         }
 
         .top-actions {
-            margin-left: auto;
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .support-link {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .support-link:hover {
+            background: var(--chip);
+            color: var(--ink);
+        }
+
+        .user {
             position: relative;
         }
 
         .user-btn {
+            all: unset;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            color: #111827;
-            border: 1px solid var(--line);
-            padding: 6px 10px;
-            border-radius: 8px;
-            background: #fff
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--chip);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+            transition: background 0.2s;
+        }
+
+        .user-btn:hover {
+            background: #d1d5db;
+        }
+
+        .wallet-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            color: #0ea5e9;
+            font-weight: 600;
+            font-size: 13px;
         }
 
         .user-menu {
             position: absolute;
+            top: calc(100% + 8px);
             right: 0;
-            top: 48px;
             background: #fff;
             border: 1px solid var(--line);
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
-            width: 200px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            min-width: 220px;
+            z-index: 1000;
             display: none;
-            z-index: 5
+            overflow: hidden;
+        }
+
+        .user-menu.show {
+            display: block;
         }
 
         .user-menu .item {
             display: block;
-            padding: 10px 12px;
-            color: #111827;
-            text-decoration: none
+            padding: 12px 16px;
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
         }
 
         .user-menu .item:hover {
-            background: #f3f4f6
+            background: var(--bg);
         }
 
-        .search {
-            position: relative;
+        .seller-apply {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            color: #0ea5e9 !important;
+            font-weight: 600;
         }
 
-        .search input {
-            height: 34px;
-            width: 220px;
-            padding: 0 12px;
+        /* Reviews Section */
+        .reviews-section {
+            flex: 1;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .reviews-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 0;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .form-select,
+        .form-control {
+            padding: 10px 14px;
             border: 1px solid var(--line);
             border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            color: var(--ink);
             outline: none;
+            transition: border-color 0.2s;
         }
 
-        .cart {
-            position: relative;
+        .form-select:focus,
+        .form-control:focus {
+            border-color: var(--brand);
+        }
+
+        .reviews-summary {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .reviews-summary h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--ink);
+            margin: 0 0 8px 0;
+        }
+
+        .reviews-summary p {
+            font-size: 14px;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .reviews-list {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: #3b82f6;
-            color: white;
-            text-decoration: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .review-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .review-product {
+            display: flex;
+            gap: 12px;
+            min-width: 250px;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
             border-radius: 8px;
+            border: 1px solid var(--line);
+        }
+
+        .product-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ink);
+            margin: 0 0 4px 0;
+        }
+
+        .product-info p {
+            font-size: 14px;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .review-details {
+            flex: 1;
+        }
+
+        .stars {
+            font-size: 18px;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .comment {
+            font-size: 14px;
+            color: var(--ink);
+            line-height: 1.6;
+            margin: 0 0 8px 0;
+        }
+
+        .date {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 500;
-            transition: all 0.2s ease;
-            border: none;
             cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            text-decoration: none;
         }
 
-        .cart:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        .btn-outline-primary {
+            color: var(--brand);
+            border-color: var(--brand);
         }
 
-        .cart .badge {
+        .btn-outline-primary:hover {
+            background: var(--brand);
+            color: white;
+        }
+
+        .btn-outline-danger {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .btn-outline-danger:hover {
             background: #ef4444;
             color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
+        }
+
+        .no-reviews {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .no-reviews p {
+            font-size: 16px;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        /* Seller Response */
+        .seller-response {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f0f9ff;
+            border-left: 3px solid var(--brand);
+            border-radius: 6px;
+        }
+
+        .seller-response-label {
             font-size: 12px;
             font-weight: 600;
-            min-width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: var(--brand);
+            margin-bottom: 4px;
+        }
+
+        .seller-response-text {
+            font-size: 14px;
+            color: var(--ink);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .review-item {
+                flex-direction: column;
+            }
+
+            .review-product {
+                width: 100%;
+            }
+
+            .review-actions {
+                width: 100%;
+            }
+
+            .topbar {
+                padding: 10px 14px;
+            }
+
+            .nav {
+                order: 3;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -194,10 +435,7 @@
     <div class="wrapper">
         <!-- Header -->
         <div class="topbar">
-            <a href="/customer/dashboard" class="brand">
-                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
-                BanHangRong
-            </a>
+            <div class="brand">BanHangRong</div>
             <nav class="nav" aria-label="Main">
                 <a href="/customer/dashboard">Home</a>
                 <a href="/categories">Category</a>
@@ -245,350 +483,182 @@
                     <form id="logoutForm" method="post" action="/logout" style="display:none;">
                     </form>
                 </div>
-                <div class="search">
-                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
-                        <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
-                            style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
-                        <button type="submit"
-                            style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-                        <a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
-                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
-                    </form>
-                </div>
-                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">
-                    🛒
-                    <span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span>
-                </a>
             </div>
         </div>
 
-        <div class="reviews-container">
-            <div class="reviews-header">
-                <h1 class="reviews-title">My Reviews</h1>
-                <p class="reviews-subtitle">View and manage reviews you've written</p>
-            </div>
-            
-            <!-- Rating Statistics -->
-            <div class="rating-stats" th:if="${reviews != null and !reviews.isEmpty()}">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" th:text="${reviews.size()}">0</div>
-                        <div class="stat-label">Total Reviews</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">4.5</div>
-                        <div class="stat-label">Average Rating</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" th:text="${reviews.size()}">0</div>
-                        <div class="stat-label">5-Star Reviews</div>
+        <!-- Reviews Section -->
+        <section class="reviews-section">
+            <div class="container">
+                <div class="reviews-header">
+                    <h2>My Reviews</h2>
+
+                    <!-- Filters -->
+                    <div class="filters">
+                        <!-- Star Filter -->
+                        <select id="starFilter" class="form-select" style="width: 150px;">
+                            <option value="">All ratings</option>
+                            <option value="5">★★★★★ (5 stars)</option>
+                            <option value="4">★★★★☆ (4 stars)</option>
+                            <option value="3">★★★☆☆ (3 stars)</option>
+                            <option value="2">★★☆☆☆ (2 stars)</option>
+                            <option value="1">★☆☆☆☆ (1 star)</option>
+                        </select>
+
+                        <!-- Date Sort -->
+                        <select id="dateSort" class="form-select" style="width: 150px;">
+                            <option value="desc">Newest first</option>
+                            <option value="asc">Oldest first</option>
+                        </select>
+
+                        <!-- Search -->
+                        <input type="text" id="searchInput" placeholder="Search by product..." class="form-control"
+                            style="width: 200px;" />
                     </div>
                 </div>
-            </div>
-            
-            <!-- Reviews List -->
-            <div id="reviewsList">
-                <div th:if="${reviews != null and !reviews.isEmpty()}" th:each="review : ${reviews}" class="review-item">
-                    <div class="review-header">
-                        <div class="product-info">
-                            <img th:src="${productImagesMap[review.productId] ?: '/img/product-placeholder.jpg'}" 
-                                 alt="Product" class="product-image">
-                            <div class="product-details">
-                                <h3 th:text="${productsMap[review.productId]?.name ?: 'Unknown Product'}">Product Name</h3>
-                                <p th:if="${review.orderItemId != null}">Order Item ID: <span th:text="${review.orderItemId}">Order Item</span></p>
-                                <p th:if="${review.orderItemId == null}">Product ID: <span th:text="${review.productId}">Product</span></p>
+
+                <!-- Reviews Stats -->
+                <div class="reviews-summary" th:if="${reviews != null and !reviews.isEmpty()}">
+                    <h3>Total reviews: <span th:text="${reviews.size()}">0</span></h3>
+                </div>
+
+                <!-- Reviews List -->
+                <div class="reviews-list">
+                    <div th:each="review : ${reviews}" class="review-item"
+                        th:attr="data-stars=${review.rating}, data-date=${review.createdAt}, data-name=${productsMap.get(review.productId) != null ? productsMap.get(review.productId).name.toLowerCase() : ''}">
+                        <div class="review-product">
+                            <img th:src="${productImagesMap.get(review.productId) != null ? productImagesMap.get(review.productId) : '/img/default-product.jpg'}"
+                                alt="Product" class="product-image" />
+                            <div class="product-info">
+                                <h4 th:text="${productsMap.get(review.productId) != null ? productsMap.get(review.productId).name : 'Product'}">
+                                    Product Name</h4>
+                                <p th:text="${productsMap.get(review.productId) != null ? productsMap.get(review.productId).brand : ''}">
+                                    Brand</p>
                             </div>
                         </div>
-                        <div class="rating">
+                        <div class="review-details">
                             <div class="stars">
-                                <span th:each="i : ${#numbers.sequence(1, review.rating)}" class="star">★</span>
-                                <span th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" class="star empty">★</span>
+                                <span th:each="i : ${#numbers.sequence(1, review.rating)}">★</span>
+                                <span th:each="i : ${#numbers.sequence(1, 5 - review.rating)}">☆</span>
                             </div>
-                            <span th:text="${review.rating} + '.0'">5.0</span>
+                            <p class="comment" th:text="${review.comment}">Great product!</p>
+                            <p class="date"
+                                th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                20/10/2025</p>
+
+                            <!-- Seller Response -->
+                            <div class="seller-response" th:if="${review.sellerResponse != null and !review.sellerResponse.isEmpty()}">
+                                <div class="seller-response-label">💬 Seller Response:</div>
+                                <p class="seller-response-text" th:text="${review.sellerResponse}">Thank you for your feedback!</p>
+                            </div>
+                        </div>
+                        <div class="review-actions">
+                            <button class="btn btn-outline-primary" 
+                                th:onclick="'editReview(' + ${review.reviewId} + ')'">Edit</button>
+                            <button class="btn btn-outline-danger"
+                                th:onclick="'deleteReview(' + ${review.reviewId} + ')'">Delete</button>
                         </div>
                     </div>
-                    <div class="review-content">
-                        <p class="review-text" th:text="${review.comment ?: 'No comment provided'}">
-                            Review comment
-                        </p>
-                        <p class="review-date">
-                            Reviewed on <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">Date</span>
-                        </p>
-                    </div>
-                    <div class="review-actions">
-                        <button class="btn btn-primary" th:onclick="'editReview(' + ${review.reviewId} + ')'">Edit</button>
-                        <button class="btn btn-secondary" th:onclick="'deleteReview(' + ${review.reviewId} + ')'">Delete</button>
-                    </div>
                 </div>
-                
-                <!-- Show empty state if no reviews -->
-                <div th:if="${reviews == null or reviews.isEmpty()}" class="empty-reviews" id="emptyReviews">
-                    <div class="empty-icon">⭐</div>
-                    <h2 class="empty-title">No Reviews Yet</h2>
-                    <p class="empty-message">You haven't written any product reviews yet.</p>
-                    <a href="/customer/dashboard" class="btn-explore">Start Shopping</a>
+
+                <!-- Empty State -->
+                <div class="no-reviews" th:if="${reviews == null or reviews.isEmpty()}">
+                    <p>📝 You haven't written any reviews yet.</p>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 
-    <style>
-        .reviews-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .reviews-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .reviews-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-        
-        .reviews-subtitle {
-            font-size: 16px;
-            color: #6b7280;
-        }
-        
-        /* Rating Statistics */
-        .rating-stats {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 30px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 24px;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #ef4444;
-            margin-bottom: 8px;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: #6b7280;
-            font-weight: 500;
-        }
-        
-        .review-item {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-        
-        .product-info {
-            display: flex;
-            gap: 16px;
-            flex: 1;
-        }
-        
-        .product-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .product-details h3 {
-            margin: 0 0 8px 0;
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        .product-details p {
-            margin: 4px 0;
-            font-size: 14px;
-            color: #6b7280;
-        }
-        
-        .rating {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-        
-        .stars {
-            display: flex;
-            gap: 2px;
-        }
-        
-        .star {
-            color: #fbbf24;
-            font-size: 18px;
-        }
-        
-        .star.empty {
-            color: #d1d5db;
-        }
-        
-        .rating span {
-            font-weight: 600;
-            color: #374151;
-        }
-        
-        .review-content {
-            margin-bottom: 16px;
-        }
-        
-        .review-text {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-        
-        .review-date {
-            font-size: 12px;
-            color: #6b7280;
-            margin: 0;
-        }
-        
-        .review-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-        
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-        
-        .empty-reviews {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        
-        .empty-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-        
-        .empty-message {
-            font-size: 16px;
-            color: #6b7280;
-            margin-bottom: 30px;
-        }
-        
-        .btn-explore {
-            background: #3b82f6;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            display: inline-block;
-        }
-    </style>
-
     <script>
-        // User menu toggle
-        document.addEventListener('DOMContentLoaded', function() {
+        // User Menu Dropdown
+        document.addEventListener('DOMContentLoaded', () => {
             const userMenuBtn = document.getElementById('userMenuBtn');
             const userDropdown = document.getElementById('userDropdown');
-            
+
             if (userMenuBtn && userDropdown) {
-                userMenuBtn.addEventListener('click', function(e) {
+                userMenuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     userDropdown.classList.toggle('show');
+                    userMenuBtn.setAttribute('aria-expanded', userDropdown.classList.contains('show'));
                 });
-                
-                // Close menu when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                        userDropdown.classList.remove('show');
-                    }
+
+                document.addEventListener('click', () => {
+                    userDropdown.classList.remove('show');
+                    userMenuBtn.setAttribute('aria-expanded', 'false');
+                });
+
+                userDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
                 });
             }
         });
 
-        // VNPay topup function
-        function topupPrompt(e) {
-            e.preventDefault();
-            const v = prompt('Enter amount to top up (VND):', '200000');
-            if (!v) return false;
-            const clean = v.replace(/[^0-9]/g, '');
-            if (!clean) {
-                alert('Please enter a valid amount');
+        // Top-up Prompt
+        function topupPrompt(event) {
+            const amount = prompt('Enter amount to top up (VND):');
+            if (!amount || isNaN(amount) || amount <= 0) {
+                event.preventDefault();
+                alert('Please enter a valid amount.');
                 return false;
             }
-            document.getElementById('topupAmountInput').value = clean;
-            e.target.submit();
+            document.getElementById('topupAmountInput').value = amount;
             return true;
         }
-    </script>
-    
-    <script>
+
+        // Reviews Filters
+        document.addEventListener('DOMContentLoaded', () => {
+            const starFilter = document.getElementById('starFilter');
+            const dateSort = document.getElementById('dateSort');
+            const searchInput = document.getElementById('searchInput');
+            const reviewItems = Array.from(document.querySelectorAll('.review-item'));
+
+            function applyFilters() {
+                const selectedStar = starFilter.value;
+                const searchQuery = searchInput.value.toLowerCase();
+
+                // Filter by stars + search
+                let filtered = reviewItems.filter(item => {
+                    const stars = item.getAttribute('data-stars');
+                    const name = item.getAttribute('data-name');
+                    return (!selectedStar || stars === selectedStar) && name.includes(searchQuery);
+                });
+
+                // Sort by date
+                const sorted = filtered.sort((a, b) => {
+                    const dateA = new Date(a.getAttribute('data-date'));
+                    const dateB = new Date(b.getAttribute('data-date'));
+                    return dateSort.value === 'asc' ? dateA - dateB : dateB - dateA;
+                });
+
+                // Update UI
+                const reviewsList = document.querySelector('.reviews-list');
+                reviewsList.innerHTML = '';
+                sorted.forEach(item => reviewsList.appendChild(item));
+
+                // Show/hide empty state
+                const noReviews = document.querySelector('.no-reviews');
+                if (noReviews) {
+                    noReviews.style.display = sorted.length === 0 ? 'block' : 'none';
+                }
+            }
+
+            if (starFilter && dateSort && searchInput) {
+                starFilter.addEventListener('change', applyFilters);
+                dateSort.addEventListener('change', applyFilters);
+                searchInput.addEventListener('input', applyFilters);
+            }
+        });
+
+        // Edit Review
         function editReview(reviewId) {
-            alert('Edit review functionality coming soon!');
+            alert('Edit review #' + reviewId + ' (Feature coming soon)');
+            // TODO: Implement edit modal
         }
-        
+
+        // Delete Review
         function deleteReview(reviewId) {
             if (confirm('Are you sure you want to delete this review?')) {
-                alert('Delete review functionality coming soon!');
+                // TODO: Implement delete API call
+                alert('Delete review #' + reviewId + ' (Feature coming soon)');
             }
         }
     </script>
