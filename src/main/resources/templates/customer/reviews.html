@@ -204,13 +204,17 @@
                 <a href="#">License Software</a>
                 <a href="#">Game Keys</a>
                 <a href="#">Voucher</a>
+                <a href="/customer/chat">💬 Chat</a>
                 <a href="#">Support</a>
             </nav>
             <div class="top-actions">
-                <div class="notif">Notification</div>
+                <a href="/customer/support" class="support-link">Support</a>
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                         <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <span class="wallet-badge">
+                            💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
+                        </span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
@@ -220,6 +224,7 @@
                         <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
                         <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
                         <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+                        <a class="item" href="/customer/chat" role="menuitem">💬 Chat</a>
                         <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
                         <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
                         <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
@@ -239,10 +244,6 @@
                     </div>
                     <form id="logoutForm" method="post" action="/logout" style="display:none;">
                     </form>
-                </div>
-                <!-- Wallet Balance Display -->
-                <div class="wallet-balance" style="padding: 6px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; color: #0ea5e9; font-weight: 600; font-size: 14px;">
-                    💰 <span th:text="${user != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') : '0'}">0</span>₫
                 </div>
                 <div class="search">
                     <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
