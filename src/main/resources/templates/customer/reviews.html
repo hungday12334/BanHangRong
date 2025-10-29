@@ -536,6 +536,347 @@
             pointer-events: none;
         }
 
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #111827;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .product-info-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .product-image-placeholder {
+            width: 60px;
+            height: 60px;
+            background: #f3f4f6;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .placeholder-icon {
+            font-size: 24px;
+        }
+
+        .product-details input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            font-size: 16px;
+            background: #f9fafb;
+        }
+
+        .rating-section, .service-rating-section {
+            margin-bottom: 24px;
+        }
+
+        .rating-label, .service-label {
+            display: block;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .service-sub-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .star-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .star-rating .star {
+            font-size: 24px;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.2s;
+            user-select: none;
+        }
+
+        .star-rating .star:hover,
+        .star-rating .star.active {
+            color: #fbbf24;
+        }
+
+        .rating-text {
+            margin-left: 12px;
+            font-weight: 600;
+            color: #f59e0b;
+            font-size: 14px;
+        }
+
+        .review-section {
+            margin-bottom: 24px;
+        }
+
+        .review-section textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .review-section textarea:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .media-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .media-btn {
+            background: #f3f4f6;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .media-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--line);
+        }
+
+        .cancel-btn {
+            background: #f3f4f6;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .cancel-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .submit-btn {
+            background: #ef4444;
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+
+        /* Notification Popup Styles */
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            min-width: 350px;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid #10b981;
+        }
+
+        .notification-popup.error {
+            border-left-color: #ef4444;
+        }
+
+        .notification-popup.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .notification-popup.error .notification-icon {
+            background: #ef4444;
+        }
+
+        .notification-popup.warning .notification-icon {
+            background: #f59e0b;
+        }
+
+        .notification-message {
+            flex: 1;
+        }
+
+        .notification-message h4 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .notification-message p {
+            margin: 0;
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .notification-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-outline-success {
+            color: #10b981;
+            border-color: #10b981;
+        }
+
+        .btn-outline-success:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .review-item {
@@ -767,9 +1108,12 @@
                         </div>
                         <div class="review-actions">
                             <button class="btn btn-outline-primary" 
-                                th:onclick="|editReview(${review.reviewId})|">Edit</button>
+                                th:onclick="|editReview(${review.reviewId})|"
+                                th:attr="data-review-id=${review.reviewId}, data-product-id=${review.productId}, data-rating=${review.rating}, data-service-rating=${review.serviceRating}, data-comment=${review.comment}">Edit</button>
                             <button class="btn btn-outline-danger"
                                 th:onclick="|deleteReview(${review.reviewId})|">Delete</button>
+                            <button class="btn btn-outline-success"
+                                th:onclick="|buyAgain(${review.productId})|">🛒 Buy again</button>
                         </div>
                     </div>
                 </div>
@@ -821,6 +1165,109 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Edit Review Modal (Rating Modal) -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Review</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Product Information -->
+                <div class="product-info-section">
+                    <div class="product-image-placeholder">
+                        <div class="placeholder-icon">📦</div>
+                    </div>
+                    <div class="product-details">
+                        <input type="text" id="editProductNameInput" placeholder="Product Name" readonly>
+                        <input type="hidden" id="editReviewIdInput" value="">
+                        <input type="hidden" id="editProductIdInput" value="">
+                    </div>
+                </div>
+
+                <!-- Product Quality Rating -->
+                <div class="rating-section">
+                    <label class="rating-label">Product Quality</label>
+                    <div class="star-rating" id="editProductQualityRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                        <span class="rating-text" id="editProductQualityText">Amazing</span>
+                    </div>
+                </div>
+
+                <!-- Review Text Area -->
+                <div class="review-section">
+                    <textarea id="editReviewText" placeholder="Write about this product&#10;Share more thoughts to help other buyer" rows="4"></textarea>
+                    <div class="media-buttons">
+                        <input type="file" id="editMediaFiles" multiple accept="image/*,video/*" style="display: none;">
+                        <button class="media-btn" onclick="document.getElementById('editMediaFiles').click()">Add photo/video</button>
+                    </div>
+                </div>
+
+                <!-- Service Rating -->
+                <div class="service-rating-section">
+                    <label class="service-label">About Service</label>
+                    <div class="service-sub-label">Seller service</div>
+                    <div class="star-rating" id="editServiceRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                        <span class="rating-text" id="editServiceRatingText">Amazing</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeEditModal()">Cancel</button>
+                <button class="submit-btn" id="submitEditBtn" onclick="submitEditReview()">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <p style="margin: 20px 0; text-align: center; font-size: 16px; color: var(--ink);">
+                    Are you sure you want to delete this review?<br>
+                    This action cannot be undone.
+                </p>
+                <input type="hidden" id="deleteReviewIdInput" value="">
+            </div>
+
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                <button class="submit-btn" id="confirmDeleteBtn" onclick="confirmDelete()" 
+                    style="background: #ef4444; border-color: #ef4444;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup" style="display: none;">
+        <div class="notification-content">
+            <div class="notification-icon">
+                <span id="notificationIcon">✓</span>
+            </div>
+            <div class="notification-message">
+                <h4 id="notificationTitle">Success</h4>
+                <p id="notificationText">Operation completed successfully</p>
+            </div>
+            <button class="notification-close" onclick="closeNotification()">&times;</button>
+        </div>
     </div>
 
     <script>
@@ -888,19 +1335,313 @@
             });
         }
 
+        // Notification functions
+        function showNotification(title, message, type = 'success') {
+            const popup = document.getElementById('notificationPopup');
+            const icon = document.getElementById('notificationIcon');
+            const titleEl = document.getElementById('notificationTitle');
+            const textEl = document.getElementById('notificationText');
+            
+            // Set content
+            titleEl.textContent = title;
+            textEl.textContent = message;
+            
+            // Set type and icon
+            popup.className = `notification-popup ${type}`;
+            if (type === 'success') {
+                icon.textContent = '✓';
+            } else if (type === 'error') {
+                icon.textContent = '✕';
+            } else if (type === 'warning') {
+                icon.textContent = '⚠';
+            }
+            
+            // Show popup
+            popup.style.display = 'block';
+            popup.style.animation = 'slideInRight 0.3s ease-out';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                closeNotification();
+            }, 5000);
+        }
+        
+        function closeNotification() {
+            const popup = document.getElementById('notificationPopup');
+            popup.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
+
         // Edit Review
         function editReview(reviewId) {
-            alert('Edit review #' + reviewId + ' (Feature coming soon)');
-            // TODO: Implement edit modal
+            // Find the review item to get data
+            const reviewElement = event.target.closest('.review-item');
+            const productName = reviewElement.querySelector('.product-info h4').textContent.trim();
+            const rating = event.target.getAttribute('data-rating');
+            const serviceRating = event.target.getAttribute('data-service-rating');
+            const comment = event.target.getAttribute('data-comment');
+            const productId = event.target.getAttribute('data-product-id');
+            
+            // Set product name and IDs
+            document.getElementById('editProductNameInput').value = productName;
+            document.getElementById('editReviewIdInput').value = reviewId;
+            document.getElementById('editProductIdInput').value = productId;
+            
+            // Set review text
+            document.getElementById('editReviewText').value = comment || '';
+            
+            // Set ratings
+            setRating('editProductQualityRating', parseInt(rating) || 5);
+            setRating('editServiceRating', parseInt(serviceRating) || 5);
+            
+            // Show modal
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function setRating(containerId, rating) {
+            const container = document.getElementById(containerId);
+            const stars = container.querySelectorAll('.star');
+            const ratingText = container.querySelector('.rating-text');
+            
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            
+            const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Amazing'];
+            ratingText.textContent = ratingTexts[rating] || '';
+        }
+
+        function getRatingValue(containerId) {
+            const container = document.getElementById(containerId);
+            const activeStars = container.querySelectorAll('.star.active');
+            return activeStars.length;
+        }
+
+        function submitEditReview() {
+            const reviewId = document.getElementById('editReviewIdInput').value;
+            const productRating = getRatingValue('editProductQualityRating');
+            const serviceRating = getRatingValue('editServiceRating');
+            const comment = document.getElementById('editReviewText').value;
+            
+            if (productRating === 0) {
+                showNotification('Validation Error', 'Please rate the product quality', 'warning');
+                return;
+            }
+            
+            if (serviceRating === 0) {
+                showNotification('Validation Error', 'Please rate the seller service', 'warning');
+                return;
+            }
+            
+            if (comment.trim() === '') {
+                showNotification('Validation Error', 'Please write a review', 'warning');
+                return;
+            }
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitEditBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Updating...';
+            submitBtn.disabled = true;
+            
+            // Send to backend
+            fetch(`/api/reviews/${reviewId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({
+                    rating: productRating,
+                    serviceRating: serviceRating,
+                    comment: comment
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Success!', 'Review updated successfully!', 'success');
+                    closeEditModal();
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error('Failed to update review');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error', 'Failed to update review', 'error');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
         }
 
         // Delete Review
         function deleteReview(reviewId) {
-            if (confirm('Are you sure you want to delete this review?')) {
-                // TODO: Implement delete API call
-                alert('Delete review #' + reviewId + ' (Feature coming soon)');
-            }
+            document.getElementById('deleteReviewIdInput').value = reviewId;
+            document.getElementById('deleteModal').style.display = 'flex';
         }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            const reviewId = document.getElementById('deleteReviewIdInput').value;
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+            
+            // Show loading state
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            const originalText = deleteBtn.textContent;
+            deleteBtn.textContent = 'Deleting...';
+            deleteBtn.disabled = true;
+            
+            // Send delete request
+            fetch(`/api/reviews/${reviewId}`, {
+                method: 'DELETE',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Success!', 'Review deleted successfully!', 'success');
+                    closeDeleteModal();
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error('Failed to delete review');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error', 'Failed to delete review', 'error');
+            })
+            .finally(() => {
+                deleteBtn.textContent = originalText;
+                deleteBtn.disabled = false;
+            });
+        }
+
+        // Buy Again
+        function buyAgain(productId) {
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+            
+            // Add to cart
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader]: csrfToken
+                },
+                body: `productId=${productId}&quantity=1`
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Success!', 'Product added to cart', 'success');
+                    // Redirect to cart after 1 second
+                    setTimeout(() => {
+                        window.location.href = '/cart';
+                    }, 1000);
+                } else {
+                    throw new Error('Failed to add product to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error', 'Failed to add product to cart', 'error');
+            });
+        }
+
+        // Star rating functionality
+        function initializeStarRatings() {
+            const ratingContainers = document.querySelectorAll('.star-rating');
+            
+            ratingContainers.forEach(container => {
+                const stars = container.querySelectorAll('.star');
+                const ratingText = container.querySelector('.rating-text');
+                
+                stars.forEach((star, index) => {
+                    star.addEventListener('click', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        
+                        // Update visual state
+                        stars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                        
+                        // Update rating text
+                        const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Amazing'];
+                        ratingText.textContent = ratingTexts[rating];
+                    });
+                    
+                    star.addEventListener('mouseenter', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        stars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.style.color = '#fbbf24';
+                            } else {
+                                s.style.color = '#d1d5db';
+                            }
+                        });
+                    });
+                });
+                
+                container.addEventListener('mouseleave', function() {
+                    stars.forEach(star => {
+                        if (star.classList.contains('active')) {
+                            star.style.color = '#fbbf24';
+                        } else {
+                            star.style.color = '#d1d5db';
+                        }
+                    });
+                });
+            });
+        }
+
+        // Initialize star ratings when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeStarRatings();
+        });
+
+        // Close modals when clicking outside
+        document.getElementById('editModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+
+        document.getElementById('deleteModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
     </script>
 </body>
 
