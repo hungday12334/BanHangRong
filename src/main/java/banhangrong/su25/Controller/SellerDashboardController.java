@@ -1,9 +1,11 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Repository.SellerOrderRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.Products;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,13 +25,16 @@ public class SellerDashboardController {
     private final ProductsRepository productsRepository;
     private final UsersRepository usersRepository;
     private final SellerOrderRepository sellerOrderRepository;
+    private final ProductLicensesRepository productLicensesRepository;
 
     public SellerDashboardController(ProductsRepository productsRepository,
                                      UsersRepository usersRepository,
-                                     SellerOrderRepository sellerOrderRepository) {
+                                     SellerOrderRepository sellerOrderRepository,
+                                     ProductLicensesRepository productLicensesRepository) {
         this.productsRepository = productsRepository;
         this.usersRepository = usersRepository;
         this.sellerOrderRepository = sellerOrderRepository;
+        this.productLicensesRepository = productLicensesRepository;
     }
 
     // Temporary: sellerId is read from query or default to 1L until auth in place
@@ -166,8 +171,33 @@ public class SellerDashboardController {
             recentOrders.add(m);
         }
 
-        // Low stock products (<= 5)
-    var lowStock = productsRepository.findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(sellerId, "public", 5);
+        // Low stock products (<= 5 remaining keys)
+    // Instead of filtering by DB quantity we compute remaining for each public product
+    // and then pick those with remaining <= 5. This avoids cases where DB quantity
+    // is out-of-sync with actual available license keys.
+    List<Products> sellerProducts = productsRepository.findBySellerId(sellerId);
+    List<Map<String, Object>> lowStock = new ArrayList<>();
+    for (var prod : sellerProducts) {
+        if (prod == null) continue;
+        String st = prod.getStatus();
+        if (st == null || !"public".equalsIgnoreCase(st.trim())) continue;
+        Long pid = prod.getProductId();
+        int capacity = prod.getQuantity() != null ? prod.getQuantity() : 0;
+        long sold = productLicensesRepository.countByProductViaOrders(pid);
+        long pre = productLicensesRepository.countPreGeneratedForProduct(pid);
+        long remaining = Math.max(0L, (long) capacity - sold - pre);
+        if (remaining <= 5) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("productId", pid);
+            m.put("name", prod.getName());
+            m.put("remaining", remaining);
+            m.put("status", prod.getStatus());
+            lowStock.add(m);
+        }
+    }
+    // sort by ascending remaining and limit to 10
+    lowStock.sort(Comparator.comparingLong(m -> ((Number) m.getOrDefault("remaining", 0)).longValue()));
+    if (lowStock.size() > 10) lowStock = lowStock.subList(0, 10);
     long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "public");
 
         // Seller ranking (revenue-based)
@@ -197,7 +227,7 @@ public class SellerDashboardController {
         model.addAttribute("dailyRevenueData", String.join(",", series.values().stream().map(BigDecimal::toPlainString).toList()));
     model.addAttribute("topProducts", topProducts);
         model.addAttribute("recentOrders", recentOrders);
-        model.addAttribute("lowStock", lowStock);
+    model.addAttribute("lowStock", lowStock);
         model.addAttribute("activeProducts", activeProducts);
     model.addAttribute("myRank", myRank == null ? 0 : myRank);
     model.addAttribute("totalSellers", totalSellers);

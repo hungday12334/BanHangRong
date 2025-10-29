@@ -29,8 +29,8 @@ public class SellerProductController {
     @GetMapping
     public ResponseEntity<List<Products>> getSellerProducts(Authentication authentication) {
         Long sellerId = getCurrentSellerId(authentication);
-        // We only need active/public products for selection
-        List<Products> products = productsRepository.findBySellerIdAndStatus(sellerId, "public");
+        // We only need active products for selection
+        List<Products> products = productsRepository.findBySellerIdAndIsActiveTrue(sellerId);
         return ResponseEntity.ok(products);
     }
 }
