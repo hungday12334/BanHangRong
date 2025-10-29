@@ -4,6 +4,7 @@ import banhangrong.su25.Entity.Users;
 import banhangrong.su25.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -190,10 +192,10 @@ public class SellerProfileController {
         return gender.equals("male") || gender.equals("female") || gender.equals("other");
     }
 
-    // === UPLOAD AVATAR VỚI ĐẦY ĐỦ VALIDATION ===
+    // === UPLOAD AVATAR VỚI ĐẦY ĐỦ VALIDATION VÀ XÓA ẢNH CŨ ===
     @PostMapping("/profile/upload-avatar")
-    public String uploadAvatar(@RequestParam("avatarFile") MultipartFile file,
-                               RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile file) {
         try {
             System.out.println("=== BẮT ĐẦU UPLOAD AVATAR ===");
             System.out.println("File name: " + file.getOriginalFilename());
@@ -202,68 +204,81 @@ public class SellerProfileController {
 
             // ===== VALIDATION 1: Check empty file =====
             if (file.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn file ảnh");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng chọn file ảnh"));
             }
 
             // ===== VALIDATION 2: Check file type by MIME type =====
             String contentType = file.getContentType();
             if (contentType == null || !isValidImageType(contentType)) {
                 System.out.println("⚠️ Invalid content type: " + contentType);
-                redirectAttributes.addFlashAttribute("errorMessage", "Chỉ được upload file ảnh (JPEG, PNG, GIF)");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Chỉ được upload file ảnh (JPEG, PNG, GIF)"));
             }
 
             // ===== VALIDATION 3: Check file size (max 5MB) =====
             long maxSize = 5 * 1024 * 1024; // 5MB
             if (file.getSize() > maxSize) {
                 System.out.println("⚠️ File too large: " + file.getSize() + " bytes");
-                redirectAttributes.addFlashAttribute("errorMessage", "Kích thước file không được vượt quá 5MB");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Kích thước file không được vượt quá 5MB"));
             }
 
             // ===== VALIDATION 4: Check file extension =====
             String originalFileName = file.getOriginalFilename();
             if (originalFileName == null || !hasValidImageExtension(originalFileName)) {
                 System.out.println("⚠️ Invalid file extension: " + originalFileName);
-                redirectAttributes.addFlashAttribute("errorMessage", "File phải có đuôi .jpg, .jpeg, .png hoặc .gif");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "File phải có đuôi .jpg, .jpeg, .png hoặc .gif"));
             }
 
             // ===== SECURITY: Validate actual file content (prevent fake extensions) =====
             byte[] fileBytes = file.getBytes();
             if (!isValidImageFile(fileBytes)) {
                 System.out.println("⚠️ SECURITY ALERT: File content does not match image signature!");
-                redirectAttributes.addFlashAttribute("errorMessage", "File không hợp lệ! Vui lòng upload ảnh thật.");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "File không hợp lệ! Vui lòng upload ảnh thật."));
             }
 
             Long sellerId = getCurrentSellerId();
+            Users currentUser = userProfileService.getSellerProfile(sellerId);
+
+            // ===== XÓA ẢNH CŨ TRƯỚC KHI UPLOAD ẢNH MỚI =====
+            String oldAvatarUrl = currentUser.getAvatarUrl();
+            if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty() && !oldAvatarUrl.equals("/img/avatar_default.jpg")) {
+                try {
+                    // Extract filename from URL (e.g., "/uploads/avatar_1_xyz.jpg" -> "avatar_1_xyz.jpg")
+                    String oldFileName = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
+                    Path oldFilePath = Paths.get(uploadDir).resolve(oldFileName);
+
+                    if (Files.exists(oldFilePath)) {
+                        Files.delete(oldFilePath);
+                        System.out.println("🗑️ Đã xóa ảnh cũ: " + oldFilePath.toAbsolutePath());
+                    }
+                } catch (Exception e) {
+                    System.out.println("⚠️ Không thể xóa ảnh cũ (không ảnh hưởng): " + e.getMessage());
+                    // Không throw exception, tiếp tục upload ảnh mới
+                }
+            }
 
             // Tạo thư mục uploads nếu chưa tồn tại
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
-                System.out.println("Đã tạo thư mục: " + uploadPath.toAbsolutePath());
+                System.out.println("📁 Đã tạo thư mục: " + uploadPath.toAbsolutePath());
             }
 
             // ===== SECURITY: Sanitize filename to prevent path traversal =====
             String safeFileName = sanitizeFileName(originalFileName);
             String fileExtension = safeFileName.substring(safeFileName.lastIndexOf("."));
-            String fileName = "avatar_" + sellerId + "_" + UUID.randomUUID() + fileExtension;
+            String fileName = "avatar_" + sellerId + "_" + System.currentTimeMillis() + fileExtension;
 
-            // Lưu file
+            // Lưu file mới
             Path filePath = uploadPath.resolve(fileName);
 
             // ===== SECURITY: Prevent path traversal =====
             if (!filePath.normalize().startsWith(uploadPath.normalize())) {
                 System.out.println("⚠️ SECURITY ALERT: Path traversal attempt detected!");
-                redirectAttributes.addFlashAttribute("errorMessage", "Phát hiện hành vi bất thường!");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Phát hiện hành vi bất thường!"));
             }
 
             Files.copy(file.getInputStream(), filePath);
-            System.out.println("Đã lưu file: " + filePath.toAbsolutePath());
+            System.out.println("💾 Đã lưu file: " + filePath.toAbsolutePath());
 
             // Tạo URL để truy cập ảnh
             String avatarUrl = "/uploads/" + fileName;
@@ -272,19 +287,22 @@ public class SellerProfileController {
             userProfileService.updateAvatar(sellerId, avatarUrl);
             System.out.println("✅ Đã cập nhật avatar URL: " + avatarUrl);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật avatar thành công!");
+            // Return JSON response
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Cập nhật avatar thành công!",
+                "avatarUrl", avatarUrl
+            ));
 
         } catch (IOException e) {
             System.out.println("❌ Lỗi IOException: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu file. Vui lòng thử lại!");
+            return ResponseEntity.status(500).body(Map.of("error", "Lỗi khi lưu file. Vui lòng thử lại!"));
         } catch (Exception e) {
             System.out.println("❌ Lỗi Exception: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra. Vui lòng thử lại!");
+            return ResponseEntity.status(500).body(Map.of("error", "Có lỗi xảy ra. Vui lòng thử lại!"));
         }
-
-        return "redirect:/seller/profile";
     }
 
     // ===== HELPER METHODS: FILE VALIDATION =====

@@ -908,8 +908,8 @@
       profilePanel.hidden = true;
       profilePanel.style.display = 'none';
       dashboardContent.style.display = '';
-      // ALSO hide other sidebar panels (orders, keys, products, vouchers) to prevent residual content
-      ['ordersPanel','keysPanel','profileSettingsPanel','productsPanel','vouchersPanel'].forEach(id => {
+      // ALSO hide other sidebar panels (orders, keys, products) to prevent residual content
+      ['ordersPanel','keysPanel','profileSettingsPanel','productsPanel'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.hidden = true; el.style.display = 'none'; }
       });
@@ -950,7 +950,6 @@
       '#keys': 'keysPanel',
       '#products': 'productsPanel',
       '#gen-keys': 'generateKeysPanel',
-      '#vouchers': 'vouchersPanel',
       '#withdraw': 'withdrawPanel',
       '#profile-settings': 'profileSettingsPanel'
     };
@@ -960,9 +959,6 @@
         hideProfile();
         // also hide any other panels
         Object.values(panelMap).forEach(id => { const el = document.getElementById(id); if (el) { el.hidden = true; el.style.display = 'none'; } });
-        // ensure vouchers panel remains hidden and flagged aria-hidden for a11y
-        const vp = document.getElementById('vouchersPanel');
-        if (vp) { vp.hidden = true; vp.style.display = 'none'; vp.setAttribute('aria-hidden','true'); }
         // close product modal if somehow left open and prevent its inline form from being visible
         const pm = document.getElementById('productModal');
         if (pm && pm.hasAttribute('open')) { try { pm.close(); } catch(_) { pm.removeAttribute('open'); pm.style.display='none'; } }
@@ -989,8 +985,6 @@
           initGenerateKeys();
         } else if (hash === '#products' && typeof loadProductsPanel === 'function') {
           loadProductsPanel(true);
-        } else if (hash === '#vouchers' && typeof loadVouchersPanel === 'function') {
-          loadVouchersPanel(true);
         } else if (hash === '#withdraw') {
           if (typeof loadWithdrawPanel === 'function') loadWithdrawPanel();
         }
@@ -1316,161 +1310,8 @@
       return await fetch(url, { method: 'DELETE' });
     }
 
-    async function loadVouchersPanel(forceReload) {
-      const panel = document.getElementById('vouchersPanel');
-      if (!panel) return;
-      const sellerIdEl = document.getElementById('sellerId');
-      const userIdEl = document.getElementById('userId');
-      const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
-      if (!sellerId) { showToast('Seller not identified', 'error'); return; }
+    // Voucher management has been moved to a separate page at /seller/voucher
 
-  const selProduct = document.getElementById('vc_product');
-      const selStatus = document.getElementById('vc_status');
-  const inpSearch = document.getElementById('vc_search');
-      const tb = document.getElementById('tbVouchers');
-      const btnNew = document.getElementById('vc_btnNew');
-      const btnRefresh = document.getElementById('vc_btnRefresh');
-
-      // load product list once
-      if (!selProduct.dataset.loaded || forceReload) {
-        selProduct.innerHTML = '<option value="">Select product</option>';
-        const products = await fetchSellerProductsLite(sellerId);
-        for (const p of products) {
-          const opt = document.createElement('option');
-          opt.value = p.productId;
-          opt.textContent = `#${p.productId} — ${p.name}`;
-          selProduct.appendChild(opt);
-        }
-        selProduct.dataset.loaded = '1';
-      }
-
-      let lastReq = 0;
-      async function render() {
-        const pid = Number(selProduct.value || '0');
-        tb.innerHTML = '';
-        if (!pid) { tb.innerHTML = '<tr class="footer-note"><td colspan="7">Select a product to manage vouchers.</td></tr>'; return; }
-        const reqId = ++lastReq;
-        const list = await fetchVouchers(sellerId, pid, inpSearch?.value || '');
-        if (reqId !== lastReq) return; // ignore out-of-order responses (typing fast)
-        const statusFilter = (selStatus.value || '').toLowerCase();
-        const filtered = list.filter(v => !statusFilter || (v.status || '').toLowerCase() === statusFilter);
-        if (!filtered.length) {
-          tb.innerHTML = '<tr class="footer-note"><td colspan="7">No vouchers found.</td></tr>';
-          return;
-        }
-        for (const v of filtered) {
-          const tr = document.createElement('tr');
-          const period = [v.startAt ? new Date(v.startAt).toLocaleString() : '-', v.endAt ? new Date(v.endAt).toLocaleString() : '-'].join(' → ');
-          const uses = `${v.usedCount ?? 0}${v.maxUses ? ' / ' + v.maxUses : ''}`;
-          const val = (v.discountType === 'AMOUNT' ? ('$' + Number(v.discountValue || 0).toLocaleString('en-US')) : (Number(v.discountValue || 0) + '%'));
-          tr.innerHTML = `
-            <td><b>${v.code}</b></td>
-            <td>${v.discountType}</td>
-            <td>${val}</td>
-            <td class="hide-md">${period}</td>
-            <td>${uses}</td>
-            <td><span class="badge">${(v.status||'').toUpperCase()}</span></td>
-            <td style="text-align:right;white-space:nowrap">
-              <button class="btn" data-act="usage">Usage</button>
-              <button class="btn" data-act="edit">Edit</button>
-              <button class="btn danger" data-act="del">Delete</button>
-            </td>`;
-          // actions
-          tr.querySelector('[data-act="edit"]').addEventListener('click', () => openVoucherModal(pid, v));
-          tr.querySelector('[data-act="usage"]').addEventListener('click', () => openUsageModal(pid, v));
-          tr.querySelector('[data-act="del"]').addEventListener('click', async () => {
-            if (!confirm('Delete this voucher?')) return;
-            const res = await deleteVoucher(sellerId, pid, v.voucherId);
-            if (res.ok) { showToast('Voucher deleted', 'success'); render(); } else showToast('Delete failed', 'error');
-          });
-          tb.appendChild(tr);
-        }
-      }
-
-  selProduct.addEventListener('change', render);
-      selStatus.addEventListener('change', render);
-      btnRefresh?.addEventListener('click', render);
-  // live search with debounce 250ms, DB-backed
-  let tmr;
-  inpSearch?.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(render, 250); });
-
-      function openVoucherModal(productId, voucher) {
-        const dlg = document.getElementById('voucherModal');
-        if (!dlg) return;
-        dlg.querySelector('#vc_voucherId').value = voucher?.voucherId ?? '';
-        dlg.querySelector('#vc_code').value = voucher?.code ?? '';
-        dlg.querySelector('#vc_type').value = voucher?.discountType ?? 'PERCENT';
-        dlg.querySelector('#vc_value').value = voucher?.discountValue ?? '';
-        dlg.querySelector('#vc_min').value = voucher?.minOrder ?? '';
-        dlg.querySelector('#vc_start').value = voucher?.startAt ? new Date(voucher.startAt).toISOString().slice(0,16) : '';
-        dlg.querySelector('#vc_end').value = voucher?.endAt ? new Date(voucher.endAt).toISOString().slice(0,16) : '';
-        dlg.querySelector('#vc_maxUses').value = voucher?.maxUses ?? '';
-        dlg.querySelector('#vc_maxPerUser').value = voucher?.maxUsesPerUser ?? '';
-        dlg.querySelector('#vc_status').value = voucher?.status ?? 'active';
-
-        dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(dlg); }, { once: true });
-        dlg.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(dlg), { once: true }));
-        dlg.querySelector('#voucherForm').onsubmit = async (e) => {
-          e.preventDefault();
-          const payload = {
-            code: dlg.querySelector('#vc_code').value.trim(),
-            discountType: dlg.querySelector('#vc_type').value,
-            discountValue: Number(dlg.querySelector('#vc_value').value || '0'),
-            minOrder: dlg.querySelector('#vc_min').value ? Number(dlg.querySelector('#vc_min').value) : null,
-            startAt: dlg.querySelector('#vc_start').value ? new Date(dlg.querySelector('#vc_start').value).toISOString() : null,
-            endAt: dlg.querySelector('#vc_end').value ? new Date(dlg.querySelector('#vc_end').value).toISOString() : null,
-            maxUses: dlg.querySelector('#vc_maxUses').value ? Number(dlg.querySelector('#vc_maxUses').value) : null,
-            maxUsesPerUser: dlg.querySelector('#vc_maxPerUser').value ? Number(dlg.querySelector('#vc_maxPerUser').value) : null,
-            status: dlg.querySelector('#vc_status').value
-          };
-          const vid = dlg.querySelector('#vc_voucherId').value || null;
-          const res = await saveVoucher(sellerId, productId, payload, vid);
-          if (res.ok) { closeModal(dlg); showToast('Voucher saved', 'success'); render(); }
-          else { const msg = await res.text(); showToast('Save failed: ' + msg, 'error'); }
-        };
-        openModal(dlg);
-      }
-
-      async function openUsageModal(productId, voucher) {
-        const dlg = document.getElementById('voucherUsageModal');
-        if (!dlg) return;
-        const codeEl = dlg.querySelector('#vu_code');
-        const usedEl = dlg.querySelector('#vu_used');
-        const maxEl = dlg.querySelector('#vu_max');
-        const leftEl = dlg.querySelector('#vu_left');
-        const table = dlg.querySelector('#vu_table');
-        codeEl.textContent = voucher.code;
-        usedEl.textContent = voucher.usedCount ?? 0;
-        maxEl.textContent = voucher.maxUses ?? '∞';
-        leftEl.textContent = voucher.maxUses ? Math.max(0, voucher.maxUses - (voucher.usedCount ?? 0)) : '∞';
-        table.innerHTML = '<tr class="footer-note"><td colspan="5">Loading...</td></tr>';
-        const res = await fetch(`/api/seller/${sellerId}/products/${productId}/vouchers/${voucher.voucherId}/usage`);
-        if (res.ok) {
-          const list = await res.json();
-          table.innerHTML = '';
-          if (!list.length) table.innerHTML = '<tr class="footer-note"><td colspan="5">No usage yet.</td></tr>';
-          list.forEach((r, idx) => {
-            const trr = document.createElement('tr');
-            trr.innerHTML = `<td>${idx + 1}</td><td>#${r.orderId || '-'}</td><td>#${r.userId || '-'}</td><td>$${Number(r.discountAmount || 0).toFixed(2)}</td><td>${r.createdAt ? new Date(r.createdAt).toLocaleString() : '-'}</td>`;
-            table.appendChild(trr);
-          });
-        } else {
-          table.innerHTML = '<tr class="footer-note"><td colspan="5">Failed to load usage.</td></tr>';
-        }
-        dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(dlg); }, { once: true });
-        dlg.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(dlg), { once: true }));
-        openModal(dlg);
-      }
-
-      btnNew?.addEventListener('click', () => {
-        const pid = Number(selProduct.value || '0');
-        if (!pid) { showToast('Select a product first', 'error'); return; }
-        openVoucherModal(pid, null);
-      });
-
-      // initial render if product already chosen
-      render();
-    }
     const profileModal = document.getElementById('profileModal');
     if (profileModal) {
       // reuse existing overlay + lock helpers

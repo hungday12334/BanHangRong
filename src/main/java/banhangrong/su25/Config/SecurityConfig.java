@@ -33,19 +33,14 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // Provide SessionRegistry bean for session management and autowiring
-    @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         http.csrf(csrf -> csrf.disable())
 
             // Cấu hình session management
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                    .invalidSessionUrl("/login?expired=true")
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false).expiredUrl("/login?expired=true")
                     .sessionRegistry(sessionRegistry)
@@ -81,7 +76,7 @@ public class SecurityConfig {
                 // Default: require authentication
                 .anyRequest().authenticated()
             )
-
+            
             // Cấu hình form login
             .formLogin(form -> form
                 .loginPage("/login")
@@ -92,20 +87,20 @@ public class SecurityConfig {
                 .passwordParameter("password")
                 .permitAll()
             )
-
+            
             // Cấu hình logout
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             );
 
-
         return http.build();
-
     }
-
-
+    @Bean
+    SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
 }

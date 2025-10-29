@@ -42,10 +42,13 @@ public class AuthService {
 
     // ✅ Login
     public AuthResponse login(LoginRequest loginRequest) {
-        // Validate CAPTCHA first
+        // TEMPORARY: Disable CAPTCHA for testing
+        // TODO: Re-enable CAPTCHA in production
+        /*
         if (loginRequest.getCaptchaResponse() == null || !captchaService.verifyCaptcha(loginRequest.getCaptchaResponse())) {
             throw new RuntimeException("CAPTCHA verification failed. Please try again!");
         }
+        */
 
         Users user = usersRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Username not found"));
@@ -68,10 +71,13 @@ public class AuthService {
 
     // ✅ Register
     public AuthResponse register(RegisterRequest registerRequest) {
-        // Validate CAPTCHA first
+        // TEMPORARY: Disable CAPTCHA for testing
+        // TODO: Re-enable CAPTCHA in production
+        /*
         if (registerRequest.getCaptchaResponse() == null || !captchaService.verifyCaptcha(registerRequest.getCaptchaResponse())) {
             throw new RuntimeException("CAPTCHA verification failed. Please try again!");
         }
+        */
 
         // Validate phone number
         if (!isValidPhone(registerRequest.getPhoneNumber())) {

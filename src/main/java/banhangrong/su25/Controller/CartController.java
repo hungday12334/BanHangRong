@@ -59,7 +59,16 @@ public class CartController {
 
     @GetMapping("/cart")
     public String viewCart(Model model) {
-        List<ShoppingCart> items = cartRepository.findByUserId(getCurrentUserId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<Users> userOptional = username != null ? usersRepository.findByUsername(username) : Optional.empty();
+        
+        if (userOptional.isEmpty()) {
+            return "redirect:/login";
+        }
+        
+        Users user = userOptional.get();
+        List<ShoppingCart> items = cartRepository.findByUserId(user.getUserId());
 
         List<Map<String,Object>> viewItems = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
@@ -86,6 +95,7 @@ public class CartController {
             m.put("stock", p.getQuantity() != null ? p.getQuantity() : 0);
             viewItems.add(m);
         }
+        model.addAttribute("user", user);
         model.addAttribute("items", viewItems);
         model.addAttribute("total", total);
         model.addAttribute("cartCount", items.size());

@@ -4,11 +4,42 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat: implement chat feature for customers and sellers; add WebSocket support, update security configuration, and create necessary database tables">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: add spring boot devtools">
+      <change afterPath="$PROJECT_DIR$/AVATAR_UPLOAD_OPTIMIZATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_JSON_PARSE_ERROR.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CATEGORY_FEATURE_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ACCESS_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ACCESS_FIX_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ANALYSIS_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_COMPLETED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_VISUAL.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIX_QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIX_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIX_VISUAL_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FLOW_TEST_CASES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ISSUES_PRIORITY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_LINKS_ADDED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_DOCUMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_QUICK_SETUP.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_STATUS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_VISUAL_FLOW.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUSTOMER_HEADER_STANDARD.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_START_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEST_CHAT_NHANH.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VIDEO_DEMO_SCRIPT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_MANAGEMENT_FEATURE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_TEST_CASES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_VISUAL_FLOW.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,15 +50,15 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
-        <option value="HTML File" />
         <option value="Class" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="MinhHQX" />
+        <entry key="$PROJECT_DIR$" value="MinhHQ" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -75,6 +106,7 @@
     &quot;Database Script.fix_old_constraint.sql.executor&quot;: &quot;Run&quot;,
     &quot;Database Script.fix_review_constraint.sql.executor&quot;: &quot;Run&quot;,
     &quot;Database Script.modify_review_system.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.quick_create_seller_test.sql.executor&quot;: &quot;Run&quot;,
     &quot;Database Script.review_system_complete.sql.executor&quot;: &quot;Run&quot;,
     &quot;Database Script.set_password.sql.executor&quot;: &quot;Run&quot;,
     &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
@@ -90,8 +122,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
     &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;#6 on MinhHQ&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Hungnv&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
@@ -111,24 +142,47 @@
     ],
     &quot;RunConfigurationTargetLRU&quot;: [
       &quot;53b38385-a361-4b09-b3fc-e28dbd7b3e5c&quot;
-    ],
-    &quot;com.intellij.ide.scratch.LRUPopupBuilder$1/&quot;: [
-      &quot;MySQL&quot;,
-      &quot;Redshift&quot;,
-      &quot;SQL92&quot;,
-      &quot;MariaDB&quot;
     ]
   }
 }</component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
     </key>
-    <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="banhangrong.su25.Repository" />
-    </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Spring Boot.Su25Application">
+    <configuration name="data_v2.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/data_v2.sql" />
+      <script-mode>FILE</script-mode>
+      <method v="2" />
+    </configuration>
+    <configuration name="fix_old_constraint.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/fix_old_constraint.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fix_review_constraint.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/fix_review_constraint.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="quick_create_seller_test.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/quick_create_seller_test.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="review_system_complete.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/review_system_complete.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
     <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="su25" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
@@ -136,6 +190,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Database Script.quick_create_seller_test.sql" />
+        <item itemvalue="Database Script.data_v2.sql" />
+        <item itemvalue="Database Script.fix_old_constraint.sql" />
+        <item itemvalue="Database Script.review_system_complete.sql" />
+        <item itemvalue="Database Script.fix_review_constraint.sql" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -165,15 +228,8 @@
       <workItem from="1761166831022" duration="5765000" />
       <workItem from="1761200442552" duration="8932000" />
       <workItem from="1761225296373" duration="388000" />
-      <workItem from="1761292847069" duration="3540000" />
-      <workItem from="1761410888616" duration="1263000" />
-      <workItem from="1761412175770" duration="6271000" />
-      <workItem from="1761639551108" duration="282000" />
-      <workItem from="1761639854195" duration="264000" />
-      <workItem from="1761642909841" duration="2000" />
-      <workItem from="1761660496275" duration="6883000" />
-      <workItem from="1761680898817" duration="8161000" />
-      <workItem from="1761735644460" duration="377000" />
+      <workItem from="1761288445557" duration="1184000" />
+      <workItem from="1761718568881" duration="3682000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -223,31 +279,7 @@
       <option name="project" value="LOCAL" />
       <updated>1760599530481</updated>
     </task>
-    <task id="LOCAL-00007" summary="fix: update database connection settings and refine pom.xml configurations">
-      <option name="closed" value="true" />
-      <created>1761298208210</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1761298208210</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fix: ensure 'full_name' column exists in users table and update related SQL scripts">
-      <option name="closed" value="true" />
-      <created>1761660598700</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1761660598700</updated>
-    </task>
-    <task id="LOCAL-00009" summary="feat: implement chat feature for customers and sellers; add WebSocket support, update security configuration, and create necessary database tables">
-      <option name="closed" value="true" />
-      <created>1761718225691</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1761718225691</updated>
-    </task>
-    <option name="localTasksCounter" value="10" />
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -283,9 +315,6 @@
     <MESSAGE value="Admin Product Approve||Cancel" />
     <MESSAGE value="fix: fix error approve Products." />
     <MESSAGE value="update: add spring boot devtools" />
-    <MESSAGE value="fix: update database connection settings and refine pom.xml configurations" />
-    <MESSAGE value="fix: ensure 'full_name' column exists in users table and update related SQL scripts" />
-    <MESSAGE value="feat: implement chat feature for customers and sellers; add WebSocket support, update security configuration, and create necessary database tables" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: implement chat feature for customers and sellers; add WebSocket support, update security configuration, and create necessary database tables" />
+    <option name="LAST_COMMIT_MESSAGE" value="update: add spring boot devtools" />
   </component>
 </project>

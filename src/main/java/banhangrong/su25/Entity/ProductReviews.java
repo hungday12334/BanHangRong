@@ -42,6 +42,10 @@ public class ProductReviews {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Transient field for display purposes (not stored in database)
+    @Transient
+    private String username;
+
     // Thêm getters và setters cho 2 field mới
     public String getSellerResponse() {
         return sellerResponse;
@@ -127,6 +131,14 @@ public class ProductReviews {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @PreUpdate

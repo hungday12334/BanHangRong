@@ -14,7 +14,7 @@
     <span style="display:none"><b id="userId" th:text="${userId}"></b></span>
     <!-- Live clock for sellers -->
     <div id="sellerClock" class="chip" aria-live="polite" title="Current time">--:--:--</div>
-    <button id="btnAddProduct" class="btn primary" type="button" title="Add product">+ Add product</button>
+    <button id="btnAddProduct" class="btn primary" type="button" title="Add product">Add product</button>
   </header>
   <section class="grid kpi" data-block="kpi">
     <div class="card" data-kpi="revenue-total">
@@ -53,11 +53,22 @@
               alt="Seller Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" width="40"
               height="40" fetchpriority="high" decoding="async" /></span>
           <div>
-            <div style="font-weight:700">Revenue (last 15 days)</div>
+            <div style="font-weight:700">Revenue</div>
             <div class="footer-note">By day (USD)</div>
           </div>
         </div>
-        <div class="chip hide-md">Range: 15 days</div>
+        <div class="chip hide-md" style="display:flex;gap:8px;align-items:center;">
+          <label for="revenueRange" style="font-weight:600;margin-right:6px;">Range:</label>
+          <select id="revenueRange" class="input" style="min-width:120px;"> 
+            <option value="7">7 days</option>
+            <option value="15" selected>15 days</option>
+            <option value="30">30 days</option>
+            <option value="90">3 months</option>
+            <option value="365">1 year</option>
+            <option value="custom">Custom</option>
+          </select>
+          <input id="revenueRangeCustom" type="number" min="1" placeholder="days" class="input" style="width:80px;display:none;margin-left:6px;" />
+        </div>
       </div>
       <div class="body"><canvas id="revenueChart" class="sparkline"
           th:attr="data-labels=${dailyRevenueLabels},data-data=${dailyRevenueData}"></canvas></div>
@@ -98,7 +109,15 @@
     <div class="card">
       <div class="header">
         <div style="font-weight:700">My products</div>
-        <div class="chip" id="myProductsCount">0</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="chip" id="myProductsCount">0</div>
+          <select id="myProductsStatusFilter" class="input" style="min-width:140px;">
+            <option value="all">All statuses</option>
+            <option value="public">Public</option>
+            <option value="pending">Pending</option>
+            <option value="hidden">Hidden</option>
+          </select>
+        </div>
       </div>
       <div class="body paged">
         <div class="table-wrap">
