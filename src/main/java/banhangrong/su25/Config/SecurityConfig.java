@@ -50,6 +50,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     // Public endpoints
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/email-verification/**").authenticated()
                     .requestMatchers("/api/database/**").permitAll()
                     .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()

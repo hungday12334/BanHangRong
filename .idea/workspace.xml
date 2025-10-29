@@ -5,36 +5,37 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read">
+      <change afterPath="$PROJECT_DIR$/API_RESEND_VERIFICATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BIRTH_DATE_FIX_AND_FULL_NAME.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DEBUG_REGISTRATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EMAIL_VERIFICATION_FIX.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EMAIL_VERIFICATION_OPTIMIZATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EMAIL_VERIFICATION_QUICK_START.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FINAL_DEBUG_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FINAL_FIX_INSTRUCTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_MESSAGE_DISPLAY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_FIX_NOW.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_SOLUTION_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TWO_SOLUTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/create_verification_for_existing_users.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/verify_email_quick_fix.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test-email-verification.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test-messages.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CATEGORY_FIXES_APPLIED.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CATEGORY_MANAGEMENT_FEATURES.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CATEGORY_MANAGEMENT_TEST_CASES.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_ACCESS_FIX.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_ACCESS_FIX_COMPLETE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_ANALYSIS_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_COMPLETED.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_VISUAL.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_FIX_QUICK_START.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_FIX_README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_FIX_VISUAL_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_FLOW_TEST_CASES.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_ISSUES_PRIORITY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_LINKS_ADDED.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_DOCUMENTATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_QUICK_SETUP.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_STATUS.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_VISUAL_FLOW.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FIXES_APPLIED.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FIX_JSON_PARSE_ERROR.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FIX_LOGIN_REDIRECT_ISSUE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FIX_LOMBOK_COMPLETE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FIX_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PAGINATION_IMPLEMENTATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/QUICK_FIX_CHAT_ACCESS.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/QUICK_START_CHAT.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/RegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/RegisterRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_619b3988-ff77-4e9a-9f69-7b86095f6625.jpeg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_6ff1d81f-1681-43c6-8434-805102acb706.jpeg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_98ff329d-0ddd-48dd-97d3-f1962f11fd34.jpeg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_ef039077-d7a0-449a-b996-0d42d173ea07.jpeg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,6 +118,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "Spring Boot.Su25Application.executor": "Run",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "#6 on MinhHQ",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
@@ -225,6 +227,7 @@
       <workItem from="1761225296373" duration="388000" />
       <workItem from="1761288445557" duration="1184000" />
       <workItem from="1761718568881" duration="3682000" />
+      <workItem from="1761771952359" duration="8189000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />

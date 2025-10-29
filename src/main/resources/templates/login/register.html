@@ -164,6 +164,11 @@
             display: none;
             align-items: center;
             gap: 8px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .error-message.show {
+            display: flex !important;
         }
 
         .success-message {
@@ -176,6 +181,11 @@
             display: none;
             align-items: center;
             gap: 8px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .success-message.show {
+            display: flex !important;
         }
 
         .verification-message {
@@ -189,6 +199,22 @@
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .verification-message.show {
+            display: flex !important;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsive */
@@ -238,7 +264,18 @@
         <form id="registerForm" class="form">
             <div class="form-group">
                 <label for="regUsername">Username :</label>
-                <input type="text" id="regUsername" name="username" required>
+                <div style="flex: 1;">
+                    <input type="text" id="regUsername" name="username" required>
+                    <small class="hint-text">3-20 characters, alphanumeric and underscore only</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="fullName">Full Name :</label>
+                <div style="flex: 1;">
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                    <small class="hint-text">Your real full name (2-100 characters)</small>
+                </div>
             </div>
 
             <div class="form-group">
@@ -248,7 +285,10 @@
 
             <div class="form-group">
                 <label for="phoneNumber">Phone Number :</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter phone number" required>
+                <div style="flex: 1;">
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter phone number" required>
+                    <small class="hint-text">10 digits, start with: 03, 05, 07, 08, 09</small>
+                </div>
             </div>
 
             <div class="form-group">
@@ -272,7 +312,10 @@
 
             <div class="form-group">
                 <label for="regPassword">Password :</label>
-                <input type="password" id="regPassword" name="password" required>
+                <div style="flex: 1;">
+                    <input type="password" id="regPassword" name="password" required>
+                    <small class="hint-text">At least 8 characters, must contain letters and numbers</small>
+                </div>
             </div>
 
             <div class="form-group">
@@ -306,62 +349,284 @@
 
         <div id="successMessage" class="success-message">
             <i class="fas fa-check-circle"></i>
-            <span>Đăng ký thành công!</span>
+            <span>Registration successful!</span>
         </div>
     </div>
 
-    <script th:src="@{/js/auth.js}"></script>
     <script>
-        // CAPTCHA setup
-        function onRecaptchaLoad() {
-            // CAPTCHA sẽ được load bởi auth.js
-        }
+        console.log('Register page script loaded');
 
-        // Form validation
-        document.getElementById('registerForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const birthDate = document.getElementById('birthDate').value;
-            const gender = document.getElementById('gender').value;
-            const termsAccepted = document.getElementById('termsAccepted').checked;
-
-            if (password !== confirmPassword) {
-                showMessage('Mật khẩu xác nhận không khớp!', 'error');
-                return;
-            }
-
-            if (!gender) {
-                showMessage('Vui lòng chọn giới tính!', 'error');
-                return;
-            }
-
-
-            if (!termsAccepted) {
-                showMessage('Vui lòng đồng ý với Điều khoản dịch vụ!', 'error');
-                return;
-            }
-
-            // Let auth.js handle the form submission
-            handleRegister(e);
-        });
-
+        // Message display functions
         function showMessage(message, type) {
+            console.log('showMessage called:', type, message);
             clearMessages();
 
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `${type}-message`;
-            messageDiv.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i><span>${message}</span>`;
-
-            document.querySelector('.register-container').appendChild(messageDiv);
-            messageDiv.style.display = 'flex';
+            if (type === 'error') {
+                const errorDiv = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                if (errorDiv && errorText) {
+                    errorText.textContent = message;
+                    errorDiv.style.display = 'flex';
+                    errorDiv.classList.add('show');
+                    console.log('Error message displayed');
+                }
+            } else if (type === 'success') {
+                const successDiv = document.getElementById('successMessage');
+                if (successDiv) {
+                    const messageSpan = successDiv.querySelector('span');
+                    if (messageSpan) {
+                        messageSpan.textContent = message;
+                    }
+                    successDiv.style.display = 'flex';
+                    successDiv.classList.add('show');
+                    console.log('Success message displayed');
+                }
+            }
         }
 
         function clearMessages() {
-            const existingMessages = document.querySelectorAll('.error-message, .success-message, .verification-message');
-            existingMessages.forEach(msg => msg.remove());
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            const verificationDiv = document.getElementById('emailVerificationMessage');
+
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+                errorDiv.classList.remove('show');
+            }
+            if (successDiv) {
+                successDiv.style.display = 'none';
+                successDiv.classList.remove('show');
+            }
+            if (verificationDiv) {
+                verificationDiv.style.display = 'none';
+                verificationDiv.classList.remove('show');
+            }
         }
+
+        function showEmailVerificationMessage() {
+            const emailMessage = document.getElementById('emailVerificationMessage');
+            if (emailMessage) {
+                emailMessage.style.display = 'flex';
+                emailMessage.classList.add('show');
+            }
+        }
+
+        // CAPTCHA initialization
+        function onRecaptchaLoad() {
+            console.log('reCAPTCHA loaded');
+        }
+
+        // Form validation functions
+        function isValidUsername(username) {
+            if (!username || username.trim() === '') return false;
+            const regex = /^[a-zA-Z0-9_]{3,20}$/;
+            return regex.test(username);
+        }
+
+        function isValidEmail(email) {
+            if (!email || email.trim() === '') return false;
+            const regex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+            return regex.test(email);
+        }
+
+        function isValidPassword(password) {
+            if (!password || password.length < 8) return false;
+            return /[A-Za-z]/.test(password) && /\d/.test(password);
+        }
+
+        function isValidPhone(phone) {
+            const regex = /^(03|05|07|08|09)\d{8}$/;
+            return phone != null && phone.trim() !== '' && regex.test(phone);
+        }
+
+        function isValidBirthDate(birthDate) {
+            if (!birthDate || birthDate.trim() === '') return true;
+
+            try {
+                const date = new Date(birthDate);
+                const today = new Date();
+                const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+                const maxDate = new Date(today.getFullYear() - 13, today.getMonth(), today.getDate());
+
+                return date <= today && date >= minDate && date <= maxDate;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Form submission handler
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+
+            const form = document.getElementById('registerForm');
+            if (!form) {
+                console.error('Form not found!');
+                return;
+            }
+
+            console.log('Form found, attaching event listener');
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('Form submitted');
+
+                const formData = new FormData(form);
+
+                // Get and validate all fields
+                const username = formData.get('username').trim();
+                const fullName = formData.get('fullName').trim();
+                const email = formData.get('email').trim();
+                const phoneNumber = formData.get('phoneNumber').trim();
+                const gender = formData.get('gender');
+                const birthDate = formData.get('birthDate') || null;
+                const password = formData.get('password');
+                const confirmPassword = formData.get('confirmPassword');
+                const termsAccepted = formData.get('termsAccepted') === 'on';
+
+                console.log('Form data collected:', {username, fullName, email, phoneNumber, gender});
+
+                // Validation
+                if (!isValidUsername(username)) {
+                    showMessage('Username must be 3-20 characters, alphanumeric and underscore only', 'error');
+                    return;
+                }
+
+                if (!fullName || fullName.length < 2 || fullName.length > 100) {
+                    showMessage('Full name must be between 2 and 100 characters', 'error');
+                    return;
+                }
+
+                if (!isValidEmail(email)) {
+                    showMessage('Invalid email format', 'error');
+                    return;
+                }
+
+                if (!isValidPassword(password)) {
+                    showMessage('Password must be at least 8 characters and contain both letters and numbers', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showMessage('Passwords do not match!', 'error');
+                    return;
+                }
+
+                if (!gender) {
+                    showMessage('Please select gender', 'error');
+                    return;
+                }
+
+                if (!isValidPhone(phoneNumber)) {
+                    showMessage('Invalid phone number. Must be 10 digits starting with 03, 05, 07, 08, or 09', 'error');
+                    return;
+                }
+
+                if (birthDate && !isValidBirthDate(birthDate)) {
+                    showMessage('Invalid birth date. You must be at least 13 years old', 'error');
+                    return;
+                }
+
+                if (!termsAccepted) {
+                    showMessage('Please agree to Terms of Service and Privacy Policy!', 'error');
+                    return;
+                }
+
+                // Get CAPTCHA response
+                let captchaResponse = 'test-captcha-token';
+                try {
+                    if (typeof grecaptcha !== 'undefined') {
+                        captchaResponse = grecaptcha.getResponse();
+                        if (!captchaResponse) {
+                            showMessage('Please verify CAPTCHA!', 'error');
+                            return;
+                        }
+                    } else {
+                        console.warn('reCAPTCHA not loaded, using test token');
+                    }
+                } catch (e) {
+                    console.warn('CAPTCHA check failed:', e);
+                }
+
+                console.log('All validations passed, sending request...');
+
+                // Prepare data
+                const registerData = {
+                    username: username,
+                    fullName: fullName,
+                    email: email,
+                    phoneNumber: phoneNumber,
+                    gender: gender,
+                    birthDate: birthDate,
+                    password: password,
+                    confirmPassword: confirmPassword,
+                    termsAccepted: termsAccepted,
+                    captchaResponse: captchaResponse
+                };
+
+                // Disable button
+                const submitBtn = document.getElementById('registerBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Registering...';
+
+                try {
+                    clearMessages();
+
+                    console.log('Sending POST request to /api/auth/register');
+                    const response = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(registerData)
+                    });
+
+                    console.log('Response received:', response.status);
+
+                    const result = await response.json();
+                    console.log('Response data:', result);
+
+                    if (response.ok) {
+                        console.log('Registration successful!');
+                        showEmailVerificationMessage();
+                        showMessage('Registration successful! Verification email has been sent to your email address.', 'success');
+
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 5000);
+                    } else {
+                        const errorMessage = result.error || 'Registration failed!';
+                        console.error('Registration error:', errorMessage);
+                        showMessage(errorMessage, 'error');
+
+                        // Reset CAPTCHA
+                        try {
+                            if (typeof grecaptcha !== 'undefined') {
+                                grecaptcha.reset();
+                            }
+                        } catch (e) {
+                            console.warn('Could not reset CAPTCHA:', e);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    showMessage('An error occurred during registration: ' + error.message, 'error');
+
+                    // Reset CAPTCHA
+                    try {
+                        if (typeof grecaptcha !== 'undefined') {
+                            grecaptcha.reset();
+                        }
+                    } catch (e) {
+                        console.warn('Could not reset CAPTCHA:', e);
+                    }
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Register';
+                }
+            });
+
+            console.log('Registration form ready');
+        });
     </script>
 </body>
 

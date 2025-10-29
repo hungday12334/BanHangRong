@@ -141,7 +141,16 @@ public class PageController {
      }
 
      @GetMapping("/verify-email-required")
-     public String verifyEmailRequired() {
+     public String verifyEmailRequired(Model model) {
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+         if (auth != null && auth.isAuthenticated()) {
+             Users user = usersRepository.findByUsername(auth.getName()).orElse(null);
+             if (user != null) {
+                 model.addAttribute("user", user);
+                 model.addAttribute("email", user.getEmail());
+                 model.addAttribute("username", user.getUsername());
+             }
+         }
          return "login/verify-email-required";
      }
  }

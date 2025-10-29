@@ -1,39 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat - BanHangRong</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Chat - Seller Dashboard</title>
+    <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
+    <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+    <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
+    <link rel="icon" type="image/png" href="/img/kua654ms.png" />
+    <link rel="shortcut icon" href="/img/kua654ms.png" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="theme-color" content="#0b1020" />
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
-        :root {
-            --primary-color: #0084ff;
-            --secondary-color: #e4e6eb;
-            --background-color: #f0f2f5;
-            --text-primary: #050505;
-            --text-secondary: #65676b;
-            --border-color: #e4e6eb;
-            --message-bg-sent: #0084ff;
-            --message-bg-received: #e4e6eb;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--background-color);
-            height: 100vh;
-            overflow: hidden;
-            margin: 0;
-        }
-
-        .chat-container {
+        /* Chat-specific styles */
+        .chat-page {
+            padding: 24px;
+            height: calc(100vh - 48px);
             display: flex;
-            height: 100vh;
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
+            flex-direction: column;
+        }
+
+        .chat-wrapper {
+            display: flex;
+            gap: 0;
+            flex: 1;
+            background: var(--bg-elev, #1a1d2e);
+            border-radius: 12px;
+            overflow: hidden;
             box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
 
@@ -54,30 +51,34 @@
         .connection-status.connected { background: #28a745; color: white; display: block; }
         .connection-status.disconnected { background: #dc3545; color: white; display: block; }
 
-        .sidebar {
+        .conversations-sidebar {
             width: 360px;
-            border-right: 1px solid var(--border-color);
+            border-right: 1px solid var(--border, #334155);
             display: flex;
             flex-direction: column;
-            background: white;
+            background: var(--bg, #0f1219);
         }
 
-        .sidebar-header {
+        .conversations-header {
             padding: 20px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border, #334155);
+            background: var(--bg-elev, #1a1d2e);
         }
 
-        .sidebar-header h2 {
+        .conversations-header h2 {
             font-size: 24px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text, #f1f5f9);
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .user-info {
             padding: 15px 20px;
-            background: var(--secondary-color);
-            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-elev, #1a1d2e);
+            border-bottom: 1px solid var(--border, #334155);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -119,15 +120,16 @@
             padding: 12px 20px;
             cursor: pointer;
             transition: background 0.2s;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid var(--border, #334155);
         }
 
         .conversation-item:hover {
-            background: var(--background-color);
+            background: var(--bg-elev, #1a1d2e);
         }
 
         .conversation-item.active {
-            background: var(--secondary-color);
+            background: var(--bg-elev, #1a1d2e);
+            border-left: 3px solid var(--accent, #3b82f6);
         }
 
         .conversation-info {
@@ -138,12 +140,12 @@
 
         .conversation-name {
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text, #f1f5f9);
             font-size: 15px;
         }
 
         .conversation-last-message {
-            color: var(--text-secondary);
+            color: var(--muted, #94a3b8);
             font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
@@ -151,7 +153,7 @@
         }
 
         .unread-badge {
-            background: var(--primary-color);
+            background: var(--accent, #3b82f6);
             color: white;
             border-radius: 12px;
             padding: 2px 8px;
@@ -163,15 +165,15 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: white;
+            background: var(--bg, #0f1219);
         }
 
         .chat-header {
             padding: 12px 20px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border, #334155);
             display: flex;
             align-items: center;
-            background: white;
+            background: var(--bg-elev, #1a1d2e);
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
@@ -179,7 +181,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            background: white;
+            background: var(--bg, #0f1219);
         }
 
         .message {
@@ -229,27 +231,27 @@
         }
 
         .message.received .message-bubble {
-            background: var(--message-bg-received);
-            color: var(--text-primary);
+            background: var(--bg-elev, #1a1d2e);
+            color: var(--text, #f1f5f9);
             border-bottom-left-radius: 4px;
         }
 
         .message.sent .message-bubble {
-            background: var(--message-bg-sent);
+            background: var(--accent, #3b82f6);
             color: white;
             border-bottom-right-radius: 4px;
         }
 
         .message-time {
             font-size: 11px;
-            color: var(--text-secondary);
+            color: var(--muted, #94a3b8);
             padding: 0 12px;
         }
 
         .chat-input-container {
             padding: 16px 20px;
-            border-top: 1px solid var(--border-color);
-            background: white;
+            border-top: 1px solid var(--border, #334155);
+            background: var(--bg-elev, #1a1d2e);
         }
 
         .chat-input-wrapper {
@@ -260,16 +262,21 @@
 
         .chat-input {
             flex: 1;
-            border: none;
-            background: var(--background-color);
+            border: 1px solid var(--border, #334155);
+            background: var(--bg, #0f1219);
+            color: var(--text, #f1f5f9);
             border-radius: 20px;
             padding: 10px 16px;
             font-size: 15px;
             outline: none;
         }
 
+        .chat-input:focus {
+            border-color: var(--accent, #3b82f6);
+        }
+
         .btn-send {
-            background: var(--primary-color);
+            background: var(--accent, #3b82f6);
             color: white;
             border: none;
             border-radius: 50%;
@@ -279,14 +286,15 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .btn-send:hover:not(:disabled) {
-            background: #006ee5;
+            background: #2563eb;
         }
 
         .btn-send:disabled {
-            background: var(--secondary-color);
+            background: var(--muted, #94a3b8);
             cursor: not-allowed;
         }
 
@@ -296,13 +304,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: var(--text-secondary);
+            color: var(--muted, #94a3b8);
         }
 
         .welcome-screen i {
             font-size: 80px;
             margin-bottom: 20px;
-            color: var(--primary-color);
+            color: var(--accent, #3b82f6);
         }
 
         .hidden {
@@ -345,72 +353,121 @@
         }
     </style>
 </head>
-<body>
-<div id="connectionStatus" class="connection-status"></div>
-
-<div class="chat-container">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h2><i class="fas fa-comments"></i> Messages</h2>
-        </div>
-        <div class="user-info">
-            <div class="avatar" id="currentUserAvatar">
-                <img th:if="${user != null && user.avatarUrl != null}"
-                     th:src="@{${user.avatarUrl}}" alt="Avatar" />
-                <span th:if="${user == null || user.avatarUrl == null}"
-                      th:text="${user != null ? (user.fullName != null ? #strings.substring(user.fullName, 0, 2) : #strings.substring(user.username, 0, 2)) : 'U'}">U</span>
+<body class="loading enhanced-dashboard" th:attr="data-user-type=${user != null ? user.userType : 'GUEST'}" data-app-root>
+<!-- GLOBAL APP LOADER -->
+<div id="appLoader" class="app-loader" role="status" aria-live="polite">
+    <div class="loader-core">
+        <div class="orbital" aria-hidden="true">
+            <div class="nucleus">
+                <img class="loader-logo" src="/img/kua654ms.png" alt="Logo" decoding="async" loading="eager" data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" />
             </div>
-            <div style="flex: 1;">
-                <div class="conversation-name" th:text="${user != null ? (user.fullName != null ? user.fullName : user.username) : 'User'}">User</div>
-                <div class="conversation-last-message" th:text="${user != null ? user.userType : 'Guest'}">Guest</div>
-            </div>
-            <a href="/" class="btn btn-sm btn-outline-secondary" title="Back to Home">
-                <i class="fas fa-home"></i>
-            </a>
-        </div>
-        <div class="conversations-list" id="conversationsList">
-            <!-- Conversations will be loaded here -->
-        </div>
-    </div>
-
-    <!-- Main Chat Area -->
-    <div class="chat-main">
-        <div id="welcomeScreen" class="welcome-screen">
-            <i class="fas fa-comment-dots"></i>
-            <h3>Welcome to Chat</h3>
-            <p>Select a conversation to start messaging</p>
-        </div>
-
-        <div id="chatArea" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
-            <div class="chat-header">
-                <div class="avatar" id="chatHeaderAvatar"></div>
-                <div style="margin-left: 12px;">
-                    <div class="conversation-name" id="chatHeaderName"></div>
-                    <div class="conversation-last-message">Active</div>
-                </div>
-            </div>
-
-            <div class="chat-messages" id="chatMessages">
-                <!-- Messages will be loaded here -->
-            </div>
-
-            <div class="chat-input-container">
-                <div class="chat-input-wrapper">
-                    <input type="text" class="chat-input" id="messageInput"
-                           placeholder="Type a message..."
-                           maxlength="5000"
-                           oninput="updateCharCount()"
-                           onkeypress="handleKeyPress(event)">
-                    <span id="charCount" style="color: #999; font-size: 12px; margin-right: 10px; display: none;">0/5000</span>
-                    <button class="btn-send" id="sendBtn" onclick="sendMessage()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
+            <div class="orbit orbit-a"><span></span></div>
+            <div class="orbit orbit-b"><span></span></div>
+            <div class="orbit orbit-c"><span></span></div>
+            <div class="rings">
+                <div class="ring r1"></div>
+                <div class="ring r2"></div>
+                <div class="ring r3"></div>
             </div>
         </div>
+        <div class="progress-wrap" aria-hidden="true">
+            <div class="progress-bar" data-loader-progress></div>
+        </div>
+        <div class="load-text" data-loader-text>Initializing...</div>
+        <div class="load-tip" data-loader-tip></div>
     </div>
 </div>
+
+<div id="connectionStatus" class="connection-status"></div>
+
+<!-- APP WRAPPER START -->
+<div class="page">
+    <!-- SIDEBAR START -->
+    <aside th:replace="fragments/sidebar :: sidebar"></aside>
+    <!-- SIDEBAR END -->
+
+    <!-- MAIN START -->
+    <main data-section="main">
+        <div class="container">
+            <div class="chat-page">
+                <div class="chat-wrapper">
+                    <!-- Conversations Sidebar -->
+                    <div class="conversations-sidebar">
+                        <div class="conversations-header">
+                            <h2><i class="ti ti-messages"></i> Messages</h2>
+                        </div>
+                        <div class="user-info">
+                            <div class="avatar" id="currentUserAvatar">
+                                <img th:if="${user != null && user.avatarUrl != null}"
+                                     th:src="@{${user.avatarUrl}}" alt="Avatar" />
+                                <span th:if="${user == null || user.avatarUrl == null}"
+                                      th:text="${user != null ? (user.fullName != null ? #strings.substring(user.fullName, 0, 2) : #strings.substring(user.username, 0, 2)) : 'U'}">U</span>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="conversation-name" th:text="${user != null ? (user.fullName != null ? user.fullName : user.username) : 'User'}">User</div>
+                                <div class="conversation-last-message" th:text="${user != null ? user.userType : 'Guest'}">Guest</div>
+                            </div>
+                        </div>
+                        <div class="conversations-list" id="conversationsList">
+                            <!-- Conversations will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Main Chat Area -->
+                    <div class="chat-main">
+                        <div id="welcomeScreen" class="welcome-screen">
+                            <i class="ti ti-message-circle"></i>
+                            <h3>Welcome to Chat</h3>
+                            <p>Select a conversation to start messaging</p>
+                        </div>
+
+                        <div id="chatArea" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
+                            <div class="chat-header">
+                                <div class="avatar" id="chatHeaderAvatar"></div>
+                                <div style="margin-left: 12px;">
+                                    <div class="conversation-name" id="chatHeaderName"></div>
+                                    <div class="conversation-last-message">Active</div>
+                                </div>
+                            </div>
+
+                            <div class="chat-messages" id="chatMessages">
+                                <!-- Messages will be loaded here -->
+                            </div>
+
+                            <div class="chat-input-container">
+                                <div class="chat-input-wrapper">
+                                    <input type="text" class="chat-input" id="messageInput"
+                                           placeholder="Type a message..."
+                                           maxlength="5000"
+                                           oninput="updateCharCount()"
+                                           onkeypress="handleKeyPress(event)">
+                                    <span id="charCount" style="color: #999; font-size: 12px; margin-right: 10px; display: none;">0/5000</span>
+                                    <button class="btn-send" id="sendBtn" onclick="sendMessage()">
+                                        <i class="ti ti-send"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- MAIN END -->
+</div>
+<!-- APP WRAPPER END -->
+
+<!-- MODAL LAYER START -->
+<div id="modalOverlay" class="modal-overlay" hidden data-modal-overlay></div>
+<section th:replace="fragments/modals :: modals"></section>
+<!-- MODAL LAYER END -->
+
+<!-- TOAST CONTAINER START -->
+<div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true" data-block="toast-root"></div>
+<!-- TOAST CONTAINER END -->
+
+<!-- SCRIPTS START -->
+<section th:replace="fragments/scripts :: scripts"></section>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
