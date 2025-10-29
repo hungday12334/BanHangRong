@@ -26,27 +26,36 @@ public class BecomeSellerController {
      */
     @GetMapping("/become-seller")
     public String becomeSellerPage(Model model, HttpSession session) {
+        System.out.println("=== BECOME SELLER PAGE LOADING ===");
+        
         // Lấy thông tin user hiện tại
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            System.out.println("❌ User not authenticated");
             return "redirect:/login?error=Please login first";
         }
 
         String username = auth.getName();
+        System.out.println("✅ Username: " + username);
+        
         Optional<Users> userOpt = usersRepository.findByUsername(username);
         
         if (userOpt.isEmpty()) {
+            System.out.println("❌ User not found in database");
             return "redirect:/login?error=User not found";
         }
 
         Users user = userOpt.get();
+        System.out.println("✅ User found: " + user.getUsername() + ", Type: " + user.getUserType());
         
         // Kiểm tra nếu đã là seller rồi
         if ("SELLER".equalsIgnoreCase(user.getUserType())) {
+            System.out.println("⚠️ User is already a seller, redirecting to seller dashboard");
             return "redirect:/seller/dashboard";
         }
 
         model.addAttribute("user", user);
+        System.out.println("✅ Returning become-seller view");
         return "customer/become-seller";
     }
 
