@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <!-- HEAD START -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản lý Voucher - Seller Dashboard</title>
+  <title>Voucher Management - Seller Dashboard</title>
   <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
   <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
   <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
@@ -509,7 +509,7 @@
       <div class="progress-wrap" aria-hidden="true">
         <div class="progress-bar" data-loader-progress></div>
       </div>
-      <div class="load-text" data-loader-text>Đang khởi tạo...</div>
+      <div class="load-text" data-loader-text>Initializing...</div>
       <div class="load-tip" data-loader-tip></div>
     </div>
   </div>
@@ -539,29 +539,29 @@
           <!-- Header -->
           <div class="voucher-header">
             <h1 class="section-title">
-              <i class="ti ti-ticket"></i> Quản lý Voucher
+              <i class="ti ti-ticket"></i> Voucher Management
             </h1>
             <a href="/seller/dashboard" class="btn btn-secondary">
-              <i class="ti ti-arrow-left"></i> Quay lại Dashboard
+              <i class="ti ti-arrow-left"></i> Back to Dashboard
             </a>
           </div>
 
           <!-- Statistics Cards -->
           <div class="stats-grid">
             <div class="stat-card blue" onclick="filterVouchersByStatus('all')">
-              <div class="stat-card-label">Tổng Voucher</div>
+              <div class="stat-card-label">Total Vouchers</div>
               <div class="stat-card-value" id="totalVouchers">0</div>
             </div>
             <div class="stat-card green" onclick="filterVouchersByStatus('active')">
-              <div class="stat-card-label">Đang hoạt động</div>
+              <div class="stat-card-label">Active</div>
               <div class="stat-card-value" id="activeVouchers">0</div>
             </div>
             <div class="stat-card yellow" onclick="filterVouchersByStatus('inactive')">
-              <div class="stat-card-label">Tạm dừng</div>
+              <div class="stat-card-label">Paused</div>
               <div class="stat-card-value" id="inactiveVouchers">0</div>
             </div>
             <div class="stat-card red" onclick="filterVouchersByStatus('expired')">
-              <div class="stat-card-label">Hết hạn</div>
+              <div class="stat-card-label">Expired</div>
               <div class="stat-card-value" id="expiredVouchers">0</div>
             </div>
           </div>
@@ -569,14 +569,14 @@
           <!-- Product Selector -->
           <div class="product-selector-section">
             <h3>
-              <i class="ti ti-package"></i> Chọn sản phẩm để quản lý Voucher
+              <i class="ti ti-package"></i> Select Product to Manage Vouchers
             </h3>
             <div class="product-search-wrapper">
               <input
                 type="text"
                 id="productSearchInput"
                 class="product-search-input"
-                placeholder="Nhập tên sản phẩm hoặc Product ID..."
+                placeholder="Enter product name or Product ID..."
                 onkeyup="searchProducts()"
               />
               <div id="productSearchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev); border-radius: 8px; margin-top: 4px; max-height: 300px; overflow-y: auto; display: none; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
@@ -584,14 +584,14 @@
 
             <div class="selected-product-display" id="selectedProductDisplay">
               <div class="selected-product-info">
-                <div class="selected-product-name" id="selectedProductName">Chưa chọn sản phẩm</div>
+                <div class="selected-product-name" id="selectedProductName">No product selected</div>
                 <div class="selected-product-meta">
                   Product ID: <span id="selectedProductId">-</span> |
-                  Giá: <span id="selectedProductPrice">-</span>
+                  Price: <span id="selectedProductPrice">-</span>
                 </div>
               </div>
               <button class="btn btn-secondary" onclick="clearProductSelection()">
-                <i class="ti ti-x"></i> Bỏ chọn
+                <i class="ti ti-x"></i> Clear
               </button>
             </div>
           </div>
@@ -603,21 +603,21 @@
           <div class="voucher-list-section">
             <div class="voucher-toolbar">
               <button class="btn btn-primary" onclick="openVoucherModal()">
-                <i class="ti ti-plus"></i> Tạo Voucher mới
+                <i class="ti ti-plus"></i> Create New Voucher
               </button>
 
               <div class="filter-group">
                 <button class="filter-btn active" data-status="all" onclick="filterVouchersByStatus('all')">
-                  Tất cả
+                  All
                 </button>
                 <button class="filter-btn" data-status="active" onclick="filterVouchersByStatus('active')">
-                  Hoạt động
+                  Active
                 </button>
                 <button class="filter-btn" data-status="inactive" onclick="filterVouchersByStatus('inactive')">
-                  Tạm dừng
+                  Paused
                 </button>
                 <button class="filter-btn" data-status="expired" onclick="filterVouchersByStatus('expired')">
-                  Hết hạn
+                  Expired
                 </button>
               </div>
             </div>
@@ -625,8 +625,8 @@
             <div id="voucherListContent">
               <div class="empty-state">
                 <i class="ti ti-ticket-off"></i>
-                <h3>Chọn sản phẩm để xem voucher</h3>
-                <p>Vui lòng chọn một sản phẩm từ danh sách để quản lý voucher</p>
+                <h3>Select a product to view vouchers</h3>
+                <p>Please select a product from the list to manage vouchers</p>
               </div>
             </div>
           </div>
@@ -643,7 +643,7 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 class="modal-title" id="modalTitle">
-          <i class="ti ti-ticket"></i> Tạo Voucher mới
+          <i class="ti ti-ticket"></i> Create New Voucher
         </h3>
         <button class="btn-action" onclick="closeVoucherModal()">
           <i class="ti ti-x"></i>
@@ -654,31 +654,31 @@
           <input type="hidden" id="voucherId" name="voucherId">
 
           <div class="form-group">
-            <label for="voucherCode">Mã Voucher <span style="color: #ef4444;">*</span></label>
+            <label for="voucherCode">Voucher Code <span style="color: #ef4444;">*</span></label>
             <input
               type="text"
               id="voucherCode"
               name="code"
               class="form-control"
-              placeholder="VD: GIAM20K, SUMMER2024"
+              placeholder="E.g: SAVE20K, SUMMER2024"
               required
               maxlength="64"
             />
-            <div class="form-text">Mã voucher phải là duy nhất cho mỗi sản phẩm</div>
+            <div class="form-text">Voucher code must be unique for each product</div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="discountType">Loại giảm giá <span style="color: #ef4444;">*</span></label>
+              <label for="discountType">Discount Type <span style="color: #ef4444;">*</span></label>
               <select id="discountType" name="discountType" class="form-control" required onchange="updateDiscountLabel()">
-                <option value="PERCENT">Phần trăm (%)</option>
-                <option value="AMOUNT">Số tiền cố định (VNĐ)</option>
+                <option value="PERCENT">Percentage (%)</option>
+                <option value="AMOUNT">Fixed Amount (VND)</option>
               </select>
             </div>
 
             <div class="form-group">
               <label for="discountValue">
-                <span id="discountValueLabel">Giá trị giảm (%)</span>
+                <span id="discountValueLabel">Discount Value (%)</span>
                 <span style="color: #ef4444;">*</span>
               </label>
               <input
@@ -686,7 +686,7 @@
                 id="discountValue"
                 name="discountValue"
                 class="form-control"
-                placeholder="VD: 10"
+                placeholder="E.g: 10"
                 required
                 min="0"
                 step="0.01"
@@ -695,22 +695,22 @@
           </div>
 
           <div class="form-group">
-            <label for="minOrder">Giá trị đơn hàng tối thiểu (VNĐ)</label>
+            <label for="minOrder">Minimum Order Value (VND)</label>
             <input
               type="number"
               id="minOrder"
               name="minOrder"
               class="form-control"
-              placeholder="Để trống nếu không giới hạn"
+              placeholder="Leave blank if no limit"
               min="0"
               step="1000"
             />
-            <div class="form-text">Đơn hàng phải đạt giá trị này mới áp dụng được voucher</div>
+            <div class="form-text">Order must meet this value to apply voucher</div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="startAt">Ngày bắt đầu</label>
+              <label for="startAt">Start Date</label>
               <input
                 type="datetime-local"
                 id="startAt"
@@ -720,7 +720,7 @@
             </div>
 
             <div class="form-group">
-              <label for="endAt">Ngày kết thúc</label>
+              <label for="endAt">End Date</label>
               <input
                 type="datetime-local"
                 id="endAt"
@@ -732,45 +732,45 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="maxUses">Số lần sử dụng tối đa</label>
+              <label for="maxUses">Maximum Total Uses</label>
               <input
                 type="number"
                 id="maxUses"
                 name="maxUses"
                 class="form-control"
-                placeholder="Không giới hạn"
+                placeholder="Unlimited"
                 min="1"
               />
             </div>
 
             <div class="form-group">
-              <label for="maxUsesPerUser">Giới hạn/người dùng</label>
+              <label for="maxUsesPerUser">Limit per User</label>
               <input
                 type="number"
                 id="maxUsesPerUser"
                 name="maxUsesPerUser"
                 class="form-control"
-                placeholder="Không giới hạn"
+                placeholder="Unlimited"
                 min="1"
               />
             </div>
           </div>
 
           <div class="form-group">
-            <label for="status">Trạng thái</label>
+            <label for="status">Status</label>
             <select id="status" name="status" class="form-control">
-              <option value="active">Hoạt động</option>
-              <option value="inactive">Tạm dừng</option>
+              <option value="active">Active</option>
+              <option value="inactive">Paused</option>
             </select>
           </div>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeVoucherModal()">
-            <i class="ti ti-x"></i> Hủy
+            <i class="ti ti-x"></i> Cancel
           </button>
           <button type="submit" class="btn btn-primary">
-            <i class="ti ti-check"></i> Lưu Voucher
+            <i class="ti ti-check"></i> Save Voucher
           </button>
         </div>
       </form>
@@ -782,7 +782,7 @@
     <div class="modal-dialog" style="max-width: 800px;">
       <div class="modal-header">
         <h3 class="modal-title">
-          <i class="ti ti-history"></i> Lịch sử sử dụng Voucher
+          <i class="ti ti-history"></i> Voucher Usage History
         </h3>
         <button class="btn-action" onclick="closeRedemptionsModal()">
           <i class="ti ti-x"></i>
@@ -791,7 +791,7 @@
       <div class="modal-body" id="redemptionsContent">
         <div class="empty-state">
           <i class="ti ti-loader"></i>
-          <p>Đang tải...</p>
+          <p>Loading...</p>
         </div>
       </div>
     </div>
@@ -852,7 +852,7 @@
       );
 
       if (filtered.length === 0) {
-        resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--muted);">Không tìm thấy sản phẩm</div>';
+        resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--muted);">No products found</div>';
         resultsDiv.style.display = 'block';
         return;
       }
@@ -893,8 +893,8 @@
       document.getElementById('voucherListContent').innerHTML = `
         <div class="empty-state">
           <i class="ti ti-ticket-off"></i>
-          <h3>Chọn sản phẩm để xem voucher</h3>
-          <p>Vui lòng chọn một sản phẩm từ danh sách để quản lý voucher</p>
+          <h3>Select a product to view vouchers</h3>
+          <p>Please select a product from the list to manage vouchers</p>
         </div>
       `;
     }
@@ -902,7 +902,7 @@
     // Voucher CRUD operations
     async function loadVouchers() {
       if (!selectedProductId) {
-        showAlert('Vui lòng chọn sản phẩm trước', 'error');
+        showAlert('Please select a product first', 'error');
         return;
       }
 
@@ -927,7 +927,7 @@
         updateStatistics();
       } catch (error) {
         console.error('Error loading vouchers:', error);
-        showAlert('Không thể tải danh sách voucher', 'error');
+        showAlert('Failed to load voucher list', 'error');
       } finally {
         hideLoading();
       }
@@ -941,10 +941,10 @@
         listDiv.innerHTML = `
           <div class="empty-state">
             <i class="ti ti-ticket-off"></i>
-            <h3>Chưa có voucher nào</h3>
-            <p>Tạo voucher đầu tiên cho sản phẩm này</p>
+            <h3>No vouchers yet</h3>
+            <p>Create your first voucher for this product</p>
             <button class="btn btn-primary" onclick="openVoucherModal()">
-              <i class="ti ti-plus"></i> Tạo Voucher
+              <i class="ti ti-plus"></i> Create Voucher
             </button>
           </div>
         `;
@@ -955,13 +955,13 @@
         <table class="voucher-table">
           <thead>
             <tr>
-              <th>Mã Voucher</th>
-              <th>Loại</th>
-              <th>Giá trị</th>
-              <th>Đã dùng</th>
-              <th>Thời hạn</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
+              <th>Voucher Code</th>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Used</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -974,26 +974,26 @@
 
     function renderVoucherRow(voucher) {
       const typeClass = voucher.discountType === 'PERCENT' ? 'voucher-type-percent' : 'voucher-type-amount';
-      const typeLabel = voucher.discountType === 'PERCENT' ? 'Phần trăm' : 'Số tiền';
+      const typeLabel = voucher.discountType === 'PERCENT' ? 'Percentage' : 'Amount';
       const discountDisplay = voucher.discountType === 'PERCENT'
         ? `${voucher.discountValue}%`
         : formatCurrency(voucher.discountValue);
 
       const statusClass = `status-${voucher.status}`;
       const statusLabel = {
-        'active': 'Hoạt động',
-        'inactive': 'Tạm dừng',
-        'expired': 'Hết hạn'
+        'active': 'Active',
+        'inactive': 'Paused',
+        'expired': 'Expired'
       }[voucher.status] || voucher.status;
 
-      const startDate = voucher.startAt ? new Date(voucher.startAt).toLocaleDateString('vi-VN') : '-';
-      const endDate = voucher.endAt ? new Date(voucher.endAt).toLocaleDateString('vi-VN') : '-';
+      const startDate = voucher.startAt ? new Date(voucher.startAt).toLocaleDateString('en-US') : '-';
+      const endDate = voucher.endAt ? new Date(voucher.endAt).toLocaleDateString('en-US') : '-';
 
       return `
         <tr>
           <td>
             <div class="voucher-code">${voucher.code}</div>
-            ${voucher.minOrder ? `<div class="form-text">Đơn tối thiểu: ${formatCurrency(voucher.minOrder)}</div>` : ''}
+            ${voucher.minOrder ? `<div class="form-text">Min order: ${formatCurrency(voucher.minOrder)}</div>` : ''}
           </td>
           <td>
             <span class="voucher-type-badge ${typeClass}">${typeLabel}</span>
@@ -1001,7 +1001,7 @@
           <td><strong>${discountDisplay}</strong></td>
           <td>
             <div>${voucher.usedCount || 0} / ${voucher.maxUses || '∞'}</div>
-            ${voucher.maxUsesPerUser ? `<div class="form-text">Giới hạn: ${voucher.maxUsesPerUser}/người</div>` : ''}
+            ${voucher.maxUsesPerUser ? `<div class="form-text">Limit: ${voucher.maxUsesPerUser}/user</div>` : ''}
           </td>
           <td>
             <div>${startDate}</div>
@@ -1012,13 +1012,13 @@
           </td>
           <td>
             <div class="action-buttons">
-              <button class="btn-action" onclick="editVoucher(${voucher.voucherId})" title="Chỉnh sửa">
+              <button class="btn-action" onclick="editVoucher(${voucher.voucherId})" title="Edit">
                 <i class="ti ti-edit"></i>
               </button>
-              <button class="btn-action" onclick="viewRedemptions(${voucher.voucherId})" title="Lịch sử sử dụng">
+              <button class="btn-action" onclick="viewRedemptions(${voucher.voucherId})" title="Usage history">
                 <i class="ti ti-history"></i>
               </button>
-              <button class="btn-action btn-delete" onclick="deleteVoucher(${voucher.voucherId})" title="Xóa">
+              <button class="btn-action btn-delete" onclick="deleteVoucher(${voucher.voucherId})" title="Delete">
                 <i class="ti ti-trash"></i>
               </button>
             </div>
@@ -1043,11 +1043,11 @@
       return `
         <div class="pagination-wrapper">
           <button class="pagination-btn" ${currentPage === 0 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
-            <i class="ti ti-chevron-left"></i> Trước
+            <i class="ti ti-chevron-left"></i> Previous
           </button>
           ${pages.join('')}
           <button class="pagination-btn" ${currentPage >= data.totalPages - 1 ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
-            Sau <i class="ti ti-chevron-right"></i>
+            Next <i class="ti ti-chevron-right"></i>
           </button>
         </div>
       `;
@@ -1102,7 +1102,7 @@
     // Modal functions
     function openVoucherModal(voucherId = null) {
       if (!selectedProductId) {
-        showAlert('Vui lòng chọn sản phẩm trước khi tạo voucher', 'error');
+        showAlert('Please select a product before creating a voucher', 'error');
         return;
       }
 
@@ -1111,7 +1111,7 @@
 
       form.reset();
       document.getElementById('voucherId').value = '';
-      document.getElementById('modalTitle').innerHTML = '<i class="ti ti-ticket"></i> Tạo Voucher mới';
+      document.getElementById('modalTitle').innerHTML = '<i class="ti ti-ticket"></i> Create New Voucher';
 
       modal.classList.add('active');
     }
@@ -1141,13 +1141,13 @@
           document.getElementById('endAt').value = formatDateTimeLocal(voucher.endAt);
         }
 
-        document.getElementById('modalTitle').innerHTML = '<i class="ti ti-edit"></i> Chỉnh sửa Voucher';
+        document.getElementById('modalTitle').innerHTML = '<i class="ti ti-edit"></i> Edit Voucher';
         document.getElementById('voucherModal').classList.add('active');
 
         updateDiscountLabel();
       } catch (error) {
         console.error('Error loading voucher:', error);
-        showAlert('Không thể tải thông tin voucher', 'error');
+        showAlert('Failed to load voucher information', 'error');
       } finally {
         hideLoading();
       }
@@ -1161,7 +1161,7 @@
       event.preventDefault();
 
       if (!selectedProductId) {
-        showAlert('Vui lòng chọn sản phẩm', 'error');
+        showAlert('Please select a product', 'error');
         return;
       }
 
@@ -1198,19 +1198,19 @@
           throw new Error(error);
         }
 
-        showAlert('Lưu voucher thành công!', 'success');
+        showAlert('Voucher saved successfully!', 'success');
         closeVoucherModal();
         loadVouchers();
       } catch (error) {
         console.error('Error saving voucher:', error);
-        showAlert(error.message || 'Không thể lưu voucher', 'error');
+        showAlert(error.message || 'Failed to save voucher', 'error');
       } finally {
         hideLoading();
       }
     }
 
     async function deleteVoucher(voucherId) {
-      if (!confirm('Bạn có chắc chắn muốn xóa voucher này?')) {
+      if (!confirm('Are you sure you want to delete this voucher?')) {
         return;
       }
 
@@ -1223,11 +1223,11 @@
 
         if (!response.ok) throw new Error('Failed to delete voucher');
 
-        showAlert('Xóa voucher thành công!', 'success');
+        showAlert('Voucher deleted successfully!', 'success');
         loadVouchers();
       } catch (error) {
         console.error('Error deleting voucher:', error);
-        showAlert('Không thể xóa voucher', 'error');
+        showAlert('Failed to delete voucher', 'error');
       } finally {
         hideLoading();
       }
@@ -1240,7 +1240,7 @@
       content.innerHTML = `
         <div class="empty-state">
           <i class="ti ti-loader"></i>
-          <p>Đang tải...</p>
+          <p>Loading...</p>
         </div>
       `;
 
@@ -1256,8 +1256,8 @@
           content.innerHTML = `
             <div class="empty-state">
               <i class="ti ti-ticket-off"></i>
-              <h3>Chưa có lượt sử dụng nào</h3>
-              <p>Voucher này chưa được sử dụng</p>
+              <h3>No usage yet</h3>
+              <p>This voucher has not been used</p>
             </div>
           `;
           return;
@@ -1267,11 +1267,11 @@
           <table class="voucher-table">
             <thead>
               <tr>
-                <th>Mã đổi</th>
-                <th>Đơn hàng</th>
-                <th>Người dùng</th>
-                <th>Giảm giá</th>
-                <th>Ngày sử dụng</th>
+                <th>Redeem ID</th>
+                <th>Order</th>
+                <th>User</th>
+                <th>Discount</th>
+                <th>Date Used</th>
               </tr>
             </thead>
             <tbody>
@@ -1281,7 +1281,7 @@
                   <td>${r.orderId ? `#${r.orderId}` : '-'}</td>
                   <td>${r.userId ? `User #${r.userId}` : '-'}</td>
                   <td><strong>${formatCurrency(r.discountAmount || 0)}</strong></td>
-                  <td>${new Date(r.createdAt).toLocaleString('vi-VN')}</td>
+                  <td>${new Date(r.createdAt).toLocaleString('en-US')}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -1292,8 +1292,8 @@
         content.innerHTML = `
           <div class="empty-state">
             <i class="ti ti-alert-circle"></i>
-            <h3>Lỗi</h3>
-            <p>Không thể tải lịch sử sử dụng</p>
+            <h3>Error</h3>
+            <p>Failed to load usage history</p>
           </div>
         `;
       }
@@ -1309,10 +1309,10 @@
       const label = document.getElementById('discountValueLabel');
 
       if (type === 'PERCENT') {
-        label.textContent = 'Giá trị giảm (%)';
+        label.textContent = 'Discount Value (%)';
         document.getElementById('discountValue').setAttribute('max', '100');
       } else {
-        label.textContent = 'Giá trị giảm (VNĐ)';
+        label.textContent = 'Discount Value (VND)';
         document.getElementById('discountValue').removeAttribute('max');
       }
     }

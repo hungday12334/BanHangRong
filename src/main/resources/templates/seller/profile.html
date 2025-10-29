@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bán Hàng Rong - Trang cá nhân</title>
+    <title>Ban Hang Rong - Profile</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
         /* CSS từ seller-dashboard.css đã được tích hợp */
@@ -1250,7 +1250,7 @@
         <div class="progress-wrap">
             <div class="progress-bar" data-loader-progress></div>
         </div>
-        <div class="load-text" data-loader-text>Đang khởi tạo...</div>
+        <div class="load-text" data-loader-text>Initializing...</div>
     </div>
 </div>
 
@@ -1267,38 +1267,38 @@
             </div>
         </div>
         <nav class="menu" data-block="nav">
-            <a href="/" class="item" data-nav="home" title="Trang chủ" aria-label="Trang chủ">
-                <i class="ti ti-home"></i><span class="lbl">Trang chủ</span>
+            <a href="/" class="item" data-nav="home" title="Home" aria-label="Home">
+                <i class="ti ti-home"></i><span class="lbl">Home</span>
             </a>
-            <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Quản lý" aria-label="Quản lý">
-                <i class="ti ti-dashboard"></i><span class="lbl">Quản lý</span>
+            <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Dashboard" aria-label="Dashboard">
+                <i class="ti ti-dashboard"></i><span class="lbl">Dashboard</span>
             </a>
-            <a href="/seller/profile" class="item active" title="Trang cá nhân">
+            <a href="/seller/profile" class="item active" title="Profile">
                 <i class="ti ti-user"></i>
-                <span class="lbl">Trang cá nhân</span>
+                <span class="lbl">Profile</span>
             </a>
-            <a href="#orders" class="item" data-nav="orders" title="Quản lý đơn hàng" aria-label="Quản lý đơn hàng">
-                <i class="ti ti-receipt"></i><span class="lbl">Quản lý đơn hàng</span>
+            <a href="#orders" class="item" data-nav="orders" title="Order Management" aria-label="Order Management">
+                <i class="ti ti-receipt"></i><span class="lbl">Order Management</span>
             </a>
-            <a href="#keys" class="item" data-nav="keys" title="Quản lý key" aria-label="Quản lý key">
-                <i class="ti ti-key"></i><span class="lbl">Quản lý key</span>
+            <a href="#keys" class="item" data-nav="keys" title="Key Management" aria-label="Key Management">
+                <i class="ti ti-key"></i><span class="lbl">Key Management</span>
             </a>
-            <a href="#profile-settings" class="item" data-nav="profile-settings" title="Quản lý profile" aria-label="Quản lý profile">
-                <i class="ti ti-settings"></i><span class="lbl">Quản lý profile</span>
+            <a href="#profile-settings" class="item" data-nav="profile-settings" title="Profile Settings" aria-label="Profile Settings">
+                <i class="ti ti-settings"></i><span class="lbl">Profile Settings</span>
             </a>
-            <a href="/seller/chat" class="item" data-nav="chat" title="Chat với khách hàng" aria-label="Chat với khách hàng">
+            <a href="/seller/chat" class="item" data-nav="chat" title="Chat with customers" aria-label="Chat with customers">
                 <i class="ti ti-messages"></i>
-                <span class="lbl">Chat hỗ trợ</span>
+                <span class="lbl">Support Chat</span>
                 <span class="badge bg-danger" id="unreadChatCount" style="display: none;">0</span>
             </a>
         </nav>
         <div class="sidebar-footer" data-block="logout">
             <div class="footer-actions">
-                <button id="themeToggle" class="theme-toggle" aria-label="Chuyển giao diện" title="Chuyển giao diện" type="button">
+                <button id="themeToggle" class="theme-toggle" aria-label="Switch theme" title="Switch theme" type="button">
                     <i class="ti ti-sun"></i>
                 </button>
-                <a href="/logout" class="logout-btn" title="Đăng xuất" aria-label="Đăng xuất">
-                    <i class="ti ti-logout"></i><span>Đăng xuất</span>
+                <a href="/logout" class="logout-btn" title="Logout" aria-label="Logout">
+                    <i class="ti ti-logout"></i><span>Logout</span>
                 </a>
             </div>
         </div>
@@ -1308,32 +1308,32 @@
     <main class="main-content">
         <div class="container">
             <section class="profile-section">
-                <h2 class="section-title">Trang cá nhân</h2>
+                <h2 class="section-title">Profile</h2>
 
                 <!-- Avatar Section -->
                 <div class="avatar-edit-wrap">
                     <div class="avatar">
-                        <!-- SỬA: Hiển thị avatar từ user data, nếu không có thì dùng default -->
+                        <!-- EDIT: Display avatar from user data, if not available use default -->
                         <img th:src="${user?.avatarUrl != null} ? ${user.avatarUrl} : '/img/avatar_default.jpg'"
                              src="/img/avatar_default.jpg"
                              alt="Avatar"
                              id="profileAvatar">
                     </div>
-                    <button class="avatar-edit-btn" id="btnEditAvatar" title="Đổi avatar">
+                    <button class="avatar-edit-btn" id="btnEditAvatar" title="Change avatar">
                         <i class="ti ti-camera"></i>
                     </button>
                 </div>
 
                 <div class="seller-info">
-                    <!-- SỬA: Hiển thị Seller ID thực tế -->
+                    <!-- EDIT: Display actual Seller ID -->
                     <div class="seller-id">Seller ID: <span id="sellerId" th:text="${user?.userId}">1</span></div>
                     <div class="seller-role">• SELLER</div>
                 </div>
 
                 <form class="profile-form" id="profileForm">
                     <div class="form-group">
-                        <label for="name">Tên:</label>
-                        <!-- SỬA: Hiển thị tên từ user data - KHÔNG THỂ SỬA -->
+                        <label for="name">Name:</label>
+                        <!-- EDIT: Display name from user data - CANNOT EDIT -->
                         <input type="text" id="name" name="username"
                                th:value="${user?.username}"
                                value="Minh" readonly disabled>
@@ -1341,33 +1341,33 @@
 
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <!-- SỬA: Hiển thị email từ user data - KHÔNG THỂ SỬA -->
+                        <!-- EDIT: Display email from user data - CANNOT EDIT -->
                         <input type="email" id="email" name="email"
                                th:value="${user?.email}"
                                value="seller@example.com" readonly disabled>
                     </div>
 
                     <div class="form-group">
-                        <label for="phone">Số điện thoại:</label>
-                        <!-- SỬA: Hiển thị số điện thoại từ user data -->
+                        <label for="phone">Phone Number:</label>
+                        <!-- EDIT: Display phone number from user data -->
                         <input type="tel" id="phone" name="phoneNumber"
                                th:value="${user?.phoneNumber}"
                                value="0900000000" readonly>
                     </div>
 
                     <div class="form-group">
-                        <label for="gender">Giới tính:</label>
-                        <!-- SỬA: Hiển thị giới tính từ user data -->
+                        <label for="gender">Gender:</label>
+                        <!-- EDIT: Display gender from user data -->
                         <select id="gender" name="gender" disabled>
-                            <option value="other" th:selected="${user?.gender == 'other'}">Khác</option>
-                            <option value="male" th:selected="${user?.gender == 'male'}">Nam</option>
-                            <option value="female" th:selected="${user?.gender == 'female'}">Nữ</option>
+                            <option value="other" th:selected="${user?.gender == 'other'}">Other</option>
+                            <option value="male" th:selected="${user?.gender == 'male'}">Male</option>
+                            <option value="female" th:selected="${user?.gender == 'female'}">Female</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="birthday">Ngày sinh:</label>
-                        <!-- SỬA: Hiển thị ngày sinh từ user data -->
+                        <label for="birthday">Birthday:</label>
+                        <!-- EDIT: Display birthday from user data -->
                         <input type="date" id="birthday" name="birthDate"
                                th:value="${user?.birthDate}"
                                value="" readonly>
@@ -1375,16 +1375,16 @@
 
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="aboutUsBtn">
-                            <i class="ti ti-info-circle"></i>Chúng tôi
+                            <i class="ti ti-info-circle"></i>About Us
                         </button>
 
-                        <!-- === THÊM NÚT ĐỔI MẬT KHẨU === -->
+                        <!-- === ADD CHANGE PASSWORD BUTTON === -->
                         <button type="button" class="btn btn-warning" id="changePasswordBtn">
-                            <i class="ti ti-lock"></i>Đổi mật khẩu
+                            <i class="ti ti-lock"></i>Change Password
                         </button>
 
                         <button type="button" class="btn btn-primary" id="editBtn">
-                            <i class="ti ti-edit"></i>Chính sửa
+                            <i class="ti ti-edit"></i>Edit
                         </button>
                     </div>
                 </form>
@@ -1393,11 +1393,11 @@
     </main>
 </div>
 
-<!-- === THÊM MODAL UPLOAD AVATAR - ĐẶT Ở CUỐI FILE TRƯỚC TOAST CONTAINER === -->
+<!-- === ADD AVATAR UPLOAD MODAL - PLACE AT END OF FILE BEFORE TOAST CONTAINER === -->
 <div id="avatarModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Đổi Avatar</h3>
+            <h3 class="modal-title">Change Avatar</h3>
             <button class="close-modal" id="closeModal">&times;</button>
         </div>
 
@@ -1410,29 +1410,29 @@
                 <input type="file" id="avatarFile" name="avatarFile" accept="image/*" class="file-input" required>
             </div>
 
-            <p class="upload-help">Chọn file ảnh (JPEG, PNG, GIF). Tối đa 5MB.</p>
+            <p class="upload-help">Select image file (JPEG, PNG, GIF). Maximum 5MB.</p>
 
             <div class="modal-actions">
-                <button type="button" class="btn btn-cancel" id="cancelUpload">Hủy</button>
+                <button type="button" class="btn btn-cancel" id="cancelUpload">Cancel</button>
                 <button type="submit" class="btn btn-upload">
-                    <i class="ti ti-upload"></i>Tải lên
+                    <i class="ti ti-upload"></i>Upload
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- === THÊM MODAL ĐỔI MẬT KHẨU === -->
+<!-- === ADD CHANGE PASSWORD MODAL === -->
 <div id="passwordModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Đổi Mật Khẩu</h3>
+            <h3 class="modal-title">Change Password</h3>
             <button class="close-modal" id="closePasswordModal">&times;</button>
         </div>
 
         <form id="passwordChangeForm">
             <div class="form-group password-input-group">
-                <label for="currentPassword">Mật khẩu hiện tại:</label>
+                <label for="currentPassword">Current Password:</label>
                 <div class="password-wrapper">
                     <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
                     <button type="button" class="password-toggle" data-target="currentPassword">
@@ -1442,7 +1442,7 @@
             </div>
 
             <div class="form-group password-input-group">
-                <label for="newPassword">Mật khẩu mới:</label>
+                <label for="newPassword">New Password:</label>
                 <div class="password-wrapper">
                     <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="6">
                     <button type="button" class="password-toggle" data-target="newPassword">
@@ -1452,7 +1452,7 @@
             </div>
 
             <div class="form-group password-input-group">
-                <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
+                <label for="confirmPassword">Confirm New Password:</label>
                 <div class="password-wrapper">
                     <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
                     <button type="button" class="password-toggle" data-target="confirmPassword">
@@ -1468,12 +1468,12 @@
                 <div class="strength-text" id="strengthText"></div>
             </div>
 
-            <p class="upload-help">Mật khẩu phải có ít nhất 6 ký tự</p>
+            <p class="upload-help">Password must be at least 6 characters</p>
 
             <div class="modal-actions">
-                <button type="button" class="btn btn-cancel" id="cancelPasswordChange">Hủy</button>
+                <button type="button" class="btn btn-cancel" id="cancelPasswordChange">Cancel</button>
                 <button type="submit" class="btn btn-warning">
-                    <i class="ti ti-key"></i>Đổi mật khẩu
+                    <i class="ti ti-key"></i>Change Password
                 </button>
             </div>
         </form>
@@ -1549,7 +1549,7 @@
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
-        toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><button class="close" aria-label="Đóng">✕</button>`;
+        toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><button class="close" aria-label="Close">✕</button>`;
         container.appendChild(toast);
 
         void toast.offsetWidth;
@@ -1625,11 +1625,11 @@
                 const isLight = document.documentElement.classList.contains('theme-light');
                 const nextTheme = isLight ? 'dark' : 'light';
                 applyTheme(nextTheme);
-                showToast(`Đã chuyển sang giao diện ${nextTheme === 'light' ? 'sáng' : 'tối'}`, 'info', { duration: 1500 });
+                showToast(`Switched to ${nextTheme === 'light' ? 'light' : 'dark'} theme`, 'info', { duration: 1500 });
             });
         }
 
-        // === SỬA LẠI PHẦN XỬ LÝ NÚT CHỈNH SỬA ===
+        // === EDIT: EDIT BUTTON HANDLING ===
         if (editBtn) {
             let isSaving = false; // Prevent multiple submissions
 
@@ -1642,35 +1642,35 @@
                 console.log("Is read only:", isReadOnly);
 
                 if (isReadOnly) {
-                    // === BẬT CHẾ ĐỘ CHỈNH SỬA - HIỆN NÚT CAMERA ===
+                    // === ENABLE EDIT MODE - SHOW CAMERA BUTTON ===
                     console.log("Enabling edit mode");
                     formInputs.forEach(input => {
-                        // KHÔNG CHO PHÉP SỬA TÊN VÀ EMAIL
+                        // DO NOT ALLOW EDITING NAME AND EMAIL
                         if (input.id === 'name' || input.id === 'email') {
                             input.readOnly = true;
                             input.disabled = true;
-                            return; // Bỏ qua, giữ nguyên trạng thái disabled
+                            return; // Skip, keep disabled state
                         }
                         input.readOnly = false;
                         input.disabled = false;
                     });
 
-                    // Hiện nút camera
+                    // Show camera button
                     if (avatarWrap) {
                         avatarWrap.classList.add('editing');
                         console.log("Added editing class to avatar wrap");
                     }
 
-                    editBtn.innerHTML = '<i class="ti ti-check"></i>Lưu thay đổi';
+                    editBtn.innerHTML = '<i class="ti ti-check"></i>Save Changes';
                     editBtn.classList.remove('btn-primary');
                     editBtn.classList.add('btn-success');
-                    showToast('Bạn đang ở chế độ chỉnh sửa', 'info', { duration: 2000 });
+                    showToast('You are in edit mode', 'info', { duration: 2000 });
                 } else {
-                    // === TẮT CHẾ ĐỘ CHỈNH SỬA VÀ GỬI DỮ LIỆU LÊN SERVER ===
+                    // === DISABLE EDIT MODE AND SEND DATA TO SERVER ===
 
                     // ===== PREVENT MULTIPLE RAPID CLICKS =====
                     if (isSaving) {
-                        showToast('Đang lưu, vui lòng đợi...', 'info');
+                        showToast('Saving, please wait...', 'info');
                         return;
                     }
 
@@ -1682,7 +1682,7 @@
                     editBtn.style.opacity = '0.6';
                     editBtn.style.cursor = 'not-allowed';
 
-                    // Gửi dữ liệu lên server
+                    // Send data to server
                     saveProfileData();
 
                     // Re-enable after 2 seconds (safety timeout)
@@ -1702,7 +1702,7 @@
         function saveProfileData() {
             console.log("Saving profile data to server...");
 
-            // Lấy dữ liệu từ form
+            // Get data from form
             const phone = document.getElementById('phone').value;
             const gender = document.getElementById('gender').value;
             const birthday = document.getElementById('birthday').value;
@@ -1711,20 +1711,20 @@
 
             // Validate: Phone number
             if (!phone || phone.trim() === '') {
-                showToast('Vui lòng nhập số điện thoại', 'error');
+                showToast('Please enter phone number', 'error');
                 return;
             }
 
             // Validate: Phone format (Vietnamese: 10-11 digits, starts with 0)
             const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
             if (!/^0\d{9,10}$/.test(cleanPhone)) {
-                showToast('Số điện thoại không hợp lệ! Phải là 10-11 số, bắt đầu bằng 0', 'error');
+                showToast('Invalid phone number! Must be 10-11 digits, starting with 0', 'error');
                 return;
             }
 
             // Validate: Gender
             if (!gender || (gender !== 'male' && gender !== 'female' && gender !== 'other')) {
-                showToast('Vui lòng chọn giới tính', 'error');
+                showToast('Please select gender', 'error');
                 return;
             }
 
@@ -1739,42 +1739,42 @@
 
                 // Check if date is in the future
                 if (birthDate > today) {
-                    showToast('Ngày sinh không được ở tương lai!', 'error');
+                    showToast('Birthday cannot be in the future!', 'error');
                     return;
                 }
 
                 // Check minimum age (13 years old)
                 if (birthDate > maxDate) {
-                    showToast('Bạn phải từ 13 tuổi trở lên!', 'error');
+                    showToast('You must be at least 13 years old!', 'error');
                     return;
                 }
 
                 // Check maximum age (120 years)
                 if (birthDate < minDate) {
-                    showToast('Ngày sinh không hợp lệ!', 'error');
+                    showToast('Invalid birthday!', 'error');
                     return;
                 }
             }
 
             const formData = new FormData();
-            // ⚠️ SECURITY: KHÔNG GỬI username và email - chúng bị khóa
+            // ⚠️ SECURITY: DO NOT SEND username and email - they are locked
             formData.append('phoneNumber', cleanPhone);
             formData.append('gender', gender);
             if (birthday && birthday.trim() !== '') {
                 formData.append('birthDate', birthday);
             }
 
-            // Hiển thị loading
-            showToast('Đang lưu thông tin...', 'info', { duration: 0 });
+            // Show loading
+            showToast('Saving information...', 'info', { duration: 0 });
 
-            // Gửi request đến server
+            // Send request to server
             fetch('/seller/profile/update', {
                 method: 'POST',
                 body: formData
             })
                 .then(response => {
                     if (response.redirected) {
-                        // Nếu server redirect, chuyển hướng trang
+                        // If server redirects, redirect page
                         window.location.href = response.url;
                         return null;
                     }
@@ -1784,34 +1784,34 @@
                     throw new Error('Save failed');
                 })
                 .then(data => {
-                    if (data === null) return; // Đã redirect
+                    if (data === null) return; // Already redirected
 
-                    // Đóng toast loading
+                    // Close loading toast
                     document.querySelectorAll('.toast').forEach(toast => toast.remove());
 
-                    // Khóa tất cả input và select
+                    // Lock all inputs and selects
                     formInputs.forEach(input => {
                         input.readOnly = true;
-                        // Đảm bảo name, email và gender luôn bị disabled
+                        // Ensure name, email and gender are always disabled
                         if (input.id === 'gender' || input.id === 'name' || input.id === 'email') {
                             input.disabled = true;
                         }
                     });
 
-                    // Ẩn nút camera
+                    // Hide camera button
                     if (avatarWrap) {
                         avatarWrap.classList.remove('editing');
                         console.log("Removed editing class from avatar wrap");
                     }
 
-                    // Đổi nút thành "Chỉnh sửa"
-                    editBtn.innerHTML = '<i class="ti ti-edit"></i>Chính sửa';
+                    // Change button to "Edit"
+                    editBtn.innerHTML = '<i class="ti ti-edit"></i>Edit';
                     editBtn.classList.remove('btn-success');
                     editBtn.classList.add('btn-primary');
 
-                    showToast('Cập nhật thông tin thành công!', 'success');
+                    showToast('Information updated successfully!', 'success');
 
-                    // Reload trang để cập nhật dữ liệu mới
+                    // Reload page to update new data
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
@@ -1820,12 +1820,12 @@
                 .catch(error => {
                     console.error('Error:', error);
                     document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                    showToast('Lỗi khi lưu thông tin. Vui lòng thử lại!', 'error');
+                    showToast('Error saving information. Please try again!', 'error');
 
-                    // Vẫn thoát chế độ chỉnh sửa dù có lỗi
+                    // Still exit edit mode even if there's an error
                     formInputs.forEach(input => {
                         input.readOnly = true;
-                        // Đảm bảo name, email và gender luôn bị disabled
+                        // Ensure name, email and gender are always disabled
                         if (input.id === 'gender' || input.id === 'name' || input.id === 'email') {
                             input.disabled = true;
                         }
@@ -1835,7 +1835,7 @@
                         avatarWrap.classList.remove('editing');
                     }
 
-                    editBtn.innerHTML = '<i class="ti ti-edit"></i>Chính sửa';
+                    editBtn.innerHTML = '<i class="ti ti-edit"></i>Edit';
                     editBtn.classList.remove('btn-success');
                     editBtn.classList.add('btn-primary');
                 });
@@ -1845,7 +1845,7 @@
         // About us button event
         if (aboutUsBtn) {
             aboutUsBtn.addEventListener('click', function() {
-                showToast('Thông tin về chúng tôi sẽ được hiển thị tại đây.', 'info');
+                showToast('About us information will be displayed here.', 'info');
             });
         }
 
@@ -1885,7 +1885,7 @@
             cancelUpload.addEventListener('click', closeAvatarModal);
         }
 
-        // Preview avatar khi chọn file với validation
+        // Preview avatar when selecting file with validation
         if (avatarFileInput) {
             avatarFileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -1898,7 +1898,7 @@
                 // Validate: File type
                 const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
                 if (!validTypes.includes(file.type)) {
-                    showToast('Chỉ được upload file ảnh (JPEG, PNG, GIF)', 'error');
+                    showToast('Only image files allowed (JPEG, PNG, GIF)', 'error');
                     this.value = ''; // Clear input
                     return;
                 }
@@ -1907,7 +1907,7 @@
                 const maxSize = 5 * 1024 * 1024; // 5MB
                 if (file.size > maxSize) {
                     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                    showToast(`File quá lớn (${sizeMB}MB). Tối đa 5MB`, 'error');
+                    showToast(`File too large (${sizeMB}MB). Maximum 5MB`, 'error');
                     this.value = ''; // Clear input
                     return;
                 }
@@ -1917,7 +1917,7 @@
                 const validExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
                 const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
                 if (!hasValidExtension) {
-                    showToast('File phải có đuôi .jpg, .jpeg, .png hoặc .gif', 'error');
+                    showToast('File must have .jpg, .jpeg, .png or .gif extension', 'error');
                     this.value = ''; // Clear input
                     return;
                 }
@@ -1930,13 +1930,13 @@
                     }
                 }
                 reader.onerror = function() {
-                    showToast('Lỗi khi đọc file', 'error');
+                    showToast('Error reading file', 'error');
                 };
                 reader.readAsDataURL(file);
             });
         }
 
-        // Xử lý submit form upload avatar
+        // Handle avatar upload form submit
         if (avatarUploadForm) {
             let isUploading = false; // Prevent multiple submissions
 
@@ -1946,7 +1946,7 @@
 
                 // ===== PREVENT MULTIPLE RAPID CLICKS =====
                 if (isUploading) {
-                    showToast('Đang tải lên, vui lòng đợi...', 'info');
+                    showToast('Uploading, please wait...', 'info');
                     return;
                 }
 
@@ -1954,14 +1954,14 @@
 
                 // ===== VALIDATION: Check if file selected =====
                 if (!file) {
-                    showToast('Vui lòng chọn file ảnh', 'error');
+                    showToast('Please select an image file', 'error');
                     return;
                 }
 
                 // ===== VALIDATION: Check file type =====
                 const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
                 if (!validTypes.includes(file.type)) {
-                    showToast('Chỉ được upload file ảnh (JPEG, PNG, GIF)', 'error');
+                    showToast('Only image files allowed (JPEG, PNG, GIF)', 'error');
                     return;
                 }
 
@@ -1969,7 +1969,7 @@
                 const maxSize = 5 * 1024 * 1024;
                 if (file.size > maxSize) {
                     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                    showToast(`Kích thước file quá lớn (${sizeMB}MB). Tối đa 5MB`, 'error');
+                    showToast(`File size too large (${sizeMB}MB). Maximum 5MB`, 'error');
                     return;
                 }
 
@@ -1978,7 +1978,7 @@
                 const validExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
                 const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
                 if (!hasValidExtension) {
-                    showToast('File phải có đuôi .jpg, .jpeg, .png hoặc .gif', 'error');
+                    showToast('File must have .jpg, .jpeg, .png or .gif extension', 'error');
                     return;
                 }
 
@@ -1996,10 +1996,10 @@
                     submitBtn.style.cursor = 'not-allowed';
                 }
 
-                // Hiển thị loading
-                showToast('Đang tải lên avatar...', 'info', { duration: 0 });
+                // Show loading
+                showToast('Uploading avatar...', 'info', { duration: 0 });
 
-                // Gửi request upload
+                // Send upload request
                 fetch('/seller/profile/upload-avatar', {
                     method: 'POST',
                     body: formData
@@ -2015,15 +2015,15 @@
                         throw new Error('Upload failed');
                     })
                     .then(data => {
-                        if (data === null) return; // Đã redirect
+                        if (data === null) return; // Already redirected
 
-                        // Đóng toast loading
+                        // Close loading toast
                         document.querySelectorAll('.toast').forEach(toast => toast.remove());
 
-                        showToast('Cập nhật avatar thành công!', 'success');
+                        showToast('Avatar updated successfully!', 'success');
                         closeAvatarModal();
 
-                        // Reload trang để cập nhật avatar mới
+                        // Reload page to update new avatar
                         setTimeout(() => {
                             window.location.reload();
                         }, 1000);
@@ -2031,7 +2031,7 @@
                     .catch(error => {
                         console.error('Error:', error);
                         document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                        showToast('Lỗi khi upload avatar. Vui lòng thử lại!', 'error');
+                        showToast('Error uploading avatar. Please try again!', 'error');
                     })
                     .finally(() => {
                         // Reset uploading flag
@@ -2187,7 +2187,7 @@
         });
     }
 
-    // === XỬ LÝ SUBMIT FORM ĐỔI MẬT KHẨU ===
+    // === HANDLE PASSWORD CHANGE FORM SUBMIT ===
     if (passwordChangeForm) {
         passwordChangeForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -2201,51 +2201,51 @@
 
             // Validate: Empty fields
             if (!currentPassword || !newPassword || !confirmPassword) {
-                showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                showToast('Please fill in all fields', 'error');
                 return;
             }
 
             // Validate: Password length minimum
             if (newPassword.length < 6) {
-                showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                showToast('New password must be at least 6 characters', 'error');
                 return;
             }
 
             // Validate: Password length maximum
             if (newPassword.length > 100) {
-                showToast('Mật khẩu không được vượt quá 100 ký tự', 'error');
+                showToast('Password must not exceed 100 characters', 'error');
                 return;
             }
 
             // Validate: Password confirmation match
             if (newPassword !== confirmPassword) {
-                showToast('Mật khẩu xác nhận không khớp', 'error');
+                showToast('Password confirmation does not match', 'error');
                 confirmPasswordInput.style.borderColor = 'var(--bad)';
                 return;
             }
 
             // Validate: New password different from current
             if (currentPassword === newPassword) {
-                showToast('Mật khẩu mới phải khác mật khẩu hiện tại', 'error');
+                showToast('New password must be different from current password', 'error');
                 return;
             }
 
-            // Gửi request đổi mật khẩu
+            // Send password change request
             changePassword(currentPassword, newPassword, confirmPassword);
         });
     }
 
-    // === HÀM GỬI REQUEST ĐỔI MẬT KHẨU ===
+    // === FUNCTION TO SEND PASSWORD CHANGE REQUEST ===
     function changePassword(currentPassword, newPassword, confirmPassword) {
         const formData = new FormData();
         formData.append('currentPassword', currentPassword);
         formData.append('newPassword', newPassword);
         formData.append('confirmPassword', confirmPassword);
 
-        // Hiển thị loading
-        showToast('Đang đổi mật khẩu...', 'info', { duration: 0 });
+        // Show loading
+        showToast('Changing password...', 'info', { duration: 0 });
 
-        // Gửi request đến server
+        // Send request to server
         fetch('/seller/profile/change-password', {
             method: 'POST',
             body: formData
@@ -2261,15 +2261,15 @@
                 throw new Error('Password change failed');
             })
             .then(data => {
-                if (data === null) return; // Đã redirect
+                if (data === null) return; // Already redirected
 
-                // Đóng toast loading
+                // Close loading toast
                 document.querySelectorAll('.toast').forEach(toast => toast.remove());
 
-                showToast('Đổi mật khẩu thành công!', 'success');
+                showToast('Password changed successfully!', 'success');
                 closePasswordModalFunc();
 
-                // Reload trang để hiển thị flash message
+                // Reload page to display flash message
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
@@ -2278,7 +2278,7 @@
             .catch(error => {
                 console.error('Error:', error);
                 document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                showToast('Lỗi khi đổi mật khẩu. Vui lòng thử lại!', 'error');
+                showToast('Error changing password. Please try again!', 'error');
             });
     }
 
