@@ -2,6 +2,7 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Notification;
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class NotificationController {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private ShoppingCartRepository shoppingCartRepository;
 
     /**
      * Trang danh sách thông báo
@@ -67,8 +71,12 @@ public class NotificationController {
         // Đếm số notification chưa đọc
         Long unreadCount = notificationService.countUnreadNotifications(currentUser.getUserId());
 
+        // Get cart count for header
+        Long cartCount = shoppingCartRepository.countByUserId(currentUser.getUserId());
+
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("cartCount", cartCount);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", notifications.getTotalPages());
         model.addAttribute("currentUser", currentUser);

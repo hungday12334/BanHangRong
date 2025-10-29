@@ -491,37 +491,65 @@
 	<div class="wrapper">
 		<!-- Header -->
 		<div class="topbar">
-			<a href="/" class="brand" style="text-decoration: none; color: inherit;">🛒 BanHangRong</a>
-			<div class="top-actions">
-				<a href="/customer/chat" class="support-link">💬 Hỗ trợ</a>
-				<a href="/cart" class="cart">
-					🛒
-					<span class="badge" th:if="${cartItemCount != null and cartItemCount > 0}"
-						th:text="${cartItemCount}"></span>
-				</a>
-				<div class="user-btn" onclick="toggleUserMenu()">
-					<span th:text="${currentUser.fullName}">User</span>
-					<span class="wallet-badge" th:text="${#numbers.formatDecimal(currentUser.balance, 0, 0)} + ' ₫'">0
-						₫</span>
-					<span>▼</span>
-				</div>
-				<div class="user-menu" id="userMenu">
-					<a href="/customer/dashboard" class="item">📊 Dashboard</a>
-					<a href="/customer/profile" class="item">👤 Hồ sơ</a>
-					<a href="/customer/notifications" class="item">🔔 Thông báo</a>
-					<a href="/logout" class="item">🚪 Đăng xuất</a>
-				</div>
-			</div>
-		</div>
-
-		<!-- Navigation -->
-		<div class="nav">
-			<a href="/customer/dashboard">📊 Dashboard</a>
-			<a href="/customer/orderhistory">📦 Đơn hàng</a>
-			<a href="/customer/reviews">⭐ Đánh giá</a>
-			<a href="/customer/notifications" class="active">🔔 Thông báo</a>
-			<a href="/customer/profile">👤 Hồ sơ</a>
+			<div class="brand">BanHangRong</div>
+			<nav class="nav" aria-label="Main">
+			<a href="/customer/dashboard">Home</a>
+			<a href="/categories">Category</a>
+			<a href="#">License Software</a>
+			<a href="#">Game Keys</a>
+			<a href="#">Voucher</a>
 			<a href="/customer/chat">💬 Chat</a>
+			<a href="#">Support</a>
+			</nav>
+			<div class="top-actions">
+				<a href="/customer/support" class="support-link">Support</a>
+				<div class="user" style="position:relative">
+					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+						<span th:text="${currentUser != null ? currentUser.username : 'User123456'}">User123456</span>
+						<span class="wallet-badge">
+							💰 <span th:text="${currentUser != null and currentUser.balance != null ? #numbers.formatDecimal(currentUser.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
+						</span>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round" />
+						</svg>
+					</button>
+					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+						<a class="item" th:href="@{'/customer/profile/' + ${currentUser.username}}" role="menuitem">My Account</a>
+						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+						<a class="item" href="/customer/chat" role="menuitem">💬 Chat</a>
+						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+							style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+								th:value="${_csrf.token}" />
+							<input type="hidden" name="amount" id="topupAmountInput" />
+							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+								(VNPay)</button>
+						</form>
+						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+						<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+							style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+							Become a Seller</a>
+						<a class="item" href="#" role="menuitem"
+							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+					</div>
+					<form id="logoutForm" method="post" action="/logout" style="display:none;">
+					</form>
+				</div>
+				<div class="search">
+					<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+						<input type="search" name="search" placeholder="search" aria-label="Search"
+							style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+						<button type="submit"
+							style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+					</form>
+				</div>
+				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+			</div>
 		</div>
 
 		<!-- Main Content -->
@@ -761,6 +789,34 @@
 					console.error('Error:', error);
 					alert('Có lỗi xảy ra, vui lòng thử lại');
 				});
+		}
+	</script>
+
+	<script>
+		// User menu toggle (from dashboard)
+		(function () {
+			const btn = document.getElementById('userMenuBtn');
+			const menu = document.getElementById('userDropdown');
+			function close() { if (menu) { menu.style.display = 'none'; btn && btn.setAttribute('aria-expanded', 'false'); } }
+			function toggle() { if (!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block' : 'none'; btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false'); }
+			if (btn) { btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); }); }
+			document.addEventListener('click', close);
+			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+		})();
+
+		// VNPay topup function (from dashboard)
+		function topupPrompt(e) {
+			e.preventDefault();
+			const v = prompt('Enter amount to top up (VND):', '200000');
+			if (!v) return false;
+			const clean = v.replace(/[^0-9]/g, '');
+			if (!clean) {
+				alert('Please enter a valid amount');
+				return false;
+			}
+			document.getElementById('topupAmountInput').value = clean;
+			e.target.submit();
+			return true;
 		}
 	</script>
 </body>
