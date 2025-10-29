@@ -14,6 +14,10 @@
       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI == '/' ? ' active' : ''}">
       <i class="ti ti-home"></i><span class="lbl">Home</span></a>
 
+    <a href="/customer/dashboard" class="item" data-nav="customer-dashboard" title="Customer Dashboard" aria-label="Switch to Customer Dashboard"
+      style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 8px; padding-bottom: 8px;">
+      <i class="ti ti-arrow-back"></i><span class="lbl">Customer View</span></a>
+
     <a href="/seller/dashboard" class="item" data-nav="dashboard" title="Dashboard" aria-label="Dashboard"
       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/seller/dashboard') ? ' active' : ''}">
       <i class="ti ti-dashboard"></i><span class="lbl">Dashboard</span></a>
