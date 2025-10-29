@@ -27,6 +27,9 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             countQuery = "SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
     Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId, @Param("status") String status, @Param("search") String search, org.springframework.data.domain.Pageable pageable);
     List<Products> findBySellerId(Long sellerId);
+    
+    // Find active products by seller ID (status = 'public')
+    List<Products> findBySellerIdAndStatus(Long sellerId, String status);
 
         // Find products by category regardless of status
         @Query("SELECT p FROM Products p WHERE EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
