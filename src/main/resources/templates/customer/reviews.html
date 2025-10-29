@@ -541,7 +541,9 @@
                             <div class="stars">
                                 <th:block th:if="${review.rating != null}">
                                     <span th:each="i : ${#numbers.sequence(1, review.rating)}">★</span>
-                                    <span th:each="i : ${#numbers.sequence(1, 5 - review.rating)}">☆</span>
+                                    <th:block th:if="${review.rating < 5}">
+                                        <span th:each="i : ${#numbers.sequence(1, 5 - review.rating)}">☆</span>
+                                    </th:block>
                                 </th:block>
                             </div>
                             <p class="comment" th:text="${review.comment}">Great product!</p>
