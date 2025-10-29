@@ -9,6 +9,7 @@ import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
 import banhangrong.su25.service.RatingCalculationService;
+import banhangrong.su25.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -44,6 +45,9 @@ public class RatingController {
     
     @Autowired
     private RatingCalculationService ratingCalculationService;
+    
+    @Autowired
+    private NotificationService notificationService;
 
     private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
 
@@ -159,6 +163,14 @@ public class RatingController {
             
             // Cập nhật rating trung bình của product
             ratingCalculationService.updateProductAverageRating(orderItem.getProductId());
+            
+            // Gửi thông báo đánh giá thành công
+            try {
+                String productName = product.getName() != null ? product.getName() : "sản phẩm";
+                notificationService.createReviewNotification(user.getUserId(), review.getReviewId(), productName);
+            } catch (Exception e) {
+                System.err.println("[Rating] Failed to send notification: " + e.getMessage());
+            }
             
             response.put("success", true);
             response.put("message", "Rating submitted successfully");

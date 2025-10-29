@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Thông Báo - Customer</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+	<style>
+		:root {
+			--bg: #f5f7fb;
+			--card: #ffffff;
+			--ink: #0f172a;
+			--muted: #6b7280;
+			--brand: #0ea5e9;
+			--chip: #e5e7eb;
+			--line: #eaeef4;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			color: var(--ink);
+			background: var(--bg);
+		}
+
+		.wrapper {
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.topbar {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			padding: 10px 16px;
+			border-bottom: 1px solid var(--line);
+			background: var(--card);
+			flex-wrap: nowrap;
+		}
+
+		.brand {
+			font-weight: 800;
+			letter-spacing: .2px;
+		}
+
+		.top-actions {
+			margin-left: auto;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			position: relative;
+		}
+
+		.support-link {
+			font-size: 14px;
+			color: var(--muted);
+			text-decoration: none;
+			padding: 6px 10px;
+			border-radius: 8px;
+			transition: all 0.2s;
+		}
+
+		.support-link:hover {
+			background: #f3f4f6;
+			color: #111827;
+		}
+
+		.user-btn {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			cursor: pointer;
+			color: #111827;
+			border: 1px solid var(--line);
+			padding: 6px 10px;
+			border-radius: 8px;
+			background: #fff;
+			white-space: nowrap;
+		}
+		
+		.user-btn .wallet-badge {
+			margin-left: 8px;
+			padding: 4px 8px;
+			background: #f0f9ff;
+			border: 1px solid #bae6fd;
+			border-radius: 6px;
+			font-weight: 600;
+			color: #0369a1;
+			font-size: 12px;
+		}
+		
+		@media (max-width: 768px) {
+			.user-btn .wallet-badge {
+				display: none;
+			}
+		}
+
+		.user-menu {
+			position: absolute;
+			right: 0;
+			top: 48px;
+			background: #fff;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+			width: 200px;
+			display: none;
+			z-index: 5
+		}
+
+		.user-menu .item {
+			display: block;
+			padding: 10px 12px;
+			color: #111827;
+			text-decoration: none
+		}
+
+		.user-menu .item:hover {
+			background: #f3f4f6
+		}
+
+		.cart {
+			position: relative;
+			width: 28px;
+			height: 28px;
+			display: grid;
+			place-items: center;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			text-decoration: none;
+			color: #111827;
+		}
+
+		.cart .badge {
+			position: absolute;
+			top: -6px;
+			right: -6px;
+			background: #ef4444;
+			color: #fff;
+			min-width: 18px;
+			height: 18px;
+			border-radius: 9px;
+			font-size: 11px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0 5px;
+		}
+
+		.nav {
+			display: flex;
+			gap: 16px;
+			padding: 12px 16px;
+			border-bottom: 1px solid var(--line);
+			background: var(--card);
+			overflow-x: auto;
+		}
+
+		.nav a {
+			text-decoration: none;
+			color: var(--muted);
+			font-size: 14px;
+			white-space: nowrap;
+			padding: 6px 12px;
+			border-radius: 8px;
+			transition: all 0.2s;
+		}
+
+		.nav a:hover,
+		.nav a.active {
+			background: #e0f2fe;
+			color: var(--brand);
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 20px;
+			flex: 1;
+		}
+
+		.page-header {
+			margin-bottom: 24px;
+		}
+
+		.page-title {
+			font-size: 28px;
+			font-weight: 700;
+			margin: 0 0 8px 0;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.unread-badge {
+			background: #ef4444;
+			color: #fff;
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 14px;
+			font-weight: 600;
+		}
+
+		.filters-section {
+			background: var(--card);
+			border-radius: 12px;
+			padding: 20px;
+			margin-bottom: 20px;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+
+		.filters-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		.filter-group {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.filter-group label {
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--ink);
+		}
+
+		.filter-group select,
+		.filter-group input {
+			padding: 10px 12px;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			font-size: 14px;
+			outline: none;
+			transition: border-color 0.2s;
+		}
+
+		.filter-group select:focus,
+		.filter-group input:focus {
+			border-color: var(--brand);
+		}
+
+		.filter-actions {
+			display: flex;
+			gap: 12px;
+			justify-content: flex-end;
+		}
+
+		.btn {
+			padding: 10px 20px;
+			border: none;
+			border-radius: 8px;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+			text-decoration: none;
+			display: inline-block;
+		}
+
+		.btn-primary {
+			background: var(--brand);
+			color: #fff;
+		}
+
+		.btn-primary:hover {
+			background: #0284c7;
+		}
+
+		.btn-secondary {
+			background: #f3f4f6;
+			color: var(--ink);
+		}
+
+		.btn-secondary:hover {
+			background: #e5e7eb;
+		}
+
+		.notifications-list {
+			background: var(--card);
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+
+		.notification-item {
+			padding: 20px;
+			border-bottom: 1px solid var(--line);
+			display: flex;
+			gap: 16px;
+			transition: background 0.2s;
+			position: relative;
+		}
+
+		.notification-item:last-child {
+			border-bottom: none;
+		}
+
+		.notification-item:hover {
+			background: #f9fafb;
+		}
+
+		.notification-item.unread {
+			background: #eff6ff;
+		}
+
+		.notification-item.unread::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 4px;
+			background: var(--brand);
+		}
+
+		.notification-icon {
+			width: 48px;
+			height: 48px;
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 24px;
+			flex-shrink: 0;
+		}
+
+		.notification-icon.order {
+			background: #dbeafe;
+			color: #1e40af;
+		}
+
+		.notification-icon.review {
+			background: #fef3c7;
+			color: #b45309;
+		}
+
+		.notification-icon.system {
+			background: #f3e8ff;
+			color: #7c3aed;
+		}
+
+		.notification-content {
+			flex: 1;
+		}
+
+		.notification-title {
+			font-size: 16px;
+			font-weight: 600;
+			margin: 0 0 8px 0;
+			color: var(--ink);
+		}
+
+		.notification-message {
+			font-size: 14px;
+			color: var(--muted);
+			margin: 0 0 8px 0;
+			line-height: 1.5;
+		}
+
+		.notification-meta {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			font-size: 13px;
+			color: var(--muted);
+		}
+
+		.notification-actions {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			align-items: flex-end;
+		}
+
+		.btn-icon {
+			padding: 6px 12px;
+			font-size: 13px;
+			background: transparent;
+			border: 1px solid var(--line);
+			color: var(--muted);
+		}
+
+		.btn-icon:hover {
+			background: #f3f4f6;
+			color: var(--ink);
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+		}
+
+		.empty-icon {
+			font-size: 64px;
+			margin-bottom: 16px;
+			opacity: 0.5;
+		}
+
+		.empty-title {
+			font-size: 20px;
+			font-weight: 600;
+			margin: 0 0 8px 0;
+		}
+
+		.empty-message {
+			color: var(--muted);
+		}
+
+		.pagination {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			margin-top: 24px;
+		}
+
+		.pagination a,
+		.pagination span {
+			padding: 8px 12px;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			text-decoration: none;
+			color: var(--ink);
+			font-size: 14px;
+			transition: all 0.2s;
+		}
+
+		.pagination a:hover {
+			background: var(--brand);
+			color: #fff;
+			border-color: var(--brand);
+		}
+
+		.pagination span.active {
+			background: var(--brand);
+			color: #fff;
+			border-color: var(--brand);
+		}
+
+		.bulk-actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 16px 20px;
+			background: #f9fafb;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.bulk-actions-info {
+			font-size: 14px;
+			color: var(--muted);
+		}
+
+		@media (max-width: 768px) {
+			.filters-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.notification-item {
+				flex-direction: column;
+			}
+
+			.notification-actions {
+				flex-direction: row;
+				align-items: center;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="wrapper">
+		<!-- Header -->
+		<div class="topbar">
+			<a href="/" class="brand" style="text-decoration: none; color: inherit;">🛒 BanHangRong</a>
+			<div class="top-actions">
+				<a href="/customer/chat" class="support-link">💬 Hỗ trợ</a>
+				<a href="/cart" class="cart">
+					🛒
+					<span class="badge" th:if="${cartItemCount != null and cartItemCount > 0}"
+						th:text="${cartItemCount}"></span>
+				</a>
+				<div class="user-btn" onclick="toggleUserMenu()">
+					<span th:text="${currentUser.fullName}">User</span>
+					<span class="wallet-badge" th:text="${#numbers.formatDecimal(currentUser.balance, 0, 0)} + ' ₫'">0
+						₫</span>
+					<span>▼</span>
+				</div>
+				<div class="user-menu" id="userMenu">
+					<a href="/customer/dashboard" class="item">📊 Dashboard</a>
+					<a href="/customer/profile" class="item">👤 Hồ sơ</a>
+					<a href="/customer/notifications" class="item">🔔 Thông báo</a>
+					<a href="/logout" class="item">🚪 Đăng xuất</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Navigation -->
+		<div class="nav">
+			<a href="/customer/dashboard">📊 Dashboard</a>
+			<a href="/customer/orderhistory">📦 Đơn hàng</a>
+			<a href="/customer/reviews">⭐ Đánh giá</a>
+			<a href="/customer/notifications" class="active">🔔 Thông báo</a>
+			<a href="/customer/profile">👤 Hồ sơ</a>
+			<a href="/customer/chat">💬 Chat</a>
+		</div>
+
+		<!-- Main Content -->
+		<div class="container">
+			<!-- Page Header -->
+			<div class="page-header">
+				<h1 class="page-title">
+					🔔 Thông Báo
+					<span class="unread-badge" th:if="${unreadCount > 0}" th:text="${unreadCount}">0</span>
+				</h1>
+			</div>
+
+			<!-- Filters -->
+			<div class="filters-section">
+				<form method="get" action="/customer/notifications">
+					<div class="filters-grid">
+						<div class="filter-group">
+							<label>Sắp xếp</label>
+							<select name="sortBy">
+								<option value="newest" th:selected="${currentSortBy == 'newest' or currentSortBy == null}">
+									Mới nhất</option>
+								<option value="oldest" th:selected="${currentSortBy == 'oldest'}">Cũ nhất</option>
+							</select>
+						</div>
+
+						<div class="filter-group">
+							<label>Loại thông báo</label>
+							<select name="type">
+								<option value="" th:selected="${currentType == null}">Tất cả</option>
+								<option value="ORDER" th:selected="${currentType == 'ORDER'}">Đơn hàng</option>
+								<option value="REVIEW" th:selected="${currentType == 'REVIEW'}">Đánh giá</option>
+								<option value="SYSTEM" th:selected="${currentType == 'SYSTEM'}">Hệ thống</option>
+							</select>
+						</div>
+
+						<div class="filter-group">
+							<label>Trạng thái</label>
+							<select name="isRead">
+								<option value="" th:selected="${currentIsRead == null}">Tất cả</option>
+								<option value="false" th:selected="${currentIsRead == false}">Chưa đọc</option>
+								<option value="true" th:selected="${currentIsRead == true}">Đã đọc</option>
+							</select>
+						</div>
+
+						<div class="filter-group">
+							<label>Từ ngày</label>
+							<input type="date" name="startDate" th:value="${currentStartDate}">
+						</div>
+
+						<div class="filter-group">
+							<label>Đến ngày</label>
+							<input type="date" name="endDate" th:value="${currentEndDate}">
+						</div>
+					</div>
+
+					<div class="filter-actions">
+						<button type="button" class="btn btn-secondary" onclick="clearFilters()">Xóa bộ lọc</button>
+						<button type="submit" class="btn btn-primary">Áp dụng</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- Bulk Actions -->
+			<div class="bulk-actions" th:if="${unreadCount > 0}">
+				<span class="bulk-actions-info">
+					Có <strong th:text="${unreadCount}">0</strong> thông báo chưa đọc
+				</span>
+				<button class="btn btn-secondary btn-icon" onclick="markAllAsRead()">
+					✓ Đánh dấu tất cả đã đọc
+				</button>
+			</div>
+
+			<!-- Notifications List -->
+			<div class="notifications-list">
+				<div th:if="${notifications.content.empty}" class="empty-state">
+					<div class="empty-icon">🔔</div>
+					<h3 class="empty-title">Không có thông báo</h3>
+					<p class="empty-message">Bạn chưa có thông báo nào.</p>
+				</div>
+
+				<div th:each="notification : ${notifications.content}" class="notification-item"
+					th:classappend="${!notification.isRead} ? 'unread' : ''">
+					<div class="notification-icon"
+						th:classappend="${notification.type == 'ORDER'} ? 'order' : (${notification.type == 'REVIEW'} ? 'review' : 'system')">
+						<span
+							th:text="${notification.type == 'ORDER'} ? '📦' : (${notification.type == 'REVIEW'} ? '⭐' : '🔔')">📦</span>
+					</div>
+
+					<div class="notification-content">
+						<h3 class="notification-title" th:text="${notification.title}">Tiêu đề</h3>
+						<p class="notification-message" th:text="${notification.message}">Nội dung thông báo</p>
+						<div class="notification-meta">
+							<span
+								th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+							<span th:if="${!notification.isRead}"
+								style="color: var(--brand); font-weight: 600;">● Chưa đọc</span>
+						</div>
+					</div>
+
+					<div class="notification-actions">
+						<button th:if="${!notification.isRead}" class="btn btn-icon"
+							th:onclick="'markAsRead(' + ${notification.notificationId} + ')'">
+							✓ Đánh dấu đã đọc
+						</button>
+						<button class="btn btn-icon"
+							th:onclick="'deleteNotification(' + ${notification.notificationId} + ')'">
+							🗑️ Xóa
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Pagination -->
+			<div class="pagination" th:if="${totalPages > 1}">
+				<a th:if="${currentPage > 0}"
+					th:href="@{/customer/notifications(page=${currentPage - 1}, size=20, sortBy=${currentSortBy}, type=${currentType}, isRead=${currentIsRead}, startDate=${currentStartDate}, endDate=${currentEndDate})}">«
+					Trước</a>
+
+				<th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+					<span th:if="${i == currentPage}" class="active" th:text="${i + 1}">1</span>
+					<a th:if="${i != currentPage}"
+						th:href="@{/customer/notifications(page=${i}, size=20, sortBy=${currentSortBy}, type=${currentType}, isRead=${currentIsRead}, startDate=${currentStartDate}, endDate=${currentEndDate})}"
+						th:text="${i + 1}">1</a>
+				</th:block>
+
+				<a th:if="${currentPage < totalPages - 1}"
+					th:href="@{/customer/notifications(page=${currentPage + 1}, size=20, sortBy=${currentSortBy}, type=${currentType}, isRead=${currentIsRead}, startDate=${currentStartDate}, endDate=${currentEndDate})}">Sau
+					»</a>
+			</div>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+		function toggleUserMenu() {
+			const menu = document.getElementById('userMenu');
+			menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+		}
+
+		document.addEventListener('click', function (event) {
+			const userBtn = document.querySelector('.user-btn');
+			const userMenu = document.getElementById('userMenu');
+			if (!userBtn.contains(event.target)) {
+				userMenu.style.display = 'none';
+			}
+		});
+
+		function clearFilters() {
+			window.location.href = '/customer/notifications';
+		}
+
+		function getCsrfToken() {
+			return document.querySelector('meta[name="_csrf"]')?.content || '';
+		}
+
+		function getCsrfHeader() {
+			return document.querySelector('meta[name="_csrf_header"]')?.content || '';
+		}
+
+		function markAsRead(notificationId) {
+			const csrfToken = getCsrfToken();
+			const csrfHeader = getCsrfHeader();
+
+			fetch(`/customer/notifications/${notificationId}/mark-read`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					[csrfHeader]: csrfToken
+				}
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						location.reload();
+					} else {
+						alert('Có lỗi xảy ra, vui lòng thử lại');
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					alert('Có lỗi xảy ra, vui lòng thử lại');
+				});
+		}
+
+		function markAllAsRead() {
+			if (!confirm('Đánh dấu tất cả thông báo đã đọc?')) {
+				return;
+			}
+
+			const csrfToken = getCsrfToken();
+			const csrfHeader = getCsrfHeader();
+
+			fetch('/customer/notifications/mark-all-read', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					[csrfHeader]: csrfToken
+				}
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						location.reload();
+					} else {
+						alert('Có lỗi xảy ra, vui lòng thử lại');
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					alert('Có lỗi xảy ra, vui lòng thử lại');
+				});
+		}
+
+		function deleteNotification(notificationId) {
+			if (!confirm('Bạn có chắc muốn xóa thông báo này?')) {
+				return;
+			}
+
+			const csrfToken = getCsrfToken();
+			const csrfHeader = getCsrfHeader();
+
+			fetch(`/customer/notifications/${notificationId}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					[csrfHeader]: csrfToken
+				}
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						location.reload();
+					} else {
+						alert('Có lỗi xảy ra, vui lòng thử lại');
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					alert('Có lỗi xảy ra, vui lòng thử lại');
+				});
+		}
+	</script>
+</body>
+
+</html>
+

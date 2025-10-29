@@ -8,6 +8,7 @@ import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.service.NotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import banhangrong.su25.Entity.Products;
 import java.math.BigDecimal;
@@ -39,6 +41,9 @@ public class VnPayController {
     private final UsersRepository usersRepository;
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
+    
+    @Autowired
+    private NotificationService notificationService;
 
     // Deprecated hardcoded values; kept for reference. Use VnPayConfig instead.
     // legacy constants removed; use values from VnPayConfig
@@ -323,6 +328,14 @@ public class VnPayController {
                     
                     Orders savedOrder = ordersRepository.save(order);
                     System.out.println("[VNPay] Created order: " + savedOrder.getOrderId());
+                    
+                    // Gửi thông báo đặt hàng thành công
+                    try {
+                        String orderCode = "ORD" + savedOrder.getOrderId();
+                        notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
+                    } catch (Exception e) {
+                        System.err.println("[VNPay] Failed to send notification: " + e.getMessage());
+                    }
                     
                     // Create order items
                     for (ShoppingCart it : items) {

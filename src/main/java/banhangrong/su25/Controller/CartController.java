@@ -11,12 +11,14 @@ import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.service.NotificationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,6 +33,9 @@ public class CartController {
     private final UsersRepository usersRepository;
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
+    
+    @Autowired
+    private NotificationService notificationService;
 
     public CartController(ShoppingCartRepository cartRepository,
                           ProductsRepository productsRepository,
@@ -228,6 +233,14 @@ public class CartController {
         
         Orders savedOrder = ordersRepository.save(order);
         System.out.println("[Demo Checkout] Created order: " + savedOrder.getOrderId());
+        
+        // Gửi thông báo đặt hàng thành công
+        try {
+            String orderCode = "ORD" + savedOrder.getOrderId();
+            notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
+        } catch (Exception e) {
+            System.err.println("[Demo Checkout] Failed to send notification: " + e.getMessage());
+        }
         
         // Create order items
         for (ShoppingCart it : items) {
