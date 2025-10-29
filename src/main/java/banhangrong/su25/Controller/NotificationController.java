@@ -2,12 +2,14 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Notification;
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.service.NotificationService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,9 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private UsersRepository usersRepository;
+
     /**
      * Trang danh sách thông báo
      */
@@ -35,10 +40,14 @@ public class NotificationController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(defaultValue = "newest") String sortBy,
-            HttpSession session,
             Model model) {
 
-        Users currentUser = (Users) session.getAttribute("loggedInUser");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
+
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (currentUser == null) {
             return "redirect:/login";
         }
@@ -79,11 +88,14 @@ public class NotificationController {
      */
     @PostMapping("/{notificationId}/mark-read")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> markAsRead(
-            @PathVariable Long notificationId,
-            HttpSession session) {
+    public ResponseEntity<Map<String, Object>> markAsRead(@PathVariable Long notificationId) {
 
-        Users currentUser = (Users) session.getAttribute("loggedInUser");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
+        }
+
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (currentUser == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
         }
@@ -103,9 +115,14 @@ public class NotificationController {
      */
     @PostMapping("/mark-all-read")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> markAllAsRead(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> markAllAsRead() {
 
-        Users currentUser = (Users) session.getAttribute("loggedInUser");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
+        }
+
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (currentUser == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
         }
@@ -125,11 +142,14 @@ public class NotificationController {
      */
     @DeleteMapping("/{notificationId}")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> deleteNotification(
-            @PathVariable Long notificationId,
-            HttpSession session) {
+    public ResponseEntity<Map<String, Object>> deleteNotification(@PathVariable Long notificationId) {
 
-        Users currentUser = (Users) session.getAttribute("loggedInUser");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
+        }
+
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (currentUser == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
         }
@@ -147,9 +167,14 @@ public class NotificationController {
      */
     @GetMapping("/unread-count")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> getUnreadCount(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> getUnreadCount() {
 
-        Users currentUser = (Users) session.getAttribute("loggedInUser");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
+        }
+
+        Users currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (currentUser == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
         }
