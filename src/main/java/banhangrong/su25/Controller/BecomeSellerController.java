@@ -2,10 +2,13 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.UsersRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,7 +66,10 @@ public class BecomeSellerController {
      * Xử lý nâng cấp lên seller
      */
     @PostMapping("/become-seller/upgrade")
-    public String upgradeToSeller(RedirectAttributes redirectAttributes, HttpSession session) {
+    public String upgradeToSeller(RedirectAttributes redirectAttributes, 
+                                  HttpServletRequest request, 
+                                  HttpServletResponse response,
+                                  HttpSession session) {
         // Lấy thông tin user hiện tại
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
@@ -84,7 +90,7 @@ public class BecomeSellerController {
         // Kiểm tra nếu đã là seller rồi
         if ("SELLER".equalsIgnoreCase(user.getUserType())) {
             redirectAttributes.addFlashAttribute("info", "Bạn đã là seller rồi!");
-            return "redirect:/seller/dashboard";
+            return "redirect:/login?message=Please login again as seller";
         }
 
         // Kiểm tra email verification
@@ -99,11 +105,14 @@ public class BecomeSellerController {
             user.setUpdatedAt(LocalDateTime.now());
             usersRepository.save(user);
 
-            // Cập nhật session
-            session.setAttribute("userRole", "SELLER");
+            System.out.println("✅ User upgraded to SELLER: " + username);
             
-            redirectAttributes.addFlashAttribute("success", "Chúc mừng! Bạn đã trở thành seller thành công! 🎉");
-            return "redirect:/seller/dashboard";
+            // QUAN TRỌNG: Logout để Spring Security refresh authorities
+            // Sau đó user sẽ login lại với role mới
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+            
+            redirectAttributes.addFlashAttribute("upgradeSuccess", "Chúc mừng! Bạn đã trở thành seller thành công! 🎉 Vui lòng đăng nhập lại để sử dụng các tính năng seller.");
+            return "redirect:/login?upgrade=success";
             
         } catch (Exception e) {
             e.printStackTrace();

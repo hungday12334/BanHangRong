@@ -336,6 +336,11 @@
             successDiv.querySelector('span').textContent = 'Logged out successfully!';
             successDiv.style.display = 'flex';
         }
+        if (urlParams.get('upgrade')) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.querySelector('span').textContent = '🎉 Chúc mừng! Bạn đã trở thành Seller! Vui lòng đăng nhập lại để sử dụng tính năng seller.';
+            successDiv.style.display = 'flex';
+        }
     </script>
 </body>
 </html>
