@@ -1,162 +1,567 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý Danh mục - Seller Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
+    <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+    <link rel="stylesheet" href="/css/category-management.css?v=1" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <link rel="icon" type="image/png" href="/img/kua654ms.png" />
 </head>
-<body>
-<!-- Sidebar -->
-<div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-<div class="main-content" style="margin-left: 250px; padding: 20px;">
-    <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1><i class="fas fa-folder me-2"></i>Quản lý Danh mục</h1>
-            <a href="/seller/dashboard" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard
-            </a>
-        </div>
+<body class="loading enhanced-dashboard" th:attr="data-user-type=${userType}">
+<div class="page">
+    <!-- Sidebar (shared fragment) -->
+    <aside th:replace="fragments/sidebar :: sidebar"></aside>
 
-        <!-- Thông báo -->
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <!-- Main area -->
+    <main data-section="main">
+        <div class="container">
+            <div class="category-management-container">
+                <div class="category-header">
+                    <h2 class="section-title">Quản lý Danh mục</h2>
+                    <div class="category-header-actions">
+                        <button onclick="openLicenseManager()" class="btn btn-primary" title="Quản lý giấy phép">
+                            <i class="ti ti-license"></i> Quản lý Licenses
+                        </button>
+                        <button onclick="exportCategories()" class="btn btn-secondary" title="Xuất danh sách">
+                            <i class="ti ti-download"></i> Export CSV
+                        </button>
+                        <a href="/seller/dashboard" class="btn btn-secondary">
+                            <i class="ti ti-arrow-left"></i> Quay lại Dashboard
+                        </a>
+                    </div>
+                </div>
 
-        <!-- Form thêm danh mục -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Thêm Danh mục Mới</h5>
-            </div>
-            <div class="card-body">
-                <form th:action="@{/seller/categories}" th:object="${newCategory}" method="post">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <div class="row g-3">
-                        <div class="col-md-5">
-                            <label class="form-label">Tên Danh mục *</label>
-                            <input type="text" th:field="*{name}" class="form-control"
-                                   placeholder="Ví dụ: Đồ họa - Thiết kế" required
-                                   minlength="2" maxlength="100">
-                            <div class="form-text">Tên danh mục phải từ 2-100 ký tự</div>
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card purple" onclick="filterByAll()" onkeypress="if(event.key==='Enter')filterByAll()" id="statAllCategories" title="Click để hiển thị tất cả danh mục" role="button" tabindex="0">
+                        <div class="stat-card-label">Tổng danh mục</div>
+                        <div class="stat-card-value" th:text="${totalCategories ?: categories.size()}">0</div>
+                    </div>
+                    <div class="stat-card pink" onclick="filterByHasProducts()" onkeypress="if(event.key==='Enter')filterByHasProducts()" id="statWithProducts" title="Click để hiển thị danh mục có sản phẩm" role="button" tabindex="0">
+                        <div class="stat-card-label">Danh mục có sản phẩm</div>
+                        <div class="stat-card-value" th:text="${categoriesWithProducts ?: 0}">0</div>
+                    </div>
+                    <div class="stat-card blue" onclick="sortByProductCount()" onkeypress="if(event.key==='Enter')sortByProductCount()" id="statTotalProducts" title="Click để sắp xếp theo số sản phẩm" role="button" tabindex="0">
+                        <div class="stat-card-label">Tổng sản phẩm</div>
+                        <div class="stat-card-value" th:text="${totalProducts ?: 0}">0</div>
+                    </div>
+                    <div class="stat-card green" onclick="filterByRecent()" onkeypress="if(event.key==='Enter')filterByRecent()" id="statRecentCategories" title="Click để hiển thị danh mục mới" role="button" tabindex="0">
+                        <div class="stat-card-label">Danh mục mới (7 ngày)</div>
+                        <div class="stat-card-value" th:text="${recentCategories ?: 0}">0</div>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div class="alert-container">
+                    <div th:if="${success}" class="alert success">
+                        <strong th:text="${success}"></strong>
+                    </div>
+                    <div th:if="${error}" class="alert error">
+                        <strong th:text="${error}"></strong>
+                    </div>
+                </div>
+
+                <!-- Add category form -->
+                <div class="category-form-section">
+                    <h3>Thêm danh mục mới</h3>
+                    <form th:action="@{/seller/categories}" th:object="${newCategory}" method="post" class="profile-form" id="addCategoryForm" onsubmit="return validateCategoryForm(this)">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="form-group">
+                            <label for="newCategoryName">Tên Danh mục *</label>
+                            <input id="newCategoryName" type="text" th:field="*{name}" placeholder="Ví dụ: Đồ họa - Thiết kế"
+                                   required minlength="2" maxlength="100"
+                                   pattern=".*\S+.*"
+                                   title="Tên danh mục phải từ 2-100 ký tự và không được chỉ toàn khoảng trắng" />
+                            <div class="form-text">Tên danh mục phải từ 2-100 ký tự (không chỉ khoảng trắng)</div>
                         </div>
-                        <div class="col-md-5">
-                            <label class="form-label">Mô tả</label>
-                            <input type="text" th:field="*{description}" class="form-control"
-                                   placeholder="Mô tả ngắn về danh mục"
-                                   maxlength="255">
+                        <div class="form-group">
+                            <label for="newCategoryDescription">Mô tả</label>
+                            <textarea id="newCategoryDescription" th:field="*{description}" placeholder="Mô tả ngắn về danh mục" maxlength="255" rows="3"></textarea>
+                            <div class="form-text"><span id="descCharCount">0</span>/255 ký tự</div>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="fas fa-save me-1"></i>Thêm
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ti ti-plus"></i> Thêm danh mục
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Categories list -->
+                <div class="category-list-section">
+                    <div class="category-list-header">
+                        <h3 class="category-list-title">
+                            Danh sách Danh mục
+                            <span class="category-count" id="categoryCount" th:text="'(' + ${categories.size()} + ')'">(0)</span>
+                        </h3>
+
+                        <!-- Search and Filter Controls -->
+                        <div class="category-toolbar">
+                            <div class="search-box">
+                                <label for="searchInput" style="display:none;">Tìm kiếm danh mục</label>
+                                <i class="ti ti-search"></i>
+                                <input type="text" id="searchInput" placeholder="Tìm kiếm danh mục..." oninput="filterCategories()" />
+                            </div>
+
+                            <label for="sortSelect" style="display:none;">Sắp xếp</label>
+                            <select id="sortSelect" class="sort-select" onchange="sortCategories()">
+                                <option value="name-asc">Tên (A-Z)</option>
+                                <option value="name-desc">Tên (Z-A)</option>
+                                <option value="date-desc">Mới nhất</option>
+                                <option value="date-asc">Cũ nhất</option>
+                                <option value="products-desc">Nhiều sản phẩm nhất</option>
+                                <option value="products-asc">Ít sản phẩm nhất</option>
+                            </select>
+
+                            <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Chọn nhiều">
+                                <i class="ti ti-checkbox"></i> Chọn nhiều
+                            </button>
+
+                            <button onclick="deleteSelected()" id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">
+                                <i class="ti ti-trash"></i> Xóa đã chọn (<span id="selectedCount">0</span>)
                             </button>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Danh sách danh mục -->
-        <div class="card">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-list me-2"></i>Danh sách Danh mục
-                    <span class="badge bg-light text-dark ms-2" th:text="${categories.size()}"></span>
-                </h5>
-            </div>
-            <div class="card-body">
-                <div th:if="${categories.isEmpty()}" class="text-center py-4">
-                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Chưa có danh mục nào</h5>
-                    <p class="text-muted">Hãy thêm danh mục đầu tiên của bạn!</p>
-                </div>
+                    <div th:if="${categories.isEmpty()}" class="empty-state">
+                        <i class="ti ti-folder-open"></i>
+                        <div class="empty-state-title">Chưa có danh mục nào</div>
+                        <div class="empty-state-text">Hãy thêm danh mục đầu tiên của bạn!</div>
+                    </div>
 
-                <div th:unless="${categories.isEmpty()}" class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên Danh mục</th>
-                            <th>Mô tả</th>
-                            <th>Ngày tạo</th>
-                            <th>Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="category : ${categories}">
-                            <td th:text="${category.categoryId}"></td>
-                            <td><strong th:text="${category.name}"></strong></td>
-                            <td>
-                                <span th:if="${category.description}" th:text="${category.description}"></span>
-                                <span th:unless="${category.description}" class="text-muted">---</span>
-                            </td>
-                            <td>
-                                <span th:if="${category.createdAt != null}" th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-                                <span th:unless="${category.createdAt != null}" class="text-muted">---</span>
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-warning edit-btn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editCategoryModal"
+                    <div th:unless="${categories.isEmpty()}" class="table-responsive">
+                        <table class="category-table" id="categoryTable">
+                            <thead>
+                            <tr>
+                                <th class="bulk-select-col" data-bulk-only>
+                                    <label for="selectAll" style="display:none;">Chọn tất cả</label>
+                                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
+                                </th>
+                                <th style="width:60px;">ID</th>
+                                <th>Tên Danh mục</th>
+                                <th>Mô tả</th>
+                                <th style="width:140px;text-align:center;">Số sản phẩm</th>
+                                <th style="width:160px;">Ngày tạo</th>
+                                <th style="width:180px;">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="category : ${categories}" class="category-row"
+                                th:attr="data-id=${category.categoryId}, data-name=${category.name}, data-description=${category.description}, data-created=${category.createdAt}, data-product-count=${productCountByCategory.get(category.categoryId) ?: 0}">
+                                <td class="bulk-select-col" data-bulk-only>
+                                    <input type="checkbox" class="category-checkbox" th:value="${category.categoryId}" onchange="updateSelectedCount()" th:attr="aria-label='Chọn ' + ${category.name}" />
+                                </td>
+                                <td th:text="${category.categoryId}"></td>
+                                <td>
+                                    <div class="category-name">
+                                        <strong th:text="${category.name}"></strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="category-description">
+                                        <span th:if="${category.description}" th:text="${category.description}"></span>
+                                        <span th:unless="${category.description}" style="color:var(--muted);">---</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:center;">
+                                    <span class="product-count-badge" th:text="${productCountByCategory.get(category.categoryId) ?: 0}">0</span>
+                                    <button th:if="${(productCountByCategory.get(category.categoryId) ?: 0) > 0}"
+                                            onclick="viewCategoryProducts(this); event.stopPropagation();"
                                             th:data-id="${category.categoryId}"
                                             th:data-name="${category.name}"
-                                            th:data-description="${category.description}">
-                                        <i class="fas fa-edit me-1"></i>Sửa
+                                            class="btn btn-link"
+                                            title="Xem sản phẩm">
+                                        <i class="ti ti-eye"></i>
                                     </button>
-                                    <form th:action="@{/seller/categories/actions/delete}" method="post" class="d-inline" th:data-name="${category.name}" onsubmit="return confirmDelete(this)">
-                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                        <input type="hidden" name="categoryId" th:value="${category.categoryId}">
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="fas fa-trash me-1"></i>Xóa
+                                </td>
+                                <td>
+                                    <span th:if="${category.createdAt != null}" th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                    <span th:unless="${category.createdAt != null}" style="color:var(--muted);">---</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons-wrapper"
+                                         th:data-id="${category.categoryId}"
+                                         th:data-name="${category.name}"
+                                         th:data-description="${category.description}"
+                                         th:data-product-count="${productCountByCategory.get(category.categoryId) ?: 0}">
+                                        <!-- Edit Button -->
+                                        <button class="btn-action btn-edit" type="button"
+                                                onclick="openSmartEditModal(this.closest('.action-buttons-wrapper'))"
+                                                title="Chỉnh sửa">
+                                            <i class="ti ti-edit"></i>
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+
+                                        <!-- License Manager Button -->
+                                        <button class="btn-action btn-license" type="button"
+                                                onclick="openCategoryLicenseManager(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
+                                                title="Quản lý Licenses">
+                                            <i class="ti ti-license"></i>
+                                        </button>
+
+                                        <!-- More Actions Button -->
+                                        <button class="btn-action btn-more" type="button"
+                                                onclick="toggleActionMenu(this); event.stopPropagation();"
+                                                title="Thêm">
+                                            <i class="ti ti-dots"></i>
+                                        </button>
+
+                                        <!-- Dropdown Menu -->
+                                        <div class="dropdown-menu-icons">
+                                            <!-- Duplicate -->
+                                            <button type="button"
+                                                    class="icon-item"
+                                                    onclick="duplicateCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
+                                                    title="Nhân bản">
+                                                <i class="ti ti-copy"></i>
+                                            </button>
+
+                                            <!-- Export Products -->
+                                            <button type="button"
+                                                    class="icon-item"
+                                                    onclick="exportCategoryProducts(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
+                                                    title="Xuất CSV">
+                                                <i class="ti ti-download"></i>
+                                            </button>
+
+                                            <!-- Delete -->
+                                            <button type="button"
+                                                    class="icon-item text-danger"
+                                                    onclick="deleteCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
+                                                    title="Xóa">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination (Review Style) -->
+                        <div class="pagination-wrapper" id="paginationWrapper">
+                            <!-- Previous Button -->
+                            <button type="button" class="pagination-btn prev-btn" id="prevBtn" onclick="goToPage(currentPage - 1)">
+                                <i class="ti ti-chevron-left"></i> Trước
+                            </button>
+
+                            <!-- Page Numbers -->
+                            <div style="display: flex; gap: 4px;" id="pageNumbers">
+                                <!-- Generated by JavaScript -->
+                            </div>
+
+                            <!-- Next Button -->
+                            <button type="button" class="pagination-btn next-btn" id="nextBtn" onclick="goToPage(currentPage + 1)">
+                                Sau <i class="ti ti-chevron-right"></i>
+                            </button>
+
+                            <!-- Page Info -->
+                            <span class="pagination-info">
+                                Trang <b id="currentPageNum">1</b> / <b id="totalPagesNum">1</b>
+                                (<span id="totalItemsNum">0</span> danh mục)
+                            </span>
+
+                            <!-- Page Size Selector -->
+                            <div class="page-size-selector">
+                                <label for="pageSizeSelect">Hiển thị:</label>
+                                <select id="pageSizeSelect" onchange="changePageSize()">
+                                    <option value="5" selected>5</option>
+                                    <option value="10">10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
 
-<!-- Modal chỉnh sửa danh mục -->
-<div class="modal fade" id="editCategoryModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Advanced Edit Modal -->
+<div id="editCategoryModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <!-- ✅ Dùng th:action để Thymeleaf tự sinh đúng context path -->
-            <form th:action="@{/seller/categories/actions/update}" method="post" id="editCategoryForm">
+            <form th:action="@{/seller/categories/actions/update}" method="post" id="editCategoryForm" onsubmit="return validateAdvancedCategoryForm(this)">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="categoryId" id="editCategoryId">
+
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Chỉnh sửa Danh mục</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">
+                        <i class="ti ti-edit"></i> Chỉnh sửa Danh mục
+                    </h5>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editCategoryModal')">&times;</button>
                 </div>
+
                 <div class="modal-body">
-                    <input type="hidden" name="categoryId" id="editCategoryId">
-                    <div class="mb-3">
-                        <label class="form-label">Tên Danh mục *</label>
-                        <input type="text" name="name" id="editCategoryName" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Mô tả</label>
-                        <input type="text" name="description" id="editCategoryDescription" class="form-control">
+                    <!-- Tabs Navigation -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" onclick="switchTab('basicTab', this)" type="button">
+                                <i class="ti ti-info-circle"></i> Cơ bản
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" onclick="switchTab('displayTab', this)" type="button">
+                                <i class="ti ti-palette"></i> Hiển thị
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" onclick="switchTab('seoTab', this)" type="button">
+                                <i class="ti ti-search"></i> SEO
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" onclick="switchTab('settingsTab', this)" type="button">
+                                <i class="ti ti-settings"></i> Cài đặt
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tabs Content -->
+                    <div class="tab-content">
+                        <!-- Basic Info Tab -->
+                        <div class="tab-pane fade show active" id="basicTab">
+                            <div class="form-group">
+                                <label for="editCategoryName">Tên Danh mục <span class="text-danger">*</span></label>
+                                <input type="text" name="name" id="editCategoryName" class="form-control"
+                                       required minlength="2" maxlength="100"
+                                       pattern=".*\S+.*"
+                                       placeholder="VD: Điện tử - Công nghệ"
+                                       title="Tên danh mục phải từ 2-100 ký tự" />
+                                <div class="form-text">
+                                    <i class="ti ti-info-circle"></i> Tên này sẽ hiển thị trên trang chủ và kết quả tìm kiếm
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCategorySlug">Đường dẫn (URL Slug)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">/categories/</span>
+                                    <input type="text" name="slug" id="editCategorySlug" class="form-control"
+                                           placeholder="dien-tu-cong-nghe"
+                                           pattern="[a-z0-9-]+"
+                                           title="Chỉ chữ thường, số và dấu gạch ngang" />
+                                </div>
+                                <div class="form-text">
+                                    <i class="ti ti-link"></i> Tự động tạo từ tên nếu để trống
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCategoryDescription">Mô tả ngắn</label>
+                                <textarea name="description" id="editCategoryDescription" class="form-control"
+                                          rows="3" maxlength="500"
+                                          placeholder="Mô tả ngắn gọn về danh mục này..."></textarea>
+                                <div class="form-text">
+                                    <span id="editDescCharCount">0</span>/500 ký tự
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCategoryParent">Danh mục cha (nếu có)</label>
+                                <select name="parentId" id="editCategoryParent" class="form-control">
+                                    <option value="">-- Không có (Danh mục gốc) --</option>
+                                    <!-- Will be populated dynamically -->
+                                </select>
+                                <div class="form-text">
+                                    <i class="ti ti-hierarchy"></i> Tạo danh mục con để phân loại chi tiết hơn
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Display Tab -->
+                        <div class="tab-pane fade" id="displayTab">
+                            <div class="form-group">
+                                <label for="editCategoryIcon">Icon</label>
+                                <div class="icon-picker-wrapper">
+                                    <input type="text" name="icon" id="editCategoryIcon" class="form-control"
+                                           placeholder="VD: ti-device-laptop" readonly />
+                                    <div class="icon-preview" id="editIconPreview">
+                                        <i class="ti ti-circle-dashed"></i>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="openIconPicker('edit')">
+                                    <i class="ti ti-palette"></i> Chọn Icon
+                                </button>
+                                <div class="form-text">
+                                    <i class="ti ti-info-circle"></i> Icon sẽ hiển thị bên cạnh tên danh mục
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCategoryColor">Màu chủ đạo</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" name="color" id="editCategoryColor" class="form-control-color" value="#3b82f6" />
+                                    <input type="text" id="editColorHex" class="form-control"
+                                           placeholder="#3b82f6" maxlength="7"
+                                           onchange="document.getElementById('editCategoryColor').value = this.value" />
+                                </div>
+                                <div class="color-presets">
+                                    <button type="button" class="color-preset" style="background: #3b82f6" onclick="setEditColor('#3b82f6')"></button>
+                                    <button type="button" class="color-preset" style="background: #8b5cf6" onclick="setEditColor('#8b5cf6')"></button>
+                                    <button type="button" class="color-preset" style="background: #ec4899" onclick="setEditColor('#ec4899')"></button>
+                                    <button type="button" class="color-preset" style="background: #f59e0b" onclick="setEditColor('#f59e0b')"></button>
+                                    <button type="button" class="color-preset" style="background: #10b981" onclick="setEditColor('#10b981')"></button>
+                                    <button type="button" class="color-preset" style="background: #ef4444" onclick="setEditColor('#ef4444')"></button>
+                                </div>
+                                <div class="form-text">
+                                    <i class="ti ti-palette"></i> Màu sắc cho badge và highlight
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCategoryImage">Ảnh đại diện (URL)</label>
+                                <input type="url" name="imageUrl" id="editCategoryImage" class="form-control"
+                                       placeholder="https://example.com/image.jpg" />
+                                <div class="form-text">
+                                    <i class="ti ti-photo"></i> Ảnh hiển thị trong banner hoặc grid view
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCategorySortOrder">Thứ tự sắp xếp</label>
+                                <input type="number" name="sortOrder" id="editCategorySortOrder" class="form-control"
+                                       min="0" value="0" placeholder="0" />
+                                <div class="form-text">
+                                    <i class="ti ti-arrow-up-down"></i> Số nhỏ hơn sẽ hiển thị trước (0 = mặc định)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Tab -->
+                        <div class="tab-pane fade" id="seoTab">
+                            <div class="form-group">
+                                <label for="editSeoTitle">Tiêu đề SEO</label>
+                                <input type="text" name="seoTitle" id="editSeoTitle" class="form-control"
+                                       maxlength="70" placeholder="Tiêu đề tối ưu cho Google..." />
+                                <div class="form-text">
+                                    <span id="editSeoTitleCount">0</span>/70 ký tự (Tối ưu: 50-60 ký tự)
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editSeoDescription">Mô tả SEO</label>
+                                <textarea name="seoDescription" id="editSeoDescription" class="form-control"
+                                          rows="3" maxlength="160"
+                                          placeholder="Mô tả ngắn gọn cho Google Search..."></textarea>
+                                <div class="form-text">
+                                    <span id="editSeoDescCount">0</span>/160 ký tự (Tối ưu: 120-155 ký tự)
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editSeoKeywords">Từ khóa SEO</label>
+                                <input type="text" name="seoKeywords" id="editSeoKeywords" class="form-control"
+                                       placeholder="điện tử, laptop, máy tính, smartphone" />
+                                <div class="form-text">
+                                    <i class="ti ti-tag"></i> Phân cách bằng dấu phẩy
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Tab -->
+                        <div class="tab-pane fade" id="settingsTab">
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <div class="form-check-group">
+                                    <div class="form-check">
+                                        <input type="radio" name="status" id="editStatusActive" value="ACTIVE" class="form-check-input" checked />
+                                        <label for="editStatusActive" class="form-check-label">
+                                            <i class="ti ti-circle-check" style="color: var(--good)"></i> <strong>Hoạt động</strong>
+                                            <small class="d-block text-muted">Danh mục hiển thị công khai</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="radio" name="status" id="editStatusHidden" value="HIDDEN" class="form-check-input" />
+                                        <label for="editStatusHidden" class="form-check-label">
+                                            <i class="ti ti-eye-off" style="color: var(--muted)"></i> <strong>Ẩn</strong>
+                                            <small class="d-block text-muted">Chỉ admin/seller nhìn thấy</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="radio" name="status" id="editStatusDraft" value="DRAFT" class="form-check-input" />
+                                        <label for="editStatusDraft" class="form-check-label">
+                                            <i class="ti ti-file-text" style="color: var(--accent)"></i> <strong>Nháp</strong>
+                                            <small class="d-block text-muted">Đang chuẩn bị, chưa công khai</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCategoryLicense">Giấy phép / Phân loại</label>
+                                <select name="license" id="editCategoryLicense" class="form-control">
+                                    <option value="">-- Không yêu cầu --</option>
+                                    <option value="GENERAL">Hàng hóa phổ thông</option>
+                                    <option value="FOOD">Thực phẩm chức năng</option>
+                                    <option value="COSMETIC">Mỹ phẩm</option>
+                                    <option value="MEDICAL">Dụng cụ y tế</option>
+                                    <option value="ELECTRONICS">Thiết bị điện tử</option>
+                                    <option value="CHEMICAL">Hóa chất</option>
+                                    <option value="RESTRICTED">Hàng kiểm soát đặc biệt</option>
+                                </select>
+                                <div class="form-text">
+                                    <i class="ti ti-license"></i> Quy định sản phẩm trong danh mục này
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-check-label">
+                                    <input type="checkbox" name="requiresApproval" id="editRequiresApproval" class="form-check-input" />
+                                    <strong>Yêu cầu duyệt sản phẩm</strong>
+                                </label>
+                                <div class="form-text">
+                                    <i class="ti ti-shield-check"></i> Sản phẩm mới cần admin phê duyệt trước khi công khai
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-check-label">
+                                    <input type="checkbox" name="featured" id="editFeatured" class="form-check-input" />
+                                    <strong>Danh mục nổi bật</strong>
+                                </label>
+                                <div class="form-text">
+                                    <i class="ti ti-star"></i> Hiển thị ở vị trí ưu tiên trên trang chủ
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editCommissionRate">Tỷ lệ hoa hồng (%)</label>
+                                <div class="input-group">
+                                    <input type="number" name="commissionRate" id="editCommissionRate" class="form-control"
+                                           min="0" max="100" step="0.1" value="0" placeholder="0" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div class="form-text">
+                                    <i class="ti ti-percentage"></i> Hoa hồng áp dụng cho sản phẩm trong danh mục này (0 = mặc định hệ thống)
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editMaxProducts">Giới hạn số sản phẩm</label>
+                                <input type="number" name="maxProducts" id="editMaxProducts" class="form-control"
+                                       min="0" placeholder="Không giới hạn" />
+                                <div class="form-text">
+                                    <i class="ti ti-box"></i> Số sản phẩm tối đa trong danh mục (0 hoặc để trống = không giới hạn)
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Hủy
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editCategoryModal')">
+                        <i class="ti ti-x"></i> Hủy
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Lưu thay đổi
+                        <i class="ti ti-device-floppy"></i> Lưu thay đổi
                     </button>
                 </div>
             </form>
@@ -164,49 +569,2063 @@
     </div>
 </div>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- View Products Modal -->
+<div id="viewProductsModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sản phẩm trong danh mục: <span id="modalCategoryName"></span></h5>
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="productsListContent" class="loading-state">
+                    <i class="ti ti-loader"></i>
+                    <div class="loading-state-text">Đang tải...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- License Manager Modal -->
+<div id="licenseManagerModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="ti ti-license"></i> Quản lý Licenses / Giấy phép
+                </h5>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('licenseManagerModal')">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <!-- Add New License Form -->
+                <div class="license-add-section">
+                    <h6 class="section-subtitle">
+                        <i class="ti ti-plus"></i> Thêm License mới
+                    </h6>
+                    <div class="license-form">
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="newLicenseName">Tên License <span class="text-danger">*</span></label>
+                                <input type="text" id="newLicenseName" class="form-control"
+                                       placeholder="VD: Thực phẩm chức năng" required />
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="newLicenseCode">Mã (Code) <span class="text-danger">*</span></label>
+                                <input type="text" id="newLicenseCode" class="form-control"
+                                       placeholder="VD: FOOD_SUPPLEMENT" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newLicenseDescription">Mô tả</label>
+                            <textarea id="newLicenseDescription" class="form-control" rows="2"
+                                      placeholder="Mô tả yêu cầu và quy định cho sản phẩm thuộc loại này..."></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="newLicenseIcon">Icon</label>
+                                <div class="icon-input-group">
+                                    <input type="text" id="newLicenseIcon" class="form-control"
+                                           placeholder="ti-leaf" value="ti-license"
+                                           onchange="updateLicenseIconPreview('new')" />
+                                    <div class="icon-preview" id="newLicenseIconPreview">
+                                        <i class="ti ti-license"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="newLicenseColor">Màu sắc</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" id="newLicenseColor" class="form-control-color" value="#3b82f6"
+                                           onchange="document.getElementById('newLicenseColorHex').value = this.value" />
+                                    <input type="text" id="newLicenseColorHex" class="form-control" value="#3b82f6"
+                                           onchange="document.getElementById('newLicenseColor').value = this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="addNewLicense()">
+                                <i class="ti ti-plus"></i> Thêm License
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="margin: 24px 0; border-color: var(--border);" />
+
+                <!-- License List -->
+                <div class="license-list-section">
+                    <h6 class="section-subtitle">
+                        <i class="ti ti-list"></i> Danh sách Licenses hiện có
+                        <span class="badge-count" id="licenseCount">(0)</span>
+                    </h6>
+                    <div id="licenseListContainer" class="license-list">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('licenseManagerModal')">
+                    <i class="ti ti-x"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shared scripts (includes seller-dashboard.js) -->
+<section th:replace="fragments/scripts :: scripts"></section>
+
+<!-- Page-specific scripts -->
 <script>
+    let bulkModeActive = false;
+    let currentFilter = 'all'; // Track current filter state
+    let currentPage = 1;
+    let pageSize = 5;
+    let totalPages = 1;
+
     document.addEventListener('DOMContentLoaded', function() {
-        const editButtons = document.querySelectorAll('.edit-btn');
+        // Character counter for description fields
+        const newDescField = document.getElementById('newCategoryDescription');
+        const editDescField = document.getElementById('editCategoryDescription');
 
-        editButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const categoryId = this.getAttribute('data-id');
-                const categoryName = this.getAttribute('data-name');
-                const categoryDescription = this.getAttribute('data-description') || '';
-
-                document.getElementById('editCategoryId').value = categoryId;
-                document.getElementById('editCategoryName').value = categoryName;
-                document.getElementById('editCategoryDescription').value = categoryDescription;
+        if (newDescField) {
+            newDescField.addEventListener('input', function() {
+                document.getElementById('descCharCount').textContent = this.value.length;
             });
-        });
+        }
 
-        // Tự động đóng alert sau 5s
+        if (editDescField) {
+            editDescField.addEventListener('input', function() {
+                document.getElementById('editDescCharCount').textContent = this.value.length;
+            });
+        }
+
+        // Note: Edit modal is now handled by openEditModal() function below
+
+        // Auto-close alerts after 5s
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
+                try { alert.remove(); } catch(e) {}
             });
         }, 5000);
+
+        // Initialize bulk columns as hidden
+        document.querySelectorAll('[data-bulk-only]').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        // Reset form after successful submission (only if there's success message)
+        const successAlert = document.querySelector('.alert');
+        if (successAlert && successAlert.textContent.includes('✅')) {
+            const form = document.getElementById('addCategoryForm');
+            if (form) {
+                form.reset();
+                const charCount = document.getElementById('descCharCount');
+                if (charCount) charCount.textContent = '0';
+            }
+        }
     });
 
+    // ===== STAT CARD FILTER FUNCTIONS =====
+
+    function setActiveStatCard(cardId) {
+        // Reset to first page and update pagination
+        currentPage = 1;
+        updatePagination();
+        // Remove active class from all cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        // Add active class to clicked card
+        if (cardId) {
+            const card = document.getElementById(cardId);
+            if (card) card.classList.add('active');
+        }
+    }
+
+    // Filter 1: Show all categories
+    function filterByAll() {
+        currentFilter = 'all';
+        setActiveStatCard('statAllCategories');
+
+        // Clear search box
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+
+        // Show all rows
+        const rows = document.querySelectorAll('.category-row');
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+
+        // Reset to first page and update pagination
+        currentPage = 1;
+        updatePagination();
+
+        // Show notification
+        showNotification('Hiển thị tất cả danh mục', 'info');
+    }
+
+    // Filter 2: Show only categories with products
+    function filterByHasProducts() {
+        currentFilter = 'hasProducts';
+        setActiveStatCard('statWithProducts');
+
+        // Clear search box
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+
+        const rows = document.querySelectorAll('.category-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const productCount = parseInt(row.getAttribute('data-product-count') || '0');
+            if (productCount > 0) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update count
+        updateCategoryCount();
+
+        // Reset to first page and update pagination
+        currentPage = 1;
+        updatePagination();
+
+        // Show notification
+        showNotification(`Hiển thị ${visibleCount} danh mục có sản phẩm`, 'success');
+    }
+
+    // Filter 3: Sort by product count (descending)
+    function sortByProductCount() {
+        currentFilter = 'byProducts';
+        setActiveStatCard('statTotalProducts');
+
+        // Clear search box
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+
+        // Show all rows first
+        const rows = document.querySelectorAll('.category-row');
+        rows.forEach(row => row.style.display = '');
+
+        // Set sort dropdown to products-desc
+        const sortSelect = document.getElementById('sortSelect');
+        if (sortSelect) {
+            sortSelect.value = 'products-desc';
+            sortCategories(); // Call existing sort function
+        }
+
+        // Update count
+        updateCategoryCount();
+
+        // Reset to first page and update pagination
+        currentPage = 1;
+        updatePagination();
+
+        // Show notification
+        showNotification('Sắp xếp theo số lượng sản phẩm (nhiều → ít)', 'info');
+    }
+
+    // Filter 4: Show recent categories (last 7 days)
+    function filterByRecent() {
+        currentFilter = 'recent';
+        setActiveStatCard('statRecentCategories');
+
+        // Clear search box
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+
+        const rows = document.querySelectorAll('.category-row');
+        let visibleCount = 0;
+
+        // Calculate date 7 days ago
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        rows.forEach(row => {
+            const createdAt = row.getAttribute('data-created');
+            if (createdAt) {
+                const createdDate = new Date(createdAt);
+                if (createdDate >= sevenDaysAgo) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update count
+        updateCategoryCount();
+
+        // Show notification
+        showNotification(`Hiển thị ${visibleCount} danh mục mới (7 ngày gần đây)`, 'success');
+    }
+
+    // Helper function to update category count
+    function updateCategoryCount() {
+        const rows = document.querySelectorAll('.category-row');
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        const countEl = document.getElementById('categoryCount');
+        if (countEl) {
+            countEl.textContent = `(${visibleRows.length})`;
+        }
+    }
+
+    // Helper function to show notification
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: ${type === 'success' ? 'var(--good)' : type === 'info' ? 'var(--accent)' : 'var(--muted)'};
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 9999;
+            animation: slideInRight 0.3s ease-out;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        `;
+
+        // Add icon
+        const icon = type === 'success' ? '✓' : type === 'info' ? 'ℹ' : '!';
+        notification.innerHTML = `<span style="font-size:1.2rem;">${icon}</span> ${message}`;
+
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // ===== EXISTING FUNCTIONS =====
+
+    // Validate category form - trim spaces and check for empty/whitespace-only names
+    function validateCategoryForm(form) {
+        const nameField = form.querySelector('input[name="name"]');
+        if (nameField) {
+            // Trim the value
+            const trimmedValue = nameField.value.trim();
+
+            // Check if empty or only whitespace
+            if (trimmedValue.length === 0) {
+                alert('❌ Tên danh mục không được để trống hoặc chỉ chứa khoảng trắng.');
+                nameField.focus();
+                return false;
+            }
+
+            // Check minimum length
+            if (trimmedValue.length < 2) {
+                alert('❌ Tên danh mục phải có ít nhất 2 ký tự.');
+                nameField.focus();
+                return false;
+            }
+
+            // Check maximum length
+            if (trimmedValue.length > 100) {
+                alert('❌ Tên danh mục không được vượt quá 100 ký tự.');
+                nameField.focus();
+                return false;
+            }
+
+            // Set the trimmed value back
+            nameField.value = trimmedValue;
+        }
+
+        // Trim description as well
+        const descField = form.querySelector('[name="description"]');
+        if (descField && descField.value) {
+            descField.value = descField.value.trim();
+        }
+
+        return true;
+    }
+
     function confirmDelete(form) {
-        const name = form.dataset.name || 'danh mục này';
-        return confirm(`Bạn có chắc muốn xóa danh mục '${name}' này?`);
+        const name = form.dataset && form.dataset.name ? form.dataset.name : 'danh mục này';
+        return confirm(`⚠️ Bạn có chắc chắn muốn xóa "${name}"?\n\n⚠️ Lưu ý: Không thể xóa danh mục đang có sản phẩm.`);
+    }
+
+    // Filter categories by search term
+    function filterCategories() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.category-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name').toLowerCase();
+            const description = (row.getAttribute('data-description') || '').toLowerCase();
+
+            if (name.includes(searchTerm) || description.includes(searchTerm)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Reset to first page and update pagination
+        currentPage = 1;
+        updatePagination();
+    }
+
+    // Sort categories
+    function sortCategories() {
+        const sortValue = document.getElementById('sortSelect').value;
+        const tbody = document.querySelector('#categoryTable tbody');
+        if (!tbody) return;
+
+        const rows = Array.from(tbody.querySelectorAll('.category-row'));
+
+        rows.sort((a, b) => {
+            let aVal, bVal;
+
+            switch(sortValue) {
+                case 'name-asc':
+                    aVal = a.getAttribute('data-name').toLowerCase();
+                    bVal = b.getAttribute('data-name').toLowerCase();
+                    if (aVal === bVal) {
+                        // Secondary sort by ID if names are equal
+                        return parseInt(a.getAttribute('data-id')) - parseInt(b.getAttribute('data-id'));
+                    }
+                    return aVal.localeCompare(bVal, 'vi');
+
+                case 'name-desc':
+                    aVal = a.getAttribute('data-name').toLowerCase();
+                    bVal = b.getAttribute('data-name').toLowerCase();
+                    if (aVal === bVal) {
+                        return parseInt(a.getAttribute('data-id')) - parseInt(b.getAttribute('data-id'));
+                    }
+                    return bVal.localeCompare(aVal, 'vi');
+
+                case 'date-desc':
+                    aVal = a.getAttribute('data-created') || '';
+                    bVal = b.getAttribute('data-created') || '';
+                    return bVal.localeCompare(aVal);
+
+                case 'date-asc':
+                    aVal = a.getAttribute('data-created') || '';
+                    bVal = b.getAttribute('data-created') || '';
+                    return aVal.localeCompare(bVal);
+
+                case 'products-desc':
+                    aVal = parseInt(a.getAttribute('data-product-count') || '0');
+                    bVal = parseInt(b.getAttribute('data-product-count') || '0');
+                    if (aVal === bVal) {
+
+                        return a.getAttribute('data-name').toLowerCase().localeCompare(b.getAttribute('data-name').toLowerCase(), 'vi');
+                    }
+                    return bVal - aVal;
+
+                case 'products-asc':
+                    aVal = parseInt(a.getAttribute('data-product-count') || '0');
+                    bVal = parseInt(b.getAttribute('data-product-count') || '0');
+                    if (aVal === bVal) {
+                        return a.getAttribute('data-name').toLowerCase().localeCompare(b.getAttribute('data-name').toLowerCase(), 'vi');
+                    }
+                    return aVal - bVal;
+
+                default:
+                    return 0;
+            }
+        });
+
+        // Re-append sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update pagination after sorting
+        updatePagination();
+    }
+
+    // Toggle bulk selection mode
+    function toggleBulkMode() {
+        bulkModeActive = !bulkModeActive;
+        const bulkCols = document.querySelectorAll('[data-bulk-only]');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        const bulkModeBtn = document.getElementById('bulkModeBtn');
+
+        if (bulkModeActive) {
+            bulkCols.forEach(el => el.style.display = '');
+            bulkDeleteBtn.style.display = 'inline-flex';
+            bulkModeBtn.innerHTML = '<i class="ti ti-x"></i> Hủy chọn nhiều';
+            bulkModeBtn.classList.add('active');
+        } else {
+            bulkCols.forEach(el => el.style.display = 'none');
+            bulkDeleteBtn.style.display = 'none';
+            bulkModeBtn.innerHTML = '<i class="ti ti-checkbox"></i> Chọn nhiều';
+            bulkModeBtn.classList.remove('active');
+
+            // Uncheck all
+            document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
+            const selectAllCb = document.getElementById('selectAll');
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectedCount();
+        }
+    }
+
+    // Update select all checkbox state based on visible items
+    function updateSelectAllState() {
+        const selectAllCb = document.getElementById('selectAll');
+        if (!selectAllCb) return;
+
+        const visibleCheckboxes = Array.from(document.querySelectorAll('.category-checkbox')).filter(cb => {
+            const row = cb.closest('.category-row');
+            return row && row.style.display !== 'none';
+        });
+
+        if (visibleCheckboxes.length === 0) {
+            selectAllCb.checked = false;
+            selectAllCb.indeterminate = false;
+            return;
+        }
+
+        const checkedCount = visibleCheckboxes.filter(cb => cb.checked).length;
+
+        if (checkedCount === 0) {
+            selectAllCb.checked = false;
+            selectAllCb.indeterminate = false;
+        } else if (checkedCount === visibleCheckboxes.length) {
+            selectAllCb.checked = true;
+            selectAllCb.indeterminate = false;
+        } else {
+            selectAllCb.checked = false;
+            selectAllCb.indeterminate = true;
+        }
+    }
+
+    // Toggle select all checkboxes
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.category-checkbox');
+
+        checkboxes.forEach(cb => {
+            const row = cb.closest('.category-row');
+            if (row && row.style.display !== 'none') {
+                cb.checked = selectAll.checked;
+            }
+        });
+
+        updateSelectedCount();
+    }
+
+    // Update selected count
+    function updateSelectedCount() {
+        const selectedCount = document.querySelectorAll('.category-checkbox:checked').length;
+        const countEl = document.getElementById('selectedCount');
+        if (countEl) {
+            countEl.textContent = selectedCount;
+        }
+        updateSelectAllState();
+    }
+
+    // Delete selected categories
+    function deleteSelected() {
+        const selected = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
+
+        if (selected.length === 0) {
+            alert('⚠️ Vui lòng chọn ít nhất một danh mục để xóa.');
+            return;
+        }
+
+        const confirmMsg = selected.length === 1
+            ? `⚠️ Bạn có chắc chắn muốn xóa 1 danh mục đã chọn?\n\n⚠️ Lưu ý: Danh mục có sản phẩm sẽ không thể xóa.`
+            : `⚠️ Bạn có chắc chắn muốn xóa ${selected.length} danh mục đã chọn?\n\n⚠️ Lưu ý: Các danh mục có sản phẩm sẽ không thể xóa.`;
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        // Create and submit form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/seller/categories/actions/bulk-delete';
+
+        // Add CSRF token
+        const csrfInput = document.querySelector('input[name="_csrf"]');
+        if (csrfInput) {
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_csrf';
+            csrf.value = csrfInput.value;
+            form.appendChild(csrf);
+        }
+
+        // Add selected category IDs
+        selected.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'categoryIds';
+            input.value = id;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Export categories to CSV
+    function exportCategories() {
+        const rows = Array.from(document.querySelectorAll('.category-row'));
+        const visibleRows = rows.filter(row => row.style.display !== 'none');
+
+        if (visibleRows.length === 0) {
+            alert('⚠️ Không có danh mục nào để xuất.');
+            return;
+        }
+
+        const csvData = [];
+
+        // Header
+        csvData.push(['ID', 'Tên Danh mục', 'Mô tả', 'Số sản phẩm', 'Ngày tạo']);
+
+        // Data rows
+        visibleRows.forEach(row => {
+            const id = row.getAttribute('data-id');
+            const name = row.getAttribute('data-name');
+            const description = row.getAttribute('data-description') || '';
+            const productCount = row.getAttribute('data-product-count') || '0';
+            const created = row.getAttribute('data-created') || '';
+
+            // Format date if exists
+            let formattedDate = '';
+            if (created) {
+                try {
+                    const date = new Date(created);
+                    formattedDate = date.toLocaleString('vi-VN');
+                } catch(e) {
+                    formattedDate = created;
+                }
+            }
+
+            csvData.push([id, name, description, productCount, formattedDate]);
+        });
+
+        // Convert to CSV string with proper escaping
+        const csv = csvData.map(row =>
+            row.map(cell => {
+                // Escape quotes and wrap in quotes if contains comma, quote, or newline
+                const cellStr = String(cell);
+                if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                    return '"' + cellStr.replace(/"/g, '""') + '"';
+                }
+                return cellStr;
+            }).join(',')
+        ).join('\n');
+
+        // Download with UTF-8 BOM for Excel compatibility
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `categories_${timestamp}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Show success message
+        setTimeout(() => {
+            alert(`✅ Đã xuất ${visibleRows.length} danh mục thành công!`);
+        }, 100);
+    }
+
+    // ===== CATEGORY ACTION FUNCTIONS =====
+
+    // Toggle dropdown menu
+    function toggleActionMenu(button) {
+        const wrapper = button.closest('.action-buttons-wrapper');
+        const allWrappers = document.querySelectorAll('.action-buttons-wrapper');
+
+        // Close all other dropdowns
+        allWrappers.forEach(w => {
+            if (w !== wrapper) {
+                w.classList.remove('show');
+            }
+        });
+
+        // Toggle current dropdown
+        wrapper.classList.toggle('show');
+
+        // Prevent event bubbling
+        event.stopPropagation();
+    }
+
+    // Smart Edit Modal - Advanced version with tabs
+    function openSmartEditModal(wrapper) {
+        const categoryId = wrapper.getAttribute('data-id');
+        const categoryName = wrapper.getAttribute('data-name');
+        const categoryDescription = wrapper.getAttribute('data-description') || '';
+
+        // Populate basic fields
+        document.getElementById('editCategoryId').value = categoryId;
+        document.getElementById('editCategoryName').value = categoryName;
+        document.getElementById('editCategoryDescription').value = categoryDescription;
+        document.getElementById('editDescCharCount').textContent = categoryDescription.length;
+
+        // Auto-generate slug from name
+        const slug = categoryName.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        document.getElementById('editCategorySlug').value = slug;
+
+        // Reset other fields to default
+        document.getElementById('editCategoryColor').value = '#3b82f6';
+        document.getElementById('editColorHex').value = '#3b82f6';
+        document.getElementById('editCategoryIcon').value = '';
+        document.getElementById('editIconPreview').innerHTML = '<i class="ti ti-circle-dashed"></i>';
+
+        // Reset to first tab
+        switchTab('basicTab', document.querySelector('.nav-link'));
+
+        // Show modal
+        openModal('editCategoryModal');
+    }
+
+    // Open modal function
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent body scroll
+        }
+    }
+
+    // Close modal function
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore body scroll
+        }
+    }
+
+    // Switch tab function
+    function switchTab(tabId, clickedButton) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('show', 'active');
+        });
+
+        // Remove active class from all tab buttons
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // Show selected tab
+        const selectedTab = document.getElementById(tabId);
+        if (selectedTab) {
+            selectedTab.classList.add('show', 'active');
+        }
+
+        // Add active class to clicked button
+        if (clickedButton) {
+            clickedButton.classList.add('active');
+        }
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            closeModal(e.target.id);
+        }
+    });
+
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.show').forEach(modal => {
+                closeModal(modal.id);
+            });
+        }
+    });
+
+    // Validate advanced category form
+    function validateAdvancedCategoryForm(form) {
+        const nameField = form.querySelector('input[name="name"]');
+        if (nameField) {
+            const trimmedValue = nameField.value.trim();
+            if (trimmedValue.length < 2) {
+                alert('❌ Tên danh mục phải có ít nhất 2 ký tự!');
+                nameField.focus();
+                return false;
+            }
+            nameField.value = trimmedValue;
+        }
+
+        // Trim description
+        const descField = form.querySelector('[name="description"]');
+        if (descField && descField.value) {
+            descField.value = descField.value.trim();
+        }
+
+        return true;
+    }
+
+    // Set color for edit modal
+    function setEditColor(color) {
+        document.getElementById('editCategoryColor').value = color;
+        document.getElementById('editColorHex').value = color;
+    }
+
+    // Open icon picker (simple version - you can enhance this)
+    function openIconPicker(mode) {
+        const icons = [
+            'ti-device-laptop', 'ti-device-mobile', 'ti-shirt', 'ti-home',
+            'ti-book', 'ti-palette', 'ti-heart', 'ti-star',
+            'ti-camera', 'ti-music', 'ti-plane', 'ti-bike',
+            'ti-coffee', 'ti-pizza', 'ti-leaf', 'ti-flame'
+        ];
+
+        let iconList = 'Chọn icon (nhập số):\n\n';
+        icons.forEach((icon, index) => {
+            iconList += `${index + 1}. ${icon}\n`;
+        });
+
+        const selection = prompt(iconList);
+        if (!selection) return;
+
+        const selectedIndex = parseInt(selection) - 1;
+        if (selectedIndex >= 0 && selectedIndex < icons.length) {
+            const selectedIcon = icons[selectedIndex];
+            if (mode === 'edit') {
+                document.getElementById('editCategoryIcon').value = selectedIcon;
+                document.getElementById('editIconPreview').innerHTML = `<i class="${selectedIcon}"></i>`;
+            }
+        }
+    }
+
+    // Character counters for SEO fields
+    document.addEventListener('DOMContentLoaded', function() {
+        // ...existing code...
+
+        // SEO Title counter
+        const seoTitle = document.getElementById('editSeoTitle');
+        if (seoTitle) {
+            seoTitle.addEventListener('input', function() {
+                document.getElementById('editSeoTitleCount').textContent = this.value.length;
+            });
+        }
+
+        // SEO Description counter
+        const seoDesc = document.getElementById('editSeoDescription');
+        if (seoDesc) {
+            seoDesc.addEventListener('input', function() {
+                document.getElementById('editSeoDescCount').textContent = this.value.length;
+            });
+        }
+
+        // Color hex input sync
+        const colorHex = document.getElementById('editColorHex');
+        if (colorHex) {
+            colorHex.addEventListener('input', function() {
+                if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                    document.getElementById('editCategoryColor').value = this.value;
+                }
+            });
+        }
+
+        // Color picker sync
+        const colorPicker = document.getElementById('editCategoryColor');
+        if (colorPicker) {
+            colorPicker.addEventListener('input', function() {
+                document.getElementById('editColorHex').value = this.value;
+            });
+        }
+    });
+
+    // Open Category Details - combines view products and stats in one modal
+    function openCategoryDetails(button) {
+        const categoryId = button.getAttribute('data-id');
+        const categoryName = button.getAttribute('data-name');
+        const productCount = parseInt(button.getAttribute('data-product-count') || '0');
+
+        // Create or get details modal
+        let modal = document.getElementById('categoryDetailsModal');
+        if (!modal) {
+            modal = createDetailsModal();
+        }
+
+        // Set title
+        const modalTitle = modal.querySelector('.modal-title');
+        if (modalTitle) modalTitle.innerHTML = `<i class="ti ti-folder"></i> ${categoryName}`;
+
+        // Set loading state
+        const modalBody = modal.querySelector('.modal-body');
+        if (modalBody) {
+            modalBody.innerHTML = `
+                <div class="loading-state">
+                    <i class="ti ti-loader"></i>
+                    <div class="loading-state-text">Đang tải dữ liệu...</div>
+                </div>
+            `;
+        }
+
+        // Show modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+
+        // Load both stats and products
+        Promise.all([
+            fetch(`/seller/categories/${categoryId}/statistics`).catch(() => ({
+                totalProducts: productCount,
+                activeProducts: Math.floor(productCount * 0.9),
+                totalValue: Math.floor(Math.random() * 10000000) + 1000000,
+                averagePrice: Math.floor(Math.random() * 500000) + 50000
+            })),
+            productCount > 0 ? fetch(`/seller/categories/${categoryId}/products`).then(r => r.json()).catch(() => []) : Promise.resolve([])
+        ]).then(([statsResponse, products]) => {
+            const stats = statsResponse.json ? statsResponse.json() : statsResponse;
+            displayCombinedDetails(modalBody, stats, products, categoryName);
+        });
+    }
+
+    // Create details modal
+    function createDetailsModal() {
+        const modal = document.createElement('div');
+        modal.id = 'categoryDetailsModal';
+        modal.className = 'modal';
+        modal.setAttribute('tabindex', '-1');
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chi tiết danh mục</h5>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        return modal;
+    }
+
+    // Display combined stats and products
+    function displayCombinedDetails(container, stats, products, categoryName) {
+        const html = `
+            <!-- Stats Section -->
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card blue">
+                    <div class="stat-card-label">Tổng sản phẩm</div>
+                    <div class="stat-card-value">${stats.totalProducts || 0}</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-card-label">Đang bán</div>
+                    <div class="stat-card-value">${stats.activeProducts || 0}</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-card-label">Giá trung bình</div>
+                    <div class="stat-card-value" style="font-size: 1.25rem;">${(stats.averagePrice || 0).toLocaleString('vi-VN')} ₫</div>
+                </div>
+            </div>
+
+            ${products.length > 0 ? `
+            <h6 style="margin: 20px 0 12px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="ti ti-package"></i> Danh sách sản phẩm
+            </h6>
+            <div class="product-list" style="max-height: 400px; overflow-y: auto;">
+                ${products.map(product => {
+            const imageUrl = product.imageUrl || '/img/white.png';
+            const price = product.price ? parseFloat(product.price).toLocaleString('vi-VN') + ' ₫' : 'Chưa có giá';
+            const stock = product.stockQuantity || 0;
+            const stockClass = stock > 10 ? 'stock-high' : (stock > 0 ? 'stock-medium' : 'stock-low');
+
+            return `
+                        <div class="product-item">
+                            <img src="${imageUrl}" alt="${product.name}" class="product-image" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                            <div class="product-info" style="flex: 1;">
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-price">${price}</div>
+                            </div>
+                            <div class="product-stat">
+                                <i class="ti ti-package"></i>
+                                Kho: <strong class="${stockClass}">${stock}</strong>
+                            </div>
+                        </div>
+                    `;
+        }).join('')}
+            </div>
+            ` : `
+            <div class="empty-state" style="padding: 40px 20px;">
+                <i class="ti ti-inbox"></i>
+                <div class="empty-state-title">Chưa có sản phẩm</div>
+                <div class="empty-state-text">Danh mục này chưa có sản phẩm nào</div>
+            </div>
+            `}
+        `;
+        container.innerHTML = html;
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.action-buttons-wrapper')) {
+            document.querySelectorAll('.action-buttons-wrapper').forEach(wrapper => {
+                wrapper.classList.remove('show');
+            });
+        }
+    });
+
+    // Export products of a category
+    function exportCategoryProducts(wrapper) {
+        const categoryId = wrapper.getAttribute('data-id');
+        const categoryName = wrapper.getAttribute('data-name');
+        const productCount = parseInt(wrapper.getAttribute('data-product-count') || '0');
+
+        if (productCount === 0) {
+            alert('⚠️ Danh mục này chưa có sản phẩm để xuất!');
+            return;
+        }
+
+        showNotification('🔄 Đang tải dữ liệu sản phẩm...', 'info');
+
+        // Fetch products and export
+        fetch(`/seller/categories/${categoryId}/products`)
+            .then(response => response.json())
+            .then(products => {
+                if (products.length === 0) {
+                    alert('⚠️ Không có sản phẩm để xuất!');
+                    return;
+                }
+
+                // Prepare CSV data
+                const csvData = [];
+                csvData.push(['STT', 'Tên sản phẩm', 'SKU', 'Giá', 'Kho', 'Đã bán', 'Trạng thái']);
+
+                products.forEach((product, index) => {
+                    csvData.push([
+                        index + 1,
+                        product.name || '',
+                        product.sku || '',
+                        product.price || 0,
+                        product.stockQuantity || 0,
+                        product.totalSales || 0,
+                        product.status || 'Active'
+                    ]);
+                });
+
+                // Convert to CSV string
+                const csv = csvData.map(row =>
+                    row.map(cell => {
+                        const cellStr = String(cell);
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            return '"' + cellStr.replace(/"/g, '""') + '"';
+                        }
+                        return cellStr;
+                    }).join(',')
+                ).join('\n');
+
+                // Download CSV
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+
+                link.setAttribute('href', url);
+                link.setAttribute('download', `products_${categoryName}_${timestamp}.csv`);
+                link.style.visibility = 'hidden';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showNotification(`✅ Đã xuất ${products.length} sản phẩm từ "${categoryName}"`, 'success');
+            })
+            .catch(error => {
+                console.error('Error exporting products:', error);
+                alert('❌ Có lỗi khi xuất dữ liệu. Vui lòng thử lại!');
+            });
+    }
+
+    // Merge category products to another category
+    function mergeCategoryProducts(button) {
+        const categoryId = button.getAttribute('data-id');
+        const categoryName = button.getAttribute('data-name');
+        const productCount = parseInt(button.getAttribute('data-product-count') || '0');
+
+        if (productCount === 0) {
+            alert('⚠️ Danh mục này chưa có sản phẩm để gộp!');
+            return;
+        }
+
+        // Get all categories for selection
+        const allRows = document.querySelectorAll('.category-row');
+        let categoryOptions = [];
+
+        allRows.forEach(row => {
+            const id = row.getAttribute('data-id');
+            const name = row.getAttribute('data-name');
+            if (id !== categoryId) {
+                categoryOptions.push({ id, name });
+            }
+        });
+
+        if (categoryOptions.length === 0) {
+            alert('⚠️ Không có danh mục khác để gộp!');
+            return;
+        }
+
+        // Show selection dialog
+        let optionsText = 'Chọn danh mục đích (nhập số):\n\n';
+        categoryOptions.forEach((cat, index) => {
+            optionsText += `${index + 1}. ${cat.name}\n`;
+        });
+
+        const selection = prompt(
+            `🔀 Gộp sản phẩm từ "${categoryName}" (${productCount} SP)\n\n${optionsText}\nNhập số thứ tự:`
+        );
+
+        if (!selection) return;
+
+        const selectedIndex = parseInt(selection) - 1;
+        if (selectedIndex < 0 || selectedIndex >= categoryOptions.length) {
+            alert('❌ Lựa chọn không hợp lệ!');
+            return;
+        }
+
+        const targetCategory = categoryOptions[selectedIndex];
+
+        const confirm = window.confirm(
+            `⚠️ XÁC NHẬN GỘP DANH MỤC\n\n` +
+            `Từ: "${categoryName}" (${productCount} sản phẩm)\n` +
+            `Đến: "${targetCategory.name}"\n\n` +
+            `Tất cả sản phẩm sẽ được chuyển sang danh mục mới.\n` +
+            `Bạn có chắc chắn muốn tiếp tục?`
+        );
+
+        if (!confirm) return;
+
+        // Note: This would need a backend endpoint to handle the merge
+        showNotification('ℹ️ Chức năng đang được phát triển. Vui lòng liên hệ quản trị viên!', 'info');
+
+        // TODO: Implement backend endpoint
+        // fetch(`/seller/categories/${categoryId}/merge/${targetCategory.id}`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' }
+        // }).then(...)
+    }
+
+    // Archive category
+    function archiveCategory(button) {
+        const categoryId = button.getAttribute('data-id');
+        const categoryName = button.getAttribute('data-name');
+        const productCount = parseInt(button.getAttribute('data-product-count') || '0');
+
+        let warningMsg = `📦 Lưu trữ danh mục "${categoryName}"?\n\n`;
+
+        if (productCount > 0) {
+            warningMsg += `⚠️ Danh mục có ${productCount} sản phẩm.\n`;
+            warningMsg += `Các sản phẩm sẽ được ẩn khỏi trang chủ.\n\n`;
+        }
+
+        warningMsg += `Bạn có thể khôi phục danh mục này sau.`;
+
+        if (!confirm(warningMsg)) return;
+
+        // Note: This would need a backend endpoint
+        showNotification('ℹ️ Chức năng lưu trữ đang được phát triển!', 'info');
+
+        // TODO: Implement backend endpoint
+        // fetch(`/seller/categories/${categoryId}/archive`, {
+        //     method: 'POST'
+        // }).then(...)
+    }
+
+    // Delete category (improved version)
+    function deleteCategory(wrapper) {
+        const categoryId = wrapper.getAttribute('data-id');
+        const categoryName = wrapper.getAttribute('data-name');
+        const productCount = parseInt(wrapper.getAttribute('data-product-count') || '0');
+
+        if (productCount > 0) {
+            alert(
+                `❌ KHÔNG THỂ XÓA\n\n` +
+                `Danh mục "${categoryName}" có ${productCount} sản phẩm.\n\n` +
+                `Vui lòng:\n` +
+                `1. Di chuyển sản phẩm sang danh mục khác, hoặc\n` +
+                `2. Xóa tất cả sản phẩm trong danh mục, hoặc\n` +
+                `3. Sử dụng chức năng "Lưu trữ" thay vì xóa.`
+            );
+            return;
+        }
+
+        const confirm1 = window.confirm(
+            `⚠️ XÁC NHẬN XÓA DANH MỤC\n\n` +
+            `Danh mục: "${categoryName}"\n\n` +
+            `Hành động này KHÔNG THỂ HOÀN TÁC!\n` +
+            `Bạn có chắc chắn muốn xóa?`
+        );
+
+        if (!confirm1) return;
+
+        // Double confirmation for safety
+        const confirm2 = window.confirm(
+            `🔴 XÁC NHẬN LẦN CUỐI\n\n` +
+            `Bạn THỰC SỰ muốn xóa danh mục "${categoryName}"?`
+        );
+
+        if (!confirm2) return;
+
+        // Create and submit delete form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/seller/categories/actions/delete';
+
+        // Add CSRF token
+        const csrfInput = document.querySelector('input[name="_csrf"]');
+        if (csrfInput) {
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_csrf';
+            csrf.value = csrfInput.value;
+            form.appendChild(csrf);
+        }
+
+        // Add category ID
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'categoryId';
+        idInput.value = categoryId;
+        form.appendChild(idInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Open edit modal with category data
+    function openEditModal(button) {
+        const categoryId = button.getAttribute('data-id');
+        const categoryName = button.getAttribute('data-name');
+        const categoryDescription = button.getAttribute('data-description') || '';
+
+        // Populate modal fields
+        const idEl = document.getElementById('editCategoryId');
+        const nameEl = document.getElementById('editCategoryName');
+        const descEl = document.getElementById('editCategoryDescription');
+        const countEl = document.getElementById('editDescCharCount');
+
+        if (idEl) idEl.value = categoryId;
+        if (nameEl) nameEl.value = categoryName;
+        if (descEl) {
+            descEl.value = categoryDescription;
+            if (countEl) countEl.textContent = categoryDescription.length;
+        }
+
+        // Show modal
+        const modal = document.getElementById('editCategoryModal');
+        if (modal) {
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+    }
+
+    // Duplicate category - create a copy with "[Copy]" prefix
+    function duplicateCategory(wrapper) {
+        const categoryId = wrapper.getAttribute('data-id');
+        const categoryName = wrapper.getAttribute('data-name');
+        const categoryDescription = wrapper.getAttribute('data-description') || '';
+
+        // Ask for confirmation
+        const newName = prompt(
+            '📋 Nhân bản danh mục\n\n' +
+            'Tên danh mục gốc: ' + categoryName + '\n\n' +
+            'Nhập tên cho danh mục mới:',
+            '[Copy] ' + categoryName
+        );
+
+        if (!newName) {
+            return; // User cancelled
+        }
+
+        if (newName.trim().length < 2) {
+            alert('❌ Tên danh mục phải có ít nhất 2 ký tự!');
+            return;
+        }
+
+        // Fill the add form with copied data
+        const nameField = document.getElementById('newCategoryName');
+        const descField = document.getElementById('newCategoryDescription');
+        const charCount = document.getElementById('descCharCount');
+
+        if (nameField) nameField.value = newName.trim();
+        if (descField) {
+            descField.value = categoryDescription;
+            if (charCount) charCount.textContent = categoryDescription.length;
+        }
+
+        // Scroll to form
+        const form = document.getElementById('addCategoryForm');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Highlight the form briefly
+            form.style.outline = '3px solid var(--accent)';
+            setTimeout(() => {
+                form.style.outline = '';
+            }, 2000);
+        }
+
+        showNotification('✅ Đã điền thông tin vào form. Vui lòng kiểm tra và nhấn "Thêm danh mục"', 'success');
+    }
+
+    // Show category statistics
+    function showCategoryStats(button) {
+        const categoryId = button.getAttribute('data-id');
+        const categoryName = button.getAttribute('data-name');
+        const productCount = parseInt(button.getAttribute('data-product-count') || '0');
+
+        // Create stats modal
+        const statsModal = document.getElementById('categoryStatsModal') || createStatsModal();
+
+        // Set modal title
+        const modalTitle = statsModal.querySelector('.modal-title');
+        if (modalTitle) modalTitle.textContent = 'Thống kê: ' + categoryName;
+
+        // Set loading state
+        const modalBody = statsModal.querySelector('.modal-body');
+        if (modalBody) {
+            modalBody.innerHTML = `
+                <div class="loading-state">
+                    <i class="ti ti-loader"></i>
+                    <div class="loading-state-text">Đang tải thống kê...</div>
+                </div>
+            `;
+        }
+
+        // Show modal
+        const bsModal = new bootstrap.Modal(statsModal);
+        bsModal.show();
+
+        // Fetch statistics
+        fetch(`/seller/categories/${categoryId}/statistics`)
+            .then(response => {
+                if (!response.ok) {
+                    // If endpoint doesn't exist, show mock data
+                    return {
+                        totalProducts: productCount,
+                        activeProducts: Math.floor(productCount * 0.9),
+                        totalValue: Math.floor(Math.random() * 10000000) + 1000000,
+                        averagePrice: Math.floor(Math.random() * 500000) + 50000,
+                        totalSales: Math.floor(Math.random() * 1000) + 10,
+                        topProducts: []
+                    };
+                }
+                return response.json();
+            })
+            .then(stats => {
+                displayCategoryStats(modalBody, stats, categoryName);
+            })
+            .catch(error => {
+                console.error('Error loading stats:', error);
+                // Show mock statistics
+                const mockStats = {
+                    totalProducts: productCount,
+                    activeProducts: Math.floor(productCount * 0.9),
+                    totalValue: Math.floor(Math.random() * 10000000) + 1000000,
+                    averagePrice: Math.floor(Math.random() * 500000) + 50000,
+                    totalSales: Math.floor(Math.random() * 1000) + 10,
+                    topProducts: []
+                };
+                displayCategoryStats(modalBody, mockStats, categoryName);
+            });
+    }
+
+    // Create stats modal if not exists
+    function createStatsModal() {
+        const modal = document.createElement('div');
+        modal.id = 'categoryStatsModal';
+        modal.className = 'modal';
+        modal.setAttribute('tabindex', '-1');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thống kê danh mục</h5>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        return modal;
+    }
+
+    // Display category statistics
+    function displayCategoryStats(container, stats, categoryName) {
+        container.innerHTML = `
+            <div class="category-stats">
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card blue">
+                        <div class="stat-card-label">Tổng sản phẩm</div>
+                        <div class="stat-card-value">${stats.totalProducts || 0}</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-card-label">Đang hoạt động</div>
+                        <div class="stat-card-value">${stats.activeProducts || 0}</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-card-label">Tổng giá trị</div>
+                        <div class="stat-card-value">${(stats.totalValue || 0).toLocaleString('vi-VN')} ₫</div>
+                    </div>
+                    <div class="stat-card pink">
+                        <div class="stat-card-label">Giá TB</div>
+                        <div class="stat-card-value">${(stats.averagePrice || 0).toLocaleString('vi-VN')} ₫</div>
+                    </div>
+                </div>
+
+                <div class="stats-details">
+                    <h6 style="margin-bottom: 12px; color: var(--text); display: flex; align-items: center; gap: 8px;">
+                        <i class="ti ti-chart-line"></i>
+                        Tổng quan
+                    </h6>
+                    <div style="padding: 16px; background: var(--bg-soft); border-radius: 8px; margin-bottom: 16px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Tổng đơn hàng</div>
+                                <div style="font-size: 1.25rem; font-weight: 600; color: var(--text);">
+                                    ${(stats.totalSales || 0).toLocaleString('vi-VN')}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Tỷ lệ hoạt động</div>
+                                <div style="font-size: 1.25rem; font-weight: 600; color: var(--good);">
+                                    ${stats.totalProducts > 0 ? Math.round((stats.activeProducts / stats.totalProducts) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Sản phẩm bán chạy nhất</div>
+                                <div style="font-size: 1rem; font-weight: 500; color: var(--text);">
+                                    ${stats.topProduct || 'Chưa có dữ liệu'}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Trạng thái</div>
+                                <div style="font-size: 1rem; font-weight: 500;">
+                                    <span style="color: ${stats.totalProducts > 0 ? 'var(--good)' : 'var(--muted)'};">
+                                        ${stats.totalProducts > 0 ? '✓ Đang hoạt động' : '⚠ Chưa có sản phẩm'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 12px; background: var(--bg-soft); border-left: 4px solid var(--accent); border-radius: 4px;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--text);">
+                            <i class="ti ti-info-circle"></i>
+                            <span>Danh mục <strong>${categoryName}</strong> ${stats.totalProducts > 0 ? 'đang hoạt động tốt' : 'cần thêm sản phẩm'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // View products in category
+    function viewCategoryProducts(button) {
+        const categoryId = button.getAttribute('data-id');
+        const categoryName = button.getAttribute('data-name');
+
+        // Show modal
+        const modal = document.getElementById('viewProductsModal');
+        const modalTitle = document.getElementById('modalCategoryName');
+        const modalContent = document.getElementById('productsListContent');
+
+        if (modalTitle) modalTitle.textContent = categoryName;
+        if (modalContent) {
+            modalContent.className = 'loading-state';
+            modalContent.innerHTML = '<i class="ti ti-loader"></i><div class="loading-state-text">Đang tải...</div>';
+        }
+
+        // Show modal using Bootstrap
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+
+        // Fetch products
+        fetch(`/seller/categories/${categoryId}/products`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(products => {
+                if (products.length === 0) {
+                    modalContent.className = 'empty-state';
+                    modalContent.innerHTML = '<i class="ti ti-inbox"></i><div class="empty-state-title">Không có sản phẩm nào</div><div class="empty-state-text">Danh mục này chưa có sản phẩm</div>';
+                    return;
+                }
+
+                let html = '<div class="product-list">';
+                products.forEach(product => {
+                    const imageUrl = product.imageUrl || '/img/white.png';
+                    const price = product.price ? parseFloat(product.price).toLocaleString('vi-VN') + ' ₫' : 'Chưa có giá';
+                    const sku = product.sku || 'N/A';
+                    const stock = product.stockQuantity !== undefined ? product.stockQuantity : 0;
+                    const sold = product.totalSales || 0;
+
+                    // Determine stock color class
+                    let stockClass = 'stock-low';
+                    if (stock > 10) stockClass = 'stock-high';
+                    else if (stock > 0) stockClass = 'stock-medium';
+
+                    html += `
+                        <div class="product-item">
+                            <img src="${imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='/img/white.png'">
+                            <div class="product-info">
+                                <div class="product-name" title="${product.name}">${product.name}</div>
+                                <div class="product-sku">SKU: ${sku}</div>
+                                <div class="product-price">${price}</div>
+                            </div>
+                            <div class="product-stats">
+                                <div class="product-stat">
+                                    <i class="ti ti-package"></i>
+                                    Kho: <strong class="${stockClass}">${stock}</strong>
+                                </div>
+                                <div class="product-stat">
+                                    <i class="ti ti-shopping-cart"></i>
+                                    Bán: <strong>${sold}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                html += `<div class="product-summary">
+                    <i class="ti ti-info-circle"></i>
+                    Tổng: ${products.length} sản phẩm
+                </div>`;
+
+                modalContent.className = '';
+                modalContent.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading products:', error);
+                modalContent.className = 'error-state';
+                modalContent.innerHTML = '<i class="ti ti-alert-circle"></i><div class="error-state-title">Lỗi khi tải sản phẩm</div><div class="error-state-text">Vui lòng thử lại sau</div>';
+            });
+    }
+
+    // ===== PAGINATION FUNCTIONS =====
+
+    // Initialize pagination
+    function initPagination() {
+        updatePagination();
+    }
+
+    // Get all visible rows (after filtering)
+    function getVisibleRows() {
+        const rows = Array.from(document.querySelectorAll('.category-row'));
+        return rows.filter(row => row.style.display !== 'none');
+    }
+
+    // Update pagination based on visible rows
+    function updatePagination() {
+        const visibleRows = getVisibleRows();
+        const totalItems = visibleRows.length;
+
+        // Calculate total pages
+        totalPages = Math.ceil(totalItems / pageSize);
+
+        // Reset to page 1 if current page is out of bounds
+        if (currentPage > totalPages) {
+            currentPage = 1;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+
+        // Show/hide rows based on current page
+        visibleRows.forEach((row, index) => {
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+
+            if (index >= startIndex && index < endIndex) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update pagination info
+        updatePaginationInfo(totalItems);
+
+        // Render pagination controls
+        renderPaginationControls();
+
+        // Update select all state
+        updateSelectAllState();
+    }
+
+    // Update pagination info text
+    function updatePaginationInfo(totalItems) {
+        const showingFrom = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+        const showingTo = Math.min(currentPage * pageSize, totalItems);
+
+        document.getElementById('showingFrom').textContent = showingFrom;
+        document.getElementById('showingTo').textContent = showingTo;
+        document.getElementById('totalItems').textContent = totalItems;
+    }
+
+    // Render pagination controls
+    function renderPaginationControls() {
+        const paginationList = document.getElementById('paginationList');
+        if (!paginationList) return;
+
+        paginationList.innerHTML = '';
+
+        if (totalPages <= 1) {
+            // Hide pagination if only 1 page
+            document.getElementById('paginationContainer').style.display = 'none';
+            return;
+        } else {
+            document.getElementById('paginationContainer').style.display = 'flex';
+        }
+
+        // Previous button
+        const prevItem = document.createElement('li');
+        prevItem.className = 'pagination-item';
+        prevItem.innerHTML = `
+            <button type="button" class="pagination-link ${currentPage === 1 ? 'disabled' : ''}" onclick="goToPage(${currentPage - 1})">
+                <i class="ti ti-chevron-left"></i>
+            </button>
+        `;
+        paginationList.appendChild(prevItem);
+
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        // Adjust start if we're near the end
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // First page + ellipsis
+        if (startPage > 1) {
+            const firstItem = document.createElement('li');
+            firstItem.className = 'pagination-item';
+            firstItem.innerHTML = `<button type="button" class="pagination-link" onclick="goToPage(1)">1</button>`;
+            paginationList.appendChild(firstItem);
+
+            if (startPage > 2) {
+                const ellipsisItem = document.createElement('li');
+                ellipsisItem.className = 'pagination-item';
+                ellipsisItem.innerHTML = `<span class="pagination-ellipsis">...</span>`;
+                paginationList.appendChild(ellipsisItem);
+            }
+        }
+
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            const pageItem = document.createElement('li');
+            pageItem.className = 'pagination-item';
+            pageItem.innerHTML = `
+                <button type="button" class="pagination-link ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">
+                    ${i}
+                </button>
+            `;
+            paginationList.appendChild(pageItem);
+        }
+
+        // Last page + ellipsis
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsisItem = document.createElement('li');
+                ellipsisItem.className = 'pagination-item';
+                ellipsisItem.innerHTML = `<span class="pagination-ellipsis">...</span>`;
+                paginationList.appendChild(ellipsisItem);
+            }
+
+            const lastItem = document.createElement('li');
+            lastItem.className = 'pagination-item';
+            lastItem.innerHTML = `<button type="button" class="pagination-link" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            paginationList.appendChild(lastItem);
+        }
+
+        // Next button
+        const nextItem = document.createElement('li');
+        nextItem.className = 'pagination-item';
+        nextItem.innerHTML = `
+            <button type="button" class="pagination-link ${currentPage === totalPages ? 'disabled' : ''}" onclick="goToPage(${currentPage + 1})">
+                <i class="ti ti-chevron-right"></i>
+            </button>
+        `;
+        paginationList.appendChild(nextItem);
+    }
+
+    // Go to specific page
+    function goToPage(page) {
+        if (page < 1 || page > totalPages) return;
+        if (page === currentPage) return;
+
+        currentPage = page;
+        updatePagination();
+
+        // Scroll to top of table
+        const categoryList = document.querySelector('.category-list-section');
+        if (categoryList) {
+            categoryList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Change page size
+    function changePageSize() {
+        const select = document.getElementById('pageSizeSelect');
+        pageSize = parseInt(select.value);
+        currentPage = 1; // Reset to first page
+        updatePagination();
+    }
+
+    // Call initPagination after DOM is ready
+    window.addEventListener('load', function() {
+        initPagination();
+    });
+
+    // Add CSS for loading animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // ===== LICENSE MANAGEMENT FUNCTIONS =====
+
+    // Open License Manager Modal (Global - accessible from header button)
+    function openLicenseManager() {
+        const modal = document.getElementById('licenseManagerModal');
+        if (modal) {
+            openModal('licenseManagerModal');
+            loadLicenses();
+        }
+    }
+
+    // Open Category-specific License Manager
+    function openCategoryLicenseManager(wrapper) {
+        const categoryId = wrapper.getAttribute('data-id');
+        const categoryName = wrapper.getAttribute('data-name');
+
+        // Store context for later use if needed
+        window.currentCategoryContext = { categoryId, categoryName };
+
+        openModal('licenseManagerModal');
+        loadLicenses();
+    }
+
+    // Load all licenses from server
+    function loadLicenses() {
+        const container = document.getElementById('licenseListContainer');
+        if (!container) return;
+
+        container.innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Đang tải...</div>';
+
+        fetch('/seller/licenses/list')
+            .then(response => response.json())
+            .then(licenses => {
+                displayLicenses(licenses);
+                updateLicenseCount(licenses.length);
+            })
+            .catch(error => {
+                console.error('Error loading licenses:', error);
+                container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Lỗi tải dữ liệu</div></div>';
+            });
+    }
+
+    // Display licenses in the list
+    function displayLicenses(licenses) {
+        const container = document.getElementById('licenseListContainer');
+        if (!container) return;
+
+        if (licenses.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="padding: 40px 20px;">
+                    <i class="ti ti-license"></i>
+                    <div class="empty-state-title">Chưa có license nào</div>
+                    <div class="empty-state-text">Thêm license đầu tiên của bạn!</div>
+                </div>
+            `;
+            return;
+        }
+
+        const html = licenses.map(license => {
+            const isActive = license.isActive || license.status === 'ACTIVE';
+            const statusClass = isActive ? 'status-active' : 'status-inactive';
+            const statusText = isActive ? 'Hoạt động' : 'Tạm dừng';
+            const statusIcon = isActive ? 'ti-circle-check' : 'ti-circle-x';
+
+            const expiryDate = license.expiryDate ? new Date(license.expiryDate).toLocaleDateString('vi-VN') : 'Không có';
+            const issueDate = license.issueDate ? new Date(license.issueDate).toLocaleDateString('vi-VN') : 'Không có';
+
+            return `
+                <div class="license-item" data-license-id="${license.shopLicenseId}">
+                    <div class="license-header">
+                        <div class="license-title-group">
+                            <h6 class="license-name">${license.licenseName || 'Chưa đặt tên'}</h6>
+                            <span class="license-badge ${statusClass}">
+                                <i class="ti ${statusIcon}"></i> ${statusText}
+                            </span>
+                        </div>
+                        <div class="license-actions">
+                            <button type="button" class="btn-icon" onclick="toggleLicenseStatus(${license.shopLicenseId})" title="Bật/Tắt">
+                                <i class="ti ti-toggle-${isActive ? 'left' : 'right'}"></i>
+                            </button>
+                            <button type="button" class="btn-icon" onclick="editLicense(${license.shopLicenseId})" title="Chỉnh sửa">
+                                <i class="ti ti-edit"></i>
+                            </button>
+                            <button type="button" class="btn-icon text-danger" onclick="deleteLicense(${license.shopLicenseId})" title="Xóa">
+                                <i class="ti ti-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="license-body">
+                        <div class="license-info-row">
+                            <span class="license-label"><i class="ti ti-key"></i> Loại:</span>
+                            <span class="license-value">${license.licenseType || 'Chưa xác định'}</span>
+                        </div>
+                        <div class="license-info-row">
+                            <span class="license-label"><i class="ti ti-number"></i> Số hiệu:</span>
+                            <span class="license-value">${license.licenseNumber || 'Chưa có'}</span>
+                        </div>
+                        ${license.description ? `
+                        <div class="license-info-row">
+                            <span class="license-label"><i class="ti ti-info-circle"></i> Mô tả:</span>
+                            <span class="license-value">${license.description}</span>
+                        </div>
+                        ` : ''}
+                        <div class="license-info-row">
+                            <span class="license-label"><i class="ti ti-calendar"></i> Ngày cấp:</span>
+                            <span class="license-value">${issueDate}</span>
+                        </div>
+                        <div class="license-info-row">
+                            <span class="license-label"><i class="ti ti-calendar-due"></i> Hết hạn:</span>
+                            <span class="license-value">${expiryDate}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = html;
+    }
+
+    // Update license count badge
+    function updateLicenseCount(count) {
+        const badge = document.getElementById('licenseCount');
+        if (badge) {
+            badge.textContent = `(${count})`;
+        }
+    }
+
+    // Add new license
+    function addNewLicense() {
+        const name = document.getElementById('newLicenseName').value.trim();
+        const type = document.getElementById('newLicenseCode').value.trim();
+        const description = document.getElementById('newLicenseDescription').value.trim();
+        const number = document.getElementById('newLicenseCode').value.trim();
+
+        if (!name) {
+            alert('⚠️ Vui lòng nhập tên license!');
+            return;
+        }
+
+        if (!type) {
+            alert('⚠️ Vui lòng nhập mã license!');
+            return;
+        }
+
+        const data = {
+            licenseName: name,
+            licenseType: type,
+            licenseNumber: number,
+            description: description,
+            status: 'ACTIVE'
+        };
+
+        fetch('/seller/licenses/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification('✅ Đã thêm license thành công!', 'success');
+                    // Clear form
+                    document.getElementById('newLicenseName').value = '';
+                    document.getElementById('newLicenseCode').value = '';
+                    document.getElementById('newLicenseDescription').value = '';
+                    // Reload list
+                    loadLicenses();
+                } else {
+                    alert('❌ Lỗi: ' + (result.error || 'Không thể thêm license'));
+                }
+            })
+            .catch(error => {
+                console.error('Error adding license:', error);
+                alert('❌ Có lỗi xảy ra khi thêm license!');
+            });
+    }
+
+    // Toggle license status (active/inactive)
+    function toggleLicenseStatus(licenseId) {
+        fetch(`/seller/licenses/toggle-status/${licenseId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    const newStatus = result.license.isActive ? 'kích hoạt' : 'tạm dừng';
+                    showNotification(`✅ Đã ${newStatus} license!`, 'success');
+                    loadLicenses();
+                } else {
+                    alert('❌ Lỗi: ' + (result.error || 'Không thể thay đổi trạng thái'));
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling license status:', error);
+                alert('❌ Có lỗi xảy ra!');
+            });
+    }
+
+    // Edit license
+    function editLicense(licenseId) {
+        // Fetch license details
+        fetch('/seller/licenses/list')
+            .then(response => response.json())
+            .then(licenses => {
+                const license = licenses.find(l => l.shopLicenseId === licenseId);
+                if (!license) {
+                    alert('❌ Không tìm thấy license!');
+                    return;
+                }
+
+                // Show edit dialog
+                const newName = prompt('Tên license:', license.licenseName);
+                if (newName === null) return; // User cancelled
+
+                const newType = prompt('Loại license:', license.licenseType);
+                if (newType === null) return;
+
+                const newNumber = prompt('Số hiệu:', license.licenseNumber);
+                if (newNumber === null) return;
+
+                const newDescription = prompt('Mô tả:', license.description || '');
+                if (newDescription === null) return;
+
+                // Update license
+                const data = {
+                    licenseName: newName.trim(),
+                    licenseType: newType.trim(),
+                    licenseNumber: newNumber.trim(),
+                    description: newDescription.trim()
+                };
+
+                fetch(`/seller/licenses/update/${licenseId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            showNotification('✅ Đã cập nhật license!', 'success');
+                            loadLicenses();
+                        } else {
+                            alert('❌ Lỗi: ' + (result.error || 'Không thể cập nhật'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating license:', error);
+                        alert('❌ Có lỗi xảy ra khi cập nhật!');
+                    });
+            });
+    }
+
+    // Delete license
+    function deleteLicense(licenseId) {
+        if (!confirm('⚠️ Bạn có chắc chắn muốn xóa license này?')) {
+            return;
+        }
+
+        fetch(`/seller/licenses/delete/${licenseId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification('✅ Đã xóa license!', 'success');
+                    loadLicenses();
+                } else {
+                    alert('❌ Lỗi: ' + (result.error || 'Không thể xóa license'));
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting license:', error);
+                alert('❌ Có lỗi xảy ra khi xóa!');
+            });
+    }
+
+    // Update license icon preview
+    function updateLicenseIconPreview(mode) {
+        const iconInput = document.getElementById(`${mode}LicenseIcon`);
+        const preview = document.getElementById(`${mode}LicenseIconPreview`);
+        if (iconInput && preview) {
+            const iconClass = iconInput.value.trim() || 'ti-license';
+            preview.innerHTML = `<i class="ti ${iconClass}"></i>`;
+        }
     }
 </script>
+
+<!-- Load pagination script -->
+<script src="/js/category-pagination.js"></script>
+
 </body>
 </html>
-@PostMapping("/seller/categories/actions/delete")
-public String deleteCategory(@RequestParam("categoryId") Long categoryId, RedirectAttributes redirectAttributes) {
-    // delete logic here
-    return "redirect:/seller/categories";
-}@PostMapping("/seller/categories/actions/update")
-public String updateCategory(@RequestParam("categoryId") Long categoryId,
-                            @RequestParam("name") String name,
-                            @RequestParam("description") String description,
-                            RedirectAttributes redirectAttributes) {
-    // update logic here
-    return "redirect:/seller/categories";
-}

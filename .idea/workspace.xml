@@ -4,8 +4,37 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: add spring boot devtools">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CATEGORY_FIXES_APPLIED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CATEGORY_MANAGEMENT_FEATURES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CATEGORY_MANAGEMENT_TEST_CASES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ACCESS_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ACCESS_FIX_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ANALYSIS_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_COMPLETED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIXES_VISUAL.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIX_QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIX_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIX_VISUAL_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FLOW_TEST_CASES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_ISSUES_PRIORITY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_LINKS_ADDED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_DOCUMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_QUICK_SETUP.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_SYSTEM_STATUS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_VISUAL_FLOW.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIXES_APPLIED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_JSON_PARSE_ERROR.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_LOGIN_REDIRECT_ISSUE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_LOMBOK_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PAGINATION_IMPLEMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_FIX_CHAT_ACCESS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_START_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -245,7 +274,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760599530481</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read">
+      <option name="closed" value="true" />
+      <created>1761768131073</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1761768131073</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -281,6 +318,7 @@
     <MESSAGE value="Admin Product Approve||Cancel" />
     <MESSAGE value="fix: fix error approve Products." />
     <MESSAGE value="update: add spring boot devtools" />
-    <option name="LAST_COMMIT_MESSAGE" value="update: add spring boot devtools" />
+    <MESSAGE value="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read" />
   </component>
 </project>

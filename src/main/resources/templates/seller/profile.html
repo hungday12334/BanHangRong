@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="_csrf" th:content="${_csrf?.token}"/>
     <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
-    <title>Thông tin cá nhân - Seller Dashboard</title>
+
+    <title>Personal information - Seller Dashboard</title>
     <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
     <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -599,10 +600,10 @@
         <div class="container">
             <div class="profile-header">
                 <h1 class="profile-title">
-                    <i class="ti ti-user-circle"></i> Thông tin cá nhân
+                    <i class="ti ti-user-circle"></i> Personal information
                 </h1>
                 <a href="/seller/dashboard" class="btn btn-secondary">
-                    <i class="ti ti-arrow-left"></i> Quay lại Dashboard
+                    <i class="ti ti-arrow-left"></i> Back to Dashboard
                 </a>
             </div>
 
@@ -617,7 +618,7 @@
                                  alt="Avatar"
                                  id="profileAvatar">
                         </div>
-                        <button class="avatar-edit-btn" id="btnEditAvatar" title="Đổi avatar">
+                        <button class="avatar-edit-btn" id="btnEditAvatar" title="Change avatar">
                             <i class="ti ti-camera"></i>
                         </button>
                     </div>
@@ -636,12 +637,12 @@
                 <form class="profile-form" id="profileForm">
                     <div class="form-group">
                         <label for="name">
-                            <i class="ti ti-user"></i> Tên người dùng:
+                            <i class="ti ti-user"></i> Username:
                         </label>
                         <input type="text" id="name" name="username"
                                th:value="${user?.username}"
                                value="" readonly disabled
-                               placeholder="Tên người dùng">
+                               placeholder="Username">
                     </div>
 
                     <div class="form-group">
@@ -656,7 +657,7 @@
 
                     <div class="form-group">
                         <label for="phone">
-                            <i class="ti ti-phone"></i> Số điện thoại:
+                            <i class="ti ti-phone"></i> Phone Number:
                         </label>
                         <input type="tel" id="phone" name="phoneNumber"
                                th:value="${user?.phoneNumber}"
@@ -666,18 +667,18 @@
 
                     <div class="form-group">
                         <label for="gender">
-                            <i class="ti ti-gender-bigender"></i> Giới tính:
+                            <i class="ti ti-gender-bigender"></i> Gender:
                         </label>
                         <select id="gender" name="gender" disabled>
-                            <option value="other" th:selected="${user?.gender == 'other'}">Khác</option>
-                            <option value="male" th:selected="${user?.gender == 'male'}">Nam</option>
-                            <option value="female" th:selected="${user?.gender == 'female'}">Nữ</option>
+                            <option value="other" th:selected="${user?.gender == 'other'}">Other</option>
+                            <option value="male" th:selected="${user?.gender == 'male'}">Male</option>
+                            <option value="female" th:selected="${user?.gender == 'female'}">Female</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="birthday">
-                            <i class="ti ti-calendar"></i> Ngày sinh:
+                            <i class="ti ti-calendar"></i> Date of Birth:
                         </label>
                         <input type="date" id="birthday" name="birthDate"
                                th:value="${user?.birthDate}"
@@ -686,15 +687,15 @@
 
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="aboutUsBtn">
-                            <i class="ti ti-info-circle"></i> Về chúng tôi
+                            <i class="ti ti-info-circle"></i> About Us
                         </button>
 
                         <button type="button" class="btn btn-warning" id="changePasswordBtn">
-                            <i class="ti ti-lock"></i> Đổi mật khẩu
+                            <i class="ti ti-lock"></i> Change Password
                         </button>
 
                         <button type="button" class="btn btn-primary" id="editBtn">
-                            <i class="ti ti-edit"></i> Chỉnh sửa
+                            <i class="ti ti-edit"></i> Edit
                         </button>
                     </div>
                 </form>
@@ -708,7 +709,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">
-                <i class="ti ti-upload"></i> Đổi Avatar
+                <i class="ti ti-upload"></i> Change Avatar
             </h3>
             <button class="close-modal" id="closeModal">&times;</button>
         </div>
@@ -720,14 +721,14 @@
                 <input type="file" id="avatarFile" name="avatar" accept="image/*" class="file-input">
             </div>
             <p class="upload-help">
-                <i class="ti ti-info-circle"></i> Chọn ảnh JPG, PNG hoặc GIF (tối đa 5MB)
+                <i class="ti ti-info-circle"></i> Select JPG, PNG or GIF image (max 5MB)
             </p>
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" id="cancelUpload">
-                    <i class="ti ti-x"></i> Hủy
+                    <i class="ti ti-x"></i> Cancel
                 </button>
                 <button type="button" class="btn btn-primary" id="uploadAvatar">
-                    <i class="ti ti-upload"></i> Tải lên
+                    <i class="ti ti-upload"></i> Upload
                 </button>
             </div>
         </form>
@@ -739,18 +740,18 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">
-                <i class="ti ti-lock"></i> Đổi mật khẩu
+                <i class="ti ti-lock"></i> Change Password
             </h3>
             <button class="close-modal" id="closePasswordModal">&times;</button>
         </div>
         <form id="passwordForm">
             <div class="password-input-group">
                 <label for="currentPassword">
-                    <i class="ti ti-key"></i> Mật khẩu hiện tại:
+                    <i class="ti ti-key"></i> Current Password:
                 </label>
                 <div class="password-wrapper">
                     <input type="password" id="currentPassword" name="currentPassword"
-                           class="form-control" required placeholder="Nhập mật khẩu hiện tại">
+                           class="form-control" required placeholder="Enter current password">
                     <button type="button" class="password-toggle" data-target="currentPassword">
                         <i class="ti ti-eye"></i>
                         <i class="ti ti-eye-off"></i>
@@ -760,11 +761,11 @@
 
             <div class="password-input-group">
                 <label for="newPassword">
-                    <i class="ti ti-lock-plus"></i> Mật khẩu mới:
+                    <i class="ti ti-lock-plus"></i> New Password:
                 </label>
                 <div class="password-wrapper">
                     <input type="password" id="newPassword" name="newPassword"
-                           class="form-control" required placeholder="Nhập mật khẩu mới">
+                           class="form-control" required placeholder="Enter new password">
                     <button type="button" class="password-toggle" data-target="newPassword">
                         <i class="ti ti-eye"></i>
                         <i class="ti ti-eye-off"></i>
@@ -781,11 +782,11 @@
 
             <div class="password-input-group">
                 <label for="confirmPassword">
-                    <i class="ti ti-lock-check"></i> Xác nhận mật khẩu:
+                    <i class="ti ti-lock-check"></i> Confirm Password:
                 </label>
                 <div class="password-wrapper">
                     <input type="password" id="confirmPassword" name="confirmPassword"
-                           class="form-control" required placeholder="Nhập lại mật khẩu mới">
+                           class="form-control" required placeholder="Re-enter new password">
                     <button type="button" class="password-toggle" data-target="confirmPassword">
                         <i class="ti ti-eye"></i>
                         <i class="ti ti-eye-off"></i>
@@ -795,10 +796,10 @@
 
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" id="cancelPasswordChange">
-                    <i class="ti ti-x"></i> Hủy
+                    <i class="ti ti-x"></i> Cancel
                 </button>
                 <button type="submit" class="btn btn-warning">
-                    <i class="ti ti-check"></i> Đổi mật khẩu
+                    <i class="ti ti-check"></i> Change Password
                 </button>
             </div>
         </form>
@@ -851,7 +852,7 @@
                 birthday.removeAttribute('readonly');
                 avatarWrap.classList.add('editing');
 
-                editBtn.innerHTML = '<i class="ti ti-check"></i> Lưu thay đổi';
+                editBtn.innerHTML = '<i class="ti ti-check"></i> Save Changes';
                 editBtn.className = 'btn btn-success';
             } else {
                 // Save changes
@@ -871,17 +872,17 @@
             })
             .then(response => {
                 if (response.ok) {
-                    showToast('Cập nhật thông tin thành công!', 'success');
+                    showToast('Profile updated successfully!', 'success');
                     exitEditMode();
                     setTimeout(() => window.location.reload(), 1500);
                 } else {
                     return response.text().then(text => {
-                        throw new Error(text || 'Có lỗi xảy ra');
+                        throw new Error(text || 'An error occurred');
                     });
                 }
             })
             .catch(error => {
-                showToast('Lỗi: ' + error.message, 'error');
+                showToast('Error: ' + error.message, 'error');
             });
         }
 
@@ -892,7 +893,7 @@
             birthday.setAttribute('readonly', 'readonly');
             avatarWrap.classList.remove('editing');
 
-            editBtn.innerHTML = '<i class="ti ti-edit"></i> Chỉnh sửa';
+            editBtn.innerHTML = '<i class="ti ti-edit"></i> Edit';
             editBtn.className = 'btn btn-primary';
         }
 
@@ -931,26 +932,26 @@
         uploadAvatar.addEventListener('click', function() {
             const file = avatarFile.files[0];
             if (!file) {
-                showToast('Vui lòng chọn ảnh!', 'error');
+                showToast('Please select an image!', 'error');
                 return;
             }
 
             // Validation phía client
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
-                showToast('Kích thước file không được vượt quá 5MB!', 'error');
+                showToast('File size must not exceed 5MB!', 'error');
                 return;
             }
 
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
             if (!validTypes.includes(file.type)) {
-                showToast('Chỉ được upload file ảnh (JPEG, PNG, GIF)!', 'error');
+                showToast('Only image files (JPEG, PNG, GIF) are allowed!', 'error');
                 return;
             }
 
             // Disable button và show loading
             uploadAvatar.disabled = true;
-            uploadAvatar.innerHTML = '<i class="ti ti-loader"></i> Đang tải lên...';
+            uploadAvatar.innerHTML = '<i class="ti ti-loader"></i> Uploading...';
 
             const formData = new FormData();
             formData.append('avatar', file);
@@ -977,7 +978,7 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(data.error || 'Upload thất bại');
+                        throw new Error(data.error || 'Upload failed');
                     }
 
                     return data;
@@ -985,12 +986,12 @@
                     // Response không phải JSON (có thể là HTML error page)
                     const text = await response.text();
                     console.error('Non-JSON response:', text);
-                    throw new Error('Server trả về response không hợp lệ. Vui lòng thử lại!');
+                    throw new Error('Server returned invalid response. Please try again!');
                 }
             })
             .then(data => {
                 if (data.success) {
-                    showToast(data.message || 'Cập nhật avatar thành công!', 'success');
+                    showToast(data.message || 'Avatar updated successfully!', 'success');
                     // Cập nhật avatar trên trang (thêm timestamp để tránh cache)
                     document.getElementById('profileAvatar').src = data.avatarUrl + '?t=' + new Date().getTime();
                     // Cập nhật avatar preview
@@ -1000,17 +1001,17 @@
                     // Reset form
                     avatarFile.value = '';
                 } else {
-                    throw new Error(data.error || 'Có lỗi xảy ra');
+                    throw new Error(data.error || 'An error occurred');
                 }
             })
             .catch(error => {
                 console.error('Upload error:', error);
-                showToast(error.message || 'Lỗi khi upload avatar!', 'error');
+                showToast(error.message || 'Error uploading avatar!', 'error');
             })
             .finally(() => {
                 // Enable button trở lại
                 uploadAvatar.disabled = false;
-                uploadAvatar.innerHTML = '<i class="ti ti-upload"></i> Tải lên';
+                uploadAvatar.innerHTML = '<i class="ti ti-upload"></i> Upload';
             });
         });
 
@@ -1075,15 +1076,15 @@
 
             if (strength <= 1) {
                 strengthIndicator.classList.add('strength-weak');
-                text.textContent = 'Mật khẩu yếu';
+                text.textContent = 'Weak Password';
                 text.style.color = 'var(--bad)';
             } else if (strength <= 2) {
                 strengthIndicator.classList.add('strength-medium');
-                text.textContent = 'Mật khẩu trung bình';
+                text.textContent = 'Medium Password';
                 text.style.color = 'var(--warn)';
             } else {
                 strengthIndicator.classList.add('strength-strong');
-                text.textContent = 'Mật khẩu mạnh';
+                text.textContent = 'Strong Password';
                 text.style.color = 'var(--good)';
             }
         });
@@ -1097,12 +1098,12 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
 
             if (newPassword !== confirmPassword) {
-                showToast('Mật khẩu xác nhận không khớp!', 'error');
+                showToast('Password confirmation does not match!', 'error');
                 return;
             }
 
             if (newPassword.length < 8) {
-                showToast('Mật khẩu phải có ít nhất 8 ký tự!', 'error');
+                showToast('Password must be at least 8 characters!', 'error');
                 return;
             }
 
@@ -1117,24 +1118,24 @@
             })
             .then(response => {
                 if (response.ok) {
-                    showToast('Đổi mật khẩu thành công!', 'success');
+                    showToast('Password changed successfully!', 'success');
                     passwordModal.style.display = 'none';
                     passwordForm.reset();
                     strengthIndicator.style.display = 'none';
                 } else {
                     return response.text().then(text => {
-                        throw new Error(text || 'Mật khẩu hiện tại không đúng');
+                        throw new Error(text || 'Current password is incorrect');
                     });
                 }
             })
             .catch(error => {
-                showToast('Lỗi: ' + error.message, 'error');
+                showToast('Error: ' + error.message, 'error');
             });
         });
 
         // About us button
         document.getElementById('aboutUsBtn').addEventListener('click', function() {
-            showToast('Bán Hàng Rong - Nền tảng bán hàng trực tuyến uy tín', 'info');
+            showToast('Bán Hàng Rong - Trusted online trading platform', 'info');
         });
 
         // Close modal when clicking outside
