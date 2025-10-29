@@ -263,29 +263,9 @@
             background: white;
             border: 1px solid var(--line);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .filters-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0;
-        }
-
-        .btn-toggle-filters {
-            background: var(--bg);
-            border: 1px solid var(--line);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn-toggle-filters:hover {
-            background: #e5e7eb;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .btn-primary {
@@ -652,101 +632,92 @@
         <!-- Reviews Section -->
         <section class="reviews-section">
             <div class="container">
-                <div class="reviews-header">
-                    <h2>My Reviews</h2>
+                <!-- Page Title - Centered -->
+                <h1 style="text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 30px; color: var(--ink);">
+                    ⭐ My Reviews
+                </h1>
 
-                    <!-- Filters Section -->
-                    <div class="filters-container">
-                        <div class="filters-header">
-                            <h3 style="margin: 0; font-size: 16px; font-weight: 600;">
-                                🔍 Bộ lọc & Tìm kiếm
-                            </h3>
-                            <button class="btn-toggle-filters" id="toggleFilters" type="button">
-                                <span>Hiện bộ lọc</span> ▼
-                            </button>
-                        </div>
-
-                        <form method="GET" action="/customer/reviews" id="filterForm" style="display: none;">
-                            <!-- Search Box - Always visible -->
-                            <div style="margin-bottom: 16px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                    🔎 Tìm kiếm theo tên sản phẩm
+                <!-- Filters Section - Always Visible -->
+                <div class="filters-container">
+                    <form method="GET" action="/customer/reviews" id="filterForm">
+                        <div class="filters-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                            <!-- Search Box -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
+                                    🔎 Tìm kiếm
                                 </label>
                                 <input type="text" name="search" class="form-control" 
-                                       placeholder="Nhập tên sản phẩm..." 
-                                       th:value="${search}"
-                                       style="width: 100%;" />
+                                       placeholder="Tên sản phẩm..." 
+                                       th:value="${search}" />
                             </div>
 
-                            <div class="filters-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                                <!-- Rating Filter -->
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                        ⭐ Đánh giá
-                                    </label>
-                                    <select name="rating" class="form-control">
-                                        <option value="">Tất cả rating</option>
-                                        <option value="5" th:selected="${filterRating == 5}">⭐⭐⭐⭐⭐ (5 sao)</option>
-                                        <option value="4" th:selected="${filterRating == 4}">⭐⭐⭐⭐ (4 sao)</option>
-                                        <option value="3" th:selected="${filterRating == 3}">⭐⭐⭐ (3 sao)</option>
-                                        <option value="2" th:selected="${filterRating == 2}">⭐⭐ (2 sao)</option>
-                                        <option value="1" th:selected="${filterRating == 1}">⭐ (1 sao)</option>
-                                    </select>
-                                </div>
-
-                                <!-- Date From -->
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                        📅 Từ ngày
-                                    </label>
-                                    <input type="date" name="fromDate" class="form-control" th:value="${filterFromDate}">
-                                </div>
-
-                                <!-- Date To -->
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                        📅 Đến ngày
-                                    </label>
-                                    <input type="date" name="toDate" class="form-control" th:value="${filterToDate}">
-                                </div>
-
-                                <!-- Sort By -->
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                        📊 Sắp xếp
-                                    </label>
-                                    <select name="sortBy" class="form-control">
-                                        <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
-                                        <option value="oldest" th:selected="${sortBy == 'oldest'}">Cũ nhất</option>
-                                        <option value="rating_high" th:selected="${sortBy == 'rating_high'}">Đánh giá cao → thấp</option>
-                                        <option value="rating_low" th:selected="${sortBy == 'rating_low'}">Đánh giá thấp → cao</option>
-                                    </select>
-                                </div>
-
-                                <!-- Page Size -->
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                        📄 Số lượng/trang
-                                    </label>
-                                    <select name="size" class="form-control">
-                                        <option value="5" th:selected="${pageSize == 5}">5</option>
-                                        <option value="10" th:selected="${pageSize == 10}">10</option>
-                                        <option value="20" th:selected="${pageSize == 20}">20</option>
-                                        <option value="50" th:selected="${pageSize == 50}">50</option>
-                                    </select>
-                                </div>
+                            <!-- Rating Filter -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
+                                    ⭐ Đánh giá
+                                </label>
+                                <select name="rating" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option value="5" th:selected="${filterRating == 5}">5 sao</option>
+                                    <option value="4" th:selected="${filterRating == 4}">4 sao</option>
+                                    <option value="3" th:selected="${filterRating == 3}">3 sao</option>
+                                    <option value="2" th:selected="${filterRating == 2}">2 sao</option>
+                                    <option value="1" th:selected="${filterRating == 1}">1 sao</option>
+                                </select>
                             </div>
 
-                            <div style="display: flex; gap: 12px; margin-top: 16px;">
-                                <button type="submit" class="btn-primary">
-                                    🔍 Áp dụng bộ lọc
-                                </button>
-                                <button type="button" class="btn-secondary" id="clearFilters">
-                                    ✕ Xóa bộ lọc
-                                </button>
+                            <!-- Date From -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
+                                    📅 Từ ngày
+                                </label>
+                                <input type="date" name="fromDate" class="form-control" th:value="${filterFromDate}">
                             </div>
-                        </form>
-                    </div>
+
+                            <!-- Date To -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
+                                    📅 Đến ngày
+                                </label>
+                                <input type="date" name="toDate" class="form-control" th:value="${filterToDate}">
+                            </div>
+
+                            <!-- Sort By -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
+                                    📊 Sắp xếp
+                                </label>
+                                <select name="sortBy" class="form-control">
+                                    <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
+                                    <option value="oldest" th:selected="${sortBy == 'oldest'}">Cũ nhất</option>
+                                    <option value="rating_high" th:selected="${sortBy == 'rating_high'}">Rating cao → thấp</option>
+                                    <option value="rating_low" th:selected="${sortBy == 'rating_low'}">Rating thấp → cao</option>
+                                </select>
+                            </div>
+
+                            <!-- Page Size -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
+                                    📄 Số/trang
+                                </label>
+                                <select name="size" class="form-control">
+                                    <option value="5" th:selected="${pageSize == 5}">5</option>
+                                    <option value="10" th:selected="${pageSize == 10}">10</option>
+                                    <option value="20" th:selected="${pageSize == 20}">20</option>
+                                    <option value="50" th:selected="${pageSize == 50}">50</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; justify-content: center;">
+                            <button type="submit" class="btn-primary">
+                                🔍 Tìm kiếm
+                            </button>
+                            <button type="button" class="btn-secondary" id="clearFilters">
+                                ✕ Xóa bộ lọc
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Reviews Stats -->
@@ -888,23 +859,8 @@
             return true;
         }
 
-        // Toggle Filters
-        const toggleFiltersBtn = document.getElementById('toggleFilters');
-        const filterForm = document.getElementById('filterForm');
-        
-        if (toggleFiltersBtn && filterForm) {
-            toggleFiltersBtn.addEventListener('click', function() {
-                if (filterForm.style.display === 'none') {
-                    filterForm.style.display = 'block';
-                    this.querySelector('span').textContent = 'Ẩn bộ lọc';
-                } else {
-                    filterForm.style.display = 'none';
-                    this.querySelector('span').textContent = 'Hiện bộ lọc';
-                }
-            });
-        }
-
         // Date Range Validation
+        const filterForm = document.getElementById('filterForm');
         if (filterForm) {
             filterForm.addEventListener('submit', function(e) {
                 const fromDateInput = this.querySelector('input[name="fromDate"]');
