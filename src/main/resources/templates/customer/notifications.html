@@ -59,44 +59,36 @@
 			letter-spacing: .2px;
 		}
 
-		.top-actions {
-			margin-left: auto;
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			position: relative;
-		}
+	.top-actions {
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		position: relative;
+		flex-wrap: nowrap;
+	}
 
-		.support-link {
-			font-size: 14px;
-			color: var(--muted);
-			text-decoration: none;
-			padding: 6px 10px;
-			border-radius: 8px;
-			transition: all 0.2s;
-		}
+	.notification-link:hover {
+		background: #f3f4f6;
+		color: #111827;
+	}
 
-		.support-link:hover {
-			background: #f3f4f6;
-			color: #111827;
-		}
-
-		.user-btn {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			cursor: pointer;
-			color: #111827;
-			border: 1px solid var(--line);
-			padding: 6px 10px;
-			border-radius: 8px;
-			background: #fff;
-			white-space: nowrap;
-		}
-		
-		.user-btn .wallet-badge {
-			margin-left: 8px;
-			padding: 4px 8px;
+	.user-btn {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		cursor: pointer;
+		color: #111827;
+		border: 1px solid var(--line);
+		padding: 6px 8px;
+		border-radius: 8px;
+		background: #fff;
+		white-space: nowrap;
+	}
+	
+	.user-btn .wallet-badge {
+		margin-left: 4px;
+		padding: 3px 6px;
 			background: #f0f9ff;
 			border: 1px solid #bae6fd;
 			border-radius: 6px;
@@ -514,10 +506,9 @@
 								stroke-linejoin="round" />
 						</svg>
 					</button>
-					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-						<a class="item" th:href="@{'/customer/profile/' + ${currentUser.username}}" role="menuitem">My Account</a>
-						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
-						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+				<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+					<a class="item" th:href="@{'/customer/profile/' + ${currentUser.username}}" role="menuitem">My Account</a>
+					<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
 						<a class="item" href="/customer/chat" role="menuitem">💬 Chat</a>
 						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
 						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
@@ -539,14 +530,14 @@
 					<form id="logoutForm" method="post" action="/logout" style="display:none;">
 					</form>
 				</div>
-				<div class="search">
-					<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
-						<input type="search" name="search" placeholder="search" aria-label="Search"
-							style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
-						<button type="submit"
-							style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-					</form>
-				</div>
+			<div class="search">
+				<form method="GET" action="/customer/dashboard" style="display:flex;gap:3px;">
+					<input type="search" name="search" placeholder="search" aria-label="Search"
+						style="height:34px;width:180px;padding:0 10px;border:1px solid var(--line);border-radius:8px;outline:none;font-size:14px;">
+					<button type="submit"
+						style="padding:6px 10px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+				</form>
+			</div>
 				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
 					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
