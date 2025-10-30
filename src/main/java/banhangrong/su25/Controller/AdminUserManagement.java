@@ -45,7 +45,6 @@ public class AdminUserManagement {
     @PostMapping("/create")
     public String createUser(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
         //Delare
-        ImageUploadUtil imageUploadUtil = new ImageUploadUtil();
         Validation valid = new Validation();
         LocalDateTime now = LocalDateTime.now();
         Users user = new Users();
@@ -55,6 +54,7 @@ public class AdminUserManagement {
         user.setUsername(request.getParameter("username"));
         user.setEmail(request.getParameter("email"));
         user.setPassword(request.getParameter("password"));
+        user.setFullName(request.getParameter("fullName"));
         user.setUserType(request.getParameter("userType"));
         user.setPhoneNumber(request.getParameter("phoneNumber"));
         user.setAvatarUrl("");//Default null, if having image --> solving below
@@ -90,6 +90,11 @@ public class AdminUserManagement {
             model.addAttribute("user", user);
             return "admin/user-creation";
         }
+
+        //Trim username
+        if(user.getUsername()!=null){
+            user.setUsername(user.getUsername().trim());
+        }
         //Check valid phone
         if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
             if (!valid.isPhoneValid(user.getPhoneNumber())) {
@@ -102,28 +107,7 @@ public class AdminUserManagement {
                 return "admin/user-creation";
             }
         }
-        // Solving if having image
-        MultipartFile avatar = multipartRequest.getFile("avatarUrl");
-
-        if (avatar != null && !avatar.isEmpty()) {
-
-            // User entered an invalid file
-            if (!valid.isImageFileValid(avatar)) {
-                model.addAttribute("error", "This file is not an image");
-                model.addAttribute("user", user);
-                return "admin/user-creation";
-            }
-
-            // Save the image into static/img/avatar folder, naming follows role+id
-            try {
-                user.setAvatarUrl(imageUploadUtil.saveAvatar(avatar, user.getUsername()));
-            } catch (Exception e) {
-                model.addAttribute("error", "Upload failed");
-                model.addAttribute("user", user);
-                return "admin/user-creation";
-            }
-
-        }
+        user.setAvatarUrl(request.getParameter("imageUrl"));
 //         Save hashed password
         user.setPassword(valid.hashPassword(user.getPassword()));
         //Blance default 0
@@ -197,6 +181,7 @@ public class AdminUserManagement {
             //Get infor from font-end
             String email = request.getParameter("email");
             String password = request.getParameter("password");
+            String fullName = request.getParameter("fullName");
             String phoneNumber = request.getParameter("phoneNumber");
             String gender = request.getParameter("gender");
             String birthDate = request.getParameter("birthDate");
@@ -223,6 +208,10 @@ public class AdminUserManagement {
                 model.addAttribute("error", "Password can not have space");
                 model.addAttribute("user", user);
                 return "admin/user-update";
+            }
+            //Trim full name
+            if(fullName!=null){
+                fullName=fullName.trim();
             }
             //Check valid phone
             if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
@@ -280,6 +269,7 @@ public class AdminUserManagement {
             user.setEmail(email);
 //          Save hashed password
             user.setPassword(valid.hashPassword(password));
+            user.setFullName(fullName);
             user.setPhoneNumber(phoneNumber);
             user.setGender(gender);
             if (!birthDate.isEmpty()) {

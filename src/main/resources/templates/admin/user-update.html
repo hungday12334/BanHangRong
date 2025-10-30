@@ -237,7 +237,7 @@
         <h2>Update</h2>
         <form id="userForm" action="/admin/user/update" method="post" enctype="multipart/form-data">
             <div class="text-center mb-3">
-                <img th:src="@{'/avatar/' + ${user.avatarUrl} + '?v=' + ${#dates.createNow().getTime()}}"
+                <img th:src="@{${user.avatarUrl}}"
                      alt="Avatar"
                      class="rounded-circle"
                      style="width: 150px; height: 150px; object-fit: cover;">
@@ -260,6 +260,11 @@
             <div class="form-group">
                 <label>Password:</label>
                 <input readonly type="text" name="password" th:value="${user!=null ? user.password : ''}">
+            </div>
+
+            <div class="form-group">
+                <label>Full Name:</label>
+                <input readonly type="text" name="fullName" th:value="${user!=null ? user.fullName : ''}">
             </div>
 
             <div class="form-group">

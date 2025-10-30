@@ -7,6 +7,7 @@ public class UserFilter {
     private Long id;
     private String username;
     private String email;
+    private String fullName;
     private String phoneNumber;
     private String gender;
     private String userType;
@@ -28,10 +29,11 @@ public class UserFilter {
     public UserFilter() {
     }
 
-    public UserFilter(Long id, String username, String email, String phoneNumber, String gender, String userType, Boolean active, Boolean verified, BigDecimal minBalance, BigDecimal maxBalance, LocalDate birthFrom, LocalDate birthTo, LocalDate lastLoginFrom, LocalDate lastLoginTo, LocalDate createdFrom, LocalDate createdTo, LocalDate updatedFrom, LocalDate updatedTo, String sortBy, String sortOrder) {
+    public UserFilter(Long id, String username, String email, String fullName, String phoneNumber, String gender, String userType, Boolean active, Boolean verified, BigDecimal minBalance, BigDecimal maxBalance, LocalDate birthFrom, LocalDate birthTo, LocalDate lastLoginFrom, LocalDate lastLoginTo, LocalDate createdFrom, LocalDate createdTo, LocalDate updatedFrom, LocalDate updatedTo, String sortBy, String sortOrder) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.gender = gender;
         this.userType = userType;
@@ -49,6 +51,14 @@ public class UserFilter {
         this.updatedTo = updatedTo;
         this.sortBy = sortBy;
         this.sortOrder = sortOrder;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public Long getId() {

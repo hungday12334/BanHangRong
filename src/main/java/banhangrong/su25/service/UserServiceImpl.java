@@ -114,8 +114,9 @@ public class UserServiceImpl implements UserService {
                     WHERE (:id IS NULL OR u.userId = :id)
                       AND (:username IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%')))
                       AND (:email IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :email, '%')))
+                      AND (:fullName IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :fullName, '%'))
                       AND (:phone IS NULL OR u.phoneNumber LIKE CONCAT('%', :phone, '%'))
-                      AND (:userType IS NULL OR lower(u.userType) = lower(:userType))
+                      AND (:userType IS NULL OR lower(u.userType) = lower(:userType)))
                       AND (:gender IS NULL OR lower(u.gender) = lower(:gender))
                       AND (:active IS NULL OR u.isActive = :active)
                       AND (:verified IS NULL OR u.isEmailVerified = :verified)
@@ -148,6 +149,10 @@ public class UserServiceImpl implements UserService {
         if (filter.getEmail() != null && !filter.getEmail().isBlank())
             query.setParameter("email", filter.getEmail());
         else query.setParameter("email", null);
+
+        if(filter.getFullName() != null && !filter.getFullName().isBlank())
+            query.setParameter("fullName", filter.getFullName());
+        else query.setParameter("fullName", null);
 
         if (filter.getPhoneNumber() != null && !filter.getPhoneNumber().isBlank())
             query.setParameter("phone", filter.getPhoneNumber());

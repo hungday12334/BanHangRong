@@ -121,6 +121,7 @@
             color: #28a745;
             border: 2px solid #1e7e34;
         }
+
         .submit-btn:hover {
             color: #fff;
             background-color: #28a745;
@@ -128,11 +129,13 @@
             transform: scale(1.05); /* phóng nhẹ khi hover */
             box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
         }
+
         /* Cancel button (đỏ) */
         .cancel-btn {
             color: #d9534f;
             border: 2px solid #b52b27;
         }
+
         .cancel-btn:hover {
             color: #fff;
             background-color: #d9534f;
@@ -146,14 +149,21 @@
             z-index: 9999;
             margin-top: 20px;
         }
-        .sidebar-item { position: relative; list-style: none; }
+
+        .sidebar-item {
+            position: relative;
+            list-style: none;
+        }
+
         .sidebar-item > ul {
             display: none;
             margin-left: 1.5rem;
         }
+
         .sidebar-item:hover > ul {
             display: block;
         }
+
         .badge {
             background-color: #dc3545;
             color: #fff;
@@ -206,6 +216,11 @@
             </div>
 
             <div class="form-group">
+                <label>Full Name:</label>
+                <input type="text" name="fullName" th:value="${user!=null ? user.fullName : ''}">
+            </div>
+
+            <div class="form-group">
                 <label>User Type (Role):</label>
                 <select name="userType">
                     <option value="CUSTOMER"
@@ -221,8 +236,19 @@
             </div>
 
             <div class="form-group">
-                <label>Avatar:</label>
-                <input type="file" name="avatarUrl" accept="image/*">
+                <label>
+                    Image URL
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <input id="pm_imageUrl" name="imageUrl" style="flex:1;"/>
+                        <input id="pm_imageFile" type="file" accept="image/*" style="display:none"/>
+                        <button type="button" id="pm_genImage" class="btn" title="Upload image and fill image URL">
+                            Generate
+                        </button>
+                    </div>
+                    <div id="pm_imagePreview" style="margin-top:6px;display:none">
+                        <img alt="Preview" style="max-width:100%;border-radius:8px;"/>
+                    </div>
+                </label>
             </div>
             <div class="form-group">
                 <label>Phone Number:</label>
@@ -231,7 +257,7 @@
 
             <div class="form-group">
                 <label>Gender:</label>
-                <select  name="gender" >
+                <select name="gender">
                     <option value="MALE" th:selected="${user != null and user.gender == 'MALE'}">Male</option>
                     <option value="FEMALE" th:selected="${user != null and user.gender == 'FEMALE'}">Female</option>
                     <option value="OTHER" th:selected="${user != null and user.gender == 'OTHER'}">Other</option>
@@ -240,7 +266,8 @@
 
             <div class="form-group">
                 <label>Birth Date:</label>
-                <input type="date" name="birthDate" th:value="${user != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : ''}"></div>
+                <input type="date" name="birthDate"
+                       th:value="${user != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : ''}"></div>
 
             <div class="form-group">
                 <label>Balance:</label>
@@ -281,7 +308,7 @@
         }
     });
 </script>
-<script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
+<script src="/js/seller-dashboard.js"></script>
 <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
 <script src="../assets/libs/simplebar/dist/simplebar.js"></script>

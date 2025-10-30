@@ -314,6 +314,10 @@
                             <input type="text" class="form-control" id="email" placeholder="e.g. abc@gmail.com" name="email">
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" placeholder="e.g. Nguyen Van A" name="fullName">
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Phone</label>
                             <input type="number" class="form-control" id="phone" placeholder="e.g. abc@gmail.com" name="phoneNumber" maxlength="10" minlength="10">
                         </div>
@@ -362,6 +366,7 @@
                             <select id="sortBy" class="form-select w-auto" name="sortBy">
                                 <option value="userId">User ID</option>
                                 <option value="username">Username</option>
+                                <option value="fullName"> Full Name</option>
                                 <option value="email">Email</option>
                                 <option value="userType">User type</option>
                                 <option value="phoneNumber">Phone number</option>
@@ -413,6 +418,7 @@
                     <th>ID</th>
                     <th>Username</th>
                     <th>Email</th>
+                    <th>Full Name</th>
                     <th>User Type</th>
                     <th>Phone</th>
                     <th>Gender</th>
@@ -443,6 +449,7 @@
                     <td th:text="${u.userId}"></td>
                     <td th:text="${u.username}"></td>
                     <td th:text="${u.email}"></td>
+                    <td th:text="${u.fullName}"></td>
                     <td>
                       <span th:text="${u.userType}"
                             th:class="${'userType-badge ' +
