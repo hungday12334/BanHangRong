@@ -301,7 +301,10 @@
 			<a href="#">License Software</a>
 			<a href="#">Game Keys</a>
 			<a href="#">Voucher</a>
-			<a href="/customer/chat">💬 Chat</a>
+			<a href="/customer/chat" style="position:relative">
+				💬 Chat
+				<span id="chatUnreadBadge" class="chat-unread-badge" style="display:none;position:absolute;top:-4px;right:-8px;background:#ef4444;color:#fff;border-radius:10px;padding:2px 6px;font-size:11px;font-weight:700;min-width:18px;text-align:center;">0</span>
+			</a>
 			<a href="#">Support</a>
 			</nav>
 			<div class="top-actions">
@@ -392,15 +395,20 @@
 							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
 					<button class="btn primary" type="submit"
 						th:disabled="${product.quantity == null or product.quantity <= 0}">Add to Cart</button>
-					<a th:href="@{/customer/chat(sellerId=${product.sellerId})}"
+					<a th:if="${product.sellerId != null}"
+					   th:href="@{/customer/chat(sellerId=${product.sellerId},productId=${product.productId},productName=${product.name},productPrice=${product.salePrice != null ? product.salePrice : product.price})}"
 					   class="btn"
 					   style="background:#10b981;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px"
 					   title="Chat with seller">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
 						</svg>
-						Chat với Shop
+						💬 Chat với Shop
 					</a>
+					<span th:if="${product.sellerId == null}"
+					      style="padding:10px 14px;background:#f3f4f6;color:#6b7280;border-radius:10px;font-size:14px;">
+						⚠️ Seller not available
+					</span>
 					</form>
 				</div>
 			</div>
@@ -540,6 +548,38 @@
 			e.target.submit();
 			return true;
 		}
+
+		// Chat unread count
+		function updateChatUnreadCount() {
+			const userIdElement = document.querySelector('[th\\:text="${user.userId}"]');
+			const userId = userIdElement ? userIdElement.textContent.trim() : null;
+
+			if (userId) {
+				fetch(`/api/conversations/${userId}`)
+					.then(res => res.json())
+					.then(conversations => {
+						let totalUnread = 0;
+						conversations.forEach(conv => {
+							totalUnread += (conv.unreadCount || 0);
+						});
+
+						const badge = document.getElementById('chatUnreadBadge');
+						if (badge && totalUnread > 0) {
+							badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+							badge.style.display = 'block';
+						} else if (badge) {
+							badge.style.display = 'none';
+						}
+					})
+					.catch(err => console.error('Error loading chat unread count:', err));
+			}
+		}
+
+		// Update on page load and periodically
+		document.addEventListener('DOMContentLoaded', function() {
+			updateChatUnreadCount();
+			setInterval(updateChatUnreadCount, 30000); // Update every 30 seconds
+		});
 	</script>
 	</div>
 </body>

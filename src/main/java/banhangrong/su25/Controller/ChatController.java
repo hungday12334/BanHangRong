@@ -148,6 +148,9 @@ public class ChatController {
     @GetMapping("/customer/chat")
     public String customerChat(
             @RequestParam(required = false) Long sellerId,
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) String productName,
+            @RequestParam(required = false) java.math.BigDecimal productPrice,
             org.springframework.ui.Model model,
             org.springframework.security.core.Authentication authentication){
         if (authentication != null && authentication.isAuthenticated()) {
@@ -165,13 +168,20 @@ public class ChatController {
                     try {
                         Conversation conversation = chatService.getOrCreateConversation(user.getUserId(), sellerId);
                         model.addAttribute("conversationId", conversation.getId());
+
+                        // Add product info if available
+                        if (productId != null) {
+                            model.addAttribute("productId", productId);
+                            model.addAttribute("productName", productName);
+                            model.addAttribute("productPrice", productPrice);
+                        }
                     } catch (Exception e) {
                         System.err.println("Error creating conversation: " + e.getMessage());
                     }
                 }
             }
         }
-        return "seller/chat"; // Same page, different functionality based on logged-in user
+        return "customer/chat"; // Return customer chat view
     }
 
     // REST endpoints for managing conversations
@@ -248,20 +258,31 @@ public class ChatController {
     @ResponseBody
     public ResponseEntity<?> createConversation(@RequestParam Long customerId, @RequestParam Long sellerId) {
         try {
+            System.out.println("=== CREATE CONVERSATION REQUEST ===");
+            System.out.println("Customer ID: " + customerId);
+            System.out.println("Seller ID: " + sellerId);
+
             if (customerId == null) {
+                System.err.println("ERROR: Customer ID is null");
                 return ResponseEntity.badRequest().body(Map.of("error", "Customer ID is required"));
             }
             if (sellerId == null) {
+                System.err.println("ERROR: Seller ID is null");
                 return ResponseEntity.badRequest().body(Map.of("error", "Seller ID is required"));
             }
 
             Conversation conversation = chatService.getOrCreateConversation(customerId, sellerId);
+            System.out.println("✓ Conversation created/found: " + conversation.getId());
             return ResponseEntity.ok(conversation);
         } catch (IllegalArgumentException e) {
+            System.err.println("ERROR (IllegalArgumentException): " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
+            System.err.println("ERROR (Exception): " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to create conversation"));
+                    .body(Map.of("error", "Failed to create conversation: " + e.getMessage()));
         }
     }
 

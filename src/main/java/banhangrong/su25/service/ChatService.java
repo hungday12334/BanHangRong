@@ -137,8 +137,12 @@ public class ChatService {
 
         List<Conversation> conversations = conversationRepository.findConversationsByUserId(userId);
 
-        // Load unread counts for each conversation
+        // Load messages and unread counts for each conversation
         conversations.forEach(conv -> {
+            // Load messages from database
+            conv.setMessages(messageRepository.findByConversationIdOrderByCreatedAtAsc(conv.getId()));
+
+            // Load unread count
             long unreadCount = messageRepository.countUnreadMessages(conv.getId(), userId);
             conv.setUnreadCount((int) unreadCount);
         });
@@ -176,11 +180,20 @@ public class ChatService {
             throw new IllegalArgumentException("Sender is not part of this conversation");
         }
 
-        // Get sender info
+        // Get sender info and set receiver ID if not provided
         Users sender = usersRepository.findById(message.getSenderId()).orElse(null);
         if (sender != null) {
             message.setSenderName(sender.getFullName() != null ? sender.getFullName() : sender.getUsername());
             message.setSenderRole(sender.getUserType());
+        }
+
+        // Set receiver ID if not already set (critical for message delivery)
+        if (message.getReceiverId() == null) {
+            if (message.getSenderId().equals(conversation.getCustomerId())) {
+                message.setReceiverId(conversation.getSellerId());
+            } else {
+                message.setReceiverId(conversation.getCustomerId());
+            }
         }
 
         // Save message to database

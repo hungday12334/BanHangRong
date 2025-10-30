@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="theme-color" content="#0b1020" />
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
@@ -489,6 +491,69 @@
     const MAX_MESSAGE_LENGTH = 5000;
     const LAST_CONVERSATION_KEY = 'lastConversationId_' + currentUser.userId;
 
+    // Notification settings
+    let notificationPermission = 'default';
+    let notificationSound = null;
+
+    // Request notification permission on load
+    if ('Notification' in window) {
+        notificationPermission = Notification.permission;
+        if (notificationPermission === 'default') {
+            Notification.requestPermission().then(permission => {
+                notificationPermission = permission;
+            });
+        }
+    }
+
+    // Create notification sound (simple beep using Web Audio API)
+    function playNotificationSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } catch (e) {
+            console.log('Could not play notification sound:', e);
+        }
+    }
+
+    // Show desktop notification
+    function showDesktopNotification(title, body, icon) {
+        if (notificationPermission === 'granted' && 'Notification' in window) {
+            try {
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: icon || '/img/kua654ms.png',
+                    badge: '/img/kua654ms.png',
+                    tag: 'chat-message',
+                    requireInteraction: false
+                });
+
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+
+                // Auto close after 5 seconds
+                setTimeout(() => notification.close(), 5000);
+            } catch (e) {
+                console.log('Could not show desktop notification:', e);
+            }
+        }
+    }
+
     function updateConnectionStatus(status) {
         const statusEl = document.getElementById('connectionStatus');
         statusEl.className = 'connection-status ' + status;
@@ -541,6 +606,9 @@
                 isConnected = true;
                 updateConnectionStatus('connected');
 
+                // Hide loader on connection
+                document.body.classList.remove('loading');
+
                 subscriptions.notifications = stompClient.subscribe(
                     '/topic/user/' + currentUser.userId + '/notification',
                     function(message) {
@@ -566,6 +634,10 @@
                 console.error('STOMP error:', error);
                 isConnected = false;
                 updateConnectionStatus('disconnected');
+
+                // Hide loader even on error
+                document.body.classList.remove('loading');
+
                 setTimeout(connect, 5000);
             }
         );
@@ -580,6 +652,10 @@
                 fetch(`/api/conversations/${currentUser.userId}`)
                     .then(res => res.json())
                     .then(convs => {
+                        console.log('✓ Loaded conversations:', convs.length);
+                        convs.forEach(conv => {
+                            console.log(`  - Conversation ${conv.id}: ${conv.messages ? conv.messages.length : 0} messages`);
+                        });
                         conversations = convs;
                         renderConversationsList();
                         restoreLastConversation();
@@ -592,12 +668,21 @@
                     });
             } else {
                 // Customer: load sellers and create conversations
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+                const headers = {};
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+
                 fetch('/api/sellers')
                     .then(res => res.json())
                     .then(sellers => {
                         const promises = sellers.map(seller =>
                             fetch(`/api/conversation?customerId=${currentUser.userId}&sellerId=${seller.userId}`, {
-                                method: 'POST'
+                                method: 'POST',
+                                headers: headers
                             }).then(res => res.json())
                         );
                         return Promise.all(promises);
@@ -628,6 +713,18 @@
             const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
             const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
 
+            // Format last message with preview
+            let lastMessagePreview = conv.lastMessage || 'Start chatting';
+            if (lastMessagePreview.length > 35) {
+                lastMessagePreview = lastMessagePreview.substring(0, 35) + '...';
+            }
+
+            // Format time
+            let timeText = '';
+            if (conv.lastMessageTime) {
+                timeText = formatRelativeTime(conv.lastMessageTime);
+            }
+
             const item = document.createElement('div');
             item.className = 'conversation-item';
             if (currentConversation && currentConversation.id === conv.id) {
@@ -637,15 +734,38 @@
             item.innerHTML = `
                 <div class="avatar ${isCustomer ? 'seller' : ''}">${avatar}</div>
                 <div class="conversation-info">
-                    <div class="conversation-name">${escapeHtml(otherPartyName)}</div>
-                    <div class="conversation-last-message">${escapeHtml(conv.lastMessage || 'Start chatting')}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                        <div class="conversation-name">${escapeHtml(otherPartyName)}</div>
+                        ${timeText ? `<span style="font-size:11px;color:#6b7280;">${timeText}</span>` : ''}
+                    </div>
+                    <div class="conversation-last-message" style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="flex:1;">${escapeHtml(lastMessagePreview)}</span>
+                        ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount > 99 ? '99+' : conv.unreadCount}</span>` : ''}
+                    </div>
                 </div>
-                ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount}</span>` : ''}
             `;
 
             item.onclick = () => openConversation(conv);
             list.appendChild(item);
         });
+    }
+
+    // Format relative time (e.g., "2m ago", "1h ago", "Yesterday")
+    function formatRelativeTime(timestamp) {
+        const now = new Date();
+        const messageTime = new Date(timestamp);
+        const diffMs = now - messageTime;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m`;
+        if (diffHours < 24) return `${diffHours}h`;
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays}d`;
+
+        return messageTime.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' });
     }
 
     function openConversation(conv) {
@@ -674,9 +794,19 @@
                 '/topic/conversation/' + conv.id,
                 function(message) {
                     const msg = JSON.parse(message.body);
+                    // Display message from others, or update own message with real ID from database
                     if (msg.senderId !== currentUser.userId) {
                         displayMessage(msg);
                         markAsRead();
+                    } else {
+                        // Update own message with database ID if it was a temp message
+                        const tempElements = document.querySelectorAll('[data-temp-id^="temp_"]');
+                        if (tempElements.length > 0 && msg.id && !msg.id.toString().startsWith('temp_')) {
+                            // Replace the temp message with the real one from database
+                            const lastTempElement = tempElements[tempElements.length - 1];
+                            lastTempElement.remove();
+                            displayMessage(msg, false);
+                        }
                     }
                 }
             );
@@ -691,8 +821,17 @@
 
     function markAsRead() {
         if (currentConversation) {
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+            const headers = {};
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+
             fetch(`/api/conversation/${currentConversation.id}/read?userId=${currentUser.userId}`, {
-                method: 'POST'
+                method: 'POST',
+                headers: headers
             }).catch(err => console.error('Error marking as read:', err));
         }
     }
@@ -701,8 +840,14 @@
         const messagesContainer = document.getElementById('chatMessages');
         messagesContainer.innerHTML = '';
 
+        console.log('📨 Rendering messages for conversation:', currentConversation?.id);
+        console.log('   Messages count:', currentConversation?.messages?.length || 0);
+
         if (currentConversation && currentConversation.messages) {
-            currentConversation.messages.forEach(msg => displayMessage(msg, false));
+            currentConversation.messages.forEach(msg => {
+                console.log('   - Message:', msg.content?.substring(0, 30), 'from:', msg.senderName);
+                displayMessage(msg, false);
+            });
         }
         scrollToBottom();
     }
@@ -736,6 +881,21 @@
     }
 
     function handleNewMessage(msg) {
+        // Play sound and show notification if message is from another user
+        if (msg.senderId !== currentUser.userId) {
+            playNotificationSound();
+
+            // Show desktop notification if window is not focused
+            if (!document.hasFocus()) {
+                const senderName = msg.senderName || 'Someone';
+                const preview = msg.content.length > 50 ? msg.content.substring(0, 50) + '...' : msg.content;
+                showDesktopNotification(
+                    `💬 New message from ${senderName}`,
+                    preview
+                );
+            }
+        }
+
         if (currentConversation && msg.conversationId === currentConversation.id) {
             displayMessage(msg);
         }
@@ -907,11 +1067,22 @@
 
     // Initialize
     connect();
-    loadConversations();
+    loadConversations().then(() => {
+        // Remove loading state after conversations are loaded
+        setTimeout(() => {
+            document.body.classList.remove('loading');
+        }, 500);
+    }).catch(() => {
+        // Remove loading state even if there's an error
+        document.body.classList.remove('loading');
+    });
 
     // Auto-open conversation if conversationId is provided
     const targetConversationId = /*[[${conversationId}]]*/ null;
     const targetSellerId = /*[[${targetSellerId}]]*/ null;
+    const productId = /*[[${productId}]]*/ null;
+    const productName = /*[[${productName}]]*/ null;
+    const productPrice = /*[[${productPrice}]]*/ null;
 
     if (targetConversationId) {
         // Wait for conversations to load, then open the target conversation
@@ -920,6 +1091,13 @@
             if (conv) {
                 clearInterval(checkAndOpen);
                 openConversation(conv);
+
+                // Auto-send product info message if product context is available
+                if (productId && productName && productPrice) {
+                    setTimeout(() => {
+                        sendProductInfoMessage(productId, productName, productPrice);
+                    }, 1000);
+                }
             }
         }, 500);
 
@@ -932,11 +1110,20 @@
         }, 10000);
     } else if (targetSellerId && currentUser.userType === 'CUSTOMER') {
         // For customer: if sellerId is provided, create/open conversation with that seller
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+        const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        };
+
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
         fetch('/api/conversation', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: headers,
             body: `customerId=${currentUser.userId}&sellerId=${targetSellerId}`
         })
         .then(response => {
@@ -953,6 +1140,13 @@
                 const conv = conversations.find(c => c.id === conversation.id);
                 if (conv) {
                     openConversation(conv);
+
+                    // Auto-send product info message if product context is available
+                    if (productId && productName && productPrice) {
+                        setTimeout(() => {
+                            sendProductInfoMessage(productId, productName, productPrice);
+                        }, 1000);
+                    }
                 } else {
                     showToast('⚠️ Conversation created but could not open', 'warning');
                 }
@@ -966,6 +1160,48 @@
                 window.location.href = document.referrer || '/';
             }, 2000);
         });
+    }
+
+    // Function to send product info message
+    function sendProductInfoMessage(prodId, prodName, prodPrice) {
+        if (!currentConversation || !isConnected) {
+            console.warn('Cannot send product info: no conversation or not connected');
+            return;
+        }
+
+        const formattedPrice = new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(prodPrice);
+
+        const productLink = window.location.origin + '/product/' + prodId;
+
+        const messageContent = `👋 Xin chào! Tôi muốn hỏi về sản phẩm này:\n\n📦 ${prodName}\n💰 Giá: ${formattedPrice}\n🔗 ${productLink}`;
+
+        const message = {
+            id: 'temp_product_' + Date.now(),
+            conversationId: currentConversation.id,
+            senderId: currentUser.userId,
+            senderName: currentUser.fullName || currentUser.username,
+            senderRole: currentUser.userType,
+            receiverId: currentConversation.sellerId,
+            content: messageContent,
+            type: 'TEXT',
+            read: false,
+            status: 'sending'
+        };
+
+        // Display message
+        displayMessage(message);
+        scrollToBottom();
+
+        // Send via WebSocket
+        if (isConnected) {
+            stompClient.send('/app/sendMessage', {}, JSON.stringify(message));
+            setTimeout(() => {
+                updateMessageStatus(message.id, 'sent');
+            }, 500);
+        }
     }
 
     window.onbeforeunload = function() {

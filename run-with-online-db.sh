@@ -21,8 +21,10 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "✓ Build successful!"
     echo ""
-    echo "Starting application with online database..."
-    java -jar target/su25-0.0.1-SNAPSHOT.jar
+    echo "Starting application with online database (profile: simple)..."
+    echo "Database: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}"
+    echo ""
+    java -jar target/su25-0.0.1-SNAPSHOT.jar --spring.profiles.active=simple
 else
     echo ""
     echo "✗ Build failed!"

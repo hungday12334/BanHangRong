@@ -4,38 +4,51 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read">
-      <change afterPath="$PROJECT_DIR$/API_RESEND_VERIFICATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BIRTH_DATE_FIX_AND_FULL_NAME.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DEBUG_REGISTRATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EMAIL_VERIFICATION_FIX.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EMAIL_VERIFICATION_OPTIMIZATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EMAIL_VERIFICATION_QUICK_START.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FINAL_DEBUG_SUMMARY.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FINAL_FIX_INSTRUCTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_MESSAGE_DISPLAY.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QUICK_FIX_NOW.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QUICK_SOLUTION_SUMMARY.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TWO_SOLUTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/create_verification_for_existing_users.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/verify_email_quick_fix.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test-email-verification.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test-messages.html" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(email-verification): implement resend verification email feature and enhance user registration flow">
+      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_CSRF_FIX.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FIX_SUMMARY.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_LOADER_FIX.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SetupChatTables.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TEST_CHAT_SEPARATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/UTF8_ENCODING_FIX.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fix-utf8-encoding.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run-online-with-chat-fix.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/setup-chat-db.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/setup-chat-online-db.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/debug_chat_issue.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/fix_chat_utf8.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/fix_products_seller.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/start-with-chat-fix.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test-and-run.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/verify-csrf-fix.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/RegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/RegisterRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DEBUG_REGISTRATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/EMAIL_VERIFICATION_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/EMAIL_VERIFICATION_OPTIMIZATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/EMAIL_VERIFICATION_QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FILTER_IMPLEMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FINAL_DEBUG_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FINAL_FIX_INSTRUCTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_REVIEW_FIXES_COMPLETED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_REVIEW_TEST_CASES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_VIEW_FEATURE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SHOP_LICENSE_MANAGEMENT_FEATURE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VIDEO_DEMO_SCRIPT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_MANAGEMENT_FEATURE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_TEST_CASES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VOUCHER_VISUAL_FLOW.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run-with-online-db.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run-with-online-db.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Conversation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Conversation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-simple.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-simple.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_619b3988-ff77-4e9a-9f69-7b86095f6625.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_6ff1d81f-1681-43c6-8434-805102acb706.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_98ff329d-0ddd-48dd-97d3-f1962f11fd34.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/uploads/avatar_1_ef039077-d7a0-449a-b996-0d42d173ea07.jpeg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,55 +106,55 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Database Script.add_sample_products.sql.executor": "Run",
-    "Database Script.add_vouchers.sql.executor": "Run",
-    "Database Script.add_withdrawals.sql.executor": "Run",
-    "Database Script.data_v2.sql.executor": "Run",
-    "Database Script.fix_old_constraint.sql.executor": "Run",
-    "Database Script.fix_review_constraint.sql.executor": "Run",
-    "Database Script.modify_review_system.sql.executor": "Run",
-    "Database Script.quick_create_seller_test.sql.executor": "Run",
-    "Database Script.review_system_complete.sql.executor": "Run",
-    "Database Script.set_password.sql.executor": "Run",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Maven.su25 [clean].executor": "Run",
-    "Maven.su25 [package].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
-    "Spring Boot.Su25Application.executor": "Run",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "#6 on MinhHQ",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Database Script.add_sample_products.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_vouchers.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_withdrawals.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.data_v2.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_old_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_review_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.modify_review_system.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.quick_create_seller_test.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.review_system_complete.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.set_password.sql.executor&quot;: &quot;Run&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Maven.su25 [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.su25 [package].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#6 on MinhHQ&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ],
-    "RunConfigurationTargetLRU": [
-      "53b38385-a361-4b09-b3fc-e28dbd7b3e5c"
+    &quot;RunConfigurationTargetLRU&quot;: [
+      &quot;53b38385-a361-4b09-b3fc-e28dbd7b3e5c&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -227,7 +240,8 @@
       <workItem from="1761225296373" duration="388000" />
       <workItem from="1761288445557" duration="1184000" />
       <workItem from="1761718568881" duration="3682000" />
-      <workItem from="1761771952359" duration="8189000" />
+      <workItem from="1761771952359" duration="9839000" />
+      <workItem from="1761782244391" duration="5020000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -285,7 +299,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761768131073</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="feat(email-verification): implement resend verification email feature and enhance user registration flow">
+      <option name="closed" value="true" />
+      <created>1761780433366</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1761780433366</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,6 +344,7 @@
     <MESSAGE value="fix: fix error approve Products." />
     <MESSAGE value="update: add spring boot devtools" />
     <MESSAGE value="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read" />
+    <MESSAGE value="feat(email-verification): implement resend verification email feature and enhance user registration flow" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(email-verification): implement resend verification email feature and enhance user registration flow" />
   </component>
 </project>
