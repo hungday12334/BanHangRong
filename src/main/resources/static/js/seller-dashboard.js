@@ -1191,11 +1191,22 @@
               if (details) details.textContent = 'Loading...';
               if (resWrap) resWrap.style.display = 'block';
               if (histWrap) histWrap.style.display = 'none';
-              const url = `/api/licenses/check?key=${encodeURIComponent(key)}&page=${page}&size=${pageSizeDefault}`;
+              // Prefer explicit sellerId exposure if present in DOM so server can enforce seller-only checks
+              const sellerIdEl = document.getElementById('sellerId');
+              const userIdEl = document.getElementById('userId');
+              const sellerIdVal = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+              let url = `/api/licenses/check?key=${encodeURIComponent(key)}&page=${page}&size=${pageSizeDefault}`;
+              if (sellerIdVal) url += `&sellerId=${encodeURIComponent(sellerIdVal)}`;
               const r = await fetch(url);
               if (!r.ok) {
                 const t = await r.text();
-                showError('Error: ' + t);
+                // If server denies access for seller, show a toast and a concise inline message
+                if (r.status === 403) {
+                  showToast('Bạn không có quyền kiểm tra key này', 'error');
+                  showError('Không có quyền kiểm tra key này');
+                } else {
+                  showError('Error: ' + t);
+                }
                 return null;
               }
               const data = await r.json();

@@ -281,11 +281,29 @@ public class ProductLicenseController {
     @GetMapping("/api/licenses/check")
     public ResponseEntity<?> checkKey(@RequestParam(name = "key") String key,
                                       @RequestParam(name = "page", defaultValue = "0") int page,
-                                      @RequestParam(name = "size", defaultValue = "10") int size) {
+                                      @RequestParam(name = "size", defaultValue = "10") int size,
+                                      @RequestParam(name = "sellerId", required = false) Long sellerId) {
         if (key == null || key.isBlank()) return ResponseEntity.badRequest().body("key is required");
         var opt = licensesRepository.findByLicenseKey(key.trim());
         if (opt.isEmpty()) return ResponseEntity.status(404).body("license not found");
         var lic = opt.get();
+        // If sellerId provided, ensure the license belongs to a product of that seller
+        if (sellerId != null) {
+            Long orderItemId = lic.getOrderItemId();
+            if (orderItemId == null) {
+                return ResponseEntity.status(403).body("Không có quyền xem license này");
+            }
+            var oiOpt = orderItemsRepository.findById(orderItemId);
+            if (oiOpt.isEmpty()) return ResponseEntity.status(403).body("Không có quyền xem license này");
+            Long productId = oiOpt.get().getProductId();
+            if (productId == null) return ResponseEntity.status(403).body("Không có quyền xem license này");
+            var pOpt = productsRepository.findById(productId);
+            if (pOpt.isEmpty()) return ResponseEntity.status(403).body("Không có quyền xem license này");
+            var prod = pOpt.get();
+            if (prod.getSellerId() == null || !prod.getSellerId().equals(sellerId)) {
+                return ResponseEntity.status(403).body("Không có quyền xem license này");
+            }
+        }
         Map<String, Object> out = new HashMap<>();
         out.put("licenseId", lic.getLicenseId());
         out.put("licenseKey", lic.getLicenseKey());
