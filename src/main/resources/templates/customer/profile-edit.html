@@ -358,9 +358,9 @@
 
         <div class="layout">
             <aside class="sidebar" aria-label="Profile navigation">
-                <div class="title">Tài Khoản Của Tôi</div>
-                <a th:href="@{'/customer/profile/' + ${user.username}}">Hồ sơ</a>
-                <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}">Đổi Mật khẩu</a>
+                <div class="title">My Account</div>
+                <a th:href="@{'/customer/profile/' + ${user.username}}">Profile</a>
+                <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}">Change Password</a>
             </aside>
             <section class="card main">
                 <h2 style="margin-top:0;">Edit Profile</h2>
