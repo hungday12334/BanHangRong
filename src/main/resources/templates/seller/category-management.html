@@ -24,10 +24,10 @@
                 <div class="category-header">
                     <h2 class="section-title">Quản lý Danh mục</h2>
                     <div class="category-header-actions">
-                        <button onclick="openLicenseManager()" class="btn btn-primary" title="Quản lý giấy phép">
+                        <button onclick="openLicenseManager()" class="btn btn-primary" title="License Management">
                             <i class="ti ti-license"></i> Quản lý Licenses
                         </button>
-                        <button onclick="exportCategories()" class="btn btn-secondary" title="Xuất danh sách">
+                        <button onclick="exportCategories()" class="btn btn-secondary" title="Export List">
                             <i class="ti ti-download"></i> Export CSV
                         </button>
                         <a href="/seller/dashboard" class="btn btn-secondary">
@@ -68,25 +68,25 @@
 
                 <!-- Add category form -->
                 <div class="category-form-section">
-                    <h3>Thêm danh mục mới</h3>
+                    <h3>Add New Category</h3>
                     <form th:action="@{/seller/categories}" th:object="${newCategory}" method="post" class="profile-form" id="addCategoryForm" onsubmit="return validateCategoryForm(this)">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <div class="form-group">
-                            <label for="newCategoryName">Tên Danh mục *</label>
-                            <input id="newCategoryName" type="text" th:field="*{name}" placeholder="Ví dụ: Đồ họa - Thiết kế"
+                            <label for="newCategoryName">Category Name *</label>
+                            <input id="newCategoryName" type="text" th:field="*{name}" placeholder="Example: Graphics - Design"
                                    required minlength="2" maxlength="100"
                                    pattern=".*\S+.*"
-                                   title="Tên danh mục phải từ 2-100 ký tự và không được chỉ toàn khoảng trắng" />
-                            <div class="form-text">Tên danh mục phải từ 2-100 ký tự (không chỉ khoảng trắng)</div>
+                                   title="Category name must be 2-100 characters and cannot be only spaces" />
+                            <div class="form-text">Category name must be 2-100 characters (not only spaces)</div>
                         </div>
                         <div class="form-group">
-                            <label for="newCategoryDescription">Mô tả</label>
-                            <textarea id="newCategoryDescription" th:field="*{description}" placeholder="Mô tả ngắn về danh mục" maxlength="255" rows="3"></textarea>
-                            <div class="form-text"><span id="descCharCount">0</span>/255 ký tự</div>
+                            <label for="newCategoryDescription">Description</label>
+                            <textarea id="newCategoryDescription" th:field="*{description}" placeholder="Short description of the category" maxlength="255" rows="3"></textarea>
+                            <div class="form-text"><span id="descCharCount">0</span>/255 characters</div>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">
-                                <i class="ti ti-plus"></i> Thêm danh mục
+                                <i class="ti ti-plus"></i> Add Category
                             </button>
                         </div>
                     </form>
@@ -118,12 +118,12 @@
                                 <option value="products-asc">Ít sản phẩm nhất</option>
                             </select>
 
-                            <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Chọn nhiều">
-                                <i class="ti ti-checkbox"></i> Chọn nhiều
+                            <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Select Multiple">
+                                <i class="ti ti-checkbox"></i> Select Multiple
                             </button>
 
                             <button onclick="deleteSelected()" id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">
-                                <i class="ti ti-trash"></i> Xóa đã chọn (<span id="selectedCount">0</span>)
+                                <i class="ti ti-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
                             </button>
                         </div>
                     </div>
@@ -558,10 +558,10 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('editCategoryModal')">
-                        <i class="ti ti-x"></i> Hủy
+                        <i class="ti ti-x"></i> Cancel
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-device-floppy"></i> Lưu thay đổi
+                        <i class="ti ti-device-floppy"></i> Save Changes
                     </button>
                 </div>
             </form>

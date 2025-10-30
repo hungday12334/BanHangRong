@@ -1348,7 +1348,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="phone">Số điện thoại:</label>
+                        <label for="phone">Phone Number:</label>
                         <!-- SỬA: Hiển thị số điện thoại từ user data -->
                         <input type="tel" id="phone" name="phoneNumber"
                                th:value="${user?.phoneNumber}"
@@ -1718,13 +1718,13 @@
             // Validate: Phone format (Vietnamese: 10-11 digits, starts with 0)
             const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
             if (!/^0\d{9,10}$/.test(cleanPhone)) {
-                showToast('Số điện thoại không hợp lệ! Phải là 10-11 số, bắt đầu bằng 0', 'error');
+                showToast('Invalid phone number! Must be 10-11 digits, starting with 0', 'error');
                 return;
             }
 
             // Validate: Gender
             if (!gender || (gender !== 'male' && gender !== 'female' && gender !== 'other')) {
-                showToast('Vui lòng chọn giới tính', 'error');
+                showToast('Please select gender', 'error');
                 return;
             }
 
@@ -1751,7 +1751,7 @@
 
                 // Check maximum age (120 years)
                 if (birthDate < minDate) {
-                    showToast('Ngày sinh không hợp lệ!', 'error');
+                    showToast('Invalid date of birth!', 'error');
                     return;
                 }
             }
@@ -1820,7 +1820,7 @@
                 .catch(error => {
                     console.error('Error:', error);
                     document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                    showToast('Lỗi khi lưu thông tin. Vui lòng thử lại!', 'error');
+                    showToast('Error saving information. Please try again!', 'error');
 
                     // Vẫn thoát chế độ chỉnh sửa dù có lỗi
                     formInputs.forEach(input => {
@@ -1930,7 +1930,7 @@
                     }
                 }
                 reader.onerror = function() {
-                    showToast('Lỗi khi đọc file', 'error');
+                    showToast('Error reading file', 'error');
                 };
                 reader.readAsDataURL(file);
             });
@@ -1954,7 +1954,7 @@
 
                 // ===== VALIDATION: Check if file selected =====
                 if (!file) {
-                    showToast('Vui lòng chọn file ảnh', 'error');
+                    showToast('Please select an image file', 'error');
                     return;
                 }
 
@@ -2031,7 +2031,7 @@
                     .catch(error => {
                         console.error('Error:', error);
                         document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                        showToast('Lỗi khi upload avatar. Vui lòng thử lại!', 'error');
+                        showToast('Error uploading avatar. Please try again!', 'error');
                     })
                     .finally(() => {
                         // Reset uploading flag
