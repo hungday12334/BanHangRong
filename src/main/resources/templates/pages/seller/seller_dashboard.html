@@ -6,21 +6,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seller Dashboard</title>
-  <!-- Preload critical dashboard stylesheet to improve LCP -->
-  <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
-  <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
-  <!-- Preload and set favicon / logo -->
-  <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
-  <link rel="icon" type="image/png" href="/img/kua654ms.png" />
-  <link rel="shortcut icon" href="/img/kua654ms.png" />
+  <!-- Preload critical dashboard stylesheet to improve LCP (use Thymeleaf resource URLs) -->
+  <link rel="preload" th:href="@{/css/seller-dashboard.css(v=2)}" as="style" />
+  <link rel="stylesheet" th:href="@{/css/seller-dashboard.css(v=2)}" />
+
+  <!-- Preload and set favicon / logo using Thymeleaf so context-path works correctly -->
+  <link rel="preload" as="image" th:href="@{/img/kua654ms.png}" fetchpriority="high" />
+  <link rel="icon" type="image/png" th:href="@{/img/kua654ms.png}" />
+  <link rel="shortcut icon" th:href="@{/img/kua654ms.png}" />
+
+  <!-- Preload local font (assumes you added SFPRODisplay .woff2 under /static/font/SFPRODISPLAY/) -->
+  <!-- If your font filename differs, tell me and I'll update the path. -->
+  <link rel="preload" th:href="@{/font/SFPRODISPLAY/SFProDisplay-Regular.ttf}" as="font" type="font/ttf" crossorigin />
+
   <!-- Icon font (can be loaded with lower priority if needed) -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+
   <!-- Defer non-critical chart library to avoid blocking rendering -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <meta name="theme-color" content="#0b1020" />
+
+  <!-- Declare @font-face so the page uses the local font. Adjust filename if needed. -->
   <style>
-    /* fallback dev */
+    @font-face {
+      font-family: 'SF Pro Display';
+      src: url('/font/SFPRODISPLAY/SFProDisplay-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root { --app-font: 'SF Pro Display', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    body { font-family: var(--app-font); }
   </style>
   <!-- HEAD END -->
 </head>
@@ -31,8 +49,8 @@
     <div class="loader-core">
       <div class="orbital" aria-hidden="true">
         <div class="nucleus">
-          <img class="loader-logo" src="/img/kua654ms.png" alt="Logo" decoding="async" loading="eager"
-            data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" />
+          <img class="loader-logo" th:src="@{/img/kua654ms.png}" alt="Logo" decoding="async" loading="eager"
+            th:attr="data-logo-light=@{/img/kua654ms.png}, data-logo-dark=@{/img/white.png}" />
         </div>
         <div class="orbit orbit-a"><span></span></div>
         <div class="orbit orbit-b"><span></span></div>
