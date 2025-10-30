@@ -268,6 +268,12 @@ public class ProductLicenseController {
                 usageLogService.append(saved.getLicenseId(), "generated", userId, null, null, null);
             } catch (Exception ignored) {}
         }
+        // Decrease product quantity by the number of generated keys so stock reflects generated keys
+        try {
+            int newQty = Math.max(0, capacity - requestQty);
+            p.setQuantity(newQty);
+            productsRepository.save(p);
+        } catch (Exception ignored) {}
         Map<String, Object> resp = new HashMap<>();
         resp.put("generated", requestQty);
         resp.put("remaining", Math.max(0, remaining - requestQty));
