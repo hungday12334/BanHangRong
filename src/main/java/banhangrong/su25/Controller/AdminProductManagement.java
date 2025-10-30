@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -67,6 +69,7 @@ public class AdminProductManagement {
             return "redirect:/admin/products";
         }
         product.setStatus("public");
+        product.setUpdatedAt(LocalDateTime.now());
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Product updated successfully");
         return "redirect:/admin/products";
@@ -92,6 +95,7 @@ public class AdminProductManagement {
             return "redirect:/admin/products";
         }
         product.setStatus("Cancelled");
+        product.setUpdatedAt(LocalDateTime.now());
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Cancelled successfully");
         return "redirect:/admin/products";

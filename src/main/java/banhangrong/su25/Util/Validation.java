@@ -32,5 +32,8 @@ public class Validation {
 
         return true;
     }
-
+    public  boolean hasSpace(String input) {
+        if (input == null) return false; // tránh NullPointerException
+        return input.contains(" ");
+    }
 }

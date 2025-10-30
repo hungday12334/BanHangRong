@@ -35,6 +35,7 @@ public class AdminUserManagement {
         redirectAttributes.addFlashAttribute("isFromFilter", true);
         return "redirect:/admin/user";
     }
+
     @GetMapping("/create")
     public String showCreateScreen(Model model) {
         return "admin/user-creation";
@@ -66,6 +67,16 @@ public class AdminUserManagement {
             model.addAttribute("error", "Username or Email already exists");
             model.addAttribute("user", user);
             return "admin/user-creation";
+        } else {
+            if (valid.hasSpace(user.getUsername())){
+                model.addAttribute("error", "Username can not have space");
+                model.addAttribute("user", user);
+                return "admin/user-creation";
+            }
+            if(valid.hasSpace(user.getEmail())){
+                model.addAttribute("error", "Email can not have space");
+                model.addAttribute("user", user);
+            }
         }
 
         //Check valid pasword
@@ -73,11 +84,19 @@ public class AdminUserManagement {
             model.addAttribute("error", "Password must be at least 6 characters long");
             model.addAttribute("user", user);
             return "admin/user-creation";
+        }else if(valid.hasSpace(user.getPassword())){
+            model.addAttribute("error", "Password can not have space");
+            model.addAttribute("user", user);
+            return "admin/user-creation";
         }
         //Check valid phone
         if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
             if (!valid.isPhoneValid(user.getPhoneNumber())) {
                 model.addAttribute("error", "Invalid phone number");
+                model.addAttribute("user", user);
+                return "admin/user-creation";
+            }else if(valid.hasSpace(user.getPhoneNumber())){
+                model.addAttribute("error", "Phone can not have space");
                 model.addAttribute("user", user);
                 return "admin/user-creation";
             }
@@ -183,7 +202,11 @@ public class AdminUserManagement {
             String balance = request.getParameter("balance");
 
             //Check valid email
-            if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
+            if(valid.hasSpace(email)){
+                model.addAttribute("error", "Email can not have space");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }else if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
                 //Kiem tra xem email da ton tai hay chua (Khong xet den email cu)
                 model.addAttribute("error", "Email already exists");
                 model.addAttribute("user", user);
@@ -195,11 +218,19 @@ public class AdminUserManagement {
                 model.addAttribute("error", "Password must be at least 6 characters long");
                 model.addAttribute("user", user);
                 return "admin/user-update";
+            }else if(valid.hasSpace(password)){
+                model.addAttribute("error", "Password can not have space");
+                model.addAttribute("user", user);
+                return "admin/user-update";
             }
             //Check valid phone
             if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
                 if (!valid.isPhoneValid(phoneNumber)) {
                     model.addAttribute("error", "Invalid phone number");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }else if(valid.hasSpace(phoneNumber)){
+                    model.addAttribute("error", "Phone can not have space");
                     model.addAttribute("user", user);
                     return "admin/user-update";
                 }
@@ -209,18 +240,19 @@ public class AdminUserManagement {
             if (balance != null && !balance.isEmpty()) {
                 try {
                     balanceD = new BigDecimal(balance);
-                    if(balanceD.compareTo(BigDecimal.ZERO) < 0){
+                    if (balanceD.compareTo(BigDecimal.ZERO) < 0) {
                         model.addAttribute("error", "Please enter a positive number");
                         model.addAttribute("user", user);
                         return "admin/user-update";
                     }
-                    if(balanceD.compareTo(user.getBalance()) > 0){}
+                    if (balanceD.compareTo(user.getBalance()) > 0) {
+                    }
                 } catch (Exception e) {
                     model.addAttribute("error", "Invalid balance");
                     model.addAttribute("user", user);
                     return "admin/user-update";
                 }
-            }else{
+            } else {
                 balanceD = BigDecimal.ZERO;
             }
             // Solving if having image

@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -88,6 +89,7 @@ public class UserServiceImpl implements UserService {
     public void deactiveUserById(Users user) {
         setExpireSessionByUsername(user.getUsername());
         user.setIsActive(false);
+        user.setUpdatedAt(LocalDateTime.now());
         if (user.getUserType().equalsIgnoreCase("SELLER")) {
             List<Products> listProduct = adminProductService.findBySellerIdAndStatusIgnoreCase(user.getUserId(), "public");
             for (Products p : listProduct) {
