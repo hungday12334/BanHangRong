@@ -1292,11 +1292,46 @@
 
           function renderDeviceBox(data) {
             const devInfo = document.getElementById('ck_device_info');
+            const resWrap = document.getElementById('ck_result');
             if (!devInfo) return;
+            // helper to format memory like before
+            function fmtMem(m) {
+              if (!m) return '';
+              const s = String(m).trim();
+              const mbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(mb)$/i);
+              const gbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(gb)$/i);
+              if (mbMatch) {
+                const mb = parseFloat(mbMatch[1]);
+                const gb = mb / 1024;
+                return `${gb.toFixed(1)} GB (${mb} MB)`;
+              }
+              if (gbMatch) {
+                const gb = parseFloat(gbMatch[1]);
+                const mb = Math.round(gb * 1024);
+                return `${gb} GB (${mb} MB)`;
+              }
+              const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
+              if (numMatch) return `${numMatch[1]} (${s.replace(numMatch[1], '').trim()})`;
+              return s;
+            }
+
+            // If no device identifier, clear or set placeholders but keep panel visible
             if (!data.deviceIdentifier) {
-              devInfo.textContent = 'Đang sẵn sàng';
+              const ids = ['ck_device_id','ck_device_host','ck_device_platform','ck_device_cpu','ck_device_cores','ck_device_memory','ck_device_path','ck_device_lastUsed','ck_device_activated'];
+              ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (id === 'ck_device_path') {
+                  el.href = '#'; el.title = ''; el.textContent = '-';
+                } else {
+                  el.textContent = '-';
+                }
+              });
+              if (resWrap) resWrap.style.display = 'block';
               return;
             }
+
+            // try to parse and populate structured fields if the specific elements exist
             try {
               const raw = String(data.deviceIdentifier || '');
               const parts = raw.split('|');
@@ -1316,35 +1351,46 @@
                 });
               }
 
-              function fmtMem(m) {
-                if (!m) return '';
-                const s = String(m).trim();
-                // examples: 7894MB, 8GB
-                const mbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(mb)$/i);
-                const gbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(gb)$/i);
-                if (mbMatch) {
-                  const mb = parseFloat(mbMatch[1]);
-                  const gb = mb / 1024;
-                  return `${gb.toFixed(1)} GB (${mb} MB)`;
-                }
-                if (gbMatch) {
-                  const gb = parseFloat(gbMatch[1]);
-                  const mb = Math.round(gb * 1024);
-                  return `${gb} GB (${mb} MB)`;
-                }
-                // plain digits
-                const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
-                if (numMatch) return `${numMatch[1]} (${s.replace(numMatch[1], '').trim()})`;
-                return s;
-              }
-
               const host = kvMap['host'] || kvMap['hostname'] || '';
               const plat = kvMap['plat'] || kvMap['platform'] || '';
               const cpu = kvMap['cpu'] || '';
               const cores = kvMap['cores'] || kvMap['cpu_cores'] || '';
               const mem = kvMap['mem'] || kvMap['memory'] || '';
 
-              // build HTML
+              // If the new structured DOM exists (spans/anchor), populate them
+              const elId = document.getElementById('ck_device_id');
+              if (elId) {
+                document.getElementById('ck_device_id').textContent = devId || '-';
+                const hostEl = document.getElementById('ck_device_host'); if (hostEl) hostEl.textContent = host || '-';
+                const platEl = document.getElementById('ck_device_platform'); if (platEl) platEl.textContent = plat || '-';
+                const cpuEl = document.getElementById('ck_device_cpu'); if (cpuEl) cpuEl.textContent = cpu || '-';
+                const coresEl = document.getElementById('ck_device_cores'); if (coresEl) coresEl.textContent = cores || '-';
+                const memEl = document.getElementById('ck_device_memory'); if (memEl) memEl.textContent = fmtMem(mem) || '-';
+                const pathEl = document.getElementById('ck_device_path');
+                if (pathEl) {
+                  const e = (extra || '').trim();
+                  if (!e) { pathEl.href = '#'; pathEl.title = ''; pathEl.textContent = '-'; }
+                  else {
+                    try {
+                      // if a helper exists (from template) use it
+                      if (typeof window.setDevicePath === 'function') {
+                        window.setDevicePath(e, 48);
+                      } else {
+                        pathEl.href = e;
+                        pathEl.title = e;
+                        const short = e.length > 48 ? (e.slice(0, 22) + '...' + e.slice(-22)) : e;
+                        pathEl.textContent = short;
+                      }
+                    } catch (err) { pathEl.textContent = e; }
+                  }
+                }
+                const lastEl = document.getElementById('ck_device_lastUsed'); if (lastEl) lastEl.textContent = data.lastUsedDate || '-';
+                const actEl = document.getElementById('ck_device_activated'); if (actEl) actEl.textContent = data.activationDate || '-';
+                if (resWrap) resWrap.style.display = 'block';
+                return; // done
+              }
+
+              // Fallback: build the old HTML if structured elements not found
               let html = '';
               html += `<div style="font-weight:700;margin-bottom:6px;">Device</div>`;
               html += `<div><strong>ID:</strong> ${devId}</div>`;
@@ -1354,11 +1400,9 @@
               if (cores) html += `<div><strong>Cores:</strong> ${cores}</div>`;
               if (mem) html += `<div><strong>Memory:</strong> ${fmtMem(mem)}</div>`;
               if (extra) {
-                // show file path or URL if present
                 const e = extra.trim();
                 if (e) {
                   const short = e.length > 80 ? e.substring(0, 77) + '...' : e;
-                  // if it's a file:// or http(s) URL, render as link
                   if (/^file:\/\//i.test(e) || /^https?:\/\//i.test(e)) {
                     html += `<div><strong>Path:</strong> <a href="${e}" target="_blank" rel="noopener noreferrer">${short}</a></div>`;
                   } else {
@@ -1369,11 +1413,13 @@
               if (data.lastUsedDate) html += `<div style="margin-top:6px;"><strong>Last used:</strong> ${data.lastUsedDate}</div>`;
               if (data.activationDate) html += `<div><strong>Activated:</strong> ${data.activationDate}</div>`;
               devInfo.innerHTML = html;
+              if (resWrap) resWrap.style.display = 'block';
             } catch (e) {
               // fallback to raw display
               devInfo.innerHTML = `<div><strong>ID:</strong> ${data.deviceIdentifier}</div>` +
                                   (data.lastUsedDate ? `<div><strong>Last used:</strong> ${data.lastUsedDate}</div>` : '') +
                                   (data.activationDate ? `<div><strong>Activated:</strong> ${data.activationDate}</div>` : '');
+              if (resWrap) resWrap.style.display = 'block';
             }
           }
 
