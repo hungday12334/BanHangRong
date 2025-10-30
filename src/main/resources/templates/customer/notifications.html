@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Thông Báo - Customer</title>
+	<title>Notifications - Customer</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -547,7 +547,7 @@
 							style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
 					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
 		</div>
@@ -557,7 +557,7 @@
 			<!-- Page Header -->
 			<div class="page-header">
 				<h1 class="page-title">
-					🔔 Thông Báo
+					🔔 Notifications
 					<span class="unread-badge" th:if="${unreadCount > 0}" th:text="${unreadCount}">0</span>
 				</h1>
 			</div>
@@ -567,47 +567,47 @@
 				<form method="get" action="/customer/notifications">
 					<div class="filters-grid">
 						<div class="filter-group">
-							<label>Sắp xếp</label>
+							<label>Sort By</label>
 							<select name="sortBy">
 								<option value="newest" th:selected="${currentSortBy == 'newest' or currentSortBy == null}">
-									Mới nhất</option>
-								<option value="oldest" th:selected="${currentSortBy == 'oldest'}">Cũ nhất</option>
+									Newest</option>
+								<option value="oldest" th:selected="${currentSortBy == 'oldest'}">Oldest</option>
 							</select>
 						</div>
 
 						<div class="filter-group">
-							<label>Loại thông báo</label>
+							<label>Notification Type</label>
 							<select name="type">
-								<option value="" th:selected="${currentType == null}">Tất cả</option>
-								<option value="ORDER" th:selected="${currentType == 'ORDER'}">Đơn hàng</option>
-								<option value="REVIEW" th:selected="${currentType == 'REVIEW'}">Đánh giá</option>
-								<option value="SYSTEM" th:selected="${currentType == 'SYSTEM'}">Hệ thống</option>
+								<option value="" th:selected="${currentType == null}">All</option>
+								<option value="ORDER" th:selected="${currentType == 'ORDER'}">Order</option>
+								<option value="REVIEW" th:selected="${currentType == 'REVIEW'}">Review</option>
+								<option value="SYSTEM" th:selected="${currentType == 'SYSTEM'}">System</option>
 							</select>
 						</div>
 
 						<div class="filter-group">
-							<label>Trạng thái</label>
+							<label>Status</label>
 							<select name="isRead">
-								<option value="" th:selected="${currentIsRead == null}">Tất cả</option>
-								<option value="false" th:selected="${currentIsRead == false}">Chưa đọc</option>
-								<option value="true" th:selected="${currentIsRead == true}">Đã đọc</option>
+								<option value="" th:selected="${currentIsRead == null}">All</option>
+								<option value="false" th:selected="${currentIsRead == false}">Unread</option>
+								<option value="true" th:selected="${currentIsRead == true}">Read</option>
 							</select>
 						</div>
 
 						<div class="filter-group">
-							<label>Từ ngày</label>
+							<label>From Date</label>
 							<input type="date" name="startDate" th:value="${currentStartDate}">
 						</div>
 
 						<div class="filter-group">
-							<label>Đến ngày</label>
+							<label>To Date</label>
 							<input type="date" name="endDate" th:value="${currentEndDate}">
 						</div>
 					</div>
 
 					<div class="filter-actions">
-						<button type="button" class="btn btn-secondary" onclick="clearFilters()">Xóa bộ lọc</button>
-						<button type="submit" class="btn btn-primary">Áp dụng</button>
+						<button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+						<button type="submit" class="btn btn-primary">Apply</button>
 					</div>
 				</form>
 			</div>
@@ -615,10 +615,10 @@
 			<!-- Bulk Actions -->
 			<div class="bulk-actions" th:if="${unreadCount > 0}">
 				<span class="bulk-actions-info">
-					Có <strong th:text="${unreadCount}">0</strong> thông báo chưa đọc
+					<strong th:text="${unreadCount}">0</strong> unread notifications
 				</span>
 				<button class="btn btn-secondary btn-icon" onclick="markAllAsRead()">
-					✓ Đánh dấu tất cả đã đọc
+					✓ Mark All as Read
 				</button>
 			</div>
 
@@ -626,8 +626,8 @@
 			<div class="notifications-list">
 				<div th:if="${notifications.content.empty}" class="empty-state">
 					<div class="empty-icon">🔔</div>
-					<h3 class="empty-title">Không có thông báo</h3>
-					<p class="empty-message">Bạn chưa có thông báo nào.</p>
+					<h3 class="empty-title">No Notifications</h3>
+					<p class="empty-message">You don't have any notifications yet.</p>
 				</div>
 
 				<div th:each="notification : ${notifications.content}" class="notification-item"
@@ -639,24 +639,24 @@
 					</div>
 
 					<div class="notification-content">
-						<h3 class="notification-title" th:text="${notification.title}">Tiêu đề</h3>
-						<p class="notification-message" th:text="${notification.message}">Nội dung thông báo</p>
+						<h3 class="notification-title" th:text="${notification.title}">Title</h3>
+						<p class="notification-message" th:text="${notification.message}">Message content</p>
 						<div class="notification-meta">
 							<span
 								th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
 							<span th:if="${!notification.isRead}"
-								style="color: var(--brand); font-weight: 600;">● Chưa đọc</span>
+								style="color: var(--brand); font-weight: 600;">● Unread</span>
 						</div>
 					</div>
 
 					<div class="notification-actions">
 						<button th:if="${!notification.isRead}" class="btn btn-icon"
 							th:onclick="'markAsRead(' + ${notification.notificationId} + ')'">
-							✓ Đánh dấu đã đọc
+							✓ Mark as Read
 						</button>
 						<button class="btn btn-icon"
 							th:onclick="'deleteNotification(' + ${notification.notificationId} + ')'">
-							🗑️ Xóa
+							🗑️ Delete
 						</button>
 					</div>
 				</div>
@@ -724,17 +724,17 @@
 					if (data.success) {
 						location.reload();
 					} else {
-						alert('Có lỗi xảy ra, vui lòng thử lại');
+						alert('An error occurred, please try again');
 					}
 				})
 				.catch(error => {
 					console.error('Error:', error);
-					alert('Có lỗi xảy ra, vui lòng thử lại');
+					alert('An error occurred, please try again');
 				});
 		}
 
 		function markAllAsRead() {
-			if (!confirm('Đánh dấu tất cả thông báo đã đọc?')) {
+			if (!confirm('Mark all notifications as read?')) {
 				return;
 			}
 
@@ -753,17 +753,17 @@
 					if (data.success) {
 						location.reload();
 					} else {
-						alert('Có lỗi xảy ra, vui lòng thử lại');
+						alert('An error occurred, please try again');
 					}
 				})
 				.catch(error => {
 					console.error('Error:', error);
-					alert('Có lỗi xảy ra, vui lòng thử lại');
+					alert('An error occurred, please try again');
 				});
 		}
 
 		function deleteNotification(notificationId) {
-			if (!confirm('Bạn có chắc muốn xóa thông báo này?')) {
+			if (!confirm('Are you sure you want to delete this notification?')) {
 				return;
 			}
 
@@ -782,12 +782,12 @@
 					if (data.success) {
 						location.reload();
 					} else {
-						alert('Có lỗi xảy ra, vui lòng thử lại');
+						alert('An error occurred, please try again');
 					}
 				})
 				.catch(error => {
 					console.error('Error:', error);
-					alert('Có lỗi xảy ra, vui lòng thử lại');
+					alert('An error occurred, please try again');
 				});
 		}
 	</script>
