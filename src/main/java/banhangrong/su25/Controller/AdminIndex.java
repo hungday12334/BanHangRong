@@ -81,10 +81,10 @@ public class AdminIndex {
         return "admin/product-management";
     }
 
-    @GetMapping("/pending-product")
-    public String getPendingProduct(Model model) {
-        List<Products> productsList = adminProductService.findByStatus("pending");
-        model.addAttribute("productsList", productsList);
-        return "admin/pendingproduct-management";
-    }
+//    @GetMapping("/pending-product")
+//    public String getPendingProduct(Model model) {
+//        List<Products> productsList = adminProductService.findByStatus("pending");
+//        model.addAttribute("productsList", productsList);
+//        return "admin/pendingproduct-management";
+//    }
 }

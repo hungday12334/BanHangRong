@@ -60,6 +60,7 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
+            margin-bottom: 10px;
         }
 
         .action-btns a,
@@ -126,7 +127,13 @@
         .advanced-filter label {
             font-weight: 500;
         }
-
+        .badge {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
         .form-user-filter { display: contents; }
     </style>
 </head>
@@ -142,21 +149,22 @@
         <form th:action="@{/admin/product/filter}" method="get" class="form-user-filter">
             <div class="user-header">
                 <div class="filter-bar d-flex flex-wrap align-items-center gap-2">
-
                     <!-- QUICK FILTER: Chỉ Status (realtime JS) -->
-                    <select id="status" class="form-select w-auto" name="status">
+                    <select id="status" class="form-select w-auto" name="status"></span>
                         <option value="">Status</option>
                         <option value="PUBLIC">Public</option>
                         <option value="PENDING">Pending</option>
                         <option value="HIDDEN">Hidden</option>
                         <option value="CANCELLED">Cancelled</option>
                     </select>
-
                     <!-- Toggle Advanced -->
                     <button type="button" class="btn btn-outline-primary" id="toggleAdvanced">
                         <i class="bi bi-funnel"></i> Advanced Filter
                     </button>
-
+                    <div th:if="${pendingCount > 0}" class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <span>Có <strong th:text="${pendingCount}">0</strong> sản phẩm đang ở trạng thái <strong>Pending</strong> cần được duyệt.</span>
+                    </div>
                 </div>
 
                 <!-- ADVANCED FILTER (ẩn mặc định) -->
@@ -320,6 +328,11 @@
                 <tbody>
                 <tr th:each="p : ${productsList}">
                     <td>
+                        <div class="action-btns">
+                            <a th:href="@{'/admin/product/update?id=' + ${p.productId}}">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        </div>
                         <div class="action-btns">
                             <form th:action="@{/admin/product/cancel}" method="post" style="text-align:center;">
                                 <input type="hidden" name="productId" th:value="${p.productId}">
