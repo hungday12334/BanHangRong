@@ -12,6 +12,7 @@ import banhangrong.su25.Repository.OrderItemsRepository;
 import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ShoppingCartRepository;
+import banhangrong.su25.Repository.NotificationRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -39,8 +40,9 @@ public class CustomerDashboardController {
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final ProductReviewsRepository productReviewsRepository;
+    private final NotificationRepository notificationRepository;
 
-    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository, ProductReviewsRepository productReviewsRepository) {
+    public CustomerDashboardController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, ShoppingCartRepository shoppingCartRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository, ProductReviewsRepository productReviewsRepository, NotificationRepository notificationRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.shoppingCartRepository = shoppingCartRepository;
@@ -48,6 +50,7 @@ public class CustomerDashboardController {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productReviewsRepository = productReviewsRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @GetMapping("/customer/dashboard")
@@ -110,6 +113,7 @@ public class CustomerDashboardController {
         try {
             if (currentUser != null) {
                 model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+                model.addAttribute("unreadCount", notificationRepository.countByUserIdAndIsRead(currentUser.getUserId(), false));
                 model.addAttribute("user", currentUser);
             }
         } catch (Exception ignored) {}
