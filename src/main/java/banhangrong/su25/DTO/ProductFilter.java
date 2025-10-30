@@ -3,6 +3,8 @@ package banhangrong.su25.DTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Data
 public class ProductFilter {
     private Long id;
@@ -19,16 +21,17 @@ public class ProductFilter {
     private Integer maxTotalSales;
     private BigDecimal minAvgRating;
     private BigDecimal maxAvgRating;
-    private String createdFrom;
-    private String createdTo;
-    private String updatedFrom;
-    private String updatedTo;
+    private LocalDate createdFrom;
+    private LocalDate createdTo;
+    private LocalDate updatedFrom;
+    private LocalDate updatedTo;
     private String sortBy;
     private String sortOrder;
+
     public ProductFilter() {
     }
 
-    public ProductFilter(Long id, Long sellerId, String name, String status, BigDecimal minPrice, BigDecimal maxPrice, Integer minSalePrice, Integer maxSalePrice, Integer minQuantity, Integer maxQuantity, Integer minTotalSales, Integer maxTotalSales, BigDecimal minAvgRating, BigDecimal maxAvgRating, String createdFrom, String createdTo, String updatedFrom, String updatedTo, String sortBy, String sortOrder) {
+    public ProductFilter(Long id, Long sellerId, String name, String status, BigDecimal minPrice, BigDecimal maxPrice, Integer minSalePrice, Integer maxSalePrice, Integer minQuantity, Integer maxQuantity, Integer minTotalSales, Integer maxTotalSales, BigDecimal minAvgRating, BigDecimal maxAvgRating, LocalDate createdFrom, LocalDate createdTo, LocalDate updatedFrom, LocalDate updatedTo, String sortBy, String sortOrder) {
         this.id = id;
         this.sellerId = sellerId;
         this.name = name;
@@ -50,5 +53,4 @@ public class ProductFilter {
         this.sortBy = sortBy;
         this.sortOrder = sortOrder;
     }
-
 }
