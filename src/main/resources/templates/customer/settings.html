@@ -484,55 +484,55 @@
                 
                 <div class="checkbox-group">
                     <input type="checkbox" id="orderUpdates" name="orderUpdates" class="checkbox" checked>
-                    <label class="checkbox-label" for="orderUpdates">Cập nhật đơn hàng</label>
+                    <label class="checkbox-label" for="orderUpdates">Order updates</label>
                 </div>
                 
                 <div class="checkbox-group">
                     <input type="checkbox" id="promotions" name="promotions" class="checkbox" checked>
-                    <label class="checkbox-label" for="promotions">Khuyến mãi và ưu đãi</label>
+                    <label class="checkbox-label" for="promotions">Promotions and offers</label>
                 </div>
                 
                 <div class="btn-group">
-                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
                 </div>
             </form>
         </div>
         
         <!-- Privacy Settings -->
         <div class="settings-section">
-            <h2 class="section-title">Bảo mật và quyền riêng tư</h2>
+            <h2 class="section-title">Privacy and Security</h2>
             <form id="privacyForm">
                 <div class="checkbox-group">
                     <input type="checkbox" id="profilePublic" name="profilePublic" class="checkbox">
-                    <label class="checkbox-label" for="profilePublic">Hiển thị hồ sơ công khai</label>
+                    <label class="checkbox-label" for="profilePublic">Show public profile</label>
                 </div>
                 
                 <div class="checkbox-group">
                     <input type="checkbox" id="showEmail" name="showEmail" class="checkbox">
-                    <label class="checkbox-label" for="showEmail">Hiển thị email trong hồ sơ</label>
+                    <label class="checkbox-label" for="showEmail">Show email in profile</label>
                 </div>
                 
                 <div class="checkbox-group">
                     <input type="checkbox" id="showPhone" name="showPhone" class="checkbox">
-                    <label class="checkbox-label" for="showPhone">Hiển thị số điện thoại</label>
+                    <label class="checkbox-label" for="showPhone">Show phone number</label>
                 </div>
                 
                 <div class="btn-group">
-                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
                 </div>
             </form>
         </div>
         
         <!-- Danger Zone -->
         <div class="settings-section">
-            <h2 class="section-title" style="color: #ef4444;">Vùng nguy hiểm</h2>
+            <h2 class="section-title" style="color: #ef4444;">Danger Zone</h2>
             <p style="color: #6b7280; margin-bottom: 20px;">
-                Các hành động này không thể hoàn tác. Vui lòng cẩn thận.
+                These actions cannot be undone. Please be careful.
             </p>
             
             <div class="btn-group">
                 <button type="button" class="btn btn-danger" onclick="deleteAccount()">
-                    Xóa tài khoản
+                    Delete Account
                 </button>
             </div>
         </div>
@@ -575,10 +575,10 @@
         }
         
         function deleteAccount() {
-            if (confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
-                if (confirm('Nhập "DELETE" để xác nhận xóa tài khoản:')) {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone!')) {
+                if (confirm('Type "DELETE" to confirm account deletion:')) {
                     // TODO: Implement account deletion
-                    alert('Chức năng xóa tài khoản đang được phát triển!');
+                    alert('Account deletion feature is under development!');
                 }
             }
         }

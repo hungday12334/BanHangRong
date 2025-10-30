@@ -1294,7 +1294,7 @@
         </nav>
         <div class="sidebar-footer" data-block="logout">
             <div class="footer-actions">
-                <button id="themeToggle" class="theme-toggle" aria-label="Chuyển giao diện" title="Chuyển giao diện" type="button">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme" type="button">
                     <i class="ti ti-sun"></i>
                 </button>
                 <a href="/logout" class="logout-btn" title="Logout" aria-label="Logout">
@@ -1711,7 +1711,7 @@
 
             // Validate: Phone number
             if (!phone || phone.trim() === '') {
-                showToast('Vui lòng nhập số điện thoại', 'error');
+                showToast('Please enter phone number', 'error');
                 return;
             }
 
