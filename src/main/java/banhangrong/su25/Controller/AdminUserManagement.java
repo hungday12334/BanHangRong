@@ -30,6 +30,7 @@ public class AdminUserManagement {
 
     @GetMapping("filter")
     public String filterUser(@ModelAttribute("filter") UserFilter userFilter, RedirectAttributes redirectAttributes) {
+
         List<Users> listFilterUser = userService.filter(userFilter);
         redirectAttributes.addFlashAttribute("filter", listFilterUser);
         redirectAttributes.addFlashAttribute("isFromFilter", true);

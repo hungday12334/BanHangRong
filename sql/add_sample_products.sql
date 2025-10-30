@@ -26,10 +26,10 @@ INSERT IGNORE INTO products (product_id, seller_id, name, description, price, sa
 (4, 2, 'Template Website Responsive', 'Mẫu website responsive đẹp mắt cho doanh nghiệp', 500000.00, NULL, 30, 'https://example.com/download/template1.zip', 15, 4.5, 'Public'),
 (5, 1, 'Ebook Lập trình Java', 'Sách điện tử hướng dẫn lập trình Java từ cơ bản đến nâng cao', 200000.00, 150000.00, 1000, 'https://example.com/download/java-ebook.pdf', 80, 4.7, 'Public'),
 (6, 2, 'Khóa học React Native', 'Khóa học lập trình ứng dụng di động với React Native', 1200000.00, 900000.00, 20, 'https://example.com/download/react-course.zip', 12, 4.8, 'Public'),
-(7, 1, 'Adobe Premiere Pro 2024', 'Phần mềm chỉnh sửa video chuyên nghiệp', 3000000.00, 2500000.00, 25, 'https://example.com/download/premiere2024.zip', 8, 4.9, 'Public'),
+(7, 1, 'Adobe Premiere Pro 2024', 'Phần mềm chỉnh sửa video chuyên nghiệp', 3000000.00, 2500000.00, 25, 'https://example.com/download/premiere2024.zip', 8, 4.9, 'Hidden'),
 (8, 2, 'Game Among Us Premium', 'Trò chơi đa người chơi phổ biến', 300000.00, NULL, 500, 'https://example.com/download/amongus.zip', 200, 4.6, 'Public'),
-(9, 1, 'Template Landing Page', 'Mẫu trang landing page chuyển đổi cao', 400000.00, 300000.00, 40, 'https://example.com/download/landing-template.zip', 25, 4.4, 'Public'),
-(10, 2, 'Ebook Python cho người mới', 'Sách điện tử học Python từ đầu', 150000.00, NULL, 800, 'https://example.com/download/python-ebook.pdf', 60, 4.5, 'Public');
+(9, 1, 'Template Landing Page', 'Mẫu trang landing page chuyển đổi cao', 400000.00, 300000.00, 40, 'https://example.com/download/landing-template.zip', 25, 4.4, 'Cancelled'),
+(10, 2, 'Ebook Python cho người mới', 'Sách điện tử học Python từ đầu', 150000.00, NULL, 800, 'https://example.com/download/python-ebook.pdf', 60, 4.5, 'Pending');
 
 -- Thêm liên kết sản phẩm với danh mục
 INSERT IGNORE INTO categories_products (category_id, product_id) VALUES
