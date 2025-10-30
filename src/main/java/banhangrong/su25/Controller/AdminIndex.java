@@ -69,7 +69,14 @@ public class AdminIndex {
 
     @GetMapping("/products")
     public String getAllProduct(Model model) {
-        List<Products> productsList = adminProductService.findAll();
+        List<Products> productsList;
+        Object filterObj = model.getAttribute("filter");
+        Boolean isFromFilter = Boolean.TRUE.equals((Boolean) model.getAttribute("isFromFilter"));
+        if(isFromFilter && filterObj instanceof List<?> filterList){
+            productsList = filterList.stream().filter(product -> product instanceof Products).map(object -> (Products) object).toList();
+        }else{
+            productsList = adminProductService.findAll();
+        }
         model.addAttribute("productsList", productsList);
         return "admin/product-management";
     }

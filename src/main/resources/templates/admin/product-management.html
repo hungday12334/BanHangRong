@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="utf-8">
@@ -12,13 +12,13 @@
     <style>
         /* Căn chỉnh phần nội dung chính để không bị sidebar che */
         .content-wrapper {
-            margin-left: 260px; /* Đẩy sang phải bằng độ rộng sidebar */
+            margin-left: 260px;
             padding: 30px;
             background-color: #f8f9fa;
             min-height: 100vh;
         }
 
-        /* Làm đẹp phần header tìm kiếm */
+        /* Header & filter bar */
         .user-header {
             display: flex;
             justify-content: space-between;
@@ -26,12 +26,6 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 10px;
-        }
-
-        .user-header form {
-            display: flex;
-            gap: 10px;
-            align-items: center;
         }
 
         table {
@@ -57,36 +51,13 @@
             background-color: #e5e8ff;
         }
 
-        .btn-create {
-            background-color: #6c8cff;
-            color: white;
-            font-weight: 500;
-            border-radius: 6px;
-            padding: 8px 16px;
-            border: none;
-            transition: background 0.2s;
-        }
+        a { text-decoration: none; }
+        a:hover { text-decoration: none; }
 
-        .btn-create:hover {
-            background-color: #5b77e6;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: none;
-        }
-
-        .sidebar-link .hide-menu {
-            margin-left: -8px; /* giảm khoảng cách chữ */
-        }
-
-        /* Nút hành động tự custom */
+        /* Nút hành động */
         .action-btns {
             display: flex;
-            flex-direction: column; /* icon xếp dọc */
+            flex-direction: column;
             align-items: center;
             gap: 6px;
         }
@@ -105,41 +76,27 @@
             transition: all 0.2s ease;
         }
 
-        /* Nút Update */
         .action-btns a {
-            background-color: #4e73df; /* xanh dương */
+            background-color: #4e73df;
         }
 
-        .action-btns a i {
-            color: white;
-            font-size: 16px;
-        }
-
-        /* Nút Delete */
-        .action-btns button {
-            background-color: #e74a3b; /* đỏ cam */
-        }
-
+        .action-btns a i,
         .action-btns button i {
             color: white;
             font-size: 16px;
         }
 
-        /* Hiệu ứng hover */
+        .action-btns button {
+            background-color: #e74a3b;
+        }
+
         .action-btns a:hover,
         .action-btns button:hover {
             transform: scale(1.1);
             filter: brightness(1.1);
         }
 
-        .status {
-            text-align: center;
-            font-weight: 600;
-            border-radius: 6px;
-            padding: 6px 10px;
-            color: white;
-        }
-
+        /* Status badge */
         .status-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -149,112 +106,186 @@
             text-align: center;
         }
 
-        /* Public - xanh lá */
-        .status-public {
-            background-color: #28a745;
-            color: white;
-        }
+        .status-public { background-color: #28a745; color: white; }
+        .status-pending { background-color: #ffc107; color: black; }
+        .status-hidden { background-color: #6c757d; color: white; }
+        .status-cancelled { background-color: #dc3545; color: white; }
 
-        /* Pending - vàng */
-        .status-pending {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        /* Cancelled - đỏ */
-        .status-cancelled {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .sidebar-item {
-            position: relative;
-            list-style: none;
-        }
-
-        .sidebar-item > ul {
-            display: none;
-            margin-left: 1.5rem;
-        }
-
-        .sidebar-item:hover > ul {
-            display: block;
-        }
-
-        .badge {
-            background-color: #dc3545;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-        /*filter*/
+        /* Filter bar */
         .filter-bar {
             gap: 10px;
             align-items: flex-end;
             margin-bottom: 15px;
-            border-bottom: 1px solid #ddd;
         }
 
+        .filter-bar select,
         .filter-bar input {
-            border-color: #0b1020;
-        }
-        .filter-bar select {
-            flex: 1;
-            min-width: 120px;
-            border-color: #0b1020;
+            min-width: 160px;
         }
 
-        .date-field {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .date-field label {
-            font-size: 13px;
+        .advanced-filter label {
             font-weight: 500;
-            color: #555;
-            margin-bottom: 3px;
         }
+
+        .form-user-filter { display: contents; }
     </style>
 </head>
 
 <body>
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
-    <!-- Sidebar Start -->
+    <!-- Sidebar -->
     <div th:replace="~{admin/sidebar::sidebar}"></div>
-    <!-- Sidebar End -->
 
-    <!-- ListUser Section -->
     <div class="content-wrapper">
-        <!--        //Filter-->
-        <div class="user-header">
-            <div class="d-flex filter-bar">
-                <input type="text" id="search" class="form-control" placeholder="ID, Name">
-                <input type="text" id="sellerId" class="form-control" placeholder="SellerID">
-                <input type="number" id="priceMin" class="form-control" placeholder="Price Min">
-                <input type="number" id="priceMax" class="form-control" placeholder="Price Max">
-                <select id="status" class="form-select">
-                    <option value="ALL">STATUS</option>
-                    <option value="HIDDEN">HIDDEN</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="PUBLIC">PUBLIC</option>
-                    <option value="CANCELLED">CANCELLED</option>
-                </select>
-                <div class="date-field">
-                    <label for="createAt">Create At</label>
-                    <input type="date" id="createAt" class="form-control">
+
+        <!-- ==================== FILTER SECTION ==================== -->
+        <form th:action="@{/admin/product/filter}" method="get" class="form-user-filter">
+            <div class="user-header">
+                <div class="filter-bar d-flex flex-wrap align-items-center gap-2">
+
+                    <!-- QUICK FILTER: Chỉ Status (realtime JS) -->
+                    <select id="status" class="form-select w-auto" name="status">
+                        <option value="">Status</option>
+                        <option value="PUBLIC">Public</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="HIDDEN">Hidden</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+
+                    <!-- Toggle Advanced -->
+                    <button type="button" class="btn btn-outline-primary" id="toggleAdvanced">
+                        <i class="bi bi-funnel"></i> Advanced Filter
+                    </button>
+
+                    <!-- Create Product -->
+                    <a th:href="@{/admin/product/create}" class="btn btn-success ms-auto">
+                        <i class="bi bi-plus-circle"></i> Create Product
+                    </a>
                 </div>
 
-                <div class="date-field">
-                    <label for="updateAt">Update At</label>
-                    <input type="date" id="updateAt" class="form-control">
+                <!-- ADVANCED FILTER (ẩn mặc định) -->
+                <div id="advancedFilter" class="advanced-filter mt-3 border rounded p-3 bg-light" style="display: none;">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">ID</label>
+                            <input min="0" type="number" class="form-control" name="id" placeholder="e.g. 1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Seller ID</label>
+                            <input min="0" type="number" class="form-control" name="sellerId" placeholder="e.g. 101">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" placeholder="Product name">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Price (Min)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="minPrice" placeholder="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Price (Max)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="maxPrice" placeholder="10000">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sale Price (Min)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="minSalePrice">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sale Price (Max)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="maxSalePrice">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity (Min)</label>
+                            <input type="number" min="0" class="form-control" name="minQuantity">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity (Max)</label>
+                            <input type="number" min="0" class="form-control" name="maxQuantity">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Total Sales (Min)</label>
+                            <input type="number" min="0" class="form-control" name="minTotalSales">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Total Sales (Max)</label>
+                            <input type="number" min="0" class="form-control" name="maxTotalSales">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Avg Rating (Min)</label>
+                            <input type="number" min="0" step="0.1" class="form-control" name="minAvgRating">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Avg Rating (Max)</label>
+                            <input type="number" min="0" step="0.1" class="form-control" name="maxAvgRating">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Created (From)</label>
+                            <input type="date" class="form-control" name="createdFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Created (To)</label>
+                            <input type="date" class="form-control" name="createdTo">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Updated (From)</label>
+                            <input type="date" class="form-control" name="updatedFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Updated (To)</label>
+                            <input type="date" class="form-control" name="updatedTo">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Sort By</label>
+                            <select class="form-select" name="sortBy">
+                                <option value="productId">Product ID</option>
+                                <option value="sellerId">Seller ID</option>
+                                <option value="name">Name</option>
+                                <option value="price">Price</option>
+                                <option value="salePrice">Sale Price</option>
+                                <option value="quantity">Quantity</option>
+                                <option value="totalSales">Total Sales</option>
+                                <option value="averageRating">Avg Rating</option>
+                                <option value="createdAt">Created At</option>
+                                <option value="updatedAt">Updated At</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Sort Order</label>
+                            <select class="form-select" name="sortOrder">
+                                <option value="ASC">Ascending</option>
+                                <option value="DESC">Descending</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-secondary me-2" id="resetFilter">Reset</button>
+                            <button type="submit" class="btn btn-primary" id="applyFilter">Apply Filter</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </form>
+        <!-- ==================== END FILTER ==================== -->
+
+        <!-- Alerts -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
+        <!-- Product Table -->
         <div class="table-responsive">
             <!-- Thông báo lỗi -->
             <div th:if="${error}"
@@ -329,62 +360,47 @@
         </div>
     </div>
 </div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.getElementById('search');
-        const sellerIdInput = document.getElementById('sellerId');
-        const priceMinInput = document.getElementById('priceMin');
-        const priceMaxInput = document.getElementById('priceMax');
-        const statusSelect = document.getElementById('status');
-        const createAtInput = document.getElementById('createAt');
-        const updateAtInput = document.getElementById('updateAt');
-        const rows = document.querySelectorAll('#productTable tbody tr');
+    document.addEventListener("DOMContentLoaded", function () {
+        const advancedFilter = document.getElementById("advancedFilter");
+        const toggleAdvanced = document.getElementById("toggleAdvanced");
+        const resetFilter = document.getElementById("resetFilter");
+        const statusSelect = document.getElementById("status");
 
-        function filterTable() {
-            const search = searchInput.value.trim().toLowerCase();
-            const sellerId = sellerIdInput.value.trim().toLowerCase();
-            const priceMin = parseFloat(priceMinInput.value) || 0;
-            const priceMax = parseFloat(priceMaxInput.value) || Infinity;
-            const status = statusSelect.value.trim().toLowerCase();
-            const createAt = createAtInput.value.trim();
-            const updateAt = updateAtInput.value.trim();
+        // Toggle Advanced Filter
+        toggleAdvanced.addEventListener("click", function () {
+            if (advancedFilter.style.display === "none") {
+                advancedFilter.style.display = "block";
+                toggleAdvanced.innerHTML = '<i class="bi bi-x-circle"></i> Hide Advanced';
+            } else {
+                advancedFilter.style.display = "none";
+                toggleAdvanced.innerHTML = '<i class="bi bi-funnel"></i> Advanced Filter';
+            }
+        });
 
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const idCell = cells[1].textContent.trim().toLowerCase();
-                const sellerIdCell = cells[2].textContent.trim().toLowerCase();
-                const nameCell = cells[4].textContent.trim().toLowerCase();
-                const priceCell = parseFloat(cells[6].textContent.trim()) || 0;
-                const statusCell = cells[10].textContent.trim().toLowerCase();
-                const createAtCell = cells[11].textContent.trim();
-                const updateAtCell = cells[12].textContent.trim();
+        // Reset Advanced Inputs
+        resetFilter.addEventListener("click", function () {
+            document.querySelectorAll("#advancedFilter input, #advancedFilter select")
+                .forEach(el => el.value = "");
+        });
 
-                const matchSearch = idCell.includes(search) || nameCell.includes(search);
-                const matchSellerId = sellerIdCell.includes(sellerId);
-                const matchPrice = priceCell >= priceMin && priceCell <= priceMax;
-                const matchStatus = status === 'all' || statusCell === status;
-                const matchCreateAt = !createAt || createAtCell.startsWith(createAt);
-                const matchUpdateAt = !updateAt || updateAtCell.startsWith(updateAt);
-
-                row.style.display = (matchSearch && matchSellerId && matchPrice && matchStatus && matchCreateAt && matchUpdateAt)
-                    ? ''
-                    : 'none';
+        // QUICK FILTER: Status (client-side)
+        function filterByStatus() {
+            const status = statusSelect.value.toUpperCase();
+            document.querySelectorAll("#productTable tbody tr").forEach(row => {
+                const rowStatus = row.children[10].textContent.trim().toUpperCase();
+                row.style.display = (status === "" || rowStatus === status) ? "" : "none";
             });
         }
 
-        let typingTimer;
-        searchInput.addEventListener("input", () => {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(filterTable, 300);
-        });
-
-        [sellerIdInput, priceMinInput, priceMaxInput, statusSelect, createAtInput, updateAtInput].forEach(el => {
-            el.addEventListener("input", filterTable);
-            el.addEventListener("change", filterTable);
-        });
+        statusSelect.addEventListener("change", filterByStatus);
+        statusSelect.addEventListener("input", filterByStatus);
     });
-
 </script>
+
+<!-- Scripts -->
 <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
 <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
@@ -394,5 +410,4 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
 </html>
