@@ -659,7 +659,7 @@
       document.getElementById('pm_name').value = p.name ?? '';
       document.getElementById('pm_price').value = p.price ?? '';
       document.getElementById('pm_salePrice').value = p.salePrice ?? '';
-      document.getElementById('pm_quantity').value = p.quantity ?? 0;
+  document.getElementById('pm_quantity').value = p.quantity;
       document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
       document.getElementById('pm_description').value = p.description ?? '';
       const st = document.getElementById('pm_status');
@@ -977,7 +977,7 @@
         if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
         else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
         const price = (p.price ?? 0).toLocaleString('en-US');
-        tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
+  tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity}</td><td>${statusHtml}</td>`;
         tbody.appendChild(tr);
       });
       if (counter) counter.textContent = list.length;
@@ -2481,7 +2481,7 @@
         const res = await fetch(`/api/products?sellerId=${sellerId}`);
         if (!res.ok) return;
         const list = await res.json();
-        onlyPublicProducts(list).forEach(p => { const o = document.createElement('option'); o.value = p.productId; o.textContent = `#${p.productId} • ${p.name}`; o.dataset.qty = p.quantity ?? 0; sel.appendChild(o); });
+  onlyPublicProducts(list).forEach(p => { const o = document.createElement('option'); o.value = p.productId; o.textContent = `#${p.productId} • ${p.name}`; o.dataset.qty = p.quantity; sel.appendChild(o); });
         sel.setAttribute('data-loaded', '1');
       } catch (_) { }
     }

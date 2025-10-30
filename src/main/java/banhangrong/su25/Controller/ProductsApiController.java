@@ -2,7 +2,6 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
-import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +17,11 @@ import java.util.stream.Collectors;
 public class ProductsApiController {
 
     private final ProductsRepository productsRepository;
-    private final ProductLicensesRepository productLicensesRepository;
     private final ProductImagesRepository productImagesRepository;
 
     public ProductsApiController(ProductsRepository productsRepository,
                                  ProductImagesRepository productImagesRepository) {
         this.productsRepository = productsRepository;
-        this.productLicensesRepository = null;
         this.productImagesRepository = productImagesRepository;
     }
 
@@ -73,39 +70,7 @@ public class ProductsApiController {
     public List<ProductDto> list(@RequestParam(name = "sellerId", required = false) Long sellerId) {
         List<Products> src = (sellerId != null) ? productsRepository.findBySellerId(sellerId) : productsRepository.findAll();
         List<ProductDto> dtos = src.stream().map(this::toDto).collect(Collectors.toList());
-        // If sellerId provided, populate quantity as remaining keys where product is license-based.
-        if (sellerId != null) {
-            try {
-                // Lazily obtain ProductLicensesRepository bean from application context to avoid breaking constructor DI
-                if (this.productLicensesRepository == null) {
-                    var ctx = org.springframework.web.context.ContextLoader.getCurrentWebApplicationContext();
-                    if (ctx != null && ctx.containsBean("productLicensesRepository")) {
-                        var repo = ctx.getBean("productLicensesRepository");
-                        if (repo instanceof ProductLicensesRepository) {
-                            // reflection assign to field (only for this request scope)
-                            java.lang.reflect.Field f = this.getClass().getDeclaredField("productLicensesRepository");
-                            f.setAccessible(true);
-                            f.set(this, repo);
-                        }
-                    }
-                }
-            } catch (Exception ignored) {}
-
-            if (this.productLicensesRepository != null) {
-                for (ProductDto d : dtos) {
-                    if (d.productId == null) continue;
-                    try {
-                        long sold = productLicensesRepository.countByProductViaOrders(d.productId);
-                        long pre = productLicensesRepository.countPreGeneratedForProduct(d.productId);
-                        int capacity = d.quantity != null ? d.quantity : 0;
-                        long remaining = Math.max(0L, (long) capacity - sold - pre);
-                        d.quantity = (int) Math.min(remaining, Integer.MAX_VALUE);
-                    } catch (Exception e) {
-                        // ignore per-product failures
-                    }
-                }
-            }
-        }
+        // Return DTOs with quantity as stored in DB (do not override with remaining keys)
         return dtos;
     }
 
