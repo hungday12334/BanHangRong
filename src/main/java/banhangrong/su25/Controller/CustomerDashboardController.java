@@ -201,6 +201,7 @@ public class CustomerDashboardController {
         // Cart count
         try {
             model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+            model.addAttribute("unreadCount", notificationRepository.countByUserIdAndIsRead(currentUser.getUserId(), false));
         } catch (Exception ignored) {}
 
         return "customer/orderhistory";

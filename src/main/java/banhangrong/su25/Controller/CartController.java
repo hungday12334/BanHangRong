@@ -36,6 +36,9 @@ public class CartController {
     
     @Autowired
     private NotificationService notificationService;
+    
+    @Autowired
+    private banhangrong.su25.Repository.NotificationRepository notificationRepository;
 
     public CartController(ShoppingCartRepository cartRepository,
                           ProductsRepository productsRepository,
@@ -104,6 +107,12 @@ public class CartController {
         model.addAttribute("items", viewItems);
         model.addAttribute("total", total);
         model.addAttribute("cartCount", items.size());
+        
+        // Add unread notification count
+        try {
+            model.addAttribute("unreadCount", notificationRepository.countByUserIdAndIsRead(user.getUserId(), false));
+        } catch (Exception ignored) {}
+        
         return "customer/cart";
     }
 

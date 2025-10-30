@@ -40,6 +40,9 @@ public class CustomerReviewsController {
     private ProductReviewsRepository productReviewsRepository;
     
     @Autowired
+    private banhangrong.su25.Repository.NotificationRepository notificationRepository;
+    
+    @Autowired
     private ProductsRepository productsRepository;
     
     @Autowired
@@ -127,6 +130,7 @@ public class CustomerReviewsController {
             
             model.addAttribute("user", user);
             model.addAttribute("cartCount", cartCount);
+            model.addAttribute("unreadCount", notificationRepository.countByUserIdAndIsRead(user.getUserId(), false));
             model.addAttribute("reviews", userReviews);
             model.addAttribute("productsMap", productsMap);
             model.addAttribute("productImagesMap", productImagesMap);
