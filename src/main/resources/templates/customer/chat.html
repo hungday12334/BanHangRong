@@ -787,58 +787,6 @@
         }
     }
 
-    function connect() {
-        if (isConnected) return;
-        updateConnectionStatus('connecting');
-
-        const socket = new SockJS('/chat');
-        stompClient = Stomp.over(socket);
-        stompClient.debug = null;
-
-        stompClient.connect(
-            { userId: currentUser.userId },
-            function(frame) {
-                console.log('Connected:', frame);
-                isConnected = true;
-                updateConnectionStatus('connected');
-
-                // Hide loader on connection
-                document.body.classList.remove('loading');
-
-                subscriptions.notifications = stompClient.subscribe(
-                    '/topic/user/' + currentUser.userId + '/notification',
-                    function(message) {
-                        const msg = JSON.parse(message.body);
-                        handleNewMessage(msg);
-                    }
-                );
-
-                stompClient.send('/app/user.connect', {}, JSON.stringify({
-                    userId: currentUser.userId
-                }));
-
-                // Send queued messages
-                if (messageQueue.length > 0) {
-                    showToast(`📤 Sending ${messageQueue.length} queued message${messageQueue.length > 1 ? 's' : ''}...`, 'info');
-                    messageQueue.forEach(msg => {
-                        stompClient.send('/app/sendMessage', {}, JSON.stringify(msg));
-                    });
-                    messageQueue = [];
-                }
-            },
-            function(error) {
-                console.error('STOMP error:', error);
-                isConnected = false;
-                updateConnectionStatus('disconnected');
-
-                // Hide loader even on error
-                document.body.classList.remove('loading');
-
-                setTimeout(connect, 5000);
-            }
-        );
-    }
-
     function loadConversations() {
         const isSeller = currentUser.userType === 'SELLER';
 
@@ -969,58 +917,6 @@
         return messageTime.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' });
     }
 
-    function openConversation(conv) {
-        if (currentConversation && subscriptions.conversation) {
-            subscriptions.conversation.unsubscribe();
-        }
-
-        currentConversation = conv;
-
-        // Save to localStorage
-        localStorage.setItem(LAST_CONVERSATION_KEY, conv.id);
-
-        document.getElementById('welcomeScreen').classList.add('hidden');
-        document.getElementById('chatArea').classList.remove('hidden');
-
-        const isCustomer = currentUser.userType === 'CUSTOMER';
-        const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
-        const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
-
-        document.getElementById('chatHeaderName').textContent = otherPartyName;
-        document.getElementById('chatHeaderAvatar').textContent = avatar;
-        document.getElementById('chatHeaderAvatar').className = `avatar ${isCustomer ? 'seller' : ''}`;
-
-        if (stompClient && isConnected) {
-            subscriptions.conversation = stompClient.subscribe(
-                '/topic/conversation/' + conv.id,
-                function(message) {
-                    const msg = JSON.parse(message.body);
-                    // Display message from others, or update own message with real ID from database
-                    if (msg.senderId !== currentUser.userId) {
-                        displayMessage(msg);
-                        markAsRead();
-                    } else {
-                        // Update own message with database ID if it was a temp message
-                        const tempElements = document.querySelectorAll('[data-temp-id^="temp_"]');
-                        if (tempElements.length > 0 && msg.id && !msg.id.toString().startsWith('temp_')) {
-                            // Replace the temp message with the real one from database
-                            const lastTempElement = tempElements[tempElements.length - 1];
-                            lastTempElement.remove();
-                            displayMessage(msg, false);
-                        }
-                    }
-                }
-            );
-        }
-
-        // Load existing messages
-        renderMessages();
-        markAsRead();
-
-        // Focus input
-        document.getElementById('messageInput').focus();
-    }
-
     function markAsRead() {
         if (currentConversation) {
             const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
@@ -1054,6 +950,7 @@
         scrollToBottom();
     }
 
+    // 🚨 SỬA LẠI displayMessage để nhận object đơn giản
     function displayMessage(message, shouldScroll = true) {
         const messagesContainer = document.getElementById('chatMessages');
         const isSent = message.senderId === currentUser.userId;
@@ -1071,95 +968,18 @@
         const statusIndicator = isSent ? `<span class="message-status" style="font-size: 10px; margin-left: 5px; color: #999;" title="${message.status || 'sent'}">${message.status === 'sending' ? '○' : message.status === 'queued' ? '⏳' : '✓'}</span>` : '';
 
         messageDiv.innerHTML = `
-            <div class="message-avatar ${avatarClass}">${avatar}</div>
-            <div class="message-content">
-                <div class="message-bubble">${escapeHtml(message.content)}${statusIndicator}</div>
-                <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
-            </div>
-        `;
+        <div class="message-avatar ${avatarClass}">${avatar}</div>
+        <div class="message-content">
+            <div class="message-bubble">${escapeHtml(message.content)}${statusIndicator}</div>
+            <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
+        </div>
+    `;
 
         messagesContainer.appendChild(messageDiv);
         if (shouldScroll) scrollToBottom();
     }
 
-    function handleNewMessage(msg) {
-        // Play sound and show notification if message is from another user
-        if (msg.senderId !== currentUser.userId) {
-            playNotificationSound();
 
-            // Show desktop notification if window is not focused
-            if (!document.hasFocus()) {
-                const senderName = msg.senderName || 'Someone';
-                const preview = msg.content.length > 50 ? msg.content.substring(0, 50) + '...' : msg.content;
-                showDesktopNotification(
-                    `💬 New message from ${senderName}`,
-                    preview
-                );
-            }
-        }
-
-        if (currentConversation && msg.conversationId === currentConversation.id) {
-            displayMessage(msg);
-        }
-        loadConversations();
-    }
-
-    function sendMessage() {
-        const input = document.getElementById('messageInput');
-        const content = input.value.trim();
-
-        // Validate empty message
-        if (!content || !currentConversation) return;
-
-        // Validate message length
-        if (content.length > MAX_MESSAGE_LENGTH) {
-            showToast(`❌ Message too long! Maximum ${MAX_MESSAGE_LENGTH} characters.`, 'error');
-            return;
-        }
-
-        // Rate limiting check
-        const now = Date.now();
-        if (lastMessageTime && (now - lastMessageTime) < RATE_LIMIT_MS) {
-            showToast('⚠️ Please slow down!', 'warning');
-            return;
-        }
-        lastMessageTime = now;
-
-        const tempId = 'temp_' + Date.now();
-        const message = {
-            id: tempId,
-            conversationId: currentConversation.id,
-            senderId: currentUser.userId,
-            senderName: currentUser.fullName || currentUser.username,
-            senderRole: currentUser.userType,
-            receiverId: currentUser.userType === 'CUSTOMER' ? currentConversation.sellerId : currentConversation.customerId,
-            content: content,
-            type: 'TEXT',
-            read: false,
-            status: 'sending'
-        };
-
-        // Display message immediately (optimistic UI)
-        displayMessage(message);
-        input.value = '';
-        updateCharCount();
-        scrollToBottom();
-
-        // Handle offline vs online
-        if (!isConnected) {
-            messageQueue.push(message);
-            showToast('⚠️ Offline - Message will be sent when reconnected', 'warning');
-            // Update message status to queued
-            updateMessageStatus(tempId, 'queued');
-        } else {
-            // Send via WebSocket
-            stompClient.send('/app/sendMessage', {}, JSON.stringify(message));
-            // Update status after short delay
-            setTimeout(() => {
-                updateMessageStatus(tempId, 'sent');
-            }, 500);
-        }
-    }
 
     function updateMessageStatus(tempId, status) {
         const msgElement = document.querySelector(`[data-temp-id="${tempId}"]`);
@@ -1433,6 +1253,220 @@
             stompClient.disconnect();
         }
     };
+
+    function processMessageQueue() {
+        if (messageQueue.length > 0) {
+            showToast(`📤 Sending ${messageQueue.length} queued message${messageQueue.length > 1 ? 's' : ''}...`, 'info');
+            const queueCopy = [...messageQueue];
+            messageQueue = [];
+
+            queueCopy.forEach(msg => {
+                setTimeout(() => {
+                    stompClient.send('/app/sendMessage', {}, JSON.stringify(msg));
+                }, 100);
+            });
+        }
+    }
+
+    function handleNotification(notification) {
+        if (notification.type === 'NEW_MESSAGE') {
+            // Reload conversations to update unread counts
+            loadConversations();
+
+            // Play sound for new messages from others
+            if (notification.senderId !== currentUser.userId) {
+                playNotificationSound();
+
+                if (!document.hasFocus()) {
+                    showDesktopNotification(
+                        `💬 New message from ${notification.senderName}`,
+                        notification.messagePreview
+                    );
+                }
+            }
+        }
+    }
+
+    function updateUserStatus(status) {
+        // Update UI to show online/offline status
+        const conversationItems = document.querySelectorAll('.conversation-item');
+        conversationItems.forEach(item => {
+            // You can implement online status indicators here
+        });
+    }
+
+    function connect() {
+        if (isConnected) return;
+        updateConnectionStatus('connecting');
+
+        // SỬA ENDPOINT THÀNH /ws-chat
+        const socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null; // Tắt debug để đỡ rối console
+
+        stompClient.connect(
+            { userId: currentUser.userId },
+            function(frame) {
+                console.log('✅ WebSocket Connected:', frame);
+                isConnected = true;
+                updateConnectionStatus('connected');
+                document.body.classList.remove('loading');
+
+                // Subscribe to conversation topics
+                if (currentConversation) {
+                    subscribeToConversation(currentConversation.id);
+                }
+
+                // Subscribe to user notifications
+                subscriptions.notifications = stompClient.subscribe(
+                    '/topic/user/' + currentUser.userId + '/messages',
+                    function(message) {
+                        console.log('📨 Received message notification');
+                        const msg = JSON.parse(message.body);
+                        handleNewMessage(msg);
+                    }
+                );
+
+                // Notify server that user is online
+                stompClient.send('/app/chat.userOnline', {}, JSON.stringify({
+                    userId: currentUser.userId
+                }));
+
+                console.log('✅ All subscriptions active');
+
+            },
+            function(error) {
+                console.error('❌ WebSocket connection error:', error);
+                isConnected = false;
+                updateConnectionStatus('disconnected');
+                document.body.classList.remove('loading');
+
+                // Auto-reconnect after 3 seconds
+                setTimeout(connect, 3000);
+            }
+        );
+    }
+
+    function subscribeToConversation(conversationId) {
+        if (subscriptions.conversation) {
+            subscriptions.conversation.unsubscribe();
+        }
+
+        subscriptions.conversation = stompClient.subscribe(
+            '/topic/conversation/' + conversationId,
+            function(message) {
+                console.log('💬 Received conversation message');
+                const msg = JSON.parse(message.body);
+                displayMessage(msg);
+                scrollToBottom();
+            }
+        );
+
+        console.log('✅ Subscribed to conversation: ' + conversationId);
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+
+        if (!content || !currentConversation) {
+            console.log('❌ Cannot send: no content or conversation');
+            return;
+        }
+
+        console.log('📤 Sending message:', content);
+
+        // 🚨 TẠO OBJECT ĐƠN GIẢN - chỉ gửi các field cần thiết
+        const messageData = {
+            conversationId: currentConversation.id,
+            senderId: currentUser.userId,
+            senderName: currentUser.fullName || currentUser.username,
+            senderRole: currentUser.userType,
+            receiverId: currentUser.userType === 'CUSTOMER' ? currentConversation.sellerId : currentConversation.customerId,
+            content: content,
+            messageType: 'TEXT'
+        };
+
+        // Display message immediately (optimistic UI)
+        const tempMessage = {
+            id: 'temp_' + Date.now(),
+            ...messageData,
+            read: false,
+            createdAt: new Date().toISOString(),
+            timestamp: new Date().toISOString()
+        };
+
+        displayMessage(tempMessage);
+        input.value = '';
+        updateCharCount();
+        scrollToBottom();
+
+        // Send via WebSocket
+        if (isConnected) {
+            stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(messageData));
+            console.log('✅ Message data sent via WebSocket:', messageData);
+        } else {
+            messageQueue.push(messageData);
+            showToast('⚠️ Offline - Message queued', 'warning');
+            console.log('⚠️ Message queued (offline)');
+        }
+    }
+
+    function openConversation(conv) {
+        console.log('💬 Opening conversation:', conv.id);
+
+        if (currentConversation && subscriptions.conversation) {
+            subscriptions.conversation.unsubscribe();
+        }
+
+        currentConversation = conv;
+        localStorage.setItem(LAST_CONVERSATION_KEY, conv.id);
+
+        document.getElementById('welcomeScreen').classList.add('hidden');
+        document.getElementById('chatArea').classList.remove('hidden');
+
+        const isCustomer = currentUser.userType === 'CUSTOMER';
+        const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
+        const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
+
+        document.getElementById('chatHeaderName').textContent = otherPartyName;
+        document.getElementById('chatHeaderAvatar').textContent = avatar;
+        document.getElementById('chatHeaderAvatar').className = `avatar ${isCustomer ? 'seller' : ''}`;
+
+        // Subscribe to conversation if connected
+        if (stompClient && isConnected) {
+            subscribeToConversation(conv.id);
+        }
+
+        renderMessages();
+        markAsRead();
+
+        document.getElementById('messageInput').focus();
+    }
+
+    function handleNewMessage(msg) {
+        console.log('🆕 Handling new message from:', msg.senderName);
+
+        // Only process if not from current user (to avoid duplicates)
+        if (msg.senderId !== currentUser.userId) {
+            playNotificationSound();
+
+            if (!document.hasFocus()) {
+                showDesktopNotification(
+                    `💬 New message from ${msg.senderName}`,
+                    msg.content.length > 50 ? msg.content.substring(0, 50) + '...' : msg.content
+                );
+            }
+        }
+
+        // If this message belongs to current conversation, display it
+        if (currentConversation && msg.conversationId === currentConversation.id) {
+            displayMessage(msg);
+        }
+
+        // Reload conversations list to update unread counts
+        loadConversations();
+    }
     /*]]>*/
 </script>
 </body>

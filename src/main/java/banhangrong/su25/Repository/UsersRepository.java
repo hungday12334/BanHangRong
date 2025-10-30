@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,6 +20,7 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     Long countByUserType(String userType);
+    List<Users> findByUserType(String userType);
 
     @Modifying
     @Transactional
@@ -28,4 +30,6 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     // Search users with optional type and keyword across username/email/phone
     @Query("SELECT u FROM Users u WHERE (:type IS NULL OR u.userType = :type) AND (:q IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(COALESCE(u.phoneNumber, '')) LIKE LOWER(CONCAT('%', :q, '%'))) ORDER BY u.createdAt DESC")
     Page<Users> searchUsers(@Param("type") String type, @Param("q") String q, Pageable pageable);
+
+
 }

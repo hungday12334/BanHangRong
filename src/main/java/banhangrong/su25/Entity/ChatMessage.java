@@ -4,23 +4,13 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "chat_messages",
-        indexes = {
-                @Index(name = "idx_conversation", columnList = "conversation_id"),
-                @Index(name = "idx_sender", columnList = "sender_id"),
-                @Index(name = "idx_receiver", columnList = "receiver_id"),
-                @Index(name = "idx_created_at", columnList = "created_at"),
-                @Index(name = "idx_is_read", columnList = "is_read")
-        }
-)
+@Table(name = "chat_messages")
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +19,10 @@ public class ChatMessage {
 
     @Column(name = "conversation_id", nullable = false, length = 100)
     private String conversationId;
+
+    // 🚨 SỬA: room_id là kiểu Long (BIGINT)
+    @Column(name = "room_id", nullable = true) // Cho phép NULL
+    private Long roomId;
 
     @Column(name = "sender_id", nullable = false)
     private Long senderId;
@@ -45,28 +39,47 @@ public class ChatMessage {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Transient // For API compatibility, mapped to createdAt
-    private String timestamp;
-
     @Column(name = "message_type", length = 20)
-    private String type = "TEXT";
+    private String messageType = "TEXT";
 
-    @Column(name = "is_read", nullable = false)
-    private boolean read = false;
+    @Column(name = "is_read")
+    private Boolean read = false;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "file_url")
+    private String fileUrl;
 
-    // Helper method to get timestamp as string for API
-    public String getTimestamp() {
-        return createdAt != null ? createdAt.toString() : timestamp;
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
+
+    // Constructor
+    public ChatMessage(String conversationId, Long senderId, Long receiverId, String content) {
+        this.conversationId = conversationId;
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.content = content;
+        this.createdAt = LocalDateTime.now();
+        this.messageType = "TEXT";
+        this.read = false;
     }
 
-    // Helper method to set timestamp from string
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-        // CreatedAt will be set by @CreationTimestamp
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (messageType == null) {
+            messageType = "TEXT";
+        }
+        if (read == null) {
+            read = false;
+        }
+        // 🚨 KHÔNG set room_id - để nó là NULL
+    }
+
+    public String getTimestamp() {
+        return createdAt != null ? createdAt.toString() : LocalDateTime.now().toString();
     }
 }

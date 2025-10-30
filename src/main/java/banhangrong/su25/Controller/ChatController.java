@@ -14,6 +14,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,13 +33,31 @@ public class ChatController {
     private final Map<Long, Long> userLastMessageTime = new ConcurrentHashMap<>();
     private static final long MESSAGE_RATE_LIMIT_MS = 100; // Minimum 100ms between messages
 
-    @MessageMapping("/sendMessage")
-    public void sendMessage(@Payload ChatMessage message) {
+    @MessageMapping("/chat.sendMessage")
+    public void sendMessage(@Payload Map<String, Object> messageData) {
         try {
-            // Validate message
-            if (message == null || message.getSenderId() == null || message.getContent() == null) {
-                return; // Silently reject invalid messages
+            System.out.println("=== 🚀 WEBSOCKET MESSAGE RECEIVED ===");
+            System.out.println("📍 Raw message data: " + messageData);
+
+            // 🚨 CHUYỂN ĐỔI từ Map sang ChatMessage
+            ChatMessage message = new ChatMessage();
+            message.setConversationId((String) messageData.get("conversationId"));
+            // 🚨 KHÔNG set room_id ở đây - để service xử lý
+            message.setSenderId(Long.valueOf(messageData.get("senderId").toString()));
+            message.setContent((String) messageData.get("content"));
+
+            // Set các field khác
+            if (messageData.get("receiverId") != null) {
+                message.setReceiverId(Long.valueOf(messageData.get("receiverId").toString()));
             }
+            if (messageData.get("senderName") != null) {
+                message.setSenderName((String) messageData.get("senderName"));
+            }
+            if (messageData.get("senderRole") != null) {
+                message.setSenderRole((String) messageData.get("senderRole"));
+            }
+
+            System.out.println("📍 Parsed message - No room_id set (will be handled by service)");
 
             // Rate limiting
             Long senderId = message.getSenderId();
@@ -45,79 +65,127 @@ public class ChatController {
             long now = System.currentTimeMillis();
 
             if (lastTime != null && (now - lastTime) < MESSAGE_RATE_LIMIT_MS) {
-                // Too many messages, ignore
+                System.err.println("⚠️ Rate limit exceeded for user: " + senderId);
                 return;
             }
             userLastMessageTime.put(senderId, now);
 
-            // Save message (will throw exception if invalid)
+            // 🚨 LƯU VÀO DATABASE
+            System.out.println("💾 Saving message to database...");
             ChatMessage savedMessage = chatService.addMessage(message);
+            System.out.println("✅ Message saved to DB with ID: " + savedMessage.getId());
 
-            // Send to specific conversation topic
-            messagingTemplate.convertAndSend(
-                    "/topic/conversation/" + message.getConversationId(),
-                    savedMessage
-            );
+            // 🚨 Gửi tin nhắn đến CẢ HAI người
+            String conversationTopic = "/topic/conversation/" + savedMessage.getConversationId();
 
-            // Notify the receiver about new message
-            if (message.getReceiverId() != null) {
-                messagingTemplate.convertAndSend(
-                        "/topic/user/" + message.getReceiverId() + "/notification",
-                        savedMessage
-                );
-            }
+            System.out.println("📤 Broadcasting to: " + conversationTopic);
+            System.out.println("👤 Sender: " + savedMessage.getSenderId());
+            System.out.println("👤 Receiver: " + savedMessage.getReceiverId());
+
+            // Convert để gửi qua WebSocket (KHÔNG gửi room_id)
+            Map<String, Object> responseMessage = new HashMap<>();
+            responseMessage.put("id", savedMessage.getId());
+            responseMessage.put("conversationId", savedMessage.getConversationId());
+            responseMessage.put("senderId", savedMessage.getSenderId());
+            responseMessage.put("senderName", savedMessage.getSenderName());
+            responseMessage.put("senderRole", savedMessage.getSenderRole());
+            responseMessage.put("receiverId", savedMessage.getReceiverId());
+            responseMessage.put("content", savedMessage.getContent());
+            responseMessage.put("messageType", savedMessage.getMessageType());
+            responseMessage.put("read", savedMessage.getRead());
+            responseMessage.put("createdAt", savedMessage.getCreatedAt().toString());
+            responseMessage.put("timestamp", savedMessage.getTimestamp());
+
+            // Gửi đến conversation topic (cả 2 user đều nhận)
+            messagingTemplate.convertAndSend(conversationTopic, responseMessage);
+            System.out.println("✅ Message broadcasted to conversation");
+
+            System.out.println("🎉 Message delivered successfully");
 
         } catch (Exception e) {
-            // Log error but don't expose internal details to client
-            System.err.println("Error sending message: " + e.getMessage());
+            System.err.println("💥 CRITICAL ERROR sending message: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    @MessageMapping("/typing")
+
+    @MessageMapping("/chat.typing")
     public void handleTyping(@Payload TypingIndicator indicator) {
         try {
-            if (indicator == null || indicator.getConversationId() == null || indicator.getUserId() == null) {
+            if (indicator == null || indicator.getConversationId() == null) {
                 return;
             }
 
-            messagingTemplate.convertAndSend(
-                    "/topic/conversation/" + indicator.getConversationId() + "/typing",
-                    indicator
-            );
+            String typingTopic = "/topic/conversation/" + indicator.getConversationId() + "/typing";
+            messagingTemplate.convertAndSend(typingTopic, indicator);
+
         } catch (Exception e) {
             System.err.println("Error handling typing indicator: " + e.getMessage());
         }
     }
 
-    @MessageMapping("/user.connect")
-    public void handleUserConnect(@Payload Map<String, Object> payload) {
+    @MessageMapping("/chat.userOnline")
+    public void handleUserOnline(@Payload Map<String, Object> payload) {
         try {
             Object userIdObj = payload.get("userId");
             if (userIdObj != null) {
                 Long userId = Long.valueOf(userIdObj.toString());
                 chatService.setUserOnlineStatus(userId, true);
+
+                // Notify all users about online status
                 messagingTemplate.convertAndSend("/topic/user.status",
-                        Map.of("userId", userId, "online", true));
+                        Map.of("userId", userId, "online", true, "timestamp", LocalDateTime.now().toString()));
             }
         } catch (Exception e) {
-            System.err.println("Error handling user connect: " + e.getMessage());
+            System.err.println("Error handling user online: " + e.getMessage());
         }
     }
 
-    @MessageMapping("/user.disconnect")
-    public void handleUserDisconnect(@Payload Map<String, Object> payload) {
+    @MessageMapping("/chat.userOffline")
+    public void handleUserOffline(@Payload Map<String, Object> payload) {
         try {
             Object userIdObj = payload.get("userId");
             if (userIdObj != null) {
                 Long userId = Long.valueOf(userIdObj.toString());
                 chatService.setUserOnlineStatus(userId, false);
+
                 messagingTemplate.convertAndSend("/topic/user.status",
-                        Map.of("userId", userId, "online", false));
+                        Map.of("userId", userId, "online", false, "timestamp", LocalDateTime.now().toString()));
             }
         } catch (Exception e) {
-            System.err.println("Error handling user disconnect: " + e.getMessage());
+            System.err.println("Error handling user offline: " + e.getMessage());
         }
     }
+
+//    @MessageMapping("/user.connect")
+//    public void handleUserConnect(@Payload Map<String, Object> payload) {
+//        try {
+//            Object userIdObj = payload.get("userId");
+//            if (userIdObj != null) {
+//                Long userId = Long.valueOf(userIdObj.toString());
+//                chatService.setUserOnlineStatus(userId, true);
+//                messagingTemplate.convertAndSend("/topic/user.status",
+//                        Map.of("userId", userId, "online", true));
+//            }
+//        } catch (Exception e) {
+//            System.err.println("Error handling user connect: " + e.getMessage());
+//        }
+//    }
+//
+//    @MessageMapping("/user.disconnect")
+//    public void handleUserDisconnect(@Payload Map<String, Object> payload) {
+//        try {
+//            Object userIdObj = payload.get("userId");
+//            if (userIdObj != null) {
+//                Long userId = Long.valueOf(userIdObj.toString());
+//                chatService.setUserOnlineStatus(userId, false);
+//                messagingTemplate.convertAndSend("/topic/user.status",
+//                        Map.of("userId", userId, "online", false));
+//            }
+//        } catch (Exception e) {
+//            System.err.println("Error handling user disconnect: " + e.getMessage());
+//        }
+//    }
 
     @GetMapping("/chat")
     public String chat(org.springframework.ui.Model model, org.springframework.security.core.Authentication authentication){
@@ -325,5 +393,40 @@ public class ChatController {
 
         public boolean isTyping() { return isTyping; }
         public void setTyping(boolean typing) { isTyping = typing; }
+    }
+
+    // Thêm method để subscribe user khi connect
+    @MessageMapping("/user.subscribe")
+    public void handleUserSubscribe(@Payload Map<String, Object> payload) {
+        try {
+            Object userIdObj = payload.get("userId");
+            if (userIdObj != null) {
+                Long userId = Long.valueOf(userIdObj.toString());
+                chatService.setUserOnlineStatus(userId, true);
+
+                // Notify all users about online status
+                messagingTemplate.convertAndSend("/topic/user.status",
+                        Map.of("userId", userId, "online", true, "timestamp", LocalDateTime.now().toString()));
+            }
+        } catch (Exception e) {
+            System.err.println("Error handling user subscribe: " + e.getMessage());
+        }
+    }
+
+    // Thêm method để unsubscribe user khi disconnect
+    @MessageMapping("/user.unsubscribe")
+    public void handleUserUnsubscribe(@Payload Map<String, Object> payload) {
+        try {
+            Object userIdObj = payload.get("userId");
+            if (userIdObj != null) {
+                Long userId = Long.valueOf(userIdObj.toString());
+                chatService.setUserOnlineStatus(userId, false);
+
+                messagingTemplate.convertAndSend("/topic/user.status",
+                        Map.of("userId", userId, "online", false, "timestamp", LocalDateTime.now().toString()));
+            }
+        } catch (Exception e) {
+            System.err.println("Error handling user unsubscribe: " + e.getMessage());
+        }
     }
 }

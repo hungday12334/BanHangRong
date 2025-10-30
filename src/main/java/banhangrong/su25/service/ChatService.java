@@ -1,6 +1,5 @@
 package banhangrong.su25.service;
 
-
 import banhangrong.su25.Entity.ChatMessage;
 import banhangrong.su25.Entity.Conversation;
 import banhangrong.su25.Entity.Users;
@@ -26,8 +25,8 @@ public class ChatService {
 
     @Autowired
     public ChatService(UsersRepository usersRepository,
-                      ConversationRepository conversationRepository,
-                      MessageRepository messageRepository) {
+                       ConversationRepository conversationRepository,
+                       MessageRepository messageRepository) {
         this.usersRepository = usersRepository;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
@@ -49,9 +48,7 @@ public class ChatService {
 
     public List<Users> getSellers() {
         // Get all users with SELLER user type
-        return usersRepository.findAll().stream()
-                .filter(u -> "SELLER".equalsIgnoreCase(u.getUserType()))
-                .toList();
+        return usersRepository.findByUserType("SELLER");
     }
 
     @Transactional
@@ -95,7 +92,7 @@ public class ChatService {
             // Load messages
             conv.setMessages(messageRepository.findByConversationIdOrderByCreatedAtAsc(conv.getId()));
             // Calculate unread count
-            conv.setUnreadCount((int) messageRepository.countUnreadMessages(conv.getId(), customerId));
+            conv.setUnreadCount(messageRepository.countUnreadMessages(conv.getId(), customerId).intValue());
             return conv;
         }
 
@@ -109,6 +106,8 @@ public class ChatService {
         conv.setSellerName(seller.getFullName() != null ? seller.getFullName() : seller.getUsername());
         conv.setMessages(new ArrayList<>());
         conv.setUnreadCount(0);
+        conv.setCreatedAt(LocalDateTime.now());
+        conv.setUpdatedAt(LocalDateTime.now());
 
         return conversationRepository.save(conv);
     }
@@ -125,26 +124,45 @@ public class ChatService {
         }).orElse(null);
     }
 
+
     public List<Conversation> getConversationsForUser(Long userId) {
+        System.out.println("=== LOADING CONVERSATIONS FOR USER: " + userId + " ===");
+
         if (userId == null) {
             return new ArrayList<>();
         }
 
-        Users user = usersRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return new ArrayList<>();
-        }
-
         List<Conversation> conversations = conversationRepository.findConversationsByUserId(userId);
+        System.out.println("✓ Found " + conversations.size() + " conversations");
 
         // Load messages and unread counts for each conversation
-        conversations.forEach(conv -> {
-            // Load messages from database
-            conv.setMessages(messageRepository.findByConversationIdOrderByCreatedAtAsc(conv.getId()));
+        for (Conversation conv : conversations) {
+            try {
+                // Load messages from database
+                List<ChatMessage> messages = messageRepository.findByConversationIdOrderByCreatedAtAsc(conv.getId());
+                conv.setMessages(messages);
+                System.out.println("✓ Loaded " + messages.size() + " messages for conversation " + conv.getId());
 
-            // Load unread count
-            long unreadCount = messageRepository.countUnreadMessages(conv.getId(), userId);
-            conv.setUnreadCount((int) unreadCount);
+                // Load unread count
+                long unreadCount = messageRepository.countUnreadMessages(conv.getId(), userId);
+                conv.setUnreadCount((int) unreadCount);
+
+                // Set last message and time
+                if (!messages.isEmpty()) {
+                    ChatMessage lastMessage = messages.get(messages.size() - 1);
+                    conv.setLastMessage(lastMessage.getContent());
+                    conv.setLastMessageTime(lastMessage.getCreatedAt());
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Error loading conversation " + conv.getId() + ": " + e.getMessage());
+            }
+        }
+
+        // Sort by last message time
+        conversations.sort((c1, c2) -> {
+            LocalDateTime time1 = c1.getLastMessageTime() != null ? c1.getLastMessageTime() : c1.getCreatedAt();
+            LocalDateTime time2 = c2.getLastMessageTime() != null ? c2.getLastMessageTime() : c2.getCreatedAt();
+            return time2.compareTo(time1); // Descending order
         });
 
         return conversations;
@@ -152,60 +170,97 @@ public class ChatService {
 
     @Transactional
     public ChatMessage addMessage(ChatMessage message) {
-        if (message == null) {
-            throw new IllegalArgumentException("Message cannot be null");
-        }
-        if (message.getConversationId() == null || message.getConversationId().trim().isEmpty()) {
-            throw new IllegalArgumentException("Conversation ID cannot be empty");
-        }
-        if (message.getSenderId() == null) {
-            throw new IllegalArgumentException("Sender ID cannot be null");
-        }
-        if (message.getContent() == null || message.getContent().trim().isEmpty()) {
-            throw new IllegalArgumentException("Message content cannot be empty");
-        }
+        System.out.println("=== 💾 ADDING MESSAGE TO DATABASE ===");
+        System.out.println("📍 Conversation: " + message.getConversationId());
+        System.out.println("📍 Sender: " + message.getSenderId());
+        System.out.println("📍 Content: " + message.getContent());
 
-        // Validate content length
-        if (message.getContent().length() > 5000) {
-            throw new IllegalArgumentException("Message too long (max 5000 characters)");
-        }
+        try {
+            // Validate conversation exists
+            Conversation conversation = conversationRepository.findById(message.getConversationId())
+                    .orElseGet(() -> {
+                        System.err.println("❌ Conversation not found: " + message.getConversationId());
+                        // 🚨 TẠO CONVERSATION NẾU CHƯA CÓ
+                        return createConversationFromMessage(message);
+                    });
 
-        // Verify conversation exists
-        Conversation conversation = conversationRepository.findById(message.getConversationId())
-                .orElseThrow(() -> new IllegalStateException("Conversation not found: " + message.getConversationId()));
+            System.out.println("✅ Conversation found: " + conversation.getId());
 
-        // Verify sender is part of conversation
-        if (!message.getSenderId().equals(conversation.getCustomerId()) &&
-                !message.getSenderId().equals(conversation.getSellerId())) {
-            throw new IllegalArgumentException("Sender is not part of this conversation");
-        }
+            // 🚨 QUAN TRỌNG: Đảm bảo receiverId được set đúng
+            if (message.getReceiverId() == null) {
+                if (message.getSenderId().equals(conversation.getCustomerId())) {
+                    message.setReceiverId(conversation.getSellerId());
+                } else {
+                    message.setReceiverId(conversation.getCustomerId());
+                }
+                System.out.println("✅ Auto-set receiver: " + message.getReceiverId());
+            }
 
-        // Get sender info and set receiver ID if not provided
-        Users sender = usersRepository.findById(message.getSenderId()).orElse(null);
-        if (sender != null) {
+            // 🚨 QUAN TRỌNG: Set room_id = 0 (hoặc giá trị mặc định)
+            if (message.getRoomId() == null) {
+                message.setRoomId(0L);
+                System.out.println("✅ Auto-set room_id: " + message.getRoomId());
+            }
+
+            // Set các field bắt buộc khác
+            if (message.getCreatedAt() == null) {
+                message.setCreatedAt(LocalDateTime.now());
+            }
+            if (message.getMessageType() == null) {
+                message.setMessageType("TEXT");
+            }
+            if (message.getRead() == null) {
+                message.setRead(false);
+            }
+
+            // Get sender info từ database
+            Users sender = usersRepository.findById(message.getSenderId())
+                    .orElseThrow(() -> new IllegalArgumentException("Sender not found: " + message.getSenderId()));
+
             message.setSenderName(sender.getFullName() != null ? sender.getFullName() : sender.getUsername());
             message.setSenderRole(sender.getUserType());
+
+            System.out.println("💽 Saving message to database...");
+            System.out.println("📍 Final message - Room ID: " + message.getRoomId());
+
+            // 🚨 LƯU VÀO DATABASE
+            ChatMessage savedMessage = messageRepository.save(message);
+            System.out.println("✅ Message saved with ID: " + savedMessage.getId());
+
+            // Update conversation
+            conversation.setLastMessage(message.getContent());
+            conversation.setLastMessageTime(LocalDateTime.now());
+            conversation.setUpdatedAt(LocalDateTime.now());
+            conversationRepository.save(conversation);
+
+            System.out.println("✅ Conversation updated");
+
+            return savedMessage;
+
+        } catch (Exception e) {
+            System.err.println("💥 ERROR saving message to DB: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save message: " + e.getMessage(), e);
         }
-
-        // Set receiver ID if not already set (critical for message delivery)
-        if (message.getReceiverId() == null) {
-            if (message.getSenderId().equals(conversation.getCustomerId())) {
-                message.setReceiverId(conversation.getSellerId());
-            } else {
-                message.setReceiverId(conversation.getCustomerId());
-            }
-        }
-
-        // Save message to database
-        ChatMessage savedMessage = messageRepository.save(message);
-
-        // Update conversation
-        conversation.setLastMessage(message.getContent());
-        conversation.setLastMessageTime(LocalDateTime.now());
-        conversationRepository.save(conversation);
-
-        return savedMessage;
     }
+
+    // 🚨 THÊM METHOD ĐỂ TẠO CONVERSATION NẾU CHƯA CÓ
+    private Conversation createConversationFromMessage(ChatMessage message) {
+        System.out.println("🆕 Creating new conversation for message...");
+
+        // Phân tích conversationId để lấy customerId và sellerId
+        String[] parts = message.getConversationId().split("_");
+        if (parts.length >= 3) {
+            Long customerId = Long.parseLong(parts[1]);
+            Long sellerId = Long.parseLong(parts[2]);
+
+            return getOrCreateConversation(customerId, sellerId);
+        } else {
+            throw new IllegalStateException("Invalid conversation ID format: " + message.getConversationId());
+        }
+    }
+
+
 
     @Transactional
     public void markConversationAsRead(String conversationId, Long userId) {
@@ -223,7 +278,9 @@ public class ChatService {
     }
 
     private String generateConversationId(Long customerId, Long sellerId) {
-        return "conv_" + customerId + "_" + sellerId;
+        // Ensure consistent ordering for same customer-seller pair
+        Long minId = Math.min(customerId, sellerId);
+        Long maxId = Math.max(customerId, sellerId);
+        return "conv_" + minId + "_" + maxId;
     }
 }
-

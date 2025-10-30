@@ -4,50 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(email-verification): implement resend verification email feature and enhance user registration flow">
-      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CHAT_CSRF_FIX.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CHAT_FIX_SUMMARY.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CHAT_LOADER_FIX.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SetupChatTables.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TEST_CHAT_SEPARATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/UTF8_ENCODING_FIX.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fix-utf8-encoding.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run-online-with-chat-fix.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/setup-chat-db.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/setup-chat-online-db.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/debug_chat_issue.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/fix_chat_utf8.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/fix_products_seller.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/start-with-chat-fix.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test-and-run.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/verify-csrf-fix.sh" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DEBUG_REGISTRATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/EMAIL_VERIFICATION_FIX.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/EMAIL_VERIFICATION_OPTIMIZATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/EMAIL_VERIFICATION_QUICK_START.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FILTER_IMPLEMENTATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FINAL_DEBUG_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FINAL_FIX_INSTRUCTIONS.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SELLER_REVIEW_FIXES_COMPLETED.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SELLER_REVIEW_TEST_CASES.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SELLER_VIEW_FEATURE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SHOP_LICENSE_MANAGEMENT_FEATURE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VIDEO_DEMO_SCRIPT.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VOUCHER_MANAGEMENT_FEATURE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VOUCHER_QUICK_START.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VOUCHER_README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VOUCHER_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VOUCHER_TEST_CASES.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VOUCHER_VISUAL_FLOW.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/run-with-online-db.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run-with-online-db.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/fix_database_add_status.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/fix_database_add_status.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Conversation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/Conversation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/MessageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/MessageRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/UsersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/UsersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-simple.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-simple.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -241,7 +207,8 @@
       <workItem from="1761288445557" duration="1184000" />
       <workItem from="1761718568881" duration="3682000" />
       <workItem from="1761771952359" duration="9839000" />
-      <workItem from="1761782244391" duration="5020000" />
+      <workItem from="1761782244391" duration="13705000" />
+      <workItem from="1761817184559" duration="601000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -307,7 +274,23 @@
       <option name="project" value="LOCAL" />
       <updated>1761780433366</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="feat(chat): fix conversation creation, CSRF, and UTF-8 issues; add setup scripts and enhance chat integration&#10;&#10;- Fix CSRF protection for chat conversation creation and message APIs in customer/seller chat pages&#10;- Add CSRF meta tags and ensure all POST requests include CSRF token&#10;- Update ChatController to support product info in chat and improve error handling/logging&#10;- Ensure chat tables use utf8mb4 encoding for full Vietnamese character support (SQL scripts and config)&#10;- Add scripts for database setup, UTF-8 fixes, and chat table creation for online DB&#10;- Enhance application properties for correct locale and MySQL UTF-8 settings&#10;- Add .env.example for environment variable guidance&#10;- Improve ChatService to load messages and unread counts per conversation&#10;- Update Conversation entity with JSON property annotations for API consistency&#10;- Show chat unread badge in product detail and auto-update via API&#10;- Add documentation and test guides for chat fixes and separation">
+      <option name="closed" value="true" />
+      <created>1761805800917</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1761805800917</updated>
+    </task>
+    <task id="LOCAL-00010" summary="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX">
+      <option name="closed" value="true" />
+      <created>1761805822892</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1761805822892</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -345,6 +328,8 @@
     <MESSAGE value="update: add spring boot devtools" />
     <MESSAGE value="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read" />
     <MESSAGE value="feat(email-verification): implement resend verification email feature and enhance user registration flow" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(email-verification): implement resend verification email feature and enhance user registration flow" />
+    <MESSAGE value="feat(chat): fix conversation creation, CSRF, and UTF-8 issues; add setup scripts and enhance chat integration&#10;&#10;- Fix CSRF protection for chat conversation creation and message APIs in customer/seller chat pages&#10;- Add CSRF meta tags and ensure all POST requests include CSRF token&#10;- Update ChatController to support product info in chat and improve error handling/logging&#10;- Ensure chat tables use utf8mb4 encoding for full Vietnamese character support (SQL scripts and config)&#10;- Add scripts for database setup, UTF-8 fixes, and chat table creation for online DB&#10;- Enhance application properties for correct locale and MySQL UTF-8 settings&#10;- Add .env.example for environment variable guidance&#10;- Improve ChatService to load messages and unread counts per conversation&#10;- Update Conversation entity with JSON property annotations for API consistency&#10;- Show chat unread badge in product detail and auto-update via API&#10;- Add documentation and test guides for chat fixes and separation" />
+    <MESSAGE value="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX" />
   </component>
 </project>

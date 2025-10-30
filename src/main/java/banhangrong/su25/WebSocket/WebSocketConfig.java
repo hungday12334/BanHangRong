@@ -25,23 +25,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chat")
-                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*") // More secure than wildcard
-                .withSockJS()
-                .setHeartbeatTime(25000); // Send heartbeat every 25 seconds
+        registry.addEndpoint("/ws-chat")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
+
+        registry.addEndpoint("/ws-chat")
+                .setAllowedOriginPatterns("*");
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Enable simple broker with heartbeat
-        registry.enableSimpleBroker("/topic", "/queue")
-                .setHeartbeatValue(new long[]{25000, 25000}) // [server-to-client, client-to-server]
-                .setTaskScheduler(taskScheduler()); // Required for heartbeat
-
-        registry.setApplicationDestinationPrefixes("/app");
-
-        // Set user destination prefix for private messages
-        registry.setUserDestinationPrefix("/user");
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.setApplicationDestinationPrefixes("/app");
+        config.enableSimpleBroker("/topic", "/queue");
     }
 
     @Override
@@ -51,4 +46,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.setSendBufferSizeLimit(512 * 1024); // 512KB
         registration.setSendTimeLimit(20000); // 20 seconds
     }
+
 }

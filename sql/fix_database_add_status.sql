@@ -2,7 +2,6 @@
 -- FIX DATABASE: Thêm column status vào products (an toàn, idempotent)
 -- =============================================
 
-USE wap;
 
 -- Đảm bảo column status tồn tại
 SET @db := DATABASE();
