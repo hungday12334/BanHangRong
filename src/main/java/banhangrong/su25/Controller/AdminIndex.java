@@ -1,7 +1,9 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.service.AdminCategoryService;
 import banhangrong.su25.service.AdminProductService;
 import banhangrong.su25.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ public class AdminIndex {
     @Autowired
     AdminProductService adminProductService;
 
+    @Autowired
+    AdminCategoryService adminCategoryService;
     @GetMapping({"/", "/dashboard", "/index"})
     public String showAdminIndex(Model model) {
         long totalUsers = userService.count();
@@ -87,4 +91,18 @@ public class AdminIndex {
 //        model.addAttribute("productsList", productsList);
 //        return "admin/pendingproduct-management";
 //    }
+    @GetMapping("/category")
+    public String getAllCategory(Model model){
+        List<Categories> categoryList;
+        Object filterObj = model.getAttribute("filter");
+        Boolean isFromFilter = Boolean.TRUE.equals((Boolean) model.getAttribute("isFromFilter"));
+        if(isFromFilter && filterObj instanceof List<?> filterList ){
+            categoryList = filterList.stream().filter(category -> category instanceof  Categories).map(object -> (Categories)object).toList();
+        }else{
+            categoryList = adminCategoryService.findAll();
+        }
+        model.addAttribute("categoryList", categoryList);
+        return "admin/category-management";
+    }
+
 }
