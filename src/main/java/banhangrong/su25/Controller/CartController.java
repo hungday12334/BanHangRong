@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import jakarta.servlet.http.HttpSession;
 import banhangrong.su25.Repository.VouchersRepository;
+import banhangrong.su25.Repository.VoucherRedemptionsRepository;
 import banhangrong.su25.Entity.Vouchers;
 import java.time.LocalDateTime;
 
@@ -36,6 +37,7 @@ public class CartController {
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final VouchersRepository vouchersRepository;
+    private final VoucherRedemptionsRepository voucherRedemptionsRepository;
 
     public CartController(ShoppingCartRepository cartRepository,
                           ProductsRepository productsRepository,
@@ -43,7 +45,8 @@ public class CartController {
                           UsersRepository usersRepository,
                           OrdersRepository ordersRepository,
                           OrderItemsRepository orderItemsRepository,
-                          VouchersRepository vouchersRepository) {
+                          VouchersRepository vouchersRepository,
+                          VoucherRedemptionsRepository voucherRedemptionsRepository) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
@@ -51,6 +54,7 @@ public class CartController {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.vouchersRepository = vouchersRepository;
+        this.voucherRedemptionsRepository = voucherRedemptionsRepository;
     }
 
     // Get current user ID from authentication
@@ -316,6 +320,31 @@ public class CartController {
         for (ShoppingCart it : items) {
             try { cartRepository.delete(it); } catch (Exception ignored) {}
         }
+        // record voucher redemption if present in session
+        try {
+            jakarta.servlet.http.HttpSession session = ((org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes()).getRequest().getSession(false);
+            if (session != null) {
+                Map<String,Object> applied = (Map<String,Object>) session.getAttribute("appliedVoucher");
+                if (applied != null) {
+                    String code = Objects.toString(applied.get("code"), null);
+                    if (code != null) {
+                        var candidates = vouchersRepository.findByCodeIgnoreCaseOrderByUpdatedAtDesc(code);
+                        Vouchers v = candidates.isEmpty() ? null : candidates.get(0);
+                        if (v != null) {
+                            banhangrong.su25.Entity.VoucherRedemptions rec = new banhangrong.su25.Entity.VoucherRedemptions();
+                            rec.setVoucherId(v.getVoucherId());
+                            rec.setOrderId(savedOrder.getOrderId());
+                            rec.setUserId(uid);
+                            rec.setDiscountAmount(java.math.BigDecimal.ZERO); // optional: compute actual discount per order
+                            voucherRedemptionsRepository.save(rec);
+                            v.setUsedCount((v.getUsedCount() == null ? 0 : v.getUsedCount()) + 1);
+                            vouchersRepository.save(v);
+                            session.removeAttribute("appliedVoucher");
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
         return "redirect:/customer/dashboard?purchase=success";
     }
 }
