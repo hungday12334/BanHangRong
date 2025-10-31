@@ -109,10 +109,13 @@ public class VnPayController {
         Collections.sort(fieldNames);
         StringBuilder query = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
+        boolean first = true;
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                if (!first) query.append('&');
+                first = false;
                 try {
                     query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
                     query.append('=');
@@ -121,9 +124,6 @@ public class VnPayController {
                     query.append(fieldName);
                     query.append('=');
                     query.append(fieldValue);
-                }
-                if (itr.hasNext()) {
-                    query.append('&');
                 }
             }
         }
@@ -194,10 +194,13 @@ public class VnPayController {
         Collections.sort(fieldNames);
         StringBuilder query = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
+        boolean first = true;
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                if (!first) query.append('&');
+                first = false;
                 try {
                     query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
                     query.append('=');
@@ -206,9 +209,6 @@ public class VnPayController {
                     query.append(fieldName);
                     query.append('=');
                     query.append(fieldValue);
-                }
-                if (itr.hasNext()) {
-                    query.append('&');
                 }
             }
         }

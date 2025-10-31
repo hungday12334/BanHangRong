@@ -38,16 +38,14 @@ public class VnPayConfig {
     public static String buildSignData(Map<String, String> fields) {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < fieldNames.size(); i++) {
-            String k = fieldNames.get(i);
-            String v = fields.get(k);
-            if (v != null && !v.isEmpty()) {
-                sb.append(k).append('=').append(v);
-                if (i < fieldNames.size() - 1) sb.append('&');
+        StringJoiner joiner = new StringJoiner("&");
+        for (String key : fieldNames) {
+            String value = fields.get(key);
+            if (value != null && !value.isEmpty()) {
+                joiner.add(key + "=" + value);
             }
         }
-        return sb.toString();
+        return joiner.toString();
     }
 
     public static String getIpAddress(HttpServletRequest request) {
