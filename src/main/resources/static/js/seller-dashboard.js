@@ -14,10 +14,10 @@
     const target = Number(targetAttr.toString().replace(/,/g, '')) || 0;
     const dur = 900; // ms
     const start = performance.now();
-    function tick(now) {
+  function tick(now) {
       const p = Math.min(1, (now - start) / dur);
       const v = Math.round(target * easeOutCubic(p));
-      el.textContent = v.toLocaleString('en-US');
+  el.textContent = v.toLocaleString('vi-VN');
       if (p < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
@@ -66,7 +66,7 @@
         plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
         scales: {
           x: { display: true, grid: { display: false }, ticks: { color: '#a8b0d3', maxTicksLimit: 8 } },
-          y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => `$${Number(v).toLocaleString('en-US')}` } }
+          y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => Number(v).toLocaleString('vi-VN') + ' đ' } }
         },
         elements: { line: { cubicInterpolationMode: 'monotone' } }
       }
@@ -871,8 +871,8 @@
         document.getElementById('om_userId').textContent = user.username || (user.userId ? `User #${user.userId}` : '');
         // In seller view, show sellerAmount if present; fallback to totalAmount
         const amtVal = (o.sellerAmount != null ? o.sellerAmount : o.totalAmount);
-        const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('om_totalAmount').textContent = amt;
+  const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+  document.getElementById('om_totalAmount').textContent = amt;
         document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
         const items = Array.isArray(data.items) ? data.items : (data.items && data.items.content ? data.items.content : []);
         const tb = document.getElementById('om_items');
@@ -880,7 +880,7 @@
         for (const it of items) {
           const tr = document.createElement('tr');
           const name = it.productName || `#${it.productId}`;
-          tr.innerHTML = `<td>${name}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`;
+          tr.innerHTML = `<td>${name}</td><td>${it.quantity}</td><td>${Number(it.priceAtTime || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td>`;
           tb.appendChild(tr);
         }
       }
@@ -976,8 +976,8 @@
         let statusHtml = '<span class="badge">Pending</span>';
         if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
         else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-        const price = (p.price ?? 0).toLocaleString('en-US');
-  tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity}</td><td>${statusHtml}</td>`;
+                  const price = (p.price ?? 0).toLocaleString('vi-VN');
+  tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td class="hide-md">${p.quantity}</td><td>${statusHtml}</td>`;
         tbody.appendChild(tr);
       });
       if (counter) counter.textContent = list.length;
@@ -1238,7 +1238,7 @@
                 if (pres.ok) {
                   const p = await pres.json();
                   if (prodWrap) {
-                    const price = (p.price ?? 0).toLocaleString('en-US');
+                    const price = (p.price ?? 0).toLocaleString('vi-VN');
                     // Prefer primaryImage from product_images; fallback to downloadUrl then placeholder
                     let img = (p.primaryImage && p.primaryImage.trim().length) ? p.primaryImage : ((p.downloadUrl && p.downloadUrl.trim().length) ? p.downloadUrl : '/img/no-image.png');
                     // If the selected URL seems to point to a PDF or non-image, try fetching images endpoint for a real image
@@ -1266,7 +1266,7 @@
                           <div style="font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
                           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                             <div style="color:var(--muted);font-size:13px;">Status: ${p.status ?? '-'}</div>
-                            <div style="color:#7c9eff;font-weight:700;">$${price}</div>
+                            <div style="color:#7c9eff;font-weight:700;">${price} đ</div>
                           </div>
                         </div>`;
                   }
@@ -1557,7 +1557,7 @@
       const netPreview = document.getElementById('wd_net_preview');
       const addBankBtn = document.getElementById('wd_add_bank');
       if (!bankSel || !histBody) return;
-      summary.textContent = `Balance: ${Number(data.balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} • Fee: ${data.feePercent}%`;
+  summary.textContent = `Balance: ${Number(data.balance ?? 0).toLocaleString('vi-VN', { minimumFractionDigits: 2 })} đ • Fee: ${data.feePercent}%`;
       bankSel.innerHTML = '';
       (data.accounts || []).forEach(b => {
         const opt = document.createElement('option');
@@ -1579,7 +1579,10 @@
         histBody.innerHTML = '';
         content.forEach(w => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${w.withdrawalId}</td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString() : ''}</td><td>${w.amount}</td><td>${w.feeAmount}</td><td>${w.netAmount}</td><td><span class="chip">${w.status}</span></td>`;
+          const amt = Number(w.amount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+          const feeAmt = Number(w.feeAmount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+          const netAmt = Number(w.netAmount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+          tr.innerHTML = `<td>${w.withdrawalId}</td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString() : ''}</td><td>${amt}</td><td>${feeAmt}</td><td>${netAmt}</td><td><span class="chip">${w.status}</span></td>`;
           histBody.appendChild(tr);
         });
         // render pager
@@ -1623,7 +1626,7 @@
         }
         const fee = amountVal * (feePct / 100);
         const net = Math.max(0, amountVal - fee);
-        netPreview.textContent = `Net after ${feePct}% fee: ${net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  netPreview.textContent = `Net after ${feePct}% fee: ${net.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ`;
       }
       document.getElementById('wd_amount')?.addEventListener('input', updateNetPreview);
       updateNetPreview();
@@ -1643,7 +1646,9 @@
         const amountEl = document.getElementById('wd_amount');
         const amount = withdrawAll ? null : Number(amountEl.value);
         const res = await createWithdrawal({ bankAccountId, amount, withdrawAll });
-        showToast(`Created. Fee: ${res.fee}, Net: ${res.net}`, 'success');
+  const feeText = Number(res.fee || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+  const netText = Number(res.net || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+  showToast(`Created. Fee: ${feeText}, Net: ${netText}`, 'success');
         const data = await loadWithdrawSummary();
         renderWithdrawUI(data);
       } catch (err) { showToast(String(err), 'error'); }
@@ -1866,7 +1871,7 @@
           const tr = document.createElement('tr');
           const period = [v.startAt ? new Date(v.startAt).toLocaleString() : '-', v.endAt ? new Date(v.endAt).toLocaleString() : '-'].join(' → ');
           const uses = `${v.usedCount ?? 0}${v.maxUses ? ' / ' + v.maxUses : ''}`;
-          const val = (v.discountType === 'AMOUNT' ? ('$' + Number(v.discountValue || 0).toLocaleString('en-US')) : (Number(v.discountValue || 0) + '%'));
+          const val = (v.discountType === 'AMOUNT' ? (Number(v.discountValue || 0).toLocaleString('vi-VN') + ' đ') : (Number(v.discountValue || 0) + '%'));
           tr.innerHTML = `
             <td><b>${v.code}</b></td>
             <td>${v.discountType}</td>
@@ -1955,7 +1960,7 @@
           if (!list.length) table.innerHTML = '<tr class="footer-note"><td colspan="5">No usage yet.</td></tr>';
           list.forEach((r, idx) => {
             const trr = document.createElement('tr');
-            trr.innerHTML = `<td>${idx + 1}</td><td>#${r.orderId || '-'}</td><td>#${r.userId || '-'}</td><td>$${Number(r.discountAmount || 0).toFixed(2)}</td><td>${r.createdAt ? new Date(r.createdAt).toLocaleString() : '-'}</td>`;
+            trr.innerHTML = `<td>${idx + 1}</td><td>#${r.orderId || '-'}</td><td>#${r.userId || '-'}</td><td>${Number(r.discountAmount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td><td>${r.createdAt ? new Date(r.createdAt).toLocaleString() : '-'}</td>`;
             table.appendChild(trr);
           });
         } else {
@@ -2049,7 +2054,7 @@
             if (data && data.type === 'new-order' && data.data) {
               const id = data.data.orderId;
               const amt = data.data.totalAmount;
-              const formatted = (amt == null) ? '' : ('$' + Number(amt).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+              const formatted = (amt == null) ? '' : (Number(amt).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ');
               showToast(`New order #${id} ${formatted}`, 'success');
               // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
               // Could implement incremental prepend instead of reload; keep simple first.
@@ -2106,7 +2111,7 @@
           `<td>${o.createdAt ? o.createdAt.replace('T', ' ') : ''}</td>` +
           `<td>${o.buyerUsername ? o.buyerUsername : (o.buyerUserId ? ('User #' + o.buyerUserId) : '')}</td>` +
           `<td>${o.sellerItems ?? 0}</td>` +
-          `<td>$${(o.sellerAmount ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>`;
+          `<td>${Number(o.sellerAmount ?? 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td>`;
         tr.className = 'clickable';
         tr.addEventListener('click', () => { // open seller-scoped order detail
           const id = o.orderId;
@@ -2121,11 +2126,11 @@
             document.getElementById('om_orderId').textContent = ord.orderId;
             document.getElementById('om_userId').textContent = user.username || (user.userId ? ('User #' + user.userId) : '');
             // Use sellerAmount for seller view total
-            const amtVal = ord.sellerAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const amtVal = ord.sellerAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
             document.getElementById('om_totalAmount').textContent = amt;
             document.getElementById('om_createdAt').textContent = ord.createdAt ?? '';
             const items = data.items || []; const tb = document.getElementById('om_items'); tb.innerHTML = '';
-            for (const it of items) { const r = document.createElement('tr'); r.innerHTML = `<td>${it.productName || ('#' + it.productId)}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`; tb.appendChild(r); }
+            for (const it of items) { const r = document.createElement('tr'); r.innerHTML = `<td>${it.productName || ('#' + it.productId)}</td><td>${it.quantity}</td><td>${Number(it.priceAtTime || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td>`; tb.appendChild(r); }
             const overlay = document.getElementById('modalOverlay');
             if (overlay) { overlay.hidden = false; overlay.classList.add('visible'); }
             if (typeof orderModal.showModal === 'function') { try { orderModal.showModal(); } catch (_) { orderModal.setAttribute('open', ''); } }
@@ -2406,7 +2411,7 @@
           let statusHtml = '<span class="badge">Pending</span>';
           if (st === 'public') statusHtml = '<span class="pill good">Public</span>';
           else if (st === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-          const price = (p.price ?? 0).toLocaleString('en-US');
+          const price = Number(p.price ?? 0).toLocaleString('vi-VN');
           const rating = (p.averageRating != null) ? Number(p.averageRating).toFixed(1) : '-';
           const totalSales = (p.totalSales != null) ? p.totalSales : 0;
           const img = (p.imageUrl && p.imageUrl.trim().length) ? p.imageUrl : '/img/no-image.png';
@@ -2417,7 +2422,7 @@
             <div class="meta" style="padding:8px 2px;display:flex;flex-direction:column;gap:6px;">
               <div class="line" style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
                 <div class="name" title="${p.name ?? ''}" style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
-                <div class="price" style="color:#7c9eff;font-weight:700;">$${price}</div>
+                <div class="price" style="color:#7c9eff;font-weight:700;">${price} đ</div>
               </div>
               <div class="sub" style="display:flex;gap:10px;font-size:12px;color:#a8b0d3;">
                   <span title="Sold">🛒 ${totalSales}</span>

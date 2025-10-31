@@ -128,7 +128,7 @@
                 <tr>
                     <td><strong>${v.code}</strong></td>
                     <td>${v.discountType}</td>
-                    <td>${v.discountType === 'PERCENT' ? `${v.discountValue}%` : `$${v.discountValue}`}</td>
+                    <td>${v.discountType === 'PERCENT' ? `${v.discountValue}%` : `${Number(v.discountValue).toLocaleString('vi-VN')} đ`}</td>
                     <td class="hide-md">${formatDate(v.startAt)} - ${formatDate(v.endAt)}</td>
                     <td>${v.usedCount} / ${v.maxUses || '∞'}</td>
                     <td><span class="badge ${v.status.toLowerCase()}">${v.status}</span></td>
@@ -261,7 +261,7 @@
                         <td>${i + 1}</td>
                         <td>${r.orderId}</td>
                         <td>${r.userId}</td>
-                        <td>$${r.discountAmount}</td>
+                        <td>${Number(r.discountAmount).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td>
                         <td>${new Date(r.redeemedAt).toLocaleString()}</td>
                     </tr>
                 `).join('');

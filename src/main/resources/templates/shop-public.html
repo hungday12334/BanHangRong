@@ -89,10 +89,10 @@
                     <p class="text-muted mb-3" th:text="${product.description}">Product description goes here...</p>
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="price" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">$0.00</span>
+                        <span class="price" th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' đ'">$0.00</span>
                         <th:block th:if="${product.salePrice != null}">
-                                <span class="text-danger text-decoration-line-through"
-                                      th:text="'$' + ${#numbers.formatDecimal(product.salePrice, 1, 2)}">$0.00</span>
+                      <span class="text-danger text-decoration-line-through"
+                          th:text="${#numbers.formatDecimal(product.salePrice, 1, 2)} + ' đ'">$0.00</span>
                         </th:block>
                     </div>
 
