@@ -118,6 +118,15 @@ public class CartController {
                     if (v != null && Objects.equals(v.getStatus(), "active") &&
                         (v.getStartAt() == null || !LocalDateTime.now().isBefore(v.getStartAt())) &&
                         (v.getEndAt() == null || !LocalDateTime.now().isAfter(v.getEndAt()))) {
+                        // enforce usage limits
+                        try {
+                            if (v.getMaxUses() != null && voucherRedemptionsRepository.countByVoucherId(v.getVoucherId()) >= v.getMaxUses()) {
+                                throw new IllegalStateException("max_uses reached");
+                            }
+                            if (v.getMaxUsesPerUser() != null && voucherRedemptionsRepository.countByVoucherIdAndUserId(v.getVoucherId(), user.getUserId()) >= v.getMaxUsesPerUser()) {
+                                throw new IllegalStateException("max_uses_per_user reached");
+                            }
+                        } catch (Exception ignored2) {}
                         // eligible total for that product id
                         BigDecimal eligible = viewItems.stream()
                                 .filter(m -> Objects.equals(((Products)m.get("product")).getProductId(), v.getProductId()))
