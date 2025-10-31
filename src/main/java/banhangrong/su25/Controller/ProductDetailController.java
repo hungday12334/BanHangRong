@@ -1,6 +1,7 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.ProductReviewsRepository;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -39,31 +41,16 @@ public class ProductDetailController {
     }
 
     @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable("id") String idStr, Model model) {
+    public String productDetail(@PathVariable("id") Long id, Model model) {
         try {
-            if (idStr == null || idStr.trim().isEmpty()) {
-                return "redirect:/customer/dashboard";
-            }
-
-            Long id;
-            try {
-                id = Long.parseLong(idStr);
-            } catch (NumberFormatException e) {
-                return "redirect:/customer/dashboard";
-            }
-
-            if (id == null || id <= 0) {
-                return "redirect:/customer/dashboard";
-            }
+            if (id == null) return "redirect:/customer/dashboard";
 
             Products p = productsRepository.findById(id).orElse(null);
-            if (p == null) {
-                return "redirect:/customer/dashboard";
-            }
+            if (p == null) return "redirect:/customer/dashboard";
 
             model.addAttribute("product", p);
 
-            // Header data from DB (match dashboard)
+            // Header data (align with dashboard)
             try {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 Users currentUser = null;
@@ -76,13 +63,18 @@ public class ProductDetailController {
                 }
             } catch (Exception ignored) {}
 
+            // Images with fallback
+            List<ProductImages> images = new ArrayList<>();
             try {
-                List<?> images = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id);
-                model.addAttribute("images", images != null ? images : Collections.emptyList());
+                images = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id);
+                if (images == null || images.isEmpty()) images = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(id);
+                if (images == null) images = new ArrayList<>();
             } catch (Exception e) {
-                model.addAttribute("images", Collections.emptyList());
+                images = new ArrayList<>();
             }
+            model.addAttribute("images", images != null ? images : Collections.emptyList());
 
+            // Reviews
             try {
                 List<?> reviews = productReviewsRepository.findByProductIdOrderByCreatedAtDesc(id);
                 model.addAttribute("reviews", reviews != null ? reviews : Collections.emptyList());
