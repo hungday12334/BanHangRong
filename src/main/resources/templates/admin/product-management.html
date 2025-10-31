@@ -324,12 +324,14 @@
                             </a>
                         </div>
                         <div class="action-btns">
-                            <form th:action="@{/admin/product/cancel}" method="post" style="text-align:center;">
-                                <input type="hidden" name="productId" th:value="${p.productId}">
-                                <div class="form-actions">
-                                    <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')"><i class="bi bi-trash"></i></button>
-                                </div>
-                            </form>
+                            <form th:action="@{/admin/product/cancel}" method="post" class="cancel-form" style="text-align:center;">
+                            <input type="hidden" name="productId" th:value="${p.productId}">
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline-danger btn-sm btn-cancel">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </form>
                         </div>
                     </td>
                     <td th:text="${p.productId}"></td>
@@ -356,12 +358,55 @@
                 </tr>
                 </tbody>
             </table>
+            <!-- Confirm Cancel Product Modal -->
+            <div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0 rounded-4">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-octagon-fill me-2"></i> Confirm Product Cancellation
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <p class="fs-5 mb-2">Do you really want to cancel this product?</p>
+                            <p class="text-muted mb-0">This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No, Keep</button>
+                            <button type="button" class="btn btn-danger px-4" id="confirmCancelBtn">Yes, Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
 <!-- ==================== JAVASCRIPT ==================== -->
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let selectedForm = null;
+        const cancelModal = new bootstrap.Modal(document.getElementById('confirmCancelModal'));
+        const confirmBtn = document.getElementById('confirmCancelBtn');
+
+        // Khi bấm nút cancel → hiện modal
+        document.querySelectorAll('.btn-cancel').forEach(button => {
+            button.addEventListener('click', function () {
+                selectedForm = this.closest('form');
+                cancelModal.show();
+            });
+        });
+
+        // Khi xác nhận → submit form
+        confirmBtn.addEventListener('click', function () {
+            if (selectedForm) selectedForm.submit();
+        });
+    });
+
+
+
     document.addEventListener("DOMContentLoaded", function () {
         const advancedFilter = document.getElementById("advancedFilter");
         const toggleAdvanced = document.getElementById("toggleAdvanced");
