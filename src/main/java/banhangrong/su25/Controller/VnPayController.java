@@ -117,9 +117,9 @@ public class VnPayController {
                 if (!first) query.append('&');
                 first = false;
                 try {
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()));
                     query.append('=');
-                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 } catch (Exception e) {
                     query.append(fieldName);
                     query.append('=');
@@ -202,9 +202,9 @@ public class VnPayController {
                 if (!first) query.append('&');
                 first = false;
                 try {
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()));
                     query.append('=');
-                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 } catch (Exception e) {
                     query.append(fieldName);
                     query.append('=');
