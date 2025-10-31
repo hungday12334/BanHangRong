@@ -18,6 +18,16 @@ public class Categories {
     private LocalDateTime updatedAt;
     // add getters and setters ...
 
+    public Categories() {
+    }
+
+    public Categories(String name, String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.name = name;
+        this.description = description;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public Long getCategoryId() {
         return categoryId;
     }

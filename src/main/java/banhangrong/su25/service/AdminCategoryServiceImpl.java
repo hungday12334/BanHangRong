@@ -74,4 +74,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService{
         return query.getResultList();
     }
 
+    @Override
+    public long countByName(String name) {
+        return categoriesRepository.countByName(name);
+    }
+
+
 }

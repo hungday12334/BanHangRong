@@ -12,4 +12,5 @@ public interface AdminCategoryService {
     public void delete(Long id);
     public void update(Categories category);
     public List<Categories> filter(CategoryFilter filter);
+    public long countByName(String name);
 }
