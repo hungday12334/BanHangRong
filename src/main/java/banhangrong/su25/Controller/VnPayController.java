@@ -77,7 +77,8 @@ public class VnPayController {
         String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
 
         long amountVnd = normalizeAmountVnd(req.getParameter("amount"));
-        if (amountVnd < 5000L) amountVnd = 5000L; // VNPay minimum
+        // Enforce business minimum topup of 20,000 VND (higher than VNPay's 5,000)
+        if (amountVnd < 20000L) amountVnd = 20000L;
 
         // VNPay expects smallest unit: VND * 100
         long amount = amountVnd * 100L;

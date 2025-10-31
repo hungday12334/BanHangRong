@@ -282,8 +282,8 @@
             </div>
             <div>
                 <label for="topupAmountField" style="display:block;margin-bottom:6px;color:#374151;font-weight:600">Amount (VND)</label>
-                <input id="topupAmountField" type="number" inputmode="numeric" min="1000" step="1000" placeholder="200000" style="width:100%;height:40px;padding:0 12px;border:1px solid #e5e7eb;border-radius:8px;outline:none;" />
-                <div id="topupError" role="alert" style="display:none;color:#ef4444;font-size:12px;margin-top:6px;">Please enter a valid amount (>= 1,000 VND).</div>
+                <input id="topupAmountField" type="number" inputmode="numeric" min="20000" step="1000" placeholder="200000" style="width:100%;height:40px;padding:0 12px;border:1px solid #e5e7eb;border-radius:8px;outline:none;" />
+                <div id="topupError" role="alert" style="display:none;color:#ef4444;font-size:12px;margin-top:6px;">Please enter a valid amount (>= 20,000 VND).</div>
             </div>
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
                 <button type="button" id="cancelTopupBtn" style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#374151;cursor:pointer;">Cancel</button>
@@ -424,7 +424,7 @@
             function validateAmount(v) {
                 if (v == null || v === '') return false;
                 const n = Number(String(v).replace(/[^0-9]/g, ''));
-                return Number.isFinite(n) && n >= 1000;
+                return Number.isFinite(n) && n >= 20000;
             }
 
             function submitTopup() {
