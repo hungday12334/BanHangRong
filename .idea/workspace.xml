@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -214,7 +213,7 @@
       <workItem from="1761817184559" duration="601000" />
       <workItem from="1761818462765" duration="825000" />
       <workItem from="1761819313004" duration="9292000" />
-      <workItem from="1761879573117" duration="3016000" />
+      <workItem from="1761879573117" duration="5801000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -320,7 +319,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761879164312</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX">
+      <option name="closed" value="true" />
+      <created>1761882746515</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1761882746515</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -391,6 +398,7 @@
     <MESSAGE value="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX" />
     <MESSAGE value="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety" />
     <MESSAGE value="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX" />
+    <MESSAGE value="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX" />
   </component>
 </project>
