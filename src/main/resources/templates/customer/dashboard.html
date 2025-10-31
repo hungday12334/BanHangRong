@@ -411,7 +411,7 @@
 				<a href="/categories">Category</a>
 				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>
-				<a href="#">Voucher</a>
+				<a href="/vouchers">Voucher</a>
 				<a href="/customer/support">Support</a>
 			</nav>
 			<div class="top-actions">
@@ -606,7 +606,7 @@
 			<div
 				style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
 				<h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">VNPay Top Up</h3>
-				<div style="color:#6b7280;font-size:14px;margin-bottom:8px">Enter amount to top up (VND)</div>
+				<div style="color:#6b7280;font-size:14px;margin-bottom:8px">Enter amount to top up (VND) — minimum 20,000</div>
 				<input id="topupAmountField" type="text" inputmode="numeric" placeholder="200000"
 					style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;font-weight:600" />
 				<div id="topupErr" style="color:#ef4444;font-size:12px;height:16px;margin-top:6px"></div>
@@ -642,6 +642,7 @@
 					const v = field.value || '';
 					const clean = v.replace(/[^0-9]/g, '');
 					if (!clean) { err.textContent = 'Invalid amount'; return; }
+					if (Number(clean) < 20000) { err.textContent = 'Minimum top up is 20,000 VND'; return; }
 					document.getElementById('topupAmountInput').value = clean;
 					ask.style.display = 'none';
 					__topupForm.submit();
@@ -703,21 +704,6 @@
 					});
 				}
 			});
-
-			// VNPay topup function
-			function topupPrompt(e) {
-				e.preventDefault();
-				const v = prompt('Enter amount to top up (VND):', '200000');
-				if (!v) return false;
-				const clean = v.replace(/[^0-9]/g, '');
-				if (!clean) {
-					alert('Please enter a valid amount');
-					return false;
-				}
-				document.getElementById('topupAmountInput').value = clean;
-				e.target.submit();
-				return true;
-			}
 		</script>
 		
 	</div>

@@ -360,34 +360,28 @@
                 <div class="user" style="position:relative">
                     <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
                         <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+                        <span class="wallet-badge">💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span></span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </button>
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" th:if="${user != null}" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+                        <a class="item" th:unless="${user != null}" href="/login" role="menuitem">Login</a>
                         <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
                         <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
                         <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
                         <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
-                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
-                            style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
-                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-                                th:value="${_csrf.token}" />
+                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="amount" id="topupAmountInput" />
-                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
-                                (VNPay)</button>
+                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up (VNPay)</button>
                         </form>
                         <a class="item" href="/orderhistory" role="menuitem">My Orders</a>
-                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
-                            style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
-                            Become a Seller</a>
-                        <a class="item" href="#" role="menuitem"
-                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Become a Seller</a>
+                        <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
                     </div>
-                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
-                    </form>
+                    <form id="logoutForm" method="post" action="/logout" style="display:none;"></form>
                 </div>
                 <div class="search">
                     <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
@@ -515,11 +509,24 @@
                 recomputeTotals();
             })();
         </script>
-        <form class="summary" method="post" action="/cart/checkout-demo">
-            <div class="total">Total: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫
+        <form class="summary" method="post" action="/cart/checkout-demo" style="flex-wrap:wrap;gap:10px;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <form method="post" action="/cart/apply-voucher" style="display:flex;gap:6px;align-items:center">
+                    <input type="text" name="code" placeholder="Voucher code" aria-label="Voucher code" style="height:34px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                    <button class="btn" type="submit" style="background:#111827;color:#fff;border:none">Apply</button>
+                </form>
+                <div th:if="${appliedVoucher != null}" style="display:flex;align-items:center;gap:8px;background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;padding:6px 10px;border-radius:8px">
+                    <span>Voucher:</span>
+                    <b th:text="${appliedVoucher}">CODE</b>
+                    <form method="post" action="/cart/remove-voucher"><button class="btn" type="submit">Remove</button></form>
+                </div>
             </div>
-            <a href="/customer/dashboard" class="btn">Continue Shopping</a>
-            <button class="btn primary" type="submit">Pay with Balance</button>
+            <div style="display:flex;align-items:center;gap:12px">
+                <div th:if="${discount != null and discount > 0}" style="color:#10b981;font-weight:700">-<span th:text="${#numbers.formatDecimal(discount,0,'COMMA',0,'POINT')}">0</span>₫</div>
+                <div class="total">Total: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
+                <a href="/customer/dashboard" class="btn">Continue Shopping</a>
+                <button class="btn primary" type="submit">Pay with Balance</button>
+            </div>
         </form>
         </div>
     </div>

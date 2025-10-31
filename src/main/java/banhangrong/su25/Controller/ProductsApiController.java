@@ -3,6 +3,8 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.VouchersRepository;
+import banhangrong.su25.Entity.Vouchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +20,14 @@ public class ProductsApiController {
 
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
+    private final VouchersRepository vouchersRepository;
 
     public ProductsApiController(ProductsRepository productsRepository,
-                                 ProductImagesRepository productImagesRepository) {
+                                 ProductImagesRepository productImagesRepository,
+                                 VouchersRepository vouchersRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
+        this.vouchersRepository = vouchersRepository;
     }
 
     // Lightweight DTO to avoid lazy recursion and reduce payload
@@ -37,6 +42,29 @@ public class ProductsApiController {
     public String downloadUrl;
     public String primaryImage;
     public String status;
+    }
+
+    // Public vouchers for product
+    @GetMapping("/{id}/vouchers")
+    public ResponseEntity<java.util.List<java.util.Map<String, Object>>> getVouchers(@PathVariable("id") Long id) {
+        return productsRepository.findById(id).map(p -> {
+            java.util.List<Vouchers> list = vouchersRepository.findBySellerIdAndProductIdOrderByUpdatedAtDesc(p.getSellerId(), p.getProductId());
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.util.List<java.util.Map<String,Object>> out = new java.util.ArrayList<>();
+            for (Vouchers v : list) {
+                if (!"active".equalsIgnoreCase(v.getStatus())) continue;
+                if (v.getStartAt() != null && now.isBefore(v.getStartAt())) continue;
+                if (v.getEndAt() != null && now.isAfter(v.getEndAt())) continue;
+                java.util.Map<String,Object> m = new java.util.LinkedHashMap<>();
+                m.put("code", v.getCode());
+                m.put("type", v.getDiscountType());
+                m.put("value", v.getDiscountValue());
+                m.put("minOrder", v.getMinOrder());
+                m.put("endAt", v.getEndAt());
+                out.add(m);
+            }
+            return ResponseEntity.ok(out);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     private ProductDto toDto(Products p) {
