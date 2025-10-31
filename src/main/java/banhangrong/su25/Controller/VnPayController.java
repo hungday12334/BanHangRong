@@ -166,12 +166,17 @@ public class VnPayController {
             }
         }
         String queryUrl = query.toString();
-        // Per VNPay docs: sign RAW sorted key=value (not URL-encoded)
-        String signData = VnPayConfig.buildSignData(vnp_Params);
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
-        System.out.println("[VNPay][CreateTopup] signData=" + signData);
+        // Compute both RAW and URL-encoded signatures; use URL-encoded to align with some sandbox gateways
+        String rawSign = VnPayConfig.buildSignData(vnp_Params);
+        String encSign = queryUrl; // already URL-encoded
+        String rawHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, rawSign);
+        String encHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, encSign);
+        String vnp_SecureHash = encHash; // prefer encoded signature
+        System.out.println("[VNPay][CreateTopup] rawSign=" + rawSign);
+        System.out.println("[VNPay][CreateTopup] rawHash=" + rawHash);
+        System.out.println("[VNPay][CreateTopup] signData(encoded)=" + encSign);
         System.out.println("[VNPay][CreateTopup] query(before hash)=" + queryUrl);
-        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash; // do not append vnp_SecureHashType for gateway
+        queryUrl += "&vnp_SecureHashType=HmacSHA512&vnp_SecureHash=" + vnp_SecureHash;
         System.out.println("[VNPay][CreateTopup] redirectQuery=" + queryUrl);
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
@@ -254,12 +259,17 @@ public class VnPayController {
             }
         }
         String queryUrl = query.toString();
-        // Per VNPay docs: sign RAW sorted key=value (not URL-encoded)
-        String signData2 = VnPayConfig.buildSignData(vnp_Params);
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData2);
-        System.out.println("[VNPay][CreatePayment] signData=" + signData2);
+        // Compute both RAW and URL-encoded signatures; use URL-encoded
+        String rawSign2 = VnPayConfig.buildSignData(vnp_Params);
+        String encSign2 = queryUrl;
+        String rawHash2 = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, rawSign2);
+        String encHash2 = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, encSign2);
+        String vnp_SecureHash = encHash2;
+        System.out.println("[VNPay][CreatePayment] rawSign=" + rawSign2);
+        System.out.println("[VNPay][CreatePayment] rawHash=" + rawHash2);
+        System.out.println("[VNPay][CreatePayment] signData(encoded)=" + encSign2);
         System.out.println("[VNPay][CreatePayment] query(before hash)=" + queryUrl);
-        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash; // do not append vnp_SecureHashType for gateway
+        queryUrl += "&vnp_SecureHashType=HmacSHA512&vnp_SecureHash=" + vnp_SecureHash;
         System.out.println("[VNPay][CreatePayment] redirectQuery=" + queryUrl);
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
