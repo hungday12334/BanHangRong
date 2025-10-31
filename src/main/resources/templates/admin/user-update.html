@@ -271,13 +271,13 @@
                 <label>User Type (Role):</label>
                 <select readonly name="userType" disabled>
                     <option value="CUSTOMER"
-                            th:selected="${user != null and user.userType == 'CUSTOMER'}">CUSTOMER
+                            th:selected="${user != null and user.userType.toUpperCase() == 'CUSTOMER'}">CUSTOMER
                     </option>
                     <option value="ADMIN"
-                            th:selected="${user != null and user.userType == 'ADMIN'}">ADMIN
+                            th:selected="${user != null and user.userType.toUpperCase() == 'ADMIN'}">ADMIN
                     </option>
                     <option value="SELLER"
-                            th:selected="${user != null and user.userType == 'SELLER'}">SELLER
+                            th:selected="${user != null and user.userType.toUpperCase() == 'SELLER'}">SELLER
                     </option>
                 </select>
             </div>
@@ -329,7 +329,7 @@
     // Khi bấm Update
     updateBtn.addEventListener('click', () => {
         inputs.forEach(input => {
-            if (!['id', 'username','userType'].includes(input.name)) {
+            if (!['id', 'username'].includes(input.name)) {
                 input.removeAttribute('readonly');
                 input.removeAttribute('disabled');
                 input.style.backgroundColor = "#fff";

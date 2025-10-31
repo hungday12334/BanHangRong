@@ -182,6 +182,7 @@ public class AdminUserManagement {
             String email = request.getParameter("email");
             String password = request.getParameter("password");
             String fullName = request.getParameter("fullName");
+            String userType = request.getParameter("userType");
             String phoneNumber = request.getParameter("phoneNumber");
             String gender = request.getParameter("gender");
             String birthDate = request.getParameter("birthDate");
@@ -210,6 +211,7 @@ public class AdminUserManagement {
                 return "admin/user-update";
             }
             //Trim full name
+
             if(fullName!=null){
                 fullName=fullName.trim();
             }
@@ -270,6 +272,7 @@ public class AdminUserManagement {
 //          Save hashed password
             user.setPassword(valid.hashPassword(password));
             user.setFullName(fullName);
+            user.setUserType(userType);
             user.setPhoneNumber(phoneNumber);
             user.setGender(gender);
             if (!birthDate.isEmpty()) {
