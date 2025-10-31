@@ -598,6 +598,73 @@
 
     /*   ........... */
 
+        /* === FIX SCROLL & LAYOUT IMPROVEMENTS === */
+
+        /* Cả khung chat và danh sách hiển thị song song, không phụ thuộc sidebar */
+        .chat-wrapper {
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        /* Danh sách seller (bên trái) cuộn riêng */
+        .conversations-sidebar {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Khung chat chính (bên phải) cuộn riêng */
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Vùng tin nhắn chỉ phần nội dung được cuộn */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* Giữ ô nhập cố định ở đáy */
+        .chat-input-container {
+            flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--bg-elev, #1a1d2e), var(--bg, #0f1219));
+            z-index: 5;
+        }
+
+        /* Auto scroll mượt tới tin nhắn mới */
+        .chat-messages {
+            scroll-behavior: smooth;
+        }
+
+        /* Tăng trải nghiệm cuộn */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+
+
     </style>
 </head>
 <body class="loading enhanced-dashboard" th:attr="data-user-type=${user != null ? user.userType : 'GUEST'}" data-app-root>
@@ -1558,6 +1625,13 @@
         }
     }
 
+    const messagesContainer = document.getElementById('chatMessages');
+    if (messagesContainer) {
+        const observer = new MutationObserver(() => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+        observer.observe(messagesContainer, { childList: true });
+    }
     /*]]>*/
 </script>
 </body>

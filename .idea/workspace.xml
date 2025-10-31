@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
@@ -204,7 +203,7 @@
       <workItem from="1761782244391" duration="13705000" />
       <workItem from="1761817184559" duration="601000" />
       <workItem from="1761818462765" duration="825000" />
-      <workItem from="1761819313004" duration="6920000" />
+      <workItem from="1761819313004" duration="8825000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -294,7 +293,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761818570255</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety">
+      <option name="closed" value="true" />
+      <created>1761877366256</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1761877366256</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

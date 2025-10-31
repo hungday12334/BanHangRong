@@ -700,7 +700,93 @@
             }
         }
 
+    /*    ....................*/
+        /* === 🔧 FIX SCROLLING & LAYOUT ENHANCEMENT === */
 
+        /* Giữ wrapper chiếm toàn màn hình */
+        .wrapper {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat page chiếm phần còn lại sau topbar */
+        .chat-page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 0; /* bỏ padding để full khung */
+        }
+
+        /* Hai cột chính: danh sách + khung chat */
+        .chat-wrapper {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            border-radius: 0;
+            background: var(--bg-elev, #fff);
+        }
+
+        /* Sidebar (customer list) cuộn riêng biệt */
+        .conversations-sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border, #e5e7eb);
+            background: var(--bg-elev, #fff);
+            overflow-y: auto;
+        }
+
+        /* Khung chat chính */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg, #f5f7fb);
+        }
+
+        /* Tin nhắn cuộn độc lập */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+
+        /* Ô nhập cố định ở đáy, không cuộn */
+        .chat-input-container {
+            position: sticky;
+            bottom: 0;
+            background: var(--bg-elev, #ffffff);
+            border-top: 1px solid var(--border, #e5e7eb);
+            padding: 14px 20px;
+            z-index: 5;
+        }
+
+        /* Khi có nhiều tin nhắn, chỉ phần chat-messages cuộn */
+        .chat-main #chatArea {
+            display: flex !important;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Khi mở khung chat, đảm bảo tin nhắn mới luôn hiển thị */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
 
 
     </style>
