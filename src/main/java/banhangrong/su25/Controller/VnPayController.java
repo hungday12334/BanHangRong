@@ -169,7 +169,10 @@ public class VnPayController {
         // Per VNPay docs: sign RAW sorted key=value (not URL-encoded)
         String signData = VnPayConfig.buildSignData(vnp_Params);
         String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
-        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash + "&vnp_SecureHashType=HmacSHA512";
+        System.out.println("[VNPay][CreateTopup] signData=" + signData);
+        System.out.println("[VNPay][CreateTopup] query(before hash)=" + queryUrl);
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash; // do not append vnp_SecureHashType for gateway
+        System.out.println("[VNPay][CreateTopup] redirectQuery=" + queryUrl);
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
     }
@@ -254,7 +257,10 @@ public class VnPayController {
         // Per VNPay docs: sign RAW sorted key=value (not URL-encoded)
         String signData2 = VnPayConfig.buildSignData(vnp_Params);
         String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData2);
-        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash + "&vnp_SecureHashType=HmacSHA512";
+        System.out.println("[VNPay][CreatePayment] signData=" + signData2);
+        System.out.println("[VNPay][CreatePayment] query(before hash)=" + queryUrl);
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash; // do not append vnp_SecureHashType for gateway
+        System.out.println("[VNPay][CreatePayment] redirectQuery=" + queryUrl);
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
     }
