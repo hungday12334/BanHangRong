@@ -118,24 +118,22 @@
 <body>
 	<div class="wrapper">
 		<!-- Header từ layout chung -->
-        <div class="topbar">
-            <a href="/customer/dashboard" class="brand">
-                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
-                BanHangRong
-            </a>
+		<div class="topbar">
+			<div class="brand">BanHangRong</div>
 			<nav class="nav" aria-label="Main">
 				<a href="/customer/dashboard">Home</a>
 				<a href="/categories">Category</a>
 				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>
 				<a href="#">Voucher</a>
-				<a href="#">Support</a>
+				<a href="/customer/support">Support</a>
 			</nav>
 			<div class="top-actions">
-				<div class="notif">Notification</div>
+				<a href="/customer/support" class="support-link">Support</a>
 				<div class="user" style="position:relative">
 					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
 						<span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+						<span class="wallet-badge">💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span></span>
 						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
 								stroke-linejoin="round" />
@@ -163,8 +161,7 @@
 						<a class="item" href="#" role="menuitem"
 							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
 					</div>
-					<form id="logoutForm" method="post" action="/logout" style="display:none;">
-					</form>
+					<form id="logoutForm" method="post" action="/logout" style="display:none;"></form>
 				</div>
 				<div class="search">
 					<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
