@@ -37,12 +37,10 @@ public class ChatController {
     public void sendMessage(@Payload Map<String, Object> messageData) {
         try {
             System.out.println("=== 🚀 WEBSOCKET MESSAGE RECEIVED ===");
-            System.out.println("📍 Raw message data: " + messageData);
 
             // 🚨 CHUYỂN ĐỔI từ Map sang ChatMessage
             ChatMessage message = new ChatMessage();
             message.setConversationId((String) messageData.get("conversationId"));
-            // 🚨 KHÔNG set room_id ở đây - để service xử lý
             message.setSenderId(Long.valueOf(messageData.get("senderId").toString()));
             message.setContent((String) messageData.get("content"));
 
@@ -57,32 +55,17 @@ public class ChatController {
                 message.setSenderRole((String) messageData.get("senderRole"));
             }
 
-            System.out.println("📍 Parsed message - No room_id set (will be handled by service)");
-
-            // Rate limiting
-            Long senderId = message.getSenderId();
-            Long lastTime = userLastMessageTime.get(senderId);
-            long now = System.currentTimeMillis();
-
-            if (lastTime != null && (now - lastTime) < MESSAGE_RATE_LIMIT_MS) {
-                System.err.println("⚠️ Rate limit exceeded for user: " + senderId);
-                return;
-            }
-            userLastMessageTime.put(senderId, now);
-
             // 🚨 LƯU VÀO DATABASE
             System.out.println("💾 Saving message to database...");
             ChatMessage savedMessage = chatService.addMessage(message);
             System.out.println("✅ Message saved to DB with ID: " + savedMessage.getId());
 
-            // 🚨 Gửi tin nhắn đến CẢ HAI người
+            // 🚨 Gửi tin nhắn đến CẢ HAI người - CHỈ 1 LẦN
             String conversationTopic = "/topic/conversation/" + savedMessage.getConversationId();
 
             System.out.println("📤 Broadcasting to: " + conversationTopic);
-            System.out.println("👤 Sender: " + savedMessage.getSenderId());
-            System.out.println("👤 Receiver: " + savedMessage.getReceiverId());
 
-            // Convert để gửi qua WebSocket (KHÔNG gửi room_id)
+            // Convert để gửi qua WebSocket
             Map<String, Object> responseMessage = new HashMap<>();
             responseMessage.put("id", savedMessage.getId());
             responseMessage.put("conversationId", savedMessage.getConversationId());
@@ -96,7 +79,7 @@ public class ChatController {
             responseMessage.put("createdAt", savedMessage.getCreatedAt().toString());
             responseMessage.put("timestamp", savedMessage.getTimestamp());
 
-            // Gửi đến conversation topic (cả 2 user đều nhận)
+            // 🚨 Gửi DUY NHẤT 1 lần đến conversation topic
             messagingTemplate.convertAndSend(conversationTopic, responseMessage);
             System.out.println("✅ Message broadcasted to conversation");
 

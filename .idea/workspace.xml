@@ -4,15 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/fix_database_add_status.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/fix_database_add_status.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/MessageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/MessageRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/UsersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/UsersRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
@@ -209,6 +203,8 @@
       <workItem from="1761771952359" duration="9839000" />
       <workItem from="1761782244391" duration="13705000" />
       <workItem from="1761817184559" duration="601000" />
+      <workItem from="1761818462765" duration="825000" />
+      <workItem from="1761819313004" duration="6920000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -290,7 +286,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761805822892</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety">
+      <option name="closed" value="true" />
+      <created>1761818570255</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1761818570255</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -330,6 +334,7 @@
     <MESSAGE value="feat(email-verification): implement resend verification email feature and enhance user registration flow" />
     <MESSAGE value="feat(chat): fix conversation creation, CSRF, and UTF-8 issues; add setup scripts and enhance chat integration&#10;&#10;- Fix CSRF protection for chat conversation creation and message APIs in customer/seller chat pages&#10;- Add CSRF meta tags and ensure all POST requests include CSRF token&#10;- Update ChatController to support product info in chat and improve error handling/logging&#10;- Ensure chat tables use utf8mb4 encoding for full Vietnamese character support (SQL scripts and config)&#10;- Add scripts for database setup, UTF-8 fixes, and chat table creation for online DB&#10;- Enhance application properties for correct locale and MySQL UTF-8 settings&#10;- Add .env.example for environment variable guidance&#10;- Improve ChatService to load messages and unread counts per conversation&#10;- Update Conversation entity with JSON property annotations for API consistency&#10;- Show chat unread badge in product detail and auto-update via API&#10;- Add documentation and test guides for chat fixes and separation" />
     <MESSAGE value="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX" />
+    <MESSAGE value="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety" />
   </component>
 </project>
