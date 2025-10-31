@@ -128,8 +128,9 @@ public class VnPayController {
             }
         }
         String queryUrl = query.toString();
-        // IMPORTANT: per VNPay docs, sign the URL-encoded query string (without vnp_SecureHash)
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, queryUrl);
+        // Per VNPay docs, the signature is computed on the raw (non-URL-encoded) sorted key=value string
+        String signData = VnPayConfig.buildSignData(vnp_Params);
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
@@ -212,8 +213,9 @@ public class VnPayController {
             }
         }
         String queryUrl = query.toString();
-        // Sign the URL-encoded query string (without vnp_SecureHash)
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, queryUrl);
+        // Signature on raw sorted key=value string, not URL-encoded
+        String signData2 = VnPayConfig.buildSignData(vnp_Params);
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData2);
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
