@@ -51,6 +51,10 @@ public class VnPayConfig {
     public static String getIpAddress(HttpServletRequest request) {
         String ip = request.getHeader("X-FORWARDED-FOR");
         if (ip == null || ip.isBlank()) ip = request.getRemoteAddr();
+        // Normalize IPv6 loopback for VNPay sandbox
+        if (ip != null && ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip))) ip = "127.0.0.1";
+        // If header contains comma-separated IPs, take the first
+        if (ip != null && ip.contains(",")) ip = ip.split(",")[0].trim();
         return ip;
     }
 
