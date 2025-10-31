@@ -4,6 +4,11 @@ import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.ProductReviewsRepository;
+import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Repository.ShoppingCartRepository;
+import banhangrong.su25.Entity.Users;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,13 +23,19 @@ public class ProductDetailController {
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
     private final ProductReviewsRepository productReviewsRepository;
+    private final UsersRepository usersRepository;
+    private final ShoppingCartRepository shoppingCartRepository;
 
     public ProductDetailController(ProductsRepository productsRepository,
                                    ProductImagesRepository productImagesRepository,
-                                   ProductReviewsRepository productReviewsRepository) {
+                                   ProductReviewsRepository productReviewsRepository,
+                                   UsersRepository usersRepository,
+                                   ShoppingCartRepository shoppingCartRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.productReviewsRepository = productReviewsRepository;
+        this.usersRepository = usersRepository;
+        this.shoppingCartRepository = shoppingCartRepository;
     }
 
     @GetMapping("/product/{id}")
@@ -51,6 +62,19 @@ public class ProductDetailController {
             }
 
             model.addAttribute("product", p);
+
+            // Header data from DB (match dashboard)
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Users currentUser = null;
+                if (auth != null && auth.isAuthenticated()) {
+                    currentUser = usersRepository.findByUsername(auth.getName()).orElse(null);
+                }
+                if (currentUser != null) {
+                    model.addAttribute("user", currentUser);
+                    try { model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId())); } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {}
 
             try {
                 List<?> images = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id);
