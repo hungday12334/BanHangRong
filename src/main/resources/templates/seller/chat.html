@@ -18,33 +18,41 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
-        /* ===== MODERN CHAT UI STYLES ===== */
+        /* ===== PROFESSIONAL MODERN CHAT UI ===== */
 
         * {
             box-sizing: border-box;
         }
 
-        /* Chat Page Container */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Improved base layout structure */
         .chat-page {
-            padding: 16px;
             height: calc(100vh - 48px);
             display: flex;
             flex-direction: column;
             background: linear-gradient(135deg, #0f1219 0%, #1a1d2e 100%);
+            overflow: hidden;
         }
 
         .chat-wrapper {
             display: flex;
-            gap: 0;
             flex: 1;
+            gap: 0;
+            min-height: 0;
             background: var(--bg-elev, #1a1d2e);
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 16px;
         }
 
-        /* Connection Status - Enhanced */
+        /* Connection Status */
         .connection-status {
             position: fixed;
             top: 0;
@@ -81,35 +89,37 @@
             display: block;
         }
 
-        /* Conversations Sidebar */
+        /* Conversations Sidebar - Optimized scrolling */
         .conversations-sidebar {
-            width: 360px;
+            width: 320px;
             border-right: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
             background: var(--bg, #0f1219);
-            transition: width 0.3s ease;
+            min-height: 0;
+            overflow: hidden;
         }
 
         .conversations-header {
-            padding: 24px 20px;
+            padding: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            background: linear-gradient(135deg, var(--bg-elev, #1a1d2e), var(--bg, #0f1219));
+            background: linear-gradient(135deg, rgba(26, 29, 46, 0.8), rgba(15, 18, 25, 0.8));
+            flex-shrink: 0;
         }
 
         .conversations-header h2 {
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 700;
             color: var(--text, #f1f5f9);
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             letter-spacing: -0.5px;
         }
 
         .conversations-header i {
-            font-size: 28px;
+            font-size: 24px;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -118,13 +128,14 @@
 
         /* User Info Section */
         .user-info {
-            padding: 16px 20px;
+            padding: 14px 16px;
             background: rgba(255, 255, 255, 0.02);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             gap: 12px;
             transition: background 0.2s ease;
+            flex-shrink: 0;
         }
 
         .user-info:hover {
@@ -133,18 +144,18 @@
 
         /* Avatar Styles */
         .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 16px;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
             transition: transform 0.2s ease;
         }
 
@@ -154,21 +165,23 @@
 
         .avatar.seller {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.2);
         }
 
         .avatar img {
             width: 100%;
             height: 100%;
-            border-radius: 12px;
+            border-radius: 10px;
             object-fit: cover;
         }
 
-        /* Conversations List */
+        /* Conversations List - Independent scrolling */
         .conversations-list {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 8px 0;
+            min-height: 0;
         }
 
         .conversations-list::-webkit-scrollbar {
@@ -192,53 +205,58 @@
         .conversation-item {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
+            padding: 12px 12px;
             margin: 4px 8px;
             cursor: pointer;
             transition: all 0.2s ease;
             border-radius: 12px;
             border-left: 3px solid transparent;
+            background: transparent;
         }
 
         .conversation-item:hover {
             background: rgba(255, 255, 255, 0.06);
-            transform: translateX(4px);
+            transform: translateX(3px);
         }
 
         .conversation-item.active {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
             border-left: 3px solid var(--accent, #3b82f6);
-            box-shadow: inset 0 0 12px rgba(59, 130, 246, 0.1);
+            box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.08);
         }
 
         .conversation-info {
             flex: 1;
             min-width: 0;
-            margin-left: 12px;
+            margin-left: 10px;
         }
 
         .conversation-name {
             font-weight: 600;
             color: var(--text, #f1f5f9);
-            font-size: 15px;
-            margin-bottom: 4px;
+            font-size: 14px;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .conversation-last-message {
             color: var(--muted, #94a3b8);
-            font-size: 13px;
+            font-size: 12px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.3;
         }
 
         /* Unread Badge */
         .unread-badge {
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             color: white;
-            border-radius: 10px;
-            padding: 4px 10px;
-            font-size: 12px;
+            border-radius: 8px;
+            padding: 3px 8px;
+            font-size: 11px;
             font-weight: 700;
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
@@ -250,43 +268,72 @@
             50% { transform: scale(1.05); }
         }
 
-        /* Chat Main Area */
+        /* Chat Main Area - Flex layout optimization */
         .chat-main {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: var(--bg, #0f1219);
+            min-height: 0;
+            overflow: hidden;
         }
 
         /* Chat Header */
         .chat-header {
-            padding: 16px 24px;
+            padding: 16px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
-            background: linear-gradient(135deg, var(--bg-elev, #1a1d2e), var(--bg, #0f1219));
+            background: linear-gradient(135deg, rgba(26, 29, 46, 0.8), rgba(15, 18, 25, 0.8));
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
         .chat-header .avatar {
-            width: 44px;
-            height: 44px;
-            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            font-size: 14px;
         }
 
         .chat-header > div:last-child {
-            margin-left: 16px;
+            margin-left: 12px;
+            flex: 1;
         }
 
-        /* Chat Messages Container */
+        .chat-header-info .conversation-name {
+            font-size: 15px;
+        }
+
+        .chat-header-status {
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-header-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        /* Chat Messages Container - Proper flex scrolling */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 24px;
+            overflow-x: hidden;
+            padding: 20px 24px 16px 24px;
             background: var(--bg, #0f1219);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            min-height: 0;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
         .chat-messages::-webkit-scrollbar {
@@ -298,26 +345,29 @@
         }
 
         .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 4px;
+            transition: background 0.2s ease;
         }
 
         .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         /* Message Styles */
         .message {
             display: flex;
             align-items: flex-end;
-            gap: 8px;
+            gap: 12px;
             animation: messageSlideIn 0.3s ease;
+            max-width: 100%;
+            margin-bottom: 8px;
         }
 
         @keyframes messageSlideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(8px);
             }
             to {
                 opacity: 1;
@@ -327,6 +377,19 @@
 
         .message.sent {
             flex-direction: row-reverse;
+            justify-content: flex-start;
+            margin-left: auto;
+            margin-right: 0;
+            width: auto;
+            max-width: 65%;
+        }
+
+        .message.received {
+            justify-content: flex-start;
+            margin-left: 0;
+            margin-right: auto;
+            width: auto;
+            max-width: 65%;
         }
 
         /* Message Avatar */
@@ -339,10 +402,15 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .message-avatar:hover {
+            transform: scale(1.08);
         }
 
         .message-avatar.seller {
@@ -350,38 +418,44 @@
             box-shadow: 0 2px 8px rgba(245, 87, 108, 0.2);
         }
 
-        /* Message Content */
+        /* Message Content - Better sizing */
         .message-content {
-            max-width: 60%;
             display: flex;
             flex-direction: column;
             gap: 4px;
+            max-width: 100%;
         }
 
         .message.sent .message-content {
             align-items: flex-end;
         }
 
+        .message.received .message-content {
+            align-items: flex-start;
+        }
+
         /* Message Bubble */
         .message-bubble {
             padding: 12px 16px;
-            border-radius: 16px;
+            border-radius: 14px;
             word-wrap: break-word;
             display: inline-block;
             line-height: 1.4;
-            font-size: 15px;
+            font-size: 14px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease;
+            max-width: 100%;
         }
 
         .message-bubble:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
         }
 
         .message.received .message-bubble {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
             color: var(--text, #f1f5f9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-bottom-left-radius: 4px;
         }
 
@@ -389,52 +463,60 @@
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
         }
 
         /* Message Time */
         .message-time {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--muted, #94a3b8);
             padding: 0 4px;
+            transition: color 0.2s ease;
         }
 
-        /* Chat Input Container */
+        .message:hover .message-time {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Chat Input Container - Fixed at bottom */
         .chat-input-container {
-            padding: 20px 24px;
+            padding: 16px 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
-            background: linear-gradient(135deg, var(--bg-elev, #1a1d2e), var(--bg, #0f1219));
+            background: linear-gradient(180deg, rgba(26, 29, 46, 0.9), rgba(15, 18, 25, 0.95));
+            backdrop-filter: blur(10px);
             flex-shrink: 0;
         }
 
         .chat-input-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        /* Chat Input */
+        /* Chat Input - Enhanced styling */
         .chat-input {
             flex: 1;
             border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.03);
             color: var(--text, #f1f5f9);
-            border-radius: 24px;
-            padding: 12px 18px;
-            font-size: 15px;
+            border-radius: 22px;
+            padding: 11px 16px;
+            font-size: 14px;
             outline: none;
             transition: all 0.2s ease;
             backdrop-filter: blur(10px);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
         .chat-input:focus {
             border-color: var(--accent, #3b82f6);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: scale(1.01);
         }
 
         .chat-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.35);
         }
 
         /* Send Button */
@@ -443,19 +525,20 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            font-size: 18px;
+            font-size: 16px;
+            flex-shrink: 0;
         }
 
         .btn-send:hover:not(:disabled) {
-            transform: scale(1.08);
+            transform: scale(1.08) translateY(-2px);
             box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
 
@@ -467,6 +550,7 @@
             background: rgba(255, 255, 255, 0.1);
             cursor: not-allowed;
             box-shadow: none;
+            opacity: 0.5;
         }
 
         /* Welcome Screen */
@@ -479,11 +563,12 @@
             color: var(--muted, #94a3b8);
             text-align: center;
             padding: 40px;
+            min-height: 0;
         }
 
         .welcome-screen i {
-            font-size: 80px;
-            margin-bottom: 24px;
+            font-size: 72px;
+            margin-bottom: 20px;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -493,19 +578,20 @@
 
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-12px); }
         }
 
         .welcome-screen h3 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
             color: var(--text, #f1f5f9);
-            margin: 0 0 12px 0;
+            margin: 0 0 10px 0;
         }
 
         .welcome-screen p {
-            font-size: 15px;
+            font-size: 14px;
             margin: 0;
+            line-height: 1.6;
         }
 
         /* Hidden Class */
@@ -513,18 +599,41 @@
             display: none !important;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .chat-page {
-                padding: 8px;
-            }
+        /* Char Count - Subtle styling */
+        #charCount {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 11px;
+            display: none;
+            transition: color 0.2s ease;
+            font-weight: 500;
+        }
 
+        #charCount.warning {
+            color: #fbbf24;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
             .conversations-sidebar {
                 width: 280px;
             }
 
             .message-content {
-                max-width: 80%;
+                max-width: 65%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-wrapper {
+                margin: 8px;
+            }
+
+            .conversations-sidebar {
+                width: 240px;
+            }
+
+            .message-content {
+                max-width: 75%;
             }
 
             .chat-header {
@@ -532,17 +641,42 @@
             }
 
             .chat-messages {
-                padding: 16px;
+                padding: 16px 12px;
             }
 
             .chat-input-container {
-                padding: 16px;
+                padding: 12px 16px;
+            }
+
+            .chat-input {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            .btn-send {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
             }
         }
 
         @media (max-width: 640px) {
+            .chat-wrapper {
+                border-radius: 0;
+            }
+
             .conversations-sidebar {
-                width: 240px;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 50;
+                display: none;
+            }
+
+            .conversations-sidebar.mobile-open {
+                display: flex;
             }
 
             .message-content {
@@ -550,120 +684,9 @@
             }
 
             .conversations-header h2 {
-                font-size: 22px;
-            }
-
-            .chat-input {
-                padding: 10px 14px;
-                font-size: 14px;
-            }
-
-            .btn-send {
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
+                font-size: 18px;
             }
         }
-
-        /* Char Count */
-        #charCount {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            margin-right: 8px;
-            display: none;
-            transition: color 0.2s ease;
-        }
-
-        #charCount.warning {
-            color: #ffc107;
-        }
-
-        /* Ensure chatArea displays correctly */
-        #chatArea {
-            display: flex !important;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            min-height: 200px;
-        }
-
-        .chat-input-container {
-            flex-shrink: 0;
-        }
-
-
-    /*   ........... */
-
-        /* === FIX SCROLL & LAYOUT IMPROVEMENTS === */
-
-        /* Cả khung chat và danh sách hiển thị song song, không phụ thuộc sidebar */
-        .chat-wrapper {
-            height: calc(100vh - 80px);
-            display: flex;
-            flex-direction: row;
-            overflow: hidden;
-        }
-
-        /* Danh sách seller (bên trái) cuộn riêng */
-        .conversations-sidebar {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .conversations-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        /* Khung chat chính (bên phải) cuộn riêng */
-        .chat-main {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        /* Vùng tin nhắn chỉ phần nội dung được cuộn */
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-
-        /* Giữ ô nhập cố định ở đáy */
-        .chat-input-container {
-            flex-shrink: 0;
-            position: sticky;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--bg-elev, #1a1d2e), var(--bg, #0f1219));
-            z-index: 5;
-        }
-
-        /* Auto scroll mượt tới tin nhắn mới */
-        .chat-messages {
-            scroll-behavior: smooth;
-        }
-
-        /* Tăng trải nghiệm cuộn */
-        .chat-messages::-webkit-scrollbar {
-            width: 8px;
-        }
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-
 
     </style>
 </head>
@@ -735,12 +758,12 @@
                             <p>Select a conversation to start messaging</p>
                         </div>
 
-                        <div id="chatArea" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
+                        <div id="chatArea" class="hidden" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
                             <div class="chat-header">
                                 <div class="avatar" id="chatHeaderAvatar"></div>
-                                <div style="margin-left: 12px;">
+                                <div class="chat-header-info">
                                     <div class="conversation-name" id="chatHeaderName"></div>
-                                    <div class="conversation-last-message">Active</div>
+                                    <div class="chat-header-status">Active</div>
                                 </div>
                             </div>
 
@@ -755,7 +778,7 @@
                                            maxlength="5000"
                                            oninput="updateCharCount()"
                                            onkeypress="handleKeyPress(event)">
-                                    <span id="charCount" style="display: none;">0/5000</span>
+                                    <span id="charCount">0/5000</span>
                                     <button class="btn-send" id="sendBtn" onclick="sendMessage()">
                                         <i class="ti ti-send"></i>
                                     </button>
@@ -803,11 +826,9 @@
     const MAX_MESSAGE_LENGTH = 5000;
     const LAST_CONVERSATION_KEY = 'lastConversationId_' + currentUser.userId;
 
-    // Notification settings
     let notificationPermission = 'default';
     let notificationSound = null;
 
-    // Request notification permission on load
     if ('Notification' in window) {
         notificationPermission = Notification.permission;
         if (notificationPermission === 'default') {
@@ -817,7 +838,6 @@
         }
     }
 
-    // Create notification sound (simple beep using Web Audio API)
     function playNotificationSound() {
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -841,7 +861,6 @@
         }
     }
 
-    // Show desktop notification
     function showDesktopNotification(title, body, icon) {
         if (notificationPermission === 'granted' && 'Notification' in window) {
             try {
@@ -858,7 +877,6 @@
                     notification.close();
                 };
 
-                // Auto close after 5 seconds
                 setTimeout(() => notification.close(), 5000);
             } catch (e) {
                 console.log('Could not show desktop notification:', e);
@@ -903,13 +921,11 @@
         }
     }
 
-
     function loadConversations() {
         const isSeller = currentUser.userType === 'SELLER';
 
         return new Promise((resolve, reject) => {
             if (isSeller) {
-                // Seller: load existing conversations
                 fetch(`/api/conversations/${currentUser.userId}`)
                     .then(res => res.json())
                     .then(convs => {
@@ -925,7 +941,6 @@
                         reject(err);
                     });
             } else {
-                // Customer: load sellers và tạo conversations
                 const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
@@ -972,13 +987,11 @@
             const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
             const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
 
-            // Format last message with preview
             let lastMessagePreview = conv.lastMessage || 'Start chatting';
             if (lastMessagePreview.length > 35) {
                 lastMessagePreview = lastMessagePreview.substring(0, 35) + '...';
             }
 
-            // Format time
             let timeText = '';
             if (conv.lastMessageTime) {
                 timeText = formatRelativeTime(conv.lastMessageTime);
@@ -1009,7 +1022,6 @@
         });
     }
 
-    // Format relative time (e.g., "2m ago", "1h ago", "Yesterday")
     function formatRelativeTime(timestamp) {
         const now = new Date();
         const messageTime = new Date(timestamp);
@@ -1044,94 +1056,10 @@
         }
     }
 
-    function renderMessages() {
-        const messagesContainer = document.getElementById('chatMessages');
-
-        if (!messagesContainer) {
-            console.error('❌ Cannot render messages: messagesContainer not found');
-            return;
-        }
-
-        messagesContainer.innerHTML = '';
-
-        console.log('📨 Rendering messages for conversation:', currentConversation?.id);
-        console.log('   Messages count:', currentConversation?.messages?.length || 0);
-
-        if (currentConversation && currentConversation.messages) {
-            currentConversation.messages.forEach(msg => {
-                console.log('   - Message:', msg.id, msg.content?.substring(0, 30));
-                displayMessage(msg, false);
-            });
-        }
-        scrollToBottom();
-    }
-
-    function displayMessage(message, shouldScroll = true) {
-        const messagesContainer = document.getElementById('chatMessages');
-
-        if (!messagesContainer) {
-            console.error('❌ messagesContainer not found!');
-            return;
-        }
-
-        const isSent = message.senderId === currentUser.userId;
-
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-        messageDiv.setAttribute('data-message-id', message.id);
-
-        const avatarClass = message.senderRole === 'SELLER' ? 'seller' : '';
-        const avatar = message.senderName ? message.senderName.substring(0, 2).toUpperCase() : '?';
-
-        messageDiv.innerHTML = `
-        <div class="message-avatar ${avatarClass}">${avatar}</div>
-        <div class="message-content">
-            <div class="message-bubble">${escapeHtml(message.content)}</div>
-            <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
-        </div>
-    `;
-
-        messagesContainer.appendChild(messageDiv);
-
-        if (shouldScroll) {
-            scrollToBottom();
-        }
-
-        console.log('✅ Displayed message:', message.id, 'from:', message.senderName);
-    }
-
-    function updateMessageStatus(tempId, status) {
-        const msgElement = document.querySelector(`[data-temp-id="${tempId}"]`);
-        if (msgElement) {
-            const statusSpan = msgElement.querySelector('.message-status');
-            if (statusSpan) {
-                switch(status) {
-                    case 'sending':
-                        statusSpan.textContent = '○';
-                        statusSpan.title = 'Sending...';
-                        break;
-                    case 'sent':
-                        statusSpan.textContent = '✓';
-                        statusSpan.title = 'Sent';
-                        break;
-                    case 'queued':
-                        statusSpan.textContent = '⏳';
-                        statusSpan.title = 'Queued';
-                        break;
-                }
-            }
-        }
-    }
-
     function handleKeyPress(event) {
         if (event.key === 'Enter') {
             sendMessage();
         }
-    }
-
-    function scrollToBottom() {
-        const messagesContainer = document.getElementById('chatMessages');
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
     function escapeHtml(text) {
@@ -1206,19 +1134,15 @@
         }
     }
 
-    // Initialize
     connect();
     loadConversations().then(() => {
-        // Remove loading state after conversations are loaded
         setTimeout(() => {
             document.body.classList.remove('loading');
         }, 500);
     }).catch(() => {
-        // Remove loading state even if there's an error
         document.body.classList.remove('loading');
     });
 
-    // Auto-open conversation if conversationId is provided
     const targetConversationId = /*[[${conversationId}]]*/ null;
     const targetSellerId = /*[[${targetSellerId}]]*/ null;
     const productId = /*[[${productId}]]*/ null;
@@ -1226,14 +1150,12 @@
     const productPrice = /*[[${productPrice}]]*/ null;
 
     if (targetConversationId) {
-        // Wait for conversations to load, then open the target conversation
         const checkAndOpen = setInterval(() => {
             const conv = conversations.find(c => c.id === targetConversationId);
             if (conv) {
                 clearInterval(checkAndOpen);
                 openConversation(conv);
 
-                // Auto-send product info message if product context is available
                 if (productId && productName && productPrice) {
                     setTimeout(() => {
                         sendProductInfoMessage(productId, productName, productPrice);
@@ -1242,7 +1164,6 @@
             }
         }, 500);
 
-        // Clear interval after 10 seconds to prevent infinite loop
         setTimeout(() => {
             clearInterval(checkAndOpen);
             if (!currentConversation) {
@@ -1250,7 +1171,6 @@
             }
         }, 10000);
     } else if (targetSellerId && currentUser.userType === 'CUSTOMER') {
-        // For customer: if sellerId is provided, create/open conversation with that seller
         const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
@@ -1276,13 +1196,11 @@
                 return response.json();
             })
             .then(conversation => {
-                // Reload conversations to include the new one
                 loadConversations().then(() => {
                     const conv = conversations.find(c => c.id === conversation.id);
                     if (conv) {
                         openConversation(conv);
 
-                        // Auto-send product info message if product context is available
                         if (productId && productName && productPrice) {
                             setTimeout(() => {
                                 sendProductInfoMessage(productId, productName, productPrice);
@@ -1296,14 +1214,12 @@
             .catch(error => {
                 console.error('Error creating conversation:', error);
                 showToast('❌ Cannot start chat: ' + error.message, 'error');
-                // Redirect back after 2 seconds
                 setTimeout(() => {
                     window.location.href = document.referrer || '/';
                 }, 2000);
             });
     }
 
-    // Function to send product info message
     function sendProductInfoMessage(prodId, prodName, prodPrice) {
         if (!currentConversation || !isConnected) {
             console.warn('Cannot send product info: no conversation or not connected');
@@ -1332,11 +1248,9 @@
             status: 'sending'
         };
 
-        // Display message
         displayMessage(message);
         scrollToBottom();
 
-        // Send via WebSocket
         if (isConnected) {
             stompClient.send('/app/sendMessage', {}, JSON.stringify(message));
             setTimeout(() => {
@@ -1354,15 +1268,13 @@
         }
     };
 
-
     function connect() {
         if (isConnected) return;
         updateConnectionStatus('connecting');
 
-        // SỬA ENDPOINT THÀNH /ws-chat
         const socket = new SockJS('/ws-chat');
         stompClient = Stomp.over(socket);
-        stompClient.debug = null; // Tắt debug để đỡ rối console
+        stompClient.debug = null;
 
         stompClient.connect(
             { userId: currentUser.userId },
@@ -1372,12 +1284,10 @@
                 updateConnectionStatus('connected');
                 document.body.classList.remove('loading');
 
-                // Subscribe to conversation topics
                 if (currentConversation) {
                     subscribeToConversation(currentConversation.id);
                 }
 
-                // Subscribe to user notifications
                 subscriptions.notifications = stompClient.subscribe(
                     '/topic/user/' + currentUser.userId + '/messages',
                     function(message) {
@@ -1387,13 +1297,11 @@
                     }
                 );
 
-                // Notify server that user is online
                 stompClient.send('/app/chat.userOnline', {}, JSON.stringify({
                     userId: currentUser.userId
                 }));
 
                 console.log('✅ All subscriptions active');
-
             },
             function(error) {
                 console.error('❌ WebSocket connection error:', error);
@@ -1401,7 +1309,6 @@
                 updateConnectionStatus('disconnected');
                 document.body.classList.remove('loading');
 
-                // Auto-reconnect after 3 seconds
                 setTimeout(connect, 3000);
             }
         );
@@ -1421,33 +1328,6 @@
         }
     }
 
-    function handleNotification(notification) {
-        if (notification.type === 'NEW_MESSAGE') {
-            // Reload conversations to update unread counts
-            loadConversations();
-
-            // Play sound for new messages from others
-            if (notification.senderId !== currentUser.userId) {
-                playNotificationSound();
-
-                if (!document.hasFocus()) {
-                    showDesktopNotification(
-                        `💬 New message from ${notification.senderName}`,
-                        notification.messagePreview
-                    );
-                }
-            }
-        }
-    }
-
-    function updateUserStatus(status) {
-        // Update UI to show online/offline status
-        const conversationItems = document.querySelectorAll('.conversation-item');
-        conversationItems.forEach(item => {
-            // You can implement online status indicators here
-        });
-    }
-
     function subscribeToConversation(conversationId) {
         if (subscriptions.conversation) {
             subscriptions.conversation.unsubscribe();
@@ -1458,8 +1338,6 @@
             function(message) {
                 console.log('💬 Received conversation message');
                 const msg = JSON.parse(message.body);
-
-                // 🚨 HIỂN THỊ TẤT CẢ tin nhắn, nhưng xử lý duplicate
                 handleIncomingMessage(msg);
             }
         );
@@ -1467,29 +1345,23 @@
         console.log('✅ Subscribed to conversation: ' + conversationId);
     }
 
-    // 🚨 Hàm mới để xử lý tin nhắn đến
     function handleIncomingMessage(msg) {
         console.log('🆕 Incoming message ID:', msg.id, 'from:', msg.senderId);
 
-        // Kiểm tra xem tin nhắn đã tồn tại chưa
         const existingMessage = document.querySelector(`[data-message-id="${msg.id}"]`);
         if (existingMessage) {
             console.log('🔄 Message already exists, skipping');
             return;
         }
 
-        // Kiểm tra temp message (tin nhắn của chính mình)
         const tempMessages = document.querySelectorAll('[data-message-id^="temp_"]');
         if (msg.senderId === currentUser.userId && tempMessages.length > 0) {
             console.log('🔄 Replacing temp message with real one');
-            // Xóa temp message và hiển thị real message
             tempMessages.forEach(tempMsg => tempMsg.remove());
         }
 
-        // Hiển thị tin nhắn
         displayMessage(msg, true);
 
-        // Thông báo cho tin nhắn từ người khác
         if (msg.senderId !== currentUser.userId) {
             playNotificationSound();
             if (!document.hasFocus()) {
@@ -1500,7 +1372,6 @@
             }
         }
 
-        // Reload conversations để update unread counts
         loadConversations();
     }
 
@@ -1526,7 +1397,6 @@
             messageType: 'TEXT'
         };
 
-        // 🚨 BẬT LẠI optimistic UI - nhưng với tempId để tránh duplicate
         const tempMessage = {
             id: tempId,
             ...messageData,
@@ -1539,7 +1409,6 @@
         input.value = '';
         updateCharCount();
 
-        // Send via WebSocket
         if (isConnected) {
             stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(messageData));
             console.log('✅ Message sent via WebSocket with tempId:', tempId);
@@ -1549,7 +1418,6 @@
             console.log('⚠️ Message queued (offline)');
         }
     }
-
 
     function openConversation(conv) {
         console.log('💬 Opening conversation:', conv.id);
@@ -1561,11 +1429,10 @@
         currentConversation = conv;
         localStorage.setItem(LAST_CONVERSATION_KEY, conv.id);
 
-        // 🚨 QUAN TRỌNG: Đảm bảo chatArea hiển thị
         document.getElementById('welcomeScreen').classList.add('hidden');
         const chatArea = document.getElementById('chatArea');
         chatArea.classList.remove('hidden');
-        chatArea.style.display = 'flex'; // 🚨 THÊM DÒNG NÀY
+        chatArea.style.display = 'flex';
 
         const isCustomer = currentUser.userType === 'CUSTOMER';
         const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
@@ -1575,16 +1442,13 @@
         document.getElementById('chatHeaderAvatar').textContent = avatar;
         document.getElementById('chatHeaderAvatar').className = `avatar ${isCustomer ? 'seller' : ''}`;
 
-        // Subscribe to conversation
         if (stompClient && isConnected) {
             subscribeToConversation(conv.id);
         }
 
-        // 🚨 QUAN TRỌNG: Render messages và focus input
         renderMessages();
         markAsRead();
 
-        // Focus input sau 100ms để đảm bảo UI đã render xong
         setTimeout(() => {
             const messageInput = document.getElementById('messageInput');
             if (messageInput) {
@@ -1596,7 +1460,6 @@
     function handleNewMessage(msg) {
         console.log('🆕 Handling new message from:', msg.senderName);
 
-        // Only process if not from current user (to avoid duplicates)
         if (msg.senderId !== currentUser.userId) {
             playNotificationSound();
 
@@ -1608,30 +1471,98 @@
             }
         }
 
-        // If this message belongs to current conversation, display it
         if (currentConversation && msg.conversationId === currentConversation.id) {
             displayMessage(msg);
         }
 
-        // Reload conversations list to update unread counts
         loadConversations();
     }
 
-    // ✅ Tự động cuộn xuống khi có tin nhắn mới
-    function scrollToBottom() {
+    function scrollToBottom(forceInstant = false) {
         const messagesContainer = document.getElementById('chatMessages');
-        if (messagesContainer) {
+        if (!messagesContainer) return;
+
+        const last = messagesContainer.lastElementChild;
+        if (!last) return;
+
+        const behavior = forceInstant ? 'auto' : 'smooth';
+        try {
+            last.scrollIntoView({ behavior, block: 'end' });
+        } catch (e) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     }
 
-    const messagesContainer = document.getElementById('chatMessages');
-    if (messagesContainer) {
-        const observer = new MutationObserver(() => {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    function renderMessages() {
+        const messagesContainer = document.getElementById('chatMessages');
+
+        if (!messagesContainer) {
+            console.error('❌ Cannot render messages: messagesContainer not found');
+            return;
+        }
+
+        messagesContainer.innerHTML = '';
+
+        if (currentConversation && currentConversation.messages) {
+            currentConversation.messages.forEach(msg => {
+                displayMessage(msg, false);
+            });
+        }
+
+        setTimeout(() => scrollToBottom(true), 20);
+    }
+
+    function displayMessage(message, shouldScroll = true) {
+        const messagesContainer = document.getElementById('chatMessages');
+        if (!messagesContainer) return;
+
+        const isSent = message.senderId === currentUser.userId;
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+        messageDiv.setAttribute('data-message-id', message.id || ('temp_' + Date.now()));
+
+        const avatarClass = message.senderRole === 'SELLER' ? 'seller' : '';
+        const avatar = message.senderName ? message.senderName.substring(0, 2).toUpperCase() : '?';
+
+        messageDiv.innerHTML = `
+        <div class="message-avatar ${avatarClass}">${avatar}</div>
+        <div class="message-content">
+            <div class="message-bubble">${escapeHtml(message.content || '')}</div>
+            <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
+        </div>
+    `;
+
+        messagesContainer.appendChild(messageDiv);
+
+        if (shouldScroll) {
+            setTimeout(() => {
+                try {
+                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                } catch (e) {
+                    scrollToBottom();
+                }
+            }, 10);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const messagesContainer = document.getElementById('chatMessages');
+        if (!messagesContainer) return;
+
+        const observer = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                if (m.addedNodes.length > 0) {
+                    scrollToBottom();
+                    break;
+                }
+            }
         });
         observer.observe(messagesContainer, { childList: true });
-    }
+    });
+
+    setTimeout(() => scrollToBottom(true), 1000);
+
     /*]]>*/
 </script>
 </body>

@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -36,6 +35,17 @@
     &quot;state&quot;: &quot;OPEN&quot;,
     &quot;assignee&quot;: &quot;hungday12334&quot;
   }
+}</component>
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
+    {
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDOPxAa-86vb7X8&quot;,
+        &quot;number&quot;: 6
+      },
+      &quot;lastSeen&quot;: 1761879200165
+    }
+  ]
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
@@ -203,7 +213,8 @@
       <workItem from="1761782244391" duration="13705000" />
       <workItem from="1761817184559" duration="601000" />
       <workItem from="1761818462765" duration="825000" />
-      <workItem from="1761819313004" duration="8825000" />
+      <workItem from="1761819313004" duration="9292000" />
+      <workItem from="1761879573117" duration="3016000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -301,15 +312,52 @@
       <option name="project" value="LOCAL" />
       <updated>1761877366256</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX">
+      <option name="closed" value="true" />
+      <created>1761879164312</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1761879164312</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="63ffc40e-db80-490a-abac-868a868bfa4b" value="TOOL_WINDOW" />
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
+        <entry key="63ffc40e-db80-490a-abac-868a868bfa4b">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="range">
+                    <value>
+                      <list>
+                        <option value="origin/main..origin/MinhHQ" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
         <entry key="MAIN">
           <value>
             <State>
@@ -342,6 +390,7 @@
     <MESSAGE value="feat(chat): fix conversation creation, CSRF, and UTF-8 issues; add setup scripts and enhance chat integration&#10;&#10;- Fix CSRF protection for chat conversation creation and message APIs in customer/seller chat pages&#10;- Add CSRF meta tags and ensure all POST requests include CSRF token&#10;- Update ChatController to support product info in chat and improve error handling/logging&#10;- Ensure chat tables use utf8mb4 encoding for full Vietnamese character support (SQL scripts and config)&#10;- Add scripts for database setup, UTF-8 fixes, and chat table creation for online DB&#10;- Enhance application properties for correct locale and MySQL UTF-8 settings&#10;- Add .env.example for environment variable guidance&#10;- Improve ChatService to load messages and unread counts per conversation&#10;- Update Conversation entity with JSON property annotations for API consistency&#10;- Show chat unread badge in product detail and auto-update via API&#10;- Add documentation and test guides for chat fixes and separation" />
     <MESSAGE value="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX" />
     <MESSAGE value="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety" />
+    <MESSAGE value="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX" />
   </component>
 </project>
