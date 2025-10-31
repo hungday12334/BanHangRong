@@ -14,7 +14,10 @@
     <span style="display:none"><b id="userId" th:text="${userId}"></b></span>
     <!-- Live clock for sellers -->
     <div id="sellerClock" class="chip" aria-live="polite" title="Current time">--:--:--</div>
-    <button id="btnAddProduct" class="btn primary" type="button" title="Add product">Add product</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <a href="/customer/dashboard" class="btn" title="Back to customer dashboard">Customer view</a>
+      <button id="btnAddProduct" class="btn primary" type="button" title="Add product">Add product</button>
+    </div>
   </header>
   <section class="grid kpi" data-block="kpi">
     <div class="card" data-kpi="revenue-total">
