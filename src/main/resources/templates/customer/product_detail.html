@@ -318,25 +318,15 @@
 	</script>
 	
 	<script>
-		// User menu toggle
-		document.addEventListener('DOMContentLoaded', function() {
-			const userMenuBtn = document.getElementById('userMenuBtn');
-			const userDropdown = document.getElementById('userDropdown');
-			
-			if (userMenuBtn && userDropdown) {
-				userMenuBtn.addEventListener('click', function(e) {
-					e.stopPropagation();
-					userDropdown.classList.toggle('show');
-				});
-				
-				// Close menu when clicking outside
-				document.addEventListener('click', function(e) {
-					if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-						userDropdown.classList.remove('show');
-					}
-				});
-			}
-		});
+		(function () {
+			const btn = document.getElementById('userMenuBtn');
+			const menu = document.getElementById('userDropdown');
+			function close() { if (menu) { menu.style.display = 'none'; btn && btn.setAttribute('aria-expanded', 'false'); } }
+			function toggle() { if (!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block' : 'none'; btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false'); }
+			if (btn) { btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); }); }
+			document.addEventListener('click', close);
+			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+		})();
 
 		// VNPay topup function
 		function topupPrompt(e) {
