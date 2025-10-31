@@ -63,9 +63,22 @@ public class VnPayController {
             }
             String receivedHash = vnp.remove("vnp_SecureHash");
             vnp.remove("vnp_SecureHashType");
-            String signData = VnPayConfig.buildSignData(new TreeMap<>(vnp));
+            TreeMap<String,String> sortedIpn = new TreeMap<>(vnp);
+            String signData = VnPayConfig.buildSignData(sortedIpn);
             String calcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
-            boolean valid = calcHash.equals(receivedHash);
+            // Also compute encoded variant
+            StringBuilder enc = new StringBuilder();
+            boolean firstIpn = true;
+            for (Map.Entry<String,String> e2 : sortedIpn.entrySet()) {
+                String k = e2.getKey(); String val = e2.getValue(); if (val == null) val = "";
+                if (!firstIpn) enc.append('&'); firstIpn = false;
+                try {
+                    enc.append(URLEncoder.encode(k, StandardCharsets.UTF_8.toString())).append('=')
+                       .append(URLEncoder.encode(val, StandardCharsets.UTF_8.toString()));
+                } catch (Exception ex) { enc.append(k).append('=').append(val); }
+            }
+            String encHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, enc.toString());
+            boolean valid = calcHash.equals(receivedHash) || encHash.equals(receivedHash);
             String respCode = vnp.getOrDefault("vnp_ResponseCode", "99");
             if (!valid || !"00".equals(respCode)) {
                 return "redirect:/customer/dashboard?topup=failure&code=" + respCode;
@@ -286,12 +299,28 @@ public class VnPayController {
             }
             String receivedHash = vnp.remove("vnp_SecureHash");
             vnp.remove("vnp_SecureHashType");
-            String signData = VnPayConfig.buildSignData(new TreeMap<>(vnp));
+            TreeMap<String,String> sortedReturn = new TreeMap<>(vnp);
+            String signData = VnPayConfig.buildSignData(sortedReturn);
             String calcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
+            // Build encoded sign string as fallback
+            StringBuilder encSb = new StringBuilder();
+            boolean firstEnc = true;
+            for (Map.Entry<String,String> e2 : sortedReturn.entrySet()) {
+                String k = e2.getKey(); String val = e2.getValue(); if (val == null) val = "";
+                if (!firstEnc) encSb.append('&'); firstEnc = false;
+                try {
+                    encSb.append(URLEncoder.encode(k, StandardCharsets.UTF_8.toString())).append('=')
+                        .append(URLEncoder.encode(val, StandardCharsets.UTF_8.toString()));
+                } catch (Exception ex) { encSb.append(k).append('=').append(val); }
+            }
+            String encSignData = encSb.toString();
+            String encCalcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, encSignData);
             System.out.println("[VNPay][Return] signData=" + signData);
             System.out.println("[VNPay][Return] calcHash=" + calcHash);
+            System.out.println("[VNPay][Return] encSignData=" + encSignData);
+            System.out.println("[VNPay][Return] encCalcHash=" + encCalcHash);
             System.out.println("[VNPay][Return] receivedHash=" + receivedHash);
-            boolean valid = calcHash.equals(receivedHash);
+            boolean valid = calcHash.equals(receivedHash) || encCalcHash.equals(receivedHash);
             String respCode = vnp.getOrDefault("vnp_ResponseCode", "99");
             boolean success = "00".equals(respCode) && valid;
 
