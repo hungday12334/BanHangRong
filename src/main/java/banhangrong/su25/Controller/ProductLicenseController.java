@@ -5,6 +5,7 @@ import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Entity.ProductLicenses;
+import banhangrong.su25.service.LicenseUsageLogService;
 import banhangrong.su25.Entity.OrderItems;
 import banhangrong.su25.Entity.Orders;
 import org.springframework.data.domain.Page;
@@ -28,15 +29,18 @@ public class ProductLicenseController {
     private final ProductsRepository productsRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final OrdersRepository ordersRepository;
+    private final LicenseUsageLogService usageLogService;
 
     public ProductLicenseController(ProductLicensesRepository licensesRepository,
                                     ProductsRepository productsRepository,
                                     OrderItemsRepository orderItemsRepository,
-                                    OrdersRepository ordersRepository) {
+                                    OrdersRepository ordersRepository,
+                                    LicenseUsageLogService usageLogService) {
         this.licensesRepository = licensesRepository;
         this.productsRepository = productsRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.ordersRepository = ordersRepository;
+        this.usageLogService = usageLogService;
     }
 
     @GetMapping("/api/seller/{sellerId}/licenses")
@@ -71,6 +75,8 @@ public class ProductLicenseController {
         Optional<ProductLicenses> opt = licensesRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         var lic = opt.get();
+        Boolean beforeActive = lic.getIsActive();
+        String beforeDevice = lic.getDeviceIdentifier();
         if (payload.containsKey("isActive")) {
             Object v = payload.get("isActive");
             if (v instanceof Boolean b) lic.setIsActive(b);
@@ -80,8 +86,19 @@ public class ProductLicenseController {
             lic.setDeviceIdentifier(v != null ? v.toString() : null);
         }
         // We intentionally do NOT change order_item_id, user_id, license_key here for integrity.
-        licensesRepository.save(lic);
-        return ResponseEntity.ok(lic);
+        var saved = licensesRepository.save(lic);
+        // append logs for changes
+        try {
+            if (beforeActive == null && saved.getIsActive() != null) {
+                usageLogService.append(saved.getLicenseId(), saved.getIsActive() ? "activated" : "deactivated", saved.getUserId(), null, saved.getDeviceIdentifier(), null);
+            } else if (beforeActive != null && !beforeActive.equals(saved.getIsActive())) {
+                usageLogService.append(saved.getLicenseId(), saved.getIsActive() ? "activated" : "deactivated", saved.getUserId(), null, saved.getDeviceIdentifier(), null);
+            }
+            if ((beforeDevice == null && saved.getDeviceIdentifier() != null) || (beforeDevice != null && !beforeDevice.equals(saved.getDeviceIdentifier()))) {
+                usageLogService.append(saved.getLicenseId(), "device_update", saved.getUserId(), null, saved.getDeviceIdentifier(), null);
+            }
+        } catch (Exception ignored) {}
+        return ResponseEntity.ok(saved);
     }
 
     /** Seller-scoped: only allow toggling licenses that belong to the seller's products */
@@ -102,6 +119,8 @@ public class ProductLicenseController {
             return ResponseEntity.status(403).body("Không có quyền cập nhật license này");
         }
         // Perform updates
+        Boolean beforeActive = lic.getIsActive();
+        String beforeDevice = lic.getDeviceIdentifier();
         if (payload.containsKey("isActive")) {
             Object v = payload.get("isActive");
             if (v instanceof Boolean b) lic.setIsActive(b);
@@ -110,8 +129,18 @@ public class ProductLicenseController {
             Object v = payload.get("deviceIdentifier");
             lic.setDeviceIdentifier(v != null ? v.toString() : null);
         }
-        licensesRepository.save(lic);
-        return ResponseEntity.ok(lic);
+        var saved = licensesRepository.save(lic);
+        try {
+            if (beforeActive == null && saved.getIsActive() != null) {
+                usageLogService.append(saved.getLicenseId(), saved.getIsActive() ? "activated" : "deactivated", saved.getUserId(), null, saved.getDeviceIdentifier(), null);
+            } else if (beforeActive != null && !beforeActive.equals(saved.getIsActive())) {
+                usageLogService.append(saved.getLicenseId(), saved.getIsActive() ? "activated" : "deactivated", saved.getUserId(), null, saved.getDeviceIdentifier(), null);
+            }
+            if ((beforeDevice == null && saved.getDeviceIdentifier() != null) || (beforeDevice != null && !beforeDevice.equals(saved.getDeviceIdentifier()))) {
+                usageLogService.append(saved.getLicenseId(), "device_update", saved.getUserId(), null, saved.getDeviceIdentifier(), null);
+            }
+        } catch (Exception ignored) {}
+        return ResponseEntity.ok(saved);
     }
 
     /**
@@ -234,11 +263,114 @@ public class ProductLicenseController {
             lic.setDeviceIdentifier(null);
             lic.setCreatedAt(now);
             lic.setUpdatedAt(now);
-            licensesRepository.save(lic);
+            var saved = licensesRepository.save(lic);
+            try {
+                usageLogService.append(saved.getLicenseId(), "generated", userId, null, null, null);
+            } catch (Exception ignored) {}
         }
+        // Decrease product quantity by the number of generated keys so stock reflects generated keys
+        try {
+            int newQty = Math.max(0, capacity - requestQty);
+            p.setQuantity(newQty);
+            productsRepository.save(p);
+        } catch (Exception ignored) {}
         Map<String, Object> resp = new HashMap<>();
         resp.put("generated", requestQty);
         resp.put("remaining", Math.max(0, remaining - requestQty));
         return ResponseEntity.ok(resp);
+    }
+
+    /**
+     * Check license key details. Returns basic info and minimal history (activation/last-used) if available.
+     * Example: GET /api/licenses/check?key=PRD1-...
+     */
+    @GetMapping("/api/licenses/check")
+    public ResponseEntity<?> checkKey(@RequestParam(name = "key") String key,
+                                      @RequestParam(name = "page", defaultValue = "0") int page,
+                                      @RequestParam(name = "size", defaultValue = "10") int size,
+                                      @RequestParam(name = "sellerId", required = false) Long sellerId) {
+        if (key == null || key.isBlank()) return ResponseEntity.badRequest().body("key is required");
+        var opt = licensesRepository.findByLicenseKey(key.trim());
+        if (opt.isEmpty()) return ResponseEntity.status(404).body("license not found");
+        var lic = opt.get();
+        // If sellerId provided, ensure the license belongs to a product of that seller
+        if (sellerId != null) {
+            Long orderItemId = lic.getOrderItemId();
+            if (orderItemId == null) {
+                return ResponseEntity.status(403).body("Không có quyền xem license này");
+            }
+            var oiOpt = orderItemsRepository.findById(orderItemId);
+            if (oiOpt.isEmpty()) return ResponseEntity.status(403).body("Không có quyền xem license này");
+            Long productId = oiOpt.get().getProductId();
+            if (productId == null) return ResponseEntity.status(403).body("Không có quyền xem license này");
+            var pOpt = productsRepository.findById(productId);
+            if (pOpt.isEmpty()) return ResponseEntity.status(403).body("Không có quyền xem license này");
+            var prod = pOpt.get();
+            if (prod.getSellerId() == null || !prod.getSellerId().equals(sellerId)) {
+                return ResponseEntity.status(403).body("Không có quyền xem license này");
+            }
+        }
+        Map<String, Object> out = new HashMap<>();
+        out.put("licenseId", lic.getLicenseId());
+        out.put("licenseKey", lic.getLicenseKey());
+        out.put("isActive", lic.getIsActive());
+        out.put("activationDate", lic.getActivationDate() != null ? lic.getActivationDate().toString() : null);
+        out.put("lastUsedDate", lic.getLastUsedDate() != null ? lic.getLastUsedDate().toString() : null);
+        out.put("deviceIdentifier", lic.getDeviceIdentifier());
+        out.put("orderItemId", lic.getOrderItemId());
+        out.put("userId", lic.getUserId());
+
+        // attempt to enrich with product/order info when possible
+        try {
+            if (lic.getOrderItemId() != null) {
+                var oiOpt = orderItemsRepository.findById(lic.getOrderItemId());
+                if (oiOpt.isPresent()) {
+                    var oi = oiOpt.get();
+                    out.put("productId", oi.getProductId());
+                    out.put("quantity", oi.getQuantity());
+                    if (oi.getOrderId() != null) {
+                        var ordOpt = ordersRepository.findById(oi.getOrderId());
+                        ordOpt.ifPresent(o -> out.put("orderId", o.getOrderId()));
+                    }
+                    if (oi.getProductId() != null) {
+                        var pOpt = productsRepository.findById(oi.getProductId());
+                        pOpt.ifPresent(p -> out.put("productName", p.getName()));
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // Build history solely from license_usage_logs (paged, no fallback to product_licenses fields)
+        if (size > 100) size = 100;
+        try {
+            var pageObj = usageLogService.getLogsPageByLicenseId(lic.getLicenseId(), page, size);
+            var arr = new java.util.ArrayList<Map<String, Object>>();
+            if (pageObj != null && pageObj.getContent() != null) {
+                for (var l : pageObj.getContent()) {
+                    var m = new HashMap<String, Object>();
+                    m.put("time", l.getEventTime() != null ? l.getEventTime().toString() : null);
+                    m.put("action", l.getAction());
+                    m.put("user", l.getUserId());
+                    m.put("ip", l.getIp());
+                    m.put("device", l.getDevice());
+                    m.put("meta", l.getMeta());
+                    arr.add(m);
+                }
+            }
+            out.put("history", arr);
+            // pagination metadata
+            out.put("page", pageObj != null ? pageObj.getNumber() : 0);
+            out.put("size", pageObj != null ? pageObj.getSize() : size);
+            out.put("totalPages", pageObj != null ? pageObj.getTotalPages() : 0);
+            out.put("totalElements", pageObj != null ? pageObj.getTotalElements() : 0);
+        } catch (Exception e) {
+            // On error, return empty history array + zeroed pagination
+            out.put("history", new java.util.ArrayList<Map<String, Object>>());
+            out.put("page", 0);
+            out.put("size", 0);
+            out.put("totalPages", 0);
+            out.put("totalElements", 0);
+        }
+        return ResponseEntity.ok(out);
     }
 }

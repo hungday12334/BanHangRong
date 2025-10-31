@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+	<title>Vouchers</title>
+	<style>
+		:root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --chip:#e5e7eb; --line:#eaeef4; }
+		* { box-sizing: border-box; }
+		html, body { height: 100%; }
+		body { margin: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+		.wrapper { min-height: 100%; display: flex; flex-direction: column; }
+		.topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
+		.brand { font-weight:800; letter-spacing:.2px; }
+		.nav { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+		.nav a { color:#111827; text-decoration:none; padding:8px 10px; border-radius:8px; }
+		.nav a:hover { background:#f3f4f6; }
+		.top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; }
+		.support-link { font-size:14px; color: var(--muted); text-decoration:none; padding:6px 10px; border-radius:8px; transition: all .2s; }
+		.support-link:hover { background:#f3f4f6; color:#111827; }
+		.user-btn { display:flex; align-items:center; gap:6px; cursor:pointer; color:#111827; border:1px solid var(--line); padding:6px 10px; border-radius:8px; background:#fff; white-space:nowrap; }
+		.user-btn .wallet-badge { margin-left:8px; padding:4px 8px; background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; font-weight:600; color:#0369a1; font-size:12px; }
+		.user-menu { position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5 }
+		.user-menu .item { display:block; padding:10px 12px; color:#111827; text-decoration:none }
+		.user-menu .item:hover { background:#f3f4f6 }
+		.cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
+		.cart .badge { position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+		.container { max-width:1100px; margin:20px auto; padding:0 10px }
+		.card { background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px }
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<div class="topbar">
+			<div class="brand">BanHangRong</div>
+			<nav class="nav" aria-label="Main">
+				<a href="/customer/dashboard">Home</a>
+				<a href="/categories">Category</a>
+				<a href="/vouchers">Voucher</a>
+				<a href="/customer/support">Support</a>
+			</nav>
+			<div class="top-actions">
+
+				<div class="user" style="position:relative">
+					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+						<span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+						<span class="wallet-badge">💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span></span>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+					</button>
+					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+						<a class="item" th:if="${user != null}" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
+						<a class="item" th:unless="${user != null}" href="/login" role="menuitem">Login</a>
+						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
+						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+							<input type="hidden" name="amount" id="topupAmountInput" />
+							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up (VNPay)</button>
+						</form>
+						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+						<a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Become a Seller</a>
+						<a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+					</div>
+					<form id="logoutForm" method="post" action="/logout" style="display:none;"></form>
+				</div>
+				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+			</div>
+		</div>
+
+
+
+			<div class="card" style="margin-top:12px">
+				<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+					<div>
+						<div style="font-weight:700;font-size:18px">Voucher </div>
+						<div style="color:#6b7280">Filter by date, code, user, product, discount range</div>
+					</div>
+					<div style="display:flex;gap:8px;align-items:center">
+						<form method="get" action="/vouchers" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+							<input type="text" name="q" th:value="${filters != null ? filters['q'] : ''}" placeholder="Search code" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;min-width:150px">
+							<input type="date" name="expire" th:value="${filters != null ? filters['expire'] : ''}" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px" title="Expires on">
+							<select name="type" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px">
+								<option value="" th:selected="${filters == null || filters['type'] == null}">All types</option>
+								<option value="AMOUNT" th:selected="${filters != null && filters['type'] == 'AMOUNT'}">Amount</option>
+								<option value="PERCENT" th:selected="${filters != null && filters['type'] == 'PERCENT'}">Percent</option>
+							</select>
+							<input type="number" name="minValue" th:value="${filters != null ? filters['minValue'] : ''}" step="1" placeholder="Min value" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;width:120px">
+							<input type="number" name="maxValue" th:value="${filters != null ? filters['maxValue'] : ''}" step="1" placeholder="Max value" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;width:120px">
+							<input type="number" name="minOrderMin" th:value="${filters != null ? filters['minOrderMin'] : ''}" step="1" placeholder="Min order ≥" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;width:130px">
+							<input type="number" name="minOrderMax" th:value="${filters != null ? filters['minOrderMax'] : ''}" step="1" placeholder="Min order ≤" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;width:130px">
+							<input type="number" name="minRemaining" th:value="${filters != null ? filters['minRemaining'] : ''}" step="1" placeholder="Remaining ≥" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;width:130px">
+							<input list="productOptions" name="productId" th:value="${filters != null ? filters['productId'] : ''}" placeholder="Select product" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;min-width:220px">
+							<datalist id="productOptions">
+								<option th:each="p : ${productOptions}" th:value="${p.id}" th:text="${p.name}">Product</option>
+							</datalist>
+							<button class="btn" type="submit" style="background:#0ea5e9;color:#fff;border:none">Filter</button>
+							<a th:href="@{/vouchers(export='csv', q=${filters != null ? filters['q'] : null}, expire=${filters != null ? filters['expire'] : null}, type=${filters != null ? filters['type'] : null}, minValue=${filters != null ? filters['minValue'] : null}, maxValue=${filters != null ? filters['maxValue'] : null}, minOrderMin=${filters != null ? filters['minOrderMin'] : null}, minOrderMax=${filters != null ? filters['minOrderMax'] : null}, minRemaining=${filters != null ? filters['minRemaining'] : null}, productId=${filters != null ? filters['productId'] : null})}" class="btn" style="background:#111827;color:#fff;border:none;text-decoration:none">Export CSV</a>
+						</form>
+					</div>
+				</div>
+				<div style="overflow:auto">
+                <table style="width:100%;border-collapse:collapse">
+						<thead>
+                        <tr style="background:#f9fafb">
+                            <th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">Date</th>
+                            <th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">Code</th>
+                            <th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">Product</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line)">Voucher</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line)">Min order</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line)">Remaining uses</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line)">Expires</th>
+                        </tr>
+						</thead>
+						<tbody>
+							<tr th:if="${transactions == null or #lists.isEmpty(transactions)}">
+                            <td colspan="7" style="padding:10px;color:#6b7280">No transactions.</td>
+							</tr>
+							<tr th:each="t: ${transactions}">
+								<td style="padding:8px" th:text="${#temporals.format(t.createdAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</td>
+								<td style="padding:8px" th:text="${t.code}">CODE</td>
+								<td style="padding:8px"><span th:text="${t.productName}">Product</span> <span style="color:#6b7280" th:text="${t.productId}">#</span></td>
+                            <td style="padding:8px;text-align:right">
+                                <span th:if="${t.discountType == 'PERCENT'}" th:text="${#numbers.formatDecimal(t.voucherValue,0,'COMMA',0,'POINT') + '%'}">0%</span>
+                                <span th:if="${t.discountType != 'PERCENT'}" th:text="${#numbers.formatDecimal(t.voucherValue,0,'COMMA',0,'POINT')}">0</span><span th:if="${t.discountType != 'PERCENT'}">₫</span>
+                            </td>
+                            <td style="padding:8px;text-align:right">
+                                <span th:text="${t.minOrder != null ? #numbers.formatDecimal(t.minOrder,0,'COMMA',0,'POINT') : '-'}">-</span><span th:if="${t.minOrder != null}">₫</span>
+                            </td>
+                            <td style="padding:8px;text-align:right" th:text="${t.remaining != null ? t.remaining : '∞'}">∞</td>
+                            <td style="padding:8px;text-align:right" th:text="${t.endAt != null ? #temporals.format(t.endAt, 'yyyy-MM-dd') : '-'}">-</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+                
+			</div>
+		</div>
+	</div>
+
+	<script>
+	(function(){ const btn=document.getElementById('userMenuBtn'); const menu=document.getElementById('userDropdown'); function close(){ if(menu){ menu.style.display='none'; btn&&btn.setAttribute('aria-expanded','false'); } } function toggle(){ if(!menu) return; const show=menu.style.display!=='block'; menu.style.display=show?'block':'none'; btn&&btn.setAttribute('aria-expanded',show?'true':'false'); } if(btn){ btn.addEventListener('click',(e)=>{ e.stopPropagation(); toggle(); }); } document.addEventListener('click', close); document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); }); })();
+	function topupPrompt(e){ e.preventDefault(); const v=prompt('Enter amount to top up (VND):','200000'); if(!v) return false; const clean=v.replace(/[^0-9]/g,''); if(!clean){ alert('Please enter a valid amount'); return false; } document.getElementById('topupAmountInput').value=clean; e.target.submit(); return true; }
+	</script>
+</body>
+</html>
+
+

@@ -38,21 +38,23 @@ public class VnPayConfig {
     public static String buildSignData(Map<String, String> fields) {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < fieldNames.size(); i++) {
-            String k = fieldNames.get(i);
-            String v = fields.get(k);
-            if (v != null && !v.isEmpty()) {
-                sb.append(k).append('=').append(v);
-                if (i < fieldNames.size() - 1) sb.append('&');
+        StringJoiner joiner = new StringJoiner("&");
+        for (String key : fieldNames) {
+            String value = fields.get(key);
+            if (value != null && !value.isEmpty()) {
+                joiner.add(key + "=" + value);
             }
         }
-        return sb.toString();
+        return joiner.toString();
     }
 
     public static String getIpAddress(HttpServletRequest request) {
         String ip = request.getHeader("X-FORWARDED-FOR");
         if (ip == null || ip.isBlank()) ip = request.getRemoteAddr();
+        // Normalize IPv6 loopback for VNPay sandbox
+        if (ip != null && ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip))) ip = "127.0.0.1";
+        // If header contains comma-separated IPs, take the first
+        if (ip != null && ip.contains(",")) ip = ip.split(",")[0].trim();
         return ip;
     }
 

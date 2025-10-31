@@ -14,14 +14,15 @@
     const target = Number(targetAttr.toString().replace(/,/g, '')) || 0;
     const dur = 900; // ms
     const start = performance.now();
-    function tick(now) {
+  function tick(now) {
       const p = Math.min(1, (now - start) / dur);
       const v = Math.round(target * easeOutCubic(p));
-      el.textContent = v.toLocaleString('en-US');
+  el.textContent = v.toLocaleString('vi-VN');
       if (p < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }
+  const MIN_LOAD = 800;
 
   function readCSVAttr(el, name) {
     const s = el.getAttribute(name) || '';
@@ -39,7 +40,12 @@
     // Resize height gently on small screens
     if (window.innerWidth < 820) canvas.height = 160;
 
-    new Chart(ctx, {
+    // Keep instance for dynamic updates
+    if (window.revenueChartInstance && window.revenueChartInstance.destroy) {
+      window.revenueChartInstance.destroy();
+      window.revenueChartInstance = null;
+    }
+    window.revenueChartInstance = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
@@ -60,10 +66,62 @@
         plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
         scales: {
           x: { display: true, grid: { display: false }, ticks: { color: '#a8b0d3', maxTicksLimit: 8 } },
-          y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => `$${Number(v).toLocaleString('en-US')}` } }
+          y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => Number(v).toLocaleString('vi-VN') + ' đ' } }
         },
         elements: { line: { cubicInterpolationMode: 'monotone' } }
       }
+    });
+  }
+
+  // Fetch revenue data for seller and update chart
+  async function loadAndUpdateRevenue(days) {
+    const sellerEl = document.getElementById('sellerId');
+    const sellerId = sellerEl ? sellerEl.textContent.trim() : null;
+    if (!sellerId) return;
+    try {
+      const resp = await fetch(`/api/seller/${encodeURIComponent(sellerId)}/analytics/revenue?days=${encodeURIComponent(days)}`);
+      if (!resp.ok) throw new Error('Failed to load revenue');
+      const json = await resp.json();
+      const labels = Array.from(json.labels || []);
+      const data = Array.from(json.data || []).map(Number);
+      const canvas = document.getElementById('revenueChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (window.revenueChartInstance) {
+        window.revenueChartInstance.data.labels = labels;
+        if (window.revenueChartInstance.data.datasets && window.revenueChartInstance.data.datasets[0]) {
+          window.revenueChartInstance.data.datasets[0].data = data;
+        }
+        window.revenueChartInstance.update();
+      } else {
+        // set data attributes then init
+        canvas.setAttribute('data-labels', labels.join(','));
+        canvas.setAttribute('data-data', data.join(','));
+        initChart();
+      }
+    } catch (e) {
+      console.error('loadAndUpdateRevenue error', e);
+      showToast('Could not load revenue data', 'error');
+    }
+  }
+
+  // Wire up range selector for revenue chart
+  function initRevenueRangeControls() {
+    const sel = document.getElementById('revenueRange');
+    const custom = document.getElementById('revenueRangeCustom');
+    if (!sel) return;
+    sel.addEventListener('change', () => {
+      if (sel.value === 'custom') {
+        custom.style.display = '';
+        custom.focus();
+      } else {
+        custom.style.display = 'none';
+        loadAndUpdateRevenue(Number(sel.value));
+      }
+    });
+    custom.addEventListener('change', () => {
+      const v = Number(custom.value) || 15;
+      loadAndUpdateRevenue(v);
     });
   }
 
@@ -73,8 +131,8 @@
     if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-      const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
-  toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><div class="act"><button class="close" aria-label="Close">✕</button></div>`;
+    const icon = type === 'success' ? 'ti ti-circle-check' : type === 'error' ? 'ti ti-alert-triangle' : 'ti ti-info-circle';
+    toast.innerHTML = `<span class="icon"><i class="${icon}"></i></span><div class="msg">${message}</div><div class="act"><button class="close" aria-label="Close">✕</button></div>`;
     container.appendChild(toast);
     // Force reflow to play animation
     void toast.offsetWidth; toast.classList.add('show');
@@ -217,19 +275,19 @@
         if (!w || !h) { toFallback('zero-size'); return; }
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
-        const data = ctx.getImageData(0,0,w,h).data;
+        const data = ctx.getImageData(0, 0, w, h).data;
         let sum = 0, opaque = 0;
-        for (let i=0;i<data.length;i+=4){
-          const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
-            if (a>12) opaque++;
-            sum += r+g+b;
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+          if (a > 12) opaque++;
+          sum += r + g + b;
         }
-        const avg = sum / ( (data.length/4) * 3 );
-        if (opaque < (data.length/4)*0.05 || avg > 250) {
+        const avg = sum / ((data.length / 4) * 3);
+        if (opaque < (data.length / 4) * 0.05 || avg > 250) {
           toFallback('blank/transparent');
         }
-      } catch(e){ console.debug('Logo analysis skipped', e); }
-    }, { once:true });
+      } catch (e) { console.debug('Logo analysis skipped', e); }
+    }, { once: true });
   }
 
   function applyTheme(theme) {
@@ -246,7 +304,7 @@
     if (meta) meta.setAttribute('content', theme === 'light' ? '#f6f7fb' : '#0b1020');
     // toggle icon
     const btn = document.getElementById('themeToggle');
-      if (btn) {
+    if (btn) {
       btn.innerHTML = theme === 'light' ? '<i class="ti ti-moon"></i>' : '<i class="ti ti-sun"></i>';
       btn.setAttribute('aria-label', 'Toggle theme');
       btn.title = 'Toggle theme';
@@ -276,17 +334,28 @@
       layer.className = 'theme-switch-layer';
       document.body.appendChild(layer);
       document.body.classList.add('theme-switching');
-      setTimeout(()=> { layer.remove(); document.body.classList.remove('theme-switching'); }, 620);
-    } catch(_) {}
+      setTimeout(() => { layer.remove(); document.body.classList.remove('theme-switching'); }, 620);
+    } catch (_) { }
     // Remove transition class after a short delay
     setTimeout(() => root.classList.remove('theme-transition'), 600);
   }
 
+
+  // Initialize charts and revenue controls after DOM ready
   onReady(function () {
     initLogoFallback();
     const loadStarted = performance.now();
-    const MIN_LOAD = 1400; // ms (slightly longer to showcase enhanced animation)
+    // Ensure appLoader element is available in this scope for loader progress handling
     const appLoader = document.getElementById('appLoader');
+    initLogoFallback();
+    initChart();
+    initRevenueRangeControls();
+    // load default range from selector (if present) to refresh chart data
+    const sel = document.getElementById('revenueRange');
+    if (sel) {
+      const initial = sel.value === 'custom' ? (document.getElementById('revenueRangeCustom')?.value || '15') : sel.value;
+      loadAndUpdateRevenue(Number(initial));
+    }
     const progressBar = appLoader?.querySelector('[data-loader-progress]');
     const loadTextEl = appLoader?.querySelector('[data-loader-text]');
     const tipEl = appLoader?.querySelector('[data-loader-tip]');
@@ -311,16 +380,16 @@
     function tickProgress() {
       if (done) return;
       // accelerate slower after 70%
-      const inc = simulated < 70 ? (4 + Math.random()*6) : (1 + Math.random()*3);
+      const inc = simulated < 70 ? (4 + Math.random() * 6) : (1 + Math.random() * 3);
       simulated = Math.min(simulated + inc, 94); // stop at 94% until finish
       if (progressBar) progressBar.style.width = simulated + '%';
       if (loadTextEl) {
-    if (simulated < 30) loadTextEl.textContent = 'Initializing...';
-    else if (simulated < 55) loadTextEl.textContent = 'Loading data...';
-    else if (simulated < 80) loadTextEl.textContent = 'Processing metrics...';
-    else loadTextEl.textContent = 'Preparing view...';
+        if (simulated < 30) loadTextEl.textContent = 'Initializing...';
+        else if (simulated < 55) loadTextEl.textContent = 'Loading data...';
+        else if (simulated < 80) loadTextEl.textContent = 'Processing metrics...';
+        else loadTextEl.textContent = 'Preparing view...';
       }
-      setTimeout(tickProgress, 260 + Math.random()*240);
+      setTimeout(tickProgress, 260 + Math.random() * 240);
     }
     tickProgress();
 
@@ -330,19 +399,19 @@
       setTimeout(() => {
         done = true;
         if (progressBar) progressBar.style.width = '100%';
-          if (loadTextEl) loadTextEl.textContent = 'Finished!';
+        if (loadTextEl) loadTextEl.textContent = 'Finished!';
         document.body.classList.remove('loading');
         document.body.classList.add('ready');
         if (appLoader) {
           appLoader.style.opacity = '0';
-          setTimeout(()=> { clearInterval(tipTimer); appLoader.remove(); }, 600);
+          setTimeout(() => { clearInterval(tipTimer); appLoader.remove(); }, 600);
         }
         // Start animations AFTER loader removed
         document.querySelectorAll('[data-count]').forEach(animateCount);
         initChart();
         document.querySelectorAll('.progress span').forEach(span => {
           const w = span.getAttribute('data-target-width') || span.style.width || '0%';
-          span.style.width = '0%'; requestAnimationFrame(()=> span.style.width = w);
+          span.style.width = '0%'; requestAnimationFrame(() => span.style.width = w);
         });
       }, remain);
     }
@@ -362,9 +431,9 @@
       if (!panelEl) return;
       let overlay = panelEl.querySelector(':scope > .panel-loading-overlay');
       if (!overlay) {
-  overlay = document.createElement('div');
-  overlay.className = 'panel-loading-overlay';
-  overlay.innerHTML = '<div class="mini-spinner"></div><div>Loading...</div>';
+        overlay = document.createElement('div');
+        overlay.className = 'panel-loading-overlay';
+        overlay.innerHTML = '<div class="mini-spinner"></div><div>Loading...</div>';
         panelEl.appendChild(overlay);
       }
       // Ensure overlay is visible and blocks interaction while loading
@@ -380,7 +449,7 @@
         try {
           // remove overlay from DOM to avoid any accidental blocking
           if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
-        } catch (_) {}
+        } catch (_) { }
       }
 
       Promise.resolve().then(task).catch(err => {
@@ -393,7 +462,7 @@
           // fade out and then remove from DOM
           overlay.style.opacity = '0';
           overlay.style.pointerEvents = 'none';
-          const onFinish = () => { try { cleanupOverlay(); } catch(_){} };
+          const onFinish = () => { try { cleanupOverlay(); } catch (_) { } };
           // If transition finishes, remove then; otherwise fallback timeout
           const removeAfter = 360;
           let fired = false;
@@ -429,7 +498,7 @@
     else applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
 
     const btn = document.getElementById('themeToggle');
-      if (btn) {
+    if (btn) {
       btn.addEventListener('click', () => {
         const isLight = document.documentElement.classList.contains('theme-light');
         const next = isLight ? 'dark' : 'light';
@@ -553,8 +622,8 @@
     // Product modal handlers
     const productModal = document.getElementById('productModal');
 
-  // === Product snapshot & helpers (exposed for reuse) ===
-  let __originalProduct = null; // snapshot of the product being edited
+    // === Product snapshot & helpers (exposed for reuse) ===
+    let __originalProduct = null; // snapshot of the product being edited
     function normalizeProductObj(p) {
       return {
         name: (p.name ?? '').trim(),
@@ -574,23 +643,23 @@
         quantity: document.getElementById('pm_quantity')?.value ? Number(document.getElementById('pm_quantity').value) : 0,
         downloadUrl: document.getElementById('pm_downloadUrl')?.value || '',
         description: document.getElementById('pm_description')?.value || '',
-  status: (document.getElementById('pm_status')?.dataset.status || '').trim()
+        status: (document.getElementById('pm_status')?.dataset.status || '').trim()
       });
     }
     function productChanged() {
       if (!__originalProduct) return true; // new product coi như có thay đổi
       const now = collectFormProduct();
-    return Object.keys(__originalProduct).some(k => __originalProduct[k] !== now[k] || (k === 'status' && now[k] === 'pending'));
+      return Object.keys(__originalProduct).some(k => __originalProduct[k] !== now[k] || (k === 'status' && now[k] === 'pending'));
     }
     async function loadProduct(id) {
       const res = await fetch(`/api/products/${id}`);
-  if (!res.ok) { showToast('Failed to load product details', 'error'); return; }
+      if (!res.ok) { showToast('Failed to load product details', 'error'); return; }
       const p = await res.json();
-        document.getElementById('pm_productId').value = p.productId || '';
+      document.getElementById('pm_productId').value = p.productId || '';
       document.getElementById('pm_name').value = p.name ?? '';
       document.getElementById('pm_price').value = p.price ?? '';
       document.getElementById('pm_salePrice').value = p.salePrice ?? '';
-      document.getElementById('pm_quantity').value = p.quantity ?? 0;
+  document.getElementById('pm_quantity').value = p.quantity;
       document.getElementById('pm_downloadUrl').value = p.downloadUrl ?? '';
       document.getElementById('pm_description').value = p.description ?? '';
       const st = document.getElementById('pm_status');
@@ -619,9 +688,9 @@
       });
       productModal.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeModal(productModal)));
 
-  const sellerIdEl = document.getElementById('sellerId');
-  const userIdEl = document.getElementById('userId');
-  const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+      const sellerIdEl = document.getElementById('sellerId');
+      const userIdEl = document.getElementById('userId');
+      const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
 
       // (định nghĩa đã đưa ra ngoài khối if)
 
@@ -640,20 +709,20 @@
         document.getElementById('pm_quantity').value = 0;
         document.getElementById('pm_downloadUrl').value = '';
         document.getElementById('pm_description').value = '';
-  // Default: Public (do not hide automatically if user hasn't changed anything)
-  const st = document.getElementById('pm_status');
-  st.textContent = 'Pending';
-  st.className = 'badge';
-  st.dataset.status = 'pending';
-  __originalProduct = null; // new product -> always treat as create
+        // Default: Public (do not hide automatically if user hasn't changed anything)
+        const st = document.getElementById('pm_status');
+        st.textContent = 'Pending';
+        st.className = 'badge';
+        st.dataset.status = 'pending';
+        __originalProduct = null; // new product -> always treat as create
         openModal(productModal);
       });
 
       // Upload image -> autofill URL
-      (function initImageGenerate(){
+      (function initImageGenerate() {
         const btn = document.getElementById('pm_genImage');
         const fileInput = document.getElementById('pm_imageFile');
-  const urlInput = document.getElementById('pm_imageUrl');
+        const urlInput = document.getElementById('pm_imageUrl');
         const previewWrap = document.getElementById('pm_imagePreview');
         const previewImg = previewWrap ? previewWrap.querySelector('img') : null;
         if (!btn || !fileInput || !urlInput) return;
@@ -666,10 +735,10 @@
             // Optional: allow passing expiration via data-expiration on Generate button
             const exp = btn && btn.dataset ? (btn.dataset.expiration || '') : '';
             if (exp && /^\d+$/.test(exp)) { fd.append('expiration', exp); }
-            const res = await fetch('/api/uploads/image', { method:'POST', body: fd });
+            const res = await fetch('/api/uploads/image', { method: 'POST', body: fd });
             if (!res.ok) {
               let msg = 'Upload failed';
-              try { msg = (await res.text()) || msg; } catch(_) {}
+              try { msg = (await res.text()) || msg; } catch (_) { }
               showToast(msg, 'error');
               return;
             }
@@ -695,7 +764,7 @@
       document.getElementById('productForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('pm_productId').value;
-  // If editing & no changes, skip API call to avoid backend switching status to Hidden
+        // If editing & no changes, skip API call to avoid backend switching status to Hidden
         if (id && !productChanged()) {
           showToast('No changes to save', 'info');
           closeModal(productModal);
@@ -768,16 +837,16 @@
       document.getElementById('pm_delete')?.addEventListener('click', async () => {
         const id = document.getElementById('pm_productId').value;
         if (!id) { closeModal(productModal); return; }
-    if (!confirm('Delete this product?')) return;
+        if (!confirm('Delete this product?')) return;
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-  if (res.ok) { closeModal(productModal); showToast('Product deleted', 'success'); setTimeout(() => refreshMyProducts(), 350); }
-    else { showToast('Failed to delete product', 'error'); }
+        if (res.ok) { closeModal(productModal); showToast('Product deleted', 'success'); setTimeout(() => refreshMyProducts(), 350); }
+        else { showToast('Failed to delete product', 'error'); }
       });
     }
 
     // Order modal handlers (view-only)
     const orderModal = document.getElementById('orderModal');
-  if (orderModal) {
+    if (orderModal) {
       orderModal.addEventListener('cancel', (e) => { e.preventDefault(); closeModal(orderModal); });
       orderModal.addEventListener('close', () => {
         const remaining = Array.from(document.querySelectorAll('dialog.modal[open]'));
@@ -794,7 +863,7 @@
         const sid = sidEl ? Number(sidEl.textContent.trim()) : null;
         const url = sid ? `/api/seller/${sid}/orders/${id}` : `/api/orders/${id}`;
         const res = await fetch(url);
-    if (!res.ok) { showToast('Failed to load order details', 'error'); return; }
+        if (!res.ok) { showToast('Failed to load order details', 'error'); return; }
         const data = await res.json();
         const o = data.order || {};
         const user = data.user || {};
@@ -802,8 +871,8 @@
         document.getElementById('om_userId').textContent = user.username || (user.userId ? `User #${user.userId}` : '');
         // In seller view, show sellerAmount if present; fallback to totalAmount
         const amtVal = (o.sellerAmount != null ? o.sellerAmount : o.totalAmount);
-        const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('om_totalAmount').textContent = amt;
+  const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+  document.getElementById('om_totalAmount').textContent = amt;
         document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
         const items = Array.isArray(data.items) ? data.items : (data.items && data.items.content ? data.items.content : []);
         const tb = document.getElementById('om_items');
@@ -811,7 +880,7 @@
         for (const it of items) {
           const tr = document.createElement('tr');
           const name = it.productName || `#${it.productId}`;
-          tr.innerHTML = `<td>${name}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`;
+          tr.innerHTML = `<td>${name}</td><td>${it.quantity}</td><td>${Number(it.priceAtTime || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td>`;
           tb.appendChild(tr);
         }
       }
@@ -823,15 +892,78 @@
       // View-only: no save/delete handlers for orders
     }
 
+    // Sort state for My Products table
+    let myProductsSort = { key: 'productId', dir: 'asc' };
+
+    // Attach click handlers to sortable headers in My Products card
+    function initMyProductsSorting() {
+      const panel = document.getElementById('sectionMyProducts');
+      if (!panel) return;
+      panel.querySelectorAll('th.sortable').forEach(th => {
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+          const key = th.getAttribute('data-sort');
+          if (!key) return;
+          if (myProductsSort.key === key) {
+            myProductsSort.dir = (myProductsSort.dir === 'asc') ? 'desc' : 'asc';
+          } else {
+            myProductsSort.key = key;
+            myProductsSort.dir = 'asc';
+          }
+          // update UI indicators
+          panel.querySelectorAll('th.sortable .sort-indicator').forEach(si => si.textContent = '');
+          const ind = th.querySelector('.sort-indicator');
+          if (ind) ind.textContent = myProductsSort.dir === 'asc' ? ' ▲' : ' ▼';
+          // re-fetch/render with new sort
+          withPanelLoading(panel.querySelector('.card') || panel, () => refreshMyProducts(false), 'Failed to sort products');
+        });
+      });
+      // set initial indicator
+      try {
+        const cur = panel.querySelector('th.sortable[data-sort="' + keysSort.key + '"]');
+        if (cur) {
+          const ind = cur.querySelector('.sort-indicator'); if (ind) ind.textContent = keysSort.dir === 'asc' ? ' ▲' : ' ▼';
+        }
+      } catch (e) { }
+    }
+
     // Load "My Products" list (reusable for refresh after CRUD)
     async function refreshMyProducts(showToastMsg = true) {
-  const sellerIdEl = document.getElementById('sellerId');
-  const userIdEl = document.getElementById('userId');
-  const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+      const sellerIdEl = document.getElementById('sellerId');
+      const userIdEl = document.getElementById('userId');
+      const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
       if (!sellerId) return; // require seller
       const res = await fetch(`/api/products?sellerId=${sellerId}`);
       if (!res.ok) { showToast('Failed to load your product list', 'error'); return; }
-      const list = await res.json();
+      let list = await res.json();
+      // Apply status filter from UI if present
+      try {
+        const statusSel = document.getElementById('myProductsStatusFilter');
+        const statusFilter = statusSel ? (statusSel.value || 'all') : 'all';
+        if (statusFilter && statusFilter !== 'all') {
+          list = list.filter(p => ((p.status || '').toString().toLowerCase() === statusFilter));
+        }
+      } catch (e) { /* non-blocking */ }
+
+      // Apply sorting (client-side)
+      try {
+        const key = myProductsSort.key;
+        const dir = myProductsSort.dir === 'asc' ? 1 : -1;
+        if (key) {
+          list.sort((a, b) => {
+            const va = (a[key] == null) ? '' : a[key];
+            const vb = (b[key] == null) ? '' : b[key];
+            // numeric compare for known numeric fields
+            if (key === 'productId' || key === 'quantity' || key === 'price') {
+              const na = Number(va) || 0;
+              const nb = Number(vb) || 0;
+              return (na - nb) * dir;
+            }
+            // fallback string compare
+            return String(va).toLowerCase().localeCompare(String(vb).toLowerCase()) * dir;
+          });
+        }
+      } catch (e) { /* non-blocking */ }
       const tbody = document.getElementById('tbMyProducts');
       const counter = document.getElementById('myProductsCount');
       if (!tbody) return;
@@ -840,12 +972,12 @@
         const tr = document.createElement('tr');
         tr.className = 'clickable';
         tr.setAttribute('data-product-id', p.productId);
-  const stVal = (p.status || '').toString().toLowerCase();
-  let statusHtml = '<span class="badge">Pending</span>';
-  if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
-  else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-  const price = (p.price ?? 0).toLocaleString('en-US');
-  tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
+        const stVal = (p.status || '').toString().toLowerCase();
+        let statusHtml = '<span class="badge">Pending</span>';
+        if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
+        else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
+                  const price = (p.price ?? 0).toLocaleString('vi-VN');
+  tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td class="hide-md">${p.quantity}</td><td>${statusHtml}</td>`;
         tbody.appendChild(tr);
       });
       if (counter) counter.textContent = list.length;
@@ -860,6 +992,25 @@
       if (pager) paginateTable(tbody, pager, 5);
       if (showToastMsg) showToast(`Loaded ${list.length} of your products`, 'info', { duration: 2000 });
     }
+
+    // initialize sorting after DOM is ready for the panel
+    initMyProductsSorting();
+
+      // Wire status filter change to refresh list
+      const myProductsFilter = document.getElementById('myProductsStatusFilter');
+      if (myProductsFilter) {
+        myProductsFilter.addEventListener('change', () => {
+          const panel = document.getElementById('sectionMyProducts');
+          // prefer to attach overlay to the inner .card so it only covers the card area
+          const card = panel ? panel.querySelector('.card') : null;
+          const target = card || panel;
+          if (target && typeof withPanelLoading === 'function') {
+            withPanelLoading(target, () => refreshMyProducts(false), 'Failed to load products');
+          } else {
+            refreshMyProducts(false);
+          }
+        });
+      }
 
     // initial load
     refreshMyProducts(false);
@@ -885,7 +1036,7 @@
     const dashboardContent = document.getElementById('dashboardContent');
     const profilePanel = document.getElementById('profilePanel');
     const profileLink = Array.from(document.querySelectorAll('.menu a')).find(a => a.getAttribute('href') === '#profile');
-  const manageLink = Array.from(document.querySelectorAll('.menu a')).find(a => a.getAttribute('href') === '/seller/dashboard');
+    const manageLink = Array.from(document.querySelectorAll('.menu a')).find(a => a.getAttribute('href') === '/seller/dashboard');
     const backBtn = document.getElementById('btnBackToDashboard');
 
     function showProfile(pushState = true) {
@@ -897,7 +1048,7 @@
       document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
       if (profileLink) profileLink.classList.add('active');
       if (pushState) {
-        try { history.replaceState({}, '', '#profile'); } catch (e) {}
+        try { history.replaceState({}, '', '#profile'); } catch (e) { }
       }
       // optional: scroll to top of profile panel
       profilePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -909,7 +1060,7 @@
       profilePanel.style.display = 'none';
       dashboardContent.style.display = '';
       // ALSO hide other sidebar panels (orders, keys, products, vouchers) to prevent residual content
-      ['ordersPanel','keysPanel','profileSettingsPanel','productsPanel','vouchersPanel'].forEach(id => {
+      ['ordersPanel', 'keysPanel', 'profileSettingsPanel', 'productsPanel', 'vouchersPanel', 'checkKeyPanel'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.hidden = true; el.style.display = 'none'; }
       });
@@ -917,7 +1068,7 @@
       document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
       const dash = Array.from(document.querySelectorAll('.menu a')).find(a => a.getAttribute('href') === '/seller/dashboard');
       if (dash) dash.classList.add('active');
-  try { history.replaceState({}, '', (location.pathname || '/seller/dashboard') + (location.search || '')); } catch (e) {}
+      try { history.replaceState({}, '', (location.pathname || '/seller/dashboard') + (location.search || '')); } catch (e) { }
       // scroll back to top of dashboard content
       dashboardContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -947,7 +1098,8 @@
     const panelMap = {
       '#profile': 'profilePanel',
       '#orders': 'ordersPanel',
-      '#keys': 'keysPanel',
+  '#keys': 'keysPanel',
+  '#check-key': 'checkKeyPanel',
       '#products': 'productsPanel',
       '#gen-keys': 'generateKeysPanel',
       '#vouchers': 'vouchersPanel',
@@ -962,10 +1114,10 @@
         Object.values(panelMap).forEach(id => { const el = document.getElementById(id); if (el) { el.hidden = true; el.style.display = 'none'; } });
         // ensure vouchers panel remains hidden and flagged aria-hidden for a11y
         const vp = document.getElementById('vouchersPanel');
-        if (vp) { vp.hidden = true; vp.style.display = 'none'; vp.setAttribute('aria-hidden','true'); }
+        if (vp) { vp.hidden = true; vp.style.display = 'none'; vp.setAttribute('aria-hidden', 'true'); }
         // close product modal if somehow left open and prevent its inline form from being visible
         const pm = document.getElementById('productModal');
-        if (pm && pm.hasAttribute('open')) { try { pm.close(); } catch(_) { pm.removeAttribute('open'); pm.style.display='none'; } }
+        if (pm && pm.hasAttribute('open')) { try { pm.close(); } catch (_) { pm.removeAttribute('open'); pm.style.display = 'none'; } }
         return;
       }
       // hide dashboard and all panels first
@@ -978,7 +1130,7 @@
       // show target panel
       const target = document.getElementById(panelMap[hash]);
       if (target) { target.hidden = false; target.style.display = ''; target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      try { history.replaceState({}, '', hash); } catch (e) {}
+      try { history.replaceState({}, '', hash); } catch (e) { }
       // NEW: tự động load dữ liệu khi chuyển panel
       try {
         if (hash === '#orders' && typeof loadSellerOrders === 'function') {
@@ -987,6 +1139,8 @@
           loadSellerKeys(true);
         } else if (hash === '#gen-keys' && typeof initGenerateKeys === 'function') {
           initGenerateKeys();
+        } else if (hash === '#check-key' && typeof loadCheckKeyPanel === 'function') {
+          loadCheckKeyPanel(true);
         } else if (hash === '#products' && typeof loadProductsPanel === 'function') {
           loadProductsPanel(true);
         } else if (hash === '#vouchers' && typeof loadVouchersPanel === 'function') {
@@ -1004,6 +1158,337 @@
     // If hash is one of our panels (other than #profile handled earlier), show it on load
     if (window.location.hash && panelMap[window.location.hash] && window.location.hash !== '#profile') {
       setTimeout(() => showPanelByHash(window.location.hash), 50);
+    }
+
+    /**
+     * Load and bind the Check Key panel UI. Uses endpoint /api/licenses/check?key=...
+     * Renders key details and usage history in-place without navigation.
+     */
+    async function loadCheckKeyPanel(forceReload) {
+      const panel = document.getElementById('checkKeyPanel');
+      await withPanelLoading(panel, async () => {
+        if (!panel) return;
+        // Bind controls once (or rebind if forceReload)
+        if (!panel.dataset.bound || forceReload) {
+          const input = document.getElementById('ck_key');
+          const btn = document.getElementById('ck_btnCheck');
+          const reset = document.getElementById('ck_btnReset');
+          const resWrap = document.getElementById('ck_result');
+          const details = document.getElementById('ck_details');
+          const histWrap = document.getElementById('ck_history_wrap');
+          const histBody = document.getElementById('ck_history');
+          const showError = (msg) => {
+            if (details) details.textContent = msg;
+            if (resWrap) resWrap.style.display = 'block';
+            if (histWrap) histWrap.style.display = 'none';
+          };
+          let currentKey = null;
+          let currentPage = 0;
+          const pageSizeDefault = 10;
+
+          async function fetchHistoryPage(key, page) {
+            try {
+              if (details) details.textContent = 'Loading...';
+              if (resWrap) resWrap.style.display = 'block';
+              if (histWrap) histWrap.style.display = 'none';
+              // Prefer explicit sellerId exposure if present in DOM so server can enforce seller-only checks
+              const sellerIdEl = document.getElementById('sellerId');
+              const userIdEl = document.getElementById('userId');
+              const sellerIdVal = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+              let url = `/api/licenses/check?key=${encodeURIComponent(key)}&page=${page}&size=${pageSizeDefault}`;
+              if (sellerIdVal) url += `&sellerId=${encodeURIComponent(sellerIdVal)}`;
+              const r = await fetch(url);
+              if (!r.ok) {
+                const t = await r.text();
+                // If server denies access for seller, show a toast and a concise inline message
+                if (r.status === 403) {
+                  showToast('Bạn không có quyền kiểm tra key này', 'error');
+                  showError('Không có quyền kiểm tra key này');
+                } else {
+                  showError('Error: ' + t);
+                }
+                return null;
+              }
+              const data = await r.json();
+              return data;
+            } catch (e) {
+              showError('Cannot check key');
+              return null;
+            }
+          }
+
+          function renderDetails(data, key) {
+            const lines = [];
+            lines.push(`Key: ${data.licenseKey ?? key}`);
+            lines.push(`Product: ${data.productName ?? '-'}`);
+            lines.push(`Status: ${data.isActive ? 'Active' : 'Inactive'}`);
+            if (data.activationDate) lines.push(`Activated: ${data.activationDate}`);
+            if (data.lastUsedDate) lines.push(`Last used: ${data.lastUsedDate}`);
+            if (data.orderId) lines.push(`Order ID: ${data.orderId}`);
+            if (data.userId) lines.push(`Owner ID: ${data.userId}`);
+            if (details) details.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+          }
+
+          async function renderProductDisplay(data) {
+            const prodWrap = document.getElementById('ck_product_display');
+            if (prodWrap) prodWrap.innerHTML = '';
+            if (data.productId) {
+              try {
+                const pres = await fetch(`/api/products-lite/${data.productId}`);
+                if (pres.ok) {
+                  const p = await pres.json();
+                  if (prodWrap) {
+                    const price = (p.price ?? 0).toLocaleString('vi-VN');
+                    // Prefer primaryImage from product_images; fallback to downloadUrl then placeholder
+                    let img = (p.primaryImage && p.primaryImage.trim().length) ? p.primaryImage : ((p.downloadUrl && p.downloadUrl.trim().length) ? p.downloadUrl : '/img/no-image.png');
+                    // If the selected URL seems to point to a PDF or non-image, try fetching images endpoint for a real image
+                    const looksLikePdf = (typeof img === 'string' && img.toLowerCase().endsWith('.pdf'));
+                    const looksLikeNonImage = (typeof img === 'string' && !/\.(jpg|jpeg|png|gif|webp|avif)(\?.*)?$/.test(img.toLowerCase()));
+                    if (looksLikePdf || looksLikeNonImage) {
+                      try {
+                        const ires = await fetch(`/api/products-lite/${data.productId}/images`);
+                        if (ires.ok) {
+                          const imgs = await ires.json();
+                          if (Array.isArray(imgs) && imgs.length) {
+                            // pick first valid-looking image URL
+                            const found = imgs.find(u => /\.(jpg|jpeg|png|gif|webp|avif)(\?.*)?$/.test((u||'').toLowerCase()));
+                            if (found) img = found;
+                            else if (imgs[0]) img = imgs[0];
+                          }
+                        }
+                      } catch (e) { /* ignore image fetch errors */ }
+                    }
+                    prodWrap.innerHTML = `
+                        <div class="product-card" style="padding:8px;">
+                          <div class="thumb" style="width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:8px;background:#0e1430;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                            <img src="${img}" alt="${p.name ?? ''}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;" />
+                          </div>
+                          <div style="font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
+                          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                            <div style="color:var(--muted);font-size:13px;">Status: ${p.status ?? '-'}</div>
+                            <div style="color:#7c9eff;font-weight:700;">${price} đ</div>
+                          </div>
+                        </div>`;
+                  }
+                }
+              } catch (e) { /* ignore product fetch errors */ }
+            }
+          }
+
+          function renderHistoryRows(hist) {
+            histBody.innerHTML = '';
+            if (Array.isArray(hist) && hist.length) {
+              hist.forEach(h => {
+                const tr = document.createElement('tr');
+                const time = h.time ?? h.createdAt ?? '';
+                tr.innerHTML = `<td>${time}</td><td>${h.action ?? ''}</td><td>${h.user ?? ''}</td><td>${h.ip ?? ''}</td><td>${h.device ?? ''}</td>`;
+                histBody.appendChild(tr);
+              });
+            } else {
+              histBody.innerHTML = '<tr class="footer-note"><td colspan="5">No history entries</td></tr>';
+            }
+            if (histWrap) histWrap.style.display = '';
+          }
+
+          function renderDeviceBox(data) {
+            const devInfo = document.getElementById('ck_device_info');
+            const resWrap = document.getElementById('ck_result');
+            if (!devInfo) return;
+            // helper to format memory like before
+            function fmtMem(m) {
+              if (!m) return '';
+              const s = String(m).trim();
+              const mbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(mb)$/i);
+              const gbMatch = s.match(/^(\d+(?:\.\d+)?)\s*(gb)$/i);
+              if (mbMatch) {
+                const mb = parseFloat(mbMatch[1]);
+                const gb = mb / 1024;
+                return `${gb.toFixed(1)} GB (${mb} MB)`;
+              }
+              if (gbMatch) {
+                const gb = parseFloat(gbMatch[1]);
+                const mb = Math.round(gb * 1024);
+                return `${gb} GB (${mb} MB)`;
+              }
+              const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
+              if (numMatch) return `${numMatch[1]} (${s.replace(numMatch[1], '').trim()})`;
+              return s;
+            }
+
+            // If no device identifier, clear or set placeholders but keep panel visible
+            if (!data.deviceIdentifier) {
+              const ids = ['ck_device_id','ck_device_host','ck_device_platform','ck_device_cpu','ck_device_cores','ck_device_memory','ck_device_path','ck_device_lastUsed','ck_device_activated'];
+              ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (id === 'ck_device_path') {
+                  el.href = '#'; el.title = ''; el.textContent = '-';
+                } else {
+                  el.textContent = '-';
+                }
+              });
+              if (resWrap) resWrap.style.display = 'block';
+              return;
+            }
+
+            // try to parse and populate structured fields if the specific elements exist
+            try {
+              const raw = String(data.deviceIdentifier || '');
+              const parts = raw.split('|');
+              const devId = parts[0] || '';
+              const kv = parts[1] || '';
+              const extra = parts[2] || '';
+
+              const kvMap = {};
+              if (kv) {
+                kv.split(';').forEach(pair => {
+                  const idx = pair.indexOf('=');
+                  if (idx > 0) {
+                    const k = pair.substring(0, idx).trim();
+                    const v = pair.substring(idx + 1).trim();
+                    if (k) kvMap[k] = v;
+                  }
+                });
+              }
+
+              const host = kvMap['host'] || kvMap['hostname'] || '';
+              const plat = kvMap['plat'] || kvMap['platform'] || '';
+              const cpu = kvMap['cpu'] || '';
+              const cores = kvMap['cores'] || kvMap['cpu_cores'] || '';
+              const mem = kvMap['mem'] || kvMap['memory'] || '';
+
+              // If the new structured DOM exists (spans/anchor), populate them
+              const elId = document.getElementById('ck_device_id');
+              if (elId) {
+                document.getElementById('ck_device_id').textContent = devId || '-';
+                const hostEl = document.getElementById('ck_device_host'); if (hostEl) hostEl.textContent = host || '-';
+                const platEl = document.getElementById('ck_device_platform'); if (platEl) platEl.textContent = plat || '-';
+                const cpuEl = document.getElementById('ck_device_cpu'); if (cpuEl) cpuEl.textContent = cpu || '-';
+                const coresEl = document.getElementById('ck_device_cores'); if (coresEl) coresEl.textContent = cores || '-';
+                const memEl = document.getElementById('ck_device_memory'); if (memEl) memEl.textContent = fmtMem(mem) || '-';
+                const pathEl = document.getElementById('ck_device_path');
+                if (pathEl) {
+                  const e = (extra || '').trim();
+                  if (!e) { pathEl.href = '#'; pathEl.title = ''; pathEl.textContent = '-'; }
+                  else {
+                    try {
+                      // if a helper exists (from template) use it
+                      if (typeof window.setDevicePath === 'function') {
+                        window.setDevicePath(e, 48);
+                      } else {
+                        pathEl.href = e;
+                        pathEl.title = e;
+                        const short = e.length > 48 ? (e.slice(0, 22) + '...' + e.slice(-22)) : e;
+                        pathEl.textContent = short;
+                      }
+                    } catch (err) { pathEl.textContent = e; }
+                  }
+                }
+                const lastEl = document.getElementById('ck_device_lastUsed'); if (lastEl) lastEl.textContent = data.lastUsedDate || '-';
+                const actEl = document.getElementById('ck_device_activated'); if (actEl) actEl.textContent = data.activationDate || '-';
+                if (resWrap) resWrap.style.display = 'block';
+                return; // done
+              }
+
+              // Fallback: build the old HTML if structured elements not found
+              let html = '';
+              html += `<div style="font-weight:700;margin-bottom:6px;">Device</div>`;
+              html += `<div><strong>ID:</strong> ${devId}</div>`;
+              if (host) html += `<div><strong>Host:</strong> ${host}</div>`;
+              if (plat) html += `<div><strong>Platform:</strong> ${plat}</div>`;
+              if (cpu) html += `<div><strong>CPU:</strong> ${cpu}</div>`;
+              if (cores) html += `<div><strong>Cores:</strong> ${cores}</div>`;
+              if (mem) html += `<div><strong>Memory:</strong> ${fmtMem(mem)}</div>`;
+              if (extra) {
+                const e = extra.trim();
+                if (e) {
+                  const short = e.length > 80 ? e.substring(0, 77) + '...' : e;
+                  if (/^file:\/\//i.test(e) || /^https?:\/\//i.test(e)) {
+                    html += `<div><strong>Path:</strong> <a href="${e}" target="_blank" rel="noopener noreferrer">${short}</a></div>`;
+                  } else {
+                    html += `<div><strong>Path:</strong> ${short}</div>`;
+                  }
+                }
+              }
+              if (data.lastUsedDate) html += `<div style="margin-top:6px;"><strong>Last used:</strong> ${data.lastUsedDate}</div>`;
+              if (data.activationDate) html += `<div><strong>Activated:</strong> ${data.activationDate}</div>`;
+              devInfo.innerHTML = html;
+              if (resWrap) resWrap.style.display = 'block';
+            } catch (e) {
+              // fallback to raw display
+              devInfo.innerHTML = `<div><strong>ID:</strong> ${data.deviceIdentifier}</div>` +
+                                  (data.lastUsedDate ? `<div><strong>Last used:</strong> ${data.lastUsedDate}</div>` : '') +
+                                  (data.activationDate ? `<div><strong>Activated:</strong> ${data.activationDate}</div>` : '');
+              if (resWrap) resWrap.style.display = 'block';
+            }
+          }
+
+          function renderPagerControls(resp) {
+            const pager = document.getElementById('ck_history_pager');
+            if (!pager) return;
+            pager.innerHTML = '';
+            const totalPages = resp.totalPages ?? 0;
+            const curPage = resp.page ?? 0;
+            if (totalPages <= 1) return; // no pager needed
+
+            // Prev button
+            const prev = document.createElement('button');
+            prev.textContent = 'Prev';
+            prev.disabled = curPage <= 0;
+            prev.addEventListener('click', () => loadPage(curPage - 1));
+            pager.appendChild(prev);
+
+            // simple numeric pages (limit displayed count)
+            const maxButtons = 9;
+            let start = Math.max(0, curPage - Math.floor(maxButtons / 2));
+            let end = Math.min(totalPages, start + maxButtons);
+            if (end - start < maxButtons) start = Math.max(0, end - maxButtons);
+            for (let i = start; i < end; i++) {
+              const b = document.createElement('button');
+              b.textContent = (i + 1).toString();
+              if (i === curPage) { b.disabled = true; b.style.fontWeight = '700'; }
+              b.addEventListener('click', () => loadPage(i));
+              pager.appendChild(b);
+            }
+
+            // Next button
+            const next = document.createElement('button');
+            next.textContent = 'Next';
+            next.disabled = curPage >= totalPages - 1;
+            next.addEventListener('click', () => loadPage(curPage + 1));
+            pager.appendChild(next);
+          }
+
+          async function loadPage(page) {
+            if (!currentKey) return;
+            currentPage = Math.max(0, page);
+            const data = await fetchHistoryPage(currentKey, currentPage);
+            if (!data) return;
+            renderDetails(data, currentKey);
+            await renderProductDisplay(data);
+            renderHistoryRows(Array.isArray(data.history) ? data.history : []);
+            renderDeviceBox(data);
+            renderPagerControls(data);
+          }
+
+          const doCheck = async () => {
+            const key = input?.value?.trim();
+            if (!key) { showError('Please enter a key'); return; }
+            currentKey = key;
+            currentPage = 0;
+            await loadPage(0);
+          };
+          btn?.addEventListener('click', doCheck);
+          input?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doCheck(); } });
+          reset?.addEventListener('click', () => {
+            if (input) input.value = '';
+            if (details) details.textContent = 'No key checked yet.';
+            if (resWrap) resWrap.style.display = 'none';
+            if (histWrap) histWrap.style.display = 'none';
+          });
+          panel.dataset.bound = '1';
+        }
+      }, 'Cannot load key checker');
     }
 
     // === Profile edit modal ===
@@ -1035,44 +1520,44 @@
       if (!res.ok) throw new Error('Cannot load withdraw summary');
       return await res.json();
     }
-    function buildWithdrawSearchURL(params){
+    function buildWithdrawSearchURL(params) {
       const url = new URL('/seller/withdraw/search', window.location.origin);
-      Object.entries(params).forEach(([k,v])=>{ if (v !== undefined && v !== null && String(v).trim() !== '') url.searchParams.set(k, v); });
+      Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== null && String(v).trim() !== '') url.searchParams.set(k, v); });
       return url.toString();
     }
-    async function searchWithdrawals({ status, fromDate, toDate, minAmount, maxAmount, page = 0, size = 10 }){
+    async function searchWithdrawals({ status, fromDate, toDate, minAmount, maxAmount, page = 0, size = 10 }) {
       const url = buildWithdrawSearchURL({ status, fromDate, toDate, minAmount, maxAmount, page, size });
       const res = await fetch(url);
       if (!res.ok) throw new Error('Cannot load withdraw list');
       return await res.json();
     }
     async function createWithdrawal(payload) {
-      const res = await fetch('/seller/withdraw', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      const res = await fetch('/seller/withdraw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(await res.text());
       return await res.json();
     }
     async function addBankAccount(payload) {
-      const res = await fetch('/seller/withdraw/bank-account', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      const res = await fetch('/seller/withdraw/bank-account', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(await res.text());
       return await res.json();
     }
     function renderWithdrawUI(data) {
       const bankSel = document.getElementById('wd_bank');
-  const histBody = document.getElementById('wd_history');
-  const pager = document.getElementById('wd_pager');
-  const fromEl = document.getElementById('wd_from');
-  const toEl = document.getElementById('wd_to');
-  const minEl = document.getElementById('wd_min');
-  const maxEl = document.getElementById('wd_max');
-  const statusEl = document.getElementById('wd_status');
-  const applyBtn = document.getElementById('wd_apply_filters');
+      const histBody = document.getElementById('wd_history');
+      const pager = document.getElementById('wd_pager');
+      const fromEl = document.getElementById('wd_from');
+      const toEl = document.getElementById('wd_to');
+      const minEl = document.getElementById('wd_min');
+      const maxEl = document.getElementById('wd_max');
+      const statusEl = document.getElementById('wd_status');
+      const applyBtn = document.getElementById('wd_apply_filters');
       const amountWrap = document.getElementById('wd_amount_wrap');
       const allChk = document.getElementById('wd_all');
       const summary = document.getElementById('wd_summary');
       const netPreview = document.getElementById('wd_net_preview');
       const addBankBtn = document.getElementById('wd_add_bank');
       if (!bankSel || !histBody) return;
-      summary.textContent = `Balance: ${Number(data.balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} • Fee: ${data.feePercent}%`;
+  summary.textContent = `Balance: ${Number(data.balance ?? 0).toLocaleString('vi-VN', { minimumFractionDigits: 2 })} đ • Fee: ${data.feePercent}%`;
       bankSel.innerHTML = '';
       (data.accounts || []).forEach(b => {
         const opt = document.createElement('option');
@@ -1083,7 +1568,7 @@
         addBankBtn.addEventListener('click', () => openBankAccountModal());
         addBankBtn.dataset.bound = '1';
       }
-      async function applyFilters(page=0){
+      async function applyFilters(page = 0) {
         const status = statusEl?.value || '';
         const fromDate = fromEl?.value || '';
         const toDate = toEl?.value || '';
@@ -1094,7 +1579,10 @@
         histBody.innerHTML = '';
         content.forEach(w => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${w.withdrawalId}</td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString() : ''}</td><td>${w.amount}</td><td>${w.feeAmount}</td><td>${w.netAmount}</td><td><span class="chip">${w.status}</span></td>`;
+          const amt = Number(w.amount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+          const feeAmt = Number(w.feeAmount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+          const netAmt = Number(w.netAmount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+          tr.innerHTML = `<td>${w.withdrawalId}</td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString() : ''}</td><td>${amt}</td><td>${feeAmt}</td><td>${netAmt}</td><td><span class="chip">${w.status}</span></td>`;
           histBody.appendChild(tr);
         });
         // render pager
@@ -1104,16 +1592,16 @@
           const number = typeof resp.number === 'number' ? resp.number : 0;
           if (totalPages > 1) {
             const mk = (label, p, disabled, active) => {
-              const b = document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=!!disabled; if (active) b.classList.add('active');
-              b.addEventListener('click', ()=> applyFilters(p)); return b;
+              const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.disabled = !!disabled; if (active) b.classList.add('active');
+              b.addEventListener('click', () => applyFilters(p)); return b;
             };
-            pager.appendChild(mk('Prev', Math.max(0, number-1), number<=0));
-            for(let i=0;i<totalPages;i++){ pager.appendChild(mk(String(i+1), i, false, i===number)); }
-            pager.appendChild(mk('Next', Math.min(totalPages-1, number+1), number>=totalPages-1));
+            pager.appendChild(mk('Prev', Math.max(0, number - 1), number <= 0));
+            for (let i = 0; i < totalPages; i++) { pager.appendChild(mk(String(i + 1), i, false, i === number)); }
+            pager.appendChild(mk('Next', Math.min(totalPages - 1, number + 1), number >= totalPages - 1));
           }
         }
       }
-      applyBtn?.addEventListener('click', ()=> applyFilters(0));
+      applyBtn?.addEventListener('click', () => applyFilters(0));
       // initial load with no filters shows recent page 0
       applyFilters(0);
       if (!data.accounts || data.accounts.length === 0) {
@@ -1124,9 +1612,9 @@
         wrap.textContent = 'No bank accounts yet. Click “+” to add one.';
         bankSel.parentElement.appendChild(wrap);
       }
-      function toggleAmount(){ amountWrap.style.display = allChk.checked ? 'none' : 'block'; updateNetPreview(); }
+      function toggleAmount() { amountWrap.style.display = allChk.checked ? 'none' : 'block'; updateNetPreview(); }
       allChk?.addEventListener('change', toggleAmount); toggleAmount();
-      function updateNetPreview(){
+      function updateNetPreview() {
         if (!netPreview) return;
         const feePct = Number(data.feePercent || 0);
         const withdrawAll = allChk?.checked;
@@ -1136,14 +1624,14 @@
           const v = Number(document.getElementById('wd_amount')?.value || 0);
           amountVal = isNaN(v) ? 0 : v;
         }
-        const fee = amountVal * (feePct/100);
+        const fee = amountVal * (feePct / 100);
         const net = Math.max(0, amountVal - fee);
-        netPreview.textContent = `Net after ${feePct}% fee: ${net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  netPreview.textContent = `Net after ${feePct}% fee: ${net.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ`;
       }
       document.getElementById('wd_amount')?.addEventListener('input', updateNetPreview);
       updateNetPreview();
     }
-    async function loadWithdrawPanel(){
+    async function loadWithdrawPanel() {
       const panel = document.getElementById('withdrawPanel');
       await withPanelLoading(panel, async () => {
         const data = await loadWithdrawSummary();
@@ -1158,10 +1646,12 @@
         const amountEl = document.getElementById('wd_amount');
         const amount = withdrawAll ? null : Number(amountEl.value);
         const res = await createWithdrawal({ bankAccountId, amount, withdrawAll });
-        showToast(`Created. Fee: ${res.fee}, Net: ${res.net}`, 'success');
+  const feeText = Number(res.fee || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+  const netText = Number(res.net || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
+  showToast(`Created. Fee: ${feeText}, Net: ${netText}`, 'success');
         const data = await loadWithdrawSummary();
         renderWithdrawUI(data);
-      } catch(err) { showToast(String(err), 'error'); }
+      } catch (err) { showToast(String(err), 'error'); }
     });
 
     // ===== Bank account modal =====
@@ -1179,7 +1669,7 @@
       const logoFallback = logoWrap ? logoWrap.querySelector('.fallback') : null;
       const browseBtn = dlg.querySelector('#ba_browseBanks');
       const listBox = dlg.querySelector('#ba_bankList');
-      function updateBankPreview(code){
+      function updateBankPreview(code) {
         if (!logoWrap || !logoImg || !logoFallback) return;
         if (!code) {
           logoImg.style.display = 'none';
@@ -1190,10 +1680,10 @@
         const urlPng = `/img/banks/${code}.png`;
         const urlSvg = `/img/banks/${code}.svg`;
         let triedSvg = false;
-        function toFallback(){
+        function toFallback() {
           logoImg.style.display = 'none';
           logoFallback.style.display = '';
-          logoFallback.textContent = code.slice(0,3).toUpperCase();
+          logoFallback.textContent = code.slice(0, 3).toUpperCase();
         }
         logoImg.onerror = () => {
           if (!triedSvg) { triedSvg = true; logoImg.src = urlSvg; }
@@ -1221,14 +1711,14 @@
       if (codeInput) codeInput.value = '';
       updateBankPreview('');
       // Image-rich browse dropdown
-      function closeBankList(){ if (listBox) { listBox.hidden = true; dlg.__bankListOpen = false; browseBtn?.setAttribute('aria-expanded', 'false'); } }
-      function openBankList(){
+      function closeBankList() { if (listBox) { listBox.hidden = true; dlg.__bankListOpen = false; browseBtn?.setAttribute('aria-expanded', 'false'); } }
+      function openBankList() {
         if (!listBox) return;
         listBox.innerHTML = '';
         BANKS.forEach(b => {
           const row = document.createElement('div');
           row.className = 'bank-option';
-          row.setAttribute('role','option');
+          row.setAttribute('role', 'option');
           row.innerHTML = `<span class="logo"><img alt="${b.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='';" /><span class="fallback" style="display:none">${b.code}</span></span><span class="name">${b.name}</span><span class="code">${b.code}</span>`;
           const img = row.querySelector('img');
           if (img) img.src = `/img/banks/${b.code}.png`;
@@ -1324,9 +1814,9 @@
       const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
       if (!sellerId) { showToast('Seller not identified', 'error'); return; }
 
-  const selProduct = document.getElementById('vc_product');
+      const selProduct = document.getElementById('vc_product');
       const selStatus = document.getElementById('vc_status');
-  const inpSearch = document.getElementById('vc_search');
+      const inpSearch = document.getElementById('vc_search');
       const tb = document.getElementById('tbVouchers');
       const btnNew = document.getElementById('vc_btnNew');
       const btnRefresh = document.getElementById('vc_btnRefresh');
@@ -1348,10 +1838,29 @@
       async function render() {
         const pid = Number(selProduct.value || '0');
         tb.innerHTML = '';
-        if (!pid) { tb.innerHTML = '<tr class="footer-note"><td colspan="7">Select a product to manage vouchers.</td></tr>'; return; }
         const reqId = ++lastReq;
-        const list = await fetchVouchers(sellerId, pid, inpSearch?.value || '');
-        if (reqId !== lastReq) return; // ignore out-of-order responses (typing fast)
+
+        let list = [];
+        if (!pid) {
+          // No product selected: fetch vouchers for all products and merge
+          const prods = Array.from(selProduct.options).filter(o => o.value).map(o => Number(o.value));
+          const promises = prods.map(p => fetchVouchers(sellerId, p, inpSearch?.value || '').catch(() => []));
+          const results = await Promise.all(promises);
+          if (reqId !== lastReq) return; // ignore out-of-order
+          // flatten and deduplicate by code (case-insensitive), keep first occurrence
+          const combined = results.flat();
+          const byCode = {};
+          for (const v of combined) {
+            const key = (v.code || '').toString().trim().toUpperCase();
+            if (!byCode[key]) byCode[key] = v;
+          }
+          list = Object.values(byCode);
+        } else {
+          const reqIdLocal = reqId;
+          list = await fetchVouchers(sellerId, pid, inpSearch?.value || '');
+          if (reqIdLocal !== lastReq) return; // ignore out-of-order responses (typing fast)
+        }
+
         const statusFilter = (selStatus.value || '').toLowerCase();
         const filtered = list.filter(v => !statusFilter || (v.status || '').toLowerCase() === statusFilter);
         if (!filtered.length) {
@@ -1362,14 +1871,14 @@
           const tr = document.createElement('tr');
           const period = [v.startAt ? new Date(v.startAt).toLocaleString() : '-', v.endAt ? new Date(v.endAt).toLocaleString() : '-'].join(' → ');
           const uses = `${v.usedCount ?? 0}${v.maxUses ? ' / ' + v.maxUses : ''}`;
-          const val = (v.discountType === 'AMOUNT' ? ('$' + Number(v.discountValue || 0).toLocaleString('en-US')) : (Number(v.discountValue || 0) + '%'));
+          const val = (v.discountType === 'AMOUNT' ? (Number(v.discountValue || 0).toLocaleString('vi-VN') + ' đ') : (Number(v.discountValue || 0) + '%'));
           tr.innerHTML = `
             <td><b>${v.code}</b></td>
             <td>${v.discountType}</td>
             <td>${val}</td>
             <td class="hide-md">${period}</td>
             <td>${uses}</td>
-            <td><span class="badge">${(v.status||'').toUpperCase()}</span></td>
+            <td><span class="badge">${(v.status || '').toUpperCase()}</span></td>
             <td style="text-align:right;white-space:nowrap">
               <button class="btn" data-act="usage">Usage</button>
               <button class="btn" data-act="edit">Edit</button>
@@ -1387,12 +1896,12 @@
         }
       }
 
-  selProduct.addEventListener('change', render);
+      selProduct.addEventListener('change', render);
       selStatus.addEventListener('change', render);
       btnRefresh?.addEventListener('click', render);
-  // live search with debounce 250ms, DB-backed
-  let tmr;
-  inpSearch?.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(render, 250); });
+      // live search with debounce 250ms, DB-backed
+      let tmr;
+      inpSearch?.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(render, 250); });
 
       function openVoucherModal(productId, voucher) {
         const dlg = document.getElementById('voucherModal');
@@ -1402,8 +1911,8 @@
         dlg.querySelector('#vc_type').value = voucher?.discountType ?? 'PERCENT';
         dlg.querySelector('#vc_value').value = voucher?.discountValue ?? '';
         dlg.querySelector('#vc_min').value = voucher?.minOrder ?? '';
-        dlg.querySelector('#vc_start').value = voucher?.startAt ? new Date(voucher.startAt).toISOString().slice(0,16) : '';
-        dlg.querySelector('#vc_end').value = voucher?.endAt ? new Date(voucher.endAt).toISOString().slice(0,16) : '';
+        dlg.querySelector('#vc_start').value = voucher?.startAt ? new Date(voucher.startAt).toISOString().slice(0, 16) : '';
+        dlg.querySelector('#vc_end').value = voucher?.endAt ? new Date(voucher.endAt).toISOString().slice(0, 16) : '';
         dlg.querySelector('#vc_maxUses').value = voucher?.maxUses ?? '';
         dlg.querySelector('#vc_maxPerUser').value = voucher?.maxUsesPerUser ?? '';
         dlg.querySelector('#vc_status').value = voucher?.status ?? 'active';
@@ -1451,7 +1960,7 @@
           if (!list.length) table.innerHTML = '<tr class="footer-note"><td colspan="5">No usage yet.</td></tr>';
           list.forEach((r, idx) => {
             const trr = document.createElement('tr');
-            trr.innerHTML = `<td>${idx + 1}</td><td>#${r.orderId || '-'}</td><td>#${r.userId || '-'}</td><td>$${Number(r.discountAmount || 0).toFixed(2)}</td><td>${r.createdAt ? new Date(r.createdAt).toLocaleString() : '-'}</td>`;
+            trr.innerHTML = `<td>${idx + 1}</td><td>#${r.orderId || '-'}</td><td>#${r.userId || '-'}</td><td>${Number(r.discountAmount || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td><td>${r.createdAt ? new Date(r.createdAt).toLocaleString() : '-'}</td>`;
             table.appendChild(trr);
           });
         } else {
@@ -1509,7 +2018,7 @@
           avatarUrl: document.getElementById('pf_avatarUrl').value
         };
         const res = await fetch(`/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-  if (!res.ok) { showToast('Failed to update profile', 'error'); return; }
+        if (!res.ok) { showToast('Failed to update profile', 'error'); return; }
         const u = await res.json();
         // reflect changes in profile panel UI
         const elU = document.getElementById('profile_username'); if (elU) elU.textContent = u.username || '-';
@@ -1525,7 +2034,7 @@
           avatarWrap.appendChild(img);
         }
         closeModal(profileModal);
-  showToast('Profile updated', 'success');
+        showToast('Profile updated', 'success');
       });
     }
 
@@ -1538,14 +2047,14 @@
       const maxRetry = 6;
       function connect() {
         ws = new WebSocket(url);
-  ws.onopen = () => { retry = 0; showToast('Connected to realtime orders', 'info', { duration: 1500 }); };
+        ws.onopen = () => { retry = 0; showToast('Connected to realtime orders', 'info', { duration: 1500 }); };
         ws.onmessage = (ev) => {
           try {
             const data = JSON.parse(ev.data);
             if (data && data.type === 'new-order' && data.data) {
               const id = data.data.orderId;
               const amt = data.data.totalAmount;
-              const formatted = (amt == null) ? '' : ('$' + Number(amt).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+              const formatted = (amt == null) ? '' : (Number(amt).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ');
               showToast(`New order #${id} ${formatted}`, 'success');
               // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
               // Could implement incremental prepend instead of reload; keep simple first.
@@ -1571,10 +2080,10 @@
     })();
 
     // ================= Seller Orders Panel (dynamic load) =================
-  const sellerIdEl = document.getElementById('sellerId');
-  const userIdEl = document.getElementById('userId');
-  // Prefer explicit userId when available (new behavior). Fall back to sellerId for backward compatibility.
-  const sellerIdVal = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+    const sellerIdEl = document.getElementById('sellerId');
+    const userIdEl = document.getElementById('userId');
+    // Prefer explicit userId when available (new behavior). Fall back to sellerId for backward compatibility.
+    const sellerIdVal = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
     const ordersTbody = document.getElementById('tbSellerOrders');
     const ordersPager = document.getElementById('pgSellerOrders');
     let ordersPageState = { page: 0, size: 10, totalPages: 0 };
@@ -1591,18 +2100,18 @@
       if (s) params.set('search', s);
       if (from) params.set('from', from);
       if (to) params.set('to', to);
-  const res = await fetch(`/api/seller/${sellerIdVal}/orders?` + params.toString());
-  if (!res.ok) { showToast('Failed to load orders', 'error'); return; }
+      const res = await fetch(`/api/seller/${sellerIdVal}/orders?` + params.toString());
+      if (!res.ok) { showToast('Failed to load orders', 'error'); return; }
       const data = await res.json();
       ordersPageState.totalPages = data.totalPages;
       ordersTbody.innerHTML = '';
       data.content.forEach(o => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${o.orderId}</td>` +
-          `<td>${o.createdAt ? o.createdAt.replace('T',' ') : ''}</td>` +
+          `<td>${o.createdAt ? o.createdAt.replace('T', ' ') : ''}</td>` +
           `<td>${o.buyerUsername ? o.buyerUsername : (o.buyerUserId ? ('User #' + o.buyerUserId) : '')}</td>` +
           `<td>${o.sellerItems ?? 0}</td>` +
-          `<td>$${(o.sellerAmount ?? 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
+          `<td>${Number(o.sellerAmount ?? 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td>`;
         tr.className = 'clickable';
         tr.addEventListener('click', () => { // open seller-scoped order detail
           const id = o.orderId;
@@ -1617,15 +2126,15 @@
             document.getElementById('om_orderId').textContent = ord.orderId;
             document.getElementById('om_userId').textContent = user.username || (user.userId ? ('User #' + user.userId) : '');
             // Use sellerAmount for seller view total
-            const amtVal = ord.sellerAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+            const amtVal = ord.sellerAmount; const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' đ';
             document.getElementById('om_totalAmount').textContent = amt;
             document.getElementById('om_createdAt').textContent = ord.createdAt ?? '';
-            const items = data.items || []; const tb = document.getElementById('om_items'); tb.innerHTML='';
-            for (const it of items) { const r=document.createElement('tr'); r.innerHTML=`<td>${it.productName||('#'+it.productId)}</td><td>${it.quantity}</td><td>${it.priceAtTime}</td>`; tb.appendChild(r); }
+            const items = data.items || []; const tb = document.getElementById('om_items'); tb.innerHTML = '';
+            for (const it of items) { const r = document.createElement('tr'); r.innerHTML = `<td>${it.productName || ('#' + it.productId)}</td><td>${it.quantity}</td><td>${Number(it.priceAtTime || 0).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} đ</td>`; tb.appendChild(r); }
             const overlay = document.getElementById('modalOverlay');
-            if (overlay) { overlay.hidden=false; overlay.classList.add('visible'); }
-            if (typeof orderModal.showModal === 'function') { try { orderModal.showModal(); } catch (_) { orderModal.setAttribute('open',''); } }
-            requestAnimationFrame(()=> orderModal.classList.add('is-open'));
+            if (overlay) { overlay.hidden = false; overlay.classList.add('visible'); }
+            if (typeof orderModal.showModal === 'function') { try { orderModal.showModal(); } catch (_) { orderModal.setAttribute('open', ''); } }
+            requestAnimationFrame(() => orderModal.classList.add('is-open'));
           })();
         });
         ordersTbody.appendChild(tr);
@@ -1633,13 +2142,14 @@
       paginateTable(ordersTbody, ordersPager, ordersPageState.size); // reuse for pager skeleton
       // Override pager to hook page changes via API (not just client slicing)
       if (ordersPager) {
-        ordersPager.innerHTML='';
+        ordersPager.innerHTML = '';
         const total = ordersPageState.totalPages;
         if (total > 1) {
           const mk = (label, page, disabled, current) => {
-            const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if (current) b.setAttribute('aria-current','page');
-            b.addEventListener('click', () => { ordersPageState.page = page; loadSellerOrders(false); }); return b; };
-          ordersPager.appendChild(mk('«', Math.max(0, ordersPageState.page-1), ordersPageState.page===0,false));
+            const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.disabled = disabled; if (current) b.setAttribute('aria-current', 'page');
+            b.addEventListener('click', () => { ordersPageState.page = page; loadSellerOrders(false); }); return b;
+          };
+          ordersPager.appendChild(mk('«', Math.max(0, ordersPageState.page - 1), ordersPageState.page === 0, false));
           // sliding window of up to 10 pages (1-based labels, page is 0-based)
           const wSize = 10;
           let startIdx = 0;
@@ -1648,25 +2158,25 @@
             if (startIdx > total - wSize) startIdx = total - wSize;
           }
           const endIdx = Math.min(total - 1, startIdx + wSize - 1);
-          for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===ordersPageState.page); btn.classList.add('page-btn'); if (i===ordersPageState.page) btn.classList.add('active'); ordersPager.appendChild(btn); }
-          ordersPager.appendChild(mk('»', Math.min(total-1, ordersPageState.page+1), ordersPageState.page===total-1,false));
+          for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i + 1), i, false, i === ordersPageState.page); btn.classList.add('page-btn'); if (i === ordersPageState.page) btn.classList.add('active'); ordersPager.appendChild(btn); }
+          ordersPager.appendChild(mk('»', Math.min(total - 1, ordersPageState.page + 1), ordersPageState.page === total - 1, false));
         }
       }
     }
 
     document.getElementById('ord_btnFilter')?.addEventListener('click', () => loadSellerOrders(true));
     document.getElementById('ord_btnReset')?.addEventListener('click', () => {
-      const f = document.getElementById('ord_from'); if (f) f.value='';
-      const t = document.getElementById('ord_to'); if (t) t.value='';
-      const s = document.getElementById('ord_search'); if (s) s.value='';
+      const f = document.getElementById('ord_from'); if (f) f.value = '';
+      const t = document.getElementById('ord_to'); if (t) t.value = '';
+      const s = document.getElementById('ord_search'); if (s) s.value = '';
       loadSellerOrders(true);
     });
-    document.getElementById('ord_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadSellerOrders(true);} });
+    document.getElementById('ord_search')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadSellerOrders(true); } });
     document.getElementById('ord_btnExport')?.addEventListener('click', () => {
-      if (!ordersTbody) return; const rows = [['OrderId','CreatedAt','User','SellerItems','SellerAmount']];
-      ordersTbody.querySelectorAll('tr').forEach(tr => { const cols=[...tr.children].map(td=> td.textContent.replace(/\s+/g,' ').trim()); if (cols.length>=5) rows.push(cols.slice(0,5)); });
-      const csv = rows.map(r=> r.map(c => '"'+c.replace(/"/g,'""')+'"').join(',')).join('\r\n');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='seller_orders.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500);
+      if (!ordersTbody) return; const rows = [['OrderId', 'CreatedAt', 'User', 'SellerItems', 'SellerAmount']];
+      ordersTbody.querySelectorAll('tr').forEach(tr => { const cols = [...tr.children].map(td => td.textContent.replace(/\s+/g, ' ').trim()); if (cols.length >= 5) rows.push(cols.slice(0, 5)); });
+      const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g, '""') + '"').join(',')).join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'seller_orders.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
     });
 
     // Auto load when panel hash activated
@@ -1676,9 +2186,30 @@
     // ================= License Keys Panel =================
     const keysTbody = document.getElementById('tbSellerKeys');
     const keysPager = document.getElementById('pgSellerKeys');
-    let keysPageState = { page:0, size:10, totalPages:0 };
+    let keysPageState = { page: 0, size: 10, totalPages: 0 };
+    // sort state for keys panel
+    let keysSort = { key: 'licenseId', dir: 'asc' };
 
-    async function loadSellerKeys(resetPage=false) {
+    function initKeysSorting() {
+      const panel = document.getElementById('keysPanel');
+      if (!panel) return;
+      panel.querySelectorAll('th.sortable').forEach(th => {
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+          const key = th.getAttribute('data-sort');
+          if (!key) return;
+          if (keysSort.key === key) keysSort.dir = (keysSort.dir === 'asc') ? 'desc' : 'asc';
+          else { keysSort.key = key; keysSort.dir = 'asc'; }
+          // update UI indicators
+          panel.querySelectorAll('th.sortable .sort-indicator').forEach(si => si.textContent = '');
+          const ind = th.querySelector('.sort-indicator'); if (ind) ind.textContent = keysSort.dir === 'asc' ? ' ▲' : ' ▼';
+          // reload current page and re-render (will sort client-side the page content)
+          withPanelLoading(panel.querySelector('.card') || panel, () => loadSellerKeys(false), 'Failed to sort keys');
+        });
+      });
+    }
+
+    async function loadSellerKeys(resetPage = false) {
       if (!sellerIdVal || !keysTbody) return;
       if (resetPage) keysPageState.page = 0;
       const params = new URLSearchParams();
@@ -1686,16 +2217,44 @@
       const prod = document.getElementById('key_product')?.value; if (prod) params.set('productId', prod);
       const act = document.getElementById('key_active')?.value; if (act) params.set('active', act);
       const s = document.getElementById('key_search')?.value.trim(); if (s) params.set('search', s);
-  const res = await fetch(`/api/seller/${sellerIdVal}/licenses?` + params.toString());
-  if (!res.ok) { showToast('Failed to load keys', 'error'); return; }
+      const res = await fetch(`/api/seller/${sellerIdVal}/licenses?` + params.toString());
+      if (!res.ok) { showToast('Failed to load keys', 'error'); return; }
       const data = await res.json(); keysPageState.totalPages = data.totalPages;
-      keysTbody.innerHTML='';
+      keysTbody.innerHTML = '';
+      // Apply client-side sorting for the currently fetched page
+      try {
+        const k = keysSort.key;
+        const dir = keysSort.dir === 'asc' ? 1 : -1;
+        if (k) {
+          data.content.sort((a, b) => {
+            let va, vb;
+            if (k === 'expireDate') {
+              // try extract yyyymmdd from licenseKey (same logic used below to render expireText)
+              const extract = (it) => { try { const parts = (it.licenseKey || '').split('-'); if (parts.length >= 3 && /^\d{8}$/.test(parts[1])) return Number(parts[1]); } catch (e) {} return 0; };
+              va = extract(a); vb = extract(b);
+              return (va - vb) * dir;
+            }
+            if (k === 'activationDate' || k === 'licenseId' || k === 'orderId') {
+              va = a[k] == null ? 0 : (k === 'activationDate' ? Date.parse(a.activationDate || '') || 0 : Number(a[k]) || 0);
+              vb = b[k] == null ? 0 : (k === 'activationDate' ? Date.parse(b.activationDate || '') || 0 : Number(b[k]) || 0);
+              return (va - vb) * dir;
+            }
+            if (k === 'isActive') {
+              va = a.isActive ? 1 : 0; vb = b.isActive ? 1 : 0; return (va - vb) * dir;
+            }
+            // fallback string compare for licenseKey/productName
+            va = (a[k] == null) ? '' : String(a[k]); vb = (b[k] == null) ? '' : String(b[k]);
+            return va.toLowerCase().localeCompare(vb.toLowerCase()) * dir;
+          });
+        }
+      } catch (e) { /* non-blocking */ }
+
       data.content.forEach(l => {
         const tr = document.createElement('tr');
         const activeBadge = l.isActive
-          ? '<button type="button" class="pill good" data-toggle-lic="'+l.licenseId+'" title="Click to disable">ON</button>'
-          : '<button type="button" class="badge" data-toggle-lic="'+l.licenseId+'" title="Click to enable">OFF</button>';
-        const actDate = l.activationDate ? l.activationDate.replace('T',' ') : '';
+          ? '<button type="button" class="pill good" data-toggle-lic="' + l.licenseId + '" title="Click to disable">ON</button>'
+          : '<button type="button" class="badge" data-toggle-lic="' + l.licenseId + '" title="Click to enable">OFF</button>';
+        const actDate = l.activationDate ? l.activationDate.replace('T', ' ') : '';
         const deviceText = (l.deviceIdentifier && l.deviceIdentifier.trim().length)
           ? l.deviceIdentifier
           : 'unused';
@@ -1707,50 +2266,50 @@
             const maybe = parts[1];
             if (/^\d{8}$/.test(maybe)) {
               // format yyyyMMdd -> yyyy-MM-dd for readability
-              expireText = maybe.slice(0,4) + '-' + maybe.slice(4,6) + '-' + maybe.slice(6,8);
+              expireText = maybe.slice(0, 4) + '-' + maybe.slice(4, 6) + '-' + maybe.slice(6, 8);
             }
           }
         } catch (e) { expireText = ''; }
         tr.innerHTML = `<td>${l.licenseId}</td>
                         <td style="font-family:monospace;">${l.licenseKey}</td>
-                        <td>${l.productName||('#'+l.productId)}</td>
-                        <td>${l.orderId||''}</td>
+                        <td>${l.productName || ('#' + l.productId)}</td>
+                        <td>${l.orderId || ''}</td>
                         <td>${activeBadge}</td>
                         <td>${expireText}</td>
                         <td>${actDate}</td>
                         <td>${deviceText}</td>`;
         keysTbody.appendChild(tr);
       });
-        if (data.content.length === 0) {
-          const tr = document.createElement('tr');
-          const colSpan = 8;
-          tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">No keys for the current seller or sellerId is incorrect.</td>`;
-          keysTbody.appendChild(tr);
-        }
+      if (data.content.length === 0) {
+        const tr = document.createElement('tr');
+        const colSpan = 8;
+        tr.innerHTML = `<td colspan="${colSpan}" class="footer-note">No keys for the current seller or sellerId is incorrect.</td>`;
+        keysTbody.appendChild(tr);
+      }
       paginateTable(keysTbody, keysPager, keysPageState.size);
       if (keysPager) {
-        keysPager.innerHTML=''; const total = keysPageState.totalPages;
-        if (total>1) {
-          const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ keysPageState.page=page; loadSellerKeys(false); }); return b; };
-          keysPager.appendChild(mk('«', Math.max(0, keysPageState.page-1), keysPageState.page===0,false));
-            {
-              const wSize = 10; let startIdx = 0; if (total <= wSize) startIdx = 0; else { if (keysPageState.page <= wSize - 1) startIdx = 0; else startIdx = keysPageState.page - (wSize - 1); if (startIdx > total - wSize) startIdx = total - wSize; }
-              const endIdx = Math.min(total - 1, startIdx + wSize - 1);
-              for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===keysPageState.page); btn.classList.add('page-btn'); if (i===keysPageState.page) btn.classList.add('active'); keysPager.appendChild(btn); }
-            }
-            keysPager.appendChild(mk('»', Math.min(total-1, keysPageState.page+1), keysPageState.page===total-1,false));
+        keysPager.innerHTML = ''; const total = keysPageState.totalPages;
+        if (total > 1) {
+          const mk = (label, page, disabled, current) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.disabled = disabled; if (current) b.setAttribute('aria-current', 'page'); b.addEventListener('click', () => { keysPageState.page = page; loadSellerKeys(false); }); return b; };
+          keysPager.appendChild(mk('«', Math.max(0, keysPageState.page - 1), keysPageState.page === 0, false));
+          {
+            const wSize = 10; let startIdx = 0; if (total <= wSize) startIdx = 0; else { if (keysPageState.page <= wSize - 1) startIdx = 0; else startIdx = keysPageState.page - (wSize - 1); if (startIdx > total - wSize) startIdx = total - wSize; }
+            const endIdx = Math.min(total - 1, startIdx + wSize - 1);
+            for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i + 1), i, false, i === keysPageState.page); btn.classList.add('page-btn'); if (i === keysPageState.page) btn.classList.add('active'); keysPager.appendChild(btn); }
+          }
+          keysPager.appendChild(mk('»', Math.min(total - 1, keysPageState.page + 1), keysPageState.page === total - 1, false));
         }
       }
     }
 
     document.getElementById('key_btnFilter')?.addEventListener('click', () => loadSellerKeys(true));
     document.getElementById('key_btnReset')?.addEventListener('click', () => {
-      const p=document.getElementById('key_product'); if (p) p.value='';
-      const a=document.getElementById('key_active'); if (a) a.value='';
-      const s=document.getElementById('key_search'); if (s) s.value='';
+      const p = document.getElementById('key_product'); if (p) p.value = '';
+      const a = document.getElementById('key_active'); if (a) a.value = '';
+      const s = document.getElementById('key_search'); if (s) s.value = '';
       loadSellerKeys(true);
     });
-    document.getElementById('key_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadSellerKeys(true); } });
+    document.getElementById('key_search')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadSellerKeys(true); } });
 
     // Toggle active by clicking the ON/OFF badge
     keysTbody?.addEventListener('click', async (e) => {
@@ -1761,33 +2320,37 @@
       const next = !isOn;
       const res = await fetch(`/api/seller/${sellerIdVal}/licenses/${id}`, {
         method: 'PATCH',
-        headers: {'Content-Type':'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: next })
       });
       if (res.ok) {
-        showToast(next? 'Key enabled':'Key disabled','success');
+        showToast(next ? 'Key enabled' : 'Key disabled', 'success');
         loadSellerKeys(false);
       } else {
-        showToast('Failed to update key','error');
+        showToast('Failed to update key', 'error');
       }
     });
 
     // Populate product filter select (reuse my products API)
-    (async function populateProductsForKeys(){
+    (async function populateProductsForKeys() {
       if (!sellerIdVal) return; const sel = document.getElementById('key_product'); if (!sel) return;
-      try { const res = await fetch(`/api/products?sellerId=${sellerIdVal}`); if (!res.ok) return; const list = await res.json();
-        list.forEach(p => { const o=document.createElement('option'); o.value=p.productId; o.textContent=p.name || ('#'+p.productId); sel.appendChild(o); });
-      } catch (_) {}
+      try {
+        const res = await fetch(`/api/products?sellerId=${sellerIdVal}`); if (!res.ok) return; const list = await res.json();
+        list.forEach(p => { const o = document.createElement('option'); o.value = p.productId; o.textContent = p.name || ('#' + p.productId); sel.appendChild(o); });
+      } catch (_) { }
     })();
+
+    // initialize keys sorting UI
+    initKeysSorting();
 
     if (window.location.hash === '#keys') setTimeout(() => loadSellerKeys(true), 120);
     window.addEventListener('hashchange', () => { if (window.location.hash === '#keys') loadSellerKeys(false); });
 
     // ================= Products Panel (list + filters in-place) =================
-  const productsGrid = document.getElementById('prdGrid');
-  const productsPager = document.getElementById('pgProducts');
-  const prdCategorySel = document.getElementById('prd_category');
-  let productsPageState = { page:0, size:18, totalPages:0 };
+    const productsGrid = document.getElementById('prdGrid');
+    const productsPager = document.getElementById('pgProducts');
+    const prdCategorySel = document.getElementById('prd_category');
+    let productsPageState = { page: 0, size: 18, totalPages: 0 };
 
     async function populateCategoriesOnce() {
       if (!prdCategorySel || prdCategorySel.getAttribute('data-loaded') === '1') return;
@@ -1795,12 +2358,12 @@
         const res = await fetch('/api/categories');
         if (!res.ok) return;
         const cats = await res.json();
-        cats.forEach(c => { const o=document.createElement('option'); o.value=c.categoryId; o.textContent=c.name; prdCategorySel.appendChild(o); });
-        prdCategorySel.setAttribute('data-loaded','1');
-      } catch(_){}
+        cats.forEach(c => { const o = document.createElement('option'); o.value = c.categoryId; o.textContent = c.name; prdCategorySel.appendChild(o); });
+        prdCategorySel.setAttribute('data-loaded', '1');
+      } catch (_) { }
     }
 
-    async function loadProductsPanel(resetPage=false) {
+    async function loadProductsPanel(resetPage = false) {
       if (!productsGrid) return;
       if (resetPage) productsPageState.page = 0;
       await populateCategoriesOnce();
@@ -1815,24 +2378,24 @@
         const userIdEl = document.getElementById('userId');
         const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
         if (sellerId) params.set('sellerId', String(sellerId));
-      } catch(_) {}
+      } catch (_) { }
       const parts = [];
-    const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`keyword "${s}"`); }
-    const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt=prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`category "${opt.text}"`); }
-  const rating = document.getElementById('prd_rating')?.value; if (rating) { params.set('minRating', rating); parts.push(`rating ≥ ${rating}`); }
-  const dl = document.getElementById('prd_downloads')?.value; if (dl) { params.set('minDownloads', dl); parts.push(`sold ≥ ${dl}`); }
+      const s = document.getElementById('prd_search')?.value.trim(); if (s) { params.set('search', s); parts.push(`keyword "${s}"`); }
+      const cat = prdCategorySel?.value; if (cat) { params.set('categoryId', cat); const opt = prdCategorySel.options[prdCategorySel.selectedIndex]; if (opt && opt.text) parts.push(`category "${opt.text}"`); }
+      const rating = document.getElementById('prd_rating')?.value; if (rating) { params.set('minRating', rating); parts.push(`rating ≥ ${rating}`); }
+      const dl = document.getElementById('prd_downloads')?.value; if (dl) { params.set('minDownloads', dl); parts.push(`sold ≥ ${dl}`); }
       const statusEl = document.getElementById('prd_status');
       const statusRaw = statusEl?.value;
       if (statusRaw) {
         const statusNorm = statusRaw.toString().trim().toLowerCase();
         params.set('status', statusNorm);
-  // Show friendly label in toast (capitalize first letter)
-  const label = statusNorm.charAt(0).toUpperCase() + statusNorm.slice(1);
-  parts.push(`status "${label}"`);
+        // Show friendly label in toast (capitalize first letter)
+        const label = statusNorm.charAt(0).toUpperCase() + statusNorm.slice(1);
+        parts.push(`status "${label}"`);
       }
 
       // Show loading feedback (toast) and overlay on panel
-      try { if (typeof showToast === 'function') showToast('Loading products' + (parts.length? ' by ' + parts.join(', ') : ''), 'info', { duration: 1200 }); } catch(_){ }
+      try { if (typeof showToast === 'function') showToast('Loading products' + (parts.length ? ' by ' + parts.join(', ') : ''), 'info', { duration: 1200 }); } catch (_) { }
       const panelEl = document.getElementById('productsPanel');
       const task = async () => {
         const res = await fetch('/api/products/search?' + params.toString());
@@ -1844,11 +2407,11 @@
           const card = document.createElement('div');
           card.className = 'product-card clickable';
           card.setAttribute('data-product-id', p.productId);
-          const st = (p.status||'').toLowerCase();
+          const st = (p.status || '').toLowerCase();
           let statusHtml = '<span class="badge">Pending</span>';
           if (st === 'public') statusHtml = '<span class="pill good">Public</span>';
           else if (st === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-          const price = (p.price ?? 0).toLocaleString('en-US');
+          const price = Number(p.price ?? 0).toLocaleString('vi-VN');
           const rating = (p.averageRating != null) ? Number(p.averageRating).toFixed(1) : '-';
           const totalSales = (p.totalSales != null) ? p.totalSales : 0;
           const img = (p.imageUrl && p.imageUrl.trim().length) ? p.imageUrl : '/img/no-image.png';
@@ -1859,7 +2422,7 @@
             <div class="meta" style="padding:8px 2px;display:flex;flex-direction:column;gap:6px;">
               <div class="line" style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
                 <div class="name" title="${p.name ?? ''}" style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
-                <div class="price" style="color:#7c9eff;font-weight:700;">$${price}</div>
+                <div class="price" style="color:#7c9eff;font-weight:700;">${price} đ</div>
               </div>
               <div class="sub" style="display:flex;gap:10px;font-size:12px;color:#a8b0d3;">
                   <span title="Sold">🛒 ${totalSales}</span>
@@ -1867,23 +2430,23 @@
                   <span>${statusHtml}</span>
                 </div>
             </div>`;
-          card.addEventListener('click', () => { const id=p.productId; loadProduct(id).then(()=> openModal(productModal)); });
+          card.addEventListener('click', () => { const id = p.productId; loadProduct(id).then(() => openModal(productModal)); });
           productsGrid.appendChild(card);
         });
         if (productsPager) {
-          productsPager.innerHTML=''; const total = productsPageState.totalPages;
-          if (total>1) {
-            const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ productsPageState.page=page; loadProductsPanel(false); }); return b; };
-            productsPager.appendChild(mk('«', Math.max(0, productsPageState.page-1), productsPageState.page===0,false));
+          productsPager.innerHTML = ''; const total = productsPageState.totalPages;
+          if (total > 1) {
+            const mk = (label, page, disabled, current) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.disabled = disabled; if (current) b.setAttribute('aria-current', 'page'); b.addEventListener('click', () => { productsPageState.page = page; loadProductsPanel(false); }); return b; };
+            productsPager.appendChild(mk('«', Math.max(0, productsPageState.page - 1), productsPageState.page === 0, false));
             {
               const wSize = 10; let startIdx = 0; if (total <= wSize) startIdx = 0; else { if (productsPageState.page <= wSize - 1) startIdx = 0; else startIdx = productsPageState.page - (wSize - 1); if (startIdx > total - wSize) startIdx = total - wSize; }
               const endIdx = Math.min(total - 1, startIdx + wSize - 1);
-              for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i+1), i, false, i===productsPageState.page); btn.classList.add('page-btn'); if (i===productsPageState.page) btn.classList.add('active'); productsPager.appendChild(btn); }
+              for (let i = startIdx; i <= endIdx; i++) { const btn = mk(String(i + 1), i, false, i === productsPageState.page); btn.classList.add('page-btn'); if (i === productsPageState.page) btn.classList.add('active'); productsPager.appendChild(btn); }
             }
-            productsPager.appendChild(mk('»', Math.min(total-1, productsPageState.page+1), productsPageState.page===total-1,false));
+            productsPager.appendChild(mk('»', Math.min(total - 1, productsPageState.page + 1), productsPageState.page === total - 1, false));
           }
         }
-        try { showToast(`Loaded ${data.content ? data.content.length : 0} products`, 'info', { duration: 1200 }); } catch(_){ }
+        try { showToast(`Loaded ${data.content ? data.content.length : 0} products`, 'info', { duration: 1200 }); } catch (_) { }
       };
       if (typeof withPanelLoading === 'function' && panelEl) {
         withPanelLoading(panelEl, task, 'Failed to load products');
@@ -1895,14 +2458,14 @@
 
     document.getElementById('prd_btnFilter')?.addEventListener('click', () => loadProductsPanel(true));
     document.getElementById('prd_btnReset')?.addEventListener('click', () => {
-      const s=document.getElementById('prd_search'); if (s) s.value='';
-      if (prdCategorySel) prdCategorySel.value='';
-      const r=document.getElementById('prd_rating'); if (r) r.value='';
-      const d=document.getElementById('prd_downloads'); if (d) d.value='';
-      const st=document.getElementById('prd_status'); if (st) st.value='';
+      const s = document.getElementById('prd_search'); if (s) s.value = '';
+      if (prdCategorySel) prdCategorySel.value = '';
+      const r = document.getElementById('prd_rating'); if (r) r.value = '';
+      const d = document.getElementById('prd_downloads'); if (d) d.value = '';
+      const st = document.getElementById('prd_status'); if (st) st.value = '';
       loadProductsPanel(true);
     });
-    document.getElementById('prd_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadProductsPanel(true);} });
+    document.getElementById('prd_search')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadProductsPanel(true); } });
     // Auto apply when changing status
     document.getElementById('prd_status')?.addEventListener('change', () => loadProductsPanel(true));
     if (window.location.hash === '#products') setTimeout(() => loadProductsPanel(true), 120);
@@ -1910,11 +2473,11 @@
 
     // ================= Generate Keys Panel =================
     function onlyPublicProducts(list) {
-      return Array.isArray(list) ? list.filter(p => (p.status||'').toLowerCase()==='public') : [];
+      return Array.isArray(list) ? list.filter(p => (p.status || '').toLowerCase() === 'public') : [];
     }
     async function populatePublicProductsForGen() {
       const sel = document.getElementById('gk_product'); if (!sel) return;
-      if (sel.getAttribute('data-loaded')==='1') return;
+      if (sel.getAttribute('data-loaded') === '1') return;
       try {
         const sellerIdEl = document.getElementById('sellerId');
         const userIdEl = document.getElementById('userId');
@@ -1923,9 +2486,9 @@
         const res = await fetch(`/api/products?sellerId=${sellerId}`);
         if (!res.ok) return;
         const list = await res.json();
-        onlyPublicProducts(list).forEach(p => { const o=document.createElement('option'); o.value=p.productId; o.textContent=`#${p.productId} • ${p.name}`; o.dataset.qty = p.quantity ?? 0; sel.appendChild(o); });
-        sel.setAttribute('data-loaded','1');
-      } catch(_){}
+  onlyPublicProducts(list).forEach(p => { const o = document.createElement('option'); o.value = p.productId; o.textContent = `#${p.productId} • ${p.name}`; o.dataset.qty = p.quantity; sel.appendChild(o); });
+        sel.setAttribute('data-loaded', '1');
+      } catch (_) { }
     }
 
     // ==== Generate Keys Panel: Custom Product Table ====
@@ -1951,23 +2514,23 @@
         const res = await fetch(`/api/products?sellerId=${sellerId}`);
         if (!res.ok) { tbody.innerHTML = '<tr><td colspan="4">Không thể tải sản phẩm</td></tr>'; return; }
         const list = await res.json();
-        gkProductsState.all = Array.isArray(list) ? list.filter(p => (p.status||'').toLowerCase()==='public') : [];
+        gkProductsState.all = Array.isArray(list) ? list.filter(p => (p.status || '').toLowerCase() === 'public') : [];
         const applyFilter = () => {
           const q = (gkProductsState.q || '').toLowerCase();
-          gkProductsState.filtered = gkProductsState.all.filter(p => !q || (p.name||'').toLowerCase().includes(q));
+          gkProductsState.filtered = gkProductsState.all.filter(p => !q || (p.name || '').toLowerCase().includes(q));
           gkProductsState.page = 0;
           renderPage();
         };
         const renderPage = () => {
           tbody.innerHTML = '';
-          if (!gkProductsState.filtered.length) { tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm PUBLIC</td></tr>'; if (pager) pager.innerHTML=''; return; }
+          if (!gkProductsState.filtered.length) { tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm PUBLIC</td></tr>'; if (pager) pager.innerHTML = ''; return; }
           const start = gkProductsState.page * gkProductsState.size;
           const end = Math.min(start + gkProductsState.size, gkProductsState.filtered.length);
           const pageItems = gkProductsState.filtered.slice(start, end);
           pageItems.forEach(p => {
             const tr = document.createElement('tr');
             tr.className = 'clickable';
-            tr.innerHTML = `<td>${p.productId}</td><td>${p.name}</td><td>${p.categoryName||''}</td><td>${p.status}</td>`;
+            tr.innerHTML = `<td>${p.productId}</td><td>${p.name}</td><td>${p.categoryName || ''}</td><td>${p.status}</td>`;
             tr.addEventListener('click', () => {
               input.value = p.productId;
               selectedDiv.textContent = `Đã chọn: #${p.productId} • ${p.name}`;
@@ -1980,16 +2543,16 @@
             pager.innerHTML = '';
             const totalPages = Math.max(1, Math.ceil(gkProductsState.filtered.length / gkProductsState.size));
             if (totalPages > 1) {
-              const mk = (label, p, disabled, active) => { const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=!!disabled; if(active) b.classList.add('active'); b.addEventListener('click', ()=>{ gkProductsState.page=p; renderPage(); }); return b; };
-              pager.appendChild(mk('«', Math.max(0, gkProductsState.page-1), gkProductsState.page===0, false));
-              for (let i=0;i<totalPages;i++){ pager.appendChild(mk(String(i+1), i, false, i===gkProductsState.page)); }
-              pager.appendChild(mk('»', Math.min(totalPages-1, gkProductsState.page+1), gkProductsState.page>=totalPages-1, false));
+              const mk = (label, p, disabled, active) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.disabled = !!disabled; if (active) b.classList.add('active'); b.addEventListener('click', () => { gkProductsState.page = p; renderPage(); }); return b; };
+              pager.appendChild(mk('«', Math.max(0, gkProductsState.page - 1), gkProductsState.page === 0, false));
+              for (let i = 0; i < totalPages; i++) { pager.appendChild(mk(String(i + 1), i, false, i === gkProductsState.page)); }
+              pager.appendChild(mk('»', Math.min(totalPages - 1, gkProductsState.page + 1), gkProductsState.page >= totalPages - 1, false));
             }
           }
         };
         // Hook search events
-        if (qBtn) qBtn.addEventListener('click', () => { gkProductsState.q = (qInput?.value||'').trim(); applyFilter(); });
-        if (qInput) qInput.addEventListener('keydown', (e) => { if (e.key==='Enter') { e.preventDefault(); gkProductsState.q = (qInput.value||'').trim(); applyFilter(); } });
+        if (qBtn) qBtn.addEventListener('click', () => { gkProductsState.q = (qInput?.value || '').trim(); applyFilter(); });
+        if (qInput) qInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); gkProductsState.q = (qInput.value || '').trim(); applyFilter(); } });
         // First render
         applyFilter();
       } catch (e) {
@@ -2000,7 +2563,7 @@
     // ==== Generate Keys Panel: User selection with search + pagination ====
     const gkUsersState = { page: 0, size: 8, totalPages: 0, q: '', type: '' };
 
-    async function loadGenUsers(resetPage=false) {
+    async function loadGenUsers(resetPage = false) {
       const tbody = document.querySelector('#gk_user_table tbody');
       const pager = document.getElementById('pgGenUsers');
       const selDiv = document.getElementById('gk_user_selected');
@@ -2039,16 +2602,16 @@
         // Build server pager
         pager.innerHTML = '';
         if (gkUsersState.totalPages > 1) {
-          const mk=(label,page,disabled,current)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=disabled; if(current) b.setAttribute('aria-current','page'); b.addEventListener('click',()=>{ gkUsersState.page=page; loadGenUsers(false); }); return b; };
-          pager.appendChild(mk('«', Math.max(0, gkUsersState.page-1), gkUsersState.page===0,false));
+          const mk = (label, page, disabled, current) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.disabled = disabled; if (current) b.setAttribute('aria-current', 'page'); b.addEventListener('click', () => { gkUsersState.page = page; loadGenUsers(false); }); return b; };
+          pager.appendChild(mk('«', Math.max(0, gkUsersState.page - 1), gkUsersState.page === 0, false));
           // Server pager for generate-keys users: sliding window (7 pages only)
           const totalG = gkUsersState.totalPages;
           const wSizeG = 7;
           let startG = 0;
           if (totalG <= wSizeG) startG = 0; else { if (gkUsersState.page <= wSizeG - 1) startG = 0; else startG = gkUsersState.page - (wSizeG - 1); if (startG > totalG - wSizeG) startG = totalG - wSizeG; }
           const endG = Math.min(totalG - 1, startG + wSizeG - 1);
-          for (let i = startG; i <= endG; i++) { const b = mk(String(i+1), i, false, i===gkUsersState.page); b.classList.add('page-btn'); if (i===gkUsersState.page) b.classList.add('active'); pager.appendChild(b); }
-          pager.appendChild(mk('»', Math.min(gkUsersState.totalPages-1, gkUsersState.page+1), gkUsersState.page===gkUsersState.totalPages-1,false));
+          for (let i = startG; i <= endG; i++) { const b = mk(String(i + 1), i, false, i === gkUsersState.page); b.classList.add('page-btn'); if (i === gkUsersState.page) b.classList.add('active'); pager.appendChild(b); }
+          pager.appendChild(mk('»', Math.min(gkUsersState.totalPages - 1, gkUsersState.page + 1), gkUsersState.page === gkUsersState.totalPages - 1, false));
         }
       } catch (_) {
         tbody.innerHTML = '<tr><td colspan="4">Error loading users</td></tr>';
@@ -2059,9 +2622,9 @@
       const q = document.getElementById('gk_user_q');
       const t = document.getElementById('gk_user_type');
       const btn = document.getElementById('gk_user_search');
-      if (q) q.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); gkUsersState.q = (q.value||'').trim(); loadGenUsers(true); } });
-      if (t) t.addEventListener('change', () => { gkUsersState.type = (t.value||'').trim(); loadGenUsers(true); });
-      if (btn) btn.addEventListener('click', () => { gkUsersState.q = (q?.value||'').trim(); gkUsersState.type = (t?.value||'').trim(); loadGenUsers(true); });
+      if (q) q.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); gkUsersState.q = (q.value || '').trim(); loadGenUsers(true); } });
+      if (t) t.addEventListener('change', () => { gkUsersState.type = (t.value || '').trim(); loadGenUsers(true); });
+      if (btn) btn.addEventListener('click', () => { gkUsersState.q = (q?.value || '').trim(); gkUsersState.type = (t?.value || '').trim(); loadGenUsers(true); });
     }
 
     async function initGenerateKeys() {
@@ -2075,7 +2638,7 @@
       const prodInput = document.getElementById('gk_product');
       const pid = prodInput?.value ? Number(prodInput.value) : null;
       const exp = document.getElementById('gk_expire')?.value || '';
-      let qty = document.getElementById('gk_qty')?.value ? parseInt(document.getElementById('gk_qty').value,10) : 0;
+      let qty = document.getElementById('gk_qty')?.value ? parseInt(document.getElementById('gk_qty').value, 10) : 0;
       const selUser = document.getElementById('gk_user')?.value ? Number(document.getElementById('gk_user').value) : undefined;
       const orderItemInput = document.getElementById('gk_order_item')?.value ? Number(document.getElementById('gk_order_item').value) : undefined;
       if (!pid) { showToast('Vui lòng chọn sản phẩm PUBLIC', 'error'); return; }
@@ -2086,8 +2649,8 @@
         return;
       }
       try {
-        const res = await fetch('/api/seller/' + (document.getElementById('userId')?.textContent?.trim()||document.getElementById('sellerId')?.textContent?.trim()) + '/licenses/generate', {
-          method: 'POST', headers: {'Content-Type':'application/json'},
+        const res = await fetch('/api/seller/' + (document.getElementById('userId')?.textContent?.trim() || document.getElementById('sellerId')?.textContent?.trim()) + '/licenses/generate', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             productId: pid,
             expireDate: exp,
@@ -2096,12 +2659,12 @@
             orderItemId: orderItemInput
           })
         });
-  if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
-  const data = await res.json();
-  showToast(`Đã tạo ${data.generated} key (còn lại ${data.remaining})`, 'success');
-  // Reload keys list and navigate to Keys panel so new keys are visible immediately
-  try { if (typeof loadSellerKeys === 'function') loadSellerKeys(true); } catch (e) { /* ignore */ }
-  try { if (typeof showPanelByHash === 'function') showPanelByHash('#keys'); } catch (e) { /* ignore */ }
+        if (!res.ok) { const t = await res.text(); showToast(t || 'Failed to generate keys', 'error'); return; }
+        const data = await res.json();
+        showToast(`Đã tạo ${data.generated} key (còn lại ${data.remaining})`, 'success');
+        // Reload keys list and navigate to Keys panel so new keys are visible immediately
+        try { if (typeof loadSellerKeys === 'function') loadSellerKeys(true); } catch (e) { /* ignore */ }
+        try { if (typeof showPanelByHash === 'function') showPanelByHash('#keys'); } catch (e) { /* ignore */ }
       } catch (e) { showToast('Lỗi tạo key', 'error'); }
     });
 
@@ -2109,7 +2672,7 @@
     window.addEventListener('hashchange', () => { if (window.location.hash === '#gen-keys') initGenerateKeys(); });
 
     // Initialize collapsible menu groups: turns .menu-group > .menu-group-title into toggles
-    (function initMenuGroupToggles(){
+    (function initMenuGroupToggles() {
       try {
         const groups = Array.from(document.querySelectorAll('.menu-group'));
         groups.forEach(g => {
@@ -2125,8 +2688,8 @@
             g.appendChild(items);
           }
           // make title button-like and add aria attributes
-          title.setAttribute('role','button');
-          title.setAttribute('tabindex','0');
+          title.setAttribute('role', 'button');
+          title.setAttribute('tabindex', '0');
           title.setAttribute('aria-expanded', String(true));
           title.classList.add('menu-group-toggle');
 

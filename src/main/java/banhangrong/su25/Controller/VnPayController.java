@@ -51,6 +51,57 @@ public class VnPayController {
         this.orderItemsRepository = orderItemsRepository;
     }
 
+    // Optional: VNPay IPN endpoint for server-to-server confirmation
+    @GetMapping("/payment/vnpay/ipn")
+    @Transactional
+    public String vnpIpn(HttpServletRequest request) {
+        try {
+            Map<String,String[]> fields = request.getParameterMap();
+            Map<String,String> vnp = new HashMap<>();
+            for (Map.Entry<String,String[]> e : fields.entrySet()) {
+                if (e.getKey().startsWith("vnp_")) vnp.put(e.getKey(), e.getValue()[0]);
+            }
+            String receivedHash = vnp.remove("vnp_SecureHash");
+            vnp.remove("vnp_SecureHashType");
+            TreeMap<String,String> sortedIpn = new TreeMap<>(vnp);
+            String signData = VnPayConfig.buildSignData(sortedIpn);
+            String calcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
+            // Also compute encoded variant
+            StringBuilder enc = new StringBuilder();
+            boolean firstIpn = true;
+            for (Map.Entry<String,String> e2 : sortedIpn.entrySet()) {
+                String k = e2.getKey(); String val = e2.getValue(); if (val == null) val = "";
+                if (!firstIpn) enc.append('&'); firstIpn = false;
+                try {
+                    enc.append(URLEncoder.encode(k, StandardCharsets.UTF_8.toString())).append('=')
+                       .append(URLEncoder.encode(val, StandardCharsets.UTF_8.toString()));
+                } catch (Exception ex) { enc.append(k).append('=').append(val); }
+            }
+            String encHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, enc.toString());
+            boolean valid = calcHash.equals(receivedHash) || encHash.equals(receivedHash);
+            String respCode = vnp.getOrDefault("vnp_ResponseCode", "99");
+            if (!valid || !"00".equals(respCode)) {
+                return "redirect:/customer/dashboard?topup=failure&code=" + respCode;
+            }
+            String orderInfo = vnp.getOrDefault("vnp_OrderInfo", "");
+            if (orderInfo.startsWith("TOPUP:")) {
+                try {
+                    Long uid = Long.parseLong(orderInfo.substring("TOPUP:".length()));
+                    long creditedAmountVnd = Long.parseLong(vnp.getOrDefault("vnp_Amount", "0")) / 100L;
+                    usersRepository.findById(uid).ifPresent(u -> {
+                        java.math.BigDecimal current = u.getBalance() != null ? u.getBalance() : java.math.BigDecimal.ZERO;
+                        java.math.BigDecimal inc = java.math.BigDecimal.valueOf(creditedAmountVnd);
+                        u.setBalance(current.add(inc));
+                        usersRepository.save(u);
+                    });
+                } catch (Exception ignored) {}
+            }
+            return "redirect:/customer/dashboard?topup=success";
+        } catch (Exception ex) {
+            return "redirect:/customer/dashboard?topup=failure&code=err";
+        }
+    }
+
     private Long getCurrentUserId() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -77,7 +128,8 @@ public class VnPayController {
         String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
 
         long amountVnd = normalizeAmountVnd(req.getParameter("amount"));
-        if (amountVnd < 5000L) amountVnd = 5000L; // VNPay minimum
+        // Enforce business minimum topup of 20,000 VND (higher than VNPay's 5,000)
+        if (amountVnd < 20000L) amountVnd = 20000L;
 
         // VNPay expects smallest unit: VND * 100
         long amount = amountVnd * 100L;
@@ -106,34 +158,39 @@ public class VnPayController {
 
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
-        StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
+        boolean first = true;
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                hashData.append(fieldName);
-                hashData.append('=');
-                hashData.append(fieldValue);
+                if (!first) query.append('&');
+                first = false;
                 try {
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()));
                     query.append('=');
-                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 } catch (Exception e) {
                     query.append(fieldName);
                     query.append('=');
                     query.append(fieldValue);
                 }
-                if (itr.hasNext()) {
-                    query.append('&');
-                    hashData.append('&');
-                }
             }
         }
         String queryUrl = query.toString();
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, hashData.toString());
-        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        // Compute both RAW and URL-encoded signatures; use URL-encoded to align with some sandbox gateways
+        String rawSign = VnPayConfig.buildSignData(vnp_Params);
+        String encSign = queryUrl; // already URL-encoded
+        String rawHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, rawSign);
+        String encHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, encSign);
+        String vnp_SecureHash = encHash; // prefer encoded signature
+        System.out.println("[VNPay][CreateTopup] rawSign=" + rawSign);
+        System.out.println("[VNPay][CreateTopup] rawHash=" + rawHash);
+        System.out.println("[VNPay][CreateTopup] signData(encoded)=" + encSign);
+        System.out.println("[VNPay][CreateTopup] query(before hash)=" + queryUrl);
+        queryUrl += "&vnp_SecureHashType=HmacSHA512&vnp_SecureHash=" + vnp_SecureHash;
+        System.out.println("[VNPay][CreateTopup] redirectQuery=" + queryUrl);
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
     }
@@ -194,37 +251,39 @@ public class VnPayController {
 
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
-        StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
+        boolean first = true;
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                //Build hash data
-                hashData.append(fieldName);
-                hashData.append('=');
-                hashData.append(fieldValue);
-                //Build query
+                if (!first) query.append('&');
+                first = false;
                 try {
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()));
                     query.append('=');
-                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 } catch (Exception e) {
-                    // Fallback to default encoding
                     query.append(fieldName);
                     query.append('=');
                     query.append(fieldValue);
                 }
-                if (itr.hasNext()) {
-                    query.append('&');
-                    hashData.append('&');
-                }
             }
         }
         String queryUrl = query.toString();
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, hashData.toString());
-        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        // Compute both RAW and URL-encoded signatures; use URL-encoded
+        String rawSign2 = VnPayConfig.buildSignData(vnp_Params);
+        String encSign2 = queryUrl;
+        String rawHash2 = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, rawSign2);
+        String encHash2 = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, encSign2);
+        String vnp_SecureHash = encHash2;
+        System.out.println("[VNPay][CreatePayment] rawSign=" + rawSign2);
+        System.out.println("[VNPay][CreatePayment] rawHash=" + rawHash2);
+        System.out.println("[VNPay][CreatePayment] signData(encoded)=" + encSign2);
+        System.out.println("[VNPay][CreatePayment] query(before hash)=" + queryUrl);
+        queryUrl += "&vnp_SecureHashType=HmacSHA512&vnp_SecureHash=" + vnp_SecureHash;
+        System.out.println("[VNPay][CreatePayment] redirectQuery=" + queryUrl);
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
     }
@@ -240,9 +299,28 @@ public class VnPayController {
             }
             String receivedHash = vnp.remove("vnp_SecureHash");
             vnp.remove("vnp_SecureHashType");
-            String signData = VnPayConfig.buildSignData(new TreeMap<>(vnp));
+            TreeMap<String,String> sortedReturn = new TreeMap<>(vnp);
+            String signData = VnPayConfig.buildSignData(sortedReturn);
             String calcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
-            boolean valid = calcHash.equals(receivedHash);
+            // Build encoded sign string as fallback
+            StringBuilder encSb = new StringBuilder();
+            boolean firstEnc = true;
+            for (Map.Entry<String,String> e2 : sortedReturn.entrySet()) {
+                String k = e2.getKey(); String val = e2.getValue(); if (val == null) val = "";
+                if (!firstEnc) encSb.append('&'); firstEnc = false;
+                try {
+                    encSb.append(URLEncoder.encode(k, StandardCharsets.UTF_8.toString())).append('=')
+                        .append(URLEncoder.encode(val, StandardCharsets.UTF_8.toString()));
+                } catch (Exception ex) { encSb.append(k).append('=').append(val); }
+            }
+            String encSignData = encSb.toString();
+            String encCalcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, encSignData);
+            System.out.println("[VNPay][Return] signData=" + signData);
+            System.out.println("[VNPay][Return] calcHash=" + calcHash);
+            System.out.println("[VNPay][Return] encSignData=" + encSignData);
+            System.out.println("[VNPay][Return] encCalcHash=" + encCalcHash);
+            System.out.println("[VNPay][Return] receivedHash=" + receivedHash);
+            boolean valid = calcHash.equals(receivedHash) || encCalcHash.equals(receivedHash);
             String respCode = vnp.getOrDefault("vnp_ResponseCode", "99");
             boolean success = "00".equals(respCode) && valid;
 

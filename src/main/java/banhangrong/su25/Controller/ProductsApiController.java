@@ -2,7 +2,9 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
-import banhangrong.su25.Repository.ProductLicensesRepository;
+import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.VouchersRepository;
+import banhangrong.su25.Entity.Vouchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +19,15 @@ import java.util.stream.Collectors;
 public class ProductsApiController {
 
     private final ProductsRepository productsRepository;
-    private final ProductLicensesRepository productLicensesRepository;
+    private final ProductImagesRepository productImagesRepository;
+    private final VouchersRepository vouchersRepository;
 
-    public ProductsApiController(ProductsRepository productsRepository) {
+    public ProductsApiController(ProductsRepository productsRepository,
+                                 ProductImagesRepository productImagesRepository,
+                                 VouchersRepository vouchersRepository) {
         this.productsRepository = productsRepository;
-        this.productLicensesRepository = null;
+        this.productImagesRepository = productImagesRepository;
+        this.vouchersRepository = vouchersRepository;
     }
 
     // Lightweight DTO to avoid lazy recursion and reduce payload
@@ -32,9 +38,33 @@ public class ProductsApiController {
         public String description;
         public BigDecimal price;
         public BigDecimal salePrice;
-        public Integer quantity;
-        public String downloadUrl;
-        public String status;
+    public Integer quantity;
+    public String downloadUrl;
+    public String primaryImage;
+    public String status;
+    }
+
+    // Public vouchers for product
+    @GetMapping("/{id}/vouchers")
+    public ResponseEntity<java.util.List<java.util.Map<String, Object>>> getVouchers(@PathVariable("id") Long id) {
+        return productsRepository.findById(id).map(p -> {
+            java.util.List<Vouchers> list = vouchersRepository.findBySellerIdAndProductIdOrderByUpdatedAtDesc(p.getSellerId(), p.getProductId());
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.util.List<java.util.Map<String,Object>> out = new java.util.ArrayList<>();
+            for (Vouchers v : list) {
+                if (!"active".equalsIgnoreCase(v.getStatus())) continue;
+                if (v.getStartAt() != null && now.isBefore(v.getStartAt())) continue;
+                if (v.getEndAt() != null && now.isAfter(v.getEndAt())) continue;
+                java.util.Map<String,Object> m = new java.util.LinkedHashMap<>();
+                m.put("code", v.getCode());
+                m.put("type", v.getDiscountType());
+                m.put("value", v.getDiscountValue());
+                m.put("minOrder", v.getMinOrder());
+                m.put("endAt", v.getEndAt());
+                out.add(m);
+            }
+            return ResponseEntity.ok(out);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     private ProductDto toDto(Products p) {
@@ -47,6 +77,18 @@ public class ProductsApiController {
         d.salePrice = p.getSalePrice();
         d.quantity = p.getQuantity();
         d.downloadUrl = p.getDownloadUrl();
+        // attempt to populate primaryImage from product_images if available
+        try {
+            if (this.productImagesRepository != null && p.getProductId() != null) {
+                var imgs = this.productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
+                if (imgs != null && !imgs.isEmpty()) {
+                    d.primaryImage = imgs.get(0).getImageUrl();
+                } else {
+                    var any = this.productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(p.getProductId());
+                    if (any != null && !any.isEmpty()) d.primaryImage = any.get(0).getImageUrl();
+                }
+            }
+        } catch (Exception ignored) {}
         d.status = p.getStatus();
         return d;
     }
@@ -56,39 +98,7 @@ public class ProductsApiController {
     public List<ProductDto> list(@RequestParam(name = "sellerId", required = false) Long sellerId) {
         List<Products> src = (sellerId != null) ? productsRepository.findBySellerId(sellerId) : productsRepository.findAll();
         List<ProductDto> dtos = src.stream().map(this::toDto).collect(Collectors.toList());
-        // If sellerId provided, populate quantity as remaining keys where product is license-based.
-        if (sellerId != null) {
-            try {
-                // Lazily obtain ProductLicensesRepository bean from application context to avoid breaking constructor DI
-                if (this.productLicensesRepository == null) {
-                    var ctx = org.springframework.web.context.ContextLoader.getCurrentWebApplicationContext();
-                    if (ctx != null && ctx.containsBean("productLicensesRepository")) {
-                        var repo = ctx.getBean("productLicensesRepository");
-                        if (repo instanceof ProductLicensesRepository) {
-                            // reflection assign to field (only for this request scope)
-                            java.lang.reflect.Field f = this.getClass().getDeclaredField("productLicensesRepository");
-                            f.setAccessible(true);
-                            f.set(this, repo);
-                        }
-                    }
-                }
-            } catch (Exception ignored) {}
-
-            if (this.productLicensesRepository != null) {
-                for (ProductDto d : dtos) {
-                    if (d.productId == null) continue;
-                    try {
-                        long sold = productLicensesRepository.countByProductViaOrders(d.productId);
-                        long pre = productLicensesRepository.countPreGeneratedForProduct(d.productId);
-                        int capacity = d.quantity != null ? d.quantity : 0;
-                        long remaining = Math.max(0L, (long) capacity - sold - pre);
-                        d.quantity = (int) Math.min(remaining, Integer.MAX_VALUE);
-                    } catch (Exception e) {
-                        // ignore per-product failures
-                    }
-                }
-            }
-        }
+        // Return DTOs with quantity as stored in DB (do not override with remaining keys)
         return dtos;
     }
 
@@ -98,6 +108,28 @@ public class ProductsApiController {
         return productsRepository.findById(id)
                 .map(p -> ResponseEntity.ok(toDto(p)))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // GET /api/products/{id}/images -> list of image URLs (primary first)
+    @GetMapping("/{id}/images")
+    public ResponseEntity<java.util.List<String>> getImages(@PathVariable("id") Long id) {
+        try {
+            if (this.productImagesRepository == null) return ResponseEntity.ok(java.util.List.of());
+            var imgs = this.productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id);
+            java.util.List<String> out = new java.util.ArrayList<>();
+            if (imgs != null && !imgs.isEmpty()) {
+                out.add(imgs.get(0).getImageUrl());
+            }
+            // also append the first image if primary wasn't present or to provide fallback
+            var any = this.productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(id);
+            if (any != null && !any.isEmpty()) {
+                String u = any.get(0).getImageUrl();
+                if (out.isEmpty() || !out.get(0).equals(u)) out.add(u);
+            }
+            return ResponseEntity.ok(out);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.List.of());
+        }
     }
 
     // Create product (sellerId must be provided via body or query)

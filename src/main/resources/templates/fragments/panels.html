@@ -107,13 +107,13 @@
       <table class="table slim" style="width:100%;min-width:780px;">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Key</th>
-            <th>Product</th>
-            <th>Order</th>
-            <th>Active</th>
-            <th>Expire date</th>
-            <th>Activated At</th>
+            <th data-sort="licenseId" class="sortable">ID <span class="sort-indicator"></span></th>
+            <th data-sort="licenseKey" class="sortable">Key <span class="sort-indicator"></span></th>
+            <th data-sort="productName" class="sortable">Product <span class="sort-indicator"></span></th>
+            <th data-sort="orderId" class="sortable">Order <span class="sort-indicator"></span></th>
+            <th data-sort="isActive" class="sortable">Active <span class="sort-indicator"></span></th>
+            <th data-sort="expireDate" class="sortable">Expire date <span class="sort-indicator"></span></th>
+            <th data-sort="activationDate" class="sortable">Activated At <span class="sort-indicator"></span></th>
             <th>Device</th>
           </tr>
         </thead>
@@ -380,4 +380,82 @@
       </div>
     </div>
   </section>
+  <!-- Check Key Panel -->
+  <section id="checkKeyPanel" class="card section-card" hidden data-panel="check-key">
+    <div class="header" style="align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-weight:700;flex:1;min-width:160px;">Check key</div>
+      <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <input id="ck_key" type="text" class="input" placeholder="Enter license key" style="min-width:200px;" />
+        <button id="ck_btnCheck" type="button" class="btn primary">Check</button>
+        <button id="ck_btnReset" type="button" class="btn" title="Clear"><i class="ti ti-restore"></i></button>
+      </div>
+    </div>
+    <div class="body" style="overflow:auto;">
+      <div id="ck_result" style="margin-bottom:12px;display:none;">
+        <h3 style="margin:0 0 6px 0;">Key details</h3>
+        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+          <div id="ck_details" class="panel-details footer-note" style="flex:1;min-width:220px;">No key checked yet.</div>
+          <div id="ck_product_display" style="min-width:220px;max-width:320px;"></div>
+          <div id="ck_device_box" style="min-width:200px;max-width:320px;padding:10px;border-radius:8px;border:1px solid var(--muted);background:var(--surface);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <i class="fa fa-desktop" aria-hidden="true" style="font-size:18px;color:var(--muted)"></i>
+              <div style="font-weight:700;">Device</div>
+            </div>
+            <div id="ck_device_info" class="footer-note" style="line-height:1.45;display:flex;flex-direction:column;gap:6px;">
+              <div><i class="fa fa-id-badge" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>ID:</strong> <span id="ck_device_id">-</span></div>
+              <div><i class="fa fa-user" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>Host:</strong> <span id="ck_device_host">-</span></div>
+              <div><i class="fa fa-window-maximize" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>Platform:</strong> <span id="ck_device_platform">-</span></div>
+              <div><i class="fa fa-microchip" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>CPU:</strong> <span id="ck_device_cpu">-</span></div>
+              <div><i class="fa fa-layer-group" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>Cores:</strong> <span id="ck_device_cores">-</span></div>
+              <div><i class="fa fa-memory" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>Memory:</strong> <span id="ck_device_memory">-</span></div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <i class="fa fa-folder-open" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i>
+                <strong style="flex:0 0 auto;">Path:</strong>
+                <a id="ck_device_path" href="#" target="_blank" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle;">-</a>
+              </div>
+              <div><i class="fa fa-clock" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>Last used:</strong> <span id="ck_device_lastUsed">-</span></div>
+              <div><i class="fa fa-calendar-check" aria-hidden="true" style="width:18px;display:inline-block;color:var(--muted)"></i> <strong>Activated:</strong> <span id="ck_device_activated">-</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="ck_history_wrap" style="display:none;margin-top:8px;">
+        <h4 style="margin:0 0 6px 0;">Usage history</h4>
+        <div class="table-wrap">
+          <table class="table slim" style="width:100%;min-width:600px;">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Action</th>
+                <th>User</th>
+                <th>IP</th>
+                <th>Device</th>
+              </tr>
+            </thead>
+            <tbody id="ck_history"></tbody>
+          </table>
+        </div>
+        <div id="ck_history_pager" class="pager" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;"></div>
+      </div>
+      <div id="ck_helper" class="footer-note" style="margin-top:10px;">Enter a license key to view its status and usage history. This lookup does not navigate away from the dashboard.</div>
+      <!-- <script>
+        (function(){
+          window.setDevicePath = function(fullUrl, maxLen = 48){
+            try{
+              const a = document.getElementById('ck_device_path');
+              if(!a) return;
+              if(!fullUrl){ a.href = '#'; a.title = ''; a.textContent = '-'; return; }
+              a.href = fullUrl;
+              a.title = fullUrl;
+              if(fullUrl.length <= maxLen){ a.textContent = fullUrl; return; }
+              // shorten middle
+              const keep = Math.max(8, Math.floor((maxLen - 3) / 2));
+              const start = fullUrl.slice(0, keep);
+              const end = fullUrl.slice(fullUrl.length - keep);
+              a.textContent = start + '...' + end;
+            }catch(e){ console && console.warn && console.warn('setDevicePath error', e); }
+          };
+        })();
+      </script> -->
+    </div>
   </section>

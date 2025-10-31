@@ -12,4 +12,6 @@ public interface VouchersRepository extends JpaRepository<Vouchers, Long> {
     List<Vouchers> findBySellerIdAndProductIdOrderByUpdatedAtDesc(Long sellerId, Long productId);
     List<Vouchers> findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByUpdatedAtDesc(Long sellerId, Long productId, String code);
     boolean existsBySellerIdAndProductIdAndCodeIgnoreCase(Long sellerId, Long productId, String code);
+    // Customer-facing: look up voucher by code
+    java.util.List<Vouchers> findByCodeIgnoreCaseOrderByUpdatedAtDesc(String code);
 }

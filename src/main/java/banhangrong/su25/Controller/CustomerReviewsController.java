@@ -22,6 +22,11 @@ import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Controller
 public class CustomerReviewsController {
@@ -42,7 +47,9 @@ public class CustomerReviewsController {
     private ProductImagesRepository productImagesRepository;
 
     @GetMapping("/customer/reviews")
-    public String reviews(Model model) {
+    public String reviews(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                         @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                         Model model) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
@@ -54,8 +61,13 @@ public class CustomerReviewsController {
             
             Users user = userOptional.get();
             
-            // Lấy tất cả reviews của user hiện tại
-            List<ProductReviews> userReviews = productReviewsRepository.findByUserIdOrderByCreatedAtDesc(user.getUserId());
+            // Pagination setup
+            Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), 
+                                             Sort.by(Sort.Order.desc("createdAt")));
+            
+            // Lấy reviews của user hiện tại với pagination
+            Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserId(user.getUserId(), pageable);
+            List<ProductReviews> userReviews = reviewsPage.getContent();
             
             // Lấy thông tin sản phẩm cho mỗi review
             Map<Long, Products> productsMap = new HashMap<>();
@@ -89,6 +101,12 @@ public class CustomerReviewsController {
             model.addAttribute("reviews", userReviews);
             model.addAttribute("productsMap", productsMap);
             model.addAttribute("productImagesMap", productImagesMap);
+            
+            // Pagination attributes
+            model.addAttribute("page", reviewsPage.getNumber());
+            model.addAttribute("totalPages", reviewsPage.getTotalPages());
+            model.addAttribute("size", reviewsPage.getSize());
+            model.addAttribute("totalReviews", reviewsPage.getTotalElements());
             
             return "customer/reviews";
         } catch (Exception e) {

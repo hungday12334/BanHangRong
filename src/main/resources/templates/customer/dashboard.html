@@ -57,21 +57,6 @@
 		.brand {
 			font-weight: 800;
 			letter-spacing: .2px;
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			cursor: pointer;
-			text-decoration: none;
-			color: inherit;
-		}
-
-		.brand:hover {
-			color: var(--brand);
-		}
-
-		.logo {
-			height: 32px;
-			width: auto;
 		}
 
 		.top-actions {
@@ -82,11 +67,18 @@
 			position: relative;
 		}
 
-		.lang,
-		.notif,
-		.user {
+		.support-link {
 			font-size: 14px;
 			color: var(--muted);
+			text-decoration: none;
+			padding: 6px 10px;
+			border-radius: 8px;
+			transition: all 0.2s;
+		}
+
+		.support-link:hover {
+			background: #f3f4f6;
+			color: #111827;
 		}
 
 		.user-btn {
@@ -98,7 +90,25 @@
 			border: 1px solid var(--line);
 			padding: 6px 10px;
 			border-radius: 8px;
-			background: #fff
+			background: #fff;
+			white-space: nowrap;
+		}
+		
+		.user-btn .wallet-badge {
+			margin-left: 8px;
+			padding: 4px 8px;
+			background: #f0f9ff;
+			border: 1px solid #bae6fd;
+			border-radius: 6px;
+			font-weight: 600;
+			color: #0369a1;
+			font-size: 12px;
+		}
+		
+		@media (max-width: 768px) {
+			.user-btn .wallet-badge {
+				display: none;
+			}
 		}
 
 		.user-menu {
@@ -159,38 +169,30 @@
 
 		.cart {
 			position: relative;
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			padding: 8px 12px;
-			background: #3b82f6;
-			color: white;
-			text-decoration: none;
+			width: 28px;
+			height: 28px;
+			display: grid;
+			place-items: center;
+			border: 1px solid var(--line);
 			border-radius: 8px;
-			font-weight: 500;
-			transition: all 0.2s ease;
-			border: none;
-			cursor: pointer;
-		}
-
-		.cart:hover {
-			background: #2563eb;
-			transform: translateY(-1px);
-			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+			text-decoration: none;
+			color: #111827;
 		}
 
 		.cart .badge {
+			position: absolute;
+			top: -6px;
+			right: -6px;
 			background: #ef4444;
-			color: white;
-			border-radius: 50%;
-			padding: 2px 6px;
-			font-size: 12px;
-			font-weight: 600;
+			color: #fff;
 			min-width: 18px;
 			height: 18px;
+			border-radius: 9px;
+			font-size: 11px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			padding: 0 5px;
 		}
 
 		.nav {
@@ -403,23 +405,23 @@
 	<div class="wrapper">
 		<!-- Header -->
 		<div class="topbar">
-			<a href="/customer/dashboard" class="brand">
-				<img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
-				BanHangRong
-			</a>
+			<div class="brand">BanHangRong</div>
 			<nav class="nav" aria-label="Main">
 				<a href="/customer/dashboard">Home</a>
 				<a href="/categories">Category</a>
 				<a href="#">License Software</a>
 				<a href="#">Game Keys</a>
-				<a href="#">Voucher</a>
-				<a href="#">Support</a>
+				<a href="/vouchers">Voucher</a>
+				<a href="/customer/support">Support</a>
 			</nav>
 			<div class="top-actions">
-				<div class="notif">Notification</div>
+				<a href="/customer/support" class="support-link">Support</a>
 				<div class="user" style="position:relative">
 					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
 						<span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
+						<span class="wallet-badge">
+							💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
+						</span>
 						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
 								stroke-linejoin="round" />
@@ -449,10 +451,6 @@
 					<form id="logoutForm" method="post" action="/logout" style="display:none;">
 					</form>
 				</div>
-				<!-- Wallet Balance Display -->
-				<div class="wallet-balance" style="padding: 6px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; color: #0ea5e9; font-weight: 600; font-size: 14px;">
-					💰 <span th:text="${user != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') : '0'}">0</span>₫
-				</div>
 				<div class="search">
 					<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
 						<input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
@@ -463,10 +461,8 @@
 							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">
-					🛒
-					<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span>
-				</a>
+				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
 		</div>
 
@@ -610,7 +606,7 @@
 			<div
 				style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
 				<h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">VNPay Top Up</h3>
-				<div style="color:#6b7280;font-size:14px;margin-bottom:8px">Enter amount to top up (VND)</div>
+				<div style="color:#6b7280;font-size:14px;margin-bottom:8px">Enter amount to top up (VND) — minimum 20,000</div>
 				<input id="topupAmountField" type="text" inputmode="numeric" placeholder="200000"
 					style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;font-weight:600" />
 				<div id="topupErr" style="color:#ef4444;font-size:12px;height:16px;margin-top:6px"></div>
@@ -646,6 +642,7 @@
 					const v = field.value || '';
 					const clean = v.replace(/[^0-9]/g, '');
 					if (!clean) { err.textContent = 'Invalid amount'; return; }
+					if (Number(clean) < 20000) { err.textContent = 'Minimum top up is 20,000 VND'; return; }
 					document.getElementById('topupAmountInput').value = clean;
 					ask.style.display = 'none';
 					__topupForm.submit();
@@ -707,21 +704,6 @@
 					});
 				}
 			});
-
-			// VNPay topup function
-			function topupPrompt(e) {
-				e.preventDefault();
-				const v = prompt('Enter amount to top up (VND):', '200000');
-				if (!v) return false;
-				const clean = v.replace(/[^0-9]/g, '');
-				if (!clean) {
-					alert('Please enter a valid amount');
-					return false;
-				}
-				document.getElementById('topupAmountInput').value = clean;
-				e.target.submit();
-				return true;
-			}
 		</script>
 		
 	</div>

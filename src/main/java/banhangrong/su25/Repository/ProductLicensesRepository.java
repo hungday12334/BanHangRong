@@ -80,4 +80,7 @@ public interface ProductLicensesRepository extends JpaRepository<ProductLicenses
   // Count pre-generated licenses (not tied to order_item_id) that belong to a product by key prefix pattern
   @Query(value = "SELECT COUNT(*) FROM product_licenses l WHERE l.order_item_id IS NULL AND l.license_key LIKE CONCAT('PRD', :productId, '-%')", nativeQuery = true)
   long countPreGeneratedForProduct(@Param("productId") Long productId);
+
+  // Find a license by exact key
+  java.util.Optional<ProductLicenses> findByLicenseKey(String licenseKey);
 }
