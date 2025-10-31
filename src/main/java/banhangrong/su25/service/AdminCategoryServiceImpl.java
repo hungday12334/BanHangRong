@@ -3,7 +3,6 @@ package banhangrong.su25.service;
 import banhangrong.su25.DTO.CategoryFilter;
 import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Repository.AdminCategoryRepository;
-import banhangrong.su25.Repository.CategoriesRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -77,6 +76,12 @@ public class AdminCategoryServiceImpl implements AdminCategoryService{
     @Override
     public long countByName(String name) {
         return categoriesRepository.countByName(name);
+    }
+
+    @Override
+    public void removeCategoryById(Long id) {
+        categoriesRepository.deleteFromCategoriesProducts(id);
+        categoriesRepository.deleteFromCategories(id);
     }
 
 

@@ -287,10 +287,13 @@
                                         th:data-desc="${c.description}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-delete"
-                                        th:data-id="${c.categoryId}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                <form th:action="@{/admin/category/delete}" method="post" style="display:inline;">
+                                    <input type="hidden" name="categoryId" th:value="${c.categoryId}">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-delete"
+                                            th:data-id="${c.categoryId}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </td>
                             <td th:text="${c.categoryId}"></td>
                             <td th:text="${c.name}"></td>

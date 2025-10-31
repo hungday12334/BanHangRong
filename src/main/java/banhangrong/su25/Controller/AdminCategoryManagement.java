@@ -2,6 +2,7 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.DTO.CategoryFilter;
 import banhangrong.su25.Entity.Categories;
+import banhangrong.su25.Repository.CategoriesRepository;
 import banhangrong.su25.service.AdminCategoryService;
 import banhangrong.su25.service.CategoryService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import java.util.List;
 public class AdminCategoryManagement {
 
     @Autowired private AdminCategoryService adminCategoryService;
+
     @GetMapping("/filter")
     public String filterCategory(Model model, @ModelAttribute("filter") CategoryFilter categoryFilter, RedirectAttributes redirectAttributes){
         List<Categories> listFilterCategory = adminCategoryService.filter(categoryFilter);
@@ -108,4 +110,26 @@ public class AdminCategoryManagement {
         redirectAttributes.addFlashAttribute("error", "Invalid action type");
         return "redirect:/admin/category";
     }
+    @PostMapping("/delete")
+    public String deleteCategory(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            // Lấy categoryId từ form
+            String idParam = request.getParameter("categoryId");
+            Long categoryId = Long.parseLong(idParam);
+
+            // Gọi service xóa
+            adminCategoryService.removeCategoryById(categoryId);
+
+            // Gửi thông báo thành công
+            redirectAttributes.addFlashAttribute("success", "Category deleted successfully!");
+
+        } catch (Exception e) {
+            // Nếu lỗi, thêm thông báo lỗi
+            redirectAttributes.addFlashAttribute("error", "Failed to delete category. It may be in use.");
+        }
+
+        // Chuyển hướng lại trang danh sách
+        return "redirect:/admin/category";
+    }
+
 }
