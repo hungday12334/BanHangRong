@@ -148,13 +148,13 @@
 						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
 						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
 						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
-						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
-							style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+                        <form id="topupForm" class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+                            style="display:flex;gap:8px;align-items:center">
 							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
 								th:value="${_csrf.token}" />
 							<input type="hidden" name="amount" id="topupAmountInput" />
-							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
-								(VNPay)</button>
+                            <button id="openTopupModalBtn" type="button" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+                                (VNPay)</button>
 						</form>
 						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
 						<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
@@ -273,7 +273,26 @@
 		</div>
 	</div>
 
-	<script>
+    <!-- Top-up Modal -->
+    <div id="topupModal" style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;">
+        <div role="dialog" aria-modal="true" aria-labelledby="topupTitle" style="background:#fff;border-radius:12px;min-width:320px;max-width:92vw;padding:16px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.18);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <h3 id="topupTitle" style="margin:0;font-size:18px;font-weight:700;color:#111827">Top Up (VNPay)</h3>
+                <button id="closeTopupModalBtn" type="button" aria-label="Close" style="background:transparent;border:none;font-size:20px;line-height:1;cursor:pointer;color:#6b7280">×</button>
+            </div>
+            <div>
+                <label for="topupAmountField" style="display:block;margin-bottom:6px;color:#374151;font-weight:600">Amount (VND)</label>
+                <input id="topupAmountField" type="number" inputmode="numeric" min="1000" step="1000" placeholder="200000" style="width:100%;height:40px;padding:0 12px;border:1px solid #e5e7eb;border-radius:8px;outline:none;" />
+                <div id="topupError" role="alert" style="display:none;color:#ef4444;font-size:12px;margin-top:6px;">Please enter a valid amount (>= 1,000 VND).</div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button type="button" id="cancelTopupBtn" style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#374151;cursor:pointer;">Cancel</button>
+                <button type="button" id="confirmTopupBtn" style="padding:8px 12px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
 		// Load rating statistics when page loads
 		document.addEventListener('DOMContentLoaded', function() {
 			const productId = window.location.pathname.split('/').pop();
@@ -374,20 +393,75 @@
 			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 		})();
 
-		// VNPay topup function
-		function topupPrompt(e) {
-			e.preventDefault();
-			const v = prompt('Enter amount to top up (VND):', '200000');
-			if (!v) return false;
-			const clean = v.replace(/[^0-9]/g, '');
-			if (!clean) {
-				alert('Please enter a valid amount');
-				return false;
-			}
-			document.getElementById('topupAmountInput').value = clean;
-			e.target.submit();
-			return true;
-		}
+        // VNPay topup modal UI
+        (function() {
+            const openBtn = document.getElementById('openTopupModalBtn');
+            const modal = document.getElementById('topupModal');
+            const closeBtn = document.getElementById('closeTopupModalBtn');
+            const cancelBtn = document.getElementById('cancelTopupBtn');
+            const confirmBtn = document.getElementById('confirmTopupBtn');
+            const amountField = document.getElementById('topupAmountField');
+            const errorEl = document.getElementById('topupError');
+            const form = document.getElementById('topupForm');
+            const hiddenAmount = document.getElementById('topupAmountInput');
+
+            function openModal() {
+                if (!modal) return;
+                modal.style.display = 'flex';
+                errorEl && (errorEl.style.display = 'none');
+                if (amountField) {
+                    amountField.value = '';
+                    setTimeout(() => amountField.focus(), 0);
+                }
+                // keep dropdown open when opening modal
+            }
+
+            function closeModal() {
+                if (!modal) return;
+                modal.style.display = 'none';
+            }
+
+            function validateAmount(v) {
+                if (v == null || v === '') return false;
+                const n = Number(String(v).replace(/[^0-9]/g, ''));
+                return Number.isFinite(n) && n >= 1000;
+            }
+
+            function submitTopup() {
+                const raw = amountField ? amountField.value : '';
+                const clean = String(raw).replace(/[^0-9]/g, '');
+                if (!validateAmount(clean)) {
+                    if (errorEl) errorEl.style.display = 'block';
+                    if (amountField) amountField.focus();
+                    return;
+                }
+                if (hiddenAmount) hiddenAmount.value = clean;
+                closeModal();
+                if (form) form.submit();
+            }
+
+            if (openBtn) openBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openModal();
+            });
+            if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); closeModal(); });
+            if (cancelBtn) cancelBtn.addEventListener('click', function(e) { e.preventDefault(); closeModal(); });
+            if (confirmBtn) confirmBtn.addEventListener('click', function(e) { e.preventDefault(); submitTopup(); });
+
+            // Close when clicking outside dialog
+            if (modal) modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeModal();
+            });
+
+            // Keyboard interactions
+            document.addEventListener('keydown', function(e) {
+                if (modal && modal.style.display === 'flex') {
+                    if (e.key === 'Escape') closeModal();
+                    if (e.key === 'Enter') submitTopup();
+                }
+            });
+        })();
 	</script>
 	</div>
 </body>
