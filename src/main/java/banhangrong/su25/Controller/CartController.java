@@ -21,6 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import jakarta.servlet.http.HttpSession;
+import banhangrong.su25.Repository.VouchersRepository;
+import banhangrong.su25.Entity.Vouchers;
+import java.time.LocalDateTime;
 
 @Controller
 public class CartController {
@@ -31,19 +35,22 @@ public class CartController {
     private final UsersRepository usersRepository;
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
+    private final VouchersRepository vouchersRepository;
 
     public CartController(ShoppingCartRepository cartRepository,
                           ProductsRepository productsRepository,
                           ProductImagesRepository productImagesRepository,
                           UsersRepository usersRepository,
                           OrdersRepository ordersRepository,
-                          OrderItemsRepository orderItemsRepository) {
+                          OrderItemsRepository orderItemsRepository,
+                          VouchersRepository vouchersRepository) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.usersRepository = usersRepository;
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
+        this.vouchersRepository = vouchersRepository;
     }
 
     // Get current user ID from authentication
@@ -58,7 +65,7 @@ public class CartController {
     }
 
     @GetMapping("/cart")
-    public String viewCart(Model model) {
+    public String viewCart(Model model, HttpSession session) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth != null ? auth.getName() : null;
         Optional<Users> userOptional = username != null ? usersRepository.findByUsername(username) : Optional.empty();
@@ -95,9 +102,41 @@ public class CartController {
             m.put("stock", p.getQuantity() != null ? p.getQuantity() : 0);
             viewItems.add(m);
         }
+        // Voucher from session if present and valid
+        Map<String,Object> applied = (Map<String,Object>) session.getAttribute("appliedVoucher");
+        BigDecimal discount = BigDecimal.ZERO;
+        if (applied != null) {
+            try {
+                String code = Objects.toString(applied.get("code"), null);
+                if (code != null) {
+                    var candidates = vouchersRepository.findByCodeIgnoreCaseOrderByUpdatedAtDesc(code);
+                    Vouchers v = candidates.isEmpty() ? null : candidates.get(0);
+                    if (v != null && Objects.equals(v.getStatus(), "active") &&
+                        (v.getStartAt() == null || !LocalDateTime.now().isBefore(v.getStartAt())) &&
+                        (v.getEndAt() == null || !LocalDateTime.now().isAfter(v.getEndAt()))) {
+                        // eligible total for that product id
+                        BigDecimal eligible = viewItems.stream()
+                                .filter(m -> Objects.equals(((Products)m.get("product")).getProductId(), v.getProductId()))
+                                .map(m -> (BigDecimal) m.get("lineTotal"))
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                        if (v.getMinOrder() == null || eligible.compareTo(v.getMinOrder()) >= 0) {
+                            if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
+                                discount = eligible.multiply(v.getDiscountValue().divide(new BigDecimal("100")));
+                            } else {
+                                discount = v.getDiscountValue();
+                            }
+                            if (discount.compareTo(eligible) > 0) discount = eligible;
+                            model.addAttribute("appliedVoucher", v.getCode());
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
         model.addAttribute("user", user);
         model.addAttribute("items", viewItems);
-        model.addAttribute("total", total);
+        model.addAttribute("discount", discount);
+        model.addAttribute("total", total.subtract(discount));
         model.addAttribute("cartCount", items.size());
         return "customer/cart";
     }
@@ -126,6 +165,22 @@ public class CartController {
             cartRepository.save(item);
         }
         return "redirect:/cart";
+    }
+
+    @PostMapping("/cart/apply-voucher")
+    public String applyVoucher(@RequestParam("code") String code, HttpSession session) {
+        if (code == null || code.trim().isEmpty()) return "redirect:/cart?voucher=invalid";
+        // Simply store code to session; validation and discount computed in viewCart
+        Map<String,Object> m = new HashMap<>();
+        m.put("code", code.trim());
+        session.setAttribute("appliedVoucher", m);
+        return "redirect:/cart?voucher=applied";
+    }
+
+    @PostMapping("/cart/remove-voucher")
+    public String removeVoucher(HttpSession session) {
+        session.removeAttribute("appliedVoucher");
+        return "redirect:/cart?voucher=removed";
     }
 
     // Ajax update for quantity with stock validation
