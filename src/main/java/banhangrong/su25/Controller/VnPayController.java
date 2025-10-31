@@ -51,6 +51,44 @@ public class VnPayController {
         this.orderItemsRepository = orderItemsRepository;
     }
 
+    // Optional: VNPay IPN endpoint for server-to-server confirmation
+    @GetMapping("/payment/vnpay/ipn")
+    @Transactional
+    public String vnpIpn(HttpServletRequest request) {
+        try {
+            Map<String,String[]> fields = request.getParameterMap();
+            Map<String,String> vnp = new HashMap<>();
+            for (Map.Entry<String,String[]> e : fields.entrySet()) {
+                if (e.getKey().startsWith("vnp_")) vnp.put(e.getKey(), e.getValue()[0]);
+            }
+            String receivedHash = vnp.remove("vnp_SecureHash");
+            vnp.remove("vnp_SecureHashType");
+            String signData = VnPayConfig.buildSignData(new TreeMap<>(vnp));
+            String calcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
+            boolean valid = calcHash.equals(receivedHash);
+            String respCode = vnp.getOrDefault("vnp_ResponseCode", "99");
+            if (!valid || !"00".equals(respCode)) {
+                return "redirect:/customer/dashboard?topup=failure&code=" + respCode;
+            }
+            String orderInfo = vnp.getOrDefault("vnp_OrderInfo", "");
+            if (orderInfo.startsWith("TOPUP:")) {
+                try {
+                    Long uid = Long.parseLong(orderInfo.substring("TOPUP:".length()));
+                    long creditedAmountVnd = Long.parseLong(vnp.getOrDefault("vnp_Amount", "0")) / 100L;
+                    usersRepository.findById(uid).ifPresent(u -> {
+                        java.math.BigDecimal current = u.getBalance() != null ? u.getBalance() : java.math.BigDecimal.ZERO;
+                        java.math.BigDecimal inc = java.math.BigDecimal.valueOf(creditedAmountVnd);
+                        u.setBalance(current.add(inc));
+                        usersRepository.save(u);
+                    });
+                } catch (Exception ignored) {}
+            }
+            return "redirect:/customer/dashboard?topup=success";
+        } catch (Exception ex) {
+            return "redirect:/customer/dashboard?topup=failure&code=err";
+        }
+    }
+
     private Long getCurrentUserId() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -128,8 +166,9 @@ public class VnPayController {
             }
         }
         String queryUrl = query.toString();
-        // Sign exactly the URL-encoded query string that will be sent (without vnp_SecureHash*)
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, queryUrl);
+        // Per VNPay docs: sign RAW sorted key=value (not URL-encoded)
+        String signData = VnPayConfig.buildSignData(vnp_Params);
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash + "&vnp_SecureHashType=HmacSHA512";
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
@@ -212,8 +251,9 @@ public class VnPayController {
             }
         }
         String queryUrl = query.toString();
-        // Sign exactly the URL-encoded query string that will be sent (without vnp_SecureHash*)
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, queryUrl);
+        // Per VNPay docs: sign RAW sorted key=value (not URL-encoded)
+        String signData2 = VnPayConfig.buildSignData(vnp_Params);
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData2);
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash + "&vnp_SecureHashType=HmacSHA512";
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
@@ -232,6 +272,9 @@ public class VnPayController {
             vnp.remove("vnp_SecureHashType");
             String signData = VnPayConfig.buildSignData(new TreeMap<>(vnp));
             String calcHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, signData);
+            System.out.println("[VNPay][Return] signData=" + signData);
+            System.out.println("[VNPay][Return] calcHash=" + calcHash);
+            System.out.println("[VNPay][Return] receivedHash=" + receivedHash);
             boolean valid = calcHash.equals(receivedHash);
             String respCode = vnp.getOrDefault("vnp_ResponseCode", "99");
             boolean success = "00".equals(respCode) && valid;
