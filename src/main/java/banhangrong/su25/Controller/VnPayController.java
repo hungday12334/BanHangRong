@@ -107,16 +107,12 @@ public class VnPayController {
 
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
-        StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                hashData.append(fieldName);
-                hashData.append('=');
-                hashData.append(fieldValue);
                 try {
                     query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
                     query.append('=');
@@ -128,12 +124,12 @@ public class VnPayController {
                 }
                 if (itr.hasNext()) {
                     query.append('&');
-                    hashData.append('&');
                 }
             }
         }
         String queryUrl = query.toString();
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, hashData.toString());
+        // IMPORTANT: per VNPay docs, sign the URL-encoded query string (without vnp_SecureHash)
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, queryUrl);
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
@@ -195,36 +191,29 @@ public class VnPayController {
 
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
-        StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                //Build hash data
-                hashData.append(fieldName);
-                hashData.append('=');
-                hashData.append(fieldValue);
-                //Build query
                 try {
                     query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
                     query.append('=');
                     query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
                 } catch (Exception e) {
-                    // Fallback to default encoding
                     query.append(fieldName);
                     query.append('=');
                     query.append(fieldValue);
                 }
                 if (itr.hasNext()) {
                     query.append('&');
-                    hashData.append('&');
                 }
             }
         }
         String queryUrl = query.toString();
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, hashData.toString());
+        // Sign the URL-encoded query string (without vnp_SecureHash)
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, queryUrl);
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
         return "redirect:" + paymentUrl;
