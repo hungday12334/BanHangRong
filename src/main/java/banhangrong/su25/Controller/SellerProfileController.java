@@ -354,10 +354,10 @@ public class SellerProfileController {
 
     // === ĐỔI MẬT KHẨU VỚI ĐẦY ĐỦ VALIDATION ===
     @PostMapping("/profile/change-password")
-    public String changePassword(@RequestParam String currentPassword,
-                                 @RequestParam String newPassword,
-                                 @RequestParam String confirmPassword,
-                                 RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> changePassword(@RequestParam String currentPassword,
+                                            @RequestParam String newPassword,
+                                            @RequestParam String confirmPassword) {
         try {
             System.out.println("=== START PASSWORD CHANGE ===");
 
@@ -366,50 +366,47 @@ public class SellerProfileController {
 
             // ===== VALIDATION 1: Check empty fields =====
             if (currentPassword == null || currentPassword.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập mật khẩu hiện tại");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mật khẩu hiện tại"));
             }
 
             if (newPassword == null || newPassword.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập mật khẩu mới");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mật khẩu mới"));
             }
 
             if (confirmPassword == null || confirmPassword.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng xác nhận mật khẩu mới");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng xác nhận mật khẩu mới"));
             }
 
             // ===== VALIDATION 2: Check current password =====
             if (!userProfileService.verifyPassword(currentPassword, user.getPassword())) {
                 System.out.println("⚠️ Incorrect current password attempt for user: " + user.getUsername());
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu hiện tại không đúng");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu hiện tại không đúng"));
             }
 
             // ===== VALIDATION 3: Check password length =====
             if (newPassword.length() < 6) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới phải có ít nhất 6 ký tự");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu mới phải có ít nhất 6 ký tự"));
             }
 
             // ===== VALIDATION 4: Check password maximum length =====
             if (newPassword.length() > 100) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu không được vượt quá 100 ký tự");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu không được vượt quá 100 ký tự"));
             }
 
-            // ===== VALIDATION 5: Check password confirmation match =====
+            // ===== VALIDATION 5: Check password does not contain spaces =====
+            if (newPassword.contains(" ")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu không được chứa dấu cách"));
+            }
+
+            // ===== VALIDATION 6: Check password confirmation match =====
             if (!newPassword.equals(confirmPassword)) {
                 System.out.println("⚠️ Password confirmation does not match");
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu xác nhận không khớp");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu xác nhận không khớp"));
             }
 
-            // ===== VALIDATION 6: Check if new password is same as current =====
+            // ===== VALIDATION 7: Check if new password is same as current =====
             if (userProfileService.verifyPassword(newPassword, user.getPassword())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới phải khác mật khẩu hiện tại");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu mới phải khác mật khẩu hiện tại"));
             }
 
             // ===== SECURITY: Sanitize password (prevent XSS in logs) =====
@@ -419,17 +416,19 @@ public class SellerProfileController {
             userProfileService.changePassword(sellerId, newPassword);
 
             System.out.println("✅ Password changed successfully for user: " + user.getUsername());
-            redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đổi mật khẩu thành công!"
+            ));
 
         } catch (IllegalArgumentException e) {
             System.out.println("❌ Validation error: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             System.out.println("❌ Error changing password: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại!");
+            return ResponseEntity.status(500).body(Map.of("error", "Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại!"));
         }
-
-        return "redirect:/seller/profile";
     }
 }

@@ -1097,13 +1097,19 @@
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (newPassword !== confirmPassword) {
-                showToast('Password confirmation does not match!', 'error');
+            // Client-side validation (bổ sung kiểm tra dấu cách)
+            if (newPassword.includes(' ')) {
+                showToast('Mật khẩu không được chứa dấu cách!', 'error');
                 return;
             }
 
-            if (newPassword.length < 8) {
-                showToast('Password must be at least 8 characters!', 'error');
+            if (newPassword !== confirmPassword) {
+                showToast('Mật khẩu xác nhận không khớp!', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'error');
                 return;
             }
 
@@ -1116,20 +1122,20 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                if (response.ok) {
-                    showToast('Password changed successfully!', 'success');
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || 'Đổi mật khẩu thành công!', 'success');
                     passwordModal.style.display = 'none';
                     passwordForm.reset();
                     strengthIndicator.style.display = 'none';
-                } else {
-                    return response.text().then(text => {
-                        throw new Error(text || 'Current password is incorrect');
-                    });
+                } else if (data.error) {
+                    showToast(data.error, 'error');
                 }
             })
             .catch(error => {
-                showToast('Error: ' + error.message, 'error');
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại!', 'error');
             });
         });
 
