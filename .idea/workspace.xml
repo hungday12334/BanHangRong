@@ -4,32 +4,45 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): enhance chat UI with unread message indicators and improved welcome screen">
-      <change afterPath="$PROJECT_DIR$/ARCHITECTURE_DIAGRAM.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BACKEND_IMPLEMENTATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DEBUG_REACTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ENHANCED_CHAT_FEATURES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIXES_APPLIED.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_EMOJI_REACTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_MESSAGE_ID_MATCHING.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_MESSAGE_POSITION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QUICK_START_ENHANCED_CHAT.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QUICK_TEST_REACTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README_CHAT_FEATURES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README_ENHANCED_CHAT.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SETUP_ENHANCED_CHAT.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TOM_TAT_FIX_REACTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VISUAL_DEMO_REACTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VISUAL_GUIDE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apply-chat-db-update.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/add_enhanced_chat_columns.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/MessageDeleteDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/MessageReactionDTO.java" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality">
+      <change afterPath="$PROJECT_DIR$/NEW_COMPACT_REACTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SELLER_CHAT_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SELLER_CHAT_THEME_SYNC.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/THEME_AWARE_REACTIONS.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API_RESEND_VERIFICATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ARCHITECTURE_DIAGRAM.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AVATAR_UPLOAD_OPTIMIZATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BACKEND_IMPLEMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BIRTH_DATE_FIX_AND_FULL_NAME.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_CSRF_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FEATURES_UPGRADE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FILE_UPLOAD_IMPLEMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_LOADER_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_OPTIMIZATION_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUSTOMER_CHAT_OPTIMIZATION_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DEBUG_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ENHANCED_CHAT_FEATURES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIXES_APPLIED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_EMOJI_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_MESSAGE_DISPLAY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_MESSAGE_ID_MATCHING.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_MESSAGE_POSITION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/HUONG_DAN_TEST_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_SOLUTION_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_START_ENHANCED_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_TEST_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README_CHAT_FEATURES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README_ENHANCED_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEST_CHAT_NHANH.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEST_CHAT_SEPARATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TOM_TAT_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TOM_TAT_FIX_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TWO_SOLUTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UTF8_ENCODING_FIX.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
@@ -261,7 +274,8 @@
       <workItem from="1761819313004" duration="9292000" />
       <workItem from="1761879573117" duration="15201000" />
       <workItem from="1761931665304" duration="7741000" />
-      <workItem from="1761983539554" duration="13890000" />
+      <workItem from="1761983539554" duration="16370000" />
+      <workItem from="1762008314114" duration="1598000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -407,7 +421,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761988662580</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality">
+      <option name="closed" value="true" />
+      <created>1762006015410</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1762006015411</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -482,6 +504,7 @@
     <MESSAGE value="chore: update workspace configuration for enhanced chat UI improvements" />
     <MESSAGE value="feat(chat): implement file upload feature with image and document support" />
     <MESSAGE value="feat(chat): enhance chat UI with unread message indicators and improved welcome screen" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): enhance chat UI with unread message indicators and improved welcome screen" />
+    <MESSAGE value="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality" />
   </component>
 </project>

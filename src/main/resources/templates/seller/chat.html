@@ -35,7 +35,7 @@
             height: calc(100vh - 48px);
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #0f1219 0%, #1a1d2e 100%);
+            background: var(--bg, #0f1219);
             overflow: hidden;
         }
 
@@ -47,8 +47,8 @@
             background: var(--bg-elev, #1a1d2e);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow, 0 8px 32px rgba(0, 0, 0, 0.3));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.05));
             margin: 16px;
         }
 
@@ -92,18 +92,18 @@
         /* Conversations Sidebar - Optimized scrolling */
         .conversations-sidebar {
             width: 320px;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid var(--border, rgba(255, 255, 255, 0.08));
             display: flex;
             flex-direction: column;
-            background: var(--bg, #0f1219);
+            background: var(--bg-soft, #0f1219);
             min-height: 0;
             overflow: hidden;
         }
 
         .conversations-header {
             padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            background: linear-gradient(135deg, rgba(26, 29, 46, 0.8), rgba(15, 18, 25, 0.8));
+            border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+            background: var(--card, rgba(26, 29, 46, 0.8));
             flex-shrink: 0;
         }
 
@@ -120,17 +120,14 @@
 
         .conversations-header i {
             font-size: 24px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--accent, #3b82f6);
         }
 
         /* User Info Section */
         .user-info {
             padding: 14px 16px;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--card, rgba(255, 255, 255, 0.02));
+            border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
             display: flex;
             align-items: center;
             gap: 12px;
@@ -139,7 +136,7 @@
         }
 
         .user-info:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.04));
         }
 
         /* Avatar Styles */
@@ -147,7 +144,7 @@
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--accent, #667eea);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -155,7 +152,7 @@
             font-weight: 700;
             font-size: 16px;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 4px 12px var(--accent, rgba(102, 126, 234, 0.2));
             transition: transform 0.2s ease;
         }
 
@@ -164,8 +161,8 @@
         }
 
         .avatar.seller {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.2);
+            background: var(--accent-2, #f5576c);
+            box-shadow: 0 4px 12px var(--accent-2, rgba(245, 87, 108, 0.2));
         }
 
         .avatar img {
@@ -193,12 +190,12 @@
         }
 
         .conversations-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--border, rgba(255, 255, 255, 0.1));
             border-radius: 3px;
         }
 
         .conversations-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--muted, rgba(255, 255, 255, 0.2));
         }
 
         /* Conversation Item */
@@ -215,14 +212,14 @@
         }
 
         .conversation-item:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.06));
             transform: translateX(3px);
         }
 
         .conversation-item.active {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
+            background: var(--card, rgba(59, 130, 246, 0.15));
             border-left: 3px solid var(--accent, #3b82f6);
-            box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.08);
+            box-shadow: inset 0 0 10px var(--accent, rgba(59, 130, 246, 0.08));
         }
 
         .conversation-info {
@@ -252,14 +249,14 @@
 
         /* Unread Badge */
         .unread-badge {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background: var(--accent, #3b82f6);
             color: white;
             border-radius: 8px;
             padding: 3px 8px;
             font-size: 11px;
             font-weight: 700;
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 2px 8px var(--accent, rgba(59, 130, 246, 0.3));
             animation: pulse 2s infinite;
         }
 
@@ -273,7 +270,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: var(--bg, #0f1219);
+            background: var(--bg-soft, #0f1219);
             min-height: 0;
             overflow: hidden;
         }
@@ -281,11 +278,11 @@
         /* Chat Header */
         .chat-header {
             padding: 16px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
             display: flex;
             align-items: center;
-            background: linear-gradient(135deg, rgba(26, 29, 46, 0.8), rgba(15, 18, 25, 0.8));
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: var(--card, rgba(26, 29, 46, 0.8));
+            box-shadow: var(--shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
             flex-shrink: 0;
         }
 
@@ -500,11 +497,11 @@
             display: none;
             flex-direction: row;
             gap: 2px;
-            background: rgba(26, 29, 46, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: var(--card, rgba(26, 29, 46, 0.95));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
             border-radius: 10px;
             padding: 2px 4px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow, 0 1px 4px rgba(0, 0, 0, 0.3));
             z-index: 10;
         }
 
@@ -535,15 +532,15 @@
             cursor: pointer;
             font-size: 10px;
             transition: all 0.15s ease;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--muted, rgba(255, 255, 255, 0.7));
             padding: 0;
             line-height: 1;
         }
 
         .message-action-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.1));
             transform: scale(1.15);
-            color: rgba(255, 255, 255, 1);
+            color: var(--text, rgba(255, 255, 255, 1));
         }
 
         .message-action-btn.emoji-btn:hover {
@@ -551,11 +548,11 @@
         }
 
         .message-action-btn.reply-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
+            background: var(--accent, rgba(59, 130, 246, 0.2));
         }
 
         .message-action-btn.delete-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
+            background: var(--bad, rgba(239, 68, 68, 0.2));
         }
 
         /* Emoji Reaction Picker (small popup) */
@@ -564,14 +561,14 @@
             bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(26, 29, 46, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: var(--card, rgba(26, 29, 46, 0.98));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
             border-radius: 20px;
             padding: 8px 12px;
             display: none;
             flex-direction: row;
             gap: 6px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.3));
             z-index: 20;
             margin-bottom: 8px;
             backdrop-filter: blur(10px);
@@ -592,7 +589,7 @@
         }
 
         .reaction-option:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.1));
             transform: scale(1.2);
         }
 
@@ -606,8 +603,8 @@
         }
 
         .reaction-badge {
-            background: rgba(255, 255, 255, 0.09);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: var(--card, rgba(255, 255, 255, 0.09));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
             border-radius: 12px;
             padding: 3px 8px;
             display: flex;
@@ -619,14 +616,40 @@
         }
 
         .reaction-badge:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.15));
             transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
         }
 
         .reaction-badge.user-reacted {
-            background: rgba(59, 130, 246, 0.3);
-            border-color: rgba(96, 165, 250, 0.5);
+            background: var(--accent, rgba(59, 130, 246, 0.3));
+            border-color: var(--accent, rgba(96, 165, 250, 0.5));
+        }
+
+        /* Compact Reaction Badge */
+        .reaction-badge-compact {
+            background: var(--bg-elev, rgba(255, 255, 255, 0.09));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+            border-radius: 12px;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.2));
+        }
+
+        .reaction-badge-compact:hover {
+            background: var(--card, rgba(255, 255, 255, 0.15));
+            transform: scale(1.08);
+            box-shadow: var(--shadow, 0 2px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .reaction-badge-compact.user-reacted {
+            background: var(--accent, rgba(59, 130, 246, 0.3));
+            border-color: var(--accent, rgba(96, 165, 250, 0.5));
         }
 
         .reaction-emoji {
@@ -636,14 +659,163 @@
         .reaction-count {
             font-size: 12px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text, rgba(255, 255, 255, 0.9));
+        }
+
+        /* Reaction Details Popup */
+        .reaction-details-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reaction-details-overlay.show {
+            display: flex;
+        }
+
+        .reaction-details-popup {
+            background: var(--bg-elev, #1e293b);
+            border-radius: 12px;
+            box-shadow: var(--shadow, 0 10px 40px rgba(0, 0, 0, 0.5));
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.2s ease;
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .reaction-details-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card, rgba(255, 255, 255, 0.05));
+            border-radius: 12px 12px 0 0;
+        }
+
+        .reaction-details-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text, #f8fafc);
+        }
+
+        .reaction-details-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--muted, rgba(255, 255, 255, 0.6));
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .reaction-details-close:hover {
+            background: var(--chip, rgba(255, 255, 255, 0.1));
+            color: var(--text, #f8fafc);
+        }
+
+        .reaction-details-content {
+            padding: 16px 20px;
+        }
+
+        .reaction-group {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+        }
+
+        .reaction-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .reaction-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .reaction-group-emoji {
+            font-size: 24px;
+        }
+
+        .reaction-group-count {
+            font-weight: 600;
+            color: var(--muted, rgba(255, 255, 255, 0.6));
+            font-size: 14px;
+        }
+
+        .reaction-user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reaction-user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--card, rgba(255, 255, 255, 0.05));
+            border-radius: 8px;
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+        }
+
+        .reaction-user-name {
+            font-size: 14px;
+            color: var(--text, #f8fafc);
+            font-weight: 500;
+        }
+
+        .reaction-remove-btn {
+            background: var(--bad, #fee2e2);
+            color: var(--bad, #dc2626);
+            border: none;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reaction-remove-btn:hover {
+            background: var(--bad, #fecaca);
+            transform: scale(1.05);
         }
 
         /* Reply Status Bar */
         .reply-status-bar {
             display: none;
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 3px solid #3b82f6;
+            background: var(--card, rgba(255, 255, 255, 0.05));
+            border-left: 3px solid var(--accent, #3b82f6);
             padding: 10px 14px;
             margin-bottom: 8px;
             border-radius: 8px;
@@ -664,13 +836,13 @@
         .reply-status-sender {
             font-size: 12px;
             font-weight: 600;
-            color: #3b82f6;
+            color: var(--accent, #3b82f6);
         }
 
         .reply-status-close {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--muted, rgba(255, 255, 255, 0.5));
             cursor: pointer;
             font-size: 16px;
             padding: 0;
@@ -684,13 +856,13 @@
         }
 
         .reply-status-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 1);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.1));
+            color: var(--text, rgba(255, 255, 255, 1));
         }
 
         .reply-status-content {
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--muted, rgba(255, 255, 255, 0.7));
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -699,7 +871,7 @@
         /* Replied Message Quote in Message Bubble */
         .message-reply-quote {
             background: rgba(0, 0, 0, 0.2);
-            border-left: 3px solid #3b82f6;
+            border-left: 3px solid var(--accent, #3b82f6);
             padding: 8px 10px;
             margin-bottom: 8px;
             border-radius: 6px;
@@ -722,13 +894,13 @@
         .reply-quote-sender {
             font-size: 11px;
             font-weight: 600;
-            color: #60a5fa;
+            color: var(--accent, #60a5fa);
             margin-bottom: 2px;
         }
 
         .reply-quote-content {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text, rgba(255, 255, 255, 0.9));
             opacity: 0.8;
             white-space: nowrap;
             overflow: hidden;
@@ -781,11 +953,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(26, 29, 46, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: var(--bg-elev, rgba(26, 29, 46, 0.98));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow, 0 10px 40px rgba(0, 0, 0, 0.4));
             z-index: 1001;
             min-width: 280px;
             max-width: 400px;
@@ -819,11 +991,14 @@
             align-items: center;
             margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.12));
         }
 
         .reaction-users-title {
             font-size: 16px;
+            font-weight: 700;
+            color: var(--text, #f1f5f9);
+        }
             font-weight: 600;
             color: rgba(255, 255, 255, 0.9);
         }
@@ -922,14 +1097,14 @@
             position: absolute;
             bottom: 70px;
             left: 20px;
-            background: linear-gradient(135deg, rgba(26, 29, 46, 0.98), rgba(15, 18, 25, 0.98));
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card, rgba(26, 29, 46, 0.98));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
             border-radius: 16px;
             padding: 8px;
             display: none;
             flex-direction: column;
             gap: 4px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow, 0 8px 32px rgba(0, 0, 0, 0.4));
             backdrop-filter: blur(20px);
             z-index: 1000;
             min-width: 200px;
@@ -1006,12 +1181,12 @@
             position: absolute;
             bottom: 70px;
             left: 20px;
-            background: linear-gradient(135deg, rgba(26, 29, 46, 0.98), rgba(15, 18, 25, 0.98));
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card, rgba(26, 29, 46, 0.98));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
             border-radius: 16px;
             padding: 16px;
             display: none;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow, 0 8px 32px rgba(0, 0, 0, 0.4));
             backdrop-filter: blur(20px);
             z-index: 1000;
             width: 320px;
@@ -1030,7 +1205,7 @@
             align-items: center;
             margin-bottom: 12px;
             padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.1));
         }
 
         .emoji-picker-header h4 {
@@ -1075,8 +1250,8 @@
         }
 
         .emoji-category-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card, rgba(255, 255, 255, 0.05));
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
             color: var(--text, #f1f5f9);
             padding: 6px 12px;
             border-radius: 8px;
@@ -1088,8 +1263,8 @@
 
         .emoji-category-btn:hover,
         .emoji-category-btn.active {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
+            background: var(--accent, rgba(59, 130, 246, 0.2));
+            border-color: var(--accent, #3b82f6);
         }
 
         .emoji-grid {
@@ -1112,7 +1287,7 @@
         }
 
         .emoji-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.1));
             transform: scale(1.2);
         }
 
@@ -1120,7 +1295,7 @@
         .upload-preview {
             display: none;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card, rgba(255, 255, 255, 0.05));
             border-radius: 12px;
             margin-bottom: 8px;
             position: relative;
@@ -1146,9 +1321,9 @@
         }
 
         .upload-preview-remove {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            color: #ef4444;
+            background: var(--bad, rgba(239, 68, 68, 0.2));
+            border: 1px solid var(--bad, #ef4444);
+            color: var(--bad, #ef4444);
             border-radius: 8px;
             width: 28px;
             height: 28px;
@@ -1160,15 +1335,15 @@
         }
 
         .upload-preview-remove:hover {
-            background: rgba(239, 68, 68, 0.3);
+            background: var(--bad, rgba(239, 68, 68, 0.3));
             transform: scale(1.1);
         }
 
         /* Chat Input - Enhanced styling */
         .chat-input {
             flex: 1;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+            background: var(--card, rgba(255, 255, 255, 0.03));
             color: var(--text, #f1f5f9);
             border-radius: 22px;
             padding: 11px 16px;
@@ -1181,18 +1356,18 @@
 
         .chat-input:focus {
             border-color: var(--accent, #3b82f6);
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: var(--bg-elev, rgba(255, 255, 255, 0.06));
+            box-shadow: 0 0 0 3px var(--accent, rgba(59, 130, 246, 0.1));
             transform: scale(1.01);
         }
 
         .chat-input::placeholder {
-            color: rgba(255, 255, 255, 0.35);
+            color: var(--muted, rgba(255, 255, 255, 0.35));
         }
 
         /* Send Button */
         .btn-send {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: var(--accent, #3b82f6);
             color: white;
             border: none;
             border-radius: 50%;
@@ -1203,14 +1378,14 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px var(--accent, rgba(59, 130, 246, 0.3));
             font-size: 16px;
             flex-shrink: 0;
         }
 
         .btn-send:hover:not(:disabled) {
             transform: scale(1.08) translateY(-2px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 6px 16px var(--accent, rgba(59, 130, 246, 0.4));
         }
 
         .btn-send:active:not(:disabled) {
@@ -1218,7 +1393,7 @@
         }
 
         .btn-send:disabled {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--muted, rgba(255, 255, 255, 0.1));
             cursor: not-allowed;
             box-shadow: none;
             opacity: 0.5;
@@ -1240,10 +1415,7 @@
         .welcome-screen i {
             font-size: 72px;
             margin-bottom: 20px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--accent, #3b82f6);
             animation: float 3s ease-in-out infinite;
         }
 
@@ -1272,7 +1444,7 @@
 
         /* Char Count - Subtle styling */
         #charCount {
-            color: rgba(255, 255, 255, 0.45);
+            color: var(--muted, rgba(255, 255, 255, 0.45));
             font-size: 11px;
             display: none;
             transition: color 0.2s ease;
@@ -1280,7 +1452,7 @@
         }
 
         #charCount.warning {
-            color: #fbbf24;
+            color: var(--warn, #fbbf24);
         }
 
         /* Responsive Design */
@@ -1526,6 +1698,20 @@
 <!-- APP WRAPPER END -->
 
 <!-- Reaction Users Popup -->
+<!-- Reaction Details Popup (Centered) -->
+<div class="reaction-details-overlay" id="reactionDetailsOverlay" onclick="closeReactionDetails(event)">
+    <div class="reaction-details-popup" onclick="event.stopPropagation()">
+        <div class="reaction-details-header">
+            <div class="reaction-details-title">Reactions</div>
+            <button class="reaction-details-close" onclick="closeReactionDetails()">×</button>
+        </div>
+        <div class="reaction-details-content" id="reactionDetailsContent">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Old Reaction Users Popup (keep for compatibility) -->
 <div class="reaction-users-overlay" id="reactionUsersOverlay" onclick="closeReactionPopup()"></div>
 <div class="reaction-users-popup" id="reactionUsersPopup">
     <div class="reaction-users-header">
@@ -2376,27 +2562,44 @@
             `;
         }
 
-        // Build reactions display
+        // Build reactions display with COMPACT format
         let reactionsHtml = '';
         if (message.reactions && Object.keys(message.reactions).length > 0) {
-            reactionsHtml = '<div class="message-reactions">';
+            // Calculate total reactions and find most popular emoji
+            let totalReactions = 0;
+            let mostPopularEmoji = '';
+            let maxCount = 0;
+
             for (const [emoji, users] of Object.entries(message.reactions)) {
-                // Check if current user reacted - convert to string for comparison
-                const userIdStr = String(currentUser.userId);
-                const userReacted = users.some(id => String(id) === userIdStr);
-                const userClass = userReacted ? 'user-reacted' : '';
-                // Click to toggle reaction (add if not reacted, remove if already reacted)
-                const clickAction = userReacted
-                    ? `removeReaction('${message.id}', '${emoji}')`
-                    : `addReaction('${message.id}', '${emoji}')`;
-                reactionsHtml += `
-                    <div class="reaction-badge ${userClass}" onclick="${clickAction}" title="${userReacted ? 'Click to remove your reaction' : 'Click to add this reaction'}">
-                        <span class="reaction-emoji">${emoji}</span>
-                        <span class="reaction-count">${users.length}</span>
-                    </div>
-                `;
+                totalReactions += users.length;
+                if (users.length > maxCount) {
+                    maxCount = users.length;
+                    mostPopularEmoji = emoji;
+                }
             }
-            reactionsHtml += '</div>';
+
+            const emojiCount = Object.keys(message.reactions).length;
+            const displayCount = emojiCount === 1 ? totalReactions : totalReactions + '+';
+
+            // Check if current user reacted to any emoji
+            const userIdStr = String(currentUser.userId);
+            let userReacted = false;
+            for (const users of Object.values(message.reactions)) {
+                if (users.some(id => String(id) === userIdStr)) {
+                    userReacted = true;
+                    break;
+                }
+            }
+            const userClass = userReacted ? 'user-reacted' : '';
+
+            reactionsHtml = `
+                <div class="message-reactions">
+                    <div class="reaction-badge-compact ${userClass}" onclick="showReactionDetails('${message.id}')" title="Xem chi tiết reactions">
+                        <span class="reaction-emoji">${mostPopularEmoji}</span>
+                        <span class="reaction-count">${displayCount}</span>
+                    </div>
+                </div>
+            `;
         }
 
         // Build message actions toolbar (only if not deleted)
@@ -2977,26 +3180,43 @@
             existingReactions.remove();
         }
 
-        // Build new reactions HTML
+        // Build new reactions HTML with COMPACT format
         if (message.reactions && Object.keys(message.reactions).length > 0) {
-            let reactionsHtml = '<div class="message-reactions">';
+            // Calculate total reactions and find most popular emoji
+            let totalReactions = 0;
+            let mostPopularEmoji = '';
+            let maxCount = 0;
+
             for (const [emoji, users] of Object.entries(message.reactions)) {
-                // Check if current user reacted - convert to string for comparison
-                const userIdStr = String(currentUser.userId);
-                const userReacted = users.some(id => String(id) === userIdStr);
-                const userClass = userReacted ? 'user-reacted' : '';
-                // Click to toggle reaction
-                const clickAction = userReacted
-                    ? `removeReaction('${message.id}', '${emoji}')`
-                    : `addReaction('${message.id}', '${emoji}')`;
-                reactionsHtml += `
-                    <div class="reaction-badge ${userClass}" onclick="${clickAction}" title="${userReacted ? 'Click to remove your reaction' : 'Click to add this reaction'}">
-                        <span class="reaction-emoji">${emoji}</span>
-                        <span class="reaction-count">${users.length}</span>
-                    </div>
-                `;
+                totalReactions += users.length;
+                if (users.length > maxCount) {
+                    maxCount = users.length;
+                    mostPopularEmoji = emoji;
+                }
             }
-            reactionsHtml += '</div>';
+
+            const emojiCount = Object.keys(message.reactions).length;
+            const displayCount = emojiCount === 1 ? totalReactions : totalReactions + '+';
+
+            // Check if current user reacted to any emoji
+            const userIdStr = String(currentUser.userId);
+            let userReacted = false;
+            for (const users of Object.values(message.reactions)) {
+                if (users.some(id => String(id) === userIdStr)) {
+                    userReacted = true;
+                    break;
+                }
+            }
+            const userClass = userReacted ? 'user-reacted' : '';
+
+            const reactionsHtml = `
+                <div class="message-reactions">
+                    <div class="reaction-badge-compact ${userClass}" onclick="showReactionDetails('${message.id}')" title="Xem chi tiết reactions">
+                        <span class="reaction-emoji">${mostPopularEmoji}</span>
+                        <span class="reaction-count">${displayCount}</span>
+                    </div>
+                </div>
+            `;
 
             // Insert reactions before message-time
             const messageTime = messageContent.querySelector('.message-time');
@@ -3004,6 +3224,93 @@
                 messageTime.insertAdjacentHTML('beforebegin', reactionsHtml);
             }
         }
+    }
+
+    // Show reaction details in centered popup
+    async function showReactionDetails(messageId) {
+        const messageIdStr = String(messageId);
+        const message = currentConversation?.messages.find(m => String(m.id) === messageIdStr);
+
+        if (!message || !message.reactions || Object.keys(message.reactions).length === 0) {
+            return;
+        }
+
+        const overlay = document.getElementById('reactionDetailsOverlay');
+        const content = document.getElementById('reactionDetailsContent');
+
+        let html = '';
+        const userIdStr = String(currentUser.userId);
+
+        // Collect all unique user IDs to fetch names
+        const allUserIds = new Set();
+        for (const userIds of Object.values(message.reactions)) {
+            userIds.forEach(id => allUserIds.add(String(id)));
+        }
+
+        // Fetch user names from backend
+        const userNames = {};
+        for (const userId of allUserIds) {
+            if (String(userId) === userIdStr) {
+                userNames[userId] = 'Bạn';
+            } else {
+                try {
+                    const response = await fetch(`/api/users/${userId}`);
+                    if (response.ok) {
+                        const userData = await response.json();
+                        userNames[userId] = userData.fullName || userData.username || `User ${userId}`;
+                    } else {
+                        userNames[userId] = `User ${userId}`;
+                    }
+                } catch (error) {
+                    console.error('Error fetching user name:', error);
+                    userNames[userId] = `User ${userId}`;
+                }
+            }
+        }
+
+        // Build HTML for each emoji group
+        for (const [emoji, userIds] of Object.entries(message.reactions)) {
+            const isMyReaction = userIds.some(id => String(id) === userIdStr);
+
+            html += `
+                <div class="reaction-group">
+                    <div class="reaction-group-header">
+                        <span class="reaction-group-emoji">${emoji}</span>
+                        <span class="reaction-group-count">${userIds.length}</span>
+                    </div>
+                    <div class="reaction-user-list">
+            `;
+
+            // Show users who reacted with this emoji
+            for (const userId of userIds) {
+                const isCurrentUser = String(userId) === userIdStr;
+                const userName = userNames[userId] || `User ${userId}`;
+
+                html += `
+                    <div class="reaction-user-item">
+                        <span class="reaction-user-name">${userName}</span>
+                        ${isCurrentUser ? `<button class="reaction-remove-btn" onclick="removeReaction('${messageId}', '${emoji}'); closeReactionDetails();">Nhấp để gỡ</button>` : ''}
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+
+        content.innerHTML = html;
+        overlay.classList.add('show');
+    }
+
+    // Close reaction details popup
+    function closeReactionDetails(event) {
+        if (event && event.target !== event.currentTarget) {
+            return; // Only close if clicking overlay, not popup content
+        }
+        const overlay = document.getElementById('reactionDetailsOverlay');
+        overlay.classList.remove('show');
     }
 
     // Show who reacted to a message
