@@ -620,10 +620,10 @@
             const verified = verifiedSelect.value;
 
             document.querySelectorAll("#userTable tbody tr").forEach(row => {
-                const userType = row.children[4].textContent.toUpperCase().trim();
-                const rowGender = row.children[6].textContent.toUpperCase();
-                const rowActive = row.children[9].textContent.toUpperCase();
-                const rowVerified = row.children[10].textContent.toUpperCase();
+                const userType = row.children[5].textContent.toUpperCase().trim();
+                const rowGender = row.children[7].textContent.toUpperCase();
+                const rowActive = row.children[10].textContent.toUpperCase();
+                const rowVerified = row.children[11].textContent.toUpperCase();
                 const matchesRole = role === "" || userType === role;
                 const matchesGender = gender === "" || rowGender === gender;
                 const matchesActive = active === "" || rowActive === active;
