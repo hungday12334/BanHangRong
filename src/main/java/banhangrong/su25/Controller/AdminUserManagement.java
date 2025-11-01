@@ -247,30 +247,10 @@ public class AdminUserManagement {
             } else {
                 balanceD = BigDecimal.ZERO;
             }
-            // Solving if having image
-            MultipartFile avatar = multipartRequest.getFile("avatarUrl");
-
-            if (avatar != null && !avatar.isEmpty()) {
-
-                // User entered an invalid file
-                if (!valid.isImageFileValid(avatar)) {
-                    model.addAttribute("error", "This file is not an image");
-                    model.addAttribute("user", user);
-                    return "admin/user-update";
-                }
-
-                // Save the image into static/img/avatar folder, naming follows role+id
-                try {
-                    user.setAvatarUrl(imageUploadUtil.saveAvatar(avatar, user.getUsername()));
-                } catch (Exception e) {
-                    model.addAttribute("error", "Upload failed");
-                    model.addAttribute("user", user);
-                    return "admin/user-update";
-                }
-            }
             user.setEmail(email);
 //          Save hashed password
             user.setPassword(valid.hashPassword(password));
+            user.setAvatarUrl(request.getParameter("imageUrl"));
             user.setFullName(fullName);
             user.setUserType(userType);
             user.setPhoneNumber(phoneNumber);

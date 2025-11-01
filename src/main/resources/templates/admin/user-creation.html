@@ -307,15 +307,51 @@
             alert("Please fix the following errors:\n- " + errors.join("\n- "));
         }
     });
+    // Upload image -> autofill URL
+    (function initImageGenerate() {
+        const btn = document.getElementById('pm_genImage');
+        const fileInput = document.getElementById('pm_imageFile');
+        const urlInput = document.getElementById('pm_imageUrl');
+        const previewWrap = document.getElementById('pm_imagePreview');
+        const previewImg = previewWrap ? previewWrap.querySelector('img') : null;
+        if (!btn || !fileInput || !urlInput) return;
+        btn.addEventListener('click', () => { fileInput.click(); });
+        fileInput.addEventListener('change', async () => {
+            const f = fileInput.files && fileInput.files[0];
+            if (!f) return;
+            try {
+                const fd = new FormData(); fd.append('file', f);
+                // Optional: allow passing expiration via data-expiration on Generate button
+                const exp = btn && btn.dataset ? (btn.dataset.expiration || '') : '';
+                if (exp && /^\d+$/.test(exp)) { fd.append('expiration', exp); }
+                const res = await fetch('/api/uploads/image', { method: 'POST', body: fd });
+                if (!res.ok) {
+                    let msg = 'Upload failed';
+                    try { msg = (await res.text()) || msg; } catch (_) { }
+                    showToast(msg, 'error');
+                    return;
+                }
+                const data = await res.json();
+                const url = data && data.url ? data.url : null;
+                if (!url) { showToast('Invalid upload response', 'error'); return; }
+                urlInput.value = url;
+                if (previewWrap && previewImg) {
+                    previewImg.src = url; previewWrap.style.display = '';
+                }
+                // Mark as changed so Save will persist
+                __originalProduct = null;
+                showToast('Image uploaded', 'success', { duration: 1500 });
+            } catch (e) {
+                showToast('Upload error', 'error');
+            } finally {
+                fileInput.value = '';
+            }
+        });
+    })();
 </script>
-<script src="/js/seller-dashboard.js"></script>
-<script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-<script src="../assets/libs/simplebar/dist/simplebar.js"></script>
-<script src="../assets/js/dashboard.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
+<script src="/js/seller-dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </html>
