@@ -55,6 +55,27 @@ public class ChatController {
                 message.setSenderRole((String) messageData.get("senderRole"));
             }
 
+            // Set message type (TEXT, IMAGE, FILE)
+            if (messageData.get("messageType") != null) {
+                message.setMessageType((String) messageData.get("messageType"));
+            } else {
+                message.setMessageType("TEXT");
+            }
+
+            // Set file attachment fields if present
+            if (messageData.get("fileUrl") != null) {
+                message.setFileUrl((String) messageData.get("fileUrl"));
+            }
+            if (messageData.get("fileName") != null) {
+                message.setFileName((String) messageData.get("fileName"));
+            }
+            if (messageData.get("fileType") != null) {
+                message.setFileType((String) messageData.get("fileType"));
+            }
+            if (messageData.get("fileSize") != null) {
+                message.setFileSize(Long.valueOf(messageData.get("fileSize").toString()));
+            }
+
             // 🚨 LƯU VÀO DATABASE
             System.out.println("💾 Saving message to database...");
             ChatMessage savedMessage = chatService.addMessage(message);
@@ -78,6 +99,14 @@ public class ChatController {
             responseMessage.put("read", savedMessage.getRead());
             responseMessage.put("createdAt", savedMessage.getCreatedAt().toString());
             responseMessage.put("timestamp", savedMessage.getTimestamp());
+
+            // Add file attachment info if present
+            if (savedMessage.getFileUrl() != null) {
+                responseMessage.put("fileUrl", savedMessage.getFileUrl());
+                responseMessage.put("fileName", savedMessage.getFileName());
+                responseMessage.put("fileType", savedMessage.getFileType());
+                responseMessage.put("fileSize", savedMessage.getFileSize());
+            }
 
             // 🚨 Gửi DUY NHẤT 1 lần đến conversation topic
             messagingTemplate.convertAndSend(conversationTopic, responseMessage);

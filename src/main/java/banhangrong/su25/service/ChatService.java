@@ -196,12 +196,6 @@ public class ChatService {
                 System.out.println("✅ Auto-set receiver: " + message.getReceiverId());
             }
 
-            // 🚨 QUAN TRỌNG: Set room_id = 0 (hoặc giá trị mặc định)
-            if (message.getRoomId() == null) {
-                message.setRoomId(0L);
-                System.out.println("✅ Auto-set room_id: " + message.getRoomId());
-            }
-
             // Set các field bắt buộc khác
             if (message.getCreatedAt() == null) {
                 message.setCreatedAt(LocalDateTime.now());
@@ -221,7 +215,6 @@ public class ChatService {
             message.setSenderRole(sender.getUserType());
 
             System.out.println("💽 Saving message to database...");
-            System.out.println("📍 Final message - Room ID: " + message.getRoomId());
 
             // 🚨 LƯU VÀO DATABASE
             ChatMessage savedMessage = messageRepository.save(message);

@@ -485,12 +485,288 @@
             background: linear-gradient(180deg, rgba(26, 29, 46, 0.9), rgba(15, 18, 25, 0.95));
             backdrop-filter: blur(10px);
             flex-shrink: 0;
+            position: relative;
         }
 
         .chat-input-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        /* Plus Button for Features */
+        .btn-plus {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            font-size: 18px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .btn-plus:hover {
+            transform: scale(1.08) rotate(90deg);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-plus:active {
+            transform: scale(0.95) rotate(90deg);
+        }
+
+        /* Features Menu */
+        .features-menu {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            background: linear-gradient(135deg, rgba(26, 29, 46, 0.98), rgba(15, 18, 25, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            min-width: 200px;
+            animation: slideUpFade 0.2s ease;
+        }
+
+        .features-menu.show {
+            display: flex;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text, #f1f5f9);
+            background: transparent;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        .feature-item i {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .feature-item.image i {
+            color: #3b82f6;
+        }
+
+        .feature-item.emoji i {
+            color: #fbbf24;
+        }
+
+        .feature-item.file i {
+            color: #10b981;
+        }
+
+        .feature-item.location i {
+            color: #ef4444;
+        }
+
+        .feature-item span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Hidden file inputs */
+        #imageInput,
+        #fileInput {
+            display: none;
+        }
+
+        /* Emoji Picker */
+        .emoji-picker {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            background: linear-gradient(135deg, rgba(26, 29, 46, 0.98), rgba(15, 18, 25, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            width: 320px;
+            max-height: 350px;
+            overflow-y: auto;
+            animation: slideUpFade 0.2s ease;
+        }
+
+        .emoji-picker.show {
+            display: block;
+        }
+
+        .emoji-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .emoji-picker-header h4 {
+            color: var(--text, #f1f5f9);
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .emoji-close {
+            background: none;
+            border: none;
+            color: var(--muted, #94a3b8);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .emoji-close:hover {
+            color: var(--text, #f1f5f9);
+        }
+
+        .emoji-categories {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .emoji-categories::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .emoji-categories::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .emoji-category-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text, #f1f5f9);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .emoji-category-btn:hover,
+        .emoji-category-btn.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+        }
+
+        .emoji-item {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.2);
+        }
+
+        /* Preview for image/file upload */
+        .upload-preview {
+            display: none;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .upload-preview.show {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .upload-preview img {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .upload-preview-info {
+            flex: 1;
+            color: var(--text, #f1f5f9);
+            font-size: 13px;
+        }
+
+        .upload-preview-remove {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-preview-remove:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: scale(1.1);
         }
 
         /* Chat Input - Enhanced styling */
@@ -772,7 +1048,58 @@
                             </div>
 
                             <div class="chat-input-container">
+                                <!-- Upload Preview -->
+                                <div class="upload-preview" id="uploadPreview">
+                                    <img id="previewImage" alt="Preview" style="display: none;">
+                                    <div class="upload-preview-info" id="previewInfo"></div>
+                                    <button class="upload-preview-remove" onclick="clearUpload()">
+                                        <i class="ti ti-x"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Features Menu -->
+                                <div class="features-menu" id="featuresMenu">
+                                    <div class="feature-item image" onclick="openImageUpload()">
+                                        <i class="ti ti-photo"></i>
+                                        <span>Gửi ảnh</span>
+                                    </div>
+                                    <div class="feature-item emoji" onclick="toggleEmojiPicker()">
+                                        <i class="ti ti-mood-smile"></i>
+                                        <span>Emoji</span>
+                                    </div>
+                                    <div class="feature-item file" onclick="openFileUpload()">
+                                        <i class="ti ti-paperclip"></i>
+                                        <span>Đính kèm file</span>
+                                    </div>
+                                </div>
+
+                                <!-- Emoji Picker -->
+                                <div class="emoji-picker" id="emojiPicker">
+                                    <div class="emoji-picker-header">
+                                        <h4>Chọn Emoji</h4>
+                                        <button class="emoji-close" onclick="closeEmojiPicker()">
+                                            <i class="ti ti-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="emoji-categories">
+                                        <button class="emoji-category-btn active" data-category="recent">Gần đây</button>
+                                        <button class="emoji-category-btn" data-category="smileys">😀 Mặt cười</button>
+                                        <button class="emoji-category-btn" data-category="gestures">👋 Cử chỉ</button>
+                                        <button class="emoji-category-btn" data-category="objects">🎁 Đồ vật</button>
+                                    </div>
+                                    <div class="emoji-grid" id="emojiGrid">
+                                        <!-- Emojis will be populated here -->
+                                    </div>
+                                </div>
+
+                                <!-- Hidden file inputs -->
+                                <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" />
+                                <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.zip" onchange="handleFileUpload(event)" />
+
                                 <div class="chat-input-wrapper">
+                                    <button class="btn-plus" id="btnPlus" onclick="toggleFeaturesMenu()">
+                                        <i class="ti ti-plus"></i>
+                                    </button>
                                     <input type="text" class="chat-input" id="messageInput"
                                            placeholder="Type a message..."
                                            maxlength="5000"
@@ -1525,13 +1852,50 @@
         const avatarClass = message.senderRole === 'SELLER' ? 'seller' : '';
         const avatar = message.senderName ? message.senderName.substring(0, 2).toUpperCase() : '?';
 
+        // Build message content based on type
+        let messageContent = '';
+
+        if (message.messageType === 'IMAGE' && message.fileUrl) {
+            // Image message
+            messageContent = `
+                <div class="message-bubble">
+                    ${message.content ? `<div style="margin-bottom: 8px;">${escapeHtml(message.content)}</div>` : ''}
+                    <img src="${message.fileUrl}" alt="${escapeHtml(message.fileName || 'Image')}"
+                         style="max-width: 300px; max-height: 300px; border-radius: 8px; cursor: pointer;"
+                         onclick="window.open('${message.fileUrl}', '_blank')">
+                </div>
+            `;
+        } else if (message.messageType === 'FILE' && message.fileUrl) {
+            // File attachment message
+            const fileSize = message.fileSize ? (message.fileSize / 1024).toFixed(1) + ' KB' : '';
+            messageContent = `
+                <div class="message-bubble">
+                    ${message.content ? `<div style="margin-bottom: 8px;">${escapeHtml(message.content)}</div>` : ''}
+                    <a href="${message.fileUrl}" target="_blank" download
+                       style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; text-decoration: none; color: inherit;">
+                        <i class="ti ti-file" style="font-size: 32px;"></i>
+                        <div>
+                            <div style="font-weight: 600;">${escapeHtml(message.fileName || 'File')}</div>
+                            ${fileSize ? `<div style="font-size: 12px; opacity: 0.8;">${fileSize}</div>` : ''}
+                        </div>
+                        <i class="ti ti-download" style="font-size: 20px; margin-left: auto;"></i>
+                    </a>
+                </div>
+            `;
+        } else {
+            // Text message
+            messageContent = `
+                <div class="message-bubble">${escapeHtml(message.content || '')}</div>
+            `;
+        }
+
         messageDiv.innerHTML = `
-        <div class="message-avatar ${avatarClass}">${avatar}</div>
-        <div class="message-content">
-            <div class="message-bubble">${escapeHtml(message.content || '')}</div>
-            <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
-        </div>
-    `;
+            <div class="message-avatar ${avatarClass}">${avatar}</div>
+            <div class="message-content">
+                ${messageContent}
+                <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
+            </div>
+        `;
 
         messagesContainer.appendChild(messageDiv);
 
@@ -1562,6 +1926,354 @@
     });
 
     setTimeout(() => scrollToBottom(true), 1000);
+
+    // ===== CHAT FEATURES FUNCTIONS =====
+
+    let currentUploadFile = null;
+    let recentEmojis = localStorage.getItem('recentEmojis') ? JSON.parse(localStorage.getItem('recentEmojis')) : [];
+
+    // Emoji data
+    const emojiData = {
+        smileys: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐'],
+        gestures: ['👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄','💋'],
+        objects: ['🎁','🎈','🎉','🎊','🎀','🎂','🎄','🎃','🎆','🎇','🧨','✨','🎋','🎍','🎑','🎏','🎐','🧧','📱','💻','⌨️','🖥️','🖨️','🖱️','🖲️','💾','💿','📀','📷','📸','📹','🎥','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏰','⏲️','⌚','📡','🔋','🔌','💡','🔦','🕯️']
+    };
+
+    function toggleFeaturesMenu() {
+        const menu = document.getElementById('featuresMenu');
+        const emojiPicker = document.getElementById('emojiPicker');
+
+        menu.classList.toggle('show');
+        emojiPicker.classList.remove('show');
+    }
+
+    function toggleEmojiPicker() {
+        const emojiPicker = document.getElementById('emojiPicker');
+        const featuresMenu = document.getElementById('featuresMenu');
+
+        emojiPicker.classList.toggle('show');
+        featuresMenu.classList.remove('show');
+
+        if (emojiPicker.classList.contains('show')) {
+            loadEmojis('smileys');
+        }
+    }
+
+    function closeEmojiPicker() {
+        document.getElementById('emojiPicker').classList.remove('show');
+    }
+
+    function loadEmojis(category) {
+        const emojiGrid = document.getElementById('emojiGrid');
+        let emojis = [];
+
+        if (category === 'recent') {
+            emojis = recentEmojis.length > 0 ? recentEmojis : emojiData.smileys.slice(0, 24);
+        } else {
+            emojis = emojiData[category] || [];
+        }
+
+        emojiGrid.innerHTML = '';
+        emojis.forEach(emoji => {
+            const btn = document.createElement('button');
+            btn.className = 'emoji-item';
+            btn.textContent = emoji;
+            btn.onclick = () => insertEmoji(emoji);
+            emojiGrid.appendChild(btn);
+        });
+
+        // Update active category button
+        document.querySelectorAll('.emoji-category-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.category === category) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    function insertEmoji(emoji) {
+        const input = document.getElementById('messageInput');
+        const cursorPos = input.selectionStart;
+        const textBefore = input.value.substring(0, cursorPos);
+        const textAfter = input.value.substring(cursorPos);
+
+        input.value = textBefore + emoji + textAfter;
+        input.focus();
+        input.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
+
+        updateCharCount();
+
+        // Add to recent emojis
+        if (!recentEmojis.includes(emoji)) {
+            recentEmojis.unshift(emoji);
+            if (recentEmojis.length > 24) {
+                recentEmojis = recentEmojis.slice(0, 24);
+            }
+            localStorage.setItem('recentEmojis', JSON.stringify(recentEmojis));
+        }
+    }
+
+    // Setup emoji category buttons
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.emoji-category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                loadEmojis(btn.dataset.category);
+            });
+        });
+
+        // Close menus when clicking outside
+        document.addEventListener('click', (e) => {
+            const featuresMenu = document.getElementById('featuresMenu');
+            const emojiPicker = document.getElementById('emojiPicker');
+            const btnPlus = document.getElementById('btnPlus');
+
+            if (!featuresMenu.contains(e.target) &&
+                !emojiPicker.contains(e.target) &&
+                e.target !== btnPlus &&
+                !btnPlus.contains(e.target)) {
+                featuresMenu.classList.remove('show');
+                emojiPicker.classList.remove('show');
+            }
+        });
+    });
+
+    function openImageUpload() {
+        document.getElementById('imageInput').click();
+        document.getElementById('featuresMenu').classList.remove('show');
+    }
+
+    function openFileUpload() {
+        document.getElementById('fileInput').click();
+        document.getElementById('featuresMenu').classList.remove('show');
+    }
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            showToast('❌ Vui lòng chọn file ảnh', 'error');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            showToast('❌ Kích thước ảnh phải nhỏ hơn 5MB', 'error');
+            return;
+        }
+
+        currentUploadFile = file;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.getElementById('uploadPreview');
+            const previewImage = document.getElementById('previewImage');
+            const previewInfo = document.getElementById('previewInfo');
+
+            previewImage.src = e.target.result;
+            previewImage.style.display = 'block';
+            previewInfo.innerHTML = `
+                <div style="font-weight: 600;">${file.name}</div>
+                <div style="color: var(--muted, #94a3b8); margin-top: 4px;">
+                    ${(file.size / 1024).toFixed(1)} KB - Nhấn Send để gửi
+                </div>
+            `;
+            preview.classList.add('show');
+
+            showToast('📸 Ảnh đã sẵn sàng để gửi', 'info');
+        };
+        reader.readAsDataURL(file);
+
+        event.target.value = '';
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            showToast('❌ Kích thước file phải nhỏ hơn 10MB', 'error');
+            return;
+        }
+
+        currentUploadFile = file;
+
+        const preview = document.getElementById('uploadPreview');
+        const previewImage = document.getElementById('previewImage');
+        const previewInfo = document.getElementById('previewInfo');
+
+        previewImage.style.display = 'none';
+
+        const fileIcon = getFileIcon(file.name);
+        previewInfo.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="${fileIcon}" style="font-size: 24px;"></i>
+                <div>
+                    <div style="font-weight: 600;">${file.name}</div>
+                    <div style="color: var(--muted, #94a3b8); margin-top: 4px;">
+                        ${(file.size / 1024).toFixed(1)} KB - Nhấn Send để gửi
+                    </div>
+                </div>
+            </div>
+        `;
+        preview.classList.add('show');
+
+        showToast('📎 File đã sẵn sàng để gửi', 'info');
+
+        event.target.value = '';
+    }
+
+    function getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const iconMap = {
+            'pdf': 'ti ti-file-type-pdf',
+            'doc': 'ti ti-file-type-doc',
+            'docx': 'ti ti-file-type-doc',
+            'txt': 'ti ti-file-text',
+            'zip': 'ti ti-file-zip',
+            'rar': 'ti ti-file-zip'
+        };
+        return iconMap[ext] || 'ti ti-file';
+    }
+
+    function clearUpload() {
+        currentUploadFile = null;
+        const preview = document.getElementById('uploadPreview');
+        preview.classList.remove('show');
+        document.getElementById('previewImage').src = '';
+        document.getElementById('previewInfo').innerHTML = '';
+        showToast('🗑️ Đã xóa file', 'info');
+    }
+
+    // Upload file to server
+    async function uploadFileToServer(file, type) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+        const headers = {};
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        try {
+            const endpoint = type === 'image' ? '/api/upload/image' : '/api/upload/file';
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: headers,
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Upload error:', error);
+            throw error;
+        }
+    }
+
+    // Modified sendMessage to handle file uploads
+    async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+
+        // Check if we have file to upload
+        if (currentUploadFile) {
+            showToast('📤 Đang tải file lên...', 'info');
+
+            try {
+                // Determine file type
+                const isImage = currentUploadFile.type.startsWith('image/');
+                const uploadType = isImage ? 'image' : 'file';
+
+                // Upload file
+                const uploadResult = await uploadFileToServer(currentUploadFile, uploadType);
+
+                if (!uploadResult.success) {
+                    throw new Error(uploadResult.error || 'Upload failed');
+                }
+
+                // Create message with file attachment
+                const messageData = {
+                    conversationId: currentConversation.id,
+                    senderId: currentUser.userId,
+                    senderName: currentUser.fullName || currentUser.username,
+                    senderRole: currentUser.userType,
+                    receiverId: currentUser.userType === 'CUSTOMER' ? currentConversation.sellerId : currentConversation.customerId,
+                    content: content || `[${isImage ? '🖼️ Ảnh' : '📎 File'}] ${currentUploadFile.name}`,
+                    messageType: isImage ? 'IMAGE' : 'FILE',
+                    fileUrl: uploadResult.fileUrl,
+                    fileName: uploadResult.filename,
+                    fileType: uploadType,
+                    fileSize: uploadResult.size
+                };
+
+                // Send message via WebSocket
+                if (isConnected) {
+                    stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(messageData));
+                    showToast('✅ Đã gửi ' + (isImage ? 'ảnh' : 'file'), 'success');
+                } else {
+                    messageQueue.push(messageData);
+                    showToast('⚠️ Offline - Message queued', 'warning');
+                }
+
+                // Clear upload and input
+                clearUpload();
+                input.value = '';
+                updateCharCount();
+
+            } catch (error) {
+                console.error('Send file error:', error);
+                showToast('❌ Không thể gửi file: ' + error.message, 'error');
+            }
+
+            return;
+        }
+
+        // Normal text message
+        if (!content || !currentConversation) {
+            console.log('❌ Cannot send: no content or conversation');
+            return;
+        }
+
+        console.log('📤 Sending message:', content);
+
+        const tempId = 'temp_' + Date.now();
+        const messageData = {
+            conversationId: currentConversation.id,
+            senderId: currentUser.userId,
+            senderName: currentUser.fullName || currentUser.username,
+            senderRole: currentUser.userType,
+            receiverId: currentUser.userType === 'CUSTOMER' ? currentConversation.sellerId : currentConversation.customerId,
+            content: content,
+            messageType: 'TEXT'
+        };
+
+        const tempMessage = {
+            id: tempId,
+            ...messageData,
+            read: false,
+            createdAt: new Date().toISOString(),
+            timestamp: new Date().toISOString()
+        };
+
+        displayMessage(tempMessage, true);
+        input.value = '';
+        updateCharCount();
+
+        if (isConnected) {
+            stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(messageData));
+            console.log('✅ Message sent via WebSocket with tempId:', tempId);
+        } else {
+            messageQueue.push(messageData);
+            showToast('⚠️ Offline - Message queued', 'warning');
+            console.log('⚠️ Message queued (offline)');
+        }
+    }
 
     /*]]>*/
 </script>

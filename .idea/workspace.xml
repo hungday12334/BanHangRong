@@ -5,9 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="chore: update workspace configuration for enhanced chat UI improvements">
+      <change afterPath="$PROJECT_DIR$/CHAT_FEATURES_UPGRADE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CHAT_FILE_UPLOAD_IMPLEMENTATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SETUP_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/setup-chat-upload.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/add_file_attachments_to_messages.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/FileUploadController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/ChatMessageDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketEventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketEventListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -236,7 +247,7 @@
       <workItem from="1761818462765" duration="825000" />
       <workItem from="1761819313004" duration="9292000" />
       <workItem from="1761879573117" duration="15201000" />
-      <workItem from="1761931665304" duration="1025000" />
+      <workItem from="1761931665304" duration="4162000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -358,7 +369,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761899230767</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="chore: update workspace configuration for enhanced chat UI improvements">
+      <option name="closed" value="true" />
+      <created>1761975362536</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1761975362536</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

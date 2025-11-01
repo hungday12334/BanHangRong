@@ -1,71 +1,33 @@
-package banhangrong.su25.Entity;
+package banhangrong.su25.DTO;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "chat_messages")
-public class ChatMessage {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "message_id")
-    private Long id;
-
-    @Column(name = "conversation_id", nullable = false, length = 100)
+public class ChatMessageDTO {
+    private Long messageId;
     private String conversationId;
-
-    @Column(name = "sender_id", nullable = false)
     private Long senderId;
-
-    @Column(name = "sender_name", length = 100)
     private String senderName;
-
-    @Column(name = "sender_role", length = 20)
     private String senderRole;
-
-    @Column(name = "receiver_id", nullable = false)
     private Long receiverId;
-
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
-
-    @Column(name = "message_type", length = 20)
-    private String messageType = "TEXT";
-
-    @Column(name = "is_read")
-    private Boolean read = false;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Transient
+    private String messageType; // TEXT, IMAGE, FILE
+    private Boolean read;
     private String timestamp;
 
     // File attachment fields
-    @Column(name = "file_url", length = 500)
     private String fileUrl;
-
-    @Column(name = "file_name", length = 255)
     private String fileName;
-
-    @Column(name = "file_type", length = 50)
     private String fileType;
-
-    @Column(name = "file_size")
     private Long fileSize;
 
     // Constructors
-    public ChatMessage() {
-    }
+    public ChatMessageDTO() {}
 
     // Getters and Setters
-    public Long getId() {
-        return id;
+    public Long getMessageId() {
+        return messageId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setMessageId(Long messageId) {
+        this.messageId = messageId;
     }
 
     public String getConversationId() {
@@ -132,18 +94,7 @@ public class ChatMessage {
         this.read = read;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public String getTimestamp() {
-        if (timestamp == null && createdAt != null) {
-            return createdAt.toString();
-        }
         return timestamp;
     }
 
@@ -151,7 +102,6 @@ public class ChatMessage {
         this.timestamp = timestamp;
     }
 
-    // File attachment getters and setters
     public String getFileUrl() {
         return fileUrl;
     }
@@ -182,19 +132,6 @@ public class ChatMessage {
 
     public void setFileSize(Long fileSize) {
         this.fileSize = fileSize;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (messageType == null) {
-            messageType = "TEXT";
-        }
-        if (read == null) {
-            read = false;
-        }
     }
 }
 
