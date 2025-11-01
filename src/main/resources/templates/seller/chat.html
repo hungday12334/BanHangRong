@@ -6,7 +6,7 @@
     <title>Chat - Seller Dashboard</title>
     <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
     <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
-    <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/img/kua654ms.png" />
     <link rel="icon" type="image/png" href="/img/kua654ms.png" />
     <link rel="shortcut icon" href="/img/kua654ms.png" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -209,6 +209,7 @@
             border-radius: 12px;
             border-left: 3px solid transparent;
             background: transparent;
+            position: relative;
         }
 
         .conversation-item:hover {
@@ -220,6 +221,185 @@
             background: var(--card, rgba(59, 130, 246, 0.15));
             border-left: 3px solid var(--accent, #3b82f6);
             box-shadow: inset 0 0 10px var(--accent, rgba(59, 130, 246, 0.08));
+        }
+
+        /* Pinned conversation indicator */
+        .conversation-item.pinned {
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.2) 0%, transparent 10%);
+        }
+
+        .conversation-item.pinned:hover {
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.3) 0%, rgba(255, 255, 255, 0.06) 10%);
+        }
+
+        .pin-indicator {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #fbbf24;
+            display: none;
+        }
+
+        .conversation-item.pinned .pin-indicator {
+            display: block;
+        }
+
+        /* Conversation actions (ellipsis button) */
+        .conversation-actions {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            z-index: 10;
+        }
+
+        .conversation-item:hover .conversation-actions {
+            display: block;
+        }
+
+        .conversation-actions-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s;
+        }
+
+        .conversation-actions-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Context menu for conversation actions */
+        .conversation-context-menu {
+            position: fixed;
+            background: var(--card, #1e293b);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            padding: 4px 0;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .conversation-context-menu.show {
+            display: block;
+        }
+
+        .conversation-context-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 14px;
+            color: var(--text, #e2e8f0);
+        }
+
+        .conversation-context-menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .conversation-context-menu-item.danger {
+            color: #f87171;
+        }
+
+        .conversation-context-menu-item.danger:hover {
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .conversation-context-menu-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Delete confirmation modal */
+        .delete-conversation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-conversation-modal.show {
+            display: flex;
+        }
+
+        .delete-conversation-dialog {
+            background: var(--card, #1e293b);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.2s ease;
+        }
+
+        .delete-conversation-dialog h3 {
+            margin: 0 0 12px 0;
+            font-size: 18px;
+            color: var(--text, #e2e8f0);
+        }
+
+        .delete-conversation-dialog p {
+            margin: 0 0 20px 0;
+            font-size: 14px;
+            color: var(--muted, #94a3b8);
+            line-height: 1.5;
+        }
+
+        .delete-conversation-dialog .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .delete-conversation-dialog button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .delete-conversation-dialog .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text, #e2e8f0);
+        }
+
+        .delete-conversation-dialog .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .delete-conversation-dialog .btn-confirm {
+            background: #dc2626;
+            color: white;
+        }
+
+        .delete-conversation-dialog .btn-confirm:hover {
+            background: #b91c1c;
         }
 
         .conversation-info {
@@ -999,9 +1179,6 @@
             font-weight: 700;
             color: var(--text, #f1f5f9);
         }
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-        }
 
         .reaction-users-close {
             background: none;
@@ -1560,6 +1737,30 @@
 
 <div id="connectionStatus" class="connection-status"></div>
 
+<!-- Conversation Context Menu -->
+<div class="conversation-context-menu" id="conversationContextMenu">
+    <div class="conversation-context-menu-item" id="contextMenuPin" onclick="handlePinConversation()">
+        <i>📌</i>
+        <span id="pinMenuText">Pin conversation</span>
+    </div>
+    <div class="conversation-context-menu-item danger" onclick="handleDeleteConversation()">
+        <i>🗑️</i>
+        <span>Delete conversation</span>
+    </div>
+</div>
+
+<!-- Delete Conversation Confirmation Modal -->
+<div class="delete-conversation-modal" id="deleteConversationModal">
+    <div class="delete-conversation-dialog">
+        <h3>Delete Conversation?</h3>
+        <p>This will remove the conversation from your account only. <strong><span id="deleteConversationName"></span></strong> will still have the conversation on their side.</p>
+        <div class="buttons">
+            <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmDeleteConversation()">Delete</button>
+        </div>
+    </div>
+</div>
+
 <!-- APP WRAPPER START -->
 <div class="page">
     <!-- SIDEBAR START -->
@@ -1853,6 +2054,7 @@
 
         return new Promise((resolve, reject) => {
             if (isSeller) {
+                // Seller: load existing conversations
                 fetch(`/api/conversations/${currentUser.userId}`)
                     .then(res => res.json())
                     .then(convs => {
@@ -1868,37 +2070,19 @@
                         reject(err);
                     });
             } else {
-                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-
-                const headers = {};
-                if (csrfToken && csrfHeader) {
-                    headers[csrfHeader] = csrfToken;
-                }
-
-                fetch('/api/sellers')
+                // Customer: load ONLY existing conversations (sellers they've already chatted with)
+                fetch(`/api/conversations/${currentUser.userId}`)
                     .then(res => res.json())
-                    .then(sellers => {
-                        const promises = sellers.map(seller =>
-                            fetch(`/api/conversation?customerId=${currentUser.userId}&sellerId=${seller.userId}`, {
-                                method: 'POST',
-                                headers: headers
-                            }).then(res => res.json())
-                        );
-                        return Promise.all(promises);
-                    })
                     .then(convs => {
                         console.log('✓ Loaded conversations for customer:', convs.length);
                         conversations = convs;
                         renderConversationsList();
-                        if (conversations.length > 0 && !currentConversation) {
-                            openConversation(conversations[0]);
-                        }
+                        // Don't auto-open any conversation - show welcome screen
                         resolve();
                     })
                     .catch(err => {
-                        console.error('Error loading sellers:', err);
-                        showToast('❌ Failed to load sellers', 'error');
+                        console.error('Error loading conversations:', err);
+                        showToast('❌ Failed to load conversations', 'error');
                         reject(err);
                     });
             }
@@ -1916,17 +2100,19 @@
             const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
             const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
 
+            // Format last message with preview
             let lastMessagePreview = conv.lastMessage || 'Start chatting';
             if (lastMessagePreview.length > 35) {
                 lastMessagePreview = lastMessagePreview.substring(0, 35) + '...';
             }
 
+            // Format time
             let timeText = '';
             if (conv.lastMessageTime) {
                 timeText = formatRelativeTime(conv.lastMessageTime);
             }
 
-            // Calculate unread count for this conversation
+            // Calculate unread
             const unreadCount = conv.unreadCount || 0;
             totalUnread += unreadCount;
 
@@ -1936,10 +2122,16 @@
                 item.classList.add('active');
             }
 
+            // Check if conversation is pinned (from metadata)
+            if (conv.isPinned) {
+                item.classList.add('pinned');
+            }
+
             // Format unread badge - show "9+" if more than 9
             const unreadBadgeText = unreadCount > 9 ? '9+' : unreadCount;
 
             item.innerHTML = `
+                <span class="pin-indicator">📌</span>
                 <div class="avatar ${isCustomer ? 'seller' : ''}">${avatar}</div>
                 <div class="conversation-info">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
@@ -1951,26 +2143,45 @@
                         ${unreadCount > 0 ? `<span class="unread-badge" data-conversation-id="${conv.id}">${unreadBadgeText}</span>` : ''}
                     </div>
                 </div>
+                <div class="conversation-actions">
+                    <button class="conversation-actions-btn" onclick="showConversationActions(event, '${conv.id}', ${conv.isPinned || false})" title="More actions">
+                        ⋯
+                    </button>
+                </div>
             `;
 
-            item.onclick = () => openConversation(conv);
+            item.onclick = (e) => {
+                // Don't open conversation if clicking on actions button
+                if (!e.target.closest('.conversation-actions')) {
+                    openConversation(conv);
+                }
+            };
             list.appendChild(item);
         });
 
-        // Update sidebar unread count badge
-        updateSidebarUnreadBadge(totalUnread);
+        // Update dashboard unread badges
+        updateDashboardUnreadBadge(totalUnread);
     }
 
-    // Update unread count in sidebar
-    function updateSidebarUnreadBadge(count) {
+    // Update unread count in dashboard
+    function updateDashboardUnreadBadge(count) {
         const badge = document.getElementById('unreadChatCount');
-        if (badge) {
-            if (count > 0) {
-                badge.textContent = count > 9 ? '9+' : count;
-                badge.style.display = 'inline-block';
-            } else {
-                badge.style.display = 'none';
+        const badgeMenu = document.getElementById('unreadChatCountMenu');
+
+        const displayText = count > 9 ? '9+' : count.toString();
+
+        if (count > 0) {
+            if (badge) {
+                badge.textContent = displayText;
+                badge.style.display = 'inline-flex';
             }
+            if (badgeMenu) {
+                badgeMenu.textContent = displayText;
+                badgeMenu.style.display = 'inline-flex';
+            }
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (badgeMenu) badgeMenu.style.display = 'none';
         }
     }
 
@@ -2417,7 +2628,7 @@
             if (sidebarBadge && sidebarBadge.style.display !== 'none') {
                 const totalUnread = parseInt(sidebarBadge.textContent.replace('+', '')) || 0;
                 const newTotal = Math.max(0, totalUnread - currentUnread);
-                updateSidebarUnreadBadge(newTotal);
+                updateDashboardUnreadBadge(newTotal);
             }
         }
 
@@ -3666,6 +3877,149 @@
             cancelReply();
         }
     };
+
+    // ===== CONVERSATION ACTIONS (PIN & DELETE) =====
+
+    let currentActionConversationId = null;
+    let currentActionIsPinned = false;
+
+    // Show conversation context menu
+    function showConversationActions(event, conversationId, isPinned) {
+        event.stopPropagation();
+
+        currentActionConversationId = conversationId;
+        currentActionIsPinned = isPinned;
+
+        const menu = document.getElementById('conversationContextMenu');
+        const pinMenuText = document.getElementById('pinMenuText');
+
+        // Update pin/unpin text
+        if (isPinned) {
+            pinMenuText.textContent = 'Unpin conversation';
+        } else {
+            pinMenuText.textContent = 'Pin conversation';
+        }
+
+        // Position menu near the clicked button
+        const rect = event.target.getBoundingClientRect();
+        menu.style.top = rect.bottom + 'px';
+        menu.style.left = (rect.left - 150) + 'px';
+        menu.classList.add('show');
+
+        // Close menu when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', closeConversationMenu);
+        }, 0);
+    }
+
+    // Close conversation context menu
+    function closeConversationMenu() {
+        const menu = document.getElementById('conversationContextMenu');
+        menu.classList.remove('show');
+        document.removeEventListener('click', closeConversationMenu);
+    }
+
+    // Handle pin/unpin conversation
+    async function handlePinConversation() {
+        closeConversationMenu();
+
+        if (!currentActionConversationId) return;
+
+        try {
+            const action = currentActionIsPinned ? 'unpin' : 'pin';
+            const url = `/api/conversations/${currentActionConversationId}/${action}?userId=${currentUser.userId}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Reload conversations from server to get updated sorting
+                await loadConversations();
+
+                showToast(currentActionIsPinned ? 'Conversation unpinned' : 'Conversation pinned', 'success');
+            } else {
+                showToast('Failed to update conversation', 'error');
+            }
+        } catch (error) {
+            console.error('Error pinning/unpinning conversation:', error);
+            showToast('Network error. Please try again.', 'error');
+        }
+    }
+
+    // Handle delete conversation (show confirmation modal)
+    function handleDeleteConversation() {
+        closeConversationMenu();
+
+        if (!currentActionConversationId) return;
+
+        // Get conversation name
+        const conv = conversations.find(c => c.id === currentActionConversationId);
+        if (!conv) return;
+
+        const isCustomer = currentUser.userType === 'CUSTOMER';
+        const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
+
+        // Show confirmation modal
+        document.getElementById('deleteConversationName').textContent = otherPartyName;
+        document.getElementById('deleteConversationModal').classList.add('show');
+    }
+
+    // Close delete confirmation modal
+    function closeDeleteModal() {
+        document.getElementById('deleteConversationModal').classList.remove('show');
+        currentActionConversationId = null;
+    }
+
+    // Confirm delete conversation
+    async function confirmDeleteConversation() {
+        if (!currentActionConversationId) return;
+
+
+        const deletedConvId = currentActionConversationId;
+        closeDeleteModal();
+
+        try {
+            const url = `/api/conversations/${deletedConvId}?userId=${currentUser.userId}`;
+
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // If current conversation was deleted, close it
+                if (currentConversation && currentConversation.id === deletedConvId) {
+                    currentConversation = null;
+                    document.getElementById('welcomeScreen').classList.remove('hidden');
+                    document.getElementById('chatArea').classList.add('hidden');
+                }
+
+                // Reload conversations from server to get updated list (deleted ones filtered out)
+                await loadConversations();
+
+                showToast('Conversation deleted', 'success');
+            } else {
+                showToast('Failed to delete conversation', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting conversation:', error);
+            showToast('Network error. Please try again.', 'error');
+        } finally {
+            currentActionConversationId = null;
+        }
+    }
 
     /*]]>*/
 </script>

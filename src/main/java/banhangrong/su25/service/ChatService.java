@@ -2,9 +2,11 @@ package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.ChatMessage;
 import banhangrong.su25.Entity.Conversation;
+import banhangrong.su25.Entity.UserConversationMetadata;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ConversationRepository;
 import banhangrong.su25.Repository.MessageRepository;
+import banhangrong.su25.Repository.UserConversationMetadataRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ public class ChatService {
     private final UsersRepository usersRepository;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final UserConversationMetadataRepository metadataRepository;
 
     // Track online users in memory (in production, use Redis or similar)
     private final Map<Long, Boolean> onlineUsers = new HashMap<>();
@@ -26,10 +29,12 @@ public class ChatService {
     @Autowired
     public ChatService(UsersRepository usersRepository,
                        ConversationRepository conversationRepository,
-                       MessageRepository messageRepository) {
+                       MessageRepository messageRepository,
+                       UserConversationMetadataRepository metadataRepository) {
         this.usersRepository = usersRepository;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
+        this.metadataRepository = metadataRepository;
     }
 
     public Users getUser(Long userId) {
@@ -135,9 +140,24 @@ public class ChatService {
         List<Conversation> conversations = conversationRepository.findConversationsByUserId(userId);
         System.out.println("✓ Found " + conversations.size() + " conversations");
 
-        // Load messages and unread counts for each conversation
+        // Load ALL metadata for this user (including deleted ones to filter them out)
+        List<UserConversationMetadata> metadataList = metadataRepository.findByUserId(userId);
+        Map<String, UserConversationMetadata> metadataMap = new HashMap<>();
+        for (UserConversationMetadata meta : metadataList) {
+            metadataMap.put(meta.getConversationId(), meta);
+        }
+
+        // Filter out deleted conversations and load messages/unread counts
+        List<Conversation> filteredConversations = new ArrayList<>();
         for (Conversation conv : conversations) {
             try {
+                // Check if conversation is deleted for this user
+                UserConversationMetadata metadata = metadataMap.get(conv.getId());
+                if (metadata != null && metadata.getIsDeleted()) {
+                    System.out.println("⏭️ Skipping deleted conversation: " + conv.getId());
+                    continue; // Skip deleted conversations
+                }
+
                 // Load messages from database
                 List<ChatMessage> messages = messageRepository.findByConversationIdOrderByCreatedAtAsc(conv.getId());
                 conv.setMessages(messages);
@@ -153,19 +173,50 @@ public class ChatService {
                     conv.setLastMessage(lastMessage.getContent());
                     conv.setLastMessageTime(lastMessage.getCreatedAt());
                 }
+
+                // Set pinned status from metadata
+                if (metadata != null && metadata.getIsPinned()) {
+                    conv.setIsPinned(true);
+                    System.out.println("📌 Conversation is pinned: " + conv.getId());
+                } else {
+                    conv.setIsPinned(false);
+                }
+
+                filteredConversations.add(conv);
             } catch (Exception e) {
                 System.err.println("❌ Error loading conversation " + conv.getId() + ": " + e.getMessage());
             }
         }
 
-        // Sort by last message time
-        conversations.sort((c1, c2) -> {
-            LocalDateTime time1 = c1.getLastMessageTime() != null ? c1.getLastMessageTime() : c1.getCreatedAt();
-            LocalDateTime time2 = c2.getLastMessageTime() != null ? c2.getLastMessageTime() : c2.getCreatedAt();
-            return time2.compareTo(time1); // Descending order
+        // Sort: Pinned conversations first (by pinnedAt desc), then non-pinned (by last message time desc)
+        filteredConversations.sort((c1, c2) -> {
+            UserConversationMetadata meta1 = metadataMap.get(c1.getId());
+            UserConversationMetadata meta2 = metadataMap.get(c2.getId());
+
+            boolean isPinned1 = meta1 != null && meta1.getIsPinned();
+            boolean isPinned2 = meta2 != null && meta2.getIsPinned();
+
+            // If both pinned or both not pinned, sort by time
+            if (isPinned1 == isPinned2) {
+                if (isPinned1) {
+                    // Both pinned: sort by pinnedAt (most recent first)
+                    LocalDateTime pinnedAt1 = meta1.getPinnedAt();
+                    LocalDateTime pinnedAt2 = meta2.getPinnedAt();
+                    return pinnedAt2.compareTo(pinnedAt1);
+                } else {
+                    // Both not pinned: sort by last message time
+                    LocalDateTime time1 = c1.getLastMessageTime() != null ? c1.getLastMessageTime() : c1.getCreatedAt();
+                    LocalDateTime time2 = c2.getLastMessageTime() != null ? c2.getLastMessageTime() : c2.getCreatedAt();
+                    return time2.compareTo(time1);
+                }
+            }
+
+            // One is pinned, one is not: pinned comes first
+            return isPinned1 ? -1 : 1;
         });
 
-        return conversations;
+        System.out.println("✅ Returning " + filteredConversations.size() + " conversations (after filtering deleted)");
+        return filteredConversations;
     }
 
     @Transactional
@@ -510,5 +561,123 @@ public class ChatService {
             System.err.println("Error stringifying reactions: " + e.getMessage());
             return null;
         }
+    }
+
+    // ===== CONVERSATION ACTIONS (PIN & DELETE) =====
+
+    /**
+     * Pin a conversation for a specific user
+     */
+    @Transactional
+    public UserConversationMetadata pinConversation(Long userId, String conversationId) {
+        System.out.println("=== 📌 PINNING CONVERSATION ===");
+        System.out.println("User ID: " + userId);
+        System.out.println("Conversation ID: " + conversationId);
+
+        try {
+            UserConversationMetadata metadata = metadataRepository
+                    .findByUserIdAndConversationId(userId, conversationId)
+                    .orElse(new UserConversationMetadata(userId, conversationId));
+
+            metadata.setIsPinned(true);
+            metadata.setPinnedAt(LocalDateTime.now());
+
+            UserConversationMetadata saved = metadataRepository.save(metadata);
+            System.out.println("✅ Conversation pinned successfully");
+            return saved;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error pinning conversation: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to pin conversation", e);
+        }
+    }
+
+    /**
+     * Unpin a conversation for a specific user
+     */
+    @Transactional
+    public UserConversationMetadata unpinConversation(Long userId, String conversationId) {
+        System.out.println("=== 📌 UNPINNING CONVERSATION ===");
+        System.out.println("User ID: " + userId);
+        System.out.println("Conversation ID: " + conversationId);
+
+        try {
+            UserConversationMetadata metadata = metadataRepository
+                    .findByUserIdAndConversationId(userId, conversationId)
+                    .orElse(new UserConversationMetadata(userId, conversationId));
+
+            metadata.setIsPinned(false);
+            metadata.setPinnedAt(null);
+
+            UserConversationMetadata saved = metadataRepository.save(metadata);
+            System.out.println("✅ Conversation unpinned successfully");
+            return saved;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error unpinning conversation: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to unpin conversation", e);
+        }
+    }
+
+    /**
+     * Delete a conversation for a specific user (soft delete - only affects this user's view)
+     */
+    @Transactional
+    public UserConversationMetadata deleteConversationForUser(Long userId, String conversationId) {
+        System.out.println("=== 🗑️ DELETING CONVERSATION FOR USER ===");
+        System.out.println("User ID: " + userId);
+        System.out.println("Conversation ID: " + conversationId);
+
+        try {
+            UserConversationMetadata metadata = metadataRepository
+                    .findByUserIdAndConversationId(userId, conversationId)
+                    .orElse(new UserConversationMetadata(userId, conversationId));
+
+            metadata.setIsDeleted(true);
+            metadata.setDeletedAt(LocalDateTime.now());
+            // Also unpin if it was pinned
+            metadata.setIsPinned(false);
+            metadata.setPinnedAt(null);
+
+            UserConversationMetadata saved = metadataRepository.save(metadata);
+            System.out.println("✅ Conversation deleted for user successfully");
+            return saved;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error deleting conversation for user: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete conversation for user", e);
+        }
+    }
+
+    /**
+     * Get conversation metadata for a specific user
+     */
+    public UserConversationMetadata getConversationMetadata(Long userId, String conversationId) {
+        return metadataRepository
+                .findByUserIdAndConversationId(userId, conversationId)
+                .orElse(null);
+    }
+
+    /**
+     * Check if conversation is pinned for a user
+     */
+    public boolean isConversationPinned(Long userId, String conversationId) {
+        return metadataRepository
+                .findByUserIdAndConversationId(userId, conversationId)
+                .map(UserConversationMetadata::getIsPinned)
+                .orElse(false);
+    }
+
+    /**
+     * Check if conversation is deleted for a user
+     */
+    public boolean isConversationDeleted(Long userId, String conversationId) {
+        return metadataRepository
+                .findByUserIdAndConversationId(userId, conversationId)
+                .map(UserConversationMetadata::getIsDeleted)
+                .orElse(false);
     }
 }

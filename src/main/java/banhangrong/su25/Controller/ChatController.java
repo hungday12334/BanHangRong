@@ -644,4 +644,146 @@ public class ChatController {
         }
     }
 
+    // ===== CONVERSATION ACTIONS API (PIN & DELETE) =====
+
+    /**
+     * Pin a conversation for the current user
+     * POST /api/conversations/{conversationId}/pin
+     */
+    @PostMapping("/api/conversations/{conversationId}/pin")
+    @ResponseBody
+    public ResponseEntity<?> pinConversation(
+            @PathVariable String conversationId,
+            @RequestParam Long userId) {
+        try {
+            System.out.println("=== 📌 PIN CONVERSATION REQUEST ===");
+            System.out.println("Conversation ID: " + conversationId);
+            System.out.println("User ID: " + userId);
+
+            chatService.pinConversation(userId, conversationId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Conversation pinned successfully");
+            response.put("conversationId", conversationId);
+            response.put("isPinned", true);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error pinning conversation: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Failed to pin conversation: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    /**
+     * Unpin a conversation for the current user
+     * POST /api/conversations/{conversationId}/unpin
+     */
+    @PostMapping("/api/conversations/{conversationId}/unpin")
+    @ResponseBody
+    public ResponseEntity<?> unpinConversation(
+            @PathVariable String conversationId,
+            @RequestParam Long userId) {
+        try {
+            System.out.println("=== 📌 UNPIN CONVERSATION REQUEST ===");
+            System.out.println("Conversation ID: " + conversationId);
+            System.out.println("User ID: " + userId);
+
+            chatService.unpinConversation(userId, conversationId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Conversation unpinned successfully");
+            response.put("conversationId", conversationId);
+            response.put("isPinned", false);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error unpinning conversation: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Failed to unpin conversation: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    /**
+     * Delete a conversation for the current user (soft delete - local only)
+     * DELETE /api/conversations/{conversationId}
+     */
+    @DeleteMapping("/api/conversations/{conversationId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteConversation(
+            @PathVariable String conversationId,
+            @RequestParam Long userId) {
+        try {
+            System.out.println("=== 🗑️ DELETE CONVERSATION REQUEST ===");
+            System.out.println("Conversation ID: " + conversationId);
+            System.out.println("User ID: " + userId);
+
+            chatService.deleteConversationForUser(userId, conversationId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Conversation deleted successfully");
+            response.put("conversationId", conversationId);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error deleting conversation: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Failed to delete conversation: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    /**
+     * Get conversation metadata (pinned/deleted status) for the current user
+     * GET /api/conversations/{conversationId}/metadata
+     */
+    @GetMapping("/api/conversations/{conversationId}/metadata")
+    @ResponseBody
+    public ResponseEntity<?> getConversationMetadata(
+            @PathVariable String conversationId,
+            @RequestParam Long userId) {
+        try {
+            boolean isPinned = chatService.isConversationPinned(userId, conversationId);
+            boolean isDeleted = chatService.isConversationDeleted(userId, conversationId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("conversationId", conversationId);
+            response.put("isPinned", isPinned);
+            response.put("isDeleted", isDeleted);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error getting conversation metadata: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Failed to get conversation metadata: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
 }

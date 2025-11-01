@@ -347,6 +347,7 @@
             cursor: pointer;
             transition: background 0.15s;
             border-bottom: 1px solid #f0f0f0;
+            position: relative;
         }
 
         .conversation-item:hover {
@@ -357,6 +358,185 @@
             background: #f0f9ff;
             border-left: 3px solid var(--accent, #0ea5e9);
             padding-left: 13px;
+        }
+
+        /* Pinned conversation indicator */
+        .conversation-item.pinned {
+            background: linear-gradient(90deg, #fef3c7 0%, #fff 10%);
+        }
+
+        .conversation-item.pinned:hover {
+            background: linear-gradient(90deg, #fde68a 0%, #f9f9f9 10%);
+        }
+
+        .pin-indicator {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #f59e0b;
+            display: none;
+        }
+
+        .conversation-item.pinned .pin-indicator {
+            display: block;
+        }
+
+        /* Conversation actions (ellipsis button) */
+        .conversation-actions {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            z-index: 10;
+        }
+
+        .conversation-item:hover .conversation-actions {
+            display: block;
+        }
+
+        .conversation-actions-btn {
+            background: #f3f4f6;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+
+        .conversation-actions-btn:hover {
+            background: #e5e7eb;
+            color: #111827;
+            transform: scale(1.1);
+        }
+
+        /* Context menu for conversation actions */
+        .conversation-context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 4px 0;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .conversation-context-menu.show {
+            display: block;
+        }
+
+        .conversation-context-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 14px;
+            color: #111827;
+        }
+
+        .conversation-context-menu-item:hover {
+            background: #f3f4f6;
+        }
+
+        .conversation-context-menu-item.danger {
+            color: #dc2626;
+        }
+
+        .conversation-context-menu-item.danger:hover {
+            background: #fee2e2;
+        }
+
+        .conversation-context-menu-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Delete confirmation modal */
+        .delete-conversation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-conversation-modal.show {
+            display: flex;
+        }
+
+        .delete-conversation-dialog {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.2s ease;
+        }
+
+        .delete-conversation-dialog h3 {
+            margin: 0 0 12px 0;
+            font-size: 18px;
+            color: #111827;
+        }
+
+        .delete-conversation-dialog p {
+            margin: 0 0 20px 0;
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .delete-conversation-dialog .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .delete-conversation-dialog button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .delete-conversation-dialog .btn-cancel {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .delete-conversation-dialog .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .delete-conversation-dialog .btn-confirm {
+            background: #dc2626;
+            color: white;
+        }
+
+        .delete-conversation-dialog .btn-confirm:hover {
+            background: #b91c1c;
         }
 
         .conversation-info {
@@ -1740,6 +1920,30 @@
 </div>
 <!-- Customer Wrapper End -->
 
+<!-- Conversation Context Menu -->
+<div class="conversation-context-menu" id="conversationContextMenu">
+    <div class="conversation-context-menu-item" id="contextMenuPin" onclick="handlePinConversation()">
+        <i>📌</i>
+        <span id="pinMenuText">Pin conversation</span>
+    </div>
+    <div class="conversation-context-menu-item danger" onclick="handleDeleteConversation()">
+        <i>🗑️</i>
+        <span>Delete conversation</span>
+    </div>
+</div>
+
+<!-- Delete Conversation Confirmation Modal -->
+<div class="delete-conversation-modal" id="deleteConversationModal">
+    <div class="delete-conversation-dialog">
+        <h3>Delete Conversation?</h3>
+        <p>This will remove the conversation from your account only. <strong><span id="deleteConversationName"></span></strong> will still have the conversation on their side.</p>
+        <div class="buttons">
+            <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmDeleteConversation()">Delete</button>
+        </div>
+    </div>
+</div>
+
 <!-- Reaction Details Popup (Centered) -->
 <div class="reaction-details-overlay" id="reactionDetailsOverlay" onclick="closeReactionDetails(event)">
     <div class="reaction-details-popup" onclick="event.stopPropagation()">
@@ -1956,10 +2160,16 @@
                 item.classList.add('active');
             }
 
+            // Check if conversation is pinned (from metadata)
+            if (conv.isPinned) {
+                item.classList.add('pinned');
+            }
+
             // Format unread badge - show "9+" if more than 9
             const unreadBadgeText = unreadCount > 9 ? '9+' : unreadCount;
 
             item.innerHTML = `
+                <span class="pin-indicator">📌</span>
                 <div class="avatar ${isCustomer ? 'seller' : ''}">${avatar}</div>
                 <div class="conversation-info">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
@@ -1971,9 +2181,19 @@
                         ${unreadCount > 0 ? `<span class="unread-badge" data-conversation-id="${conv.id}">${unreadBadgeText}</span>` : ''}
                     </div>
                 </div>
+                <div class="conversation-actions">
+                    <button class="conversation-actions-btn" onclick="showConversationActions(event, '${conv.id}', ${conv.isPinned || false})" title="More actions">
+                        ⋯
+                    </button>
+                </div>
             `;
 
-            item.onclick = () => openConversation(conv);
+            item.onclick = (e) => {
+                // Don't open conversation if clicking on actions button
+                if (!e.target.closest('.conversation-actions')) {
+                    openConversation(conv);
+                }
+            };
             list.appendChild(item);
         });
 
@@ -3430,6 +3650,149 @@
     function removeReactionFromPopup(messageId, emoji) {
         removeReaction(messageId, emoji);
         closeReactionPopup();
+    }
+
+    // ===== CONVERSATION ACTIONS (PIN & DELETE) =====
+
+    let currentActionConversationId = null;
+    let currentActionIsPinned = false;
+
+    // Show conversation context menu
+    function showConversationActions(event, conversationId, isPinned) {
+        event.stopPropagation();
+
+        currentActionConversationId = conversationId;
+        currentActionIsPinned = isPinned;
+
+        const menu = document.getElementById('conversationContextMenu');
+        const pinMenuItem = document.getElementById('contextMenuPin');
+        const pinMenuText = document.getElementById('pinMenuText');
+
+        // Update pin/unpin text
+        if (isPinned) {
+            pinMenuText.textContent = 'Unpin conversation';
+        } else {
+            pinMenuText.textContent = 'Pin conversation';
+        }
+
+        // Position menu near the clicked button
+        const rect = event.target.getBoundingClientRect();
+        menu.style.top = rect.bottom + 'px';
+        menu.style.left = (rect.left - 150) + 'px';
+        menu.classList.add('show');
+
+        // Close menu when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', closeConversationMenu);
+        }, 0);
+    }
+
+    // Close conversation context menu
+    function closeConversationMenu() {
+        const menu = document.getElementById('conversationContextMenu');
+        menu.classList.remove('show');
+        document.removeEventListener('click', closeConversationMenu);
+    }
+
+    // Handle pin/unpin conversation
+    async function handlePinConversation() {
+        closeConversationMenu();
+
+        if (!currentActionConversationId) return;
+
+        try {
+            const action = currentActionIsPinned ? 'unpin' : 'pin';
+            const url = `/api/conversations/${currentActionConversationId}/${action}?userId=${currentUser.userId}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Reload conversations from server to get updated sorting
+                await loadConversations();
+
+                showToast(currentActionIsPinned ? 'Conversation unpinned' : 'Conversation pinned', 'success');
+            } else {
+                showToast('Failed to update conversation', 'error');
+            }
+        } catch (error) {
+            console.error('Error pinning/unpinning conversation:', error);
+            showToast('Network error. Please try again.', 'error');
+        }
+    }
+
+    // Handle delete conversation (show confirmation modal)
+    function handleDeleteConversation() {
+        closeConversationMenu();
+
+        if (!currentActionConversationId) return;
+
+        // Get conversation name
+        const conv = conversations.find(c => c.id === currentActionConversationId);
+        if (!conv) return;
+
+        const isCustomer = currentUser.userType === 'CUSTOMER';
+        const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
+
+        // Show confirmation modal
+        document.getElementById('deleteConversationName').textContent = otherPartyName;
+        document.getElementById('deleteConversationModal').classList.add('show');
+    }
+
+    // Close delete confirmation modal
+    function closeDeleteModal() {
+        document.getElementById('deleteConversationModal').classList.remove('show');
+        currentActionConversationId = null;
+    }
+
+    // Confirm delete conversation
+    async function confirmDeleteConversation() {
+        if (!currentActionConversationId) return;
+
+        const deletedConvId = currentActionConversationId;
+        closeDeleteModal();
+
+        try {
+            const url = `/api/conversations/${deletedConvId}?userId=${currentUser.userId}`;
+
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // If current conversation was deleted, close it
+                if (currentConversation && currentConversation.id === deletedConvId) {
+                    currentConversation = null;
+                    document.getElementById('welcomeScreen').classList.remove('hidden');
+                    document.getElementById('chatArea').classList.add('hidden');
+                }
+
+                // Reload conversations from server to get updated list (deleted ones filtered out)
+                await loadConversations();
+
+                showToast('Conversation deleted', 'success');
+            } else {
+                showToast('Failed to delete conversation', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting conversation:', error);
+            showToast('Network error. Please try again.', 'error');
+        } finally {
+            currentActionConversationId = null;
+        }
     }
 
     function closeReactionPopup() {

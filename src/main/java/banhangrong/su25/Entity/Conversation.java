@@ -60,6 +60,10 @@ public class Conversation {
     @JsonProperty("unreadCount")
     private int unreadCount = 0;
 
+    @Transient // Not persisted, loaded from user_conversation_metadata
+    @JsonProperty("isPinned")
+    private Boolean isPinned = false;
+
     @Transient // Not persisted, loaded separately
     @JsonProperty("messages")
     private List<ChatMessage> messages = new ArrayList<>();
