@@ -4,20 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="chore: update workspace configuration for enhanced chat UI improvements">
-      <change afterPath="$PROJECT_DIR$/CHAT_FEATURES_UPGRADE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CHAT_FILE_UPLOAD_IMPLEMENTATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SETUP_COMPLETE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/setup-chat-upload.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/add_file_attachments_to_messages.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/FileUploadController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/ChatMessageDTO.java" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): implement file upload feature with image and document support">
+      <change afterPath="$PROJECT_DIR$/CHAT_OPTIMIZATION_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CUSTOMER_CHAT_OPTIMIZATION_COMPLETE.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/seller-dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/seller-dashboard.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/pages/seller/seller_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/pages/seller/seller_dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -247,7 +242,8 @@
       <workItem from="1761818462765" duration="825000" />
       <workItem from="1761819313004" duration="9292000" />
       <workItem from="1761879573117" duration="15201000" />
-      <workItem from="1761931665304" duration="4162000" />
+      <workItem from="1761931665304" duration="7741000" />
+      <workItem from="1761983539554" duration="2632000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -377,7 +373,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761975362536</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="feat(chat): implement file upload feature with image and document support">
+      <option name="closed" value="true" />
+      <created>1761978450743</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1761978450743</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -450,6 +454,7 @@
     <MESSAGE value="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX" />
     <MESSAGE value="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX" />
     <MESSAGE value="chore: update workspace configuration for enhanced chat UI improvements" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: update workspace configuration for enhanced chat UI improvements" />
+    <MESSAGE value="feat(chat): implement file upload feature with image and document support" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): implement file upload feature with image and document support" />
   </component>
 </project>

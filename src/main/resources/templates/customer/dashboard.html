@@ -412,7 +412,10 @@
 			<a href="#">License Software</a>
 			<a href="#">Game Keys</a>
 			<a href="#">Voucher</a>
-			<a href="/customer/chat">💬 Chat</a>
+			<a href="/customer/chat" style="position: relative;">
+				💬 Chat
+				<span class="badge bg-danger" id="unreadChatCount" style="display: none; position: absolute; top: -8px; right: -12px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); align-items: center; justify-content: center;">0</span>
+			</a>
 			<a href="#">Support</a>
 			</nav>
 			<div class="top-actions">
@@ -432,7 +435,10 @@
 						<a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
 						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
 						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
-						<a class="item" href="/customer/chat" role="menuitem">💬 Chat</a>
+						<a class="item" href="/customer/chat" role="menuitem" style="position: relative;">
+							💬 Chat
+							<span class="badge bg-danger" id="unreadChatCountMenu" style="display: none; margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); align-items: center; justify-content: center;">0</span>
+						</a>
 						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
 						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
 						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
@@ -570,11 +576,12 @@
 				th:href="@{'/customer/dashboard'(page=${page - 1}, size=${size}, search=${search})}"
 				style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">«
 					Previous</a>
-			<span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-				<a th:href="@{'/customer/dashboard'(page=${i}, size=${size}, search=${search})}" th:text="${i + 1}"
-					th:classappend="${i} == ${page} ? ' active' : ''"
-					style="margin:0 2px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827"></a>
-			</span>
+            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <a th:href="@{'/customer/dashboard'(page=${i}, size=${size}, search=${search})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i == page} ? ' active' : ''"
+                   style="margin:0 2px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827"></a>
+            </span>
 			<a th:if="${totalPages > 1 and page < totalPages - 1}"
 				th:href="@{'/customer/dashboard'(page=${page + 1}, size=${size}, search=${search})}"
 				style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">Sau
@@ -722,6 +729,56 @@
 			}
 		</script>
 		
+		<!-- Load unread chat count -->
+		<script th:inline="javascript">
+			(function() {
+				const currentUser = /*[[${user}]]*/ null;
+				if (!currentUser || !currentUser.userId) return;
+
+				function loadUnreadChatCount() {
+					fetch(`/api/conversations/${currentUser.userId}`)
+						.then(res => res.json())
+						.then(conversations => {
+							let totalUnread = 0;
+							conversations.forEach(conv => {
+								totalUnread += (conv.unreadCount || 0);
+							});
+
+							const badge = document.getElementById('unreadChatCount');
+							const badgeMenu = document.getElementById('unreadChatCountMenu');
+
+							if (totalUnread > 0) {
+								const displayText = totalUnread > 9 ? '9+' : totalUnread.toString();
+								if (badge) {
+									badge.textContent = displayText;
+									badge.style.display = 'inline-flex';
+								}
+								if (badgeMenu) {
+									badgeMenu.textContent = displayText;
+									badgeMenu.style.display = 'inline-flex';
+								}
+							} else {
+								if (badge) badge.style.display = 'none';
+								if (badgeMenu) badgeMenu.style.display = 'none';
+							}
+						})
+						.catch(err => {
+							console.error('Failed to load unread count:', err);
+						});
+				}
+
+				// Load on page ready
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', loadUnreadChatCount);
+				} else {
+					loadUnreadChatCount();
+				}
+
+				// Refresh every 30 seconds
+				setInterval(loadUnreadChatCount, 30000);
+			})();
+		</script>
+
 	</div>
 </body>
 

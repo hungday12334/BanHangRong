@@ -879,6 +879,33 @@ body.theme-switching {
   border-radius: 10px;
   color: var(--muted);
   transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+  position: relative;
+}
+
+.menu .item .badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.menu .item .badge.bg-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.menu .item .badge.bg-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
 }
 
 .menu .item .ti {

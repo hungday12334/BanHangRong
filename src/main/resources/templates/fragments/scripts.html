@@ -31,6 +31,52 @@
       });
     })();
   </script>
+
+  <!-- Load unread chat count for sidebar badge -->
+  <script>
+    (function() {
+      function loadUnreadChatCount() {
+        // Get current user ID from Thymeleaf (if available)
+        const userIdMeta = document.querySelector('meta[name="user-id"]');
+        if (!userIdMeta) return;
+
+        const userId = userIdMeta.content;
+
+        fetch(`/api/conversations/${userId}`)
+          .then(res => res.json())
+          .then(conversations => {
+            let totalUnread = 0;
+            conversations.forEach(conv => {
+              totalUnread += (conv.unreadCount || 0);
+            });
+
+            const badge = document.getElementById('unreadChatCount');
+            if (badge) {
+              if (totalUnread > 0) {
+                badge.textContent = totalUnread > 9 ? '9+' : totalUnread;
+                badge.style.display = 'inline-flex';
+              } else {
+                badge.style.display = 'none';
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Failed to load unread count:', err);
+          });
+      }
+
+      // Load on page ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadUnreadChatCount);
+      } else {
+        loadUnreadChatCount();
+      }
+
+      // Refresh every 30 seconds
+      setInterval(loadUnreadChatCount, 30000);
+    })();
+  </script>
+
   <script src="/js/seller-dashboard.js"></script>
 </section>
 

@@ -561,24 +561,21 @@
             color: var(--muted, #9ca3af);
             text-align: center;
             padding: 40px 20px;
+            background: var(--bg, #f5f7fb);
         }
 
-        .welcome-screen i {
-            font-size: 64px;
-            margin-bottom: 16px;
-            color: var(--accent, #0ea5e9);
-        }
 
         .welcome-screen h3 {
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 600;
             color: var(--text, #0f172a);
-            margin: 0 0 8px 0;
+            margin: 0 0 12px 0;
         }
 
         .welcome-screen p {
-            font-size: 14px;
+            font-size: 15px;
             margin: 0;
+            color: var(--muted, #6b7280);
         }
 
         .hidden {
@@ -1089,13 +1086,13 @@
 
             <!-- Main Chat Area -->
             <div class="chat-main">
-                <div id="welcomeScreen" class="welcome-screen">
-                    <i class="ti ti-message-circle"></i>
+                <div id="welcomeScreen" class="welcome-screen" style="display: flex;">
+                    <div style="font-size: 80px; margin-bottom: 24px;">💬</div>
                     <h3>Welcome to Chat</h3>
-                    <p>Select a conversation to start messaging</p>
+                    <p>Select a seller to start messaging</p>
                 </div>
 
-                <div id="chatArea" class="hidden">
+                <div id="chatArea" class="hidden" style="display: none !important; flex-direction: column; flex: 1; min-height: 0;">
                     <div class="chat-header">
                         <div class="avatar" id="chatHeaderAvatar"></div>
                         <div style="margin-left: 12px; flex: 1; min-width: 0;">
@@ -1312,38 +1309,19 @@
                         reject(err);
                     });
             } else {
-                // Customer: load sellers và tạo conversations
-                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-
-                const headers = {};
-                if (csrfToken && csrfHeader) {
-                    headers[csrfHeader] = csrfToken;
-                }
-
-                fetch('/api/sellers')
+                // Customer: load ONLY existing conversations (sellers they've already chatted with)
+                fetch(`/api/conversations/${currentUser.userId}`)
                     .then(res => res.json())
-                    .then(sellers => {
-                        const promises = sellers.map(seller =>
-                            fetch(`/api/conversation?customerId=${currentUser.userId}&sellerId=${seller.userId}`, {
-                                method: 'POST',
-                                headers: headers
-                            }).then(res => res.json())
-                        );
-                        return Promise.all(promises);
-                    })
                     .then(convs => {
                         console.log('✓ Loaded conversations for customer:', convs.length);
                         conversations = convs;
                         renderConversationsList();
-                        if (conversations.length > 0 && !currentConversation) {
-                            openConversation(conversations[0]);
-                        }
+                        // Don't auto-open any conversation - show welcome screen
                         resolve();
                     })
                     .catch(err => {
-                        console.error('Error loading sellers:', err);
-                        showToast('❌ Failed to load sellers', 'error');
+                        console.error('Error loading conversations:', err);
+                        showToast('❌ Failed to load conversations', 'error');
                         reject(err);
                     });
             }
@@ -1353,6 +1331,8 @@
     function renderConversationsList() {
         const list = document.getElementById('conversationsList');
         list.innerHTML = '';
+
+        let totalUnread = 0;
 
         conversations.forEach(conv => {
             const isCustomer = currentUser.userType === 'CUSTOMER';
@@ -1371,11 +1351,18 @@
                 timeText = formatRelativeTime(conv.lastMessageTime);
             }
 
+            // Calculate unread
+            const unreadCount = conv.unreadCount || 0;
+            totalUnread += unreadCount;
+
             const item = document.createElement('div');
             item.className = 'conversation-item';
             if (currentConversation && currentConversation.id === conv.id) {
                 item.classList.add('active');
             }
+
+            // Format unread badge - show "9+" if more than 9
+            const unreadBadgeText = unreadCount > 9 ? '9+' : unreadCount;
 
             item.innerHTML = `
                 <div class="avatar ${isCustomer ? 'seller' : ''}">${avatar}</div>
@@ -1386,7 +1373,7 @@
                     </div>
                     <div class="conversation-last-message" style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="flex:1;">${escapeHtml(lastMessagePreview)}</span>
-                        ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount > 99 ? '99+' : conv.unreadCount}</span>` : ''}
+                        ${unreadCount > 0 ? `<span class="unread-badge" data-conversation-id="${conv.id}">${unreadBadgeText}</span>` : ''}
                     </div>
                 </div>
             `;
@@ -1394,6 +1381,31 @@
             item.onclick = () => openConversation(conv);
             list.appendChild(item);
         });
+
+        // Update dashboard unread badges
+        updateDashboardUnreadBadge(totalUnread);
+    }
+
+    // Update unread count in dashboard
+    function updateDashboardUnreadBadge(count) {
+        const badge = document.getElementById('unreadChatCount');
+        const badgeMenu = document.getElementById('unreadChatCountMenu');
+
+        const displayText = count > 9 ? '9+' : count.toString();
+
+        if (count > 0) {
+            if (badge) {
+                badge.textContent = displayText;
+                badge.style.display = 'inline-flex';
+            }
+            if (badgeMenu) {
+                badgeMenu.textContent = displayText;
+                badgeMenu.style.display = 'inline-flex';
+            }
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (badgeMenu) badgeMenu.style.display = 'none';
+        }
     }
 
     // Format relative time (e.g., "2m ago", "1h ago", "Yesterday")
@@ -2001,11 +2013,12 @@
         currentConversation = conv;
         localStorage.setItem(LAST_CONVERSATION_KEY, conv.id);
 
-        // 🚨 QUAN TRỌNG: Đảm bảo chatArea hiển thị
-        document.getElementById('welcomeScreen').classList.add('hidden');
+        // Hide welcome screen and show chat area
+        document.getElementById('welcomeScreen').style.display = 'none';
         const chatArea = document.getElementById('chatArea');
         chatArea.classList.remove('hidden');
-        chatArea.style.display = 'flex'; // 🚨 THÊM DÒNG NÀY
+        chatArea.style.removeProperty('display'); // Remove the !important
+        chatArea.style.display = 'flex';
 
         const isCustomer = currentUser.userType === 'CUSTOMER';
         const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
@@ -2020,11 +2033,26 @@
             subscribeToConversation(conv.id);
         }
 
-        // 🚨 QUAN TRỌNG: Render messages và focus input
+        // Render messages and mark as read
         renderMessages();
         markAsRead();
 
-        // Focus input sau 100ms để đảm bảo UI đã render xong
+        // Hide unread badge for this conversation
+        const badge = document.querySelector(`.unread-badge[data-conversation-id="${conv.id}"]`);
+        if (badge) {
+            badge.style.display = 'none';
+
+            // Update total unread count in dashboard
+            const currentUnread = parseInt(badge.textContent.replace('+', '')) || 0;
+            const dashboardBadge = document.getElementById('unreadChatCount');
+            if (dashboardBadge && dashboardBadge.style.display !== 'none') {
+                const totalUnread = parseInt(dashboardBadge.textContent.replace('+', '')) || 0;
+                const newTotal = Math.max(0, totalUnread - currentUnread);
+                updateDashboardUnreadBadge(newTotal);
+            }
+        }
+
+        // Focus input
         setTimeout(() => {
             const messageInput = document.getElementById('messageInput');
             if (messageInput) {
@@ -2051,10 +2079,12 @@
         // If this message belongs to current conversation, display it
         if (currentConversation && msg.conversationId === currentConversation.id) {
             displayMessage(msg);
+            // Mark as read immediately if conversation is open
+            markAsRead();
+        } else {
+            // Update unread count for other conversations
+            loadConversations();
         }
-
-        // Reload conversations list to update unread counts
-        loadConversations();
     }
 
     // ===== CHAT FEATURES FUNCTIONS =====

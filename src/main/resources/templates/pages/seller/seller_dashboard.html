@@ -19,6 +19,7 @@
   <!-- Defer non-critical chart library to avoid blocking rendering -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <meta name="theme-color" content="#0b1020" />
+  <meta name="user-id" th:content="${user != null ? user.userId : ''}" />
   <style>
     /* fallback dev */
   </style>

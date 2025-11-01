@@ -1028,13 +1028,13 @@
 
                     <!-- Main Chat Area -->
                     <div class="chat-main">
-                        <div id="welcomeScreen" class="welcome-screen">
+                        <div id="welcomeScreen" class="welcome-screen" style="display: flex;">
                             <i class="ti ti-message-circle"></i>
                             <h3>Welcome to Chat</h3>
-                            <p>Select a conversation to start messaging</p>
+                            <p>Select a customer to start messaging</p>
                         </div>
 
-                        <div id="chatArea" class="hidden" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+                        <div id="chatArea" class="hidden" style="display: none; flex-direction: column; flex: 1; min-height: 0;">
                             <div class="chat-header">
                                 <div class="avatar" id="chatHeaderAvatar"></div>
                                 <div class="chat-header-info">
@@ -1309,6 +1309,8 @@
         const list = document.getElementById('conversationsList');
         list.innerHTML = '';
 
+        let totalUnread = 0;
+
         conversations.forEach(conv => {
             const isCustomer = currentUser.userType === 'CUSTOMER';
             const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
@@ -1324,11 +1326,18 @@
                 timeText = formatRelativeTime(conv.lastMessageTime);
             }
 
+            // Calculate unread count for this conversation
+            const unreadCount = conv.unreadCount || 0;
+            totalUnread += unreadCount;
+
             const item = document.createElement('div');
             item.className = 'conversation-item';
             if (currentConversation && currentConversation.id === conv.id) {
                 item.classList.add('active');
             }
+
+            // Format unread badge - show "9+" if more than 9
+            const unreadBadgeText = unreadCount > 9 ? '9+' : unreadCount;
 
             item.innerHTML = `
                 <div class="avatar ${isCustomer ? 'seller' : ''}">${avatar}</div>
@@ -1339,7 +1348,7 @@
                     </div>
                     <div class="conversation-last-message" style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="flex:1;">${escapeHtml(lastMessagePreview)}</span>
-                        ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount > 99 ? '99+' : conv.unreadCount}</span>` : ''}
+                        ${unreadCount > 0 ? `<span class="unread-badge" data-conversation-id="${conv.id}">${unreadBadgeText}</span>` : ''}
                     </div>
                 </div>
             `;
@@ -1347,6 +1356,22 @@
             item.onclick = () => openConversation(conv);
             list.appendChild(item);
         });
+
+        // Update sidebar unread count badge
+        updateSidebarUnreadBadge(totalUnread);
+    }
+
+    // Update unread count in sidebar
+    function updateSidebarUnreadBadge(count) {
+        const badge = document.getElementById('unreadChatCount');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count > 9 ? '9+' : count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
     }
 
     function formatRelativeTime(timestamp) {
@@ -1452,8 +1477,10 @@
     }
 
     function restoreLastConversation() {
+        // Only restore if there's a specific target or user explicitly wants to continue
+        // For now, don't auto-open to keep chat box empty on initial load
         const lastConvId = localStorage.getItem(LAST_CONVERSATION_KEY);
-        if (lastConvId && !targetConversationId && !targetSellerId) {
+        if (lastConvId && (targetConversationId || targetSellerId)) {
             const conv = conversations.find(c => c.id === lastConvId);
             if (conv) {
                 openConversation(conv);
@@ -1756,7 +1783,8 @@
         currentConversation = conv;
         localStorage.setItem(LAST_CONVERSATION_KEY, conv.id);
 
-        document.getElementById('welcomeScreen').classList.add('hidden');
+        // Hide welcome screen and show chat area
+        document.getElementById('welcomeScreen').style.display = 'none';
         const chatArea = document.getElementById('chatArea');
         chatArea.classList.remove('hidden');
         chatArea.style.display = 'flex';
@@ -1774,7 +1802,24 @@
         }
 
         renderMessages();
+
+        // Mark as read and hide unread badge for this conversation
         markAsRead();
+
+        // Hide unread badge for this specific conversation
+        const badge = document.querySelector(`.unread-badge[data-conversation-id="${conv.id}"]`);
+        if (badge) {
+            badge.style.display = 'none';
+
+            // Update total unread count in sidebar
+            const currentUnread = parseInt(badge.textContent.replace('+', '')) || 0;
+            const sidebarBadge = document.getElementById('unreadChatCount');
+            if (sidebarBadge && sidebarBadge.style.display !== 'none') {
+                const totalUnread = parseInt(sidebarBadge.textContent.replace('+', '')) || 0;
+                const newTotal = Math.max(0, totalUnread - currentUnread);
+                updateSidebarUnreadBadge(newTotal);
+            }
+        }
 
         setTimeout(() => {
             const messageInput = document.getElementById('messageInput');
@@ -1800,9 +1845,12 @@
 
         if (currentConversation && msg.conversationId === currentConversation.id) {
             displayMessage(msg);
+            // Mark as read immediately if conversation is open
+            markAsRead();
+        } else {
+            // Update unread count for other conversations
+            loadConversations();
         }
-
-        loadConversations();
     }
 
     function scrollToBottom(forceInstant = false) {
