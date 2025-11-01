@@ -306,7 +306,7 @@
                     <th></th>
                     <th>ID</th>
                     <th>Seller ID</th>
-                    <th>Image</th>
+<!--                    <th>Image</th>-->
                     <th>Name</th>
                     <th>Description</th>
                     <th>Price</th>
@@ -339,9 +339,12 @@
                     </td>
                     <td th:text="${p.productId}"></td>
                     <td th:text="${p.sellerId}"></td>
-                    <td>
-                        ảnh
-                    </td>
+<!--                    <td >-->
+<!--                        <img th:src="@{${p.}}"-->
+<!--                             alt="Avatar"-->
+<!--                             class="rounded-circle"-->
+<!--                             style="width: 150px; height: 150px; object-fit: cover;">-->
+<!--                    </td>-->
                     <td th:text="${p.name}"></td>
                     <td th:text="${p.description}"></td>
                     <td th:text="${p.price}"></td>
