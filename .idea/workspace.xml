@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="chore: update workspace configuration for enhanced chat UI improvements">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketEventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketEventListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,6 +111,7 @@
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;/Users/hoangquangminh/Library/Application Support/JetBrains/IntelliJIdea2025.2/node/versions/24.11.0/bin/node&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
@@ -162,12 +165,31 @@
       <method v="2" />
     </configuration>
     <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="simple" />
       <module name="su25" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
+      <extension name="net.ashald.envfile">
+        <option name="IS_ENABLED" value="true" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        </ENTRIES>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Database Script.data_v2.sql" />
+      <item itemvalue="Database Script.fix_old_constraint.sql" />
+      <item itemvalue="Database Script.fix_review_constraint.sql" />
+      <item itemvalue="Database Script.quick_create_seller_test.sql" />
+      <item itemvalue="Database Script.review_system_complete.sql" />
+      <item itemvalue="Spring Boot.Su25Application" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Database Script.quick_create_seller_test.sql" />
@@ -213,7 +235,8 @@
       <workItem from="1761817184559" duration="601000" />
       <workItem from="1761818462765" duration="825000" />
       <workItem from="1761819313004" duration="9292000" />
-      <workItem from="1761879573117" duration="5801000" />
+      <workItem from="1761879573117" duration="15201000" />
+      <workItem from="1761931665304" duration="1025000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -327,7 +350,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761882746515</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="chore: update workspace configuration for enhanced chat UI improvements">
+      <option name="closed" value="true" />
+      <created>1761899230767</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1761899230767</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -399,6 +430,7 @@
     <MESSAGE value="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety" />
     <MESSAGE value="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX" />
     <MESSAGE value="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX" />
+    <MESSAGE value="chore: update workspace configuration for enhanced chat UI improvements" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: update workspace configuration for enhanced chat UI improvements" />
   </component>
 </project>
