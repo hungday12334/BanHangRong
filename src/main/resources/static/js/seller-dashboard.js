@@ -2,7 +2,6 @@
    - Progressive enhancement: runs after DOM ready
    - No external deps except Chart.js (loaded via CDN in template)
    - Features: count-up anim, chart render, simple pagination for tables */
-
 ; (function () {
   function onReady(fn) { if (document.readyState !== 'loading') { fn(); } else { document.addEventListener('DOMContentLoaded', fn); } }
 
@@ -717,7 +716,6 @@
         __originalProduct = null; // new product -> always treat as create
         openModal(productModal);
       });
-
       // Upload image -> autofill URL
       (function initImageGenerate() {
         const btn = document.getElementById('pm_genImage');
