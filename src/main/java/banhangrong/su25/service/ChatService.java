@@ -276,4 +276,239 @@ public class ChatService {
         Long maxId = Math.max(customerId, sellerId);
         return "conv_" + minId + "_" + maxId;
     }
+
+    // ===== ENHANCED CHAT FEATURES =====
+
+    /**
+     * Add emoji reaction to a message
+     */
+    @Transactional
+    public ChatMessage addReaction(Long messageId, String userId, String emoji) {
+        System.out.println("=== 😊 ADDING REACTION TO MESSAGE ===");
+        System.out.println("Message ID: " + messageId);
+        System.out.println("User ID: " + userId);
+        System.out.println("Emoji: " + emoji);
+
+        try {
+            ChatMessage message = messageRepository.findById(messageId)
+                    .orElseThrow(() -> new IllegalArgumentException("Message not found: " + messageId));
+
+            // Parse existing reactions JSON
+            String reactionsJson = message.getReactions();
+            Map<String, List<String>> reactions = parseReactions(reactionsJson);
+
+            // Add user to emoji list
+            List<String> userList = reactions.getOrDefault(emoji, new ArrayList<>());
+            if (!userList.contains(userId)) {
+                userList.add(userId);
+                reactions.put(emoji, userList);
+            }
+
+            // Convert back to JSON and save
+            message.setReactions(stringifyReactions(reactions));
+            ChatMessage saved = messageRepository.save(message);
+
+            System.out.println("✅ Reaction added successfully");
+            return saved;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error adding reaction: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to add reaction", e);
+        }
+    }
+
+    /**
+     * Remove emoji reaction from a message
+     */
+    @Transactional
+    public ChatMessage removeReaction(Long messageId, String userId, String emoji) {
+        System.out.println("=== 🗑️ REMOVING REACTION FROM MESSAGE ===");
+        System.out.println("Message ID: " + messageId);
+        System.out.println("User ID: " + userId);
+        System.out.println("Emoji: " + emoji);
+
+        try {
+            ChatMessage message = messageRepository.findById(messageId)
+                    .orElseThrow(() -> new IllegalArgumentException("Message not found: " + messageId));
+
+            // Parse existing reactions JSON
+            String reactionsJson = message.getReactions();
+            Map<String, List<String>> reactions = parseReactions(reactionsJson);
+
+            // Remove user from emoji list
+            List<String> userList = reactions.get(emoji);
+            if (userList != null) {
+                userList.remove(userId);
+                if (userList.isEmpty()) {
+                    reactions.remove(emoji);
+                } else {
+                    reactions.put(emoji, userList);
+                }
+            }
+
+            // Convert back to JSON and save
+            message.setReactions(stringifyReactions(reactions));
+            ChatMessage saved = messageRepository.save(message);
+
+            System.out.println("✅ Reaction removed successfully");
+            return saved;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error removing reaction: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to remove reaction", e);
+        }
+    }
+
+    /**
+     * Soft delete a message (mark as deleted)
+     */
+    @Transactional
+    public ChatMessage softDeleteMessage(Long messageId) {
+        System.out.println("=== 🗑️ SOFT DELETING MESSAGE ===");
+        System.out.println("Message ID: " + messageId);
+
+        try {
+            ChatMessage message = messageRepository.findById(messageId)
+                    .orElseThrow(() -> new IllegalArgumentException("Message not found: " + messageId));
+
+            message.setDeleted(true);
+            message.setContent("This message has been deleted");
+            ChatMessage saved = messageRepository.save(message);
+
+            System.out.println("✅ Message soft deleted successfully");
+            return saved;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error soft deleting message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to soft delete message", e);
+        }
+    }
+
+    /**
+     * Permanently delete a message
+     */
+    @Transactional
+    public boolean permanentDeleteMessage(Long messageId) {
+        System.out.println("=== 💥 PERMANENTLY DELETING MESSAGE ===");
+        System.out.println("Message ID: " + messageId);
+
+        try {
+            if (messageRepository.existsById(messageId)) {
+                messageRepository.deleteById(messageId);
+                System.out.println("✅ Message permanently deleted successfully");
+                return true;
+            } else {
+                System.out.println("⚠️ Message not found");
+                return false;
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error permanently deleting message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to permanently delete message", e);
+        }
+    }
+
+    /**
+     * Parse reactions JSON string to Map
+     */
+    private Map<String, List<String>> parseReactions(String reactionsJson) {
+        if (reactionsJson == null || reactionsJson.trim().isEmpty() || "null".equals(reactionsJson)) {
+            return new HashMap<>();
+        }
+
+        try {
+            // Simple JSON parsing for format: {"❤️":["user1","user2"],"😂":["user3"]}
+            Map<String, List<String>> reactions = new HashMap<>();
+
+            // Remove outer braces
+            String content = reactionsJson.trim();
+            if (content.startsWith("{")) content = content.substring(1);
+            if (content.endsWith("}")) content = content.substring(0, content.length() - 1);
+
+            if (content.trim().isEmpty()) {
+                return reactions;
+            }
+
+            // Split by emoji entries (looking for "}," or "]," patterns)
+            String[] entries = content.split("(?<=\\]),");
+
+            for (String entry : entries) {
+                entry = entry.trim();
+                if (entry.isEmpty()) continue;
+
+                // Extract emoji and users
+                int colonIndex = entry.indexOf(":");
+                if (colonIndex > 0) {
+                    String emoji = entry.substring(0, colonIndex).replaceAll("[\"{}]", "").trim();
+                    String usersStr = entry.substring(colonIndex + 1).trim();
+
+                    // Parse user list
+                    usersStr = usersStr.replaceAll("[\\[\\]]", "").trim();
+                    List<String> userList = new ArrayList<>();
+
+                    if (!usersStr.isEmpty()) {
+                        String[] users = usersStr.split(",");
+                        for (String user : users) {
+                            String cleanUser = user.replaceAll("\"", "").trim();
+                            if (!cleanUser.isEmpty()) {
+                                userList.add(cleanUser);
+                            }
+                        }
+                    }
+
+                    if (!emoji.isEmpty()) {
+                        reactions.put(emoji, userList);
+                    }
+                }
+            }
+
+            return reactions;
+
+        } catch (Exception e) {
+            System.err.println("Error parsing reactions JSON: " + e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
+    /**
+     * Convert reactions Map to JSON string
+     */
+    private String stringifyReactions(Map<String, List<String>> reactions) {
+        if (reactions == null || reactions.isEmpty()) {
+            return null;
+        }
+
+        try {
+            StringBuilder json = new StringBuilder("{");
+            boolean first = true;
+
+            for (Map.Entry<String, List<String>> entry : reactions.entrySet()) {
+                if (!first) {
+                    json.append(",");
+                }
+                first = false;
+
+                json.append("\"").append(entry.getKey()).append("\":[");
+
+                List<String> users = entry.getValue();
+                for (int i = 0; i < users.size(); i++) {
+                    if (i > 0) json.append(",");
+                    json.append("\"").append(users.get(i)).append("\"");
+                }
+
+                json.append("]");
+            }
+
+            json.append("}");
+            return json.toString();
+
+        } catch (Exception e) {
+            System.err.println("Error stringifying reactions: " + e.getMessage());
+            return null;
+        }
+    }
 }

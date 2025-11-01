@@ -4,15 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): implement file upload feature with image and document support">
-      <change afterPath="$PROJECT_DIR$/CHAT_OPTIMIZATION_COMPLETE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CUSTOMER_CHAT_OPTIMIZATION_COMPLETE.md" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): enhance chat UI with unread message indicators and improved welcome screen">
+      <change afterPath="$PROJECT_DIR$/ARCHITECTURE_DIAGRAM.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BACKEND_IMPLEMENTATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DEBUG_REACTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ENHANCED_CHAT_FEATURES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIXES_APPLIED.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_EMOJI_REACTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_MESSAGE_ID_MATCHING.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_MESSAGE_POSITION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_START_ENHANCED_CHAT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_TEST_REACTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README_CHAT_FEATURES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README_ENHANCED_CHAT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SETUP_ENHANCED_CHAT.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TOM_TAT_FIX_REACTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VISUAL_DEMO_REACTIONS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VISUAL_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apply-chat-db-update.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/add_enhanced_chat_columns.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/MessageDeleteDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/MessageReactionDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/seller-dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/seller-dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ChatMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/pages/seller/seller_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/pages/seller/seller_dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -243,7 +261,7 @@
       <workItem from="1761819313004" duration="9292000" />
       <workItem from="1761879573117" duration="15201000" />
       <workItem from="1761931665304" duration="7741000" />
-      <workItem from="1761983539554" duration="2632000" />
+      <workItem from="1761983539554" duration="13890000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -381,7 +399,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761978450743</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="feat(chat): enhance chat UI with unread message indicators and improved welcome screen">
+      <option name="closed" value="true" />
+      <created>1761988662580</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1761988662580</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -455,6 +481,7 @@
     <MESSAGE value="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX" />
     <MESSAGE value="chore: update workspace configuration for enhanced chat UI improvements" />
     <MESSAGE value="feat(chat): implement file upload feature with image and document support" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): implement file upload feature with image and document support" />
+    <MESSAGE value="feat(chat): enhance chat UI with unread message indicators and improved welcome screen" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): enhance chat UI with unread message indicators and improved welcome screen" />
   </component>
 </project>

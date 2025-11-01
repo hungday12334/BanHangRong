@@ -489,6 +489,396 @@
             margin-top: 2px;
         }
 
+        /* === ENHANCED CHAT FEATURES === */
+
+        /* Message Wrapper with Hover Actions */
+        .message-wrapper {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 12px;
+        }
+
+        .message-wrapper.sent {
+            flex-direction: row-reverse;
+        }
+
+        /* Message Actions Toolbar - appears on hover */
+        .message-actions {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            flex-direction: row;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--border, #e5e7eb);
+            border-radius: 10px;
+            padding: 2px 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            z-index: 10;
+        }
+
+        .message-wrapper:hover .message-actions {
+            display: flex;
+        }
+
+        /* Tin nhắn của MÌNH (sent) -> Actions ở BÊN TRÁI CỰC KỲ SÁT */
+        .message-wrapper.sent .message-actions {
+            left: -15px;
+        }
+
+        /* Tin nhắn của ĐỐI PHƯƠNG (received) -> Actions ở BÊN PHẢI CỰC KỲ SÁT */
+        .message-wrapper.received .message-actions {
+            right: -15px;
+        }
+
+        .message-action-btn {
+            background: transparent;
+            border: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.15s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .message-action-btn:hover {
+            background: #f3f4f6;
+            transform: scale(1.15);
+        }
+
+        .message-action-btn.emoji-btn:hover {
+            background: #fef3c7;
+        }
+
+        .message-action-btn.reply-btn:hover {
+            background: #dbeafe;
+        }
+
+        .message-action-btn.delete-btn:hover {
+            background: #fee2e2;
+        }
+
+        /* Emoji Reaction Picker (small popup) */
+        .reaction-picker {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid var(--border, #e5e7eb);
+            border-radius: 20px;
+            padding: 8px 12px;
+            display: none;
+            flex-direction: row;
+            gap: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 20;
+            margin-bottom: 8px;
+        }
+
+        .reaction-picker.show {
+            display: flex;
+        }
+
+        .reaction-option {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .reaction-option:hover {
+            background: #f3f4f6;
+            transform: scale(1.2);
+        }
+
+        /* Message Reactions Display */
+        .message-reactions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+            padding: 0 8px;
+        }
+
+        .reaction-badge {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--border, #e5e7eb);
+            border-radius: 12px;
+            padding: 3px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reaction-badge:hover {
+            background: #f9fafb;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .reaction-badge.user-reacted {
+            background: #dbeafe;
+            border-color: #60a5fa;
+        }
+
+        .reaction-emoji {
+            font-size: 16px;
+        }
+
+        .reaction-count {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text, #0f172a);
+        }
+
+        /* Reply Status Bar */
+        .reply-status-bar {
+            display: none;
+            background: #f9fafb;
+            border-left: 3px solid var(--accent, #0ea5e9);
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .reply-status-bar.show {
+            display: block;
+        }
+
+        .reply-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .reply-status-sender {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent, #0ea5e9);
+        }
+
+        .reply-status-close {
+            background: none;
+            border: none;
+            color: var(--muted, #6b7280);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .reply-status-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text, #0f172a);
+        }
+
+        .reply-status-content {
+            font-size: 13px;
+            color: var(--muted, #6b7280);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Replied Message Quote in Message Bubble */
+        .message-reply-quote {
+            background: rgba(0, 0, 0, 0.05);
+            border-left: 3px solid var(--accent, #0ea5e9);
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .message-reply-quote:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        .message.sent .message-reply-quote {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .message.sent .message-reply-quote:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .reply-quote-sender {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent, #0ea5e9);
+            margin-bottom: 2px;
+        }
+
+        .reply-quote-content {
+            font-size: 12px;
+            color: var(--text, #0f172a);
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Message Highlight Animation */
+        .message-highlight {
+            animation: highlightPulse 1.5s ease-out;
+        }
+
+        @keyframes highlightPulse {
+            0%, 100% { background: transparent; }
+            50% { background: rgba(14, 165, 233, 0.2); border-radius: 12px; }
+        }
+
+        /* Deleted Message Styles */
+        .message-bubble.deleted {
+            opacity: 0.5;
+            background: #f3f4f6 !important;
+            color: var(--muted, #9ca3af) !important;
+            font-style: italic;
+            position: relative;
+        }
+
+        .deleted-message-icon {
+            display: none;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .message-bubble.deleted:hover .deleted-message-icon {
+            display: block;
+        }
+
+        .deleted-message-icon:hover {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        /* Reaction Users Popup */
+        .reaction-users-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 1px solid var(--border, #e5e7eb);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            min-width: 280px;
+            max-width: 400px;
+            display: none;
+        }
+
+        .reaction-users-popup.show {
+            display: block;
+        }
+
+        .reaction-users-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            display: none;
+        }
+
+        .reaction-users-overlay.show {
+            display: block;
+        }
+
+        .reaction-users-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border, #e5e7eb);
+        }
+
+        .reaction-users-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text, #0f172a);
+        }
+
+        .reaction-users-close {
+            background: none;
+            border: none;
+            color: var(--muted, #6b7280);
+            cursor: pointer;
+            font-size: 20px;
+            padding: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .reaction-users-close:hover {
+            background: #f3f4f6;
+            color: var(--text, #0f172a);
+        }
+
+        .reaction-group {
+            margin-bottom: 12px;
+        }
+
+        .reaction-group-emoji {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .reaction-user-list {
+            display: inline;
+            font-size: 14px;
+            color: var(--text, #0f172a);
+        }
+
+        .remove-reaction-hint {
+            font-size: 12px;
+            color: var(--muted, #6b7280);
+            font-style: italic;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border, #e5e7eb);
+        }
+
         /* Improved input container with better styling */
         .chat-input-container {
             padding: 16px 20px;
@@ -1106,6 +1496,15 @@
                     </div>
 
                     <div class="chat-input-container">
+                        <!-- Reply Status Bar -->
+                        <div class="reply-status-bar" id="replyStatusBar">
+                            <div class="reply-status-header">
+                                <span class="reply-status-sender" id="replyStatusSender"></span>
+                                <button class="reply-status-close" onclick="cancelReply()">✕</button>
+                            </div>
+                            <div class="reply-status-content" id="replyStatusContent"></div>
+                        </div>
+
                         <!-- Upload Preview -->
                         <div class="upload-preview" id="uploadPreview">
                             <img id="previewImage" alt="Preview" style="display: none;">
@@ -1167,6 +1566,16 @@
     </div>
 </div>
 <!-- Customer Wrapper End -->
+
+<!-- Reaction Users Popup -->
+<div class="reaction-users-overlay" id="reactionUsersOverlay" onclick="closeReactionPopup()"></div>
+<div class="reaction-users-popup" id="reactionUsersPopup">
+    <div class="reaction-users-header">
+        <div class="reaction-users-title">Reactions</div>
+        <button class="reaction-users-close" onclick="closeReactionPopup()">✕</button>
+    </div>
+    <div id="reactionUsersContent"></div>
+</div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
@@ -1473,21 +1882,42 @@
         }
 
         const isSent = message.senderId === currentUser.userId;
+        const isDeleted = message.deleted || false;
 
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-        messageDiv.setAttribute('data-message-id', message.id);
+        const messageWrapper = document.createElement('div');
+        messageWrapper.className = `message-wrapper ${isSent ? 'sent' : 'received'}`;
+        messageWrapper.setAttribute('data-message-id', message.id);
 
         const avatarClass = message.senderRole === 'SELLER' ? 'seller' : '';
         const avatar = message.senderName ? message.senderName.substring(0, 2).toUpperCase() : '?';
 
+        // Build reply quote if message is a reply
+        let replyQuoteHtml = '';
+        if (message.replyToMessageId && message.replyToContent) {
+            replyQuoteHtml = `
+                <div class="message-reply-quote" onclick="scrollToMessage('${message.replyToMessageId}')">
+                    <div class="reply-quote-sender">${escapeHtml(message.replyToSenderName || 'User')}</div>
+                    <div class="reply-quote-content">${escapeHtml(message.replyToContent.substring(0, 50))}${message.replyToContent.length > 50 ? '...' : ''}</div>
+                </div>
+            `;
+        }
+
         // Build message content based on type
         let messageContent = '';
 
-        if (message.messageType === 'IMAGE' && message.fileUrl) {
+        if (isDeleted) {
+            // Deleted message
+            messageContent = `
+                <div class="message-bubble deleted">
+                    This message has been deleted
+                    <span class="deleted-message-icon" onclick="permanentlyDeleteMessage('${message.id}')">🗑️</span>
+                </div>
+            `;
+        } else if (message.messageType === 'IMAGE' && message.fileUrl) {
             // Image message
             messageContent = `
                 <div class="message-bubble">
+                    ${replyQuoteHtml}
                     ${message.content ? `<div style="margin-bottom: 8px;">${escapeHtml(message.content)}</div>` : ''}
                     <img src="${message.fileUrl}" alt="${escapeHtml(message.fileName || 'Image')}"
                          style="max-width: 300px; max-height: 300px; border-radius: 8px; cursor: pointer;"
@@ -1499,6 +1929,7 @@
             const fileSize = message.fileSize ? (message.fileSize / 1024).toFixed(1) + ' KB' : '';
             messageContent = `
                 <div class="message-bubble">
+                    ${replyQuoteHtml}
                     ${message.content ? `<div style="margin-bottom: 8px;">${escapeHtml(message.content)}</div>` : ''}
                     <a href="${message.fileUrl}" target="_blank" download
                        style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px; text-decoration: none; color: inherit;">
@@ -1514,19 +1945,65 @@
         } else {
             // Text message
             messageContent = `
-                <div class="message-bubble">${escapeHtml(message.content)}</div>
+                <div class="message-bubble">
+                    ${replyQuoteHtml}
+                    ${escapeHtml(message.content)}
+                </div>
             `;
         }
 
-        messageDiv.innerHTML = `
-            <div class="message-avatar ${avatarClass}">${avatar}</div>
-            <div class="message-content">
-                ${messageContent}
-                <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
+        // Build reactions display
+        let reactionsHtml = '';
+        if (message.reactions && Object.keys(message.reactions).length > 0) {
+            reactionsHtml = '<div class="message-reactions">';
+            for (const [emoji, users] of Object.entries(message.reactions)) {
+                // Check if current user reacted - convert to string for comparison
+                const userIdStr = String(currentUser.userId);
+                const userReacted = users.some(id => String(id) === userIdStr);
+                const userClass = userReacted ? 'user-reacted' : '';
+                // Click to toggle reaction (add if not reacted, remove if already reacted)
+                const clickAction = userReacted
+                    ? `removeReaction('${message.id}', '${emoji}')`
+                    : `addReaction('${message.id}', '${emoji}')`;
+                reactionsHtml += `
+                    <div class="reaction-badge ${userClass}" onclick="${clickAction}" title="${userReacted ? 'Click to remove your reaction' : 'Click to add this reaction'}">
+                        <span class="reaction-emoji">${emoji}</span>
+                        <span class="reaction-count">${users.length}</span>
+                    </div>
+                `;
+            }
+            reactionsHtml += '</div>';
+        }
+
+        // Build message actions toolbar (only if not deleted)
+        let actionsHtml = '';
+        if (!isDeleted) {
+            actionsHtml = `
+                <div class="message-actions">
+                    <button class="message-action-btn emoji-btn" onclick="showReactionPicker('${message.id}')" title="React">
+                        😊
+                    </button>
+                    <button class="message-action-btn reply-btn" onclick="replyToMessage('${message.id}', '${escapeHtml(message.senderName)}', '${escapeHtml(message.content.substring(0, 50))}')" title="Reply">
+                        ↩️
+                    </button>
+                    ${isSent ? `<button class="message-action-btn delete-btn" onclick="deleteMessage('${message.id}')" title="Delete">🗑️</button>` : ''}
+                </div>
+            `;
+        }
+
+        messageWrapper.innerHTML = `
+            <div class="message ${isSent ? 'sent' : 'received'}">
+                <div class="message-avatar ${avatarClass}">${avatar}</div>
+                <div class="message-content">
+                    ${messageContent}
+                    ${reactionsHtml}
+                    <div class="message-time">${formatTime(message.timestamp || message.createdAt)}</div>
+                </div>
             </div>
+            ${actionsHtml}
         `;
 
-        messagesContainer.appendChild(messageDiv);
+        messagesContainer.appendChild(messageWrapper);
 
         if (shouldScroll) {
             scrollToBottom();
@@ -2399,6 +2876,557 @@
 
         // Normal text message - call original function
         originalSendMessage();
+    };
+
+    // ===== ENHANCED CHAT FEATURES =====
+
+    let currentReplyTo = null;
+    let currentReactionPicker = null;
+
+    // Available reactions
+    const REACTIONS = ['❤️', '😂', '😢', '😡', '😮', '👍'];
+
+    // Show reaction picker for a message
+    function showReactionPicker(messageId) {
+        // Close any existing picker
+        if (currentReactionPicker) {
+            currentReactionPicker.remove();
+            currentReactionPicker = null;
+        }
+
+        const messageWrapper = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (!messageWrapper) return;
+
+        const picker = document.createElement('div');
+        picker.className = 'reaction-picker show';
+        picker.innerHTML = REACTIONS.map(emoji =>
+            `<button class="reaction-option" onclick="addReaction('${messageId}', '${emoji}')">${emoji}</button>`
+        ).join('');
+
+        messageWrapper.style.position = 'relative';
+        messageWrapper.appendChild(picker);
+        currentReactionPicker = picker;
+
+        // Close picker when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', closeReactionPickerHandler);
+        }, 100);
+    }
+
+    function closeReactionPickerHandler(e) {
+        if (currentReactionPicker && !currentReactionPicker.contains(e.target) &&
+            !e.target.classList.contains('emoji-btn')) {
+            currentReactionPicker.remove();
+            currentReactionPicker = null;
+            document.removeEventListener('click', closeReactionPickerHandler);
+        }
+    }
+
+    // Add reaction to a message
+    function addReaction(messageId, emoji) {
+        console.log('🎯 addReaction called:', { messageId, emoji, userId: currentUser.userId });
+
+        if (!currentConversation || !isConnected) {
+            showToast('⚠️ Cannot add reaction: not connected', 'warning');
+            return;
+        }
+
+        // 🚀 OPTIMISTIC UPDATE - Update UI immediately
+        // Convert messageId to String for comparison (message.id from DB could be Number or String)
+        const messageIdStr = String(messageId);
+        const message = currentConversation?.messages.find(m => String(m.id) === messageIdStr);
+        console.log('📝 Looking for message:', messageIdStr, 'Found:', message ? 'YES' : 'NO', message?.id);
+
+        if (!message) {
+            console.error('❌ Message not found. All message IDs:', currentConversation?.messages.map(m => m.id));
+        }
+
+        if (message) {
+            if (!message.reactions) {
+                message.reactions = {};
+            }
+            if (!message.reactions[emoji]) {
+                message.reactions[emoji] = [];
+            }
+
+            // Convert userId to string to ensure matching
+            const userIdStr = String(currentUser.userId);
+
+            if (!message.reactions[emoji].includes(userIdStr)) {
+                message.reactions[emoji].push(userIdStr);
+                console.log('✅ Updated reactions locally:', message.reactions);
+
+                // 🔧 UPDATE IN-PLACE instead of remove/append to keep message position
+                const messageWrapper = document.querySelector(`[data-message-id="${messageId}"]`);
+                console.log('🔍 Found messageWrapper:', messageWrapper ? 'YES' : 'NO');
+
+                if (messageWrapper) {
+                    // Update only the reactions section, not the entire message
+                    updateReactionsDisplay(messageWrapper, message);
+                    console.log('🎨 Updated reactions in-place (position preserved)');
+                }
+            } else {
+                console.log('⚠️ User already reacted with this emoji');
+            }
+        } else {
+            console.error('❌ Message not found:', messageId);
+        }
+
+        const reactionData = {
+            messageId: messageId,
+            userId: String(currentUser.userId),
+            userName: currentUser.fullName || currentUser.username,
+            emoji: emoji,
+            conversationId: currentConversation.id
+        };
+
+        console.log('📤 Sending reaction to server:', reactionData);
+
+        // Send reaction via WebSocket
+        stompClient.send('/app/chat.addReaction', {}, JSON.stringify(reactionData));
+
+        // Close picker
+        if (currentReactionPicker) {
+            currentReactionPicker.remove();
+            currentReactionPicker = null;
+        }
+
+        console.log('✅ Added reaction:', emoji, 'to message:', messageId);
+    }
+
+    // Remove reaction from a message
+    function removeReaction(messageId, emoji) {
+        console.log('🎯 removeReaction called:', { messageId, emoji, userId: currentUser.userId });
+
+        if (!currentConversation || !isConnected) {
+            showToast('⚠️ Cannot remove reaction: not connected', 'warning');
+            return;
+        }
+
+        // 🚀 OPTIMISTIC UPDATE - Update UI immediately
+        // Convert messageId to String for comparison
+        const messageIdStr = String(messageId);
+        const message = currentConversation?.messages.find(m => String(m.id) === messageIdStr);
+        const userIdStr = String(currentUser.userId);
+
+        if (message && message.reactions && message.reactions[emoji]) {
+            message.reactions[emoji] = message.reactions[emoji].filter(id => String(id) !== userIdStr);
+            if (message.reactions[emoji].length === 0) {
+                delete message.reactions[emoji];
+            }
+
+            console.log('✅ Removed reaction locally:', message.reactions);
+
+            // 🔧 UPDATE IN-PLACE to preserve message position
+            const messageWrapper = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageWrapper) {
+                updateReactionsDisplay(messageWrapper, message);
+                console.log('🎨 Updated reactions in-place after removal');
+            }
+        }
+
+        const reactionData = {
+            messageId: messageId,
+            userId: String(currentUser.userId),
+            emoji: emoji,
+            conversationId: currentConversation.id
+        };
+
+        console.log('📤 Sending remove reaction to server:', reactionData);
+
+        // Send remove reaction via WebSocket
+        stompClient.send('/app/chat.removeReaction', {}, JSON.stringify(reactionData));
+
+        console.log('✅ Removed reaction:', emoji, 'from message:', messageId);
+    }
+
+    // Helper function to update reactions display in-place without re-rendering entire message
+    function updateReactionsDisplay(messageWrapper, message) {
+        // Find or create reactions container
+        const messageContent = messageWrapper.querySelector('.message-content');
+        if (!messageContent) return;
+
+        // Remove existing reactions if any
+        const existingReactions = messageContent.querySelector('.message-reactions');
+        if (existingReactions) {
+            existingReactions.remove();
+        }
+
+        // Build new reactions HTML
+        if (message.reactions && Object.keys(message.reactions).length > 0) {
+            let reactionsHtml = '<div class="message-reactions">';
+            for (const [emoji, users] of Object.entries(message.reactions)) {
+                // Check if current user reacted - convert to string for comparison
+                const userIdStr = String(currentUser.userId);
+                const userReacted = users.some(id => String(id) === userIdStr);
+                const userClass = userReacted ? 'user-reacted' : '';
+                // Click to toggle reaction
+                const clickAction = userReacted
+                    ? `removeReaction('${message.id}', '${emoji}')`
+                    : `addReaction('${message.id}', '${emoji}')`;
+                reactionsHtml += `
+                    <div class="reaction-badge ${userClass}" onclick="${clickAction}" title="${userReacted ? 'Click to remove your reaction' : 'Click to add this reaction'}">
+                        <span class="reaction-emoji">${emoji}</span>
+                        <span class="reaction-count">${users.length}</span>
+                    </div>
+                `;
+            }
+            reactionsHtml += '</div>';
+
+            // Insert reactions before message-time
+            const messageTime = messageContent.querySelector('.message-time');
+            if (messageTime) {
+                messageTime.insertAdjacentHTML('beforebegin', reactionsHtml);
+            }
+        }
+    }
+
+    // Show who reacted to a message
+    function showReactionUsers(messageId, emoji) {
+        const message = currentConversation.messages.find(m => m.id === messageId);
+        if (!message || !message.reactions) return;
+
+        const overlay = document.getElementById('reactionUsersOverlay');
+        const popup = document.getElementById('reactionUsersPopup');
+        const content = document.getElementById('reactionUsersContent');
+
+        let html = '';
+
+        for (const [reactionEmoji, userIds] of Object.entries(message.reactions)) {
+            // Get user names for these IDs
+            const userNames = userIds.map(userId => {
+                if (userId === currentUser.userId) return 'You';
+                // Try to find the user name from message history
+                const userMessage = currentConversation.messages.find(m => m.senderId === userId);
+                return userMessage ? userMessage.senderName : 'User';
+            });
+
+            html += `
+                <div class="reaction-group">
+                    <span class="reaction-group-emoji">${reactionEmoji}</span>
+                    <span class="reaction-user-list">${userNames.join(', ')}</span>
+                </div>
+            `;
+        }
+
+        // Add remove hint if user has reacted
+        const userReacted = message.reactions[emoji] && message.reactions[emoji].includes(currentUser.userId);
+        if (userReacted) {
+            html += `<div class="remove-reaction-hint" onclick="removeReactionFromPopup('${messageId}', '${emoji}')">Click to remove your reaction</div>`;
+        }
+
+        content.innerHTML = html;
+        overlay.classList.add('show');
+        popup.classList.add('show');
+    }
+
+    function removeReactionFromPopup(messageId, emoji) {
+        removeReaction(messageId, emoji);
+        closeReactionPopup();
+    }
+
+    function closeReactionPopup() {
+        document.getElementById('reactionUsersOverlay').classList.remove('show');
+        document.getElementById('reactionUsersPopup').classList.remove('show');
+    }
+
+    // Reply to a message
+    function replyToMessage(messageId, senderName, content) {
+        const replyBar = document.getElementById('replyStatusBar');
+        const senderEl = document.getElementById('replyStatusSender');
+        const contentEl = document.getElementById('replyStatusContent');
+
+        currentReplyTo = {
+            id: messageId,
+            senderName: senderName,
+            content: content
+        };
+
+        senderEl.textContent = senderName === (currentUser.fullName || currentUser.username) ? 'You' : senderName;
+        contentEl.textContent = content.length > 50 ? content.substring(0, 50) + '...' : content;
+
+        replyBar.classList.add('show');
+        document.getElementById('messageInput').focus();
+
+        console.log('📝 Replying to message:', messageId);
+    }
+
+    function cancelReply() {
+        currentReplyTo = null;
+        document.getElementById('replyStatusBar').classList.remove('show');
+    }
+
+    // Scroll to a specific message (when clicking on reply quote)
+    function scrollToMessage(messageId) {
+        const messageWrapper = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (!messageWrapper) {
+            showToast('⚠️ Original message not found', 'warning');
+            return;
+        }
+
+        // Scroll to message
+        messageWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Highlight the message
+        const messageEl = messageWrapper.querySelector('.message');
+        messageEl.classList.add('message-highlight');
+        setTimeout(() => {
+            messageEl.classList.remove('message-highlight');
+        }, 1500);
+    }
+
+    // Delete a message (soft delete)
+    function deleteMessage(messageId) {
+        if (!confirm('Delete this message? It will be replaced with "This message has been deleted"')) {
+            return;
+        }
+
+        if (!currentConversation || !isConnected) {
+            showToast('⚠️ Cannot delete message: not connected', 'warning');
+            return;
+        }
+
+        // Update UI immediately (optimistic update)
+        const messageWrapper = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageWrapper) {
+            const bubbleEl = messageWrapper.querySelector('.message-bubble');
+            if (bubbleEl) {
+                bubbleEl.classList.add('deleted');
+                bubbleEl.innerHTML = 'This message has been deleted <span class="deleted-message-icon" onclick="permanentlyDeleteMessage(\'' + messageId + '\')">🗑️</span>';
+            }
+
+            // Remove action buttons
+            const actionsEl = messageWrapper.querySelector('.message-actions');
+            if (actionsEl) {
+                actionsEl.remove();
+            }
+        }
+
+        // Update in conversation messages
+        const message = currentConversation?.messages.find(m => m.id === messageId);
+        if (message) {
+            message.deleted = true;
+            message.content = 'This message has been deleted';
+        }
+
+        const deleteData = {
+            messageId: messageId,
+            conversationId: currentConversation.id,
+            userId: currentUser.userId
+        };
+
+        // Send delete via WebSocket
+        stompClient.send('/app/chat.deleteMessage', {}, JSON.stringify(deleteData));
+
+        console.log('🗑️ Deleted message:', messageId);
+    }
+
+    // Permanently delete a message
+    function permanentlyDeleteMessage(messageId) {
+        if (!confirm('Permanently delete this message? This cannot be undone.')) {
+            return;
+        }
+
+        if (!currentConversation || !isConnected) {
+            showToast('⚠️ Cannot delete message: not connected', 'warning');
+            return;
+        }
+
+        const deleteData = {
+            messageId: messageId,
+            conversationId: currentConversation.id,
+            userId: currentUser.userId,
+            permanent: true
+        };
+
+        // Send permanent delete via WebSocket
+        stompClient.send('/app/chat.permanentDeleteMessage', {}, JSON.stringify(deleteData));
+
+        // Remove from DOM immediately
+        const messageWrapper = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageWrapper) {
+            messageWrapper.style.transition = 'opacity 0.3s ease';
+            messageWrapper.style.opacity = '0';
+            setTimeout(() => messageWrapper.remove(), 300);
+        }
+
+        console.log('🗑️ Permanently deleted message:', messageId);
+    }
+
+    // Update sendMessage to support replies
+    const originalSendMessageWithReply = sendMessage;
+    sendMessage = async function() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+
+        // Check if we're replying
+        if (currentReplyTo && content && !currentUploadFile) {
+            const messageData = {
+                conversationId: currentConversation.id,
+                senderId: currentUser.userId,
+                senderName: currentUser.fullName || currentUser.username,
+                senderRole: currentUser.userType,
+                receiverId: currentUser.userType === 'CUSTOMER' ? currentConversation.sellerId : currentConversation.customerId,
+                content: content,
+                messageType: 'TEXT',
+                replyToMessageId: currentReplyTo.id,
+                replyToSenderName: currentReplyTo.senderName,
+                replyToContent: currentReplyTo.content
+            };
+
+            // Send message via WebSocket
+            if (isConnected) {
+                const tempId = 'temp_' + Date.now();
+                const tempMessage = {
+                    id: tempId,
+                    ...messageData,
+                    read: false,
+                    createdAt: new Date().toISOString(),
+                    timestamp: new Date().toISOString()
+                };
+
+                displayMessage(tempMessage, true);
+                stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(messageData));
+
+                input.value = '';
+                updateCharCount();
+                cancelReply();
+
+                console.log('✅ Sent reply message');
+                return;
+            }
+        }
+
+        // Handle file upload or normal message
+        originalSendMessageWithReply();
+
+        // Clear reply after sending
+        if (currentReplyTo) {
+            cancelReply();
+        }
+    };
+
+    // Handle incoming reaction updates
+    function handleReactionUpdate(update) {
+        console.log('📨 Received reaction update:', update);
+
+        // Skip if this is our own reaction (already updated optimistically)
+        if (String(update.userId) === String(currentUser.userId)) {
+            console.log('⏭️ Skipping own reaction update (already applied optimistically)');
+            return;
+        }
+
+        // Find the message in current conversation - convert both IDs to String
+        const messageIdStr = String(update.messageId);
+        const message = currentConversation?.messages.find(m => String(m.id) === messageIdStr);
+        if (!message) {
+            console.log('❌ Message not found for reaction update:', update.messageId);
+            console.log('Available message IDs:', currentConversation?.messages.map(m => m.id));
+            return;
+        }
+
+        console.log('✅ Processing reaction from other user');
+
+        // Update message reactions
+        if (!message.reactions) {
+            message.reactions = {};
+        }
+
+        if (update.action === 'add') {
+            if (!message.reactions[update.emoji]) {
+                message.reactions[update.emoji] = [];
+            }
+            const userIdStr = String(update.userId);
+            if (!message.reactions[update.emoji].includes(userIdStr)) {
+                message.reactions[update.emoji].push(userIdStr);
+                console.log('✅ Added reaction from other user:', update.emoji, userIdStr);
+            }
+        } else if (update.action === 'remove') {
+            if (message.reactions[update.emoji]) {
+                const userIdStr = String(update.userId);
+                message.reactions[update.emoji] = message.reactions[update.emoji].filter(id => String(id) !== userIdStr);
+                if (message.reactions[update.emoji].length === 0) {
+                    delete message.reactions[update.emoji];
+                }
+                console.log('✅ Removed reaction from other user:', update.emoji, userIdStr);
+            }
+        }
+
+        // 🔧 UPDATE IN-PLACE for other users' reactions to preserve message position
+        const messageWrapper = document.querySelector(`[data-message-id="${update.messageId}"]`);
+        if (messageWrapper) {
+            updateReactionsDisplay(messageWrapper, message);
+            console.log('🎨 Updated reactions in-place for other user reaction');
+        }
+    }
+
+    // Handle incoming delete updates
+    function handleDeleteUpdate(update) {
+        console.log('📨 Received delete update:', update);
+
+        const messageWrapper = document.querySelector(`[data-message-id="${update.messageId}"]`);
+
+        if (update.permanent) {
+            // Permanent delete - Remove from DOM immediately
+            if (messageWrapper) {
+                messageWrapper.style.transition = 'opacity 0.3s ease';
+                messageWrapper.style.opacity = '0';
+                setTimeout(() => messageWrapper.remove(), 300);
+            }
+
+            // Remove from conversation messages
+            if (currentConversation) {
+                currentConversation.messages = currentConversation.messages.filter(m => m.id !== update.messageId);
+            }
+        } else {
+            // Soft delete - Update message content immediately
+            const message = currentConversation?.messages.find(m => m.id === update.messageId);
+            if (message) {
+                message.deleted = true;
+                message.content = 'This message has been deleted';
+            }
+
+            // Update DOM immediately without re-rendering
+            if (messageWrapper) {
+                const bubbleEl = messageWrapper.querySelector('.message-bubble');
+                if (bubbleEl) {
+                    bubbleEl.classList.add('deleted');
+                    bubbleEl.innerHTML = 'This message has been deleted <span class="deleted-message-icon" onclick="permanentlyDeleteMessage(\'' + update.messageId + '\')">🗑️</span>';
+                }
+
+                // Remove action buttons
+                const actionsEl = messageWrapper.querySelector('.message-actions');
+                if (actionsEl) {
+                    actionsEl.remove();
+                }
+            }
+        }
+    }
+
+    // Subscribe to reaction and delete updates when subscribing to conversation
+    const originalSubscribeToConversation = subscribeToConversation;
+    subscribeToConversation = function(conversationId) {
+        originalSubscribeToConversation(conversationId);
+
+        // Subscribe to reactions
+        subscriptions.reactions = stompClient.subscribe(
+            '/topic/conversation/' + conversationId + '/reactions',
+            function(message) {
+                const update = JSON.parse(message.body);
+                handleReactionUpdate(update);
+            }
+        );
+
+        // Subscribe to deletes
+        subscriptions.deletes = stompClient.subscribe(
+            '/topic/conversation/' + conversationId + '/deletes',
+            function(message) {
+                const update = JSON.parse(message.body);
+                handleDeleteUpdate(update);
+            }
+        );
+
+        console.log('✅ Subscribed to reactions and deletes for conversation: ' + conversationId);
     };
 
     /*]]>*/

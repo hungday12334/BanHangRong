@@ -1,5 +1,8 @@
 package banhangrong.su25.Entity;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -54,6 +57,24 @@ public class ChatMessage {
 
     @Column(name = "file_size")
     private Long fileSize;
+
+    // Enhanced chat features - NEW FIELDS
+    @Column(name = "reactions", columnDefinition = "TEXT")
+    @JsonRawValue  // Serialize JSON string as object for proper emoji display
+    @JsonDeserialize(using = StringDeserializer.class)  // Deserialize as string when receiving
+    private String reactions; // JSON format: {"❤️":["userId1","userId2"],"😂":["userId3"]}
+
+    @Column(name = "reply_to_message_id", length = 255)
+    private String replyToMessageId;
+
+    @Column(name = "reply_to_sender_name", length = 255)
+    private String replyToSenderName;
+
+    @Column(name = "reply_to_content", columnDefinition = "TEXT")
+    private String replyToContent;
+
+    @Column(name = "deleted")
+    private Boolean deleted = false;
 
     // Constructors
     public ChatMessage() {
@@ -184,6 +205,47 @@ public class ChatMessage {
         this.fileSize = fileSize;
     }
 
+    // Enhanced chat features - Getters and Setters
+    public String getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(String reactions) {
+        this.reactions = reactions;
+    }
+
+    public String getReplyToMessageId() {
+        return replyToMessageId;
+    }
+
+    public void setReplyToMessageId(String replyToMessageId) {
+        this.replyToMessageId = replyToMessageId;
+    }
+
+    public String getReplyToSenderName() {
+        return replyToSenderName;
+    }
+
+    public void setReplyToSenderName(String replyToSenderName) {
+        this.replyToSenderName = replyToSenderName;
+    }
+
+    public String getReplyToContent() {
+        return replyToContent;
+    }
+
+    public void setReplyToContent(String replyToContent) {
+        this.replyToContent = replyToContent;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
@@ -194,6 +256,9 @@ public class ChatMessage {
         }
         if (read == null) {
             read = false;
+        }
+        if (deleted == null) {
+            deleted = false;
         }
     }
 }

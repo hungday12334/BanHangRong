@@ -1,10 +1,13 @@
 package banhangrong.su25.Controller;
 
 
+import banhangrong.su25.DTO.MessageDeleteDTO;
+import banhangrong.su25.DTO.MessageReactionDTO;
 import banhangrong.su25.Entity.ChatMessage;
 import banhangrong.su25.Entity.Conversation;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.service.ChatService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,8 @@ public class ChatController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Rate limiting: track last message time per user
     private final Map<Long, Long> userLastMessageTime = new ConcurrentHashMap<>();
@@ -76,6 +81,17 @@ public class ChatController {
                 message.setFileSize(Long.valueOf(messageData.get("fileSize").toString()));
             }
 
+            // Set reply fields if present (NEW)
+            if (messageData.get("replyToMessageId") != null) {
+                message.setReplyToMessageId((String) messageData.get("replyToMessageId"));
+            }
+            if (messageData.get("replyToSenderName") != null) {
+                message.setReplyToSenderName((String) messageData.get("replyToSenderName"));
+            }
+            if (messageData.get("replyToContent") != null) {
+                message.setReplyToContent((String) messageData.get("replyToContent"));
+            }
+
             // 🚨 LƯU VÀO DATABASE
             System.out.println("💾 Saving message to database...");
             ChatMessage savedMessage = chatService.addMessage(message);
@@ -107,6 +123,19 @@ public class ChatController {
                 responseMessage.put("fileType", savedMessage.getFileType());
                 responseMessage.put("fileSize", savedMessage.getFileSize());
             }
+
+            // Add reply info if present (NEW)
+            if (savedMessage.getReplyToMessageId() != null) {
+                responseMessage.put("replyToMessageId", savedMessage.getReplyToMessageId());
+                responseMessage.put("replyToSenderName", savedMessage.getReplyToSenderName());
+                responseMessage.put("replyToContent", savedMessage.getReplyToContent());
+            }
+
+            // Add reactions and deleted status (NEW)
+            // Parse reactions JSON string to Object for proper frontend display
+            Object reactionsObj = parseReactionsJson(savedMessage.getReactions());
+            responseMessage.put("reactions", reactionsObj);
+            responseMessage.put("deleted", savedMessage.getDeleted());
 
             // 🚨 Gửi DUY NHẤT 1 lần đến conversation topic
             messagingTemplate.convertAndSend(conversationTopic, responseMessage);
@@ -200,10 +229,10 @@ public class ChatController {
 //    }
 
     @GetMapping("/chat")
-    public String chat(org.springframework.ui.Model model, org.springframework.security.core.Authentication authentication){
+    public String chat(org.springframework.ui.Model model, org.springframework.security.core.Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             org.springframework.security.core.userdetails.UserDetails userDetails =
-                (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
+                    (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
             Users user = chatService.getUserByUsername(userDetails.getUsername());
             if (user != null) {
                 model.addAttribute("user", user);
@@ -213,10 +242,10 @@ public class ChatController {
     }
 
     @GetMapping("/seller/chat")
-    public String sellerChat(org.springframework.ui.Model model, org.springframework.security.core.Authentication authentication){
+    public String sellerChat(org.springframework.ui.Model model, org.springframework.security.core.Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             org.springframework.security.core.userdetails.UserDetails userDetails =
-                (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
+                    (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
             Users user = chatService.getUserByUsername(userDetails.getUsername());
             if (user != null) {
                 model.addAttribute("user", user);
@@ -232,10 +261,10 @@ public class ChatController {
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) java.math.BigDecimal productPrice,
             org.springframework.ui.Model model,
-            org.springframework.security.core.Authentication authentication){
+            org.springframework.security.core.Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             org.springframework.security.core.userdetails.UserDetails userDetails =
-                (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
+                    (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
             Users user = chatService.getUserByUsername(userDetails.getUsername());
             if (user != null) {
                 model.addAttribute("user", user);
@@ -392,19 +421,40 @@ public class ChatController {
         private String userName;
         private boolean isTyping;
 
-        public TypingIndicator() {}
+        public TypingIndicator() {
+        }
 
-        public String getConversationId() { return conversationId; }
-        public void setConversationId(String conversationId) { this.conversationId = conversationId; }
+        public String getConversationId() {
+            return conversationId;
+        }
 
-        public String getUserId() { return userId; }
-        public void setUserId(String userId) { this.userId = userId; }
+        public void setConversationId(String conversationId) {
+            this.conversationId = conversationId;
+        }
 
-        public String getUserName() { return userName; }
-        public void setUserName(String userName) { this.userName = userName; }
+        public String getUserId() {
+            return userId;
+        }
 
-        public boolean isTyping() { return isTyping; }
-        public void setTyping(boolean typing) { isTyping = typing; }
+        public void setUserId(String userId) {
+            this.userId = userId;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
+
+        public boolean isTyping() {
+            return isTyping;
+        }
+
+        public void setTyping(boolean typing) {
+            isTyping = typing;
+        }
     }
 
     // Thêm method để subscribe user khi connect
@@ -441,4 +491,157 @@ public class ChatController {
             System.err.println("Error handling user unsubscribe: " + e.getMessage());
         }
     }
+
+    // ===== ENHANCED CHAT FEATURES =====
+
+    /**
+     * Add emoji reaction to a message
+     */
+    @MessageMapping("/chat.addReaction")
+    public void addReaction(@Payload MessageReactionDTO reactionDTO) {
+        try {
+            System.out.println("=== 😊 ADD REACTION ===");
+            System.out.println("Message ID: " + reactionDTO.getMessageId());
+            System.out.println("Emoji: " + reactionDTO.getEmoji());
+            System.out.println("User ID: " + reactionDTO.getUserId());
+
+            // Add reaction to message
+            ChatMessage message = chatService.addReaction(
+                    Long.valueOf(reactionDTO.getMessageId()),
+                    reactionDTO.getUserId(),
+                    reactionDTO.getEmoji()
+            );
+
+            if (message != null) {
+                // Broadcast to conversation
+                Map<String, Object> update = new HashMap<>();
+                update.put("messageId", reactionDTO.getMessageId());
+                update.put("userId", reactionDTO.getUserId());
+                update.put("emoji", reactionDTO.getEmoji());
+                update.put("action", "add");
+
+                String reactionTopic = "/topic/conversation/" + reactionDTO.getConversationId() + "/reactions";
+                messagingTemplate.convertAndSend(reactionTopic, update);
+
+                System.out.println("✅ Reaction added and broadcasted");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error adding reaction: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Remove emoji reaction from a message
+     */
+    @MessageMapping("/chat.removeReaction")
+    public void removeReaction(@Payload MessageReactionDTO reactionDTO) {
+        try {
+            System.out.println("=== 🗑️ REMOVE REACTION ===");
+            System.out.println("Message ID: " + reactionDTO.getMessageId());
+            System.out.println("Emoji: " + reactionDTO.getEmoji());
+            System.out.println("User ID: " + reactionDTO.getUserId());
+
+            // Remove reaction from message
+            ChatMessage message = chatService.removeReaction(
+                    Long.valueOf(reactionDTO.getMessageId()),
+                    reactionDTO.getUserId(),
+                    reactionDTO.getEmoji()
+            );
+
+            if (message != null) {
+                // Broadcast to conversation
+                Map<String, Object> update = new HashMap<>();
+                update.put("messageId", reactionDTO.getMessageId());
+                update.put("userId", reactionDTO.getUserId());
+                update.put("emoji", reactionDTO.getEmoji());
+                update.put("action", "remove");
+
+                String reactionTopic = "/topic/conversation/" + reactionDTO.getConversationId() + "/reactions";
+                messagingTemplate.convertAndSend(reactionTopic, update);
+
+                System.out.println("✅ Reaction removed and broadcasted");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error removing reaction: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Soft delete a message (mark as deleted)
+     */
+    @MessageMapping("/chat.deleteMessage")
+    public void deleteMessage(@Payload MessageDeleteDTO deleteDTO) {
+        try {
+            System.out.println("=== 🗑️ DELETE MESSAGE (SOFT) ===");
+            System.out.println("Message ID: " + deleteDTO.getMessageId());
+
+            // Soft delete the message
+            ChatMessage message = chatService.softDeleteMessage(Long.valueOf(deleteDTO.getMessageId()));
+
+            if (message != null) {
+                // Broadcast to conversation
+                Map<String, Object> update = new HashMap<>();
+                update.put("messageId", deleteDTO.getMessageId());
+                update.put("deleted", true);
+                update.put("permanent", false);
+
+                String deleteTopic = "/topic/conversation/" + deleteDTO.getConversationId() + "/deletes";
+                messagingTemplate.convertAndSend(deleteTopic, update);
+
+                System.out.println("✅ Message soft deleted and broadcasted");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error deleting message: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Permanently delete a message
+     */
+    @MessageMapping("/chat.permanentDeleteMessage")
+    public void permanentDeleteMessage(@Payload MessageDeleteDTO deleteDTO) {
+        try {
+            System.out.println("=== 💥 PERMANENT DELETE MESSAGE ===");
+            System.out.println("Message ID: " + deleteDTO.getMessageId());
+
+            // Permanently delete the message
+            boolean deleted = chatService.permanentDeleteMessage(Long.valueOf(deleteDTO.getMessageId()));
+
+            if (deleted) {
+                // Broadcast to conversation
+                Map<String, Object> update = new HashMap<>();
+                update.put("messageId", deleteDTO.getMessageId());
+                update.put("permanent", true);
+
+                String deleteTopic = "/topic/conversation/" + deleteDTO.getConversationId() + "/deletes";
+                messagingTemplate.convertAndSend(deleteTopic, update);
+
+                System.out.println("✅ Message permanently deleted and broadcasted");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error permanently deleting message: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Helper method to parse reactions JSON string to Object for proper emoji display
+     */
+    private Object parseReactionsJson(String reactionsJson) {
+        if (reactionsJson == null || reactionsJson.trim().isEmpty() || "null".equals(reactionsJson)) {
+            return null;
+        }
+
+        try {
+            // Use ObjectMapper to parse JSON string to Map
+            return objectMapper.readValue(reactionsJson, Map.class);
+        } catch (Exception e) {
+            System.err.println("Error parsing reactions JSON: " + e.getMessage());
+            return null;
+        }
+    }
+
 }
