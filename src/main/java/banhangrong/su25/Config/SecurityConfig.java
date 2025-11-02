@@ -37,13 +37,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         http.csrf(csrf -> csrf.disable())
 
-            // Cấu hình session management
+            // Cấu hình session management - INCREASED TIMEOUT
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                    .invalidSessionUrl("/login?expired=true")
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false).expiredUrl("/login?expired=true")
-                    .sessionRegistry(sessionRegistry)
+                .invalidSessionUrl("/login?expired=true")
+                .maximumSessions(5) // Allow multiple tabs/sessions
+                .maxSessionsPreventsLogin(false)
+                .expiredUrl("/login?expired=true")
+                .sessionRegistry(sessionRegistry)
             )
 
             // Cấu hình authorization
@@ -59,21 +60,22 @@ public class SecurityConfig {
                     .requestMatchers("/categories", "/category/**", "/product/**").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()
 
-                // Chat endpoints - CHỈ CẦN AUTHENTICATED (không cần role cụ thể)
-                // Đặt TRƯỚC các rule khác để được ưu tiên
+                // Chat endpoints - CHỈ CẦN AUTHENTICATED
                 .requestMatchers("/chat", "/customer/chat", "/seller/chat").authenticated()
                 .requestMatchers("/api/conversation/**", "/api/conversations/**").authenticated()
                 .requestMatchers("/api/users/**", "/api/sellers/**").authenticated()
                 .requestMatchers("/ws/**").authenticated()
                 
-                // Customer pages - cho phép tất cả authenticated users
+                // Customer pages
                 .requestMatchers("/customer/**", "/cart/**").authenticated()
                 
-                // Role-based access
+                // Seller pages - IMPORTANT: Only require authenticated, role check done in controller
+                .requestMatchers("/seller/**").authenticated()
+
+                // Admin pages
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "SELLER", "ADMIN")
-                
+                .requestMatchers("/api/user/**").authenticated()
+
                 // Default: require authentication
                 .anyRequest().authenticated()
             )

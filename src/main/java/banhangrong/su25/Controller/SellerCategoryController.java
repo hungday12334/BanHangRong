@@ -1,10 +1,15 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.DTO.LicenseDTO;
 import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.ShopLicenses;
+import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.service.CategoryService;
+import banhangrong.su25.service.LicenseManagementService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,41 +34,83 @@ public class SellerCategoryController {
     @Autowired
     private ProductImagesRepository productImagesRepository;
 
+    @Autowired
+    private LicenseManagementService licenseManagementService;
+
     // ========== MAIN ENDPOINTS ==========
 
     // Hiển thị trang quản lý danh mục
     @GetMapping
-    public String categoryManagementPage(Model model) {
+    public String categoryManagementPage(Model model, HttpSession session) {
         try {
-            List<Categories> categories = categoryService.getAllCategories();
+            // Get current seller from session
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                // Session expired or not logged in
+                model.addAttribute("error", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+                return "redirect:/login?expired=true";
+            }
 
-            // Calculate statistics
+            // Check if user is seller or admin
+            String userType = currentUser.getUserType();
+            if (!"seller".equalsIgnoreCase(userType) && !"admin".equalsIgnoreCase(userType)) {
+                model.addAttribute("error", "Bạn không có quyền truy cập trang này.");
+                return "redirect:/";
+            }
+
+            Long sellerId = currentUser.getUserId();
+
+            // Get ALL categories (shared across sellers)
+            List<Categories> allCategories = categoryService.getAllCategories();
+
+            // Calculate statistics - FILTER BY SELLER'S PRODUCTS
             Map<Long, Long> productCountByCategory = new HashMap<>();
             long totalProducts = 0;
             long categoriesWithProducts = 0;
 
-            for (Categories category : categories) {
-                Long count = productsRepository.countByCategoryId(category.getCategoryId());
+            // Filter categories: only show if seller has products OR if seller created it
+            List<Categories> relevantCategories = new ArrayList<>();
+
+            for (Categories category : allCategories) {
+                // Count seller's products in this category
+                Long count = productsRepository.countByCategoryIdAndSellerId(category.getCategoryId(), sellerId);
                 productCountByCategory.put(category.getCategoryId(), count);
-                totalProducts += count;
-                if (count > 0) {
-                    categoriesWithProducts++;
+
+                // Only include category if seller has products in it
+                // OR if it's a recently created category (last 7 days) to allow sellers to add products
+                LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+                boolean isRecentCategory = category.getCreatedAt() != null && category.getCreatedAt().isAfter(sevenDaysAgo);
+
+                if (count > 0 || isRecentCategory) {
+                    relevantCategories.add(category);
+                    totalProducts += count;
+                    if (count > 0) {
+                        categoriesWithProducts++;
+                    }
                 }
             }
 
-            // Count recent categories (last 7 days)
+            // Count recent categories that seller is using
             LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-            long recentCategories = categories.stream()
+            long recentCategories = relevantCategories.stream()
                 .filter(c -> c.getCreatedAt() != null && c.getCreatedAt().isAfter(sevenDaysAgo))
                 .count();
 
-            model.addAttribute("categories", categories);
+            // If seller has no products at all, show empty state with all categories
+            // so they can start adding products
+            if (totalProducts == 0) {
+                relevantCategories = allCategories; // Show all to let them choose
+            }
+
+            model.addAttribute("categories", relevantCategories);
             model.addAttribute("productCountByCategory", productCountByCategory);
-            model.addAttribute("totalCategories", categories.size());
+            model.addAttribute("totalCategories", relevantCategories.size());
             model.addAttribute("categoriesWithProducts", categoriesWithProducts);
             model.addAttribute("totalProducts", totalProducts);
             model.addAttribute("recentCategories", recentCategories);
             model.addAttribute("newCategory", new Categories());
+            model.addAttribute("sellerId", sellerId);
+            model.addAttribute("hasNoProducts", totalProducts == 0); // Flag for empty state
 
             return "seller/category-management";
         } catch (Exception e) {
@@ -76,6 +123,7 @@ public class SellerCategoryController {
             model.addAttribute("totalProducts", 0);
             model.addAttribute("recentCategories", 0);
             model.addAttribute("newCategory", new Categories());
+            model.addAttribute("hasNoProducts", true);
             return "seller/category-management";
         }
     }
@@ -183,9 +231,19 @@ public class SellerCategoryController {
     // API để xem sản phẩm trong danh mục
     @GetMapping("/{categoryId}/products")
     @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> getCategoryProducts(@PathVariable Long categoryId) {
+    public ResponseEntity<List<Map<String, Object>>> getCategoryProducts(
+            @PathVariable Long categoryId,
+            HttpSession session) {
         try {
-            List<Products> products = productsRepository.findByCategoryId(categoryId);
+            // Get current seller from session
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(new ArrayList<>());
+            }
+            Long sellerId = currentUser.getUserId();
+
+            // Get products filtered by category AND seller
+            List<Products> products = productsRepository.findByCategoryIdAndSellerId(categoryId, sellerId);
 
             List<Map<String, Object>> productData = products.stream().map(product -> {
                 Map<String, Object> data = new HashMap<>();
@@ -193,8 +251,11 @@ public class SellerCategoryController {
                 data.put("name", product.getName());
                 data.put("sku", "P" + product.getProductId()); // Generate SKU from ID
                 data.put("price", product.getPrice());
+                data.put("salePrice", product.getSalePrice());
                 data.put("stockQuantity", product.getQuantity()); // Use quantity field
                 data.put("totalSales", product.getTotalSales() != null ? product.getTotalSales() : 0);
+                data.put("status", product.getStatus());
+                data.put("averageRating", product.getAverageRating());
 
                 // Get primary image
                 try {
@@ -214,6 +275,192 @@ public class SellerCategoryController {
             return ResponseEntity.ok(productData);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ArrayList<>());
+        }
+    }
+
+    // ========== LICENSE MANAGEMENT ENDPOINTS ==========
+
+    /**
+     * Get all licenses for seller with assignment status for a specific category
+     */
+    @GetMapping("/api/licenses")
+    @ResponseBody
+    public ResponseEntity<?> getAllLicenses(
+            @RequestParam(required = false) Long categoryId,
+            HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
+            }
+
+            Long sellerId = currentUser.getUserId();
+            List<LicenseDTO> licenses;
+
+            if (categoryId != null) {
+                // Get licenses with assignment status for this category
+                licenses = licenseManagementService.getAllLicensesWithAssignmentStatus(sellerId, categoryId);
+            } else {
+                // Get all licenses
+                licenses = licenseManagementService.getAllLicensesBySeller(sellerId);
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "licenses", licenses
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get licenses assigned to a category
+     */
+    @GetMapping("/api/licenses/assigned")
+    @ResponseBody
+    public ResponseEntity<?> getAssignedLicenses(
+            @RequestParam Long categoryId,
+            HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
+            }
+
+            Long sellerId = currentUser.getUserId();
+            List<LicenseDTO> licenses = licenseManagementService.getAssignedLicensesForCategory(categoryId, sellerId);
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "licenses", licenses
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Create a new license
+     */
+    @PostMapping("/api/licenses")
+    @ResponseBody
+    public ResponseEntity<?> createLicense(
+            @RequestBody ShopLicenses license,
+            HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
+            }
+
+            license.setSellerId(currentUser.getUserId());
+            ShopLicenses created = licenseManagementService.createLicense(license);
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã tạo license thành công",
+                "license", created
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "error", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Assign a license to a category
+     */
+    @PostMapping("/api/licenses/assign")
+    @ResponseBody
+    public ResponseEntity<?> assignLicenseToCategory(
+            @RequestParam Long categoryId,
+            @RequestParam Long licenseId,
+            HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
+            }
+
+            Long sellerId = currentUser.getUserId();
+            licenseManagementService.assignLicenseToCategory(categoryId, licenseId, sellerId);
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã thêm license vào danh mục"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "error", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Remove a license from a category
+     */
+    @DeleteMapping("/api/licenses/remove")
+    @ResponseBody
+    public ResponseEntity<?> removeLicenseFromCategory(
+            @RequestParam Long categoryId,
+            @RequestParam Long licenseId,
+            HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
+            }
+
+            Long sellerId = currentUser.getUserId();
+            licenseManagementService.removeLicenseFromCategory(categoryId, licenseId, sellerId);
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã xóa license khỏi danh mục"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "error", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Get count of products per category including license count - SELLER SPECIFIC
+     */
+    @GetMapping("/api/stats")
+    @ResponseBody
+    public ResponseEntity<?> getCategoryStats(HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
+            }
+
+            Long sellerId = currentUser.getUserId();
+            List<Categories> categories = categoryService.getAllCategories();
+
+            List<Map<String, Object>> stats = categories.stream().map(category -> {
+                Map<String, Object> stat = new HashMap<>();
+                stat.put("categoryId", category.getCategoryId());
+                stat.put("categoryName", category.getName());
+                // Use seller-specific count
+                stat.put("productCount", productsRepository.countByCategoryIdAndSellerId(category.getCategoryId(), sellerId));
+                stat.put("licenseCount", licenseManagementService.getLicenseCountForCategory(category.getCategoryId(), sellerId));
+                return stat;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "stats", stats
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
 }

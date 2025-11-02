@@ -58,6 +58,19 @@
 
                 <!-- Alerts -->
                 <div class="alert-container">
+                    <!-- Empty state alert for sellers with no products -->
+                    <div th:if="${hasNoProducts}" class="alert info" style="background: #e3f2fd; border-left: 4px solid #2196f3;">
+                        <strong>ℹ️ Chào mừng bạn đến với quản lý danh mục!</strong>
+                        <p style="margin-top: 8px; margin-bottom: 0;">
+                            Bạn chưa có sản phẩm nào trong hệ thống. Các danh mục bên dưới là danh mục chung của hệ thống.
+                            Sau khi bạn thêm sản phẩm và gán vào danh mục, thống kê sẽ được cập nhật tự động.
+                        </p>
+                        <p style="margin-top: 8px; margin-bottom: 0;">
+                            <strong>Bước tiếp theo:</strong> Vào <a href="/seller/products/add" style="color: #1976d2; text-decoration: underline;">Thêm sản phẩm</a>
+                            hoặc sử dụng tính năng <strong>"Quản lý Licenses"</strong> để bắt đầu.
+                        </p>
+                    </div>
+
                     <div th:if="${success}" class="alert success">
                         <strong th:text="${success}"></strong>
                     </div>
@@ -2329,8 +2342,11 @@
 
     // ===== LICENSE MANAGEMENT FUNCTIONS =====
 
+    let currentCategoryId = null;
+
     // Open License Manager Modal (Global - accessible from header button)
     function openLicenseManager() {
+        currentCategoryId = null;
         const modal = document.getElementById('licenseManagerModal');
         if (modal) {
             openModal('licenseManagerModal');
@@ -2340,14 +2356,18 @@
 
     // Open Category-specific License Manager
     function openCategoryLicenseManager(wrapper) {
-        const categoryId = wrapper.getAttribute('data-id');
+        currentCategoryId = wrapper.getAttribute('data-id');
         const categoryName = wrapper.getAttribute('data-name');
 
-        // Store context for later use if needed
-        window.currentCategoryContext = { categoryId, categoryName };
-
-        openModal('licenseManagerModal');
-        loadLicenses();
+        const modal = document.getElementById('licenseManagerModal');
+        if (modal) {
+            const modalTitle = modal.querySelector('.modal-title');
+            if (modalTitle) {
+                modalTitle.innerHTML = `<i class="ti ti-license"></i> Quản lý Licenses - ${categoryName}`;
+            }
+            openModal('licenseManagerModal');
+            loadLicenses();
+        }
     }
 
     // Load all licenses from server
@@ -2357,15 +2377,42 @@
 
         container.innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Đang tải...</div>';
 
-        fetch('/seller/licenses/list')
+        const url = currentCategoryId ?
+            `/seller/categories/api/licenses?categoryId=${currentCategoryId}` :
+            '/seller/categories/api/licenses';
+
+        fetch(url)
             .then(response => response.json())
-            .then(licenses => {
-                displayLicenses(licenses);
-                updateLicenseCount(licenses.length);
+            .then(data => {
+                if (data.success && data.licenses) {
+                    displayLicenses(data.licenses);
+                    updateLicenseCount(data.licenses.length);
+                    if (currentCategoryId) {
+                        loadAssignedLicenses();
+                    }
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Lỗi tải dữ liệu</div></div>';
+                }
             })
             .catch(error => {
                 console.error('Error loading licenses:', error);
                 container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Lỗi tải dữ liệu</div></div>';
+            });
+    }
+
+    // Load licenses assigned to current category
+    function loadAssignedLicenses() {
+        if (!currentCategoryId) return;
+
+        fetch(`/seller/categories/api/licenses/assigned?categoryId=${currentCategoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.licenses) {
+                    displayAssignedLicenses(data.licenses);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading assigned licenses:', error);
             });
     }
 
@@ -2377,7 +2424,7 @@
         if (licenses.length === 0) {
             container.innerHTML = `
                 <div class="empty-state" style="padding: 40px 20px;">
-                    <i class="ti ti-license"></i>
+                    <i class="ti ti-license" style="font-size: 48px; color: var(--muted); margin-bottom: 12px;"></i>
                     <div class="empty-state-title">Chưa có license nào</div>
                     <div class="empty-state-text">Thêm license đầu tiên của bạn!</div>
                 </div>
@@ -2390,29 +2437,31 @@
             const statusClass = isActive ? 'status-active' : 'status-inactive';
             const statusText = isActive ? 'Hoạt động' : 'Tạm dừng';
             const statusIcon = isActive ? 'ti-circle-check' : 'ti-circle-x';
-
-            const expiryDate = license.expiryDate ? new Date(license.expiryDate).toLocaleDateString('vi-VN') : 'Không có';
-            const issueDate = license.issueDate ? new Date(license.issueDate).toLocaleDateString('vi-VN') : 'Không có';
+            const isAssigned = license.isAssignedToCategory || false;
 
             return `
-                <div class="license-item" data-license-id="${license.shopLicenseId}">
+                <div class="license-item ${isAssigned ? 'license-assigned' : ''}" data-license-id="${license.shopLicenseId}">
                     <div class="license-header">
                         <div class="license-title-group">
-                            <h6 class="license-name">${license.licenseName || 'Chưa đặt tên'}</h6>
+                            <h6 class="license-name">
+                                ${license.licenseName || 'Chưa đặt tên'}
+                                ${isAssigned ? '<span class="badge-small" style="background: var(--good); margin-left: 8px;">Đã gán</span>' : ''}
+                            </h6>
                             <span class="license-badge ${statusClass}">
                                 <i class="ti ${statusIcon}"></i> ${statusText}
                             </span>
                         </div>
                         <div class="license-actions">
-                            <button type="button" class="btn-icon" onclick="toggleLicenseStatus(${license.shopLicenseId})" title="Bật/Tắt">
-                                <i class="ti ti-toggle-${isActive ? 'left' : 'right'}"></i>
-                            </button>
-                            <button type="button" class="btn-icon" onclick="editLicense(${license.shopLicenseId})" title="Chỉnh sửa">
-                                <i class="ti ti-edit"></i>
-                            </button>
-                            <button type="button" class="btn-icon text-danger" onclick="deleteLicense(${license.shopLicenseId})" title="Xóa">
-                                <i class="ti ti-trash"></i>
-                            </button>
+                            ${currentCategoryId ? `
+                                ${isAssigned ?
+                                    `<button type="button" class="btn btn-sm btn-danger" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Xóa khỏi danh mục">
+                                        <i class="ti ti-x"></i> Xóa
+                                    </button>` :
+                                    `<button type="button" class="btn btn-sm btn-primary" onclick="assignLicenseToCategory(${license.shopLicenseId})" title="Thêm vào danh mục">
+                                        <i class="ti ti-plus"></i> Thêm
+                                    </button>`
+                                }
+                            ` : ''}
                         </div>
                     </div>
                     <div class="license-body">
@@ -2420,30 +2469,67 @@
                             <span class="license-label"><i class="ti ti-key"></i> Loại:</span>
                             <span class="license-value">${license.licenseType || 'Chưa xác định'}</span>
                         </div>
+                        ${license.licenseNumber ? `
                         <div class="license-info-row">
                             <span class="license-label"><i class="ti ti-number"></i> Số hiệu:</span>
-                            <span class="license-value">${license.licenseNumber || 'Chưa có'}</span>
+                            <span class="license-value">${license.licenseNumber}</span>
                         </div>
+                        ` : ''}
                         ${license.description ? `
                         <div class="license-info-row">
                             <span class="license-label"><i class="ti ti-info-circle"></i> Mô tả:</span>
                             <span class="license-value">${license.description}</span>
                         </div>
                         ` : ''}
-                        <div class="license-info-row">
-                            <span class="license-label"><i class="ti ti-calendar"></i> Ngày cấp:</span>
-                            <span class="license-value">${issueDate}</span>
-                        </div>
-                        <div class="license-info-row">
-                            <span class="license-label"><i class="ti ti-calendar-due"></i> Hết hạn:</span>
-                            <span class="license-value">${expiryDate}</span>
-                        </div>
                     </div>
                 </div>
             `;
         }).join('');
 
         container.innerHTML = html;
+    }
+
+    // Display assigned licenses section (between add form and available licenses)
+    function displayAssignedLicenses(licenses) {
+        // Find or create assigned licenses section
+        let assignedSection = document.querySelector('.assigned-licenses-section');
+        const licenseAddSection = document.querySelector('.license-add-section');
+
+        if (licenses.length === 0) {
+            if (assignedSection) {
+                assignedSection.remove();
+            }
+            return;
+        }
+
+        if (!assignedSection) {
+            assignedSection = document.createElement('div');
+            assignedSection.className = 'assigned-licenses-section';
+            const hrElement = licenseAddSection.nextElementSibling;
+            if (hrElement && hrElement.tagName === 'HR') {
+                hrElement.parentNode.insertBefore(assignedSection, hrElement);
+            }
+        }
+
+        const html = `
+            <h6 class="section-subtitle" style="margin-top: 24px;">
+                <i class="ti ti-check"></i> Licenses đã gán vào danh mục
+                <span class="badge-count">(${licenses.length})</span>
+            </h6>
+            <div class="assigned-licenses-list">
+                ${licenses.map(license => `
+                    <div class="assigned-license-badge">
+                        <i class="ti ti-license"></i>
+                        <span>${license.licenseName}</span>
+                        <button type="button" class="btn-remove" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Xóa">
+                            <i class="ti ti-x"></i>
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        assignedSection.innerHTML = html;
     }
 
     // Update license count badge
@@ -2459,7 +2545,6 @@
         const name = document.getElementById('newLicenseName').value.trim();
         const type = document.getElementById('newLicenseCode').value.trim();
         const description = document.getElementById('newLicenseDescription').value.trim();
-        const number = document.getElementById('newLicenseCode').value.trim();
 
         if (!name) {
             alert('⚠️ Vui lòng nhập tên license!');
@@ -2474,12 +2559,13 @@
         const data = {
             licenseName: name,
             licenseType: type,
-            licenseNumber: number,
+            licenseNumber: type,
             description: description,
-            status: 'ACTIVE'
+            status: 'ACTIVE',
+            isActive: true
         };
 
-        fetch('/seller/licenses/add', {
+        fetch('/seller/categories/api/licenses', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2506,10 +2592,15 @@
             });
     }
 
-    // Toggle license status (active/inactive)
-    function toggleLicenseStatus(licenseId) {
-        fetch(`/seller/licenses/toggle-status/${licenseId}`, {
-            method: 'PUT',
+    // Assign license to category
+    function assignLicenseToCategory(licenseId) {
+        if (!currentCategoryId) {
+            alert('⚠️ Vui lòng chọn danh mục trước!');
+            return;
+        }
+
+        fetch(`/seller/categories/api/licenses/assign?categoryId=${currentCategoryId}&licenseId=${licenseId}`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             }
@@ -2517,82 +2608,30 @@
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    const newStatus = result.license.isActive ? 'kích hoạt' : 'tạm dừng';
-                    showNotification(`✅ Đã ${newStatus} license!`, 'success');
+                    showNotification('✅ Đã thêm license vào danh mục!', 'success');
                     loadLicenses();
                 } else {
-                    alert('❌ Lỗi: ' + (result.error || 'Không thể thay đổi trạng thái'));
+                    alert('❌ Lỗi: ' + (result.error || 'Không thể thêm license'));
                 }
             })
             .catch(error => {
-                console.error('Error toggling license status:', error);
+                console.error('Error assigning license:', error);
                 alert('❌ Có lỗi xảy ra!');
             });
     }
 
-    // Edit license
-    function editLicense(licenseId) {
-        // Fetch license details
-        fetch('/seller/licenses/list')
-            .then(response => response.json())
-            .then(licenses => {
-                const license = licenses.find(l => l.shopLicenseId === licenseId);
-                if (!license) {
-                    alert('❌ Không tìm thấy license!');
-                    return;
-                }
-
-                // Show edit dialog
-                const newName = prompt('Tên license:', license.licenseName);
-                if (newName === null) return; // User cancelled
-
-                const newType = prompt('Loại license:', license.licenseType);
-                if (newType === null) return;
-
-                const newNumber = prompt('Số hiệu:', license.licenseNumber);
-                if (newNumber === null) return;
-
-                const newDescription = prompt('Mô tả:', license.description || '');
-                if (newDescription === null) return;
-
-                // Update license
-                const data = {
-                    licenseName: newName.trim(),
-                    licenseType: newType.trim(),
-                    licenseNumber: newNumber.trim(),
-                    description: newDescription.trim()
-                };
-
-                fetch(`/seller/licenses/update/${licenseId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            showNotification('✅ Đã cập nhật license!', 'success');
-                            loadLicenses();
-                        } else {
-                            alert('❌ Lỗi: ' + (result.error || 'Không thể cập nhật'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error updating license:', error);
-                        alert('❌ Có lỗi xảy ra khi cập nhật!');
-                    });
-            });
-    }
-
-    // Delete license
-    function deleteLicense(licenseId) {
-        if (!confirm('⚠️ Bạn có chắc chắn muốn xóa license này?')) {
+    // Remove license from category
+    function removeLicenseFromCategory(licenseId) {
+        if (!currentCategoryId) {
+            alert('⚠️ Vui lòng chọn danh mục trước!');
             return;
         }
 
-        fetch(`/seller/licenses/delete/${licenseId}`, {
+        if (!confirm('Bạn có chắc muốn xóa license này khỏi danh mục?')) {
+            return;
+        }
+
+        fetch(`/seller/categories/api/licenses/remove?categoryId=${currentCategoryId}&licenseId=${licenseId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -2601,17 +2640,18 @@
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    showNotification('✅ Đã xóa license!', 'success');
+                    showNotification('✅ Đã xóa license khỏi danh mục!', 'success');
                     loadLicenses();
                 } else {
                     alert('❌ Lỗi: ' + (result.error || 'Không thể xóa license'));
                 }
             })
             .catch(error => {
-                console.error('Error deleting license:', error);
-                alert('❌ Có lỗi xảy ra khi xóa!');
+                console.error('Error removing license:', error);
+                alert('❌ Có lỗi xảy ra!');
             });
     }
+
 
     // Update license icon preview
     function updateLicenseIconPreview(mode) {

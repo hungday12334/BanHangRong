@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Đánh giá - Bán Hàng Rong</title>
+    <title>Review Management - Ban Hang Rong</title>
     <link rel="stylesheet" href="/css/style.min.css">
     <link rel="stylesheet" href="/css/seller-dashboard.css">
 </head>
@@ -25,7 +25,7 @@
                      data-logo-light="/img/kua654ms.png" data-logo-dark="/img/white.png" />
             </div>
         </div>
-        <div class="load-text" data-loader-text>Đang khởi tạo...</div>
+        <div class="load-text" data-loader-text>Initializing...</div>
         <div class="progress-wrap">
             <div class="progress-bar" data-loader-progress></div>
         </div>
@@ -42,27 +42,27 @@
         <!-- Dashboard Header -->
         <header class="title" data-block="dashboard-header">
             <span class="accent"></span>
-            <h1>Quản lý Đánh giá & Phản hồi</h1>
+            <h1>Review & Response Management</h1>
             <span class="chip">Seller ID: <b id="sellerId" th:text="${sellerId}"></b></span>
         </header>
 
         <!-- KPI Cards - Clickable Filters -->
         <section class="grid kpi" data-block="kpi">
             <a href="#" class="card filter-card" data-filter="all" th:classappend="${filterStatus == null} ? 'active' : ''">
-                <div class="label">Tổng đánh giá</div>
+                <div class="label">Total Reviews</div>
                 <div class="value"><span data-count th:attr="data-count=${totalCount}" th:text="${totalCount}">0</span></div>
-                <div class="delta pill">Tất cả đánh giá nhận được</div>
+                <div class="delta pill">All reviews received</div>
                 <div class="orb one"></div><div class="orb two"></div>
             </a>
             <a href="#" class="card filter-card" data-filter="unanswered" th:classappend="${filterStatus == 'unanswered'} ? 'active' : ''">
-                <div class="label">Chờ phản hồi</div>
+                <div class="label">Pending Response</div>
                 <div class="value"><span data-count th:attr="data-count=${unansweredCount}" th:text="${unansweredCount}">0</span></div>
-                <div class="delta pill warn">Cần xử lý ngay</div>
+                <div class="delta pill warn">Need immediate action</div>
             </a>
             <a href="#" class="card filter-card" data-filter="answered" th:classappend="${filterStatus == 'answered'} ? 'active' : ''">
-                <div class="label">Đã phản hồi</div>
+                <div class="label">Responded</div>
                 <div class="value"><span data-count th:attr="data-count=${answeredCount}" th:text="${answeredCount}">0</span></div>
-                <div class="delta pill good">Đã hoàn thành</div>
+                <div class="delta pill good">Completed</div>
             </a>
         </section>
 
@@ -71,34 +71,49 @@
             <div class="card-body">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
-                        <i class="ti ti-filter"></i> Bộ lọc nâng cao
+                        <i class="ti ti-filter"></i> Advanced Filters
                     </h3>
                     <button class="btn" id="toggleFilters" style="padding: 8px 16px;">
-                        <i class="ti ti-chevron-down"></i> <span>Hiện</span>
+                        <i class="ti ti-chevron-down"></i> <span>Show</span>
                     </button>
                 </div>
 
                 <form id="filterForm" style="display: none;">
                     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                        <!-- Rating Filter -->
+                        <!-- Rating From -->
                         <div>
                             <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                <i class="ti ti-star"></i> Đánh giá
+                                <i class="ti ti-star"></i> Rating From
                             </label>
-                            <select name="rating" class="form-control" th:value="${filterRating}">
-                                <option value="">Tất cả rating</option>
-                                <option value="5" th:selected="${filterRating == 5}">⭐⭐⭐⭐⭐ (5 sao)</option>
-                                <option value="4" th:selected="${filterRating == 4}">⭐⭐⭐⭐ (4 sao)</option>
-                                <option value="3" th:selected="${filterRating == 3}">⭐⭐⭐ (3 sao)</option>
-                                <option value="2" th:selected="${filterRating == 2}">⭐⭐ (2 sao)</option>
-                                <option value="1" th:selected="${filterRating == 1}">⭐ (1 sao)</option>
+                            <select name="ratingFrom" class="form-control" th:value="${filterRatingFrom}">
+                                <option value="">Any</option>
+                                <option value="1" th:selected="${filterRatingFrom == 1}">⭐ 1 star</option>
+                                <option value="2" th:selected="${filterRatingFrom == 2}">⭐⭐ 2 stars</option>
+                                <option value="3" th:selected="${filterRatingFrom == 3}">⭐⭐⭐ 3 stars</option>
+                                <option value="4" th:selected="${filterRatingFrom == 4}">⭐⭐⭐⭐ 4 stars</option>
+                                <option value="5" th:selected="${filterRatingFrom == 5}">⭐⭐⭐⭐⭐ 5 stars</option>
+                            </select>
+                        </div>
+
+                        <!-- Rating To -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                <i class="ti ti-star"></i> Rating To
+                            </label>
+                            <select name="ratingTo" class="form-control" th:value="${filterRatingTo}">
+                                <option value="">Any</option>
+                                <option value="1" th:selected="${filterRatingTo == 1}">⭐ 1 star</option>
+                                <option value="2" th:selected="${filterRatingTo == 2}">⭐⭐ 2 stars</option>
+                                <option value="3" th:selected="${filterRatingTo == 3}">⭐⭐⭐ 3 stars</option>
+                                <option value="4" th:selected="${filterRatingTo == 4}">⭐⭐⭐⭐ 4 stars</option>
+                                <option value="5" th:selected="${filterRatingTo == 5}">⭐⭐⭐⭐⭐ 5 stars</option>
                             </select>
                         </div>
 
                         <!-- Date From -->
                         <div>
                             <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                <i class="ti ti-calendar"></i> Từ ngày
+                                <i class="ti ti-calendar"></i> From Date
                             </label>
                             <input type="date" name="fromDate" class="form-control" th:value="${filterFromDate}">
                         </div>
@@ -106,7 +121,7 @@
                         <!-- Date To -->
                         <div>
                             <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                <i class="ti ti-calendar"></i> Đến ngày
+                                <i class="ti ti-calendar"></i> To Date
                             </label>
                             <input type="date" name="toDate" class="form-control" th:value="${filterToDate}">
                         </div>
@@ -116,24 +131,24 @@
                             <label style="display: block; margin-bottom: 8px; font-weight: 500;">
                                 <i class="ti ti-package"></i> Product ID
                             </label>
-                            <input type="number" name="productId" class="form-control" placeholder="Nhập Product ID" th:value="${filterProductId}">
+                            <input type="number" name="productId" class="form-control" placeholder="Enter Product ID" th:value="${filterProductId}">
                         </div>
 
-                        <!-- User ID -->
+                        <!-- Customer Name -->
                         <div>
                             <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                                <i class="ti ti-user"></i> User ID
+                                <i class="ti ti-user"></i> Customer Name
                             </label>
-                            <input type="number" name="userId" class="form-control" placeholder="Nhập User ID" th:value="${filterUserId}">
+                            <input type="text" name="customerName" class="form-control" placeholder="Enter customer name" th:value="${filterCustomerName}">
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-top: 16px;">
                         <button type="submit" class="btn primary">
-                            <i class="ti ti-search"></i> Áp dụng bộ lọc
+                            <i class="ti ti-search"></i> Apply filters
                         </button>
                         <button type="button" class="btn" id="clearFilters">
-                            <i class="ti ti-x"></i> Xóa bộ lọc
+                            <i class="ti ti-x"></i> Clear filters
                         </button>
                     </div>
                 </form>
@@ -141,22 +156,30 @@
         </div>
 
         <!-- Filter Status Display -->
-        <div th:if="${filterStatus != null || filterRating != null || filterFromDate != null || filterToDate != null || filterProductId != null || filterUserId != null}"
+        <div th:if="${filterStatus != null || filterRatingFrom != null || filterRatingTo != null || filterFromDate != null || filterToDate != null || filterProductId != null || filterCustomerName != null}"
              class="card" style="margin-bottom: 16px; background: color-mix(in oklab, var(--accent) 8%, var(--bg-elev));">
             <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                     <i class="ti ti-filter" style="font-size: 20px;"></i>
-                    <span style="font-weight: 500;">Đang lọc:</span>
-                    <span th:if="${filterStatus == 'unanswered'}" class="badge bg-warning">Chờ phản hồi</span>
-                    <span th:if="${filterStatus == 'answered'}" class="badge bg-success">Đã phản hồi</span>
-                    <span th:if="${filterRating != null}" class="badge">Rating: <span th:text="${filterRating}">5</span>⭐</span>
-                    <span th:if="${filterFromDate != null}" class="badge">Từ: <span th:text="${filterFromDate}">date</span></span>
-                    <span th:if="${filterToDate != null}" class="badge">Đến: <span th:text="${filterToDate}">date</span></span>
+                    <span style="font-weight: 500;">Active filters:</span>
+                    <span th:if="${filterStatus == 'unanswered'}" class="badge bg-warning">Pending Response</span>
+                    <span th:if="${filterStatus == 'answered'}" class="badge bg-success">Responded</span>
+                    <span th:if="${filterRatingFrom != null || filterRatingTo != null}" class="badge">
+                        Rating:
+                        <span th:if="${filterRatingFrom != null}" th:text="${filterRatingFrom}">1</span>
+                        <span th:if="${filterRatingFrom == null}">1</span>
+                        ⭐ -
+                        <span th:if="${filterRatingTo != null}" th:text="${filterRatingTo}">5</span>
+                        <span th:if="${filterRatingTo == null}">5</span>
+                        ⭐
+                    </span>
+                    <span th:if="${filterFromDate != null}" class="badge">From: <span th:text="${filterFromDate}">date</span></span>
+                    <span th:if="${filterToDate != null}" class="badge">To: <span th:text="${filterToDate}">date</span></span>
                     <span th:if="${filterProductId != null}" class="badge">Product ID: <span th:text="${filterProductId}">0</span></span>
-                    <span th:if="${filterUserId != null}" class="badge">User ID: <span th:text="${filterUserId}">0</span></span>
+                    <span th:if="${filterCustomerName != null}" class="badge">Customer: <span th:text="${filterCustomerName}">name</span></span>
                 </div>
                 <a href="/seller/reviews" class="btn" style="padding: 8px 16px;">
-                    <i class="ti ti-x"></i> Xóa filter
+                    <i class="ti ti-x"></i> Clear filters
                 </a>
             </div>
         </div>
@@ -165,17 +188,17 @@
         <div id="reviewsList">
             <div th:if="${reviews.isEmpty()}" class="empty-state card" style="text-align: center; padding: 60px 20px;">
                 <i class="ti ti-search-off" style="font-size: 64px; opacity: 0.3; margin-bottom: 16px;"></i>
-                <h4>Không tìm thấy đánh giá nào</h4>
+                <h4>No reviews found</h4>
                 <p style="color: var(--muted); margin-bottom: 16px;">
                     <span th:if="${filterStatus != null || filterRating != null}">
-                        Thử thay đổi bộ lọc để xem thêm kết quả
+                        Try adjusting your filters to see more results
                     </span>
                     <span th:if="${filterStatus == null && filterRating == null}">
-                        Chưa có đánh giá nào cho sản phẩm của bạn
+                        No reviews yet for your products
                     </span>
                 </p>
                 <a href="/seller/reviews" class="btn primary">
-                    <i class="ti ti-refresh"></i> Xem tất cả
+                    <i class="ti ti-refresh"></i> View all
                 </a>
             </div>
 
@@ -192,24 +215,24 @@
                                 <i th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" class="ti ti-star"></i>
                             </div>
                         </div>
-                        <span th:if="${review.sellerResponse != null}" class="badge bg-success">Đã phản hồi</span>
-                        <span th:if="${review.sellerResponse == null}" class="badge bg-warning">Chờ phản hồi</span>
+                        <span th:if="${review.sellerResponse != null}" class="badge bg-success">Responded</span>
+                        <span th:if="${review.sellerResponse == null}" class="badge bg-warning">Pending Response</span>
                     </div>
 
                     <div style="margin-bottom: 12px; line-height: 1.5;" th:text="${review.comment}">Comment content</div>
 
                     <div style="color: var(--muted); font-size: 12px; margin-bottom: 12px;">
-                        User ID: <span th:text="${review.userId}">User</span> •
+                        <strong th:text="${review.userFullName != null ? review.userFullName : 'Anonymous'}">Customer Name</strong> •
                         <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">Date</span>
                     </div>
 
                     <!-- Seller response -->
                     <div th:if="${review.sellerResponse != null}"
                          style="background: color-mix(in oklab, var(--bg-soft) 96%, transparent); border-left: 4px solid var(--accent); padding: 12px; border-radius: 0 8px 8px 0; margin-top: 12px;">
-                        <strong>Phản hồi của bạn:</strong>
+                        <strong>Your response:</strong>
                         <p style="margin: 8px 0;" th:text="${review.sellerResponse}">Seller response</p>
                         <div style="color: var(--muted); font-size: 12px;" th:if="${review.sellerResponseAt != null}">
-                            Phản hồi lúc: <span th:text="${#temporals.format(review.sellerResponseAt, 'dd/MM/yyyy HH:mm')}">Response date</span>
+                            Responded at: <span th:text="${#temporals.format(review.sellerResponseAt, 'dd/MM/yyyy HH:mm')}">Response date</span>
                         </div>
                     </div>
 
@@ -219,11 +242,11 @@
                           class="response-form"
                           style="margin-top: 12px;">
                         <div style="margin-bottom: 12px;">
-                            <textarea placeholder="Nhập phản hồi của bạn..." rows="3" maxlength="1000" required
+                            <textarea placeholder="Enter your response..." rows="3" maxlength="1000" required
                                       style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--bg) 94%, transparent); color: var(--text); resize: vertical; font-family: inherit;"></textarea>
                         </div>
                         <button class="btn primary" type="submit" style="margin-top: 8px;">
-                            <i class="ti ti-send"></i> Gửi phản hồi
+                            <i class="ti ti-send"></i> Send response
                         </button>
                     </form>
                 </div>
@@ -233,7 +256,7 @@
             <div th:if="${reviewsPage.totalPages > 1}" class="pagination-wrapper">
                 <!-- Previous Button -->
                 <a class="pagination-btn prev-btn" th:classappend="${reviewsPage.first} ? 'disabled' : ''">
-                    <i class="ti ti-chevron-left"></i> Trước
+                    <i class="ti ti-chevron-left"></i> Previous
                 </a>
 
                 <!-- Page Numbers -->
@@ -252,12 +275,12 @@
 
                 <!-- Next Button -->
                 <a class="pagination-btn next-btn" th:classappend="${reviewsPage.last} ? 'disabled' : ''">
-                    Sau <i class="ti ti-chevron-right"></i>
+                    Next <i class="ti ti-chevron-right"></i>
                 </a>
 
                 <span style="padding: 8px 12px; color: var(--muted); font-size: 14px;">
-                    Trang <b th:text="${reviewsPage.number + 1}">1</b> / <b th:text="${reviewsPage.totalPages}">1</b>
-                    (<span th:text="${reviewsPage.totalElements}">0</span> đánh giá)
+                    Page <b th:text="${reviewsPage.number + 1}">1</b> / <b th:text="${reviewsPage.totalPages}">1</b>
+                    (<span th:text="${reviewsPage.totalElements}">0</span> reviews)
                 </span>
             </div>
         </div>
@@ -424,10 +447,10 @@
 
                 if (isHidden) {
                     icon.className = 'ti ti-chevron-up';
-                    text.textContent = 'Ẩn';
+                    text.textContent = 'Hide';
                 } else {
                     icon.className = 'ti ti-chevron-down';
-                    text.textContent = 'Hiện';
+                    text.textContent = 'Show';
                 }
             });
         }
@@ -436,6 +459,25 @@
         if (filterForm) {
             filterForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+
+                // Validate rating range
+                const ratingFromSelect = this.querySelector('select[name="ratingFrom"]');
+                const ratingToSelect = this.querySelector('select[name="ratingTo"]');
+
+                if (ratingFromSelect.value && ratingToSelect.value) {
+                    const ratingFrom = parseInt(ratingFromSelect.value);
+                    const ratingTo = parseInt(ratingToSelect.value);
+
+                    if (ratingFrom > ratingTo) {
+                        if (typeof showToast === 'function') {
+                            showToast('Rating From must be less than or equal to Rating To', 'error', 3000);
+                        } else {
+                            alert('Rating From must be less than or equal to Rating To');
+                        }
+                        ratingFromSelect.focus();
+                        return;
+                    }
+                }
 
                 // Validate date range
                 const fromDateInput = this.querySelector('input[name="fromDate"]');
@@ -447,9 +489,9 @@
 
                     if (fromDate > toDate) {
                         if (typeof showToast === 'function') {
-                            showToast('Từ ngày phải nhỏ hơn hoặc bằng Đến ngày', 'error', 3000);
+                            showToast('From date must be less than or equal to To date', 'error', 3000);
                         } else {
-                            alert('Từ ngày phải nhỏ hơn hoặc bằng Đến ngày');
+                            alert('From date must be less than or equal to To date');
                         }
                         fromDateInput.focus();
                         return;
@@ -501,9 +543,9 @@
 
                 if (!response) {
                     if (typeof showToast === 'function') {
-                        showToast('Vui lòng nhập nội dung phản hồi', 'error', 3000);
+                        showToast('Please enter response content', 'error', 3000);
                     } else {
-                        alert('Vui lòng nhập nội dung phản hồi');
+                        alert('Please enter response content');
                     }
                     return;
                 }
@@ -511,7 +553,7 @@
                 // Show loading state
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="ti ti-loader"></i> Đang gửi...';
+                submitBtn.innerHTML = '<i class="ti ti-loader"></i> Sending...';
                 submitBtn.disabled = true;
 
                 // API call to submit response
@@ -528,9 +570,9 @@
                 .then(data => {
                     if (data.success) {
                         if (typeof showToast === 'function') {
-                            showToast('Đã gửi phản hồi thành công!', 'success', 3000);
+                            showToast('Response sent successfully!', 'success', 3000);
                         } else {
-                            alert('Đã gửi phản hồi thành công!');
+                            alert('Response sent successfully!');
                         }
 
                         // Update UI without reloading
@@ -538,7 +580,7 @@
                         const badge = reviewCard.querySelector('.badge');
 
                         if (badge) {
-                            badge.textContent = 'Đã phản hồi';
+                            badge.textContent = 'Responded';
                             badge.className = 'badge bg-success';
                         }
 
@@ -558,10 +600,10 @@
                         };
 
                         responseBox.innerHTML = `
-                            <strong>Phản hồi của bạn:</strong>
+                            <strong>Your response:</strong>
                             <p style="margin: 8px 0;">${escapeHtml(response)}</p>
                             <div style="color: var(--muted); font-size: 12px;">
-                                Phản hồi lúc: ${new Date().toLocaleString('vi-VN')}
+                                Responded at: ${new Date().toLocaleString('en-US')}
                             </div>
                         `;
 
@@ -574,9 +616,9 @@
 
                     } else {
                         if (typeof showToast === 'function') {
-                            showToast('Lỗi: ' + data.message, 'error', 4000);
+                            showToast('Error: ' + data.message, 'error', 4000);
                         } else {
-                            alert('Lỗi: ' + data.message);
+                            alert('Error: ' + data.message);
                         }
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
@@ -585,9 +627,9 @@
                 .catch(error => {
                     console.error('Error:', error);
                     if (typeof showToast === 'function') {
-                        showToast('Lỗi gửi phản hồi', 'error', 4000);
+                        showToast('Failed to send response', 'error', 4000);
                     } else {
-                        alert('Lỗi gửi phản hồi');
+                        alert('Failed to send response');
                     }
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;

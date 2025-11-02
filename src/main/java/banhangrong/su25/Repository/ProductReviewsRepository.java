@@ -37,24 +37,28 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
     @Query("SELECT COUNT(pr) FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId")
     Long countBySellerId(@Param("sellerId") Long sellerId);
 
-    // Filter reviews với nhiều điều kiện
-    @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId " +
+    // Filter reviews với nhiều điều kiện (updated with rating range and customer name)
+    @Query("SELECT pr FROM ProductReviews pr " +
+           "JOIN Products p ON pr.productId = p.productId " +
+           "LEFT JOIN Users u ON pr.userId = u.userId " +
            "WHERE p.sellerId = :sellerId " +
            "AND (:status IS NULL OR " +
            "     (:status = 'unanswered' AND pr.sellerResponse IS NULL) OR " +
            "     (:status = 'answered' AND pr.sellerResponse IS NOT NULL)) " +
-           "AND (:rating IS NULL OR pr.rating = :rating) " +
+           "AND (:ratingFrom IS NULL OR pr.rating >= :ratingFrom) " +
+           "AND (:ratingTo IS NULL OR pr.rating <= :ratingTo) " +
            "AND (:fromDate IS NULL OR pr.createdAt >= CAST(:fromDate AS timestamp)) " +
            "AND (:toDate IS NULL OR pr.createdAt <= CAST(:toDate AS timestamp)) " +
            "AND (:productId IS NULL OR pr.productId = :productId) " +
-           "AND (:userId IS NULL OR pr.userId = :userId)")
+           "AND (:customerName IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :customerName, '%')) OR LOWER(u.username) LIKE LOWER(CONCAT('%', :customerName, '%')))")
     Page<ProductReviews> findByFilters(@Param("sellerId") Long sellerId,
                                         @Param("status") String status,
-                                        @Param("rating") Integer rating,
+                                        @Param("ratingFrom") Integer ratingFrom,
+                                        @Param("ratingTo") Integer ratingTo,
                                         @Param("fromDate") String fromDate,
                                         @Param("toDate") String toDate,
                                         @Param("productId") Long productId,
-                                        @Param("userId") Long userId,
+                                        @Param("customerName") String customerName,
                                         Pageable pageable);
 
     // Tìm review theo productId

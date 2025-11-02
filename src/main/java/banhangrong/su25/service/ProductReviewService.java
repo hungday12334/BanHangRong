@@ -1,7 +1,9 @@
 package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.ProductReviews;
+import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ProductReviewsRepository;
+import banhangrong.su25.Repository.UsersRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,11 @@ import java.util.Optional;
 public class ProductReviewService {
 
     private final ProductReviewsRepository productReviewsRepository;
+    private final UsersRepository usersRepository;
 
-    public ProductReviewService(ProductReviewsRepository productReviewsRepository) {
+    public ProductReviewService(ProductReviewsRepository productReviewsRepository, UsersRepository usersRepository) {
         this.productReviewsRepository = productReviewsRepository;
+        this.usersRepository = usersRepository;
     }
 
     public List<ProductReviews> getSellerReviews(Long sellerId) {
@@ -45,13 +49,32 @@ public class ProductReviewService {
     }
 
     /**
-     * Filter reviews với nhiều tiêu chí
+     * Filter reviews with various criteria and populate user full names
      */
-    public Page<ProductReviews> getFilteredReviews(Long sellerId, String status, Integer rating,
+    public Page<ProductReviews> getFilteredReviews(Long sellerId, String status, Integer ratingFrom, Integer ratingTo,
                                                      String fromDate, String toDate, Long productId,
-                                                     Long userId, Pageable pageable) {
-        return productReviewsRepository.findByFilters(sellerId, status, rating, fromDate, toDate,
-                                                       productId, userId, pageable);
+                                                     String customerName, Pageable pageable) {
+        Page<ProductReviews> reviewsPage = productReviewsRepository.findByFilters(
+            sellerId, status, ratingFrom, ratingTo, fromDate, toDate, productId, customerName, pageable
+        );
+
+        // Populate user full names for each review
+        reviewsPage.forEach(this::populateUserFullName);
+
+        return reviewsPage;
+    }
+
+    /**
+     * Populate user full name for a review
+     */
+    private void populateUserFullName(ProductReviews review) {
+        if (review.getUserId() != null) {
+            Optional<Users> userOpt = usersRepository.findById(review.getUserId());
+            userOpt.ifPresent(user -> {
+                review.setUserFullName(user.getFullName() != null ? user.getFullName() : user.getUsername());
+                review.setUsername(user.getUsername());
+            });
+        }
     }
 
     public Optional<ProductReviews> getReviewById(Long reviewId) {
