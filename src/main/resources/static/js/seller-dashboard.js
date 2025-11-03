@@ -60,7 +60,7 @@
                 plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
                 scales: {
                     x: { display: true, grid: { display: false }, ticks: { color: '#a8b0d3', maxTicksLimit: 8 } },
-                    y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => `$${Number(v).toLocaleString('en-US')}` } }
+                    y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => `${Number(v).toLocaleString('vi-VN')} đ` } }
                 },
                 elements: { line: { cubicInterpolationMode: 'monotone' } }
             }
@@ -802,7 +802,7 @@
                 document.getElementById('om_userId').textContent = user.username || (user.userId ? `User #${user.userId}` : '');
                 // In seller view, show sellerAmount if present; fallback to totalAmount
                 const amtVal = (o.sellerAmount != null ? o.sellerAmount : o.totalAmount);
-                const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const amt = (amtVal == null) ? '' : `${Number(amtVal).toLocaleString('vi-VN')} đ`;
                 document.getElementById('om_totalAmount').textContent = amt;
                 document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
                 const items = Array.isArray(data.items) ? data.items : (data.items && data.items.content ? data.items.content : []);
@@ -844,8 +844,8 @@
                 let statusHtml = '<span class="badge">Pending</span>';
                 if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
                 else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-                const price = (p.price ?? 0).toLocaleString('en-US');
-                tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
+                const price = (p.price ?? 0).toLocaleString('vi-VN');
+                tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
                 tbody.appendChild(tr);
             });
             if (counter) counter.textContent = list.length;
@@ -948,6 +948,7 @@
             '#profile': 'profilePanel',
             '#orders': 'ordersPanel',
             '#keys': 'keysPanel',
+            '#check-key': 'checkKeyPanel',
             '#products': 'productsPanel',
             '#gen-keys': 'generateKeysPanel',
             '#withdraw': 'withdrawPanel',
@@ -1157,6 +1158,212 @@
                 renderWithdrawUI(data);
             } catch(err) { showToast(String(err), 'error'); }
         });
+
+        // ===== Check Key panel logic =====
+        (function initCheckKeyPanel(){
+            const panel = document.getElementById('checkKeyPanel');
+            if (!panel) return;
+            const input = document.getElementById('ck_key');
+            const btnCheck = document.getElementById('ck_btnCheck');
+            const btnReset = document.getElementById('ck_btnReset');
+            const detailsBox = document.getElementById('ck_details');
+            const resultWrap = document.getElementById('ck_result');
+            const helper = document.getElementById('ck_helper');
+            const historyBody = document.getElementById('ck_history');
+            const historyPager = document.getElementById('ck_history_pager');
+            const productBox = document.getElementById('ck_product_display');
+
+            const dev = {
+                id: document.getElementById('ck_device_id'),
+                host: document.getElementById('ck_device_host'),
+                platform: document.getElementById('ck_device_platform'),
+                cpu: document.getElementById('ck_device_cpu'),
+                cores: document.getElementById('ck_device_cores'),
+                memory: document.getElementById('ck_device_memory'),
+                path: document.getElementById('ck_device_path'),
+                lastUsed: document.getElementById('ck_device_lastUsed'),
+                activated: document.getElementById('ck_device_activated')
+            };
+
+            const sellerIdEl = document.getElementById('sellerId');
+            const userIdEl = document.getElementById('userId');
+            const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+
+            let currentKey = '';
+            let lastLicenseId = null;
+
+            function setDevicePath(fullUrl, maxLen = 48){
+                try{
+                    const a = dev.path;
+                    if(!a) return;
+                    if(!fullUrl){ a.href = '#'; a.title = ''; a.textContent = '-'; return; }
+                    a.href = fullUrl; a.title = fullUrl;
+                    if(fullUrl.length <= maxLen){ a.textContent = fullUrl; return; }
+                    const keep = Math.max(8, Math.floor((maxLen - 3) / 2));
+                    const start = fullUrl.slice(0, keep);
+                    const end = fullUrl.slice(fullUrl.length - keep);
+                    a.textContent = start + '...' + end;
+                }catch(e){}
+            }
+
+            function renderDetails(d){
+                const safe = (v, def='-') => (v === null || v === undefined || String(v).trim?.() === '') ? def : v;
+                const active = !!(d.isActive ?? d.active);
+                const statusBadge = active ? '<span class="pill good">Active</span>' : '<span class="badge">Inactive</span>';
+                const price = (d.price ?? d.productPrice);
+                const priceHtml = (price != null) ? `${Number(price).toLocaleString('vi-VN')} đ` : '-';
+                const expire = d.expireDate || d.expire || d.expirationDate;
+                const activatedAt = d.activationDate || d.activatedAt;
+                detailsBox.innerHTML = `
+                    <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:8px;">
+                      <div><div class="label">License ID</div><div class="value">${safe(d.licenseId)}</div></div>
+                      <div><div class="label">Status</div><div class="value">${statusBadge}</div></div>
+                      <div style="grid-column:1/span 2"><div class="label">Key</div><div class="value" style="font-family:monospace;word-break:break-all;">${safe(d.licenseKey)}</div></div>
+                      <div><div class="label">Product</div><div class="value">${safe(d.productName)}</div></div>
+                      <div><div class="label">Price</div><div class="value">${priceHtml}</div></div>
+                      <div><div class="label">Order</div><div class="value">${safe(d.orderId)}</div></div>
+                      <div><div class="label">User</div><div class="value">${safe(d.username || d.userName)}</div></div>
+                      <div><div class="label">Expire</div><div class="value">${safe(expire)}</div></div>
+                      <div><div class="label">Activated</div><div class="value">${safe(activatedAt)}</div></div>
+                    </div>`;
+                // Product card (if available)
+                const img = d.productImage || d.imageUrl;
+                productBox.innerHTML = '';
+                if (d.productId || d.productName || img) {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.style.padding = '10px';
+                    div.innerHTML = `
+                        <div style="font-weight:700;margin-bottom:6px;">Product</div>
+                        <div class="thumb" style="width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:10px;background:#0e1430;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
+                          ${img ? `<img src="${img}" alt="${safe(d.productName,'Product')}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;" />` : '<span class="footer-note">No image</span>'}
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                           <div style="font-weight:600;">${safe(d.productName,'-')}</div>
+                           <div class="footer-note">ID: ${safe(d.productId)}</div>
+                           <div style="color:#7c9eff;font-weight:700;">${priceHtml}</div>
+                        </div>`;
+                    productBox.appendChild(div);
+                }
+                // Device
+                dev.id.textContent = safe(d.deviceIdentifier || d.deviceId);
+                dev.host.textContent = safe(d.deviceHost || d.hostname);
+                dev.platform.textContent = safe(d.devicePlatform || d.platform);
+                dev.cpu.textContent = safe(d.deviceCpu || d.cpu);
+                dev.cores.textContent = safe(d.deviceCores || d.cores);
+                dev.memory.textContent = safe(d.deviceMemory || d.memory);
+                setDevicePath(d.devicePath || d.path);
+                dev.lastUsed.textContent = safe(d.lastUsedAt || d.lastUsed);
+                dev.activated.textContent = safe(activatedAt);
+            }
+
+            async function fetchCheck(key, page=0, size=10){
+                // Prefer seller-scoped endpoint if sellerId available
+                const base = sellerId ? `/api/seller/${sellerId}/licenses/check` : `/api/licenses/check`;
+                const url = new URL(base, window.location.origin);
+                url.searchParams.set('key', key);
+                url.searchParams.set('page', page);
+                url.searchParams.set('size', size);
+                const res = await fetch(url.toString());
+                if (!res.ok) throw new Error(await res.text().catch(()=> 'Check failed'));
+                return await res.json();
+            }
+
+            function renderHistory(hist){
+                if (!historyBody) return;
+                historyBody.innerHTML = '';
+                const list = hist && Array.isArray(hist.content) ? hist.content : (Array.isArray(hist) ? hist : []);
+                if (!list.length) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = '<td colspan="5" class="footer-note">No history.</td>';
+                    historyBody.appendChild(tr);
+                } else {
+                    list.forEach(h => {
+                        const tr = document.createElement('tr');
+                        const t = h.time || h.createdAt || h.timestamp || '';
+                        const action = h.action || h.type || '-';
+                        const user = h.username || (h.userId ? ('#'+h.userId) : '-');
+                        const ip = h.ip || h.ipAddress || '-';
+                        const device = h.deviceIdentifier || h.device || '-';
+                        tr.innerHTML = `<td>${t}</td><td>${action}</td><td>${user}</td><td>${ip}</td><td>${device}</td>`;
+                        historyBody.appendChild(tr);
+                    });
+                }
+                // pager
+                const total = typeof hist?.totalPages === 'number' ? hist.totalPages : 1;
+                const number = typeof hist?.number === 'number' ? hist.number : 0;
+                historyPager.innerHTML = '';
+                if (total > 1){
+                    const mk=(label,p,dis,cur)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=dis; if(cur) b.setAttribute('aria-current','page'); b.addEventListener('click',()=> doCheck(currentKey, p)); return b; };
+                    historyPager.appendChild(mk('«', Math.max(0, number-1), number===0,false));
+                    const w=10; let start=0; if(total>w){ start = Math.max(0, number-(w-1)); if (start > total-w) start = total - w; }
+                    const end=Math.min(total-1, start+w-1);
+                    for (let i=start;i<=end;i++){ const btn=mk(String(i+1), i, false, i===number); btn.classList.add('page-btn'); if(i===number) btn.classList.add('active'); historyPager.appendChild(btn); }
+                    historyPager.appendChild(mk('»', Math.min(total-1, number+1), number===total-1,false));
+                }
+            }
+
+            async function doCheck(key, page=0){
+                if (!key || !key.trim()) { showToast && showToast('Vui lòng nhập key', 'error'); return; }
+                currentKey = key.trim();
+                try {
+                    // Loading indicator
+                    if (detailsBox) detailsBox.innerHTML = '<div class="panel-loading-overlay" style="position:relative;inset:auto;"><div class="mini-spinner"></div><div>Checking...</div></div>';
+                    const data = await fetchCheck(currentKey, page, 10);
+                    const lic = data.license || data; // support plain object
+                    lastLicenseId = lic.licenseId ?? lic.id ?? null;
+                    renderDetails({
+                        licenseId: lic.licenseId ?? lic.id,
+                        licenseKey: lic.licenseKey ?? currentKey,
+                        isActive: lic.isActive ?? lic.active,
+                        expireDate: lic.expireDate ?? lic.expirationDate,
+                        activationDate: lic.activationDate ?? lic.activatedAt,
+                        productId: lic.productId ?? data.productId,
+                        productName: lic.productName ?? data.productName,
+                        productPrice: lic.productPrice ?? data.productPrice,
+                        productImage: lic.productImage || data.productImage,
+                        orderId: lic.orderId ?? data.orderId,
+                        username: lic.username ?? data.username,
+                        deviceIdentifier: lic.deviceIdentifier ?? data.deviceIdentifier,
+                        deviceHost: lic.deviceHost ?? data.deviceHost,
+                        devicePlatform: lic.devicePlatform ?? data.devicePlatform,
+                        deviceCpu: lic.deviceCpu ?? data.deviceCpu,
+                        deviceCores: lic.deviceCores ?? data.deviceCores,
+                        deviceMemory: lic.deviceMemory ?? data.deviceMemory,
+                        devicePath: lic.devicePath ?? data.devicePath,
+                        lastUsed: lic.lastUsedAt ?? data.lastUsedAt
+                    });
+                    resultWrap.style.display = '';
+                    helper.style.display = 'none';
+                    const hist = data.history || data.logs || null;
+                    if (hist) {
+                        document.getElementById('ck_history_wrap').style.display = '';
+                        renderHistory(hist);
+                    } else {
+                        document.getElementById('ck_history_wrap').style.display = 'none';
+                    }
+                    showToast && showToast('Đã kiểm tra key', 'success', { duration: 1500 });
+                } catch (e) {
+                    if (detailsBox) detailsBox.innerHTML = '<div class="footer-note">Không tìm thấy hoặc lỗi kiểm tra.</div>';
+                    resultWrap.style.display = '';
+                    helper.style.display = '';
+                    document.getElementById('ck_history_wrap').style.display = 'none';
+                    showToast && showToast(String(e.message || e), 'error');
+                }
+            }
+
+            btnCheck?.addEventListener('click', () => doCheck(input.value));
+            btnReset?.addEventListener('click', () => { input.value=''; resultWrap.style.display='none'; helper.style.display=''; historyPager.innerHTML=''; historyBody.innerHTML=''; productBox.innerHTML=''; });
+            input?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); doCheck(input.value); } });
+
+            // auto-check when navigating with hash containing key param: #check-key=XXXX
+            try {
+                if (window.location.hash.startsWith('#check-key=')){
+                    const k = decodeURIComponent(window.location.hash.split('=')[1]||'');
+                    if (k) { input.value = k; setTimeout(()=> doCheck(k), 100); }
+                }
+            } catch(_){}
+        })();
 
         // ===== Bank account modal =====
         function openBankAccountModal() {
@@ -1386,7 +1593,7 @@
                         if (data && data.type === 'new-order' && data.data) {
                             const id = data.data.orderId;
                             const amt = data.data.totalAmount;
-                            const formatted = (amt == null) ? '' : ('$' + Number(amt).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                            const formatted = (amt == null) ? '' : (`${Number(amt).toLocaleString('vi-VN')} đ`);
                             showToast(`New order #${id} ${formatted}`, 'success');
                             // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
                             // Could implement incremental prepend instead of reload; keep simple first.
@@ -1443,7 +1650,7 @@
                     `<td>${o.createdAt ? o.createdAt.replace('T',' ') : ''}</td>` +
                     `<td>${o.buyerUsername ? o.buyerUsername : (o.buyerUserId ? ('User #' + o.buyerUserId) : '')}</td>` +
                     `<td>${o.sellerItems ?? 0}</td>` +
-                    `<td>$${(o.sellerAmount ?? 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
+                    `<td>${Number(o.sellerAmount ?? 0).toLocaleString('vi-VN')} đ</td>`;
                 tr.className = 'clickable';
                 tr.addEventListener('click', () => { // open seller-scoped order detail
                     const id = o.orderId;
@@ -1689,7 +1896,7 @@
                     let statusHtml = '<span class="badge">Pending</span>';
                     if (st === 'public') statusHtml = '<span class="pill good">Public</span>';
                     else if (st === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-                    const price = (p.price ?? 0).toLocaleString('en-US');
+                    const price = (p.price ?? 0).toLocaleString('vi-VN');
                     const rating = (p.averageRating != null) ? Number(p.averageRating).toFixed(1) : '-';
                     const totalSales = (p.totalSales != null) ? p.totalSales : 0;
                     const img = (p.imageUrl && p.imageUrl.trim().length) ? p.imageUrl : '/img/no-image.png';
@@ -1700,7 +1907,7 @@
             <div class="meta" style="padding:8px 2px;display:flex;flex-direction:column;gap:6px;">
               <div class="line" style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
                 <div class="name" title="${p.name ?? ''}" style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
-                <div class="price" style="color:#7c9eff;font-weight:700;">$${price}</div>
+                <div class="price" style="color:#7c9eff;font-weight:700;">${price} đ</div>
               </div>
               <div class="sub" style="display:flex;gap:10px;font-size:12px;color:#a8b0d3;">
                   <span title="Sold">🛒 ${totalSales}</span>
