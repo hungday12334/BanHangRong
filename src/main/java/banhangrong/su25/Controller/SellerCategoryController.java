@@ -5,8 +5,11 @@ import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.ShopLicenses;
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.CategoriesProducts;
+import banhangrong.su25.Entity.CategoriesProductsId;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.CategoriesProductsRepository;
 import banhangrong.su25.service.CategoryService;
 import banhangrong.su25.service.LicenseManagementService;
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +39,9 @@ public class SellerCategoryController {
 
     @Autowired
     private LicenseManagementService licenseManagementService;
+
+    @Autowired
+    private CategoriesProductsRepository categoriesProductsRepository;
 
     // ========== DEBUG/TEST ENDPOINT ==========
 
@@ -299,6 +305,166 @@ public class SellerCategoryController {
             return ResponseEntity.ok(productData);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ArrayList<>());
+        }
+    }
+
+    // API để lấy tất cả sản phẩm của seller
+    @GetMapping("/api/products/all")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getAllSellerProducts(HttpSession session) {
+        try {
+            // Get current seller from session
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "error", "Chưa đăng nhập"));
+            }
+            Long sellerId = currentUser.getUserId();
+
+            // Get all products of seller
+            List<Products> products = productsRepository.findBySellerId(sellerId);
+
+            List<Map<String, Object>> productData = products.stream().map(product -> {
+                Map<String, Object> data = new HashMap<>();
+                data.put("productId", product.getProductId());
+                data.put("name", product.getName());
+                data.put("sku", "P" + product.getProductId());
+                data.put("price", product.getPrice());
+                data.put("salePrice", product.getSalePrice());
+                data.put("stockQuantity", product.getQuantity());
+                data.put("totalSales", product.getTotalSales() != null ? product.getTotalSales() : 0);
+                data.put("status", product.getStatus());
+
+                // Get categories for this product (many-to-many relationship)
+                try {
+                    List<Categories> categories = categoriesProductsRepository.findCategoriesByProductId(product.getProductId());
+                    if (!categories.isEmpty()) {
+                        // If product has categories, use the first one
+                        Categories firstCategory = categories.get(0);
+                        data.put("categoryId", firstCategory.getCategoryId());
+                        data.put("categoryName", firstCategory.getName());
+                    } else {
+                        data.put("categoryId", null);
+                        data.put("categoryName", null);
+                    }
+                } catch (Exception e) {
+                    data.put("categoryId", null);
+                    data.put("categoryName", null);
+                }
+
+                // Get primary image
+                try {
+                    var images = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(product.getProductId());
+                    if (!images.isEmpty()) {
+                        data.put("imageUrl", images.get(0).getImageUrl());
+                    } else {
+                        data.put("imageUrl", null);
+                    }
+                } catch (Exception e) {
+                    data.put("imageUrl", null);
+                }
+
+                return data;
+            }).toList();
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "products", productData,
+                "count", productData.size()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    // API để gán sản phẩm vào danh mục
+    @PostMapping("/api/products/assign")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> assignProductToCategory(
+            @RequestParam Long productId,
+            @RequestParam Long categoryId,
+            HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "error", "Chưa đăng nhập"));
+            }
+            Long sellerId = currentUser.getUserId();
+
+            // Verify product belongs to seller
+            Products product = productsRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+            if (!product.getSellerId().equals(sellerId)) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "error", "Không có quyền truy cập"));
+            }
+
+            // Verify category exists
+            Categories category = categoryService.getCategoryById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+
+            // Check if relationship already exists
+            CategoriesProductsId id = new CategoriesProductsId(categoryId, productId);
+            if (categoriesProductsRepository.existsById(id)) {
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Sản phẩm đã có trong danh mục này"
+                ));
+            }
+
+            // Create new relationship
+            CategoriesProducts categoryProduct = new CategoriesProducts(category, product);
+            categoriesProductsRepository.save(categoryProduct);
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã gán sản phẩm vào danh mục thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    // API để xóa sản phẩm khỏi danh mục
+    @PostMapping("/api/products/remove")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> removeProductFromCategory(
+            @RequestParam Long productId,
+            @RequestParam(required = false) Long categoryId,
+            HttpSession session) {
+        try {
+            Users currentUser = (Users) session.getAttribute("user");
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "error", "Chưa đăng nhập"));
+            }
+            Long sellerId = currentUser.getUserId();
+
+            // Verify product belongs to seller
+            Products product = productsRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+            if (!product.getSellerId().equals(sellerId)) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "error", "Không có quyền truy cập"));
+            }
+
+            if (categoryId != null) {
+                // Remove from specific category
+                CategoriesProductsId id = new CategoriesProductsId(categoryId, productId);
+                categoriesProductsRepository.deleteById(id);
+            } else {
+                // Remove from all categories
+                List<Categories> categories = categoriesProductsRepository.findCategoriesByProductId(productId);
+                for (Categories category : categories) {
+                    CategoriesProductsId id = new CategoriesProductsId(category.getCategoryId(), productId);
+                    categoriesProductsRepository.deleteById(id);
+                }
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã xóa sản phẩm khỏi danh mục"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
         }
     }
 

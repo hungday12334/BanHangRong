@@ -5,9 +5,58 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update main">
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ANSWER_CURRENT_LICENSES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CATEGORY_PRODUCT_MANAGEMENT_FEATURE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DEBUG_PAGINATION_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EXPLANATION_CURRENT_LICENSES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FILTERS_FIXED.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_CATEGORY_PAGINATION_BUG.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_EYE_ICON_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_PAGINATION_NOT_VISIBLE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PAGINATION_OPTIMIZED_FINAL.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PRODUCTS_PAGINATION_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_FIX_PAGINATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_GUIDE_PAGINATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_TEST_PAGINATION_FINAL.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SIMPLE_PAGINATION_REWRITE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TEST_GUIDE_EYE_ICON.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VISUAL_DIAGRAM_EYE_ICON.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VISUAL_PAGINATION_FIX.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_DIAGRAM.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_FEATURE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_TEST_CHECKLIST.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_LOGIN_REDIRECT_ISSUE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_SELLER_PRODUCT_FILTER.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_SELLER_PROFILE_USER_ID.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_SESSION_LOST.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_WEBSOCKET_ERROR.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE_MANAGEMENT_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE_MANAGEMENT_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_FIX_NOW.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_TEST_SELLER_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/REVIEW_MANAGEMENT_UPDATES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SECURITY_REVIEW_ISOLATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_DEBUG_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_ISSUE_SOLUTION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_THEME_SYNC.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SETUP_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SETUP_ENHANCED_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SETUP_INSTRUCTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TESTING_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/THEME_AWARE_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TRANSLATION_CATEGORY_MANAGEMENT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TRANSLATION_PROFILE_PAGE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TRANSLATION_VERIFICATION_REPORT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VISUAL_DEMO_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VISUAL_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/WEBSOCKET_IMPLEMENTED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -244,7 +293,7 @@
       <workItem from="1762071570533" duration="875000" />
       <workItem from="1762111402526" duration="8323000" />
       <workItem from="1762138370900" duration="473000" />
-      <workItem from="1762151908837" duration="1739000" />
+      <workItem from="1762151908837" duration="11251000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -438,7 +487,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762143655559</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="update main">
+      <option name="closed" value="true" />
+      <created>1762155649476</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1762155649476</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
