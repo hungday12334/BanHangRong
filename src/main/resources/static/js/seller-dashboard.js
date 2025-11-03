@@ -1212,7 +1212,31 @@
                 const statusBadge = active ? '<span class="pill good">Active</span>' : '<span class="badge">Inactive</span>';
                 const price = (d.price ?? d.productPrice);
                 const priceHtml = (price != null) ? `${Number(price).toLocaleString('vi-VN')} đ` : '-';
-                const expire = d.expireDate || d.expire || d.expirationDate;
+                // Expire: derive from licenseKey pattern PRD<productId>-yyyyMMdd-<random> if backend doesn't provide
+                function formatExpireFromAny(exp){
+                    if (!exp) return null;
+                    // Accept yyyyMMdd or yyyy-MM-dd
+                    try {
+                        let y,m,dd;
+                        if (/^\d{8}$/.test(exp)) { y = exp.slice(0,4); m = exp.slice(4,6); dd = exp.slice(6,8); }
+                        else if (/^\d{4}-\d{2}-\d{2}$/.test(exp)) { const [Y,M,D] = exp.split('-'); y=Y; m=M; dd=D; }
+                        else return null;
+                        return `${dd}/${m}/${y}`;
+                    } catch(_) { return null; }
+                }
+                function formatExpireFromKey(key){
+                    if (!key) return null;
+                    const parts = String(key).split('-');
+                    if (parts.length >= 2) {
+                        const raw = parts[1];
+                        if (raw && raw !== 'N/A' && /^\d{8}$/.test(raw)) {
+                            return `${raw.slice(6,8)}/${raw.slice(4,6)}/${raw.slice(0,4)}`;
+                        }
+                    }
+                    return null;
+                }
+                const backendExpireRaw = d.expireDate || d.expire || d.expirationDate;
+                const expire = formatExpireFromAny(backendExpireRaw) || formatExpireFromKey(d.licenseKey);
                 const activatedAt = d.activationDate || d.activatedAt;
                 detailsBox.innerHTML = `
                     <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:8px;">
@@ -1245,14 +1269,44 @@
                         </div>`;
                     productBox.appendChild(div);
                 }
-                // Device
-                dev.id.textContent = safe(d.deviceIdentifier || d.deviceId);
-                dev.host.textContent = safe(d.deviceHost || d.hostname);
-                dev.platform.textContent = safe(d.devicePlatform || d.platform);
-                dev.cpu.textContent = safe(d.deviceCpu || d.cpu);
-                dev.cores.textContent = safe(d.deviceCores || d.cores);
-                dev.memory.textContent = safe(d.deviceMemory || d.memory);
-                setDevicePath(d.devicePath || d.path);
+                // Device with smart fallback parsing from deviceIdentifier format:
+                // <id>|host=<h>;plat=<p>;cpu=<c>;cores=<n>;mem=<m>|<path>
+                let idRaw = d.deviceIdentifier || d.deviceId || '';
+                let host = d.deviceHost || d.hostname || '';
+                let platform = d.devicePlatform || d.platform || '';
+                let cpu = d.deviceCpu || d.cpu || '';
+                let cores = d.deviceCores || d.cores || '';
+                let memory = d.deviceMemory || d.memory || '';
+                let dpath = d.devicePath || d.path || '';
+                try {
+                    if ((!host || !platform || !cpu || !cores || !memory || !dpath) && idRaw && idRaw.includes('|')) {
+                        const parts = String(idRaw).split('|');
+                        const kvStr = parts[1] || '';
+                        const pth = parts[2] || '';
+                        if (!dpath && pth) dpath = pth;
+                        if (kvStr) {
+                            kvStr.split(';').forEach(seg => {
+                                const eq = seg.indexOf('=');
+                                if (eq > 0) {
+                                    const k = seg.slice(0, eq).trim();
+                                    const v = seg.slice(eq + 1).trim();
+                                    if (!host && k === 'host') host = v;
+                                    else if (!platform && (k === 'plat' || k === 'platform')) platform = v;
+                                    else if (!cpu && k === 'cpu') cpu = v;
+                                    else if (!cores && k === 'cores') cores = v;
+                                    else if (!memory && (k === 'mem' || k === 'memory')) memory = v;
+                                }
+                            });
+                        }
+                    }
+                } catch(_) {}
+                dev.id.textContent = safe(idRaw);
+                dev.host.textContent = safe(host);
+                dev.platform.textContent = safe(platform);
+                dev.cpu.textContent = safe(cpu);
+                dev.cores.textContent = safe(cores);
+                dev.memory.textContent = safe(memory);
+                setDevicePath(dpath);
                 dev.lastUsed.textContent = safe(d.lastUsedAt || d.lastUsed);
                 dev.activated.textContent = safe(activatedAt);
             }
