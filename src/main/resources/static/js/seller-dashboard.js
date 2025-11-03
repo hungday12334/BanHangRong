@@ -1300,7 +1300,11 @@
                         }
                     }
                 } catch(_) {}
-                dev.id.textContent = safe(idRaw);
+                // Show only the pure ID (before the first '|'), keep full string as tooltip
+                let idDisplay = idRaw;
+                if (idDisplay && idDisplay.includes('|')) idDisplay = idDisplay.split('|')[0];
+                dev.id.textContent = safe(idDisplay);
+                if (idRaw) try { dev.id.title = idRaw; } catch(_) {}
                 dev.host.textContent = safe(host);
                 dev.platform.textContent = safe(platform);
                 dev.cpu.textContent = safe(cpu);
