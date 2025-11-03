@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý Danh mục - Seller Dashboard</title>
+    <title>Category Management - Seller Dashboard</title>
     <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
     <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
     <link rel="stylesheet" href="/css/category-management.css?v=1" />
@@ -22,36 +22,36 @@
         <div class="container">
             <div class="category-management-container">
                 <div class="category-header">
-                    <h2 class="section-title">Quản lý Danh mục</h2>
+                    <h2 class="section-title">Category Management</h2>
                     <div class="category-header-actions">
-                        <button onclick="openLicenseManager()" class="btn btn-primary" title="Quản lý giấy phép">
-                            <i class="ti ti-license"></i> Quản lý Licenses
+                        <button onclick="openLicenseManager()" class="btn btn-primary" title="License Management">
+                            <i class="ti ti-license"></i> Manage Licenses
                         </button>
-                        <button onclick="exportCategories()" class="btn btn-secondary" title="Xuất danh sách">
+                        <button onclick="exportCategories()" class="btn btn-secondary" title="Export list">
                             <i class="ti ti-download"></i> Export CSV
                         </button>
                         <a href="/seller/dashboard" class="btn btn-secondary">
-                            <i class="ti ti-arrow-left"></i> Quay lại Dashboard
+                            <i class="ti ti-arrow-left"></i> Back to Dashboard
                         </a>
                     </div>
                 </div>
 
                 <!-- Statistics Cards -->
                 <div class="stats-grid">
-                    <div class="stat-card purple" onclick="filterByAll()" onkeypress="if(event.key==='Enter')filterByAll()" id="statAllCategories" title="Click để hiển thị tất cả danh mục" role="button" tabindex="0">
-                        <div class="stat-card-label">Tổng danh mục</div>
+                    <div class="stat-card purple" onclick="filterByAll()" onkeypress="if(event.key==='Enter')filterByAll()" id="statAllCategories" title="Click to show all categories" role="button" tabindex="0">
+                        <div class="stat-card-label">Total Categories</div>
                         <div class="stat-card-value" th:text="${totalCategories ?: categories.size()}">0</div>
                     </div>
-                    <div class="stat-card pink" onclick="filterByHasProducts()" onkeypress="if(event.key==='Enter')filterByHasProducts()" id="statWithProducts" title="Click để hiển thị danh mục có sản phẩm" role="button" tabindex="0">
-                        <div class="stat-card-label">Danh mục có sản phẩm</div>
+                    <div class="stat-card pink" onclick="filterByHasProducts()" onkeypress="if(event.key==='Enter')filterByHasProducts()" id="statWithProducts" title="Click to show categories with products" role="button" tabindex="0">
+                        <div class="stat-card-label">Categories with Products</div>
                         <div class="stat-card-value" th:text="${categoriesWithProducts ?: 0}">0</div>
                     </div>
-                    <div class="stat-card blue" onclick="sortByProductCount()" onkeypress="if(event.key==='Enter')sortByProductCount()" id="statTotalProducts" title="Click để sắp xếp theo số sản phẩm" role="button" tabindex="0">
-                        <div class="stat-card-label">Tổng sản phẩm</div>
+                    <div class="stat-card blue" onclick="sortByProductCount()" onkeypress="if(event.key==='Enter')sortByProductCount()" id="statTotalProducts" title="Click to sort by product count" role="button" tabindex="0">
+                        <div class="stat-card-label">Total Products</div>
                         <div class="stat-card-value" th:text="${totalProducts ?: 0}">0</div>
                     </div>
-                    <div class="stat-card green" onclick="filterByRecent()" onkeypress="if(event.key==='Enter')filterByRecent()" id="statRecentCategories" title="Click để hiển thị danh mục mới" role="button" tabindex="0">
-                        <div class="stat-card-label">Danh mục mới (7 ngày)</div>
+                    <div class="stat-card green" onclick="filterByRecent()" onkeypress="if(event.key==='Enter')filterByRecent()" id="statRecentCategories" title="Click to show new categories" role="button" tabindex="0">
+                        <div class="stat-card-label">New Categories (7 days)</div>
                         <div class="stat-card-value" th:text="${recentCategories ?: 0}">0</div>
                     </div>
                 </div>
@@ -60,14 +60,14 @@
                 <div class="alert-container">
                     <!-- Empty state alert for sellers with no products -->
                     <div th:if="${hasNoProducts}" class="alert info" style="background: #e3f2fd; border-left: 4px solid #2196f3;">
-                        <strong>ℹ️ Chào mừng bạn đến với quản lý danh mục!</strong>
+                        <strong>ℹ️ Welcome to Category Management!</strong>
                         <p style="margin-top: 8px; margin-bottom: 0;">
-                            Bạn chưa có sản phẩm nào trong hệ thống. Các danh mục bên dưới là danh mục chung của hệ thống.
-                            Sau khi bạn thêm sản phẩm và gán vào danh mục, thống kê sẽ được cập nhật tự động.
+                            You don't have any products in the system yet. The categories below are system-wide categories.
+                            After you add products and assign them to categories, the statistics will be updated automatically.
                         </p>
                         <p style="margin-top: 8px; margin-bottom: 0;">
-                            <strong>Bước tiếp theo:</strong> Vào <a href="/seller/products/add" style="color: #1976d2; text-decoration: underline;">Thêm sản phẩm</a>
-                            hoặc sử dụng tính năng <strong>"Quản lý Licenses"</strong> để bắt đầu.
+                            <strong>Next step:</strong> Go to <a href="/seller/products/add" style="color: #1976d2; text-decoration: underline;">Add Product</a>
+                            or use the <strong>"Manage Licenses"</strong> feature to get started.
                         </p>
                     </div>
 
@@ -81,25 +81,25 @@
 
                 <!-- Add category form -->
                 <div class="category-form-section">
-                    <h3>Thêm danh mục mới</h3>
+                    <h3>Add New Category</h3>
                     <form th:action="@{/seller/categories}" th:object="${newCategory}" method="post" class="profile-form" id="addCategoryForm" onsubmit="return validateCategoryForm(this)">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <div class="form-group">
-                            <label for="newCategoryName">Tên Danh mục *</label>
-                            <input id="newCategoryName" type="text" th:field="*{name}" placeholder="Ví dụ: Đồ họa - Thiết kế"
+                            <label for="newCategoryName">Category Name *</label>
+                            <input id="newCategoryName" type="text" th:field="*{name}" placeholder="e.g: Graphics - Design"
                                    required minlength="2" maxlength="100"
                                    pattern=".*\S+.*"
-                                   title="Tên danh mục phải từ 2-100 ký tự và không được chỉ toàn khoảng trắng" />
-                            <div class="form-text">Tên danh mục phải từ 2-100 ký tự (không chỉ khoảng trắng)</div>
+                                   title="Category name must be 2-100 characters and cannot be only whitespace" />
+                            <div class="form-text">Category name must be 2-100 characters (not only whitespace)</div>
                         </div>
                         <div class="form-group">
-                            <label for="newCategoryDescription">Mô tả</label>
-                            <textarea id="newCategoryDescription" th:field="*{description}" placeholder="Mô tả ngắn về danh mục" maxlength="255" rows="3"></textarea>
-                            <div class="form-text"><span id="descCharCount">0</span>/255 ký tự</div>
+                            <label for="newCategoryDescription">Description</label>
+                            <textarea id="newCategoryDescription" th:field="*{description}" placeholder="Short description about the category" maxlength="255" rows="3"></textarea>
+                            <div class="form-text"><span id="descCharCount">0</span>/255 characters</div>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">
-                                <i class="ti ti-plus"></i> Thêm danh mục
+                                <i class="ti ti-plus"></i> Add Category
                             </button>
                         </div>
                     </form>
@@ -109,42 +109,42 @@
                 <div class="category-list-section">
                     <div class="category-list-header">
                         <h3 class="category-list-title">
-                            Danh sách Danh mục
+                            Category List
                             <span class="category-count" id="categoryCount" th:text="'(' + ${categories.size()} + ')'">(0)</span>
                         </h3>
 
                         <!-- Search and Filter Controls -->
                         <div class="category-toolbar">
                             <div class="search-box">
-                                <label for="searchInput" style="display:none;">Tìm kiếm danh mục</label>
+                                <label for="searchInput" style="display:none;">Search categories</label>
                                 <i class="ti ti-search"></i>
-                                <input type="text" id="searchInput" placeholder="Tìm kiếm danh mục..." oninput="filterCategories()" />
+                                <input type="text" id="searchInput" placeholder="Search categories..." oninput="filterCategories()" />
                             </div>
 
-                            <label for="sortSelect" style="display:none;">Sắp xếp</label>
+                            <label for="sortSelect" style="display:none;">Sort</label>
                             <select id="sortSelect" class="sort-select" onchange="sortCategories()">
-                                <option value="name-asc">Tên (A-Z)</option>
-                                <option value="name-desc">Tên (Z-A)</option>
-                                <option value="date-desc">Mới nhất</option>
-                                <option value="date-asc">Cũ nhất</option>
-                                <option value="products-desc">Nhiều sản phẩm nhất</option>
-                                <option value="products-asc">Ít sản phẩm nhất</option>
+                                <option value="name-asc">Name (A-Z)</option>
+                                <option value="name-desc">Name (Z-A)</option>
+                                <option value="date-desc">Newest</option>
+                                <option value="date-asc">Oldest</option>
+                                <option value="products-desc">Most Products</option>
+                                <option value="products-asc">Least Products</option>
                             </select>
 
-                            <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Chọn nhiều">
-                                <i class="ti ti-checkbox"></i> Chọn nhiều
+                            <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Select multiple">
+                                <i class="ti ti-checkbox"></i> Select Multiple
                             </button>
 
                             <button onclick="deleteSelected()" id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">
-                                <i class="ti ti-trash"></i> Xóa đã chọn (<span id="selectedCount">0</span>)
+                                <i class="ti ti-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
                             </button>
                         </div>
                     </div>
 
                     <div th:if="${categories.isEmpty()}" class="empty-state">
                         <i class="ti ti-folder-open"></i>
-                        <div class="empty-state-title">Chưa có danh mục nào</div>
-                        <div class="empty-state-text">Hãy thêm danh mục đầu tiên của bạn!</div>
+                        <div class="empty-state-title">No categories yet</div>
+                        <div class="empty-state-text">Add your first category!</div>
                     </div>
 
                     <div th:unless="${categories.isEmpty()}" class="table-responsive">
@@ -152,22 +152,22 @@
                             <thead>
                             <tr>
                                 <th class="bulk-select-col" data-bulk-only>
-                                    <label for="selectAll" style="display:none;">Chọn tất cả</label>
+                                    <label for="selectAll" style="display:none;">Select all</label>
                                     <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
                                 </th>
                                 <th style="width:60px;">ID</th>
-                                <th>Tên Danh mục</th>
-                                <th>Mô tả</th>
-                                <th style="width:140px;text-align:center;">Số sản phẩm</th>
-                                <th style="width:160px;">Ngày tạo</th>
-                                <th style="width:180px;">Thao tác</th>
+                                <th>Category Name</th>
+                                <th>Description</th>
+                                <th style="width:140px;text-align:center;">Product Count</th>
+                                <th style="width:160px;">Created Date</th>
+                                <th style="width:180px;">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="category : ${categories}" class="category-row"
                                 th:attr="data-id=${category.categoryId}, data-name=${category.name}, data-description=${category.description}, data-created=${category.createdAt}, data-product-count=${productCountByCategory.get(category.categoryId) ?: 0}">
                                 <td class="bulk-select-col" data-bulk-only>
-                                    <input type="checkbox" class="category-checkbox" th:value="${category.categoryId}" onchange="updateSelectedCount()" th:attr="aria-label='Chọn ' + ${category.name}" />
+                                    <input type="checkbox" class="category-checkbox" th:value="${category.categoryId}" onchange="updateSelectedCount()" th:attr="aria-label='Select ' + ${category.name}" />
                                 </td>
                                 <td th:text="${category.categoryId}"></td>
                                 <td>
@@ -188,7 +188,7 @@
                                             th:data-id="${category.categoryId}"
                                             th:data-name="${category.name}"
                                             class="btn btn-link"
-                                            title="Xem sản phẩm">
+                                            title="View products">
                                         <i class="ti ti-eye"></i>
                                     </button>
                                 </td>
@@ -205,21 +205,21 @@
                                         <!-- Edit Button -->
                                         <button class="btn-action btn-edit" type="button"
                                                 onclick="openSmartEditModal(this.closest('.action-buttons-wrapper'))"
-                                                title="Chỉnh sửa">
+                                                title="Edit">
                                             <i class="ti ti-edit"></i>
                                         </button>
 
                                         <!-- License Manager Button -->
                                         <button class="btn-action btn-license" type="button"
                                                 onclick="openCategoryLicenseManager(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
-                                                title="Quản lý Licenses">
+                                                title="Manage Licenses">
                                             <i class="ti ti-license"></i>
                                         </button>
 
                                         <!-- More Actions Button -->
                                         <button class="btn-action btn-more" type="button"
                                                 onclick="toggleActionMenu(this); event.stopPropagation();"
-                                                title="Thêm">
+                                                title="More">
                                             <i class="ti ti-dots"></i>
                                         </button>
 
@@ -229,7 +229,7 @@
                                             <button type="button"
                                                     class="icon-item"
                                                     onclick="duplicateCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
-                                                    title="Nhân bản">
+                                                    title="Duplicate">
                                                 <i class="ti ti-copy"></i>
                                             </button>
 
@@ -237,7 +237,7 @@
                                             <button type="button"
                                                     class="icon-item"
                                                     onclick="exportCategoryProducts(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
-                                                    title="Xuất CSV">
+                                                    title="Export CSV">
                                                 <i class="ti ti-download"></i>
                                             </button>
 
@@ -245,7 +245,7 @@
                                             <button type="button"
                                                     class="icon-item text-danger"
                                                     onclick="deleteCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
-                                                    title="Xóa">
+                                                    title="Delete">
                                                 <i class="ti ti-trash"></i>
                                             </button>
                                         </div>
@@ -259,7 +259,7 @@
                         <div class="pagination-wrapper" id="paginationWrapper">
                             <!-- Previous Button -->
                             <button type="button" class="pagination-btn prev-btn" id="prevBtn" onclick="goToPage(currentPage - 1)">
-                                <i class="ti ti-chevron-left"></i> Trước
+                                <i class="ti ti-chevron-left"></i> Previous
                             </button>
 
                             <!-- Page Numbers -->
@@ -269,18 +269,18 @@
 
                             <!-- Next Button -->
                             <button type="button" class="pagination-btn next-btn" id="nextBtn" onclick="goToPage(currentPage + 1)">
-                                Sau <i class="ti ti-chevron-right"></i>
+                                Next <i class="ti ti-chevron-right"></i>
                             </button>
 
                             <!-- Page Info -->
                             <span class="pagination-info">
-                                Trang <b id="currentPageNum">1</b> / <b id="totalPagesNum">1</b>
-                                (<span id="totalItemsNum">0</span> danh mục)
+                                Page <b id="currentPageNum">1</b> / <b id="totalPagesNum">1</b>
+                                (<span id="totalItemsNum">0</span> categories)
                             </span>
 
                             <!-- Page Size Selector -->
                             <div class="page-size-selector">
-                                <label for="pageSizeSelect">Hiển thị:</label>
+                                <label for="pageSizeSelect">Show:</label>
                                 <select id="pageSizeSelect" onchange="changePageSize()">
                                     <option value="5" selected>5</option>
                                     <option value="10">10</option>
@@ -307,7 +307,7 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="ti ti-edit"></i> Chỉnh sửa Danh mục
+                        <i class="ti ti-edit"></i> Edit Category
                     </h5>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('editCategoryModal')">&times;</button>
                 </div>
@@ -317,12 +317,12 @@
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
                             <button class="nav-link active" onclick="switchTab('basicTab', this)" type="button">
-                                <i class="ti ti-info-circle"></i> Cơ bản
+                                <i class="ti ti-info-circle"></i> Basic
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" onclick="switchTab('displayTab', this)" type="button">
-                                <i class="ti ti-palette"></i> Hiển thị
+                                <i class="ti ti-palette"></i> Display
                             </button>
                         </li>
                         <li class="nav-item">
@@ -332,7 +332,7 @@
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" onclick="switchTab('settingsTab', this)" type="button">
-                                <i class="ti ti-settings"></i> Cài đặt
+                                <i class="ti ti-settings"></i> Settings
                             </button>
                         </li>
                     </ul>
@@ -342,49 +342,49 @@
                         <!-- Basic Info Tab -->
                         <div class="tab-pane fade show active" id="basicTab">
                             <div class="form-group">
-                                <label for="editCategoryName">Tên Danh mục <span class="text-danger">*</span></label>
+                                <label for="editCategoryName">Category Name <span class="text-danger">*</span></label>
                                 <input type="text" name="name" id="editCategoryName" class="form-control"
                                        required minlength="2" maxlength="100"
                                        pattern=".*\S+.*"
-                                       placeholder="VD: Điện tử - Công nghệ"
-                                       title="Tên danh mục phải từ 2-100 ký tự" />
+                                       placeholder="e.g: Electronics - Technology"
+                                       title="Category name must be 2-100 characters" />
                                 <div class="form-text">
-                                    <i class="ti ti-info-circle"></i> Tên này sẽ hiển thị trên trang chủ và kết quả tìm kiếm
+                                    <i class="ti ti-info-circle"></i> This name will be displayed on homepage and search results
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCategorySlug">Đường dẫn (URL Slug)</label>
+                                <label for="editCategorySlug">URL Slug</label>
                                 <div class="input-group">
                                     <span class="input-group-text">/categories/</span>
                                     <input type="text" name="slug" id="editCategorySlug" class="form-control"
-                                           placeholder="dien-tu-cong-nghe"
+                                           placeholder="electronics-technology"
                                            pattern="[a-z0-9-]+"
-                                           title="Chỉ chữ thường, số và dấu gạch ngang" />
+                                           title="Only lowercase letters, numbers and hyphens" />
                                 </div>
                                 <div class="form-text">
-                                    <i class="ti ti-link"></i> Tự động tạo từ tên nếu để trống
+                                    <i class="ti ti-link"></i> Auto-generated from name if empty
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCategoryDescription">Mô tả ngắn</label>
+                                <label for="editCategoryDescription">Short Description</label>
                                 <textarea name="description" id="editCategoryDescription" class="form-control"
                                           rows="3" maxlength="500"
-                                          placeholder="Mô tả ngắn gọn về danh mục này..."></textarea>
+                                          placeholder="Brief description about this category..."></textarea>
                                 <div class="form-text">
-                                    <span id="editDescCharCount">0</span>/500 ký tự
+                                    <span id="editDescCharCount">0</span>/500 characters
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCategoryParent">Danh mục cha (nếu có)</label>
+                                <label for="editCategoryParent">Parent Category (if any)</label>
                                 <select name="parentId" id="editCategoryParent" class="form-control">
-                                    <option value="">-- Không có (Danh mục gốc) --</option>
+                                    <option value="">-- None (Root Category) --</option>
                                     <!-- Will be populated dynamically -->
                                 </select>
                                 <div class="form-text">
-                                    <i class="ti ti-hierarchy"></i> Tạo danh mục con để phân loại chi tiết hơn
+                                    <i class="ti ti-hierarchy"></i> Create subcategory for more detailed classification
                                 </div>
                             </div>
                         </div>
@@ -395,21 +395,21 @@
                                 <label for="editCategoryIcon">Icon</label>
                                 <div class="icon-picker-wrapper">
                                     <input type="text" name="icon" id="editCategoryIcon" class="form-control"
-                                           placeholder="VD: ti-device-laptop" readonly />
+                                           placeholder="e.g: ti-device-laptop" readonly />
                                     <div class="icon-preview" id="editIconPreview">
                                         <i class="ti ti-circle-dashed"></i>
                                     </div>
                                 </div>
                                 <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="openIconPicker('edit')">
-                                    <i class="ti ti-palette"></i> Chọn Icon
+                                    <i class="ti ti-palette"></i> Choose Icon
                                 </button>
                                 <div class="form-text">
-                                    <i class="ti ti-info-circle"></i> Icon sẽ hiển thị bên cạnh tên danh mục
+                                    <i class="ti ti-info-circle"></i> Icon will be displayed next to category name
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCategoryColor">Màu chủ đạo</label>
+                                <label for="editCategoryColor">Primary Color</label>
                                 <div class="color-picker-wrapper">
                                     <input type="color" name="color" id="editCategoryColor" class="form-control-color" value="#3b82f6" />
                                     <input type="text" id="editColorHex" class="form-control"
@@ -425,25 +425,25 @@
                                     <button type="button" class="color-preset" style="background: #ef4444" onclick="setEditColor('#ef4444')"></button>
                                 </div>
                                 <div class="form-text">
-                                    <i class="ti ti-palette"></i> Màu sắc cho badge và highlight
+                                    <i class="ti ti-palette"></i> Color for badges and highlights
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCategoryImage">Ảnh đại diện (URL)</label>
+                                <label for="editCategoryImage">Image URL</label>
                                 <input type="url" name="imageUrl" id="editCategoryImage" class="form-control"
                                        placeholder="https://example.com/image.jpg" />
                                 <div class="form-text">
-                                    <i class="ti ti-photo"></i> Ảnh hiển thị trong banner hoặc grid view
+                                    <i class="ti ti-photo"></i> Image displayed in banner or grid view
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCategorySortOrder">Thứ tự sắp xếp</label>
+                                <label for="editCategorySortOrder">Sort Order</label>
                                 <input type="number" name="sortOrder" id="editCategorySortOrder" class="form-control"
                                        min="0" value="0" placeholder="0" />
                                 <div class="form-text">
-                                    <i class="ti ti-arrow-up-down"></i> Số nhỏ hơn sẽ hiển thị trước (0 = mặc định)
+                                    <i class="ti ti-arrow-up-down"></i> Lower numbers appear first (0 = default)
                                 </div>
                             </div>
                         </div>
@@ -451,30 +451,30 @@
                         <!-- SEO Tab -->
                         <div class="tab-pane fade" id="seoTab">
                             <div class="form-group">
-                                <label for="editSeoTitle">Tiêu đề SEO</label>
+                                <label for="editSeoTitle">SEO Title</label>
                                 <input type="text" name="seoTitle" id="editSeoTitle" class="form-control"
-                                       maxlength="70" placeholder="Tiêu đề tối ưu cho Google..." />
+                                       maxlength="70" placeholder="Optimized title for Google..." />
                                 <div class="form-text">
-                                    <span id="editSeoTitleCount">0</span>/70 ký tự (Tối ưu: 50-60 ký tự)
+                                    <span id="editSeoTitleCount">0</span>/70 characters (Optimal: 50-60 characters)
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editSeoDescription">Mô tả SEO</label>
+                                <label for="editSeoDescription">SEO Description</label>
                                 <textarea name="seoDescription" id="editSeoDescription" class="form-control"
                                           rows="3" maxlength="160"
-                                          placeholder="Mô tả ngắn gọn cho Google Search..."></textarea>
+                                          placeholder="Brief description for Google Search..."></textarea>
                                 <div class="form-text">
-                                    <span id="editSeoDescCount">0</span>/160 ký tự (Tối ưu: 120-155 ký tự)
+                                    <span id="editSeoDescCount">0</span>/160 characters (Optimal: 120-155 characters)
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editSeoKeywords">Từ khóa SEO</label>
+                                <label for="editSeoKeywords">SEO Keywords</label>
                                 <input type="text" name="seoKeywords" id="editSeoKeywords" class="form-control"
-                                       placeholder="điện tử, laptop, máy tính, smartphone" />
+                                       placeholder="electronics, laptop, computer, smartphone" />
                                 <div class="form-text">
-                                    <i class="ti ti-tag"></i> Phân cách bằng dấu phẩy
+                                    <i class="ti ti-tag"></i> Separate with commas
                                 </div>
                             </div>
                         </div>
@@ -482,87 +482,87 @@
                         <!-- Settings Tab -->
                         <div class="tab-pane fade" id="settingsTab">
                             <div class="form-group">
-                                <label>Trạng thái</label>
+                                <label>Status</label>
                                 <div class="form-check-group">
                                     <div class="form-check">
                                         <input type="radio" name="status" id="editStatusActive" value="ACTIVE" class="form-check-input" checked />
                                         <label for="editStatusActive" class="form-check-label">
-                                            <i class="ti ti-circle-check" style="color: var(--good)"></i> <strong>Hoạt động</strong>
-                                            <small class="d-block text-muted">Danh mục hiển thị công khai</small>
+                                            <i class="ti ti-circle-check" style="color: var(--good)"></i> <strong>Active</strong>
+                                            <small class="d-block text-muted">Category displayed publicly</small>
                                         </label>
                                     </div>
                                     <div class="form-check">
                                         <input type="radio" name="status" id="editStatusHidden" value="HIDDEN" class="form-check-input" />
                                         <label for="editStatusHidden" class="form-check-label">
-                                            <i class="ti ti-eye-off" style="color: var(--muted)"></i> <strong>Ẩn</strong>
-                                            <small class="d-block text-muted">Chỉ admin/seller nhìn thấy</small>
+                                            <i class="ti ti-eye-off" style="color: var(--muted)"></i> <strong>Hidden</strong>
+                                            <small class="d-block text-muted">Only visible to admin/seller</small>
                                         </label>
                                     </div>
                                     <div class="form-check">
                                         <input type="radio" name="status" id="editStatusDraft" value="DRAFT" class="form-check-input" />
                                         <label for="editStatusDraft" class="form-check-label">
-                                            <i class="ti ti-file-text" style="color: var(--accent)"></i> <strong>Nháp</strong>
-                                            <small class="d-block text-muted">Đang chuẩn bị, chưa công khai</small>
+                                            <i class="ti ti-file-text" style="color: var(--accent)"></i> <strong>Draft</strong>
+                                            <small class="d-block text-muted">In preparation, not public yet</small>
                                         </label>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCategoryLicense">Giấy phép / Phân loại</label>
+                                <label for="editCategoryLicense">License / Classification</label>
                                 <select name="license" id="editCategoryLicense" class="form-control">
-                                    <option value="">-- Không yêu cầu --</option>
-                                    <option value="GENERAL">Hàng hóa phổ thông</option>
-                                    <option value="FOOD">Thực phẩm chức năng</option>
-                                    <option value="COSMETIC">Mỹ phẩm</option>
-                                    <option value="MEDICAL">Dụng cụ y tế</option>
-                                    <option value="ELECTRONICS">Thiết bị điện tử</option>
-                                    <option value="CHEMICAL">Hóa chất</option>
-                                    <option value="RESTRICTED">Hàng kiểm soát đặc biệt</option>
+                                    <option value="">-- No requirement --</option>
+                                    <option value="GENERAL">General Goods</option>
+                                    <option value="FOOD">Functional Food</option>
+                                    <option value="COSMETIC">Cosmetics</option>
+                                    <option value="MEDICAL">Medical Devices</option>
+                                    <option value="ELECTRONICS">Electronic Devices</option>
+                                    <option value="CHEMICAL">Chemicals</option>
+                                    <option value="RESTRICTED">Specially Controlled Items</option>
                                 </select>
                                 <div class="form-text">
-                                    <i class="ti ti-license"></i> Quy định sản phẩm trong danh mục này
+                                    <i class="ti ti-license"></i> Regulations for products in this category
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-check-label">
                                     <input type="checkbox" name="requiresApproval" id="editRequiresApproval" class="form-check-input" />
-                                    <strong>Yêu cầu duyệt sản phẩm</strong>
+                                    <strong>Requires Product Approval</strong>
                                 </label>
                                 <div class="form-text">
-                                    <i class="ti ti-shield-check"></i> Sản phẩm mới cần admin phê duyệt trước khi công khai
+                                    <i class="ti ti-shield-check"></i> New products need admin approval before going public
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-check-label">
                                     <input type="checkbox" name="featured" id="editFeatured" class="form-check-input" />
-                                    <strong>Danh mục nổi bật</strong>
+                                    <strong>Featured Category</strong>
                                 </label>
                                 <div class="form-text">
-                                    <i class="ti ti-star"></i> Hiển thị ở vị trí ưu tiên trên trang chủ
+                                    <i class="ti ti-star"></i> Display in priority position on homepage
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editCommissionRate">Tỷ lệ hoa hồng (%)</label>
+                                <label for="editCommissionRate">Commission Rate (%)</label>
                                 <div class="input-group">
                                     <input type="number" name="commissionRate" id="editCommissionRate" class="form-control"
                                            min="0" max="100" step="0.1" value="0" placeholder="0" />
                                     <span class="input-group-text">%</span>
                                 </div>
                                 <div class="form-text">
-                                    <i class="ti ti-percentage"></i> Hoa hồng áp dụng cho sản phẩm trong danh mục này (0 = mặc định hệ thống)
+                                    <i class="ti ti-percentage"></i> Commission applied to products in this category (0 = system default)
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="editMaxProducts">Giới hạn số sản phẩm</label>
+                                <label for="editMaxProducts">Product Limit</label>
                                 <input type="number" name="maxProducts" id="editMaxProducts" class="form-control"
-                                       min="0" placeholder="Không giới hạn" />
+                                       min="0" placeholder="Unlimited" />
                                 <div class="form-text">
-                                    <i class="ti ti-box"></i> Số sản phẩm tối đa trong danh mục (0 hoặc để trống = không giới hạn)
+                                    <i class="ti ti-box"></i> Maximum number of products in category (0 or empty = unlimited)
                                 </div>
                             </div>
                         </div>
@@ -571,10 +571,10 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('editCategoryModal')">
-                        <i class="ti ti-x"></i> Hủy
+                        <i class="ti ti-x"></i> Cancel
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-device-floppy"></i> Lưu thay đổi
+                        <i class="ti ti-device-floppy"></i> Save Changes
                     </button>
                 </div>
             </form>
@@ -587,18 +587,18 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Sản phẩm trong danh mục: <span id="modalCategoryName"></span></h5>
+                <h5 class="modal-title">Products in category: <span id="modalCategoryName"></span></h5>
 
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="productsListContent" class="loading-state">
                     <i class="ti ti-loader"></i>
-                    <div class="loading-state-text">Đang tải...</div>
+                    <div class="loading-state-text">Loading...</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -610,7 +610,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="ti ti-license"></i> Quản lý Licenses / Giấy phép
+                    <i class="ti ti-license"></i> License Management
                 </h5>
                 <button type="button" class="btn btn-secondary" onclick="closeModal('licenseManagerModal')">&times;</button>
             </div>
@@ -618,26 +618,26 @@
                 <!-- Add New License Form -->
                 <div class="license-add-section">
                     <h6 class="section-subtitle">
-                        <i class="ti ti-plus"></i> Thêm License mới
+                        <i class="ti ti-plus"></i> Add New License
                     </h6>
                     <div class="license-form">
                         <div class="form-row">
                             <div class="form-group" style="flex: 1;">
-                                <label for="newLicenseName">Tên License <span class="text-danger">*</span></label>
+                                <label for="newLicenseName">License Name <span class="text-danger">*</span></label>
                                 <input type="text" id="newLicenseName" class="form-control"
-                                       placeholder="VD: Thực phẩm chức năng" required />
+                                       placeholder="e.g: Functional Food" required />
                             </div>
                             <div class="form-group" style="flex: 1;">
-                                <label for="newLicenseCode">Mã (Code) <span class="text-danger">*</span></label>
+                                <label for="newLicenseCode">Code <span class="text-danger">*</span></label>
                                 <input type="text" id="newLicenseCode" class="form-control"
-                                       placeholder="VD: FOOD_SUPPLEMENT" required />
+                                       placeholder="e.g: FOOD_SUPPLEMENT" required />
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="newLicenseDescription">Mô tả</label>
+                            <label for="newLicenseDescription">Description</label>
                             <textarea id="newLicenseDescription" class="form-control" rows="2"
-                                      placeholder="Mô tả yêu cầu và quy định cho sản phẩm thuộc loại này..."></textarea>
+                                      placeholder="Description of requirements and regulations for products of this type..."></textarea>
                         </div>
 
                         <div class="form-row">
@@ -653,7 +653,7 @@
                                 </div>
                             </div>
                             <div class="form-group" style="flex: 1;">
-                                <label for="newLicenseColor">Màu sắc</label>
+                                <label for="newLicenseColor">Color</label>
                                 <div class="color-picker-wrapper">
                                     <input type="color" id="newLicenseColor" class="form-control-color" value="#3b82f6"
                                            onchange="document.getElementById('newLicenseColorHex').value = this.value" />
@@ -665,7 +665,7 @@
 
                         <div class="form-actions">
                             <button type="button" class="btn btn-primary" onclick="addNewLicense()">
-                                <i class="ti ti-plus"></i> Thêm License
+                                <i class="ti ti-plus"></i> Add License
                             </button>
                         </div>
                     </div>
@@ -676,7 +676,7 @@
                 <!-- License List -->
                 <div class="license-list-section">
                     <h6 class="section-subtitle">
-                        <i class="ti ti-list"></i> Danh sách Licenses hiện có
+                        <i class="ti ti-list"></i> Current Licenses
                         <span class="badge-count" id="licenseCount">(0)</span>
                     </h6>
                     <div id="licenseListContainer" class="license-list">
@@ -686,7 +686,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('licenseManagerModal')">
-                    <i class="ti ti-x"></i> Đóng
+                    <i class="ti ti-x"></i> Close
                 </button>
             </div>
         </div>
@@ -784,7 +784,7 @@
         updatePagination();
 
         // Show notification
-        showNotification('Hiển thị tất cả danh mục', 'info');
+        showNotification('Displaying all categories', 'info');
     }
 
     // Filter 2: Show only categories with products
@@ -817,7 +817,7 @@
         updatePagination();
 
         // Show notification
-        showNotification(`Hiển thị ${visibleCount} danh mục có sản phẩm`, 'success');
+        showNotification(`Displaying ${visibleCount} categories with products`, 'success');
     }
 
     // Filter 3: Sort by product count (descending)
@@ -848,7 +848,7 @@
         updatePagination();
 
         // Show notification
-        showNotification('Sắp xếp theo số lượng sản phẩm (nhiều → ít)', 'info');
+        showNotification('Sorted by product count (most → least)', 'info');
     }
 
     // Filter 4: Show recent categories (last 7 days)
@@ -886,7 +886,7 @@
         updateCategoryCount();
 
         // Show notification
-        showNotification(`Hiển thị ${visibleCount} danh mục mới (7 ngày gần đây)`, 'success');
+        showNotification(`Displaying ${visibleCount} new categories (last 7 days)`, 'success');
     }
 
     // Helper function to update category count
@@ -944,21 +944,21 @@
 
             // Check if empty or only whitespace
             if (trimmedValue.length === 0) {
-                alert('❌ Tên danh mục không được để trống hoặc chỉ chứa khoảng trắng.');
+                alert('❌ Category name cannot be empty or contain only spaces.');
                 nameField.focus();
                 return false;
             }
 
             // Check minimum length
             if (trimmedValue.length < 2) {
-                alert('❌ Tên danh mục phải có ít nhất 2 ký tự.');
+                alert('❌ Category name must be at least 2 characters.');
                 nameField.focus();
                 return false;
             }
 
             // Check maximum length
             if (trimmedValue.length > 100) {
-                alert('❌ Tên danh mục không được vượt quá 100 ký tự.');
+                alert('❌ Category name cannot exceed 100 characters.');
                 nameField.focus();
                 return false;
             }
@@ -977,8 +977,8 @@
     }
 
     function confirmDelete(form) {
-        const name = form.dataset && form.dataset.name ? form.dataset.name : 'danh mục này';
-        return confirm(`⚠️ Bạn có chắc chắn muốn xóa "${name}"?\n\n⚠️ Lưu ý: Không thể xóa danh mục đang có sản phẩm.`);
+        const name = form.dataset && form.dataset.name ? form.dataset.name : 'this category';
+        return confirm(`⚠️ Are you sure you want to delete "${name}"?\n\n⚠️ Note: Cannot delete categories with products.`);
     }
 
     // Filter categories by search term
@@ -1082,12 +1082,12 @@
         if (bulkModeActive) {
             bulkCols.forEach(el => el.style.display = '');
             bulkDeleteBtn.style.display = 'inline-flex';
-            bulkModeBtn.innerHTML = '<i class="ti ti-x"></i> Hủy chọn nhiều';
+            bulkModeBtn.innerHTML = '<i class="ti ti-x"></i> Cancel Select';
             bulkModeBtn.classList.add('active');
         } else {
             bulkCols.forEach(el => el.style.display = 'none');
             bulkDeleteBtn.style.display = 'none';
-            bulkModeBtn.innerHTML = '<i class="ti ti-checkbox"></i> Chọn nhiều';
+            bulkModeBtn.innerHTML = '<i class="ti ti-checkbox"></i> Select Multiple';
             bulkModeBtn.classList.remove('active');
 
             // Uncheck all
@@ -1158,13 +1158,13 @@
         const selected = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
 
         if (selected.length === 0) {
-            alert('⚠️ Vui lòng chọn ít nhất một danh mục để xóa.');
+            alert('⚠️ Please select at least one category to delete.');
             return;
         }
 
         const confirmMsg = selected.length === 1
-            ? `⚠️ Bạn có chắc chắn muốn xóa 1 danh mục đã chọn?\n\n⚠️ Lưu ý: Danh mục có sản phẩm sẽ không thể xóa.`
-            : `⚠️ Bạn có chắc chắn muốn xóa ${selected.length} danh mục đã chọn?\n\n⚠️ Lưu ý: Các danh mục có sản phẩm sẽ không thể xóa.`;
+            ? `⚠️ Are you sure you want to delete 1 selected category?\n\n⚠️ Note: Categories with products cannot be deleted.`
+            : `⚠️ Are you sure you want to delete ${selected.length} selected categories?\n\n⚠️ Note: Categories with products cannot be deleted.`;
 
         if (!confirm(confirmMsg)) {
             return;
@@ -1204,14 +1204,14 @@
         const visibleRows = rows.filter(row => row.style.display !== 'none');
 
         if (visibleRows.length === 0) {
-            alert('⚠️ Không có danh mục nào để xuất.');
+            alert('⚠️ No categories to export.');
             return;
         }
 
         const csvData = [];
 
         // Header
-        csvData.push(['ID', 'Tên Danh mục', 'Mô tả', 'Số sản phẩm', 'Ngày tạo']);
+        csvData.push(['ID', 'Category Name', 'Description', 'Product Count', 'Created Date']);
 
         // Data rows
         visibleRows.forEach(row => {
@@ -1226,7 +1226,7 @@
             if (created) {
                 try {
                     const date = new Date(created);
-                    formattedDate = date.toLocaleString('vi-VN');
+                    formattedDate = date.toLocaleString('en-US');
                 } catch(e) {
                     formattedDate = created;
                 }
@@ -1263,7 +1263,7 @@
 
         // Show success message
         setTimeout(() => {
-            alert(`✅ Đã xuất ${visibleRows.length} danh mục thành công!`);
+            alert(`✅ Successfully exported ${visibleRows.length} categories!`);
         }, 100);
     }
 
@@ -1387,7 +1387,7 @@
         if (nameField) {
             const trimmedValue = nameField.value.trim();
             if (trimmedValue.length < 2) {
-                alert('❌ Tên danh mục phải có ít nhất 2 ký tự!');
+                alert('❌ Category name must be at least 2 characters!');
                 nameField.focus();
                 return false;
             }
@@ -1418,7 +1418,7 @@
             'ti-coffee', 'ti-pizza', 'ti-leaf', 'ti-flame'
         ];
 
-        let iconList = 'Chọn icon (nhập số):\n\n';
+        let iconList = 'Choose icon (enter number):\n\n';
         icons.forEach((icon, index) => {
             iconList += `${index + 1}. ${icon}\n`;
         });
@@ -1497,7 +1497,7 @@
             modalBody.innerHTML = `
                 <div class="loading-state">
                     <i class="ti ti-loader"></i>
-                    <div class="loading-state-text">Đang tải dữ liệu...</div>
+                    <div class="loading-state-text">Loading data...</div>
                 </div>
             `;
         }
@@ -1531,12 +1531,12 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Chi tiết danh mục</h5>
+                        <h5 class="modal-title">Category Details</h5>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body"></div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -1551,27 +1551,27 @@
             <!-- Stats Section -->
             <div class="stats-grid" style="margin-bottom: 20px;">
                 <div class="stat-card blue">
-                    <div class="stat-card-label">Tổng sản phẩm</div>
+                    <div class="stat-card-label">Total Products</div>
                     <div class="stat-card-value">${stats.totalProducts || 0}</div>
                 </div>
                 <div class="stat-card green">
-                    <div class="stat-card-label">Đang bán</div>
+                    <div class="stat-card-label">Active</div>
                     <div class="stat-card-value">${stats.activeProducts || 0}</div>
                 </div>
                 <div class="stat-card purple">
-                    <div class="stat-card-label">Giá trung bình</div>
-                    <div class="stat-card-value" style="font-size: 1.25rem;">${(stats.averagePrice || 0).toLocaleString('vi-VN')} ₫</div>
+                    <div class="stat-card-label">Average Price</div>
+                    <div class="stat-card-value" style="font-size: 1.25rem;">${(stats.averagePrice || 0).toLocaleString('en-US')} ₫</div>
                 </div>
             </div>
 
             ${products.length > 0 ? `
             <h6 style="margin: 20px 0 12px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                <i class="ti ti-package"></i> Danh sách sản phẩm
+                <i class="ti ti-package"></i> Product List
             </h6>
             <div class="product-list" style="max-height: 400px; overflow-y: auto;">
                 ${products.map(product => {
             const imageUrl = product.imageUrl || '/img/white.png';
-            const price = product.price ? parseFloat(product.price).toLocaleString('vi-VN') + ' ₫' : 'Chưa có giá';
+            const price = product.price ? parseFloat(product.price).toLocaleString('en-US') + ' ₫' : 'No price';
             const stock = product.stockQuantity || 0;
             const stockClass = stock > 10 ? 'stock-high' : (stock > 0 ? 'stock-medium' : 'stock-low');
 
@@ -1584,7 +1584,7 @@
                             </div>
                             <div class="product-stat">
                                 <i class="ti ti-package"></i>
-                                Kho: <strong class="${stockClass}">${stock}</strong>
+                                Stock: <strong class="${stockClass}">${stock}</strong>
                             </div>
                         </div>
                     `;
@@ -1593,8 +1593,8 @@
             ` : `
             <div class="empty-state" style="padding: 40px 20px;">
                 <i class="ti ti-inbox"></i>
-                <div class="empty-state-title">Chưa có sản phẩm</div>
-                <div class="empty-state-text">Danh mục này chưa có sản phẩm nào</div>
+                <div class="empty-state-title">No products yet</div>
+                <div class="empty-state-text">This category has no products</div>
             </div>
             `}
         `;
@@ -1617,24 +1617,24 @@
         const productCount = parseInt(wrapper.getAttribute('data-product-count') || '0');
 
         if (productCount === 0) {
-            alert('⚠️ Danh mục này chưa có sản phẩm để xuất!');
+            alert('⚠️ This category has no products to export!');
             return;
         }
 
-        showNotification('🔄 Đang tải dữ liệu sản phẩm...', 'info');
+        showNotification('🔄 Loading product data...', 'info');
 
         // Fetch products and export
         fetch(`/seller/categories/${categoryId}/products`)
             .then(response => response.json())
             .then(products => {
                 if (products.length === 0) {
-                    alert('⚠️ Không có sản phẩm để xuất!');
+                    alert('⚠️ No products to export!');
                     return;
                 }
 
                 // Prepare CSV data
                 const csvData = [];
-                csvData.push(['STT', 'Tên sản phẩm', 'SKU', 'Giá', 'Kho', 'Đã bán', 'Trạng thái']);
+                csvData.push(['No.', 'Product Name', 'SKU', 'Price', 'Stock', 'Sold', 'Status']);
 
                 products.forEach((product, index) => {
                     csvData.push([
@@ -1673,11 +1673,11 @@
                 link.click();
                 document.body.removeChild(link);
 
-                showNotification(`✅ Đã xuất ${products.length} sản phẩm từ "${categoryName}"`, 'success');
+                showNotification(`✅ Exported ${products.length} products from "${categoryName}"`, 'success');
             })
             .catch(error => {
                 console.error('Error exporting products:', error);
-                alert('❌ Có lỗi khi xuất dữ liệu. Vui lòng thử lại!');
+                alert('❌ Error exporting data. Please try again!');
             });
     }
 
@@ -1688,7 +1688,7 @@
         const productCount = parseInt(button.getAttribute('data-product-count') || '0');
 
         if (productCount === 0) {
-            alert('⚠️ Danh mục này chưa có sản phẩm để gộp!');
+            alert('⚠️ This category has no products to merge!');
             return;
         }
 
@@ -1705,42 +1705,42 @@
         });
 
         if (categoryOptions.length === 0) {
-            alert('⚠️ Không có danh mục khác để gộp!');
+            alert('⚠️ No other categories available to merge!');
             return;
         }
 
         // Show selection dialog
-        let optionsText = 'Chọn danh mục đích (nhập số):\n\n';
+        let optionsText = 'Choose destination category (enter number):\n\n';
         categoryOptions.forEach((cat, index) => {
             optionsText += `${index + 1}. ${cat.name}\n`;
         });
 
         const selection = prompt(
-            `🔀 Gộp sản phẩm từ "${categoryName}" (${productCount} SP)\n\n${optionsText}\nNhập số thứ tự:`
+            `🔀 Merge products from "${categoryName}" (${productCount} products)\n\n${optionsText}\nEnter number:`
         );
 
         if (!selection) return;
 
         const selectedIndex = parseInt(selection) - 1;
         if (selectedIndex < 0 || selectedIndex >= categoryOptions.length) {
-            alert('❌ Lựa chọn không hợp lệ!');
+            alert('❌ Invalid selection!');
             return;
         }
 
         const targetCategory = categoryOptions[selectedIndex];
 
         const confirm = window.confirm(
-            `⚠️ XÁC NHẬN GỘP DANH MỤC\n\n` +
-            `Từ: "${categoryName}" (${productCount} sản phẩm)\n` +
-            `Đến: "${targetCategory.name}"\n\n` +
-            `Tất cả sản phẩm sẽ được chuyển sang danh mục mới.\n` +
-            `Bạn có chắc chắn muốn tiếp tục?`
+            `⚠️ CONFIRM CATEGORY MERGE\n\n` +
+            `From: "${categoryName}" (${productCount} products)\n` +
+            `To: "${targetCategory.name}"\n\n` +
+            `All products will be moved to the new category.\n` +
+            `Are you sure you want to continue?`
         );
 
         if (!confirm) return;
 
         // Note: This would need a backend endpoint to handle the merge
-        showNotification('ℹ️ Chức năng đang được phát triển. Vui lòng liên hệ quản trị viên!', 'info');
+        showNotification('ℹ️ Feature under development. Please contact administrator!', 'info');
 
         // TODO: Implement backend endpoint
         // fetch(`/seller/categories/${categoryId}/merge/${targetCategory.id}`, {
@@ -1755,19 +1755,19 @@
         const categoryName = button.getAttribute('data-name');
         const productCount = parseInt(button.getAttribute('data-product-count') || '0');
 
-        let warningMsg = `📦 Lưu trữ danh mục "${categoryName}"?\n\n`;
+        let warningMsg = `📦 Archive category "${categoryName}"?\n\n`;
 
         if (productCount > 0) {
-            warningMsg += `⚠️ Danh mục có ${productCount} sản phẩm.\n`;
-            warningMsg += `Các sản phẩm sẽ được ẩn khỏi trang chủ.\n\n`;
+            warningMsg += `⚠️ Category has ${productCount} products.\n`;
+            warningMsg += `Products will be hidden from homepage.\n\n`;
         }
 
-        warningMsg += `Bạn có thể khôi phục danh mục này sau.`;
+        warningMsg += `You can restore this category later.`;
 
         if (!confirm(warningMsg)) return;
 
         // Note: This would need a backend endpoint
-        showNotification('ℹ️ Chức năng lưu trữ đang được phát triển!', 'info');
+        showNotification('ℹ️ Archive feature under development!', 'info');
 
         // TODO: Implement backend endpoint
         // fetch(`/seller/categories/${categoryId}/archive`, {
@@ -1783,29 +1783,29 @@
 
         if (productCount > 0) {
             alert(
-                `❌ KHÔNG THỂ XÓA\n\n` +
-                `Danh mục "${categoryName}" có ${productCount} sản phẩm.\n\n` +
-                `Vui lòng:\n` +
-                `1. Di chuyển sản phẩm sang danh mục khác, hoặc\n` +
-                `2. Xóa tất cả sản phẩm trong danh mục, hoặc\n` +
-                `3. Sử dụng chức năng "Lưu trữ" thay vì xóa.`
+                `❌ CANNOT DELETE\n\n` +
+                `Category "${categoryName}" has ${productCount} products.\n\n` +
+                `Please:\n` +
+                `1. Move products to another category, or\n` +
+                `2. Delete all products in the category, or\n` +
+                `3. Use "Archive" feature instead of deletion.`
             );
             return;
         }
 
         const confirm1 = window.confirm(
-            `⚠️ XÁC NHẬN XÓA DANH MỤC\n\n` +
-            `Danh mục: "${categoryName}"\n\n` +
-            `Hành động này KHÔNG THỂ HOÀN TÁC!\n` +
-            `Bạn có chắc chắn muốn xóa?`
+            `⚠️ CONFIRM CATEGORY DELETION\n\n` +
+            `Category: "${categoryName}"\n\n` +
+            `This action CANNOT BE UNDONE!\n` +
+            `Are you sure you want to delete?`
         );
 
         if (!confirm1) return;
 
         // Double confirmation for safety
         const confirm2 = window.confirm(
-            `🔴 XÁC NHẬN LẦN CUỐI\n\n` +
-            `Bạn THỰC SỰ muốn xóa danh mục "${categoryName}"?`
+            `🔴 FINAL CONFIRMATION\n\n` +
+            `Do you REALLY want to delete category "${categoryName}"?`
         );
 
         if (!confirm2) return;
@@ -1871,9 +1871,9 @@
 
         // Ask for confirmation
         const newName = prompt(
-            '📋 Nhân bản danh mục\n\n' +
-            'Tên danh mục gốc: ' + categoryName + '\n\n' +
-            'Nhập tên cho danh mục mới:',
+            '📋 Duplicate Category\n\n' +
+            'Original category name: ' + categoryName + '\n\n' +
+            'Enter name for new category:',
             '[Copy] ' + categoryName
         );
 
@@ -1882,7 +1882,7 @@
         }
 
         if (newName.trim().length < 2) {
-            alert('❌ Tên danh mục phải có ít nhất 2 ký tự!');
+            alert('❌ Category name must be at least 2 characters!');
             return;
         }
 
@@ -1908,7 +1908,7 @@
             }, 2000);
         }
 
-        showNotification('✅ Đã điền thông tin vào form. Vui lòng kiểm tra và nhấn "Thêm danh mục"', 'success');
+        showNotification('✅ Form filled with data. Please review and click "Add Category"', 'success');
     }
 
     // Show category statistics
@@ -1922,7 +1922,7 @@
 
         // Set modal title
         const modalTitle = statsModal.querySelector('.modal-title');
-        if (modalTitle) modalTitle.textContent = 'Thống kê: ' + categoryName;
+        if (modalTitle) modalTitle.textContent = 'Statistics: ' + categoryName;
 
         // Set loading state
         const modalBody = statsModal.querySelector('.modal-body');
@@ -1930,7 +1930,7 @@
             modalBody.innerHTML = `
                 <div class="loading-state">
                     <i class="ti ti-loader"></i>
-                    <div class="loading-state-text">Đang tải thống kê...</div>
+                    <div class="loading-state-text">Loading statistics...</div>
                 </div>
             `;
         }
@@ -1984,12 +1984,12 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Thống kê danh mục</h5>
+                        <h5 class="modal-title">Category Statistics</h5>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body"></div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -2004,53 +2004,53 @@
             <div class="category-stats">
                 <div class="stats-grid" style="margin-bottom: 24px;">
                     <div class="stat-card blue">
-                        <div class="stat-card-label">Tổng sản phẩm</div>
+                        <div class="stat-card-label">Total Products</div>
                         <div class="stat-card-value">${stats.totalProducts || 0}</div>
                     </div>
                     <div class="stat-card green">
-                        <div class="stat-card-label">Đang hoạt động</div>
+                        <div class="stat-card-label">Active</div>
                         <div class="stat-card-value">${stats.activeProducts || 0}</div>
                     </div>
                     <div class="stat-card purple">
-                        <div class="stat-card-label">Tổng giá trị</div>
-                        <div class="stat-card-value">${(stats.totalValue || 0).toLocaleString('vi-VN')} ₫</div>
+                        <div class="stat-card-label">Total Value</div>
+                        <div class="stat-card-value">${(stats.totalValue || 0).toLocaleString('en-US')} ₫</div>
                     </div>
                     <div class="stat-card pink">
-                        <div class="stat-card-label">Giá TB</div>
-                        <div class="stat-card-value">${(stats.averagePrice || 0).toLocaleString('vi-VN')} ₫</div>
+                        <div class="stat-card-label">Avg Price</div>
+                        <div class="stat-card-value">${(stats.averagePrice || 0).toLocaleString('en-US')} ₫</div>
                     </div>
                 </div>
 
                 <div class="stats-details">
                     <h6 style="margin-bottom: 12px; color: var(--text); display: flex; align-items: center; gap: 8px;">
                         <i class="ti ti-chart-line"></i>
-                        Tổng quan
+                        Overview
                     </h6>
                     <div style="padding: 16px; background: var(--bg-soft); border-radius: 8px; margin-bottom: 16px;">
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                             <div>
-                                <div style="color: var(--muted); font-size: 0.875rem;">Tổng đơn hàng</div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Total Orders</div>
                                 <div style="font-size: 1.25rem; font-weight: 600; color: var(--text);">
-                                    ${(stats.totalSales || 0).toLocaleString('vi-VN')}
+                                    ${(stats.totalSales || 0).toLocaleString('en-US')}
                                 </div>
                             </div>
                             <div>
-                                <div style="color: var(--muted); font-size: 0.875rem;">Tỷ lệ hoạt động</div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Activity Rate</div>
                                 <div style="font-size: 1.25rem; font-weight: 600; color: var(--good);">
                                     ${stats.totalProducts > 0 ? Math.round((stats.activeProducts / stats.totalProducts) * 100) : 0}%
                                 </div>
                             </div>
                             <div>
-                                <div style="color: var(--muted); font-size: 0.875rem;">Sản phẩm bán chạy nhất</div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Best Selling Product</div>
                                 <div style="font-size: 1rem; font-weight: 500; color: var(--text);">
-                                    ${stats.topProduct || 'Chưa có dữ liệu'}
+                                    ${stats.topProduct || 'No data yet'}
                                 </div>
                             </div>
                             <div>
-                                <div style="color: var(--muted); font-size: 0.875rem;">Trạng thái</div>
+                                <div style="color: var(--muted); font-size: 0.875rem;">Status</div>
                                 <div style="font-size: 1rem; font-weight: 500;">
                                     <span style="color: ${stats.totalProducts > 0 ? 'var(--good)' : 'var(--muted)'};">
-                                        ${stats.totalProducts > 0 ? '✓ Đang hoạt động' : '⚠ Chưa có sản phẩm'}
+                                        ${stats.totalProducts > 0 ? '✓ Active' : '⚠ No products'}
                                     </span>
                                 </div>
                             </div>
@@ -2060,7 +2060,7 @@
                     <div style="padding: 12px; background: var(--bg-soft); border-left: 4px solid var(--accent); border-radius: 4px;">
                         <div style="display: flex; align-items: center; gap: 8px; color: var(--text);">
                             <i class="ti ti-info-circle"></i>
-                            <span>Danh mục <strong>${categoryName}</strong> ${stats.totalProducts > 0 ? 'đang hoạt động tốt' : 'cần thêm sản phẩm'}</span>
+                            <span>Category <strong>${categoryName}</strong> ${stats.totalProducts > 0 ? 'is performing well' : 'needs more products'}</span>
                         </div>
                     </div>
                 </div>
@@ -2081,7 +2081,7 @@
         if (modalTitle) modalTitle.textContent = categoryName;
         if (modalContent) {
             modalContent.className = 'loading-state';
-            modalContent.innerHTML = '<i class="ti ti-loader"></i><div class="loading-state-text">Đang tải...</div>';
+            modalContent.innerHTML = '<i class="ti ti-loader"></i><div class="loading-state-text">Loading...</div>';
         }
 
         // Show modal using Bootstrap
@@ -2099,14 +2099,14 @@
             .then(products => {
                 if (products.length === 0) {
                     modalContent.className = 'empty-state';
-                    modalContent.innerHTML = '<i class="ti ti-inbox"></i><div class="empty-state-title">Không có sản phẩm nào</div><div class="empty-state-text">Danh mục này chưa có sản phẩm</div>';
+                    modalContent.innerHTML = '<i class="ti ti-inbox"></i><div class="empty-state-title">No products</div><div class="empty-state-text">This category has no products</div>';
                     return;
                 }
 
                 let html = '<div class="product-list">';
                 products.forEach(product => {
                     const imageUrl = product.imageUrl || '/img/white.png';
-                    const price = product.price ? parseFloat(product.price).toLocaleString('vi-VN') + ' ₫' : 'Chưa có giá';
+                    const price = product.price ? parseFloat(product.price).toLocaleString('en-US') + ' ₫' : 'No price';
                     const sku = product.sku || 'N/A';
                     const stock = product.stockQuantity !== undefined ? product.stockQuantity : 0;
                     const sold = product.totalSales || 0;
@@ -2127,11 +2127,11 @@
                             <div class="product-stats">
                                 <div class="product-stat">
                                     <i class="ti ti-package"></i>
-                                    Kho: <strong class="${stockClass}">${stock}</strong>
+                                    Stock: <strong class="${stockClass}">${stock}</strong>
                                 </div>
                                 <div class="product-stat">
                                     <i class="ti ti-shopping-cart"></i>
-                                    Bán: <strong>${sold}</strong>
+                                    Sold: <strong>${sold}</strong>
                                 </div>
                             </div>
                         </div>
@@ -2140,7 +2140,7 @@
                 html += '</div>';
                 html += `<div class="product-summary">
                     <i class="ti ti-info-circle"></i>
-                    Tổng: ${products.length} sản phẩm
+                    Total: ${products.length} products
                 </div>`;
 
                 modalContent.className = '';
@@ -2149,7 +2149,7 @@
             .catch(error => {
                 console.error('Error loading products:', error);
                 modalContent.className = 'error-state';
-                modalContent.innerHTML = '<i class="ti ti-alert-circle"></i><div class="error-state-title">Lỗi khi tải sản phẩm</div><div class="error-state-text">Vui lòng thử lại sau</div>';
+                modalContent.innerHTML = '<i class="ti ti-alert-circle"></i><div class="error-state-title">Error loading products</div><div class="error-state-text">Please try again later</div>';
             });
     }
 
@@ -2363,7 +2363,7 @@
         if (modal) {
             const modalTitle = modal.querySelector('.modal-title');
             if (modalTitle) {
-                modalTitle.innerHTML = `<i class="ti ti-license"></i> Quản lý Licenses - ${categoryName}`;
+                modalTitle.innerHTML = `<i class="ti ti-license"></i> License Management - ${categoryName}`;
             }
             openModal('licenseManagerModal');
             loadLicenses();
@@ -2375,7 +2375,7 @@
         const container = document.getElementById('licenseListContainer');
         if (!container) return;
 
-        container.innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Đang tải...</div>';
+        container.innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Loading...</div>';
 
         const url = currentCategoryId ?
             `/seller/categories/api/licenses?categoryId=${currentCategoryId}` :
@@ -2391,12 +2391,12 @@
                         loadAssignedLicenses();
                     }
                 } else {
-                    container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Lỗi tải dữ liệu</div></div>';
+                    container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Error loading data</div></div>';
                 }
             })
             .catch(error => {
                 console.error('Error loading licenses:', error);
-                container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Lỗi tải dữ liệu</div></div>';
+                container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Error loading data</div></div>';
             });
     }
 
@@ -2425,8 +2425,8 @@
             container.innerHTML = `
                 <div class="empty-state" style="padding: 40px 20px;">
                     <i class="ti ti-license" style="font-size: 48px; color: var(--muted); margin-bottom: 12px;"></i>
-                    <div class="empty-state-title">Chưa có license nào</div>
-                    <div class="empty-state-text">Thêm license đầu tiên của bạn!</div>
+                    <div class="empty-state-title">No licenses yet</div>
+                    <div class="empty-state-text">Add your first license!</div>
                 </div>
             `;
             return;
@@ -2435,7 +2435,7 @@
         const html = licenses.map(license => {
             const isActive = license.isActive || license.status === 'ACTIVE';
             const statusClass = isActive ? 'status-active' : 'status-inactive';
-            const statusText = isActive ? 'Hoạt động' : 'Tạm dừng';
+            const statusText = isActive ? 'Active' : 'Paused';
             const statusIcon = isActive ? 'ti-circle-check' : 'ti-circle-x';
             const isAssigned = license.isAssignedToCategory || false;
 
@@ -2444,8 +2444,8 @@
                     <div class="license-header">
                         <div class="license-title-group">
                             <h6 class="license-name">
-                                ${license.licenseName || 'Chưa đặt tên'}
-                                ${isAssigned ? '<span class="badge-small" style="background: var(--good); margin-left: 8px;">Đã gán</span>' : ''}
+                                ${license.licenseName || 'Unnamed'}
+                                ${isAssigned ? '<span class="badge-small" style="background: var(--good); margin-left: 8px;">Assigned</span>' : ''}
                             </h6>
                             <span class="license-badge ${statusClass}">
                                 <i class="ti ${statusIcon}"></i> ${statusText}
@@ -2454,11 +2454,11 @@
                         <div class="license-actions">
                             ${currentCategoryId ? `
                                 ${isAssigned ?
-                                    `<button type="button" class="btn btn-sm btn-danger" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Xóa khỏi danh mục">
-                                        <i class="ti ti-x"></i> Xóa
+                                    `<button type="button" class="btn btn-sm btn-danger" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Remove from category">
+                                        <i class="ti ti-x"></i> Remove
                                     </button>` :
-                                    `<button type="button" class="btn btn-sm btn-primary" onclick="assignLicenseToCategory(${license.shopLicenseId})" title="Thêm vào danh mục">
-                                        <i class="ti ti-plus"></i> Thêm
+                                    `<button type="button" class="btn btn-sm btn-primary" onclick="assignLicenseToCategory(${license.shopLicenseId})" title="Add to category">
+                                        <i class="ti ti-plus"></i> Add
                                     </button>`
                                 }
                             ` : ''}
@@ -2466,18 +2466,18 @@
                     </div>
                     <div class="license-body">
                         <div class="license-info-row">
-                            <span class="license-label"><i class="ti ti-key"></i> Loại:</span>
-                            <span class="license-value">${license.licenseType || 'Chưa xác định'}</span>
+                            <span class="license-label"><i class="ti ti-key"></i> Type:</span>
+                            <span class="license-value">${license.licenseType || 'Not specified'}</span>
                         </div>
                         ${license.licenseNumber ? `
                         <div class="license-info-row">
-                            <span class="license-label"><i class="ti ti-number"></i> Số hiệu:</span>
+                            <span class="license-label"><i class="ti ti-number"></i> Number:</span>
                             <span class="license-value">${license.licenseNumber}</span>
                         </div>
                         ` : ''}
                         ${license.description ? `
                         <div class="license-info-row">
-                            <span class="license-label"><i class="ti ti-info-circle"></i> Mô tả:</span>
+                            <span class="license-label"><i class="ti ti-info-circle"></i> Description:</span>
                             <span class="license-value">${license.description}</span>
                         </div>
                         ` : ''}
@@ -2513,7 +2513,7 @@
 
         const html = `
             <h6 class="section-subtitle" style="margin-top: 24px;">
-                <i class="ti ti-check"></i> Licenses đã gán vào danh mục
+                <i class="ti ti-check"></i> Licenses assigned to category
                 <span class="badge-count">(${licenses.length})</span>
             </h6>
             <div class="assigned-licenses-list">
@@ -2521,7 +2521,7 @@
                     <div class="assigned-license-badge">
                         <i class="ti ti-license"></i>
                         <span>${license.licenseName}</span>
-                        <button type="button" class="btn-remove" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Xóa">
+                        <button type="button" class="btn-remove" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Remove">
                             <i class="ti ti-x"></i>
                         </button>
                     </div>
@@ -2547,12 +2547,12 @@
         const description = document.getElementById('newLicenseDescription').value.trim();
 
         if (!name) {
-            alert('⚠️ Vui lòng nhập tên license!');
+            alert('⚠️ Please enter license name!');
             return;
         }
 
         if (!type) {
-            alert('⚠️ Vui lòng nhập mã license!');
+            alert('⚠️ Please enter license code!');
             return;
         }
 
@@ -2575,7 +2575,7 @@
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    showNotification('✅ Đã thêm license thành công!', 'success');
+                    showNotification('✅ License added successfully!', 'success');
                     // Clear form
                     document.getElementById('newLicenseName').value = '';
                     document.getElementById('newLicenseCode').value = '';
@@ -2583,19 +2583,19 @@
                     // Reload list
                     loadLicenses();
                 } else {
-                    alert('❌ Lỗi: ' + (result.error || 'Không thể thêm license'));
+                    alert('❌ Error: ' + (result.error || 'Cannot add license'));
                 }
             })
             .catch(error => {
                 console.error('Error adding license:', error);
-                alert('❌ Có lỗi xảy ra khi thêm license!');
+                alert('❌ An error occurred while adding license!');
             });
     }
 
     // Assign license to category
     function assignLicenseToCategory(licenseId) {
         if (!currentCategoryId) {
-            alert('⚠️ Vui lòng chọn danh mục trước!');
+            alert('⚠️ Please select a category first!');
             return;
         }
 
@@ -2608,26 +2608,26 @@
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    showNotification('✅ Đã thêm license vào danh mục!', 'success');
+                    showNotification('✅ License added to category!', 'success');
                     loadLicenses();
                 } else {
-                    alert('❌ Lỗi: ' + (result.error || 'Không thể thêm license'));
+                    alert('❌ Error: ' + (result.error || 'Cannot add license'));
                 }
             })
             .catch(error => {
                 console.error('Error assigning license:', error);
-                alert('❌ Có lỗi xảy ra!');
+                alert('❌ An error occurred!');
             });
     }
 
     // Remove license from category
     function removeLicenseFromCategory(licenseId) {
         if (!currentCategoryId) {
-            alert('⚠️ Vui lòng chọn danh mục trước!');
+            alert('⚠️ Please select a category first!');
             return;
         }
 
-        if (!confirm('Bạn có chắc muốn xóa license này khỏi danh mục?')) {
+        if (!confirm('Are you sure you want to remove this license from the category?')) {
             return;
         }
 
@@ -2640,15 +2640,15 @@
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    showNotification('✅ Đã xóa license khỏi danh mục!', 'success');
+                    showNotification('✅ License removed from category!', 'success');
                     loadLicenses();
                 } else {
-                    alert('❌ Lỗi: ' + (result.error || 'Không thể xóa license'));
+                    alert('❌ Error: ' + (result.error || 'Cannot remove license'));
                 }
             })
             .catch(error => {
                 console.error('Error removing license:', error);
-                alert('❌ Có lỗi xảy ra!');
+                alert('❌ An error occurred!');
             });
     }
 

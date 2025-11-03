@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -936,7 +936,7 @@
                 return;
             }
 
-            // Validation phía client
+            // Validation on client side
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
                 showToast('File size must not exceed 5MB!', 'error');
@@ -949,14 +949,14 @@
                 return;
             }
 
-            // Disable button và show loading
+            // Disable button and show loading
             uploadAvatar.disabled = true;
             uploadAvatar.innerHTML = '<i class="ti ti-loader"></i> Uploading...';
 
             const formData = new FormData();
             formData.append('avatar', file);
 
-            // Thêm CSRF token nếu có
+            // Add CSRF token if available
             const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
@@ -983,7 +983,7 @@
 
                     return data;
                 } else {
-                    // Response không phải JSON (có thể là HTML error page)
+                    // Response is not JSON (may be HTML error page)
                     const text = await response.text();
                     console.error('Non-JSON response:', text);
                     throw new Error('Server returned invalid response. Please try again!');
@@ -992,11 +992,11 @@
             .then(data => {
                 if (data.success) {
                     showToast(data.message || 'Avatar updated successfully!', 'success');
-                    // Cập nhật avatar trên trang (thêm timestamp để tránh cache)
+                    // Update avatar on page (add timestamp to avoid cache)
                     document.getElementById('profileAvatar').src = data.avatarUrl + '?t=' + new Date().getTime();
-                    // Cập nhật avatar preview
+                    // Update avatar preview
                     avatarPreview.src = data.avatarUrl + '?t=' + new Date().getTime();
-                    // Đóng modal
+                    // Close modal
                     avatarModal.style.display = 'none';
                     // Reset form
                     avatarFile.value = '';
@@ -1009,7 +1009,7 @@
                 showToast(error.message || 'Error uploading avatar!', 'error');
             })
             .finally(() => {
-                // Enable button trở lại
+                // Re-enable button
                 uploadAvatar.disabled = false;
                 uploadAvatar.innerHTML = '<i class="ti ti-upload"></i> Upload';
             });
@@ -1097,19 +1097,19 @@
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // Client-side validation (bổ sung kiểm tra dấu cách)
+            // Client-side validation (with space check)
             if (newPassword.includes(' ')) {
-                showToast('Mật khẩu không được chứa dấu cách!', 'error');
+                showToast('Password cannot contain spaces!', 'error');
                 return;
             }
 
             if (newPassword !== confirmPassword) {
-                showToast('Mật khẩu xác nhận không khớp!', 'error');
+                showToast('Password confirmation does not match!', 'error');
                 return;
             }
 
             if (newPassword.length < 6) {
-                showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'error');
+                showToast('Password must be at least 6 characters long!', 'error');
                 return;
             }
 
@@ -1125,7 +1125,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showToast(data.message || 'Đổi mật khẩu thành công!', 'success');
+                    showToast(data.message || 'Password changed successfully!', 'success');
                     passwordModal.style.display = 'none';
                     passwordForm.reset();
                     strengthIndicator.style.display = 'none';
@@ -1135,13 +1135,13 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showToast('Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại!', 'error');
+                showToast('An error occurred while changing password. Please try again!', 'error');
             });
         });
 
         // About us button
         document.getElementById('aboutUsBtn').addEventListener('click', function() {
-            showToast('Bán Hàng Rong - Trusted online trading platform', 'info');
+            showToast('Ban Hang Rong - Trusted online trading platform', 'info');
         });
 
         // Close modal when clicking outside

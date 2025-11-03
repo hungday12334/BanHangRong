@@ -1,10 +1,13 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -26,11 +30,32 @@ public class SellerProfileController {
     @Autowired
     private UserProfileService userProfileService;
 
+    @Autowired
+    private UsersRepository usersRepository;
+
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
 
     private Long getCurrentSellerId() {
-        return 1L;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        System.out.println("=== GETTING CURRENT SELLER ===");
+        System.out.println("Authenticated username: " + username);
+
+        Optional<Users> userOptional = usersRepository.findByUsername(username);
+
+        if (userOptional.isEmpty()) {
+            System.out.println("❌ User not found: " + username);
+            throw new RuntimeException("User not found");
+        }
+
+        Users user = userOptional.get();
+        System.out.println("✅ Found user ID: " + user.getUserId());
+        System.out.println("   Username: " + user.getUsername());
+        System.out.println("   Role: " + user.getUserType());
+
+        return user.getUserId();
     }
 
     @GetMapping("/profile")
