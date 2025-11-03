@@ -850,7 +850,15 @@
                 if (!confirm('Delete this product?')) return;
                 const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
                 if (res.ok) { closeModal(productModal); showToast('Product deleted', 'success'); setTimeout(() => refreshMyProducts(), 350); }
-                else { showToast('Failed to delete product', 'error'); }
+                else {
+                    try {
+                        const body = await res.json().catch(()=>({}));
+                        const msg = body && (body.message || body.error) ? (body.message || body.error) : 'Failed to delete product';
+                        showToast(msg, 'error');
+                    } catch(_) {
+                        showToast('Failed to delete product', 'error');
+                    }
+                }
             });
         }
 

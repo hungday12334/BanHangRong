@@ -32,7 +32,8 @@ public class Products {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     private Boolean isActive;
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "was_public")
+    private Boolean wasPublic; // ever been public at least once
 
     public Long getProductId() {
         return productId;
@@ -106,11 +107,14 @@ public class Products {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+    public Boolean getWasPublic() { return wasPublic; }
+    public void setWasPublic(Boolean wasPublic) { this.wasPublic = wasPublic; }
 
     @PrePersist
     public void _prePersistNormalizeStatus() {
         if (status == null || status.isBlank()) status = "pending";
         status = status.toLowerCase();
+        if (wasPublic == null) wasPublic = Boolean.FALSE;
     }
 
     @PreUpdate

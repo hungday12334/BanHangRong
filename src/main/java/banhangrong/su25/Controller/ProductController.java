@@ -115,7 +115,18 @@ public class ProductController {
     // DELETE /api/products/{id} → Xóa product
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        if (!productsRepository.existsById(id)) return ResponseEntity.notFound().build();
+        Optional<Products> opt = productsRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        Products p = opt.get();
+        // Rule: only allow delete if product has NEVER been public
+        Boolean everPublic = p.getWasPublic();
+        String currentStatus = p.getStatus() != null ? p.getStatus().toLowerCase() : null;
+        if (Boolean.TRUE.equals(everPublic) || "public".equals(currentStatus)) {
+            return ResponseEntity.status(409).body(Map.of(
+                    "error", "cannot_delete_public_product",
+                    "message", "Product that has been public cannot be deleted. Please hide it instead."
+            ));
+        }
         productsRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -135,6 +146,7 @@ public class ProductController {
                     return ResponseEntity.ok(p); // no-op
                 }
                 p.setStatus("public");
+                p.setWasPublic(Boolean.TRUE);
             } else {
                 p.setStatus("hidden");
             }

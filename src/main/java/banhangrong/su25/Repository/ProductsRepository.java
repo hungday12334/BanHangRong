@@ -49,7 +49,7 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
         @Query(value = "SELECT COALESCE(SUM(oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
     Long totalUnitsSoldBySeller(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT CAST(o.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND o.created_at >= :fromDate GROUP BY CAST(o.created_at AS DATE) ORDER BY CAST(o.created_at AS DATE)", nativeQuery = true)
+        @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND oi.created_at >= :fromDate GROUP BY CAST(oi.created_at AS DATE) ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
     List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDateTime fromDate);
 
         @Query(value = "SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
