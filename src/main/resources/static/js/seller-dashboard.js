@@ -1258,12 +1258,12 @@
             }
 
             async function fetchCheck(key, page=0, size=10){
-                // Prefer seller-scoped endpoint if sellerId available
-                const base = sellerId ? `/api/seller/${sellerId}/licenses/check` : `/api/licenses/check`;
-                const url = new URL(base, window.location.origin);
+                // Backend supports only GET /api/licenses/check with optional sellerId filter
+                const url = new URL('/api/licenses/check', window.location.origin);
                 url.searchParams.set('key', key);
                 url.searchParams.set('page', page);
                 url.searchParams.set('size', size);
+                if (sellerId) url.searchParams.set('sellerId', sellerId);
                 const res = await fetch(url.toString());
                 if (!res.ok) throw new Error(await res.text().catch(()=> 'Check failed'));
                 return await res.json();
@@ -1338,7 +1338,11 @@
                     const hist = data.history || data.logs || null;
                     if (hist) {
                         document.getElementById('ck_history_wrap').style.display = '';
-                        renderHistory(hist);
+                        // Adapt backend shape (history array + page metadata at top-level)
+                        const histObj = Array.isArray(hist)
+                            ? { content: hist, totalPages: (typeof data.totalPages==='number'? data.totalPages : 1), number: (typeof data.page==='number'? data.page : 0) }
+                            : hist;
+                        renderHistory(histObj);
                     } else {
                         document.getElementById('ck_history_wrap').style.display = 'none';
                     }
