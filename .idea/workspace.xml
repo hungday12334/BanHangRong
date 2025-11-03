@@ -4,43 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(profile): add password validation to prevent spaces and enhance response handling">
-      <change afterPath="$PROJECT_DIR$/ADVANCED_FILTERS_UPDATE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BAO_MAT_DANH_GIA.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CATEGORIES_DESIGN_EXPLAINED.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FEATURE_COMPLETE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_LOGIN_REDIRECT_ISSUE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_SELLER_PRODUCT_FILTER.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LICENSE_MANAGEMENT_README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LICENSE_MANAGEMENT_SUMMARY.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QUICK_FIX_LOGIN_ISSUE.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QUICK_START.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QUICK_TEST_SELLER_FIX.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/REVIEW_MANAGEMENT_UPDATES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SECURITY_REVIEW_ISOLATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SETUP_INSTRUCTIONS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TESTING_GUIDE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TEST_REVIEW_UPDATES.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TEST_SECURITY_ISOLATION.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/create_category_licenses_table.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/test_seller_product_filtering.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/LicenseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/CategoryLicenses.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoryLicensesRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/LicenseManagementService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test-license-management.sh" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(license-management): implement category licenses feature for tracking license assignments">
+      <change afterPath="$PROJECT_DIR$/CRITICAL_SESSION_DEBUG.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_SESSION_LOST.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_WEBSOCKET_ERROR.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WEBSOCKET_IMPLEMENTED.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clear-cache-guide.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test-session-debug.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomAuthenticationSuccessHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomAuthenticationSuccessHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerReviewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ProductReviews.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductReviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/reviews.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/reviews.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/seller-dashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/seller-dashboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -274,7 +252,8 @@
       <workItem from="1762008314114" duration="10413000" />
       <workItem from="1762019652256" duration="2430000" />
       <workItem from="1762071570533" duration="875000" />
-      <workItem from="1762111402526" duration="6417000" />
+      <workItem from="1762111402526" duration="8323000" />
+      <workItem from="1762138370900" duration="473000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -452,7 +431,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762022040310</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="feat(license-management): implement category licenses feature for tracking license assignments">
+      <option name="closed" value="true" />
+      <created>1762118397187</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1762118397188</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -530,6 +517,8 @@
     <MESSAGE value="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality" />
     <MESSAGE value="feat(chat): implement conversation actions with pinning and soft delete functionality" />
     <MESSAGE value="feat(profile): add password validation to prevent spaces and enhance response handling" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(profile): add password validation to prevent spaces and enhance response handling" />
+    <MESSAGE value="feat(license-management): implement category licenses feature for managing licenses per category" />
+    <MESSAGE value="feat(license-management): implement category licenses feature for tracking license assignments" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(license-management): implement category licenses feature for tracking license assignments" />
   </component>
 </project>

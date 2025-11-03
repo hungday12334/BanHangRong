@@ -35,19 +35,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+            // CSRF - Keep disabled for now
+            .csrf(csrf -> csrf.disable())
 
-            // Cấu hình session management - INCREASED TIMEOUT
+            // Session management - CRITICAL for maintaining session
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionFixation().migrateSession() // Migrate session on authentication
                 .invalidSessionUrl("/login?expired=true")
-                .maximumSessions(5) // Allow multiple tabs/sessions
+                .maximumSessions(5)
                 .maxSessionsPreventsLogin(false)
                 .expiredUrl("/login?expired=true")
                 .sessionRegistry(sessionRegistry)
             )
 
-            // Cấu hình authorization
+            // Authorization rules
             .authorizeHttpRequests(auth -> auth
                     // Public endpoints
                     .requestMatchers("/api/auth/**").permitAll()

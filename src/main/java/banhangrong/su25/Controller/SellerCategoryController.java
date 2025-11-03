@@ -37,19 +37,43 @@ public class SellerCategoryController {
     @Autowired
     private LicenseManagementService licenseManagementService;
 
+    // ========== DEBUG/TEST ENDPOINT ==========
+
+    @GetMapping("/test")
+    @ResponseBody
+    public String testEndpoint(HttpSession session) {
+        System.out.println("🧪 TEST ENDPOINT CALLED");
+        Users user = (Users) session.getAttribute("user");
+        return "TEST OK - Session ID: " + session.getId() +
+               ", User: " + (user != null ? user.getUsername() : "NULL") +
+               ", Attributes: " + java.util.Collections.list(session.getAttributeNames());
+    }
+
     // ========== MAIN ENDPOINTS ==========
 
     // Hiển thị trang quản lý danh mục
     @GetMapping
     public String categoryManagementPage(Model model, HttpSession session) {
+        System.out.println("========================================");
+        System.out.println("🔍 SellerCategoryController.categoryManagementPage() CALLED");
+        System.out.println("Session ID: " + session.getId());
+        System.out.println("Session isNew: " + session.isNew());
+        System.out.println("Session MaxInactiveInterval: " + session.getMaxInactiveInterval());
+
         try {
             // Get current seller from session
             Users currentUser = (Users) session.getAttribute("user");
+            System.out.println("Current user from session: " + (currentUser != null ? currentUser.getUsername() : "NULL"));
+
             if (currentUser == null) {
                 // Session expired or not logged in
+                System.out.println("❌ User is NULL - redirecting to login");
+                System.out.println("========================================");
                 model.addAttribute("error", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
                 return "redirect:/login?expired=true";
             }
+
+            System.out.println("✅ User found: " + currentUser.getUsername() + " (ID: " + currentUser.getUserId() + ")");
 
             // Check if user is seller or admin
             String userType = currentUser.getUserType();
