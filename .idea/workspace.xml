@@ -4,21 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(license-management): implement category licenses feature for tracking license assignments">
-      <change afterPath="$PROJECT_DIR$/CRITICAL_SESSION_DEBUG.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_SESSION_LOST.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_WEBSOCKET_ERROR.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WEBSOCKET_IMPLEMENTED.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clear-cache-guide.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test-session-debug.sh" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update main">
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/seller-dashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/seller-dashboard.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +103,7 @@
     &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
     &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;#6 on MinhHQ&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
@@ -254,6 +244,7 @@
       <workItem from="1762071570533" duration="875000" />
       <workItem from="1762111402526" duration="8323000" />
       <workItem from="1762138370900" duration="473000" />
+      <workItem from="1762151908837" duration="1739000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -439,7 +430,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762118397188</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="update main">
+      <option name="closed" value="true" />
+      <created>1762143655559</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1762143655559</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -519,6 +518,7 @@
     <MESSAGE value="feat(profile): add password validation to prevent spaces and enhance response handling" />
     <MESSAGE value="feat(license-management): implement category licenses feature for managing licenses per category" />
     <MESSAGE value="feat(license-management): implement category licenses feature for tracking license assignments" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(license-management): implement category licenses feature for tracking license assignments" />
+    <MESSAGE value="update main" />
+    <option name="LAST_COMMIT_MESSAGE" value="update main" />
   </component>
 </project>
