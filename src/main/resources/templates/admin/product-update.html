@@ -287,7 +287,7 @@
                        th:value="${product != null ? #temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm') : ''}">
             </div>
         <div class="form-container">
-            <form  action="/admin/product/update" method="post" enctype="multipart/form-data">
+            <form  th:action="@{/admin/product/update}" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="productId" th:value="${product.productId}">
                 <div class="form-actions">
 
@@ -295,7 +295,7 @@
                 </div>
 
             </form>
-            <form action="/admin/product/cancel" method="post" style="text-align:center;">
+            <form th:action="@{/admin/product/cancel}" method="post" style="text-align:center;">
                 <input type="hidden" name="productId" th:value="${product.productId}">
                 <div class="form-actions">
                     <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')">Cancel</button>

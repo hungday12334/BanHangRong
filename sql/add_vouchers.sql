@@ -42,6 +42,24 @@ CREATE TABLE IF NOT EXISTS voucher_redemptions (
 
 SET @seller := 1;
 SET @p1 := (SELECT p.product_id FROM products p WHERE p.seller_id = @seller ORDER BY p.product_id LIMIT 1);
+SET @p2 := (SELECT p.product_id FROM products p WHERE p.seller_id = @seller ORDER BY p.product_id OFFSET 1 LIMIT 1);
+SET @p3 := (SELECT p.product_id FROM products p WHERE p.seller_id = @seller ORDER BY p.product_id OFFSET 2 LIMIT 1);
+
+-- Sample vouchers (safe if products exist)
+INSERT INTO vouchers (seller_id, product_id, code, discount_type, discount_value, min_order, start_at, end_at, max_uses, max_uses_per_user, status)
+SELECT @seller, @p1, 'TECH10', 'PERCENT', 10, 100000, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 100, 1, 'active'
+WHERE @p1 IS NOT NULL
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO vouchers (seller_id, product_id, code, discount_type, discount_value, min_order, start_at, end_at, max_uses, max_uses_per_user, status)
+SELECT @seller, @p2, 'SAVE50K', 'AMOUNT', 50000, 200000, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 200, 2, 'active'
+WHERE @p2 IS NOT NULL
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO vouchers (seller_id, product_id, code, discount_type, discount_value, min_order, start_at, end_at, max_uses, max_uses_per_user, status)
+SELECT @seller, @p3, 'MEGA20', 'PERCENT', 20, 300000, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY), 50, 1, 'active'
+WHERE @p3 IS NOT NULL
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
 
 -- Insert two vouchers for that product (if the product exists)
 INSERT INTO vouchers (seller_id, product_id, code, discount_type, discount_value, min_order, start_at, end_at, max_uses, max_uses_per_user, status)

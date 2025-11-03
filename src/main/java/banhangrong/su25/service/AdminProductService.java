@@ -1,4 +1,5 @@
 package banhangrong.su25.service;
+import banhangrong.su25.DTO.ProductFilter;
 import banhangrong.su25.Entity.Products;
 
 import java.util.List;
@@ -13,4 +14,5 @@ public interface AdminProductService {
     public Long count();
     public Long countByStatus(String status);
     public List<Products> findBySellerIdAndStatusIgnoreCase(Long sellerId, String status);
+    public List<Products> filter(ProductFilter filter);
 }

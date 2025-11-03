@@ -1,5 +1,6 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.DTO.UserFilter;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Util.ImageUploadUtil;
@@ -27,6 +28,15 @@ public class AdminUserManagement {
     @Autowired
     private UserService userService;
 
+    @GetMapping("filter")
+    public String filterUser(@ModelAttribute("filter") UserFilter userFilter, RedirectAttributes redirectAttributes) {
+
+        List<Users> listFilterUser = userService.filter(userFilter);
+        redirectAttributes.addFlashAttribute("filter", listFilterUser);
+        redirectAttributes.addFlashAttribute("isFromFilter", true);
+        return "redirect:/admin/user";
+    }
+
     @GetMapping("/create")
     public String showCreateScreen(Model model) {
         return "admin/user-creation";
@@ -35,7 +45,6 @@ public class AdminUserManagement {
     @PostMapping("/create")
     public String createUser(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
         //Delare
-        ImageUploadUtil imageUploadUtil = new ImageUploadUtil();
         Validation valid = new Validation();
         LocalDateTime now = LocalDateTime.now();
         Users user = new Users();
@@ -45,6 +54,7 @@ public class AdminUserManagement {
         user.setUsername(request.getParameter("username"));
         user.setEmail(request.getParameter("email"));
         user.setPassword(request.getParameter("password"));
+        user.setFullName(request.getParameter("fullName"));
         user.setUserType(request.getParameter("userType"));
         user.setPhoneNumber(request.getParameter("phoneNumber"));
         user.setAvatarUrl("");//Default null, if having image --> solving below
@@ -58,6 +68,16 @@ public class AdminUserManagement {
             model.addAttribute("error", "Username or Email already exists");
             model.addAttribute("user", user);
             return "admin/user-creation";
+        } else {
+            if (valid.hasSpace(user.getUsername())){
+                model.addAttribute("error", "Username can not have space");
+                model.addAttribute("user", user);
+                return "admin/user-creation";
+            }
+            if(valid.hasSpace(user.getEmail())){
+                model.addAttribute("error", "Email can not have space");
+                model.addAttribute("user", user);
+            }
         }
 
         //Check valid pasword
@@ -65,6 +85,15 @@ public class AdminUserManagement {
             model.addAttribute("error", "Password must be at least 6 characters long");
             model.addAttribute("user", user);
             return "admin/user-creation";
+        }else if(valid.hasSpace(user.getPassword())){
+            model.addAttribute("error", "Password can not have space");
+            model.addAttribute("user", user);
+            return "admin/user-creation";
+        }
+
+        //Trim username
+        if(user.getUsername()!=null){
+            user.setUsername(user.getUsername().trim());
         }
         //Check valid phone
         if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
@@ -72,30 +101,13 @@ public class AdminUserManagement {
                 model.addAttribute("error", "Invalid phone number");
                 model.addAttribute("user", user);
                 return "admin/user-creation";
-            }
-        }
-        // Solving if having image
-        MultipartFile avatar = multipartRequest.getFile("avatarUrl");
-
-        if (avatar != null && !avatar.isEmpty()) {
-
-            // User entered an invalid file
-            if (!valid.isImageFileValid(avatar)) {
-                model.addAttribute("error", "This file is not an image");
+            }else if(valid.hasSpace(user.getPhoneNumber())){
+                model.addAttribute("error", "Phone can not have space");
                 model.addAttribute("user", user);
                 return "admin/user-creation";
             }
-
-            // Save the image into static/img/avatar folder, naming follows role+id
-            try {
-                user.setAvatarUrl(imageUploadUtil.saveAvatar(avatar, user.getUsername()));
-            } catch (Exception e) {
-                model.addAttribute("error", "Upload failed");
-                model.addAttribute("user", user);
-                return "admin/user-creation";
-            }
-
         }
+        user.setAvatarUrl(request.getParameter("imageUrl"));
 //         Save hashed password
         user.setPassword(valid.hashPassword(user.getPassword()));
         //Blance default 0
@@ -169,13 +181,19 @@ public class AdminUserManagement {
             //Get infor from font-end
             String email = request.getParameter("email");
             String password = request.getParameter("password");
+            String fullName = request.getParameter("fullName");
+            String userType = request.getParameter("userType");
             String phoneNumber = request.getParameter("phoneNumber");
             String gender = request.getParameter("gender");
             String birthDate = request.getParameter("birthDate");
             String balance = request.getParameter("balance");
 
             //Check valid email
-            if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
+            if(valid.hasSpace(email)){
+                model.addAttribute("error", "Email can not have space");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }else if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
                 //Kiem tra xem email da ton tai hay chua (Khong xet den email cu)
                 model.addAttribute("error", "Email already exists");
                 model.addAttribute("user", user);
@@ -187,11 +205,24 @@ public class AdminUserManagement {
                 model.addAttribute("error", "Password must be at least 6 characters long");
                 model.addAttribute("user", user);
                 return "admin/user-update";
+            }else if(valid.hasSpace(password)){
+                model.addAttribute("error", "Password can not have space");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }
+            //Trim full name
+
+            if(fullName!=null){
+                fullName=fullName.trim();
             }
             //Check valid phone
             if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
                 if (!valid.isPhoneValid(phoneNumber)) {
                     model.addAttribute("error", "Invalid phone number");
+                    model.addAttribute("user", user);
+                    return "admin/user-update";
+                }else if(valid.hasSpace(phoneNumber)){
+                    model.addAttribute("error", "Phone can not have space");
                     model.addAttribute("user", user);
                     return "admin/user-update";
                 }
@@ -201,44 +232,27 @@ public class AdminUserManagement {
             if (balance != null && !balance.isEmpty()) {
                 try {
                     balanceD = new BigDecimal(balance);
-                    if(balanceD.compareTo(BigDecimal.ZERO) < 0){
+                    if (balanceD.compareTo(BigDecimal.ZERO) < 0) {
                         model.addAttribute("error", "Please enter a positive number");
                         model.addAttribute("user", user);
                         return "admin/user-update";
                     }
-                    if(balanceD.compareTo(user.getBalance()) > 0){}
+                    if (balanceD.compareTo(user.getBalance()) > 0) {
+                    }
                 } catch (Exception e) {
                     model.addAttribute("error", "Invalid balance");
                     model.addAttribute("user", user);
                     return "admin/user-update";
                 }
-            }else{
+            } else {
                 balanceD = BigDecimal.ZERO;
-            }
-            // Solving if having image
-            MultipartFile avatar = multipartRequest.getFile("avatarUrl");
-
-            if (avatar != null && !avatar.isEmpty()) {
-
-                // User entered an invalid file
-                if (!valid.isImageFileValid(avatar)) {
-                    model.addAttribute("error", "This file is not an image");
-                    model.addAttribute("user", user);
-                    return "admin/user-update";
-                }
-
-                // Save the image into static/img/avatar folder, naming follows role+id
-                try {
-                    user.setAvatarUrl(imageUploadUtil.saveAvatar(avatar, user.getUsername()));
-                } catch (Exception e) {
-                    model.addAttribute("error", "Upload failed");
-                    model.addAttribute("user", user);
-                    return "admin/user-update";
-                }
             }
             user.setEmail(email);
 //          Save hashed password
             user.setPassword(valid.hashPassword(password));
+            user.setAvatarUrl(request.getParameter("imageUrl"));
+            user.setFullName(fullName);
+            user.setUserType(userType);
             user.setPhoneNumber(phoneNumber);
             user.setGender(gender);
             if (!birthDate.isEmpty()) {

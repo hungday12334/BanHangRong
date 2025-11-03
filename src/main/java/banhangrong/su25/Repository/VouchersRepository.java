@@ -23,4 +23,6 @@ public interface VouchersRepository extends JpaRepository<Vouchers, Long> {
      * Checks if a voucher with the given code already exists for a specific seller and product.
      */
     boolean existsBySellerIdAndProductIdAndCodeIgnoreCase(Long sellerId, Long productId, String code);
+    // Customer-facing: look up voucher by code
+    java.util.List<Vouchers> findByCodeIgnoreCaseOrderByUpdatedAtDesc(String code);
 }

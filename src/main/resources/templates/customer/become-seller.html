@@ -3,231 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trở thành Seller - BanHangRong</title>
+    <title>Become a Seller - BanHangRong</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 16px;
-            opacity: 0.95;
-        }
-
-        .icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
-        .content {
-            padding: 40px 30px;
-        }
-
-        .benefits {
-            margin-bottom: 30px;
-        }
-
-        .benefit-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-
-        .benefit-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-
-        .benefit-icon {
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .benefit-text h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #1f2937;
-        }
-
-        .benefit-text p {
-            font-size: 14px;
-            color: #6b7280;
-            line-height: 1.5;
-        }
-
-        .terms {
-            background: #fff8dc;
-            border-left: 4px solid #f59e0b;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 8px;
-        }
-
-        .terms h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #92400e;
-        }
-
-        .terms ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .terms li {
-            font-size: 14px;
-            color: #78350f;
-            margin-bottom: 8px;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .terms li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #f59e0b;
-            font-weight: bold;
-        }
-
-        .user-info {
-            background: #f3f4f6;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-
-        .user-info-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .user-info-item label {
-            font-weight: 600;
-            color: #4b5563;
-        }
-
-        .user-info-item span {
-            color: #1f2937;
-        }
-
-        .actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 16px 24px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            text-align: center;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #6b7280;
-        }
-
-        .btn-secondary:hover {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .note {
-            margin-top: 20px;
-            padding: 15px;
-            background: #eff6ff;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #1e40af;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .content {
-                padding: 30px 20px;
-            }
-
-            .actions {
-                flex-direction: column;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: white; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 600px; width: 100%; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; font-weight: 700; }
+        .header p { font-size: 16px; opacity: 0.95; }
+        .icon { font-size: 64px; margin-bottom: 20px; }
+        .content { padding: 40px 30px; }
+        .benefits { margin-bottom: 30px; }
+        .benefit-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 12px; transition: all 0.3s; }
+        .benefit-item:hover { background: #e9ecef; transform: translateX(5px); }
+        .benefit-icon { font-size: 24px; flex-shrink: 0; }
+        .benefit-text h3 { font-size: 16px; font-weight: 600; margin-bottom: 5px; color: #1f2937; }
+        .benefit-text p { font-size: 14px; color: #6b7280; line-height: 1.5; }
+        .terms { background: #fff8dc; border-left: 4px solid #f59e0b; padding: 20px; margin-bottom: 30px; border-radius: 8px; }
+        .terms h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #92400e; }
+        .terms ul { list-style: none; padding-left: 0; }
+        .terms li { font-size: 14px; color: #78350f; margin-bottom: 8px; padding-left: 20px; position: relative; }
+        .terms li:before { content: "•"; position: absolute; left: 0; color: #f59e0b; font-weight: bold; }
+        .user-info { background: #f3f4f6; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+        .user-info-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .user-info-item label { font-weight: 600; color: #4b5563; }
+        .user-info-item span { color: #1f2937; }
+        .actions { display: flex; gap: 15px; }
+        .btn { flex: 1; padding: 16px 24px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; text-align: center; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+        .btn-secondary { background: #f3f4f6; color: #6b7280; }
+        .btn-secondary:hover { background: #e5e7eb; color: #374151; }
+        .note { margin-top: 20px; padding: 15px; background: #eff6ff; border-radius: 8px; font-size: 13px; color: #1e40af; text-align: center; }
+        @media (max-width: 768px) { .header h1 { font-size: 24px; } .content { padding: 30px 20px; } .actions { flex-direction: column; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="icon">🚀</div>
-            <h1>Trở thành Seller</h1>
-            <p>Bắt đầu kinh doanh và kiếm tiền trên BanHangRong</p>
+            <h1>Become a Seller</h1>
+            <p>Start your business and earn money on BanHangRong</p>
         </div>
 
         <div class="content">
@@ -249,46 +68,18 @@
 
             <div class="benefits">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #1f2937;">Quyền lợi khi trở thành Seller</h3>
-                
-                <div class="benefit-item">
-                    <div class="benefit-icon">💰</div>
-                    <div class="benefit-text">
-                        <h3>Kiếm tiền online</h3>
-                        <p>Bán sản phẩm digital, game keys, software licenses và nhận tiền ngay</p>
-                    </div>
-                </div>
-
-                <div class="benefit-item">
-                    <div class="benefit-icon">📊</div>
-                    <div class="benefit-text">
-                        <h3>Quản lý dễ dàng</h3>
-                        <p>Dashboard chuyên nghiệp với thống kê chi tiết về doanh thu và đơn hàng</p>
-                    </div>
-                </div>
-
-                <div class="benefit-item">
-                    <div class="benefit-icon">🎯</div>
-                    <div class="benefit-text">
-                        <h3>Tiếp cận khách hàng</h3>
-                        <p>Hàng nghìn người dùng đang tìm kiếm sản phẩm trên nền tảng</p>
-                    </div>
-                </div>
-
-                <div class="benefit-item">
-                    <div class="benefit-icon">🔒</div>
-                    <div class="benefit-text">
-                        <h3>An toàn & Bảo mật</h3>
-                        <p>Giao dịch được bảo vệ, thanh toán an toàn qua VNPay</p>
-                    </div>
-                </div>
+                <div class="benefit-item"><div class="benefit-icon">💼</div><div class="benefit-text"><h3>Kiếm tiền online</h3><p>Bán sản phẩm digital, game keys, software licenses và nhận tiền ngay</p></div></div>
+                <div class="benefit-item"><div class="benefit-icon">📊</div><div class="benefit-text"><h3>Quản lý đa dạng</h3><p>Dashboard chuyên nghiệp với thống kê chi tiết về doanh thu và đơn hàng</p></div></div>
+                <div class="benefit-item"><div class="benefit-icon">📣</div><div class="benefit-text"><h3>Tiếp cận khách hàng</h3><p>Hàng nghìn người dùng đang tìm kiếm sản phẩm trên nền tảng</p></div></div>
+                <div class="benefit-item"><div class="benefit-icon">🔒</div><div class="benefit-text"><h3>An toàn & Bảo mật</h3><p>Giao dịch được bảo vệ, thanh toán an toàn qua VNPay</p></div></div>
             </div>
 
             <div class="terms">
-                <h3>📋 Điều khoản và Trách nhiệm</h3>
+                <h3>📜 Điều khoản & Trách nhiệm</h3>
                 <ul>
                     <li>Chỉ bán sản phẩm hợp pháp và có bản quyền</li>
                     <li>Cung cấp thông tin sản phẩm chính xác và đầy đủ</li>
-                    <li>Giao hàng đúng hạn và hỗ trợ khách hàng tốt</li>
+                    <li>Giao hàng đúng hẹn và hỗ trợ khách hàng tốt</li>
                     <li>Tuân thủ chính sách và quy định của nền tảng</li>
                     <li>Chịu trách nhiệm về chất lượng sản phẩm</li>
                 </ul>
@@ -302,11 +93,10 @@
                 </div>
             </form>
 
-            <div class="note">
-                💡 Bạn có thể chuyển đổi giữa Seller và Customer dashboard bất cứ lúc nào
-            </div>
+            <div class="note">ℹ Bạn có thể chuyển đổi giữa Seller và Customer dashboard bất cứ lúc nào</div>
         </div>
     </div>
 </body>
 </html>
+
 
