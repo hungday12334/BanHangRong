@@ -94,8 +94,8 @@ public class SellerDashboardController {
         BigDecimal monthRev = Optional.ofNullable(productsRepository.thisMonthRevenue(sellerId))
                 .orElse(BigDecimal.ZERO);
 
-        // Daily revenue for last 14 days
-        LocalDateTime from = LocalDateTime.now().minus(14, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
+    // Daily revenue for default range: last 15 days (inclusive today)
+    LocalDateTime from = LocalDateTime.now().minus(14, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
         List<Object[]> raw = productsRepository.dailyRevenueFrom(sellerId, from);
         // Build date -> revenue map covering all days
         LinkedHashMap<String, BigDecimal> series = new LinkedHashMap<>();
@@ -221,8 +221,8 @@ public class SellerDashboardController {
         model.addAttribute("totalUnits", totalUnits);
         model.addAttribute("totalOrders", totalOrders);
         model.addAttribute("avgRating", avgRating);
-        model.addAttribute("todayRevenue", todayRev);
-        model.addAttribute("monthRevenue", monthRev);
+    model.addAttribute("todayRevenue", todayRev);
+    model.addAttribute("monthRevenue", monthRev);
         model.addAttribute("dailyRevenueLabels", String.join(",", series.keySet()));
         model.addAttribute("dailyRevenueData", String.join(",", series.values().stream().map(BigDecimal::toPlainString).toList()));
     model.addAttribute("topProducts", topProducts);
@@ -242,5 +242,47 @@ public class SellerDashboardController {
         }
 
         return "pages/seller/seller_dashboard";
+    }
+
+    // Revenue series API for dynamic ranges (defaults to 15 days)
+    @GetMapping("/api/seller/{sellerId}/revenue-series")
+    public org.springframework.http.ResponseEntity<?> revenueSeries(
+            @org.springframework.web.bind.annotation.PathVariable Long sellerId,
+            @RequestParam(name = "days", required = false, defaultValue = "15") Integer days) {
+        int safeDays = (days == null || days < 1) ? 15 : Math.min(days, 365);
+        LocalDateTime from = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).minus(safeDays - 1L, ChronoUnit.DAYS);
+        List<Object[]> raw = productsRepository.dailyRevenueFrom(sellerId, from);
+        LinkedHashMap<String, BigDecimal> series = new LinkedHashMap<>();
+        for (int i = safeDays - 1; i >= 0; i--) {
+            LocalDateTime d = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).minus(i, ChronoUnit.DAYS);
+            series.put(d.toLocalDate().toString(), BigDecimal.ZERO);
+        }
+        for (Object[] row : raw) {
+            Object dObj = row[0];
+            String dateKey;
+            try {
+                if (dObj instanceof java.sql.Date) dateKey = ((java.sql.Date) dObj).toLocalDate().toString();
+                else if (dObj instanceof java.sql.Timestamp) dateKey = ((java.sql.Timestamp) dObj).toLocalDateTime().toLocalDate().toString();
+                else if (dObj instanceof java.time.LocalDate) dateKey = dObj.toString();
+                else if (dObj instanceof java.time.LocalDateTime) dateKey = ((java.time.LocalDateTime) dObj).toLocalDate().toString();
+                else {
+                    String s = java.util.Objects.toString(dObj, "");
+                    dateKey = s.length() >= 10 ? s.substring(0, 10) : s;
+                }
+            } catch (Exception ex) {
+                dateKey = java.util.Objects.toString(dObj, "");
+            }
+            BigDecimal rev = BigDecimal.ZERO;
+            if (row.length > 1 && row[1] != null) {
+                if (row[1] instanceof BigDecimal) rev = (BigDecimal) row[1];
+                else {
+                    try { rev = new BigDecimal(row[1].toString()); } catch (Exception ignore) {}
+                }
+            }
+            if (series.containsKey(dateKey)) series.put(dateKey, rev);
+        }
+        var labels = new java.util.ArrayList<>(series.keySet());
+        var data = series.values().stream().map(BigDecimal::toPlainString).toList();
+        return org.springframework.http.ResponseEntity.ok(java.util.Map.of("labels", labels, "data", data));
     }
 }

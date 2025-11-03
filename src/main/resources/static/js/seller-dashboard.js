@@ -29,6 +29,7 @@
         return s.split(',').map(x => x.trim()).filter(Boolean);
     }
 
+    let revenueChart = null;
     function initChart() {
         const canvas = document.getElementById('revenueChart');
         if (!canvas || typeof Chart === 'undefined') return;
@@ -39,7 +40,7 @@
         // Resize height gently on small screens
         if (window.innerWidth < 820) canvas.height = 160;
 
-        new Chart(ctx, {
+        revenueChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels,
@@ -65,6 +66,83 @@
                 elements: { line: { cubicInterpolationMode: 'monotone' } }
             }
         });
+    }
+
+    function getSellerId() {
+        const userIdEl = document.getElementById('userId');
+        if (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) {
+            const v = Number(userIdEl.textContent.trim());
+            if (!Number.isNaN(v)) return v;
+        }
+        const sellerIdEl = document.getElementById('sellerId');
+        if (sellerIdEl && sellerIdEl.textContent && sellerIdEl.textContent.trim()) {
+            const v = Number(sellerIdEl.textContent.trim());
+            if (!Number.isNaN(v)) return v;
+        }
+        return null;
+    }
+
+    async function updateRevenueChart(days) {
+        const sid = getSellerId();
+        const canvas = document.getElementById('revenueChart');
+        if (!sid || !canvas || !window.fetch || !window.Chart || !revenueChart) return;
+        const body = canvas.closest('.card');
+        const overlay = document.createElement('div');
+        overlay.className = 'panel-loading-overlay';
+        overlay.innerHTML = '<div class="mini-spinner"></div><div>Loading...</div>';
+        try {
+            body && body.appendChild(overlay);
+        } catch(_){}
+        try {
+            const res = await fetch(`/api/seller/${sid}/revenue-series?days=${encodeURIComponent(days)}`);
+            if (!res.ok) throw new Error('Failed to load revenue series');
+            const json = await res.json();
+            const labels = Array.isArray(json.labels) ? json.labels : [];
+            const data = Array.isArray(json.data) ? json.data.map(Number) : [];
+            revenueChart.data.labels = labels;
+            if (revenueChart.data.datasets && revenueChart.data.datasets[0]) {
+                revenueChart.data.datasets[0].data = data;
+            }
+            revenueChart.update();
+            // Also mirror back to data-* so SSR fallback stays roughly in sync
+            canvas.setAttribute('data-labels', labels.join(','));
+            canvas.setAttribute('data-data', data.join(','));
+        } catch (e) {
+            console.error(e);
+            showToast && showToast('Không tải được dữ liệu doanh thu', 'error');
+        } finally {
+            try { overlay.style.opacity = '0'; setTimeout(()=> overlay.remove(), 200); } catch(_){}
+        }
+    }
+
+    function bindRevenueRange() {
+        const sel = document.getElementById('revenueRange');
+        const custom = document.getElementById('revenueRangeCustom');
+        if (!sel) return;
+        function apply(val) {
+            let days = 15;
+            if (val === 'custom' && custom && custom.value) {
+                const n = Number(custom.value);
+                if (!Number.isNaN(n) && n > 0) days = Math.min(n, 365);
+            } else {
+                const n = Number(val);
+                if (!Number.isNaN(n) && n > 0) days = n;
+            }
+            updateRevenueChart(days);
+        }
+        sel.addEventListener('change', () => {
+            const v = sel.value;
+            if (v === 'custom') {
+                if (custom) { custom.style.display = ''; custom.focus(); }
+            } else {
+                if (custom) custom.style.display = 'none';
+                apply(v);
+            }
+        });
+        if (custom) {
+            custom.addEventListener('change', () => apply('custom'));
+            custom.addEventListener('keyup', (e) => { if (e.key === 'Enter') apply('custom'); });
+        }
     }
 
     // Toast utility
@@ -340,6 +418,7 @@
                 // Start animations AFTER loader removed
                 document.querySelectorAll('[data-count]').forEach(animateCount);
                 initChart();
+                bindRevenueRange();
                 document.querySelectorAll('.progress span').forEach(span => {
                     const w = span.getAttribute('data-target-width') || span.style.width || '0%';
                     span.style.width = '0%'; requestAnimationFrame(()=> span.style.width = w);

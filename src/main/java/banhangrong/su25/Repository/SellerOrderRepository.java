@@ -34,7 +34,7 @@ public interface SellerOrderRepository extends Repository<banhangrong.su25.Entit
             JOIN order_items oi ON o.order_id = oi.order_id
             JOIN products p ON oi.product_id = p.product_id
             LEFT JOIN users u ON o.user_id = u.user_id
-            WHERE p.seller_id = :sellerId
+            WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'
               AND (:fromTs IS NULL OR o.created_at >= :fromTs)
               AND (:toTs IS NULL OR o.created_at <= :toTs)
               AND (
@@ -53,7 +53,7 @@ public interface SellerOrderRepository extends Repository<banhangrong.su25.Entit
                 JOIN order_items oi ON o.order_id = oi.order_id
                 JOIN products p ON oi.product_id = p.product_id
                 LEFT JOIN users u ON o.user_id = u.user_id
-                WHERE p.seller_id = :sellerId
+                WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'
                   AND (:fromTs IS NULL OR o.created_at >= :fromTs)
                   AND (:toTs IS NULL OR o.created_at <= :toTs)
                   AND (
@@ -82,7 +82,7 @@ public interface SellerOrderRepository extends Repository<banhangrong.su25.Entit
       JOIN order_items oi ON o.order_id = oi.order_id
       JOIN products p ON oi.product_id = p.product_id
       LEFT JOIN users u ON o.user_id = u.user_id
-      WHERE o.order_id = :orderId AND p.seller_id = :sellerId
+  WHERE o.order_id = :orderId AND p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'
        GROUP BY o.order_id, o.created_at, u.user_id, u.username
       HAVING SUM(CASE WHEN p.seller_id = :sellerId THEN oi.quantity ELSE 0 END) > 0
       """,

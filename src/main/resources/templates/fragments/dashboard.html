@@ -25,7 +25,7 @@
     <div class="value">đ<span data-count th:attr="data-count=${totalRevenue}"
       th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
     <div class="delta pill good">Today: đ<span
-      th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+      th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',0,'POINT')}">0</span></div>
       <div class="orb one"></div>
       <div class="orb two"></div>
     </div>
@@ -33,7 +33,7 @@
     <div class="label">Orders</div>
       <div class="value"><span data-count th:attr="data-count=${totalOrders}" th:text="${totalOrders}">0</span></div>
     <div class="delta badge">This month: đ<span
-          th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',2,'POINT')}">0</span></div>
+      th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',0,'POINT')}">0</span></div>
     </div>
     <div class="card" data-kpi="products-active">
       <div class="label">Products on sale</div>
@@ -201,7 +201,7 @@
                   </div>
                 </td>
                 <td>
-                  <span class="revenue" th:text="${#numbers.formatDecimal(s.revenue,0,'COMMA',2,'POINT')}">0.00</span>
+                  <span class="revenue" th:text="${#numbers.formatDecimal(s.revenue,0,'COMMA',0,'POINT')}">0</span>
                 </td>
                 <td class="hide-md"><span th:text="${s.units}">0</span></td>
               </tr>
@@ -237,7 +237,7 @@
                 <td th:text="${p.name}">Name</td>
                 <td th:text="${p.units}">0</td>
                 <td class="hide-md" th:text="${#numbers.formatDecimal(p.rating,1,'COMMA',1,'POINT')}">0</td>
-                <td>đ<span th:text="${#numbers.formatDecimal(p.revenue,1,'COMMA',2,'POINT')}">0</span></td>
+                <td>đ<span th:text="${#numbers.formatDecimal(p.revenue,1,'COMMA',0,'POINT')}">0</span></td>
               </tr>
               <tr th:if="${#lists.isEmpty(topProducts)}">
                 <td colspan="5" class="footer-note">No products sold yet.</td>
@@ -268,7 +268,7 @@
                 <td th:text="${o.orderId}">1001</td>
                 <td th:text="${o.createdAtStr}">27/09/2025</td>
                 <td class="hide-md" th:text="${o.items}">0</td>
-                <td>đ<span th:text="${#numbers.formatDecimal(o.amount,1,'COMMA',2,'POINT')}">0</span></td>
+                <td>đ<span th:text="${#numbers.formatDecimal(o.amount,1,'COMMA',0,'POINT')}">0</span></td>
               </tr>
               <tr th:if="${#lists.isEmpty(recentOrders)}">
                 <td colspan="4" class="footer-note">No recent orders.</td>
