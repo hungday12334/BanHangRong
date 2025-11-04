@@ -72,7 +72,9 @@ public class AdminProductManagement {
             redirectAttributes.addFlashAttribute("error", "Product not found");
             return "redirect:/admin/products";
         }
-        product.setStatus("public");
+    product.setStatus("public");
+    // Mark that this product has been public at least once
+    try { product.setWasPublic(Boolean.TRUE); } catch (Exception ignored) {}
         product.setUpdatedAt(LocalDateTime.now());
         adminProductService.save(product);
         redirectAttributes.addFlashAttribute("success", "Product updated successfully");
