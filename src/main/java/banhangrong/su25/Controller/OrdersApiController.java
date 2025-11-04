@@ -28,9 +28,9 @@ public class OrdersApiController {
     private final UsersRepository usersRepository;
 
     public OrdersApiController(SellerOrderRepository sellerOrderRepository,
-                               OrderItemsRepository orderItemsRepository,
-                               ProductsRepository productsRepository,
-                               UsersRepository usersRepository) {
+            OrderItemsRepository orderItemsRepository,
+            ProductsRepository productsRepository,
+            UsersRepository usersRepository) {
         this.sellerOrderRepository = sellerOrderRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productsRepository = productsRepository;
@@ -39,49 +39,54 @@ public class OrdersApiController {
 
     @GetMapping("/{orderId}")
     public ResponseEntity<?> getOrderForSeller(@PathVariable Long orderId,
-                                               @RequestParam(name = "sellerId", required = false) Long sellerId) {
+            @RequestParam(name = "sellerId", required = false) Long sellerId) {
         Long sellerIdResolved = sellerId;
         if (sellerIdResolved == null) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getName() != null) {
                 Users u = usersRepository.findByUsername(auth.getName()).orElse(null);
-                if (u != null) sellerIdResolved = u.getUserId();
+                if (u != null)
+                    sellerIdResolved = u.getUserId();
             }
-            if (sellerIdResolved == null) return ResponseEntity.status(401).body(Map.of("error", "unauthenticated"));
+            if (sellerIdResolved == null)
+                return ResponseEntity.status(401).body(Map.of("error", "unauthenticated"));
         }
         final Long sid = sellerIdResolved;
         var summary = sellerOrderRepository.findSellerOrder(sid, orderId);
-        if (summary == null) return ResponseEntity.notFound().build();
+        if (summary == null)
+            return ResponseEntity.notFound().build();
 
         List<OrderItems> allItems = orderItemsRepository.findByOrderId(orderId);
-        var involvedProductIds = allItems.stream().map(OrderItems::getProductId).filter(Objects::nonNull).distinct().toList();
+        var involvedProductIds = allItems.stream().map(OrderItems::getProductId).filter(Objects::nonNull).distinct()
+                .toList();
         var productList = productsRepository.findAllById(involvedProductIds);
-    var productNameMap = productList.stream().collect(Collectors.toMap(Products::getProductId, Products::getName));
-    var sellerProductIdSet = productList.stream().filter(p -> sid.equals(p.getSellerId())).map(Products::getProductId).collect(Collectors.toSet());
-        var sellerItems = new ArrayList<Map<String,Object>>();
+        var productNameMap = productList.stream().collect(Collectors.toMap(Products::getProductId, Products::getName));
+        var sellerProductIdSet = productList.stream().filter(p -> sid.equals(p.getSellerId()))
+                .map(Products::getProductId).collect(Collectors.toSet());
+        var sellerItems = new ArrayList<Map<String, Object>>();
         for (OrderItems it : allItems) {
             var pid = it.getProductId();
-            if (pid == null || !sellerProductIdSet.contains(pid)) continue;
-            var m = new LinkedHashMap<String,Object>();
+            if (pid == null || !sellerProductIdSet.contains(pid))
+                continue;
+            var m = new LinkedHashMap<String, Object>();
             m.put("productId", pid);
             m.put("productName", productNameMap.get(pid));
             m.put("quantity", it.getQuantity());
             m.put("priceAtTime", it.getPriceAtTime());
             sellerItems.add(m);
         }
-        var body = new LinkedHashMap<String,Object>();
-    body.put("order", Map.of(
-        "orderId", summary.getOrderId(),
-        "createdAt", summary.getCreatedAt(),
-        "sellerAmount", summary.getSellerAmount(),
-        "sellerItems", summary.getSellerItems(),
-        // Include totalAmount for client compatibility (use sellerAmount scoped to this seller)
-        "totalAmount", summary.getSellerAmount()
-    ));
+        var body = new LinkedHashMap<String, Object>();
+        body.put("order", Map.of(
+                "orderId", summary.getOrderId(),
+                "createdAt", summary.getCreatedAt(),
+                "sellerAmount", summary.getSellerAmount(),
+                "sellerItems", summary.getSellerItems(),
+                // Include totalAmount for client compatibility (use sellerAmount scoped to this
+                // seller)
+                "totalAmount", summary.getSellerAmount()));
         body.put("user", Map.of(
                 "userId", summary.getBuyerUserId(),
-                "username", summary.getBuyerUsername()
-        ));
+                "username", summary.getBuyerUsername()));
         body.put("items", sellerItems);
         return ResponseEntity.ok(body);
     }
