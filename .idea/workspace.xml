@@ -4,8 +4,60 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update: add spring boot devtools">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update main">
+      <change afterPath="$PROJECT_DIR$/ANSWER_CURRENT_LICENSES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CATEGORY_PRODUCT_MANAGEMENT_FEATURE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DEBUG_PAGINATION_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EXPLANATION_CURRENT_LICENSES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FILTERS_FIXED.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_CATEGORY_PAGINATION_BUG.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_EYE_ICON_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FIX_PAGINATION_NOT_VISIBLE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PAGINATION_OPTIMIZED_FINAL.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PRODUCTS_PAGINATION_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_FIX_PAGINATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_GUIDE_PAGINATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_TEST_PAGINATION_FINAL.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SIMPLE_PAGINATION_REWRITE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TEST_GUIDE_EYE_ICON.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VISUAL_DIAGRAM_EYE_ICON.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VISUAL_PAGINATION_FIX.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_DIAGRAM.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_FEATURE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONVERSATION_ACTIONS_TEST_CHECKLIST.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_LOGIN_REDIRECT_ISSUE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_SELLER_PRODUCT_FILTER.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_SELLER_PROFILE_USER_ID.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_SESSION_LOST.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FIX_WEBSOCKET_ERROR.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE_MANAGEMENT_README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE_MANAGEMENT_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_FIX_NOW.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_TEST_SELLER_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/REVIEW_MANAGEMENT_UPDATES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SECURITY_REVIEW_ISOLATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_DEBUG_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_ISSUE_SOLUTION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SELLER_CHAT_THEME_SYNC.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SETUP_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SETUP_ENHANCED_CHAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SETUP_INSTRUCTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TESTING_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/THEME_AWARE_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TRANSLATION_CATEGORY_MANAGEMENT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TRANSLATION_PROFILE_PAGE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TRANSLATION_VERIFICATION_REPORT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VISUAL_DEMO_REACTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VISUAL_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/WEBSOCKET_IMPLEMENTED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,10 +87,21 @@
     &quot;assignee&quot;: &quot;hungday12334&quot;
   }
 }</component>
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
+    {
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDOPxAa-86vb7X8&quot;,
+        &quot;number&quot;: 6
+      },
+      &quot;lastSeen&quot;: 1761879200165
+    }
+  ]
+}</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
-    &quot;accountId&quot;: &quot;e0255c87-1891-4a10-ac00-ab7ed3312585&quot;
+    &quot;accountId&quot;: &quot;efd5b86f-5509-426a-a183-1d6d3c55d639&quot;
   }
 }</component>
   <component name="KubernetesApiPersistence">{}</component>
@@ -88,7 +151,8 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
     &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Hungnv&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
@@ -97,6 +161,7 @@
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;/Users/hoangquangminh/Library/Application Support/JetBrains/IntelliJIdea2025.2/node/versions/24.11.0/bin/node&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
@@ -150,12 +215,31 @@
       <method v="2" />
     </configuration>
     <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="simple" />
       <module name="su25" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
+      <extension name="net.ashald.envfile">
+        <option name="IS_ENABLED" value="true" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        </ENTRIES>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Database Script.data_v2.sql" />
+      <item itemvalue="Database Script.fix_old_constraint.sql" />
+      <item itemvalue="Database Script.fix_review_constraint.sql" />
+      <item itemvalue="Database Script.quick_create_seller_test.sql" />
+      <item itemvalue="Database Script.review_system_complete.sql" />
+      <item itemvalue="Spring Boot.Su25Application" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Database Script.quick_create_seller_test.sql" />
@@ -169,8 +253,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
       </set>
     </attachedChunks>
   </component>
@@ -196,7 +280,20 @@
       <workItem from="1761225296373" duration="388000" />
       <workItem from="1761288445557" duration="1184000" />
       <workItem from="1761718568881" duration="3682000" />
-      <workItem from="1761805813942" duration="2929000" />
+      <workItem from="1761771952359" duration="9839000" />
+      <workItem from="1761782244391" duration="13705000" />
+      <workItem from="1761817184559" duration="601000" />
+      <workItem from="1761818462765" duration="825000" />
+      <workItem from="1761819313004" duration="9292000" />
+      <workItem from="1761879573117" duration="15201000" />
+      <workItem from="1761931665304" duration="7741000" />
+      <workItem from="1761983539554" duration="16370000" />
+      <workItem from="1762008314114" duration="10413000" />
+      <workItem from="1762019652256" duration="2430000" />
+      <workItem from="1762071570533" duration="875000" />
+      <workItem from="1762111402526" duration="8323000" />
+      <workItem from="1762138370900" duration="473000" />
+      <workItem from="1762151908837" duration="11251000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -246,15 +343,196 @@
       <option name="project" value="LOCAL" />
       <updated>1760599530481</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read">
+      <option name="closed" value="true" />
+      <created>1761768131073</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1761768131073</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat(email-verification): implement resend verification email feature and enhance user registration flow">
+      <option name="closed" value="true" />
+      <created>1761780433366</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1761780433366</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat(chat): fix conversation creation, CSRF, and UTF-8 issues; add setup scripts and enhance chat integration&#10;&#10;- Fix CSRF protection for chat conversation creation and message APIs in customer/seller chat pages&#10;- Add CSRF meta tags and ensure all POST requests include CSRF token&#10;- Update ChatController to support product info in chat and improve error handling/logging&#10;- Ensure chat tables use utf8mb4 encoding for full Vietnamese character support (SQL scripts and config)&#10;- Add scripts for database setup, UTF-8 fixes, and chat table creation for online DB&#10;- Enhance application properties for correct locale and MySQL UTF-8 settings&#10;- Add .env.example for environment variable guidance&#10;- Improve ChatService to load messages and unread counts per conversation&#10;- Update Conversation entity with JSON property annotations for API consistency&#10;- Show chat unread badge in product detail and auto-update via API&#10;- Add documentation and test guides for chat fixes and separation">
+      <option name="closed" value="true" />
+      <created>1761805800917</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1761805800917</updated>
+    </task>
+    <task id="LOCAL-00010" summary="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX">
+      <option name="closed" value="true" />
+      <created>1761805822892</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1761805822892</updated>
+    </task>
+    <task id="LOCAL-00011" summary="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety">
+      <option name="closed" value="true" />
+      <created>1761818570255</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1761818570255</updated>
+    </task>
+    <task id="LOCAL-00012" summary="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety">
+      <option name="closed" value="true" />
+      <created>1761877366256</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1761877366256</updated>
+    </task>
+    <task id="LOCAL-00013" summary="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX">
+      <option name="closed" value="true" />
+      <created>1761879164312</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1761879164312</updated>
+    </task>
+    <task id="LOCAL-00014" summary="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX">
+      <option name="closed" value="true" />
+      <created>1761882746515</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1761882746515</updated>
+    </task>
+    <task id="LOCAL-00015" summary="chore: update workspace configuration for enhanced chat UI improvements">
+      <option name="closed" value="true" />
+      <created>1761899230767</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1761899230767</updated>
+    </task>
+    <task id="LOCAL-00016" summary="chore: update workspace configuration for enhanced chat UI improvements">
+      <option name="closed" value="true" />
+      <created>1761975362536</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1761975362536</updated>
+    </task>
+    <task id="LOCAL-00017" summary="feat(chat): implement file upload feature with image and document support">
+      <option name="closed" value="true" />
+      <created>1761978450743</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1761978450743</updated>
+    </task>
+    <task id="LOCAL-00018" summary="feat(chat): enhance chat UI with unread message indicators and improved welcome screen">
+      <option name="closed" value="true" />
+      <created>1761988662580</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1761988662580</updated>
+    </task>
+    <task id="LOCAL-00019" summary="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality">
+      <option name="closed" value="true" />
+      <created>1762006015410</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1762006015411</updated>
+    </task>
+    <task id="LOCAL-00020" summary="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality">
+      <option name="closed" value="true" />
+      <created>1762010564485</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1762010564485</updated>
+    </task>
+    <task id="LOCAL-00021" summary="feat(chat): implement conversation actions with pinning and soft delete functionality">
+      <option name="closed" value="true" />
+      <created>1762021072121</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1762021072121</updated>
+    </task>
+    <task id="LOCAL-00022" summary="feat(profile): add password validation to prevent spaces and enhance response handling">
+      <option name="closed" value="true" />
+      <created>1762022040310</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1762022040310</updated>
+    </task>
+    <task id="LOCAL-00023" summary="feat(license-management): implement category licenses feature for tracking license assignments">
+      <option name="closed" value="true" />
+      <created>1762118397187</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1762118397188</updated>
+    </task>
+    <task id="LOCAL-00024" summary="update main">
+      <option name="closed" value="true" />
+      <created>1762143655559</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1762143655559</updated>
+    </task>
+    <task id="LOCAL-00025" summary="update main">
+      <option name="closed" value="true" />
+      <created>1762155649476</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1762155649476</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="63ffc40e-db80-490a-abac-868a868bfa4b" value="TOOL_WINDOW" />
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
+        <entry key="63ffc40e-db80-490a-abac-868a868bfa4b">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="range">
+                    <value>
+                      <list>
+                        <option value="origin/main..origin/MinhHQ" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
         <entry key="MAIN">
           <value>
             <State>
@@ -282,6 +560,22 @@
     <MESSAGE value="Admin Product Approve||Cancel" />
     <MESSAGE value="fix: fix error approve Products." />
     <MESSAGE value="update: add spring boot devtools" />
-    <option name="LAST_COMMIT_MESSAGE" value="update: add spring boot devtools" />
+    <MESSAGE value="feat(chat): update ChatMessageRepository to use conversationId for message retrieval and marking as read" />
+    <MESSAGE value="feat(email-verification): implement resend verification email feature and enhance user registration flow" />
+    <MESSAGE value="feat(chat): fix conversation creation, CSRF, and UTF-8 issues; add setup scripts and enhance chat integration&#10;&#10;- Fix CSRF protection for chat conversation creation and message APIs in customer/seller chat pages&#10;- Add CSRF meta tags and ensure all POST requests include CSRF token&#10;- Update ChatController to support product info in chat and improve error handling/logging&#10;- Ensure chat tables use utf8mb4 encoding for full Vietnamese character support (SQL scripts and config)&#10;- Add scripts for database setup, UTF-8 fixes, and chat table creation for online DB&#10;- Enhance application properties for correct locale and MySQL UTF-8 settings&#10;- Add .env.example for environment variable guidance&#10;- Improve ChatService to load messages and unread counts per conversation&#10;- Update Conversation entity with JSON property annotations for API consistency&#10;- Show chat unread badge in product detail and auto-update via API&#10;- Add documentation and test guides for chat fixes and separation" />
+    <MESSAGE value="feat(chat): add customer chat page with real-time messaging, conversation management, and enhanced UI/UX" />
+    <MESSAGE value="feat(chat): refactor chat message handling, WebSocket endpoints, and conversation logic&#10;&#10;- Update ChatController to use new WebSocket message mappings and improve message broadcasting logic&#10;- Refactor ChatMessage entity: add roomId, fileUrl, readAt fields; rename type to messageType; update is_read handling&#10;- Enhance MessageRepository with new queries for unread messages and conversation message retrieval&#10;- Simplify and optimize ChatService: auto-create conversations, improve message saving, and sort conversations by last message time&#10;- Update WebSocketConfig to use /ws-chat endpoint and adjust broker configuration&#10;- Revamp chat.html JavaScript: update WebSocket connection logic, message sending, optimistic UI, and conversation subscriptions&#10;- Minor SQL and repository adjustments for consistency and safety" />
+    <MESSAGE value="feat(chat): improve chat layout, scrolling, and auto-scroll to latest message&#10;&#10;- Refactor chat page CSS for better layout and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom&#10;- Add MutationObserver to auto-scroll to newest message when messages update&#10;- Enhance scrollbar appearance for improved UX" />
+    <MESSAGE value="feat(chat): enhance chat UI layout, scrolling, and message rendering&#10;&#10;- Refactor chat page CSS for improved layout, responsive design, and independent scrolling of sidebar and message area&#10;- Ensure chat input remains fixed at the bottom for better usability&#10;- Add MutationObserver and JS logic to auto-scroll to the latest message when new messages arrive&#10;- Refine message rendering for smoother experience and consistent avatar/status display&#10;- Improve scrollbar appearance and overall chat UX" />
+    <MESSAGE value="chore: update workspace configuration for enhanced chat UI improvements" />
+    <MESSAGE value="feat(chat): implement file upload feature with image and document support" />
+    <MESSAGE value="feat(chat): enhance chat UI with unread message indicators and improved welcome screen" />
+    <MESSAGE value="feat(chat): add enhanced chat features with reactions, replies, and soft delete functionality" />
+    <MESSAGE value="feat(chat): implement conversation actions with pinning and soft delete functionality" />
+    <MESSAGE value="feat(profile): add password validation to prevent spaces and enhance response handling" />
+    <MESSAGE value="feat(license-management): implement category licenses feature for managing licenses per category" />
+    <MESSAGE value="feat(license-management): implement category licenses feature for tracking license assignments" />
+    <MESSAGE value="update main" />
+    <option name="LAST_COMMIT_MESSAGE" value="update main" />
   </component>
 </project>

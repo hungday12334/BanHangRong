@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Message Display</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+        }
+
+        .error-message {
+            background: #fff3f3;
+            color: #c82333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .error-message.show {
+            display: flex !important;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .success-message.show {
+            display: flex !important;
+        }
+
+        .verification-message {
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #b3d9ff;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .verification-message.show {
+            display: flex !important;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Message Display</h1>
+
+    <div class="info">
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Click buttons below to test message display</li>
+            <li>Open Developer Console (F12) to see logs</li>
+            <li>Messages should appear below buttons</li>
+        </ol>
+    </div>
+
+    <div>
+        <button class="btn-error" onclick="testError()">Show Error Message</button>
+        <button class="btn-success" onclick="testSuccess()">Show Success Message</button>
+        <button class="btn-clear" onclick="testClear()">Clear Messages</button>
+    </div>
+
+    <!-- Message containers -->
+    <div id="emailVerificationMessage" class="verification-message">
+        <i class="fas fa-check-circle"></i>
+        <span>Verification email has been sent! Please check your inbox.</span>
+    </div>
+
+    <div id="errorMessage" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorText"></span>
+    </div>
+
+    <div id="successMessage" class="success-message">
+        <i class="fas fa-check-circle"></i>
+        <span>Registration successful!</span>
+    </div>
+
+    <script>
+        function showMessage(message, type) {
+            console.log('showMessage called:', type, message);
+            clearMessages();
+
+            if (type === 'error') {
+                const errorDiv = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                console.log('Error div found:', errorDiv !== null, 'Error text found:', errorText !== null);
+                if (errorDiv && errorText) {
+                    errorText.textContent = message;
+                    errorDiv.style.display = 'flex';
+                    errorDiv.classList.add('show');
+                    console.log('Error message displayed');
+                } else {
+                    console.error('Could not find error message elements!');
+                }
+            } else if (type === 'success') {
+                const successDiv = document.getElementById('successMessage');
+                console.log('Success div found:', successDiv !== null);
+                if (successDiv) {
+                    const messageSpan = successDiv.querySelector('span');
+                    if (messageSpan) {
+                        messageSpan.textContent = message;
+                    }
+                    successDiv.style.display = 'flex';
+                    successDiv.classList.add('show');
+                    console.log('Success message displayed');
+                } else {
+                    console.error('Could not find success message element!');
+                }
+            }
+        }
+
+        function clearMessages() {
+            console.log('clearMessages called');
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            const verificationDiv = document.getElementById('emailVerificationMessage');
+
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+                errorDiv.classList.remove('show');
+            }
+            if (successDiv) {
+                successDiv.style.display = 'none';
+                successDiv.classList.remove('show');
+            }
+            if (verificationDiv) {
+                verificationDiv.style.display = 'none';
+                verificationDiv.classList.remove('show');
+            }
+        }
+
+        function showEmailVerificationMessage() {
+            console.log('showEmailVerificationMessage called');
+            const emailMessage = document.getElementById('emailVerificationMessage');
+            if (emailMessage) {
+                emailMessage.style.display = 'flex';
+                emailMessage.classList.add('show');
+                console.log('Verification message displayed');
+            }
+        }
+
+        function testError() {
+            showMessage('This is a test error message!', 'error');
+        }
+
+        function testSuccess() {
+            showMessage('This is a test success message!', 'success');
+            setTimeout(() => {
+                showEmailVerificationMessage();
+            }, 500);
+        }
+
+        function testClear() {
+            clearMessages();
+        }
+
+        console.log('Test page loaded. Click buttons to test message display.');
+        console.log('Elements check:', {
+            errorMessage: document.getElementById('errorMessage') !== null,
+            successMessage: document.getElementById('successMessage') !== null,
+            emailVerificationMessage: document.getElementById('emailVerificationMessage') !== null
+        });
+    </script>
+</body>
+</html>
+

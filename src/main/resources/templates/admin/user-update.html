@@ -237,7 +237,7 @@
         <h2>Update</h2>
         <form id="userForm" action="/admin/user/update" method="post" enctype="multipart/form-data">
             <div class="text-center mb-3">
-                <img th:src="@{'/avatar/' + ${user.avatarUrl} + '?v=' + ${#dates.createNow().getTime()}}"
+                <img th:src="@{${user.avatarUrl}}"
                      alt="Avatar"
                      class="rounded-circle"
                      style="width: 150px; height: 150px; object-fit: cover;">
@@ -263,23 +263,40 @@
             </div>
 
             <div class="form-group">
+                <label>Full Name:</label>
+                <input readonly type="text" name="fullName" th:value="${user!=null ? user.fullName : ''}">
+            </div>
+
+            <div class="form-group">
                 <label>User Type (Role):</label>
                 <select readonly name="userType" disabled>
                     <option value="CUSTOMER"
-                            th:selected="${user != null and user.userType == 'CUSTOMER'}">CUSTOMER
+                            th:selected="${user != null and user.userType.toUpperCase() == 'CUSTOMER'}">CUSTOMER
                     </option>
                     <option value="ADMIN"
-                            th:selected="${user != null and user.userType == 'ADMIN'}">ADMIN
+                            th:selected="${user != null and user.userType.toUpperCase() == 'ADMIN'}">ADMIN
                     </option>
                     <option value="SELLER"
-                            th:selected="${user != null and user.userType == 'SELLER'}">SELLER
+                            th:selected="${user != null and user.userType.toUpperCase() == 'SELLER'}">SELLER
                     </option>
                 </select>
             </div>
 
+
             <div class="form-group">
-                <label>Avatar:</label>
-                <input disabled type="file" name="avatarUrl" accept="image/*">
+                <label>
+                    Image URL
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <input readonly id="pm_imageUrl" name="imageUrl" style="flex:1;" th:value="${user!=null ? user.avatarUrl : ''}"/>
+                        <input readonly id="pm_imageFile" type="file" accept="image/*" style="display:none"/>
+                        <button read type="button" id="pm_genImage" class="btn" title="Upload image and fill image URL">
+                            Generate
+                        </button>
+                    </div>
+                    <div id="pm_imagePreview" style="margin-top:6px;display:none">
+                        <img alt="Preview" style="max-width:100%;border-radius:8px;"/>
+                    </div>
+                </label>
             </div>
 
             <div class="form-group">
@@ -324,7 +341,7 @@
     // Khi bấm Update
     updateBtn.addEventListener('click', () => {
         inputs.forEach(input => {
-            if (!['id', 'username','userType'].includes(input.name)) {
+            if (!['id', 'username'].includes(input.name)) {
                 input.removeAttribute('readonly');
                 input.removeAttribute('disabled');
                 input.style.backgroundColor = "#fff";
@@ -351,6 +368,47 @@
         cancelBtn.classList.add('d-none');
         updateBtn.classList.remove('d-none');
     });
+    // Upload image -> autofill URL
+    (function initImageGenerate() {
+        const btn = document.getElementById('pm_genImage');
+        const fileInput = document.getElementById('pm_imageFile');
+        const urlInput = document.getElementById('pm_imageUrl');
+        const previewWrap = document.getElementById('pm_imagePreview');
+        const previewImg = previewWrap ? previewWrap.querySelector('img') : null;
+        if (!btn || !fileInput || !urlInput) return;
+        btn.addEventListener('click', () => { fileInput.click(); });
+        fileInput.addEventListener('change', async () => {
+            const f = fileInput.files && fileInput.files[0];
+            if (!f) return;
+            try {
+                const fd = new FormData(); fd.append('file', f);
+                // Optional: allow passing expiration via data-expiration on Generate button
+                const exp = btn && btn.dataset ? (btn.dataset.expiration || '') : '';
+                if (exp && /^\d+$/.test(exp)) { fd.append('expiration', exp); }
+                const res = await fetch('/api/uploads/image', { method: 'POST', body: fd });
+                if (!res.ok) {
+                    let msg = 'Upload failed';
+                    try { msg = (await res.text()) || msg; } catch (_) { }
+                    showToast(msg, 'error');
+                    return;
+                }
+                const data = await res.json();
+                const url = data && data.url ? data.url : null;
+                if (!url) { showToast('Invalid upload response', 'error'); return; }
+                urlInput.value = url;
+                if (previewWrap && previewImg) {
+                    previewImg.src = url; previewWrap.style.display = '';
+                }
+                // Mark as changed so Save will persist
+                __originalProduct = null;
+                showToast('Image uploaded', 'success', { duration: 1500 });
+            } catch (e) {
+                showToast('Upload error', 'error');
+            } finally {
+                fileInput.value = '';
+            }
+        });
+    })();
 </script>
 <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
 <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -24,7 +24,9 @@ public class UserProfileService {
 
     public Users getSellerProfile(Long sellerId) {
         Users user = getUserById(sellerId);
-        // Note: isSeller() method may not exist, simplified version
+        if (!user.isSeller()) {
+            throw new RuntimeException("User is not a seller");
+        }
         return user;
     }
 
@@ -98,7 +100,7 @@ public class UserProfileService {
             String encryptedPassword = passwordEncoder.encode(newPassword);
             existingUser.setPassword(encryptedPassword);
 
-            usersRepository.save(existingUser);
+            Users savedUser = usersRepository.save(existingUser);
             System.out.println("✅ Password changed successfully");
 
         } catch (Exception e) {

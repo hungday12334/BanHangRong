@@ -23,7 +23,7 @@ public class UploadController {
 
     @Value("${imgbb.api.key:}")
     private String imgbbApiKey;
-    // Also allow IMGBB_API_KEY from .env (simple profile imports .env as properties)
+    // Also allow IMGBB_API_KEY from ..env (simple profile imports ..env as properties)
     @Value("${IMGBB_API_KEY:}")
     private String imgbbApiKeyAlt;
 

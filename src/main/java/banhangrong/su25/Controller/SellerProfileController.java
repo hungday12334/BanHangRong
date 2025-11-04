@@ -1,9 +1,13 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -24,11 +30,32 @@ public class SellerProfileController {
     @Autowired
     private UserProfileService userProfileService;
 
+    @Autowired
+    private UsersRepository usersRepository;
+
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
 
     private Long getCurrentSellerId() {
-        return 1L;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        System.out.println("=== GETTING CURRENT SELLER ===");
+        System.out.println("Authenticated username: " + username);
+
+        Optional<Users> userOptional = usersRepository.findByUsername(username);
+
+        if (userOptional.isEmpty()) {
+            System.out.println("❌ User not found: " + username);
+            throw new RuntimeException("User not found");
+        }
+
+        Users user = userOptional.get();
+        System.out.println("✅ Found user ID: " + user.getUserId());
+        System.out.println("   Username: " + user.getUsername());
+        System.out.println("   Role: " + user.getUserType());
+
+        return user.getUserId();
     }
 
     @GetMapping("/profile")
@@ -190,10 +217,10 @@ public class SellerProfileController {
         return gender.equals("male") || gender.equals("female") || gender.equals("other");
     }
 
-    // === UPLOAD AVATAR VỚI ĐẦY ĐỦ VALIDATION ===
+    // === UPLOAD AVATAR VỚI ĐẦY ĐỦ VALIDATION VÀ XÓA ẢNH CŨ ===
     @PostMapping("/profile/upload-avatar")
-    public String uploadAvatar(@RequestParam("avatarFile") MultipartFile file,
-                               RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile file) {
         try {
             System.out.println("=== BẮT ĐẦU UPLOAD AVATAR ===");
             System.out.println("File name: " + file.getOriginalFilename());
@@ -202,68 +229,81 @@ public class SellerProfileController {
 
             // ===== VALIDATION 1: Check empty file =====
             if (file.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn file ảnh");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng chọn file ảnh"));
             }
 
             // ===== VALIDATION 2: Check file type by MIME type =====
             String contentType = file.getContentType();
             if (contentType == null || !isValidImageType(contentType)) {
                 System.out.println("⚠️ Invalid content type: " + contentType);
-                redirectAttributes.addFlashAttribute("errorMessage", "Chỉ được upload file ảnh (JPEG, PNG, GIF)");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Chỉ được upload file ảnh (JPEG, PNG, GIF)"));
             }
 
             // ===== VALIDATION 3: Check file size (max 5MB) =====
             long maxSize = 5 * 1024 * 1024; // 5MB
             if (file.getSize() > maxSize) {
                 System.out.println("⚠️ File too large: " + file.getSize() + " bytes");
-                redirectAttributes.addFlashAttribute("errorMessage", "Kích thước file không được vượt quá 5MB");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Kích thước file không được vượt quá 5MB"));
             }
 
             // ===== VALIDATION 4: Check file extension =====
             String originalFileName = file.getOriginalFilename();
             if (originalFileName == null || !hasValidImageExtension(originalFileName)) {
                 System.out.println("⚠️ Invalid file extension: " + originalFileName);
-                redirectAttributes.addFlashAttribute("errorMessage", "File phải có đuôi .jpg, .jpeg, .png hoặc .gif");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "File phải có đuôi .jpg, .jpeg, .png hoặc .gif"));
             }
 
             // ===== SECURITY: Validate actual file content (prevent fake extensions) =====
             byte[] fileBytes = file.getBytes();
             if (!isValidImageFile(fileBytes)) {
                 System.out.println("⚠️ SECURITY ALERT: File content does not match image signature!");
-                redirectAttributes.addFlashAttribute("errorMessage", "File không hợp lệ! Vui lòng upload ảnh thật.");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "File không hợp lệ! Vui lòng upload ảnh thật."));
             }
 
             Long sellerId = getCurrentSellerId();
+            Users currentUser = userProfileService.getSellerProfile(sellerId);
+
+            // ===== XÓA ẢNH CŨ TRƯỚC KHI UPLOAD ẢNH MỚI =====
+            String oldAvatarUrl = currentUser.getAvatarUrl();
+            if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty() && !oldAvatarUrl.equals("/img/avatar_default.jpg")) {
+                try {
+                    // Extract filename from URL (e.g., "/uploads/avatar_1_xyz.jpg" -> "avatar_1_xyz.jpg")
+                    String oldFileName = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
+                    Path oldFilePath = Paths.get(uploadDir).resolve(oldFileName);
+
+                    if (Files.exists(oldFilePath)) {
+                        Files.delete(oldFilePath);
+                        System.out.println("🗑️ Đã xóa ảnh cũ: " + oldFilePath.toAbsolutePath());
+                    }
+                } catch (Exception e) {
+                    System.out.println("⚠️ Không thể xóa ảnh cũ (không ảnh hưởng): " + e.getMessage());
+                    // Không throw exception, tiếp tục upload ảnh mới
+                }
+            }
 
             // Tạo thư mục uploads nếu chưa tồn tại
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
-                System.out.println("Đã tạo thư mục: " + uploadPath.toAbsolutePath());
+                System.out.println("📁 Đã tạo thư mục: " + uploadPath.toAbsolutePath());
             }
 
             // ===== SECURITY: Sanitize filename to prevent path traversal =====
             String safeFileName = sanitizeFileName(originalFileName);
             String fileExtension = safeFileName.substring(safeFileName.lastIndexOf("."));
-            String fileName = "avatar_" + sellerId + "_" + UUID.randomUUID() + fileExtension;
+            String fileName = "avatar_" + sellerId + "_" + System.currentTimeMillis() + fileExtension;
 
-            // Lưu file
+            // Lưu file mới
             Path filePath = uploadPath.resolve(fileName);
 
             // ===== SECURITY: Prevent path traversal =====
             if (!filePath.normalize().startsWith(uploadPath.normalize())) {
                 System.out.println("⚠️ SECURITY ALERT: Path traversal attempt detected!");
-                redirectAttributes.addFlashAttribute("errorMessage", "Phát hiện hành vi bất thường!");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Phát hiện hành vi bất thường!"));
             }
 
             Files.copy(file.getInputStream(), filePath);
-            System.out.println("Đã lưu file: " + filePath.toAbsolutePath());
+            System.out.println("💾 Đã lưu file: " + filePath.toAbsolutePath());
 
             // Tạo URL để truy cập ảnh
             String avatarUrl = "/uploads/" + fileName;
@@ -272,19 +312,22 @@ public class SellerProfileController {
             userProfileService.updateAvatar(sellerId, avatarUrl);
             System.out.println("✅ Đã cập nhật avatar URL: " + avatarUrl);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật avatar thành công!");
+            // Return JSON response
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Cập nhật avatar thành công!",
+                "avatarUrl", avatarUrl
+            ));
 
         } catch (IOException e) {
             System.out.println("❌ Lỗi IOException: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu file. Vui lòng thử lại!");
+            return ResponseEntity.status(500).body(Map.of("error", "Lỗi khi lưu file. Vui lòng thử lại!"));
         } catch (Exception e) {
             System.out.println("❌ Lỗi Exception: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra. Vui lòng thử lại!");
+            return ResponseEntity.status(500).body(Map.of("error", "Có lỗi xảy ra. Vui lòng thử lại!"));
         }
-
-        return "redirect:/seller/profile";
     }
 
     // ===== HELPER METHODS: FILE VALIDATION =====
@@ -336,10 +379,10 @@ public class SellerProfileController {
 
     // === ĐỔI MẬT KHẨU VỚI ĐẦY ĐỦ VALIDATION ===
     @PostMapping("/profile/change-password")
-    public String changePassword(@RequestParam String currentPassword,
-                                 @RequestParam String newPassword,
-                                 @RequestParam String confirmPassword,
-                                 RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> changePassword(@RequestParam String currentPassword,
+                                            @RequestParam String newPassword,
+                                            @RequestParam String confirmPassword) {
         try {
             System.out.println("=== START PASSWORD CHANGE ===");
 
@@ -348,50 +391,47 @@ public class SellerProfileController {
 
             // ===== VALIDATION 1: Check empty fields =====
             if (currentPassword == null || currentPassword.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập mật khẩu hiện tại");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mật khẩu hiện tại"));
             }
 
             if (newPassword == null || newPassword.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập mật khẩu mới");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mật khẩu mới"));
             }
 
             if (confirmPassword == null || confirmPassword.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng xác nhận mật khẩu mới");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng xác nhận mật khẩu mới"));
             }
 
             // ===== VALIDATION 2: Check current password =====
             if (!userProfileService.verifyPassword(currentPassword, user.getPassword())) {
                 System.out.println("⚠️ Incorrect current password attempt for user: " + user.getUsername());
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu hiện tại không đúng");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu hiện tại không đúng"));
             }
 
             // ===== VALIDATION 3: Check password length =====
             if (newPassword.length() < 6) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới phải có ít nhất 6 ký tự");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu mới phải có ít nhất 6 ký tự"));
             }
 
             // ===== VALIDATION 4: Check password maximum length =====
             if (newPassword.length() > 100) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu không được vượt quá 100 ký tự");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu không được vượt quá 100 ký tự"));
             }
 
-            // ===== VALIDATION 5: Check password confirmation match =====
+            // ===== VALIDATION 5: Check password does not contain spaces =====
+            if (newPassword.contains(" ")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu không được chứa dấu cách"));
+            }
+
+            // ===== VALIDATION 6: Check password confirmation match =====
             if (!newPassword.equals(confirmPassword)) {
                 System.out.println("⚠️ Password confirmation does not match");
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu xác nhận không khớp");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu xác nhận không khớp"));
             }
 
-            // ===== VALIDATION 6: Check if new password is same as current =====
+            // ===== VALIDATION 7: Check if new password is same as current =====
             if (userProfileService.verifyPassword(newPassword, user.getPassword())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới phải khác mật khẩu hiện tại");
-                return "redirect:/seller/profile";
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu mới phải khác mật khẩu hiện tại"));
             }
 
             // ===== SECURITY: Sanitize password (prevent XSS in logs) =====
@@ -401,17 +441,19 @@ public class SellerProfileController {
             userProfileService.changePassword(sellerId, newPassword);
 
             System.out.println("✅ Password changed successfully for user: " + user.getUsername());
-            redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đổi mật khẩu thành công!"
+            ));
 
         } catch (IllegalArgumentException e) {
             System.out.println("❌ Validation error: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             System.out.println("❌ Error changing password: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại!");
+            return ResponseEntity.status(500).body(Map.of("error", "Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại!"));
         }
-
-        return "redirect:/seller/profile";
     }
 }

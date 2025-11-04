@@ -30,30 +30,30 @@ public class BecomeSellerController {
     @GetMapping("/become-seller")
     public String becomeSellerPage(Model model, HttpSession session) {
         System.out.println("=== BECOME SELLER PAGE LOADING ===");
-        
+
         // Lấy thông tin user hiện tại
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            System.out.println("❌ User not authenticated");
+            System.out.println("⚠ User not authenticated");
             return "redirect:/login?error=Please login first";
         }
 
         String username = auth.getName();
-        System.out.println("✅ Username: " + username);
-        
+        System.out.println("ℹ Username: " + username);
+
         Optional<Users> userOpt = usersRepository.findByUsername(username);
-        
+
         if (userOpt.isEmpty()) {
-            System.out.println("❌ User not found in database");
+            System.out.println("⚠ User not found in database");
             return "redirect:/login?error=User not found";
         }
 
         Users user = userOpt.get();
-        System.out.println("✅ User found: " + user.getUsername() + ", Type: " + user.getUserType());
-        
+        System.out.println("ℹ User found: " + user.getUsername() + ", Type: " + user.getUserType());
+
         // Kiểm tra nếu đã là seller rồi
         if ("SELLER".equalsIgnoreCase(user.getUserType())) {
-            System.out.println("⚠️ User is already a seller, redirecting to seller dashboard");
+            System.out.println("✅ User is already a seller, redirecting to seller dashboard");
             return "redirect:/seller/dashboard";
         }
 
@@ -66,8 +66,8 @@ public class BecomeSellerController {
      * Xử lý nâng cấp lên seller
      */
     @PostMapping("/become-seller/upgrade")
-    public String upgradeToSeller(RedirectAttributes redirectAttributes, 
-                                  HttpServletRequest request, 
+    public String upgradeToSeller(RedirectAttributes redirectAttributes,
+                                  HttpServletRequest request,
                                   HttpServletResponse response,
                                   HttpSession session) {
         // Lấy thông tin user hiện tại
@@ -79,14 +79,14 @@ public class BecomeSellerController {
 
         String username = auth.getName();
         Optional<Users> userOpt = usersRepository.findByUsername(username);
-        
+
         if (userOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy người dùng");
             return "redirect:/customer/dashboard";
         }
 
         Users user = userOpt.get();
-        
+
         // Kiểm tra nếu đã là seller rồi
         if ("SELLER".equalsIgnoreCase(user.getUserType())) {
             redirectAttributes.addFlashAttribute("info", "Bạn đã là seller rồi!");
@@ -105,15 +105,14 @@ public class BecomeSellerController {
             user.setUpdatedAt(LocalDateTime.now());
             usersRepository.save(user);
 
-            System.out.println("✅ User upgraded to SELLER: " + username);
-            
-            // QUAN TRỌNG: Logout để Spring Security refresh authorities
-            // Sau đó user sẽ login lại với role mới
+            System.out.println("ℹ User upgraded to SELLER: " + username);
+
+            // Logout để Spring Security refresh authorities
             new SecurityContextLogoutHandler().logout(request, response, auth);
-            
+
             redirectAttributes.addFlashAttribute("upgradeSuccess", "Chúc mừng! Bạn đã trở thành seller thành công! 🎉 Vui lòng đăng nhập lại để sử dụng các tính năng seller.");
             return "redirect:/login?upgrade=success";
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
@@ -121,4 +120,5 @@ public class BecomeSellerController {
         }
     }
 }
+
 

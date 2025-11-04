@@ -50,6 +50,63 @@
   font-size: 17px;
 }
 
+/* Font: SF Pro Display (from /static/font/SFPRODISPLAY)
+   We use TTFs available in the repo and map common weights.
+   Note: For best performance, consider adding WOFF2 in future. */
+@font-face {
+  font-family: "SF Pro Display";
+  src: local("SF Pro Display Light"), local("SFProDisplay-Light"),
+       url("/font/SFPRODISPLAY/SFProDisplay-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: local("SF Pro Display Regular"), local("SFProDisplay-Regular"),
+       url("/font/SFPRODISPLAY/SFProDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: local("SF Pro Display Medium"), local("SFProDisplay-Medium"),
+       url("/font/SFPRODISPLAY/SFProDisplay-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: local("SF Pro Display Semibold"), local("SFProDisplay-Semibold"),
+       url("/font/SFPRODISPLAY/SFProDisplay-Semibold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: local("SF Pro Display Bold"), local("SFProDisplay-Bold"),
+       url("/font/SFPRODISPLAY/SFProDisplay-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: local("SF Pro Display Heavy"), local("SFProDisplay-Heavy"),
+       url("/font/SFPRODISPLAY/SFProDisplay-Heavy.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Seller Dashboard Styles
    Scope: /templates/pages/seller_dashboard.html
    Notes: Keep colors accessible (AA contrast), responsive grid, minimal dependencies. */
@@ -120,7 +177,7 @@ body {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "SF Pro Display", "SFProDisplay", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   color: var(--text);
   background:
     radial-gradient(1200px 800px at 15% -10%, color-mix(in oklab, var(--accent) 24%, transparent) 0%, transparent 50%),
@@ -879,6 +936,33 @@ body.theme-switching {
   border-radius: 10px;
   color: var(--muted);
   transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+  position: relative;
+}
+
+.menu .item .badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.menu .item .badge.bg-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.menu .item .badge.bg-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
 }
 
 .menu .item .ti {

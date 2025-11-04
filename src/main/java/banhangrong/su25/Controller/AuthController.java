@@ -70,4 +70,14 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestParam String username) {
+        try {
+            authService.resendVerificationEmail(username);
+            return ResponseEntity.ok(Map.of("message", "Verification email has been sent to your email address"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

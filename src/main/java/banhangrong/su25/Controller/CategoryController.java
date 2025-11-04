@@ -3,12 +3,7 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
-import banhangrong.su25.Repository.CategoriesRepository;
-import banhangrong.su25.Repository.ProductsRepository;
-import banhangrong.su25.Repository.ProductImagesRepository;
-import banhangrong.su25.Repository.ShoppingCartRepository;
-import banhangrong.su25.Repository.UsersRepository;
-import banhangrong.su25.Repository.NotificationRepository;
+import banhangrong.su25.Repository.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,20 +28,17 @@ public class CategoryController {
     private final ProductImagesRepository productImagesRepository;
     private final ShoppingCartRepository shoppingCartRepository;
     private final UsersRepository usersRepository;
-    private final NotificationRepository notificationRepository;
 
     public CategoryController(CategoriesRepository categoriesRepository, 
                            ProductsRepository productsRepository,
                            ProductImagesRepository productImagesRepository,
                            ShoppingCartRepository shoppingCartRepository,
-                           UsersRepository usersRepository,
-                           NotificationRepository notificationRepository) {
+                           UsersRepository usersRepository) {
         this.categoriesRepository = categoriesRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.shoppingCartRepository = shoppingCartRepository;
         this.usersRepository = usersRepository;
-        this.notificationRepository = notificationRepository;
     }
 
     @GetMapping("/categories")
@@ -88,15 +80,7 @@ public class CategoryController {
         model.addAttribute("categories", categories);
         model.addAttribute("productCountByCategory", productCountByCategory);
         model.addAttribute("cartCount", cartCount);
-        
-        // Add unread notification count
-        Users currentUser = (auth != null && !(auth instanceof AnonymousAuthenticationToken)) ? usersRepository.findByUsername(auth.getName()).orElse(null) : null;
-        model.addAttribute("user", currentUser);
-        if (currentUser != null) {
-            try {
-                model.addAttribute("unreadCount", notificationRepository.countByUserIdAndIsRead(currentUser.getUserId(), false));
-            } catch (Exception ignored) {}
-        }
+        model.addAttribute("user", (auth != null && !(auth instanceof AnonymousAuthenticationToken)) ? usersRepository.findByUsername(auth.getName()).orElse(null) : null);
 
         return "customer/categories";
     }
@@ -175,15 +159,7 @@ public class CategoryController {
         model.addAttribute("totalPages", productsPage.getTotalPages());
         model.addAttribute("totalElements", productsPage.getTotalElements());
         model.addAttribute("cartCount", cartCount);
-        
-        // Add unread notification count
-        Users currentUser = (auth != null && !(auth instanceof AnonymousAuthenticationToken)) ? usersRepository.findByUsername(auth.getName()).orElse(null) : null;
-        model.addAttribute("user", currentUser);
-        if (currentUser != null) {
-            try {
-                model.addAttribute("unreadCount", notificationRepository.countByUserIdAndIsRead(currentUser.getUserId(), false));
-            } catch (Exception ignored) {}
-        }
+        model.addAttribute("user", (auth != null && !(auth instanceof AnonymousAuthenticationToken)) ? usersRepository.findByUsername(auth.getName()).orElse(null) : null);
 
         return "customer/category-products";
     }

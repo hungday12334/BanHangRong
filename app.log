@@ -1,0 +1,98 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/opt/homebrew/Cellar/maven/3.9.11/libexec/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< banhangrong:su25 >--------------------------
+[INFO] Building su25 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ su25 ---
+[INFO] Deleting /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ su25 ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] Copying 50 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ su25 ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 101 source files with javac [debug parameters release 21] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/service/AuthService.java:[110,22] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/service/AuthService.java:[147,22] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[23,31] cannot find symbol
+  symbol:   method getToEmail()
+  location: variable email of type banhangrong.su25.email.Email
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[24,36] cannot find symbol
+  symbol:   method getSubject()
+  location: variable email of type banhangrong.su25.email.Email
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[25,33] cannot find symbol
+  symbol:   method getBody()
+  location: variable email of type banhangrong.su25.email.Email
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[40,23] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java:[129,44] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java:[255,42] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[INFO] 8 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.847 s
+[INFO] Finished at: 2025-10-23T00:05:11+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.0:compile (default-compile) on project su25: Compilation failure: Compilation failure: 
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/service/AuthService.java:[110,22] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/service/AuthService.java:[147,22] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[23,31] cannot find symbol
+[ERROR]   symbol:   method getToEmail()
+[ERROR]   location: variable email of type banhangrong.su25.email.Email
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[24,36] cannot find symbol
+[ERROR]   symbol:   method getSubject()
+[ERROR]   location: variable email of type banhangrong.su25.email.Email
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[25,33] cannot find symbol
+[ERROR]   symbol:   method getBody()
+[ERROR]   location: variable email of type banhangrong.su25.email.Email
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/email/EmailService.java:[40,23] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java:[129,44] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /Users/hoangquangminh/Desktop/FUlearning/FALL25/SWP391/banhangrong1/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java:[255,42] constructor Email in class banhangrong.su25.email.Email cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -1656,7 +1656,7 @@ Hướng dẫn sử dụng Shop Designer:
                 <i class="ti ti-box" style="font-size: 2rem; color: #6c757d;"></i>
             </div>
             <h6 class="product-name mb-1" title="${product.name}">${this.truncateText(product.name, 20)}</h6>
-            <small class="text-primary fw-bold d-block">$${product.price}</small>
+            <small class="text-primary fw-bold d-block">${Number(product.price).toLocaleString('vi-VN')} đ</small>
             ${product.totalSales ? `<small class="text-success">🛒 ${product.totalSales}</small>` : ''}
             ${product.averageRating ? `<small class="text-warning">⭐ ${product.averageRating}</small>` : ''}
         </div>
@@ -1726,7 +1726,7 @@ Hướng dẫn sử dụng Shop Designer:
                        value="${product.productId}"
                        id="product-${product.productId}">
                 <label class="form-check-label" for="product-${product.productId}">
-                    ${product.name} - $${product.price}
+                    ${product.name} - ${Number(product.price).toLocaleString('vi-VN')} đ
                 </label>
             </div>
         `).join('');
@@ -1773,7 +1773,7 @@ Hướng dẫn sử dụng Shop Designer:
                     <i class="ti ti-box" style="font-size: 2rem;"></i>
                 </div>
                 <h6 class="mb-1">${product.name}</h6>
-                <small class="text-muted d-block">$${product.price}</small>
+                <small class="text-muted d-block">${Number(product.price).toLocaleString('vi-VN')} đ</small>
                 <small class="text-success">Đã bán: ${product.totalSales || 0}</small>
             </div>
         `).join('');

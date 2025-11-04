@@ -7,8 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seller Dashboard</title>
   <!-- Preload critical dashboard stylesheet to improve LCP -->
-  <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
-  <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
+  <link rel="preload" href="/css/seller-dashboard.css?v=3" as="style" />
+  <link rel="stylesheet" href="/css/seller-dashboard.css?v=3" />
+  <!-- Preload primary dashboard font (TTF available in repo); add more weights if needed -->
+  <link rel="preload" href="/font/SFPRODISPLAY/SFProDisplay-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/font/SFPRODISPLAY/SFProDisplay-Semibold.ttf" as="font" type="font/ttf" crossorigin>
   <!-- Preload and set favicon / logo -->
   <link rel="preload" as="image" href="/img/kua654ms.png" fetchpriority="high" />
   <link rel="icon" type="image/png" href="/img/kua654ms.png" />
@@ -19,6 +22,7 @@
   <!-- Defer non-critical chart library to avoid blocking rendering -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <meta name="theme-color" content="#0b1020" />
+  <meta name="user-id" th:content="${user != null ? user.userId : ''}" />
   <style>
     /* fallback dev */
   </style>

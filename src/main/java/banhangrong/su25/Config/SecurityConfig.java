@@ -6,7 +6,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -36,21 +35,26 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+            // CSRF - Keep disabled for now
+            .csrf(csrf -> csrf.disable())
 
-            // Cấu hình session management
+            // Session management - CRITICAL for maintaining session
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                    .invalidSessionUrl("/login?expired=true")
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false).expiredUrl("/login?expired=true")
-                    .sessionRegistry(sessionRegistry)
+                .sessionFixation().migrateSession() // Migrate session on authentication
+                .invalidSessionUrl("/login?expired=true")
+                .maximumSessions(5)
+                .maxSessionsPreventsLogin(false)
+                .expiredUrl("/login?expired=true")
+                .sessionRegistry(sessionRegistry)
             )
 
-            // Cấu hình authorization
+            // Authorization rules
             .authorizeHttpRequests(auth -> auth
                     // Public endpoints
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/email-verification/**").authenticated()
                     .requestMatchers("/api/database/**").permitAll()
                     .requestMatchers("/api/password-hash/**").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
@@ -59,21 +63,22 @@ public class SecurityConfig {
                     .requestMatchers("/categories", "/category/**", "/product/**").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()
 
-                // Chat endpoints - CHỈ CẦN AUTHENTICATED (không cần role cụ thể)
-                // Đặt TRƯỚC các rule khác để được ưu tiên
+                // Chat endpoints - CHỈ CẦN AUTHENTICATED
                 .requestMatchers("/chat", "/customer/chat", "/seller/chat").authenticated()
                 .requestMatchers("/api/conversation/**", "/api/conversations/**").authenticated()
                 .requestMatchers("/api/users/**", "/api/sellers/**").authenticated()
                 .requestMatchers("/ws/**").authenticated()
                 
-                // Customer pages - cho phép tất cả authenticated users
+                // Customer pages
                 .requestMatchers("/customer/**", "/cart/**").authenticated()
                 
-                // Role-based access
+                // Seller pages - IMPORTANT: Only require authenticated, role check done in controller
+                .requestMatchers("/seller/**").authenticated()
+
+                // Admin pages
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "SELLER", "ADMIN")
-                
+                .requestMatchers("/api/user/**").authenticated()
+
                 // Default: require authentication
                 .anyRequest().authenticated()
             )
