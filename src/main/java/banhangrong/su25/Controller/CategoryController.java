@@ -3,84 +3,45 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
-import banhangrong.su25.Repository.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import banhangrong.su25.service.CategoryViewService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @Controller
 public class CategoryController {
 
-    private final CategoriesRepository categoriesRepository;
-    private final ProductsRepository productsRepository;
-    private final ProductImagesRepository productImagesRepository;
-    private final ShoppingCartRepository shoppingCartRepository;
-    private final UsersRepository usersRepository;
+    private final CategoryViewService categoryViewService;
 
-    public CategoryController(CategoriesRepository categoriesRepository, 
-                           ProductsRepository productsRepository,
-                           ProductImagesRepository productImagesRepository,
-                           ShoppingCartRepository shoppingCartRepository,
-                           UsersRepository usersRepository) {
-        this.categoriesRepository = categoriesRepository;
-        this.productsRepository = productsRepository;
-        this.productImagesRepository = productImagesRepository;
-        this.shoppingCartRepository = shoppingCartRepository;
-        this.usersRepository = usersRepository;
+    public CategoryController(CategoryViewService categoryViewService) {
+        this.categoryViewService = categoryViewService;
     }
 
     @GetMapping("/categories")
     public String categoriesPage(Model model) {
-        // Kiểm tra email verified cho CUSTOMER
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            String username = auth.getName();
-            Users currentUser = usersRepository.findByUsername(username).orElse(null);
-            if (currentUser != null && "CUSTOMER".equals(currentUser.getUserType())) {
-                if (!Boolean.TRUE.equals(currentUser.getIsEmailVerified())) {
-                    return "redirect:/verify-email-required";
-                }
-            }
+        if (categoryViewService.shouldRedirectVerifyForCustomer()) {
+            return "redirect:/verify-email-required";
         }
 
-        // Lấy danh sách tất cả categories
-        List<Categories> categories = categoriesRepository.findCategoriesWithPublicProducts();
-        
-        // Đếm số products cho mỗi category
-        Map<Long, Long> productCountByCategory = new HashMap<>();
+        List<Categories> categories = categoryViewService.listCategoriesWithPublicProducts();
+        Map<Long, Long> productCountByCategory = new java.util.HashMap<>();
         for (Categories category : categories) {
-            Long count = productsRepository.countByCategoryIdAndStatus(category.getCategoryId(), "Public");
-            productCountByCategory.put(category.getCategoryId(), count);
+            productCountByCategory.put(category.getCategoryId(), categoryViewService.countPublicProductsInCategory(category.getCategoryId()));
         }
 
-        // Lấy cart count nếu user đã đăng nhập
-        Long cartCount = 0L;
-        try {
-            if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-                String username = auth.getName();
-                Users user = usersRepository.findByUsername(username).orElse(null);
-                if (user != null) {
-                    cartCount = shoppingCartRepository.countByUserId(user.getUserId());
-                }
-            }
-        } catch (Exception ignored) {}
+        Users currentUser = categoryViewService.getCurrentUserOrNull();
+        Long cartCount = currentUser != null ? categoryViewService.getCartCount(currentUser.getUserId()) : 0L;
 
         model.addAttribute("categories", categories);
         model.addAttribute("productCountByCategory", productCountByCategory);
         model.addAttribute("cartCount", cartCount);
-        model.addAttribute("user", (auth != null && !(auth instanceof AnonymousAuthenticationToken)) ? usersRepository.findByUsername(auth.getName()).orElse(null) : null);
+        model.addAttribute("user", currentUser);
 
         return "customer/categories";
     }
@@ -91,64 +52,21 @@ public class CategoryController {
                                 @RequestParam(name = "size", required = false, defaultValue = "15") int size,
                                 @RequestParam(name = "search", required = false) String search,
                                 Model model) {
-        // Kiểm tra email verified cho CUSTOMER
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            String username = auth.getName();
-            Users currentUser = usersRepository.findByUsername(username).orElse(null);
-            if (currentUser != null && "CUSTOMER".equals(currentUser.getUserType())) {
-                if (!Boolean.TRUE.equals(currentUser.getIsEmailVerified())) {
-                    return "redirect:/verify-email-required";
-                }
-            }
+        if (categoryViewService.shouldRedirectVerifyForCustomer()) {
+            return "redirect:/verify-email-required";
         }
 
-        // Kiểm tra category có tồn tại không
-        Categories category = categoriesRepository.findById(categoryId).orElse(null);
+        Categories category = categoryViewService.getCategoryById(categoryId);
         if (category == null) {
             return "redirect:/categories";
         }
 
-        // Tạo pageable với sắp xếp theo totalSales desc, createdAt desc
-        PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
-                Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt")));
-
-        Page<Products> productsPage;
-        if (search != null && !search.trim().isEmpty()) {
-            // Search mode
-            productsPage = productsRepository.findByCategoryIdAndStatusAndSearch(
-                categoryId, "Public", search.trim(), pageable);
-        } else {
-            // Normal mode
-            productsPage = productsRepository.findByCategoryIdAndStatus(categoryId, "Public", pageable);
-        }
-
+        Page<Products> productsPage = categoryViewService.getProductsPage(categoryId, page, size, search);
         List<Products> products = productsPage.getContent();
-        
-        // Lấy primary image cho mỗi product
-        Map<Long, String> primaryImageByProduct = new HashMap<>();
-        for (Products p : products) {
-            String url = null;
-            try {
-                var images = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
-                if (!images.isEmpty()) {
-                    url = images.get(0).getImageUrl();
-                }
-            } catch (Exception ignored) {}
-            primaryImageByProduct.put(p.getProductId(), url);
-        }
+        Map<Long, String> primaryImageByProduct = categoryViewService.buildPrimaryImageMap(products);
 
-        // Lấy cart count nếu user đã đăng nhập
-        Long cartCount = 0L;
-        try {
-            if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-                String username = auth.getName();
-                Users user = usersRepository.findByUsername(username).orElse(null);
-                if (user != null) {
-                    cartCount = shoppingCartRepository.countByUserId(user.getUserId());
-                }
-            }
-        } catch (Exception ignored) {}
+        Users currentUser = categoryViewService.getCurrentUserOrNull();
+        Long cartCount = currentUser != null ? categoryViewService.getCartCount(currentUser.getUserId()) : 0L;
 
         model.addAttribute("category", category);
         model.addAttribute("products", products);
@@ -159,7 +77,7 @@ public class CategoryController {
         model.addAttribute("totalPages", productsPage.getTotalPages());
         model.addAttribute("totalElements", productsPage.getTotalElements());
         model.addAttribute("cartCount", cartCount);
-        model.addAttribute("user", (auth != null && !(auth instanceof AnonymousAuthenticationToken)) ? usersRepository.findByUsername(auth.getName()).orElse(null) : null);
+        model.addAttribute("user", currentUser);
 
         return "customer/category-products";
     }

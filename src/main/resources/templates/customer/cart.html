@@ -509,7 +509,7 @@
                 recomputeTotals();
             })();
         </script>
-        <form class="summary" method="post" action="/cart/checkout-demo" style="flex-wrap:wrap;gap:10px;justify-content:space-between">
+        <div class="summary" style="flex-wrap:wrap;gap:10px;justify-content:space-between">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                 <form method="post" action="/cart/apply-voucher" style="display:flex;gap:6px;align-items:center">
                     <input type="text" name="code" placeholder="Voucher code" aria-label="Voucher code" style="height:34px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
@@ -525,9 +525,11 @@
                 <div th:if="${discount != null and discount > 0}" style="color:#10b981;font-weight:700">-<span th:text="${#numbers.formatDecimal(discount,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <div class="total">Total: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <a href="/customer/dashboard" class="btn">Continue Shopping</a>
-                <button class="btn primary" type="submit">Pay with Balance</button>
+                <form method="post" action="/cart/checkout-demo" style="display:inline">
+                    <button class="btn primary" type="submit">Pay with Balance</button>
+                </form>
             </div>
-        </form>
+        </div>
         </div>
     </div>
     
