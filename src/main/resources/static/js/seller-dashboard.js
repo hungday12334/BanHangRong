@@ -919,11 +919,20 @@
             const res = await fetch(`/api/products?sellerId=${sellerId}`);
             if (!res.ok) { showToast('Failed to load your product list', 'error'); return; }
             const list = await res.json();
+            // Apply client-side status filter from dropdown (all/public/pending/hidden)
+            const statusSel = document.getElementById('myProductsStatusFilter');
+            const statusVal = (statusSel && statusSel.value) ? statusSel.value.toString().trim().toLowerCase() : 'all';
+            const filtered = (statusVal === 'all') ? list : list.filter(p => ((p.status || '').toString().toLowerCase() === statusVal));
             const tbody = document.getElementById('tbMyProducts');
             const counter = document.getElementById('myProductsCount');
             if (!tbody) return;
             tbody.innerHTML = '';
-            list.forEach(p => {
+            if (!filtered.length) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" class="footer-note">Không có sản phẩm theo trạng thái đã chọn.</td>';
+                tbody.appendChild(tr);
+            }
+            filtered.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.setAttribute('data-product-id', p.productId);
@@ -935,7 +944,7 @@
                 tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
                 tbody.appendChild(tr);
             });
-            if (counter) counter.textContent = list.length;
+            if (counter) counter.textContent = filtered.length;
             // rebind row click to open product modal
             document.querySelectorAll('#tbMyProducts [data-product-id]').forEach(row => {
                 row.addEventListener('click', () => {
@@ -945,11 +954,13 @@
             });
             const pager = document.getElementById('pgMyProducts');
             if (pager) paginateTable(tbody, pager, 5);
-            if (showToastMsg) showToast(`Loaded ${list.length} of your products`, 'info', { duration: 2000 });
+            if (showToastMsg) showToast(`Loaded ${filtered.length} of your products`, 'info', { duration: 2000 });
         }
 
-        // initial load
+    // initial load
         refreshMyProducts(false);
+    // Bind status filter change for My products
+    document.getElementById('myProductsStatusFilter')?.addEventListener('change', () => refreshMyProducts(false));
 
         // === Avatar edit button hover ===
         const avatarWrap = document.querySelector('.avatar-edit-wrap');
