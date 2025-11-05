@@ -26,6 +26,8 @@ import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Controller
 public class CustomerReviewsController {
@@ -69,6 +71,33 @@ public class CustomerReviewsController {
             
             Users user = userOptional.get();
             
+            // Normalize filter parameters (convert empty strings to null)
+            Integer ratingFilter = (rating != null) ? rating : null;
+            String fromDateFilter = (fromDate != null && !fromDate.trim().isEmpty()) ? fromDate : null;
+            String toDateFilter = (toDate != null && !toDate.trim().isEmpty()) ? toDate : null;
+            String searchFilter = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+            
+            // Convert date strings to LocalDateTime for query (at start/end of day)
+            LocalDateTime fromDateTime = null;
+            if (fromDateFilter != null) {
+                try {
+                    LocalDate date = LocalDate.parse(fromDateFilter);
+                    fromDateTime = date.atStartOfDay();
+                } catch (Exception e) {
+                    // Ignore parsing errors
+                }
+            }
+            
+            LocalDateTime toDateTime = null;
+            if (toDateFilter != null) {
+                try {
+                    LocalDate date = LocalDate.parse(toDateFilter);
+                    toDateTime = date.atTime(23, 59, 59);
+                } catch (Exception e) {
+                    // Ignore parsing errors
+                }
+            }
+            
             // Determine sorting
             Sort sort;
             switch (sortBy) {
@@ -93,10 +122,10 @@ public class CustomerReviewsController {
             // Lấy reviews của user hiện tại với pagination và filters
             Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserIdWithFilters(
                 user.getUserId(),
-                rating,
-                fromDate,
-                toDate,
-                search,
+                ratingFilter,
+                fromDateTime,
+                toDateTime,
+                searchFilter,
                 pageable
             );
             List<ProductReviews> userReviews = reviewsPage.getContent();
@@ -143,10 +172,10 @@ public class CustomerReviewsController {
             model.addAttribute("sortBy", sortBy);
             
             // Filter attributes
-            model.addAttribute("filterRating", rating);
-            model.addAttribute("filterFromDate", fromDate);
-            model.addAttribute("filterToDate", toDate);
-            model.addAttribute("search", search);
+            model.addAttribute("filterRating", ratingFilter);
+            model.addAttribute("filterFromDate", fromDateFilter);
+            model.addAttribute("filterToDate", toDateFilter);
+            model.addAttribute("search", searchFilter);
             
             return "customer/reviews";
         } catch (Exception e) {

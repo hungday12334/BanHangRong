@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ProductReviewsRepository extends JpaRepository<ProductReviews, Long> {
@@ -74,13 +75,13 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
            "LEFT JOIN Products p ON pr.productId = p.productId " +
            "WHERE pr.userId = :userId " +
            "AND (:rating IS NULL OR pr.rating = :rating) " +
-           "AND (:fromDate IS NULL OR pr.createdAt >= CAST(:fromDate AS timestamp)) " +
-           "AND (:toDate IS NULL OR pr.createdAt <= CAST(:toDate AS timestamp)) " +
+           "AND (:fromDate IS NULL OR pr.createdAt >= :fromDate) " +
+           "AND (:toDate IS NULL OR pr.createdAt <= :toDate) " +
            "AND (:search IS NULL OR :search = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<ProductReviews> findByUserIdWithFilters(@Param("userId") Long userId,
                                                    @Param("rating") Integer rating,
-                                                   @Param("fromDate") String fromDate,
-                                                   @Param("toDate") String toDate,
+                                                   @Param("fromDate") LocalDateTime fromDate,
+                                                   @Param("toDate") LocalDateTime toDate,
                                                    @Param("search") String search,
                                                    Pageable pageable);
 

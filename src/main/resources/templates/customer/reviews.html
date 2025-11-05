@@ -1119,13 +1119,13 @@
                     </div>
                     <div class="pagination-controls">
                         <!-- First Page -->
-                        <a th:href="@{/customer/reviews(page=0, size=${pageSize}, sortBy=${sortBy}, rating=${filterRating}, fromDate=${filterFromDate}, toDate=${filterToDate}, search=${search})}" 
+                        <a th:href="${'/customer/reviews?page=0&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage == 0} ? 'disabled' : ''"
                            class="page-btn"
                            title="Trang đầu">«</a>
                         
                         <!-- Previous Page -->
-                        <a th:href="@{/customer/reviews(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, rating=${filterRating}, fromDate=${filterFromDate}, toDate=${filterToDate}, search=${search})}" 
+                        <a th:href="${'/customer/reviews?page=' + (currentPage - 1) + '&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage == 0} ? 'disabled' : ''"
                            class="page-btn"
                            title="Trang trước">‹</a>
@@ -1133,20 +1133,20 @@
                         <!-- Page Numbers -->
                         <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
                               th:if="${pageNum >= (currentPage - 2 > 0 ? currentPage - 2 : 0) and pageNum <= (currentPage + 2 < totalPages - 1 ? currentPage + 2 : totalPages - 1)}">
-                            <a th:href="@{/customer/reviews(page=${pageNum}, size=${pageSize}, sortBy=${sortBy}, rating=${filterRating}, fromDate=${filterFromDate}, toDate=${filterToDate}, search=${search})}" 
+                            <a th:href="${'/customer/reviews?page=' + pageNum + '&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                                th:text="${pageNum + 1}"
                                th:classappend="${pageNum == currentPage} ? 'active' : ''"
                                class="page-btn">1</a>
                         </span>
                         
                         <!-- Next Page -->
-                        <a th:href="@{/customer/reviews(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, rating=${filterRating}, fromDate=${filterFromDate}, toDate=${filterToDate}, search=${search})}" 
+                        <a th:href="${'/customer/reviews?page=' + (currentPage + 1) + '&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
                            class="page-btn"
                            title="Trang sau">›</a>
                         
                         <!-- Last Page -->
-                        <a th:href="@{/customer/reviews(page=${totalPages - 1}, size=${pageSize}, sortBy=${sortBy}, rating=${filterRating}, fromDate=${filterFromDate}, toDate=${filterToDate}, search=${search})}" 
+                        <a th:href="${'/customer/reviews?page=' + (totalPages - 1) + '&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
                            class="page-btn"
                            title="Trang cuối">»</a>

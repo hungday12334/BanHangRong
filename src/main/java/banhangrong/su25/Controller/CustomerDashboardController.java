@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.HashMap;
@@ -275,44 +276,36 @@ public class CustomerDashboardController {
             Long totalProducts = (long) products.size();
             Long totalSales = productsRepository.totalUnitsSoldBySeller(sellerId);
             
-            // Get reviews for seller's products
-            List<ProductReviews> reviews = new java.util.ArrayList<>();
-            for (Products product : products) {
-                List<ProductReviews> productReviews = productReviewsRepository.findByProductIdOrderByCreatedAtDesc(product.getProductId());
-                for (ProductReviews review : productReviews) {
-                    // Get username for each review
-                    usersRepository.findById(review.getUserId()).ifPresent(user -> {
-                        review.setUsername(user.getUsername());
-                    });
-                }
-                reviews.addAll(productReviews);
-            }
-            Long totalReviews = (long) reviews.size();
-            
             // Calculate separate averages for product rating and service rating
             BigDecimal averageProductRating = BigDecimal.ZERO;
             BigDecimal averageServiceRating = BigDecimal.ZERO;
+            Long totalReviews = 0L;
             
-            if (!reviews.isEmpty()) {
-                double productSum = reviews.stream()
+            // Calculate ratings from all reviews of seller's products
+            List<ProductReviews> allReviews = new java.util.ArrayList<>();
+            for (Products product : products) {
+                List<ProductReviews> productReviews = productReviewsRepository.findByProductIdOrderByCreatedAtDesc(product.getProductId());
+                if (productReviews != null) {
+                    allReviews.addAll(productReviews);
+                }
+            }
+            
+            if (!allReviews.isEmpty()) {
+                totalReviews = (long) allReviews.size();
+                
+                double productSum = allReviews.stream()
                     .filter(r -> r.getRating() != null)
                     .mapToInt(ProductReviews::getRating)
                     .average()
                     .orElse(0.0);
-                averageProductRating = BigDecimal.valueOf(productSum);
+                averageProductRating = BigDecimal.valueOf(productSum).setScale(1, RoundingMode.HALF_UP);
                 
-                double serviceSum = reviews.stream()
+                double serviceSum = allReviews.stream()
                     .filter(r -> r.getServiceRating() != null)
                     .mapToInt(ProductReviews::getServiceRating)
                     .average()
                     .orElse(0.0);
-                averageServiceRating = BigDecimal.valueOf(serviceSum);
-            }
-            
-            // Sort reviews by created date descending and limit to 10
-            reviews.sort((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()));
-            if (reviews.size() > 10) {
-                reviews = reviews.subList(0, 10);
+                averageServiceRating = BigDecimal.valueOf(serviceSum).setScale(1, RoundingMode.HALF_UP);
             }
             
             // Add data to model
@@ -324,7 +317,6 @@ public class CustomerDashboardController {
             model.addAttribute("averageProductRating", averageProductRating);
             model.addAttribute("averageServiceRating", averageServiceRating);
             model.addAttribute("totalReviews", totalReviews);
-            model.addAttribute("reviews", reviews);
             
             // Add current user data for header
             if (currentUser != null) {
