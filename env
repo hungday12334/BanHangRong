@@ -1,0 +1,9 @@
+DB_HOST=smiledev.id.vn
+DB_NAME=smiledev_wap
+DB_USERNAME=smiledev_wap
+DB_PASSWORD=123456789
+DB_CONNECT_TIMEOUT=4000
+DB_SOCKET_TIMEOUT=60000
+
+# Imgbb API Key for online image upload
+IMGBB_API_KEY=0c8cb2db990806bfbbbcb1c8afe2e6a6
