@@ -7,7 +7,6 @@ import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,11 +38,11 @@ public class NotificationController {
     @GetMapping
     public String notificationsPage(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "4") int size,
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) Boolean isRead,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) String isRead,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "newest") String sortBy,
             Model model) {
 
@@ -56,13 +56,39 @@ public class NotificationController {
             return "redirect:/login";
         }
 
+        // Parse và xử lý các tham số filter
+        Boolean isReadFilter = null;
+        if (isRead != null && !isRead.isEmpty()) {
+            isReadFilter = Boolean.parseBoolean(isRead);
+        }
+
+        LocalDateTime startDateTime = null;
+        if (startDate != null && !startDate.isEmpty()) {
+            try {
+                LocalDate date = LocalDate.parse(startDate);
+                startDateTime = date.atStartOfDay();
+            } catch (Exception e) {
+                // Ignore parsing errors
+            }
+        }
+
+        LocalDateTime endDateTime = null;
+        if (endDate != null && !endDate.isEmpty()) {
+            try {
+                LocalDate date = LocalDate.parse(endDate);
+                endDateTime = date.atTime(23, 59, 59);
+            } catch (Exception e) {
+                // Ignore parsing errors
+            }
+        }
+
         // Lấy danh sách notification với bộ lọc
         Page<Notification> notifications = notificationService.getNotificationsWithFilters(
             currentUser.getUserId(),
             type,
-            isRead,
-            startDate,
-            endDate,
+            isReadFilter,
+            startDateTime,
+            endDateTime,
             sortBy,
             page,
             size
@@ -78,10 +104,11 @@ public class NotificationController {
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("cartCount", cartCount);
         model.addAttribute("currentPage", page);
+        model.addAttribute("size", size);
         model.addAttribute("totalPages", notifications.getTotalPages());
         model.addAttribute("currentUser", currentUser);
         
-        // Bộ lọc hiện tại
+        // Bộ lọc hiện tại (giữ nguyên format string để hiển thị trong form)
         model.addAttribute("currentType", type);
         model.addAttribute("currentIsRead", isRead);
         model.addAttribute("currentStartDate", startDate);
