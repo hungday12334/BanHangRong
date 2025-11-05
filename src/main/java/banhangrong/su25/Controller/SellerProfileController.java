@@ -228,7 +228,7 @@ public class SellerProfileController {
     @ResponseBody
     public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile file) {
         try {
-            System.out.println("=== BẮT ĐẦU UPLOAD AVATAR ===");
+            System.out.println("=== START UPLOAD AVATAR ===");
             System.out.println("File name: " + file.getOriginalFilename());
             System.out.println("File size: " + file.getSize());
             System.out.println("Content type: " + file.getContentType());
@@ -447,23 +447,66 @@ public class SellerProfileController {
             userProfileService.changePassword(sellerId, newPassword);
 
             System.out.println("✅ Password changed successfully for user: " + user.getUsername());
+            System.out.println("=================================================================");
+            System.out.println("=== SENDING PASSWORD CHANGE NOTIFICATION EMAIL ===");
+            System.out.println("=================================================================");
 
             // Gửi email thông báo đổi mật khẩu thành công
             try {
-                String emailSubject = "Thông báo thay đổi mật khẩu - Ban Hang Rong";
-                String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-                String emailBody = "Xin chào " + user.getUsername() + ",\n\n" +
-                        "Your password has been successfully changed at " + timeStamp + ".\n\n" +
-                        "If you do not do this, please contact us immediately.\n\n" +
-                        "Best regards,\n" +
-                        "Ban Hang Rong Team";
+                // Validate email address
+                String userEmail = user.getEmail();
+                if (userEmail == null || userEmail.isEmpty()) {
+                    System.err.println("❌ WARNING: User email is NULL or EMPTY!");
+                    System.err.println("   User ID: " + user.getUserId());
+                    System.err.println("   Username: " + user.getUsername());
+                    System.err.println("   Email cannot be sent without valid email address!");
+                } else {
+                    System.out.println("📧 User email: " + userEmail);
+                    System.out.println("📧 User ID: " + user.getUserId());
+                    System.out.println("📧 Username: " + user.getUsername());
 
-                Email email = new Email(user.getEmail(), emailSubject, emailBody);
-                emailService.sendEmail(email);
-                System.out.println("📧 Password change notification email sent to: " + user.getEmail());
+                    String emailSubject = "🔒 Thông báo thay đổi mật khẩu - Ban Hang Rong";
+                    String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+
+                    // Format email body với line breaks rõ ràng
+                    StringBuilder emailBody = new StringBuilder();
+                    emailBody.append("Hello ").append(user.getUsername()).append(",\n\n");
+                    emailBody.append("Your password has been changed successfully.!\n\n");
+                    emailBody.append("📅 Time: ").append(timeStamp).append("\n");
+                    emailBody.append("📧 Email: ").append(userEmail).append("\n");
+                    emailBody.append("👤 Account: ").append(user.getUsername()).append("\n\n");
+                    emailBody.append("⚠️ If you do NOT do this, please contact us IMMEDIATELY to secure your account.!\n\n");
+                    emailBody.append("To ensure safety:\n");
+                    emailBody.append("- Do not share your password with anyone\n");
+                    emailBody.append("- Use strong and unique passwords\n");
+                    emailBody.append("- Sign out of devices no longer in use\n\n");
+                    emailBody.append("Best regards,\n");
+                    emailBody.append("Ban Hang Rong Team\n");
+                    emailBody.append("Email: bonhoangncd@gmail.com");
+
+                    Email email = new Email(userEmail, emailSubject, emailBody.toString());
+
+                    System.out.println("📧 Creating email object...");
+                    System.out.println("   To: " + userEmail);
+                    System.out.println("   Subject: " + emailSubject);
+                    System.out.println("📧 Calling emailService.sendEmail()...");
+
+                    emailService.sendEmail(email);
+
+                    System.out.println("✅✅✅ PASSWORD CHANGE EMAIL SENT SUCCESSFULLY! ✅✅✅");
+                    System.out.println("=================================================================");
+                }
             } catch (Exception emailEx) {
-                // Log lỗi nhưng không fail request
-                System.out.println("⚠️ Failed to send email notification: " + emailEx.getMessage());
+                // Log chi tiết lỗi
+                System.err.println("=================================================================");
+                System.err.println("❌❌❌ FAILED TO SEND EMAIL NOTIFICATION! ❌❌❌");
+                System.err.println("=================================================================");
+                System.err.println("Error type: " + emailEx.getClass().getName());
+                System.err.println("Error message: " + emailEx.getMessage());
+                System.err.println("Stack trace:");
+                emailEx.printStackTrace();
+                System.err.println("=================================================================");
+                // Không fail request - user vẫn đã đổi mật khẩu thành công
             }
 
             return ResponseEntity.ok(Map.of(

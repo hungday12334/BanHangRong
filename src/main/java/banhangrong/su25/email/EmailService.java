@@ -15,24 +15,37 @@ public class EmailService {
 
     // Gửi email chung
     public void sendEmail(Email email) {
+        System.out.println("=== EMAIL SERVICE: Starting to send email ===");
+        System.out.println("To: " + email.getToEmail());
+        System.out.println("Subject: " + email.getSubject());
+
         if (mailSender == null) {
-            System.err.println("Warning: JavaMailSender is not configured. Email not sent to: " + email.getToEmail());
+            System.err.println("❌ ERROR: JavaMailSender is not configured. Email not sent to: " + email.getToEmail());
+            System.err.println("Please check application.properties for email configuration");
             return;
         }
         
         MimeMessage message = mailSender.createMimeMessage();
         try {
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("Dormitory@gmail.com");
+            helper.setFrom("Ban Hang Rong <bonhoangncd@gmail.com>");
             helper.setTo(email.getToEmail());
             helper.setSubject(email.getSubject());
             helper.setText(email.getBody(), false);
 
+            System.out.println("📧 Sending email...");
             mailSender.send(message);
+            System.out.println("✅ Email sent successfully to: " + email.getToEmail());
 
         } catch (MessagingException e) {
-            throw new RuntimeException("Lỗi khi gửi email: " + e.getMessage());
+            System.err.println("❌ ERROR sending email: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error sending email: " + e.getMessage(), e);
+        } catch (Exception e) {
+            System.err.println("❌ UNEXPECTED ERROR: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Unexpected error while sending email: " + e.getMessage(), e);
         }
     }
 
@@ -40,7 +53,7 @@ public class EmailService {
     public void sendPasswordResetEmail(String to, String token) {
         String subject = "Password Reset Request";
         String resetLink = "http://localhost:8080/reset-password?token=" + token;
-        String body = "Nhấn vào link để đặt lại mật khẩu: " + resetLink;
+        String body = "Click the link to reset your password: " + resetLink;
 
         Email email = new Email(to, subject, body);
         sendEmail(email);

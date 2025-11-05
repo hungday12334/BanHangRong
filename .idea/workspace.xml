@@ -4,17 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(category-management): reorganize category management UI and enhance data attributes for improved usability">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(profile-management): enhance profile update process with email notification and improved validation messages">
       <change afterPath="$PROJECT_DIR$/CATEGORY_IMPROVEMENTS_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DEBUG_PASSWORD_CHANGE_EMAIL.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/EDIT_CATEGORY_ANALYSIS.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/EDIT_CATEGORY_IMPLEMENTATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EMAIL_FIX_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EMAIL_TROUBLESHOOTING_GUIDE.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/HUONG_DAN_CAC_TRUONG_MOI.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PASSWORD_CHANGE_EMAIL_SUMMARY.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/PROFILE_UPDATE_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QUICK_EMAIL_TEST.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/TOM_TAT_HOAN_THANH.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/WHERE_NEW_FIELDS_APPEAR.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/email/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/email/EmailService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -260,7 +265,7 @@
       <workItem from="1762071570533" duration="875000" />
       <workItem from="1762111402526" duration="8323000" />
       <workItem from="1762138370900" duration="473000" />
-      <workItem from="1762332301596" duration="4851000" />
+      <workItem from="1762332301596" duration="6123000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -478,7 +483,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762335027536</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="feat(profile-management): enhance profile update process with email notification and improved validation messages">
+      <option name="closed" value="true" />
+      <created>1762354003113</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1762354003113</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -561,6 +574,7 @@
     <MESSAGE value="feat(category-management): implement advanced filters and pagination for improved category management experience" />
     <MESSAGE value="feat(category-management): add enhanced fields for improved category management" />
     <MESSAGE value="feat(category-management): reorganize category management UI and enhance data attributes for improved usability" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(category-management): reorganize category management UI and enhance data attributes for improved usability" />
+    <MESSAGE value="feat(profile-management): enhance profile update process with email notification and improved validation messages" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(profile-management): enhance profile update process with email notification and improved validation messages" />
   </component>
 </project>
