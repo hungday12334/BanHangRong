@@ -5,6 +5,8 @@ import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Util.ImageUploadUtil;
 import banhangrong.su25.Util.Validation;
+import banhangrong.su25.email.Email;
+import banhangrong.su25.email.EmailService;
 import banhangrong.su25.service.AdminProductService;
 import banhangrong.su25.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +29,9 @@ public class AdminUserManagement {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private EmailService emailService;
+
 
     @GetMapping("filter")
     public String filterUser(@ModelAttribute("filter") UserFilter userFilter, RedirectAttributes redirectAttributes) {
@@ -69,12 +74,12 @@ public class AdminUserManagement {
             model.addAttribute("user", user);
             return "admin/user-creation";
         } else {
-            if (valid.hasSpace(user.getUsername())){
+            if (valid.hasSpace(user.getUsername())) {
                 model.addAttribute("error", "Username can not have space");
                 model.addAttribute("user", user);
                 return "admin/user-creation";
             }
-            if(valid.hasSpace(user.getEmail())){
+            if (valid.hasSpace(user.getEmail())) {
                 model.addAttribute("error", "Email can not have space");
                 model.addAttribute("user", user);
             }
@@ -85,14 +90,14 @@ public class AdminUserManagement {
             model.addAttribute("error", "Password must be at least 6 characters long");
             model.addAttribute("user", user);
             return "admin/user-creation";
-        }else if(valid.hasSpace(user.getPassword())){
+        } else if (valid.hasSpace(user.getPassword())) {
             model.addAttribute("error", "Password can not have space");
             model.addAttribute("user", user);
             return "admin/user-creation";
         }
 
         //Trim username
-        if(user.getUsername()!=null){
+        if (user.getUsername() != null) {
             user.setUsername(user.getUsername().trim());
         }
         //Check valid phone
@@ -101,7 +106,7 @@ public class AdminUserManagement {
                 model.addAttribute("error", "Invalid phone number");
                 model.addAttribute("user", user);
                 return "admin/user-creation";
-            }else if(valid.hasSpace(user.getPhoneNumber())){
+            } else if (valid.hasSpace(user.getPhoneNumber())) {
                 model.addAttribute("error", "Phone can not have space");
                 model.addAttribute("user", user);
                 return "admin/user-creation";
@@ -109,15 +114,43 @@ public class AdminUserManagement {
         }
         user.setAvatarUrl(request.getParameter("imageUrl"));
 //         Save hashed password
+        String prePassword = user.getPassword();
         user.setPassword(valid.hashPassword(user.getPassword()));
         //Blance default 0
         user.setBalance(BigDecimal.ZERO);
-        user.setIsEmailVerified(true);
+        user.setIsEmailVerified(false);
         user.setIsActive(true);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         userService.save(user);
+
+        String subject = "Welcome to BanHangRong - Notification";
+
+        String message = """
+                <div style="font-family: Arial, sans-serif; color: #333;">
+                    <h2 style="color: #2c7be5;">🎉 Chào mừng bạn đến với BanHangRong!</h2>
+                    <p>Xin chào <strong>%s</strong>,</p>
+                    <p>Admin vừa đăng ký thành công tài khoản của bạn trên hệ thống <strong>BanHangRong</strong>.</p>
+                    <p>Dưới đây là thông tin đăng nhập:</p>
+                    <div style="background-color: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #ddd; width: fit-content;">
+                        <p><b>Email:</b> %s</p>
+                        <p><b>Tài khoản:</b> %s</p>
+                        <p><b>Mật khẩu:</b> %s</p>
+                    </div>
+                    <br>
+                    <p>Khi đăng nhập lần đầu, bạn sẽ cần <strong>Verify email</strong> để xác minh tài khoản.</p>
+                    <p>Hãy nhớ <strong>đổi mật khẩu</strong> sau khi đăng nhập để đảm bảo an toàn thông tin cá nhân.</p>
+                    <hr>
+                    <p style="font-size: 13px; color: #777;">Trân trọng,<br><em>Đội ngũ BanHangRong</em></p>
+                </div>
+                """.formatted(user.getEmail(), user.getEmail(), user.getUsername(), prePassword);
+
+        emailService.sendEmail(
+                new Email(user.getEmail(), subject, message)
+        );
+
         redirectAttributes.addFlashAttribute("success", "User created successfully");
+
         //redirect to user list page
         return "redirect:/admin/user";
     }
@@ -189,11 +222,11 @@ public class AdminUserManagement {
             String balance = request.getParameter("balance");
 
             //Check valid email
-            if(valid.hasSpace(email)){
+            if (valid.hasSpace(email)) {
                 model.addAttribute("error", "Email can not have space");
                 model.addAttribute("user", user);
                 return "admin/user-update";
-            }else if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
+            } else if (userService.existsByEmail(email) && !email.equals(user.getEmail())) {
                 //Kiem tra xem email da ton tai hay chua (Khong xet den email cu)
                 model.addAttribute("error", "Email already exists");
                 model.addAttribute("user", user);
@@ -205,15 +238,15 @@ public class AdminUserManagement {
                 model.addAttribute("error", "Password must be at least 6 characters long");
                 model.addAttribute("user", user);
                 return "admin/user-update";
-            }else if(valid.hasSpace(password)){
+            } else if (valid.hasSpace(password)) {
                 model.addAttribute("error", "Password can not have space");
                 model.addAttribute("user", user);
                 return "admin/user-update";
             }
             //Trim full name
 
-            if(fullName!=null){
-                fullName=fullName.trim();
+            if (fullName != null) {
+                fullName = fullName.trim();
             }
             //Check valid phone
             if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
@@ -221,7 +254,7 @@ public class AdminUserManagement {
                     model.addAttribute("error", "Invalid phone number");
                     model.addAttribute("user", user);
                     return "admin/user-update";
-                }else if(valid.hasSpace(phoneNumber)){
+                } else if (valid.hasSpace(phoneNumber)) {
                     model.addAttribute("error", "Phone can not have space");
                     model.addAttribute("user", user);
                     return "admin/user-update";
@@ -247,6 +280,12 @@ public class AdminUserManagement {
             } else {
                 balanceD = BigDecimal.ZERO;
             }
+            if (!user.getIsActive()) {
+                model.addAttribute("error", "User is not active");
+                model.addAttribute("user", user);
+                return "admin/user-update";
+            }
+            String preEmail = user.getEmail();
             user.setEmail(email);
 //          Save hashed password
             user.setPassword(valid.hashPassword(password));
@@ -260,8 +299,51 @@ public class AdminUserManagement {
             }
             user.setBalance(balanceD);
             user.setUpdatedAt(LocalDateTime.now());
+
+            if (!preEmail.equals(email)) {
+                String oldMailMsg = """
+                            <div style="font-family: Arial,sans-serif; color:#333;">
+                                <h3>🔔 Thông báo thay đổi email</h3>
+                                <p>Xin chào,</p>
+                                <p>Email đăng ký của tài khoản <b>%s</b> trong hệ thống <b>BanHangRong</b> vừa được thay đổi.</p>
+            <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
+                <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
+            </p>
+                                <hr>
+                                <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ BanHangRong</p>
+                            </div>
+                        """.formatted(user.getUsername());
+                emailService.sendEmail(new Email(preEmail, "BanHangRong - Email Change Notification", oldMailMsg));
+                String newMailMsg = """
+                            <div style="font-family: Arial,sans-serif; color:#333;">
+                                <h3>✅ Cập nhật email thành công</h3>
+                                <p>Xin chào <b>%s</b>,</p>
+                                <p>Tài khoản của bạn trên <b>BanHangRong</b> vừa được liên kết với địa chỉ email mới này.</p>
+                                <p>Hãy dùng email này để đăng nhập và xác minh trong những lần tiếp theo.</p>
+                                <hr>
+                                <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ BanHangRong</p>
+                            </div>
+                        """.formatted(user.getUsername());
+                emailService.sendEmail(new Email(email, "BanHangRong - Email Updated Successfully", newMailMsg));
+                user.setIsEmailVerified(false);
+                model.addAttribute("success", "User information updated successfully and email notifications sent.");
+            } else {
+                String infoChangeMsg = """
+                                        <div style="font-family: Arial,sans-serif; color:#333;">
+                                            <h3 style="color:#2c7be5;">ℹ️ Thông tin tài khoản của bạn đã được cập nhật</h3>
+                                            <p>Xin chào <b>%s</b>,</p>
+                                            <p>Admin đã cập nhật một số thông tin trong tài khoản của bạn trên hệ thống <b>BanHangRong</b>.</p>
+                           <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
+                            <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
+                        </p>
+                                            <hr>
+                                            <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ BanHangRong</p>
+                                        </div>
+                        """.formatted(user.getUsername());
+                emailService.sendEmail(new Email(email, "BanHangRong - Account Information Updated", infoChangeMsg));
+                model.addAttribute("success", "User information updated successfully and notification sent.");
+            }
             userService.save(user);
-            model.addAttribute("success", "User created successfully");
             model.addAttribute("user", user);
             return "admin/user-update";
 
@@ -276,20 +358,49 @@ public class AdminUserManagement {
     @PostMapping("/deactive")
     public String deactiveUser(HttpServletRequest request, RedirectAttributes redirectAttributes) {
         String sId = request.getParameter("id");
+
         if (sId == null || sId.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "User not found");
-        } else {
-            Long id = Long.parseLong(sId);
-            Users user = userService.findById(id);
-            if (user == null) {
-                redirectAttributes.addFlashAttribute("error", "User not found");
-            } else {
-                userService.deactiveUserById(user);
-                redirectAttributes.addFlashAttribute("success", "Deactivated user successfully");
-
-            }
+            return "redirect:/admin/user";
         }
+
+        Long id = Long.parseLong(sId);
+        Users user = userService.findById(id);
+
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "User not found");
+            return "redirect:/admin/user";
+        }
+        if (!user.getIsActive()) {
+            redirectAttributes.addFlashAttribute("error", "User is already deactivated");
+            return "redirect:/admin/user";
+        }
+        userService.deactiveUserById(user);
+        redirectAttributes.addFlashAttribute("success", "Deactivated user successfully");
+
+        String subject = "BanHangRong - Your Account Has Been Deactivated";
+        String message = """
+                    <div style="font-family: Arial,sans-serif; color:#333;">
+                        <h3 style="color:#d9534f;">⚠️ Tài khoản của bạn đã bị vô hiệu hóa</h3>
+                        <p>Xin chào <b>%s</b>,</p>
+                        <p>Tài khoản của bạn trên hệ thống <b>BanHangRong</b> đã bị <b>vô hiệu hóa (deactivated)</b> bởi quản trị viên.</p>
+                        <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
+                            <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
+                        </p>
+                        <p>Bạn sẽ không thể đăng nhập cho đến khi tài khoản được kích hoạt lại.</p>
+                        <hr>
+                        <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ <b>BanHangRong</b></p>
+                    </div>
+                """.formatted(user.getUsername());
+
+        try {
+            emailService.sendEmail(new Email(user.getEmail(), subject, message));
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while sending email: " + e.getMessage());
+        }
+
         return "redirect:/admin/user";
     }
+
 
 }

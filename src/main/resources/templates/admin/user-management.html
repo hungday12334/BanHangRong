@@ -441,12 +441,25 @@
                             <a th:href="@{'/admin/user/update?id=' + ${u.userId}}">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <form th:action="@{'/admin/user/deactive'}" method="post" class="deactivate-form" style="display:inline;">
-                                <input type="hidden" name="id" th:value="${u.userId}">
-                                <button type="button" class="btn btn-outline-danger btn-sm btn-deactivate">
-                                    <i class="bi bi-person-x"></i>
-                                </button>
-                            </form>
+                            <!-- Nếu user đang active => hiện nút Deactivate -->
+                            <div th:if="${u.isActive}">
+                                <form th:action="@{'/admin/user/deactive'}" method="post" class="deactivate-form" style="display:inline;">
+                                    <input type="hidden" name="id" th:value="${u.userId}">
+                                    <button type="button" class="btn btn-outline-danger btn-sm btn-deactivate">
+                                        <i class="bi bi-person-x-fill"></i> Deactivate
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Nếu user đang inactive => hiện nút Active -->
+                            <div th:if="${!u.isActive}">
+                                <form th:action="@{'/admin/user/active'}" method="post" class="activate-form" style="display:inline;">
+                                    <input type="hidden" name="id" th:value="${u.userId}">
+                                    <button type="button" class="btn btn-outline-success btn-sm btn-activate">
+                                        <i class="bi bi-person-check-fill"></i> Activate
+                                    </button>
+                                </form>
+                            </div>
 
                         </div>
                     </td>

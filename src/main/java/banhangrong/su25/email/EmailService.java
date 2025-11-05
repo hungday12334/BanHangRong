@@ -27,7 +27,7 @@ public class EmailService {
             helper.setFrom("Dormitory@gmail.com");
             helper.setTo(email.getToEmail());
             helper.setSubject(email.getSubject());
-            helper.setText(email.getBody(), false);
+            helper.setText(email.getBody(), true);
 
             mailSender.send(message);
 
@@ -41,7 +41,6 @@ public class EmailService {
         String subject = "Password Reset Request";
         String resetLink = "http://localhost:8080/reset-password?token=" + token;
         String body = "Nhấn vào link để đặt lại mật khẩu: " + resetLink;
-
         Email email = new Email(to, subject, body);
         sendEmail(email);
     }
