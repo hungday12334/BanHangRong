@@ -535,6 +535,80 @@
       color: white;
     }
 
+    /* Advanced Filters */
+    .advanced-filters {
+      background: var(--bg, #0f1219);
+      border: 1px solid var(--border, #334155);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .advanced-filters.active {
+      display: block;
+    }
+
+    .advanced-filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .advanced-filters-title {
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .advanced-filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter-field label {
+      font-size: 12px;
+      color: var(--muted, #94a3b8);
+      font-weight: 500;
+    }
+
+    .filter-field input,
+    .filter-field select {
+      padding: 8px 12px;
+      border: 1px solid var(--border, #334155);
+      border-radius: 6px;
+      background: var(--bg-elev, #1a1d2e);
+      color: var(--text, #f1f5f9);
+      font-size: 13px;
+    }
+
+    .filter-field input:focus,
+    .filter-field select:focus {
+      outline: none;
+      border-color: var(--accent, #3b82f6);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
     .voucher-table {
       width: 100%;
       border-collapse: collapse;
@@ -604,6 +678,26 @@
     .status-expired {
       background: rgba(239, 68, 68, 0.2);
       color: #f87171;
+    }
+
+    .status-cell {
+      position: relative;
+    }
+
+    .status-dropdown {
+      padding: 4px 8px;
+      border: 1px solid var(--border, #334155);
+      border-radius: 6px;
+      background: var(--bg, #0f1219);
+      color: var(--text, #f1f5f9);
+      font-size: 12px;
+      cursor: pointer;
+      min-width: 100px;
+    }
+
+    .status-dropdown:focus {
+      outline: none;
+      border-color: var(--accent, #3b82f6);
     }
 
     .action-buttons {
@@ -727,6 +821,34 @@
       border-color: var(--accent, #3b82f6);
     }
 
+    .form-control.is-invalid {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-control.is-valid {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .error-message {
+      color: #ef4444;
+      font-size: 12px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .success-message {
+      color: #10b981;
+      font-size: 12px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -739,6 +861,51 @@
       margin-top: 4px;
     }
 
+    /* Voucher Pagination Styles (matching product grid) */
+    .voucher-pagination-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0 10px 0;
+      border-top: 1px solid var(--border, #334155);
+      margin-top: 20px;
+    }
+
+    .voucher-pagination-controls {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .voucher-pagination-info {
+      font-size: 13px;
+      color: var(--muted, #94a3b8);
+    }
+
+    .voucher-pagination-info strong {
+      color: var(--text, #f1f5f9);
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .voucher-pagination-wrapper {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .voucher-pagination-controls {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .voucher-pagination-info {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* Old pagination styles - keep for backward compatibility */
     .pagination-wrapper {
       display: flex;
       justify-content: center;
@@ -1023,6 +1190,135 @@
                 </button>
                 <button class="filter-btn" data-status="expired" onclick="filterVouchersByStatus('expired')">
                   Expired
+                </button>
+                <button class="filter-btn" onclick="toggleAdvancedFilters()">
+                  <i class="ti ti-filter"></i> Advanced
+                </button>
+              </div>
+            </div>
+
+            <!-- Advanced Filters Section -->
+            <div class="advanced-filters" id="advancedFilters">
+              <div class="advanced-filters-header">
+                <div class="advanced-filters-title">
+                  <i class="ti ti-adjustments"></i>
+                  <span>Advanced Filters</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="clearAdvancedFilters()">
+                  <i class="ti ti-x"></i> Clear All
+                </button>
+              </div>
+
+              <div class="advanced-filters-grid">
+                <!-- Voucher Code Filter -->
+                <div class="filter-field">
+                  <label for="filterCode">
+                    <i class="ti ti-ticket"></i> Voucher Code
+                  </label>
+                  <input
+                    type="text"
+                    id="filterCode"
+                    placeholder="Search by code..."
+                    onkeyup="applyAdvancedFilters()"
+                  />
+                </div>
+
+                <!-- Type Filter -->
+                <div class="filter-field">
+                  <label for="filterType">
+                    <i class="ti ti-tag"></i> Type
+                  </label>
+                  <select id="filterType" onchange="applyAdvancedFilters()">
+                    <option value="">All Types</option>
+                    <option value="PERCENT">Percentage (%)</option>
+                    <option value="AMOUNT">Fixed Amount</option>
+                  </select>
+                </div>
+
+                <!-- Value Range Filter -->
+                <div class="filter-field">
+                  <label for="filterValueMin">
+                    <i class="ti ti-currency-dollar"></i> Min Value
+                  </label>
+                  <input
+                    type="number"
+                    id="filterValueMin"
+                    placeholder="0"
+                    min="0"
+                    onchange="applyAdvancedFilters()"
+                  />
+                </div>
+
+                <div class="filter-field">
+                  <label for="filterValueMax">
+                    <i class="ti ti-currency-dollar"></i> Max Value
+                  </label>
+                  <input
+                    type="number"
+                    id="filterValueMax"
+                    placeholder="100"
+                    min="0"
+                    onchange="applyAdvancedFilters()"
+                  />
+                </div>
+
+                <!-- Used Range Filter -->
+                <div class="filter-field">
+                  <label for="filterUsedMin">
+                    <i class="ti ti-users"></i> Min Used
+                  </label>
+                  <input
+                    type="number"
+                    id="filterUsedMin"
+                    placeholder="0"
+                    min="0"
+                    onchange="applyAdvancedFilters()"
+                  />
+                </div>
+
+                <div class="filter-field">
+                  <label for="filterUsedMax">
+                    <i class="ti ti-users"></i> Max Used
+                  </label>
+                  <input
+                    type="number"
+                    id="filterUsedMax"
+                    placeholder="∞"
+                    min="0"
+                    onchange="applyAdvancedFilters()"
+                  />
+                </div>
+
+                <!-- Duration Filter -->
+                <div class="filter-field">
+                  <label for="filterStartDate">
+                    <i class="ti ti-calendar"></i> Start From
+                  </label>
+                  <input
+                    type="date"
+                    id="filterStartDate"
+                    onchange="applyAdvancedFilters()"
+                  />
+                </div>
+
+                <div class="filter-field">
+                  <label for="filterEndDate">
+                    <i class="ti ti-calendar"></i> End Before
+                  </label>
+                  <input
+                    type="date"
+                    id="filterEndDate"
+                    onchange="applyAdvancedFilters()"
+                  />
+                </div>
+              </div>
+
+              <div class="filter-actions">
+                <button class="btn btn-primary btn-sm" onclick="applyAdvancedFilters()">
+                  <i class="ti ti-check"></i> Apply Filters
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="clearAdvancedFilters()">
+                  <i class="ti ti-refresh"></i> Reset
                 </button>
               </div>
             </div>
@@ -1677,6 +1973,14 @@
       const startDate = voucher.startAt ? new Date(voucher.startAt).toLocaleDateString('en-US') : '-';
       const endDate = voucher.endAt ? new Date(voucher.endAt).toLocaleDateString('en-US') : '-';
 
+      // Status dropdown options (exclude expired from dropdown if not already expired)
+      const statusOptions = voucher.status === 'expired'
+        ? `<option value="expired" selected>Expired</option>`
+        : `
+          <option value="active" ${voucher.status === 'active' ? 'selected' : ''}>Active</option>
+          <option value="inactive" ${voucher.status === 'inactive' ? 'selected' : ''}>Paused</option>
+        `;
+
       return `
         <tr>
           <td>
@@ -1696,7 +2000,19 @@
             <div>${endDate}</div>
           </td>
           <td>
-            <span class="status-badge ${statusClass}">${statusLabel}</span>
+            <div class="status-cell">
+              <span class="status-badge ${statusClass}" onclick="toggleStatusDropdown(${voucher.voucherId})" style="cursor: pointer;" title="Click to change status">
+                ${statusLabel} <i class="ti ti-chevron-down" style="font-size: 12px;"></i>
+              </span>
+              <select
+                class="status-dropdown"
+                id="statusDropdown${voucher.voucherId}"
+                onchange="updateVoucherStatus(${voucher.voucherId}, this.value)"
+                style="display: none;"
+              >
+                ${statusOptions}
+              </select>
+            </div>
           </td>
           <td>
             <div class="action-buttons">
@@ -1718,27 +2034,80 @@
     function renderPagination(data) {
       if (data.totalPages <= 1) return '';
 
-      const pages = [];
-      for (let i = 0; i < data.totalPages; i++) {
-        const active = i === currentPage ? 'active' : '';
-        pages.push(`
-          <div class="page-number ${active}" onclick="goToPage(${i})">
-            ${i + 1}
-          </div>
-        `);
+      const totalPages = data.totalPages;
+      const totalElements = data.totalElements || 0;
+      const pageSize = data.size || 10;
+      const startIdx = currentPage * pageSize + 1;
+      const endIdx = Math.min((currentPage + 1) * pageSize, totalElements);
+
+      let html = '<div class="voucher-pagination-wrapper">';
+
+      // Pagination controls
+      html += '<div class="voucher-pagination-controls">';
+
+      // Previous button
+      html += `
+        <button class="grid-page-btn" ${currentPage === 0 ? 'disabled' : ''}
+                onclick="goToPage(${currentPage - 1})" title="Previous page">
+          <i class="ti ti-chevron-left"></i>
+        </button>
+      `;
+
+      // Page numbers (show max 5 pages)
+      const maxVisible = 5;
+      let startPage = Math.max(0, currentPage - Math.floor(maxVisible / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisible);
+
+      if (endPage - startPage < maxVisible) {
+        startPage = Math.max(0, endPage - maxVisible);
       }
 
-      return `
-        <div class="pagination-wrapper">
-          <button class="pagination-btn" ${currentPage === 0 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
-            <i class="ti ti-chevron-left"></i> Previous
+      // First page + ellipsis
+      if (startPage > 0) {
+        html += `<button class="grid-page-btn" onclick="goToPage(0)">1</button>`;
+        if (startPage > 1) {
+          html += `<span style="padding: 0 8px; color: var(--muted);">...</span>`;
+        }
+      }
+
+      // Page numbers
+      for (let i = startPage; i < endPage; i++) {
+        html += `
+          <button class="grid-page-btn ${i === currentPage ? 'active' : ''}"
+                  onclick="goToPage(${i})">
+            ${i + 1}
           </button>
-          ${pages.join('')}
-          <button class="pagination-btn" ${currentPage >= data.totalPages - 1 ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
-            Next <i class="ti ti-chevron-right"></i>
-          </button>
+        `;
+      }
+
+      // Last page + ellipsis
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          html += `<span style="padding: 0 8px; color: var(--muted);">...</span>`;
+        }
+        html += `<button class="grid-page-btn" onclick="goToPage(${totalPages - 1})">${totalPages}</button>`;
+      }
+
+      // Next button
+      html += `
+        <button class="grid-page-btn" ${currentPage >= totalPages - 1 ? 'disabled' : ''}
+                onclick="goToPage(${currentPage + 1})" title="Next page">
+          <i class="ti ti-chevron-right"></i>
+        </button>
+      `;
+
+      html += '</div>'; // end pagination-controls
+
+      // Info text
+      html += `
+        <div class="voucher-pagination-info">
+          Showing <strong>${startIdx}-${endIdx}</strong> of <strong>${totalElements}</strong> voucher${totalElements !== 1 ? 's' : ''}
         </div>
       `;
+
+      html += '</div>'; // end pagination-wrapper
+
+      return html;
     }
 
     function goToPage(page) {
@@ -1761,30 +2130,137 @@
       loadVouchers();
     }
 
-    async function updateStatistics() {
-      if (!selectedProductId) return;
+    // ============================================================
+    // ADVANCED FILTERS
+    // ============================================================
 
-      try {
-        const response = await fetch(`/api/seller/vouchers?productId=${selectedProductId}&size=1000`);
-        if (!response.ok) return;
+    function toggleAdvancedFilters() {
+      const filtersEl = document.getElementById('advancedFilters');
+      filtersEl.classList.toggle('active');
+    }
 
-        const data = await response.json();
-        const allVouchers = data.content || [];
+    function clearAdvancedFilters() {
+      document.getElementById('filterCode').value = '';
+      document.getElementById('filterType').value = '';
+      document.getElementById('filterValueMin').value = '';
+      document.getElementById('filterValueMax').value = '';
+      document.getElementById('filterUsedMin').value = '';
+      document.getElementById('filterUsedMax').value = '';
+      document.getElementById('filterStartDate').value = '';
+      document.getElementById('filterEndDate').value = '';
 
-        const stats = {
-          total: allVouchers.length,
-          active: allVouchers.filter(v => v.status === 'active').length,
-          inactive: allVouchers.filter(v => v.status === 'inactive').length,
-          expired: allVouchers.filter(v => v.status === 'expired').length
-        };
+      applyAdvancedFilters();
+    }
 
-        document.getElementById('totalVouchers').textContent = stats.total;
-        document.getElementById('activeVouchers').textContent = stats.active;
-        document.getElementById('inactiveVouchers').textContent = stats.inactive;
-        document.getElementById('expiredVouchers').textContent = stats.expired;
-      } catch (error) {
-        console.error('Error updating statistics:', error);
+    function applyAdvancedFilters() {
+      if (!selectedProductId) {
+        showAlert('Please select a product first', 'error');
+        return;
       }
+
+      // Get filter values
+      const filters = {
+        code: document.getElementById('filterCode').value.trim(),
+        type: document.getElementById('filterType').value,
+        valueMin: parseFloat(document.getElementById('filterValueMin').value) || null,
+        valueMax: parseFloat(document.getElementById('filterValueMax').value) || null,
+        usedMin: parseInt(document.getElementById('filterUsedMin').value) || null,
+        usedMax: parseInt(document.getElementById('filterUsedMax').value) || null,
+        startDate: document.getElementById('filterStartDate').value,
+        endDate: document.getElementById('filterEndDate').value
+      };
+
+      // Build query params
+      const params = new URLSearchParams();
+      params.append('productId', selectedProductId);
+      params.append('page', 0);
+      params.append('size', 1000); // Get all for filtering
+
+      if (currentStatus && currentStatus !== 'all') {
+        params.append('status', currentStatus);
+      }
+
+      showLoading();
+
+      fetch(`/api/seller/vouchers?${params}`)
+        .then(response => response.json())
+        .then(data => {
+          let filtered = data.content || [];
+
+          // Apply client-side filters
+          if (filters.code) {
+            filtered = filtered.filter(v =>
+              v.code.toLowerCase().includes(filters.code.toLowerCase())
+            );
+          }
+
+          if (filters.type) {
+            filtered = filtered.filter(v =>
+              v.discountType === filters.type
+            );
+          }
+
+          if (filters.valueMin !== null) {
+            filtered = filtered.filter(v =>
+              v.discountValue >= filters.valueMin
+            );
+          }
+
+          if (filters.valueMax !== null) {
+            filtered = filtered.filter(v =>
+              v.discountValue <= filters.valueMax
+            );
+          }
+
+          if (filters.usedMin !== null) {
+            filtered = filtered.filter(v =>
+              (v.usedCount || 0) >= filters.usedMin
+            );
+          }
+
+          if (filters.usedMax !== null) {
+            filtered = filtered.filter(v =>
+              (v.usedCount || 0) <= filters.usedMax
+            );
+          }
+
+          if (filters.startDate) {
+            const startFilter = new Date(filters.startDate);
+            filtered = filtered.filter(v => {
+              if (!v.startAt) return false;
+              const voucherStart = new Date(v.startAt);
+              return voucherStart >= startFilter;
+            });
+          }
+
+          if (filters.endDate) {
+            const endFilter = new Date(filters.endDate);
+            filtered = filtered.filter(v => {
+              if (!v.endAt) return false;
+              const voucherEnd = new Date(v.endAt);
+              return voucherEnd <= endFilter;
+            });
+          }
+
+          // Render filtered results
+          const mockData = {
+            content: filtered,
+            totalPages: 1,
+            totalElements: filtered.length,
+            number: 0
+          };
+
+          renderVouchers(mockData);
+
+          showAlert(`Found ${filtered.length} voucher(s)`, 'success');
+        })
+        .catch(error => {
+          console.error('Error applying filters:', error);
+          showAlert('Failed to apply filters', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
     }
 
     // Modal functions
@@ -1991,6 +2467,71 @@
       document.getElementById('redemptionsModal').classList.remove('active');
     }
 
+    // ============================================================
+    // INLINE STATUS EDITING
+    // ============================================================
+
+    /**
+     * Toggle status dropdown for inline editing
+     */
+    function toggleStatusDropdown(voucherId) {
+      const dropdown = document.getElementById(`statusDropdown${voucherId}`);
+      const badge = dropdown.previousElementSibling;
+
+      if (dropdown.style.display === 'none') {
+        // Show dropdown
+        badge.style.display = 'none';
+        dropdown.style.display = 'inline-block';
+        dropdown.focus();
+      } else {
+        // Hide dropdown
+        dropdown.style.display = 'none';
+        badge.style.display = 'inline-block';
+      }
+    }
+
+    /**
+     * Update voucher status via API
+     */
+    async function updateVoucherStatus(voucherId, newStatus) {
+      if (!newStatus) return;
+
+      showLoading();
+
+      try {
+        const response = await fetch(`/api/seller/vouchers/${voucherId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: newStatus })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(error);
+        }
+
+        // Success
+        const statusText = newStatus === 'active' ? 'Active' :
+                          newStatus === 'inactive' ? 'Paused' : 'Expired';
+        showAlert(`Voucher status updated to: ${statusText}`, 'success');
+
+        // Reload vouchers to show updated status
+        loadVouchers();
+        updateStatistics();
+
+      } catch (error) {
+        console.error('Error updating status:', error);
+        showAlert(error.message || 'Failed to update status', 'error');
+
+        // Reload to revert dropdown
+        loadVouchers();
+      } finally {
+        hideLoading();
+      }
+    }
+
     // Utility functions
     function updateDiscountLabel() {
       const type = document.getElementById('discountType').value;
@@ -2057,6 +2598,11 @@
       }
     });
   </script>
+
+  <!-- VOUCHER VALIDATION SCRIPT -->
+  <script src="/js/voucher-validation.js"></script>
+
   <!-- SCRIPTS END -->
 </body>
 </html>
+

@@ -1,5 +1,6 @@
 package banhangrong.su25.Controller;
 
+import banhangrong.su25.DTO.VoucherDTO;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Entity.Vouchers;
 import banhangrong.su25.Entity.VoucherRedemptions;
@@ -9,10 +10,13 @@ import banhangrong.su25.Repository.VouchersRepository;
 import banhangrong.su25.Repository.VoucherRedemptionsRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.service.VoucherService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -375,6 +379,116 @@ public class SellerVoucherApiController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Lỗi khi xóa voucher: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Quick update voucher status (inline editing)
+     */
+    @PatchMapping("/{voucherId}/status")
+    public ResponseEntity<?> updateVoucherStatus(@PathVariable Long voucherId,
+                                                  @RequestBody Map<String, String> request) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            String newStatus = request.get("status");
+            if (newStatus == null || newStatus.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Status không được để trống");
+            }
+
+            newStatus = newStatus.trim().toLowerCase();
+            if (!newStatus.equals("active") && !newStatus.equals("inactive") && !newStatus.equals("expired")) {
+                return ResponseEntity.badRequest().body("Status phải là active, inactive, hoặc expired");
+            }
+
+            Vouchers voucher = vouchersRepository.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+            if (!voucher.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền chỉnh sửa voucher này");
+            }
+
+            // Check if trying to activate expired voucher
+            if (newStatus.equals("active") && voucher.getEndAt() != null
+                && LocalDateTime.now().isAfter(voucher.getEndAt())) {
+                return ResponseEntity.badRequest()
+                    .body("Không thể kích hoạt voucher đã hết hạn");
+            }
+
+            voucher.setStatus(newStatus);
+            Vouchers saved = vouchersRepository.save(voucher);
+
+            return ResponseEntity.ok(saved);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi cập nhật status: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Pause a voucher (set status to inactive)
+     */
+    @PostMapping("/{voucherId}/pause")
+    public ResponseEntity<?> pauseVoucher(@PathVariable Long voucherId) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            Vouchers voucher = vouchersRepository.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+            if (!voucher.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền tạm dừng voucher này");
+            }
+
+            Vouchers paused = voucherService.pauseVoucher(voucherId);
+            return ResponseEntity.ok(paused);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi tạm dừng voucher: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Resume a voucher (set status to active)
+     */
+    @PostMapping("/{voucherId}/resume")
+    public ResponseEntity<?> resumeVoucher(@PathVariable Long voucherId) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            Vouchers voucher = vouchersRepository.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+            if (!voucher.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền kích hoạt lại voucher này");
+            }
+
+            Vouchers resumed = voucherService.resumeVoucher(voucherId);
+            return ResponseEntity.ok(resumed);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi kích hoạt lại voucher: " + e.getMessage());
         }
     }
 

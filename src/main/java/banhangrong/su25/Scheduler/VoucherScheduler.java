@@ -19,14 +19,33 @@ public class VoucherScheduler {
     }
 
 
+    /**
+     * Auto-expire vouchers - Runs daily at midnight
+     */
     @Scheduled(cron = "0 0 0 * * ?")
-    public void autoExpireVouchers() {
+    public void autoExpireVouchersDaily() {
         try {
-            logger.info("Starting auto-expire vouchers job");
+            logger.info("🕐 Starting daily auto-expire vouchers job");
             int expiredCount = voucherService.autoExpireVouchers();
-            logger.info("Auto-expired {} vouchers", expiredCount);
+            logger.info("✅ Daily job: Auto-expired {} vouchers", expiredCount);
         } catch (Exception e) {
-            logger.error("Error during auto-expire vouchers job", e);
+            logger.error("❌ Error during daily auto-expire vouchers job", e);
+        }
+    }
+
+    /**
+     * Auto-expire vouchers - Runs every hour (for more frequent checks)
+     */
+    @Scheduled(cron = "0 0 * * * ?")
+    public void autoExpireVouchersHourly() {
+        try {
+            logger.debug("⏰ Starting hourly auto-expire vouchers check");
+            int expiredCount = voucherService.autoExpireVouchers();
+            if (expiredCount > 0) {
+                logger.info("✅ Hourly check: Auto-expired {} vouchers", expiredCount);
+            }
+        } catch (Exception e) {
+            logger.error("❌ Error during hourly auto-expire vouchers check", e);
         }
     }
 }

@@ -4,31 +4,36 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(email-notification): enhance email service with detailed logging and improved password change notification">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(voucher-management): implement voucher scheduling and enhance repository queries for better management">
       <change afterPath="$PROJECT_DIR$/CATEGORY_IMPROVEMENTS_COMPLETE.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/GRID_PAGINATION_ENHANCEMENT.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/HUONG_DAN_CAC_TRUONG_MOI.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/INLINE_STATUS_EDIT_COMPLETE.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/PASSWORD_CHANGE_EMAIL_SUMMARY.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/PRODUCT_SELECTOR_ENHANCEMENT.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/PROFILE_UPDATE_SUMMARY.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/QUICK_EMAIL_TEST.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/REALTIME_VALIDATION_COMPLETE.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/TOM_TAT_HOAN_THANH.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/VOUCHER_DEVELOPER_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_FIXES_COMPLETE.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/VOUCHER_IMPROVEMENTS_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_PAGINATION_UPGRADE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_QUANTITY_LOGIC.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/VOUCHER_SYSTEM_DOCUMENTATION.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/VOUCHER_SYSTEM_README.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/VOUCHER_TROUBLESHOOTING.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_VALIDATION_IMPLEMENTATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_VALIDATION_RULES.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/WHERE_NEW_FIELDS_APPEAR.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerVoucherApiController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Scheduler/VoucherScheduler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/VoucherDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Exception/ValidationExceptionHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VouchersApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VouchersApiController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VoucherRedemptionsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VoucherRedemptionsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Su25Application.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Su25Application.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Scheduler/VoucherScheduler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Scheduler/VoucherScheduler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -275,7 +280,7 @@
       <workItem from="1762071570533" duration="875000" />
       <workItem from="1762111402526" duration="8323000" />
       <workItem from="1762138370900" duration="473000" />
-      <workItem from="1762332301596" duration="14131000" />
+      <workItem from="1762332301596" duration="19958000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -517,7 +522,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762355311231</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="feat(voucher-management): implement voucher scheduling and enhance repository queries for better management">
+      <option name="closed" value="true" />
+      <created>1762364385857</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1762364385857</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -576,7 +589,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Admin UserManagement Create" />
     <MESSAGE value="Admin User Update&amp;Delete" />
     <MESSAGE value="Admin Product Approve||Cancel" />
     <MESSAGE value="fix: fix error approve Products." />
@@ -601,6 +613,7 @@
     <MESSAGE value="feat(category-management): reorganize category management UI and enhance data attributes for improved usability" />
     <MESSAGE value="feat(profile-management): enhance profile update process with email notification and improved validation messages" />
     <MESSAGE value="feat(email-notification): enhance email service with detailed logging and improved password change notification" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(email-notification): enhance email service with detailed logging and improved password change notification" />
+    <MESSAGE value="feat(voucher-management): implement voucher scheduling and enhance repository queries for better management" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(voucher-management): implement voucher scheduling and enhance repository queries for better management" />
   </component>
 </project>

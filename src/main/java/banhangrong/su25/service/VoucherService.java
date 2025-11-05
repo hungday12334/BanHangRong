@@ -314,10 +314,23 @@ public class VoucherService {
         Vouchers existing = vouchersRepository.findById(voucherId)
             .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
 
-        // Check if changing code would create duplicate
-        if (!existing.getCode().equalsIgnoreCase(updatedVoucher.getCode()) &&
-            isVoucherCodeExists(existing.getSellerId(), existing.getProductId(), updatedVoucher.getCode())) {
-            throw new IllegalArgumentException("Mã voucher đã tồn tại");
+        // Check if changing code would create duplicate (exclude current voucher)
+        if (!existing.getCode().equalsIgnoreCase(updatedVoucher.getCode())) {
+            // Only check if code is actually changing
+            List<Vouchers> existingWithCode = vouchersRepository
+                .findBySellerIdAndProductIdAndCodeIgnoreCase(
+                    existing.getSellerId(),
+                    existing.getProductId(),
+                    updatedVoucher.getCode()
+                );
+
+            // Check if any voucher with this code exists (excluding current one)
+            boolean duplicateExists = existingWithCode.stream()
+                .anyMatch(v -> !v.getVoucherId().equals(voucherId));
+
+            if (duplicateExists) {
+                throw new IllegalArgumentException("Mã voucher đã tồn tại");
+            }
         }
 
         // Update fields
@@ -332,6 +345,45 @@ public class VoucherService {
         existing.setStatus(updatedVoucher.getStatus());
 
         return vouchersRepository.save(existing);
+    }
+
+    /**
+     * Pause a voucher (set status to inactive)
+     */
+    @Transactional
+    public Vouchers pauseVoucher(Long voucherId) {
+        Vouchers voucher = vouchersRepository.findById(voucherId)
+            .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+        if ("expired".equalsIgnoreCase(voucher.getStatus())) {
+            throw new IllegalArgumentException("Không thể tạm dừng voucher đã hết hạn");
+        }
+
+        voucher.setStatus("inactive");
+        return vouchersRepository.save(voucher);
+    }
+
+    /**
+     * Resume a voucher (set status to active)
+     */
+    @Transactional
+    public Vouchers resumeVoucher(Long voucherId) {
+        Vouchers voucher = vouchersRepository.findById(voucherId)
+            .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+        if ("expired".equalsIgnoreCase(voucher.getStatus())) {
+            throw new IllegalArgumentException("Không thể kích hoạt lại voucher đã hết hạn");
+        }
+
+        // Check if voucher is already expired based on endDate
+        if (voucher.getEndAt() != null && LocalDateTime.now().isAfter(voucher.getEndAt())) {
+            voucher.setStatus("expired");
+            vouchersRepository.save(voucher);
+            throw new IllegalArgumentException("Voucher đã hết hạn, không thể kích hoạt lại");
+        }
+
+        voucher.setStatus("active");
+        return vouchersRepository.save(voucher);
     }
 
     /**
