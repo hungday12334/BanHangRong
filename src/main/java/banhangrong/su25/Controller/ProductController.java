@@ -2,6 +2,8 @@ package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.Repository.ProductImagesRepository;
+import banhangrong.su25.Repository.CategoriesProductsRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,12 +14,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductsRepository productsRepository;
-    public ProductController(ProductsRepository productsRepository) { this.productsRepository = productsRepository; }
+    private final ProductImagesRepository productImagesRepository;
+    private final CategoriesProductsRepository categoriesProductsRepository;
+
+    public ProductController(ProductsRepository productsRepository,
+                             ProductImagesRepository productImagesRepository,
+                             CategoriesProductsRepository categoriesProductsRepository) {
+        this.productsRepository = productsRepository;
+        this.productImagesRepository = productImagesRepository;
+        this.categoriesProductsRepository = categoriesProductsRepository;
+    }
 
     // GET /api/products?sellerId=1 → Lấy products (có thể filter theo seller)
     @GetMapping
@@ -114,6 +126,7 @@ public class ProductController {
 
     // DELETE /api/products/{id} → Xóa product
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> delete(@PathVariable Long id) {
         Optional<Products> opt = productsRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
@@ -127,6 +140,13 @@ public class ProductController {
                     "message", "Product that has been public cannot be deleted. Please hide it instead."
             ));
         }
+        // Cleanup dependencies to satisfy FK constraints
+        try {
+            categoriesProductsRepository.deleteByProductId(id);
+        } catch (Exception ignore) {}
+        try {
+            productImagesRepository.deleteByProductId(id);
+        } catch (Exception ignore) {}
         productsRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
