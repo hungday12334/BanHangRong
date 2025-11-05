@@ -80,7 +80,7 @@
             border-radius: 50%;
             width: 36px;
             height: 36px;
-            display: none;
+            display: none; /* Ẩn mặc định */
             align-items: center;
             justify-content: center;
             color: white;
@@ -89,6 +89,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
+        /* Chỉ hiện khi đang ở chế độ edit */
         .avatar-edit-wrap.editing .avatar-edit-btn {
             display: flex;
         }
@@ -907,7 +908,12 @@
         const uploadAvatar = document.getElementById('uploadAvatar');
 
         btnEditAvatar.addEventListener('click', () => {
-            avatarModal.style.display = 'block';
+            // Chỉ mở modal khi đang ở chế độ edit
+            if (isEditing) {
+                avatarModal.style.display = 'block';
+            } else {
+                showToast('Vui lòng bấm nút Edit để thay đổi avatar!', 'info');
+            }
         });
 
         closeModal.addEventListener('click', () => {
@@ -1125,10 +1131,26 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showToast(data.message || 'Password changed successfully!', 'success');
+                    showToast(data.message || 'Password changed successfully! You will be logged out...', 'success');
                     passwordModal.style.display = 'none';
                     passwordForm.reset();
                     strengthIndicator.style.display = 'none';
+
+                    // Đợi 3 giây rồi logout
+                    setTimeout(() => {
+                        // Gọi logout endpoint
+                        fetch('/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            }
+                        }).then(() => {
+                            window.location.href = '/login?passwordChanged=true';
+                        }).catch(() => {
+                            // Fallback nếu logout API fail
+                            window.location.href = '/login?passwordChanged=true';
+                        });
+                    }, 3000);
                 } else if (data.error) {
                     showToast(data.error, 'error');
                 }

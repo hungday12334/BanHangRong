@@ -3,6 +3,8 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.service.UserProfileService;
+import banhangrong.su25.email.EmailService;
+import banhangrong.su25.email.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/seller")
@@ -32,6 +35,9 @@ public class SellerProfileController {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
@@ -74,7 +80,7 @@ public class SellerProfileController {
             System.out.println("Email: " + user.getEmail());
 
         } catch (Exception e) {
-            model.addAttribute("error", "Không tìm thấy thông tin seller");
+            model.addAttribute("error", "Seller information not found");
             System.out.println("Error in viewSellerProfile: " + e.getMessage());
         }
         return "seller/profile";
@@ -106,13 +112,13 @@ public class SellerProfileController {
             // Nếu client cố gắng gửi username hoặc email, REJECT ngay
             if (username != null && !username.equals(currentUser.getUsername())) {
                 System.out.println("⚠️ SECURITY ALERT: Attempt to change username detected!");
-                redirectAttributes.addFlashAttribute("errorMessage", "Không được phép thay đổi tên người dùng!");
+                redirectAttributes.addFlashAttribute("errorMessage", "Changing username is not allowed!");
                 return "redirect:/seller/profile";
             }
 
             if (email != null && !email.equals(currentUser.getEmail())) {
                 System.out.println("⚠️ SECURITY ALERT: Attempt to change email detected!");
-                redirectAttributes.addFlashAttribute("errorMessage", "Không được phép thay đổi email!");
+                redirectAttributes.addFlashAttribute("errorMessage", "Changing email is not allowed!");
                 return "redirect:/seller/profile";
             }
 
@@ -122,13 +128,13 @@ public class SellerProfileController {
 
             // Validate phone number format (Vietnamese phone: 10-11 digits)
             if (!isValidPhoneNumber(sanitizedPhone)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Số điện thoại không hợp lệ! Vui lòng nhập đúng định dạng.");
+                redirectAttributes.addFlashAttribute("errorMessage", "Invalid phone number! Please enter in correct format.");
                 return "redirect:/seller/profile";
             }
 
             // Validate gender
             if (!isValidGender(sanitizedGender)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Giới tính không hợp lệ!");
+                redirectAttributes.addFlashAttribute("errorMessage", "Invalid gender!");
                 return "redirect:/seller/profile";
             }
 
@@ -148,26 +154,26 @@ public class SellerProfileController {
 
                     // Validate: Ngày sinh không được trong tương lai
                     if (parsedDate.isAfter(LocalDate.now())) {
-                        redirectAttributes.addFlashAttribute("errorMessage", "Ngày sinh không được ở tương lai!");
+                        redirectAttributes.addFlashAttribute("errorMessage", "Date of birth cannot be in the future!");
                         return "redirect:/seller/profile";
                     }
 
                     // Validate: Phải từ 13 tuổi trở lên
                     if (parsedDate.isAfter(LocalDate.now().minusYears(13))) {
-                        redirectAttributes.addFlashAttribute("errorMessage", "Bạn phải từ 13 tuổi trở lên!");
+                        redirectAttributes.addFlashAttribute("errorMessage", "You must be 13 years or older!");
                         return "redirect:/seller/profile";
                     }
 
                     // Validate: Không quá 120 tuổi
                     if (parsedDate.isBefore(LocalDate.now().minusYears(120))) {
-                        redirectAttributes.addFlashAttribute("errorMessage", "Ngày sinh không hợp lệ!");
+                        redirectAttributes.addFlashAttribute("errorMessage", "Invalid date of birth!");
                         return "redirect:/seller/profile";
                     }
 
                     updatedUser.setBirthDate(parsedDate);
                     System.out.println("Parsed birth date: " + parsedDate);
                 } catch (Exception e) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Định dạng ngày sinh không hợp lệ!");
+                    redirectAttributes.addFlashAttribute("errorMessage", "Invalid date of birth format!");
                     return "redirect:/seller/profile";
                 }
             }
@@ -180,12 +186,12 @@ public class SellerProfileController {
             System.out.println("Saved gender: " + savedUser.getGender());
             System.out.println("Saved birth date: " + savedUser.getBirthDate());
 
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Information updated successfully!");
 
         } catch (Exception e) {
             System.out.println("❌ Error updating profile: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật thông tin. Vui lòng thử lại!");
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating information. Please try again!");
         }
 
         return "redirect:/seller/profile";
@@ -229,35 +235,35 @@ public class SellerProfileController {
 
             // ===== VALIDATION 1: Check empty file =====
             if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng chọn file ảnh"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Please select image file"));
             }
 
             // ===== VALIDATION 2: Check file type by MIME type =====
             String contentType = file.getContentType();
             if (contentType == null || !isValidImageType(contentType)) {
                 System.out.println("⚠️ Invalid content type: " + contentType);
-                return ResponseEntity.badRequest().body(Map.of("error", "Chỉ được upload file ảnh (JPEG, PNG, GIF)"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Only image files (JPEG, PNG, GIF) can be uploaded"));
             }
 
             // ===== VALIDATION 3: Check file size (max 5MB) =====
             long maxSize = 5 * 1024 * 1024; // 5MB
             if (file.getSize() > maxSize) {
                 System.out.println("⚠️ File too large: " + file.getSize() + " bytes");
-                return ResponseEntity.badRequest().body(Map.of("error", "Kích thước file không được vượt quá 5MB"));
+                return ResponseEntity.badRequest().body(Map.of("error", "File size must not exceed 5MB"));
             }
 
             // ===== VALIDATION 4: Check file extension =====
             String originalFileName = file.getOriginalFilename();
             if (originalFileName == null || !hasValidImageExtension(originalFileName)) {
                 System.out.println("⚠️ Invalid file extension: " + originalFileName);
-                return ResponseEntity.badRequest().body(Map.of("error", "File phải có đuôi .jpg, .jpeg, .png hoặc .gif"));
+                return ResponseEntity.badRequest().body(Map.of("error", "File must have the extension .jpg, .jpeg, .png or .gif"));
             }
 
             // ===== SECURITY: Validate actual file content (prevent fake extensions) =====
             byte[] fileBytes = file.getBytes();
             if (!isValidImageFile(fileBytes)) {
                 System.out.println("⚠️ SECURITY ALERT: File content does not match image signature!");
-                return ResponseEntity.badRequest().body(Map.of("error", "File không hợp lệ! Vui lòng upload ảnh thật."));
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid file! Please upload a real photo."));
             }
 
             Long sellerId = getCurrentSellerId();
@@ -273,10 +279,10 @@ public class SellerProfileController {
 
                     if (Files.exists(oldFilePath)) {
                         Files.delete(oldFilePath);
-                        System.out.println("🗑️ Đã xóa ảnh cũ: " + oldFilePath.toAbsolutePath());
+                        System.out.println("🗑️ Deleted old photo: " + oldFilePath.toAbsolutePath());
                     }
                 } catch (Exception e) {
-                    System.out.println("⚠️ Không thể xóa ảnh cũ (không ảnh hưởng): " + e.getMessage());
+                    System.out.println("⚠️ Cannot delete old photos (no impact): " + e.getMessage());
                     // Không throw exception, tiếp tục upload ảnh mới
                 }
             }
@@ -285,7 +291,7 @@ public class SellerProfileController {
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
-                System.out.println("📁 Đã tạo thư mục: " + uploadPath.toAbsolutePath());
+                System.out.println("📁 Created folder: " + uploadPath.toAbsolutePath());
             }
 
             // ===== SECURITY: Sanitize filename to prevent path traversal =====
@@ -299,34 +305,34 @@ public class SellerProfileController {
             // ===== SECURITY: Prevent path traversal =====
             if (!filePath.normalize().startsWith(uploadPath.normalize())) {
                 System.out.println("⚠️ SECURITY ALERT: Path traversal attempt detected!");
-                return ResponseEntity.badRequest().body(Map.of("error", "Phát hiện hành vi bất thường!"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Detect abnormal behavior!"));
             }
 
             Files.copy(file.getInputStream(), filePath);
-            System.out.println("💾 Đã lưu file: " + filePath.toAbsolutePath());
+            System.out.println("💾 File saved: " + filePath.toAbsolutePath());
 
             // Tạo URL để truy cập ảnh
             String avatarUrl = "/uploads/" + fileName;
 
             // Cập nhật avatar URL trong database
             userProfileService.updateAvatar(sellerId, avatarUrl);
-            System.out.println("✅ Đã cập nhật avatar URL: " + avatarUrl);
+            System.out.println("✅ Updated avatar URL: " + avatarUrl);
 
             // Return JSON response
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "Cập nhật avatar thành công!",
+                "message", "Avatar update successful!",
                 "avatarUrl", avatarUrl
             ));
 
         } catch (IOException e) {
             System.out.println("❌ Lỗi IOException: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", "Lỗi khi lưu file. Vui lòng thử lại!"));
+            return ResponseEntity.status(500).body(Map.of("error", "Error saving file. Please try again!"));
         } catch (Exception e) {
             System.out.println("❌ Lỗi Exception: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", "Có lỗi xảy ra. Vui lòng thử lại!"));
+            return ResponseEntity.status(500).body(Map.of("error", "An error occurred. Please try again!"));
         }
     }
 
@@ -391,47 +397,47 @@ public class SellerProfileController {
 
             // ===== VALIDATION 1: Check empty fields =====
             if (currentPassword == null || currentPassword.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mật khẩu hiện tại"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Please enter current password"));
             }
 
             if (newPassword == null || newPassword.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mật khẩu mới"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Please enter new password"));
             }
 
             if (confirmPassword == null || confirmPassword.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng xác nhận mật khẩu mới"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Please confirm new password"));
             }
 
             // ===== VALIDATION 2: Check current password =====
             if (!userProfileService.verifyPassword(currentPassword, user.getPassword())) {
                 System.out.println("⚠️ Incorrect current password attempt for user: " + user.getUsername());
-                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu hiện tại không đúng"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Current password is incorrect"));
             }
 
             // ===== VALIDATION 3: Check password length =====
             if (newPassword.length() < 6) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu mới phải có ít nhất 6 ký tự"));
+                return ResponseEntity.badRequest().body(Map.of("error", "New password must be at least 6 characters"));
             }
 
             // ===== VALIDATION 4: Check password maximum length =====
             if (newPassword.length() > 100) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu không được vượt quá 100 ký tự"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Password must not exceed 100 characters"));
             }
 
             // ===== VALIDATION 5: Check password does not contain spaces =====
             if (newPassword.contains(" ")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu không được chứa dấu cách"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Password cannot contain spaces"));
             }
 
             // ===== VALIDATION 6: Check password confirmation match =====
             if (!newPassword.equals(confirmPassword)) {
                 System.out.println("⚠️ Password confirmation does not match");
-                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu xác nhận không khớp"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Confirmation password does not match"));
             }
 
             // ===== VALIDATION 7: Check if new password is same as current =====
             if (userProfileService.verifyPassword(newPassword, user.getPassword())) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu mới phải khác mật khẩu hiện tại"));
+                return ResponseEntity.badRequest().body(Map.of("error", "The new password must be different from the current password."));
             }
 
             // ===== SECURITY: Sanitize password (prevent XSS in logs) =====
@@ -442,9 +448,27 @@ public class SellerProfileController {
 
             System.out.println("✅ Password changed successfully for user: " + user.getUsername());
 
+            // Gửi email thông báo đổi mật khẩu thành công
+            try {
+                String emailSubject = "Thông báo thay đổi mật khẩu - Ban Hang Rong";
+                String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+                String emailBody = "Xin chào " + user.getUsername() + ",\n\n" +
+                        "Your password has been successfully changed at " + timeStamp + ".\n\n" +
+                        "If you do not do this, please contact us immediately.\n\n" +
+                        "Best regards,\n" +
+                        "Ban Hang Rong Team";
+
+                Email email = new Email(user.getEmail(), emailSubject, emailBody);
+                emailService.sendEmail(email);
+                System.out.println("📧 Password change notification email sent to: " + user.getEmail());
+            } catch (Exception emailEx) {
+                // Log lỗi nhưng không fail request
+                System.out.println("⚠️ Failed to send email notification: " + emailEx.getMessage());
+            }
+
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "Đổi mật khẩu thành công!"
+                "message", "Password changed successfully! You will be logged out and logged in again."
             ));
 
         } catch (IllegalArgumentException e) {
@@ -453,7 +477,7 @@ public class SellerProfileController {
         } catch (Exception e) {
             System.out.println("❌ Error changing password: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", "Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại!"));
+            return ResponseEntity.status(500).body(Map.of("error", "An error occurred while changing your password. Please try again!"));
         }
     }
 }
