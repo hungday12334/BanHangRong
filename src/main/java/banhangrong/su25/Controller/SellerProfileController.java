@@ -465,7 +465,7 @@ public class SellerProfileController {
                     System.out.println("📧 User ID: " + user.getUserId());
                     System.out.println("📧 Username: " + user.getUsername());
 
-                    String emailSubject = "🔒 Thông báo thay đổi mật khẩu - Ban Hang Rong";
+                    String emailSubject = "🔒 Password change notice - Ban Hang Rong";
                     String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
 
                     // Format email body với line breaks rõ ràng
