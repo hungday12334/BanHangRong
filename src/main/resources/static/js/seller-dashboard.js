@@ -914,6 +914,47 @@
             // View-only: no save/delete handlers for orders
         }
 
+        // ===== My Products: sorting state + helpers =====
+        const myProductsSort = { key: 'productId', dir: 'asc' }; // dir: 'asc' | 'desc'
+        function sortProducts(list) {
+            const key = myProductsSort.key || 'productId';
+            const dir = myProductsSort.dir === 'desc' ? -1 : 1;
+            const toNum = (v) => {
+                const n = Number(v);
+                return Number.isFinite(n) ? n : 0;
+            };
+            const get = (p) => {
+                if (key === 'name') return (p.name || '').toString();
+                if (key === 'price') return toNum(p.price);
+                if (key === 'quantity') return toNum(p.quantity);
+                return toNum(p.productId); // default productId
+            };
+            return (Array.isArray(list) ? list.slice() : []).sort((a,b) => {
+                const va = get(a);
+                const vb = get(b);
+                if (typeof va === 'string' || typeof vb === 'string') {
+                    return va.toString().localeCompare(vb.toString(), undefined, { sensitivity: 'base' }) * dir;
+                }
+                if (va < vb) return -1 * dir;
+                if (va > vb) return 1 * dir;
+                return 0;
+            });
+        }
+        function updateMyProductsSortIndicators() {
+            document.querySelectorAll('#sectionMyProducts th.sortable').forEach(th => {
+                const span = th.querySelector('.sort-indicator');
+                const k = th.getAttribute('data-sort');
+                if (!span) return;
+                if (k === myProductsSort.key) {
+                    th.classList.add('sorted');
+                    span.textContent = myProductsSort.dir === 'desc' ? '▼' : '▲';
+                } else {
+                    th.classList.remove('sorted');
+                    span.textContent = '';
+                }
+            });
+        }
+
         // Load "My Products" list (reusable for refresh after CRUD)
         async function refreshMyProducts(showToastMsg = true) {
             const sellerIdEl = document.getElementById('sellerId');
@@ -945,6 +986,8 @@
                     return pst === statusVal;
                 });
             }
+            // Apply current sorting before rendering
+            filtered = sortProducts(filtered);
             const tbody = document.getElementById('tbMyProducts');
             const counter = document.getElementById('myProductsCount');
             if (!tbody) return;
@@ -977,6 +1020,7 @@
             });
             const pager = document.getElementById('pgMyProducts');
             if (pager) paginateTable(tbody, pager, 5);
+            updateMyProductsSortIndicators();
             if (showToastMsg) showToast(`Loaded ${filtered.length} of your products`, 'info', { duration: 2000 });
         }
 
@@ -998,6 +1042,95 @@
             });
         }
     })();
+
+        // Bind sorting on My Products header
+        document.querySelectorAll('#sectionMyProducts th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.getAttribute('data-sort');
+                if (!key) return;
+                if (myProductsSort.key === key) {
+                    myProductsSort.dir = (myProductsSort.dir === 'asc') ? 'desc' : 'asc';
+                } else {
+                    myProductsSort.key = key; myProductsSort.dir = 'asc';
+                }
+                updateMyProductsSortIndicators();
+                refreshMyProducts(false);
+            });
+        });
+
+        // ===== Recent Orders: sorting =====
+        const recentOrdersSort = { key: 'date', dir: 'desc' };
+        function parseDateGuess(s) {
+            if (!s) return 0;
+            const t = s.toString().trim();
+            const n = Date.parse(t);
+            if (!Number.isNaN(n)) return n;
+            const m = t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+            if (m) {
+                const d = Number(m[1]); const mo = Number(m[2]); const y = Number(m[3].length===2? ('20'+m[3]) : m[3]);
+                const hh = Number(m[4]||0); const mm = Number(m[5]||0); const ss = Number(m[6]||0);
+                return new Date(y, mo-1, d, hh, mm, ss).getTime();
+            }
+            return 0;
+        }
+        function numFromText(el) {
+            const txt = (el && (el.innerText||el.textContent)) ? (el.innerText||el.textContent) : '';
+            const cleaned = txt.replace(/[^0-9.,-]/g,'').replace(/,/g,'');
+            const n = Number(cleaned);
+            return Number.isFinite(n) ? n : 0;
+        }
+        function sortRecentOrdersTable() {
+            const tbody = document.getElementById('tbRecentOrders');
+            const pager = document.getElementById('pgRecentOrders');
+            if (!tbody) return;
+            const rows = Array.from(tbody.querySelectorAll('tr'))
+                .filter(tr => !tr.classList.contains('filler-row') && !tr.querySelector('td.footer-note'));
+            const key = recentOrdersSort.key;
+            const dir = recentOrdersSort.dir === 'desc' ? -1 : 1;
+            rows.sort((a,b) => {
+                const tda = a.children;
+                const tdb = b.children;
+                let va=0, vb=0;
+                if (key === 'orderId') { va = numFromText(tda[0]); vb = numFromText(tdb[0]); }
+                else if (key === 'date') { va = parseDateGuess(tda[1]?.textContent); vb = parseDateGuess(tdb[1]?.textContent); }
+                else if (key === 'items') { va = numFromText(tda[2]); vb = numFromText(tdb[2]); }
+                else if (key === 'amount') { va = numFromText(tda[3]); vb = numFromText(tdb[3]); }
+                if (va < vb) return -1*dir; if (va > vb) return 1*dir; return 0;
+            });
+            // Re-render
+            tbody.innerHTML = '';
+            rows.forEach(tr => tbody.appendChild(tr));
+            if (pager) paginateTable(tbody, pager, 5);
+            updateRecentOrdersSortIndicators();
+        }
+        function updateRecentOrdersSortIndicators() {
+            document.querySelectorAll('#sectionTopAndRecent [data-block="recent-orders"] th.sortable').forEach(th => {
+                const span = th.querySelector('.sort-indicator');
+                const k = th.getAttribute('data-sort');
+                if (!span) return;
+                if (k === recentOrdersSort.key) {
+                    th.classList.add('sorted');
+                    span.textContent = recentOrdersSort.dir === 'desc' ? '▼' : '▲';
+                } else {
+                    th.classList.remove('sorted');
+                    span.textContent = '';
+                }
+            });
+        }
+        document.querySelectorAll('#sectionTopAndRecent [data-block="recent-orders"] th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.getAttribute('data-sort');
+                if (!key) return;
+                if (recentOrdersSort.key === key) {
+                    recentOrdersSort.dir = (recentOrdersSort.dir === 'asc') ? 'desc' : 'asc';
+                } else {
+                    recentOrdersSort.key = key; recentOrdersSort.dir = 'desc'; // default newest/highest first
+                }
+                sortRecentOrdersTable();
+            });
+        });
+        // Initialize indicators once (no re-render yet)
+        updateRecentOrdersSortIndicators();
 
         // === Avatar edit button hover ===
         const avatarWrap = document.querySelector('.avatar-edit-wrap');
