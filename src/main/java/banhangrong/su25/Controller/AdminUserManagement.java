@@ -302,45 +302,142 @@ public class AdminUserManagement {
 
             if (!preEmail.equals(email)) {
                 String oldMailMsg = """
-                            <div style="font-family: Arial,sans-serif; color:#333;">
-                                <h3>🔔 Thông báo thay đổi email</h3>
-                                <p>Xin chào,</p>
-                                <p>Email đăng ký của tài khoản <b>%s</b> trong hệ thống <b>BanHangRong</b> vừa được thay đổi.</p>
-            <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
-                <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
-            </p>
-                                <hr>
-                                <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ BanHangRong</p>
+                        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <!-- Header cam cảnh báo -->
+                            <div style="background: linear-gradient(135deg, #fd7e14, #f39c12); padding: 20px; text-align: center; color: white;">
+                                <h2 style="margin: 0; font-size: 24px;">
+                                    Email đã bị thay đổi
+                                </h2>
                             </div>
-                        """.formatted(user.getUsername());
-                emailService.sendEmail(new Email(preEmail, "BanHangRong - Email Change Notification", oldMailMsg));
+                        
+                            <!-- Nội dung -->
+                            <div style="padding: 25px; background-color: #fff;">
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Xin chào,
+                                </p>
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Email đăng ký của tài khoản <strong>%s</strong> trên hệ thống <strong>BanHangRong</strong> <span style="color: #e67e22; font-weight: bold;">đã bị thay đổi</span>.
+                                </p>
+                        
+                                <div style="background-color: #fff8f0; border-left: 4px solid #fd7e14; padding: 15px; margin: 20px 0; font-size: 15px;">
+                                    <p style="margin: 0;"><strong>Tài khoản:</strong> %s</p>
+                                    <p style="margin: 8px 0 0;"><strong>Thời gian thay đổi:</strong> vừa xong</p>
+                                </div>
+                        
+                                <p style="font-size: 16px; line-height: 1.6; color: #d35400;">
+                                    <strong>Nếu bạn KHÔNG thực hiện thay đổi này</strong>, vui lòng liên hệ ngay với chúng tôi!
+                                </p>
+                        
+                                <div style="text-align: center; margin: 25px 0;">
+                                    <a href="mailto:bonhoangncd@gmail.com" 
+                                       style="background-color: #fd7e14; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                                       Liên hệ hỗ trợ ngay
+                                    </a>
+                                </div>
+                            </div>
+                        
+                            <!-- Footer -->
+                            <div style="background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 13px; color: #777; border-top: 1px solid #eee;">
+                                <p style="margin: 5px 0;">
+                                    Trân trọng,<br>
+                                    <strong>Đội ngũ BanHangRong</strong>
+                                </p>
+                            </div>
+                        </div>
+                        """.formatted(user.getUsername(), user.getUsername());
+
+
                 String newMailMsg = """
-                            <div style="font-family: Arial,sans-serif; color:#333;">
-                                <h3>✅ Cập nhật email thành công</h3>
-                                <p>Xin chào <b>%s</b>,</p>
-                                <p>Tài khoản của bạn trên <b>BanHangRong</b> vừa được liên kết với địa chỉ email mới này.</p>
-                                <p>Hãy dùng email này để đăng nhập và xác minh trong những lần tiếp theo.</p>
-                                <hr>
-                                <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ BanHangRong</p>
+                        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <!-- Header xanh lá -->
+                            <div style="background: linear-gradient(135deg, #28a745, #20c997); padding: 20px; text-align: center; color: white;">
+                                <h2 style="margin: 0; font-size: 24px;">
+                                    Email đã được cập nhật
+                                </h2>
                             </div>
-                        """.formatted(user.getUsername());
-                emailService.sendEmail(new Email(email, "BanHangRong - Email Updated Successfully", newMailMsg));
+                        
+                            <!-- Nội dung -->
+                            <div style="padding: 25px; background-color: #fff;">
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Xin chào <strong>%s</strong>,
+                                </p>
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Tài khoản của bạn trên <strong>BanHangRong</strong> đã được liên kết thành công với <strong>địa chỉ email mới này</strong>.
+                                </p>
+                        
+                                <div style="background-color: #f8fff9; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; font-size: 15px;">
+                                    <p style="margin: 0;"><strong>Tài khoản:</strong> %s</p>
+                                    <p style="margin: 8px 0 0;"><strong>Email mới:</strong> %s</p>
+                                </div>
+                        
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Từ bây giờ, hãy sử dụng email này để <strong>đăng nhập</strong> và <strong>xác minh tài khoản</strong>.
+                                </p>
+                        
+                                <div style="text-align: center; margin: 25px 0;">
+                                    <a href="https://banhangrong.com/login" 
+                                       style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                                       Đăng nhập ngay
+                                    </a>
+                                </div>
+                            </div>
+                        
+                            <!-- Footer -->
+                            <div style="background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 13px; color: #777; border-top: 1px solid #eee;">
+                                <p style="margin: 5px 0;">
+                                    Trân trọng,<br>
+                                    <strong>Đội ngũ BanHangRong</strong>
+                                </p>
+                            </div>
+                        </div>
+                        """.formatted(user.getUsername(), user.getUsername(), email);
                 user.setIsEmailVerified(false);
                 model.addAttribute("success", "User information updated successfully and email notifications sent.");
             } else {
                 String infoChangeMsg = """
-                                        <div style="font-family: Arial,sans-serif; color:#333;">
-                                            <h3 style="color:#2c7be5;">ℹ️ Thông tin tài khoản của bạn đã được cập nhật</h3>
-                                            <p>Xin chào <b>%s</b>,</p>
-                                            <p>Admin đã cập nhật một số thông tin trong tài khoản của bạn trên hệ thống <b>BanHangRong</b>.</p>
-                           <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
-                            <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
-                        </p>
-                                            <hr>
-                                            <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ BanHangRong</p>
-                                        </div>
-                        """.formatted(user.getUsername());
-                emailService.sendEmail(new Email(email, "BanHangRong - Account Information Updated", infoChangeMsg));
+                        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <!-- Header xanh dương -->
+                            <div style="background: linear-gradient(135deg, #2c7be5, #3498db); padding: 20px; text-align: center; color: white;">
+                                <h2 style="margin: 0; font-size: 24px;">
+                                    Thông tin tài khoản đã được cập nhật
+                                </h2>
+                            </div>
+                        
+                            <!-- Nội dung -->
+                            <div style="padding: 25px; background-color: #fff;">
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Xin chào <strong>%s</strong>,
+                                </p>
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Quản trị viên vừa <strong>cập nhật một số thông tin</strong> trong tài khoản của bạn trên hệ thống <strong>BanHangRong</strong>.
+                                </p>
+                        
+                                <div style="background-color: #f0f8ff; border-left: 4px solid #2c7be5; padding: 15px; margin: 20px 0; font-size: 15px;">
+                                    <p style="margin: 0;"><strong>Tài khoản:</strong> %s</p>
+                                    <p style="margin: 8px 0 0;"><strong>Thời gian cập nhật:</strong> vừa xong</p>
+                                </div>
+                        
+                                <p style="font-size: 16px; line-height: 1.6;">
+                                    Nếu bạn <strong>không yêu cầu thay đổi</strong> hoặc cần hỗ trợ, vui lòng liên hệ ngay.
+                                </p>
+                        
+                                <div style="text-align: center; margin: 25px 0;">
+                                    <a href="mailto:bonhoangncd@gmail.com" 
+                                       style="background-color: #2c7be5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                                       Liên hệ hỗ trợ
+                                    </a>
+                                </div>
+                            </div>
+                        
+                            <!-- Footer -->
+                            <div style="background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 13px; color: #777; border-top: 1px solid #eee;">
+                                <p style="margin: 5px 0;">
+                                    Trân trọng,<br>
+                                    <strong>Đội ngũ BanHangRong</strong>
+                                </p>
+                            </div>
+                        </div>
+                        """.formatted(user.getUsername(), user.getUsername());
                 model.addAttribute("success", "User information updated successfully and notification sent.");
             }
             userService.save(user);
@@ -380,19 +477,65 @@ public class AdminUserManagement {
         redirectAttributes.addFlashAttribute("success", "Deactivated user successfully");
         String subject = "BanHangRong - Your Account Has Been Deactivated";
         String message = """
-                    <div style="font-family: Arial,sans-serif; color:#333;">
-                        <h3 style="color:#d9534f;">⚠️ Tài khoản của bạn đã bị vô hiệu hóa</h3>
-                        <p>Xin chào <b>%s</b>,</p>
-                        <p>Tài khoản của bạn trên hệ thống <b>BanHangRong</b> đã bị <b>vô hiệu hóa (deactivated)</b> bởi quản trị viên. Tại vì: </p>
-                        <p>%s</p>
-                        <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
-                            <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
-                        </p>
-                        <p>Bạn sẽ không thể đăng nhập cho đến khi tài khoản được kích hoạt lại.</p>
-                        <hr>
-                        <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ <b>BanHangRong</b></p>
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <!-- Header đỏ cảnh báo -->
+                    <div style="background: linear-gradient(135deg, #dc3545, #e74c3c); padding: 20px; text-align: center; color: white;">
+                        <h2 style="margin: 0; font-size: 24px;">
+                            Tài khoản đã bị vô hiệu hóa
+                        </h2>
                     </div>
-                """.formatted(user.getUsername(),reason);
+                
+                    <!-- Nội dung -->
+                    <div style="padding: 25px; background-color: #fff;">
+                        <p style="font-size: 16px; line-height: 1.6;">
+                            Xin chào <strong>%s</strong>,
+                        </p>
+                        <p style="font-size: 16px; line-height: 1.6;">
+                            Chúng tôi rất tiếc phải thông báo rằng tài khoản của bạn trên hệ thống <strong>BanHangRong</strong> đã bị <strong>vô hiệu hóa</strong> bởi quản trị viên.
+                        </p>
+                
+                        <div style="background-color: #fff5f5; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; font-size: 15px;">
+                            <p style="margin: 0;"><strong>Tài khoản:</strong> %s</p>
+                            <p style="margin: 8px 0 0;"><strong>Thời gian vô hiệu hóa:</strong> vừa xong</p>
+                        </div>
+                
+                        <div style="background-color: #fdf2f2; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 20px 0; font-size: 15px; color: #721c24;">
+                            <p style="margin: 0; font-weight: bold;">Lý do:</p>
+                            <p style="margin: 8px 0 0; font-style: italic;">"%s"</p>
+                        </div>
+                
+                        <p style="font-size: 16px; line-height: 1.6; color: #721c24;">
+                            <strong>Bạn không thể đăng nhập</strong> cho đến khi tài khoản được kích hoạt lại.
+                        </p>
+                
+                        <p style="font-size: 16px; line-height: 1.6;">
+                            Nếu bạn cho rằng đây là nhầm lẫn, vui lòng <strong>liên hệ ngay</strong> với chúng tôi để được hỗ trợ.
+                        </p>
+                
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="mailto:bonhoangncd@gmail.com" 
+                               style="background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 8px rgba(220,53,69,0.3);">
+                               Liên hệ hỗ trợ ngay
+                            </a>
+                        </div>
+                    </div>
+                
+                    <!-- Footer -->
+                    <div style="background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 13px; color: #777; border-top: 1px solid #eee;">
+                        <p style="margin: 5px 0;">
+                            Trân trọng,<br>
+                            <strong>Đội ngũ BanHangRong</strong>
+                        </p>
+                        <p style="margin: 8px 0 0; font-size: 12px;">
+                            © 2025 BanHangRong. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+                """.formatted(
+                user.getUsername(),           // %s đầu tiên: username
+                user.getUsername(),           // %s thứ hai: username (trong thông tin)
+                reason                        // %s thứ ba: lý do
+        );
 
         try {
             emailService.sendEmail(new Email(user.getEmail(), subject, message));
@@ -402,6 +545,7 @@ public class AdminUserManagement {
 
         return "redirect:/admin/user";
     }
+
     @PostMapping("/active")
     public String activeUser(HttpServletRequest request, RedirectAttributes redirectAttributes) {
         String sId = request.getParameter("id");
@@ -423,23 +567,65 @@ public class AdminUserManagement {
             return "redirect:/admin/user";
         }
         user.setIsActive(true);
-        userService.save(user) ;
+        userService.save(user);
         redirectAttributes.addFlashAttribute("success", "Activated user successfully");
 
         String subject = "BanHangRong - Your Account Has Been Activated";
         String message = """
-                    <div style="font-family: Arial,sans-serif; color:#333;">
-                        <h3 style="color:#00A86B;"> Tài khoản của bạn đã được mở lại.</h3>
-                        <p>Xin chào <b>%s</b>,</p>
-                        <p>Tài khoản của bạn trên hệ thống <b>BanHangRong</b> đã được <b>mở lại </b> bởi quản trị viên.</p>
-                        <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
-                            <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
-                        </p>
-                        <p>Bây giờ bạn có thể đăng nhập lại và sử dụng như bình thường.</p>
-                        <hr>
-                        <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ <b>BanHangRong</b></p>
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <!-- Header xanh lá thành công -->
+                    <div style="background: linear-gradient(135deg, #00A86B, #20c997); padding: 20px; text-align: center; color: white;">
+                        <h2 style="margin: 0; font-size: 24px;">
+                            Tài khoản đã được mở lại
+                        </h2>
                     </div>
-                """.formatted(user.getUsername());
+                
+                    <!-- Nội dung -->
+                    <div style="padding: 25px; background-color: #fff;">
+                        <p style="font-size: 16px; line-height: 1.6;">
+                            Xin chào <strong>%s</strong>,
+                        </p>
+                        <p style="font-size: 16px; line-height: 1.6;">
+                            Chúng tôi rất vui mừng thông báo rằng tài khoản của bạn trên hệ thống <strong>BanHangRong</strong> đã được <strong>mở lại thành công</strong> bởi quản trị viên.
+                        </p>
+                
+                        <div style="background-color: #f8fff9; border-left: 4px solid #00A86B; padding: 15px; margin: 20px 0; font-size: 15px;">
+                            <p style="margin: 0;"><strong>Tài khoản:</strong> %s</p>
+                            <p style="margin: 8px 0 0;"><strong>Thời gian mở lại:</strong> vừa xong</p>
+                        </div>
+                
+                        <p style="font-size: 16px; line-height: 1.6;">
+                            Bây giờ bạn <strong>có thể đăng nhập lại</strong> và sử dụng đầy đủ các tính năng như bình thường.
+                        </p>
+                
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="https://banhangrong.com/login" 
+                               style="background-color: #00A86B; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 8px rgba(0,168,107,0.3);">
+                               Đăng nhập ngay
+                            </a>
+                        </div>
+                
+                        <p style="font-size: 14px; color: #666; line-height: 1.6;">
+                            Nếu bạn cần hỗ trợ hoặc có thắc mắc, vui lòng liên hệ:
+                            <a href="mailto:bonhoangncd@gmail.com" style="color: #00A86B; font-weight: bold;">bonhoangncd@gmail.com</a>
+                        </p>
+                    </div>
+                
+                    <!-- Footer -->
+                    <div style="background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 13px; color: #777; border-top: 1px solid #eee;">
+                        <p style="margin: 5px 0;">
+                            Trân trọng,<br>
+                            <strong>Đội ngũ BanHangRong</strong>
+                        </p>
+                        <p style="margin: 8px 0 0; font-size: 12px;">
+                            © 2025 BanHangRong. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+                """.formatted(
+                user.getUsername(),     // %s đầu tiên: chào
+                user.getUsername()      // %s thứ hai: trong thông tin
+        );
 
         try {
             emailService.sendEmail(new Email(user.getEmail(), subject, message));
