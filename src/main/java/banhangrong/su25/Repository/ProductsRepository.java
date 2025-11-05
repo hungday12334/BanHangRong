@@ -73,7 +73,15 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
         @Query(value = "SELECT p.seller_id, u.username, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.price_at_time * oi.quantity) ELSE 0 END),0) AS revenue, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN oi.quantity ELSE 0 END),0) AS units FROM products p JOIN users u ON u.user_id = p.seller_id LEFT JOIN order_items oi ON oi.product_id = p.product_id LEFT JOIN orders o ON o.order_id = oi.order_id GROUP BY p.seller_id, u.username ORDER BY revenue DESC LIMIT 10", nativeQuery = true)
     List<Object[]> topSellers();
 
-        @Query(value = "SELECT r.rank FROM (SELECT p.seller_id, DENSE_RANK() OVER (ORDER BY COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.price_at_time * oi.quantity) ELSE 0 END),0) DESC) AS rank FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id LEFT JOIN orders o ON o.order_id = oi.order_id GROUP BY p.seller_id) r WHERE r.seller_id = :sellerId", nativeQuery = true)
+    @Query(value = "SELECT r.seller_rank FROM (" +
+        "  SELECT seller_id, DENSE_RANK() OVER (ORDER BY revenue DESC) AS seller_rank FROM (" +
+        "    SELECT p.seller_id AS seller_id, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.price_at_time * oi.quantity) ELSE 0 END),0) AS revenue " +
+        "    FROM products p " +
+        "    LEFT JOIN order_items oi ON oi.product_id = p.product_id " +
+        "    LEFT JOIN orders o ON o.order_id = oi.order_id " +
+        "    GROUP BY p.seller_id" +
+        "  ) s" +
+        ") r WHERE r.seller_id = :sellerId", nativeQuery = true)
     Integer sellerRevenueRank(@Param("sellerId") Long sellerId);
 
     @Query(value = "SELECT COUNT(DISTINCT seller_id) FROM products", nativeQuery = true)
