@@ -28,27 +28,20 @@ public class SellerDashboardController {
     private final ProductLicensesRepository productLicensesRepository;
 
     public SellerDashboardController(ProductsRepository productsRepository,
-                                     UsersRepository usersRepository,
-                                     SellerOrderRepository sellerOrderRepository,
-                                     ProductLicensesRepository productLicensesRepository) {
+            UsersRepository usersRepository,
+            SellerOrderRepository sellerOrderRepository,
+            ProductLicensesRepository productLicensesRepository) {
         this.productsRepository = productsRepository;
         this.usersRepository = usersRepository;
         this.sellerOrderRepository = sellerOrderRepository;
         this.productLicensesRepository = productLicensesRepository;
     }
 
-    // Temporary: sellerId is read from query or default to 1L until auth in place
     @GetMapping("/seller/dashboard")
     public String dashboard(@RequestParam(name = "sellerId", required = false) Long sellerId,
-                            Model model,
-                            Principal principal,
-                            HttpSession session) {
-        // Resolve sellerId from authenticated principal or session when available.
-        // Order of preference:
-        // 1) explicit request param (useful for testing / admin overrides)
-        // 2) Principal - if Principal.getName() is numeric we parse it as userId; otherwise lookup by username
-        // 3) HttpSession attribute "userId" (Long) or "user" (Users object)
-        // 4) fallback demo id 56L (existing behaviour)
+            Model model,
+            Principal principal,
+            HttpSession session) {
 
         if (sellerId == null) {
             // Try principal
@@ -59,23 +52,28 @@ public class SellerDashboardController {
                 } catch (NumberFormatException e) {
                     // Not a numeric principal name, try lookup by username
                     var opt = usersRepository.findByUsername(name);
-                    if (opt.isPresent()) sellerId = opt.get().getUserId();
+                    if (opt.isPresent())
+                        sellerId = opt.get().getUserId();
                 }
             }
 
             // Try session attributes
             if (sellerId == null && session != null) {
                 Object uid = session.getAttribute("userId");
-                if (uid instanceof Long) sellerId = (Long) uid;
-                else if (uid instanceof Integer) sellerId = ((Integer) uid).longValue();
+                if (uid instanceof Long)
+                    sellerId = (Long) uid;
+                else if (uid instanceof Integer)
+                    sellerId = ((Integer) uid).longValue();
                 else {
                     Object userObj = session.getAttribute("user");
-                    if (userObj instanceof Users) sellerId = ((Users) userObj).getUserId();
+                    if (userObj instanceof Users)
+                        sellerId = ((Users) userObj).getUserId();
                 }
             }
 
             // final fallback
-            if (sellerId == null) sellerId = 6L; // assumption: demo seller
+            if (sellerId == null)
+                sellerId = 6L; // assumption: demo seller
         }
 
         // KPIs
@@ -94,8 +92,8 @@ public class SellerDashboardController {
         BigDecimal monthRev = Optional.ofNullable(productsRepository.thisMonthRevenue(sellerId))
                 .orElse(BigDecimal.ZERO);
 
-    // Daily revenue for default range: last 15 days (inclusive today)
-    LocalDateTime from = LocalDateTime.now().minus(14, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
+        // Daily revenue for default range: last 15 days (inclusive today)
+        LocalDateTime from = LocalDateTime.now().minus(14, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
         List<Object[]> raw = productsRepository.dailyRevenueFrom(sellerId, from);
         // Build date -> revenue map covering all days
         LinkedHashMap<String, BigDecimal> series = new LinkedHashMap<>();
@@ -120,21 +118,30 @@ public class SellerDashboardController {
                     String s = Objects.toString(dObj, "");
                     // If the DB driver returns a datetime string like "2025-09-28 00:00:00",
                     // take the first 10 chars which correspond to yyyy-MM-dd
-                    if (s.length() >= 10) dateKey = s.substring(0, 10);
-                    else dateKey = s;
+                    if (s.length() >= 10)
+                        dateKey = s.substring(0, 10);
+                    else
+                        dateKey = s;
                 }
             } catch (Exception ex) {
                 dateKey = Objects.toString(dObj, "");
             }
-            if (dateKey == null) continue;
+            if (dateKey == null)
+                continue;
             BigDecimal rev = BigDecimal.ZERO;
             if (row.length > 1 && row[1] != null) {
-                if (row[1] instanceof BigDecimal) rev = (BigDecimal) row[1];
+                if (row[1] instanceof BigDecimal)
+                    rev = (BigDecimal) row[1];
                 else {
-                    try { rev = new BigDecimal(row[1].toString()); } catch (Exception e) { rev = BigDecimal.ZERO; }
+                    try {
+                        rev = new BigDecimal(row[1].toString());
+                    } catch (Exception e) {
+                        rev = BigDecimal.ZERO;
+                    }
                 }
             }
-            // Only put into the series if the dateKey exists (guards against formatting mismatches)
+            // Only put into the series if the dateKey exists (guards against formatting
+            // mismatches)
             if (series.containsKey(dateKey)) {
                 series.put(dateKey, rev);
             }
@@ -155,7 +162,8 @@ public class SellerDashboardController {
         // Recent orders (strictly scoped to this seller)
         List<Map<String, Object>> recentOrders = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        var pageableRecent = org.springframework.data.domain.PageRequest.of(0, 8, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        var pageableRecent = org.springframework.data.domain.PageRequest.of(0, 8, org.springframework.data.domain.Sort
+                .by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
         var pageRecent = sellerOrderRepository.findSellerOrders(sellerId, null, null, null, pageableRecent);
         for (SellerOrderRepository.SellerOrderSummary s : pageRecent.getContent()) {
             Map<String, Object> m = new HashMap<>();
@@ -165,61 +173,60 @@ public class SellerDashboardController {
             m.put("createdAtStr", createdAtStr);
             m.put("amount", s.getSellerAmount());
             m.put("items", s.getSellerItems());
-            // Optional: could include buyer info if needed for UI in future
-            // m.put("buyerUsername", s.getBuyerUsername());
-            // m.put("buyerUserId", s.getBuyerUserId());
             recentOrders.add(m);
         }
-
-        // Low stock products (<= 5 remaining keys)
-    // Instead of filtering by DB quantity we compute remaining for each public product
-    // and then pick those with remaining <= 5. This avoids cases where DB quantity
-    // is out-of-sync with actual available license keys.
-    List<Products> sellerProducts = productsRepository.findBySellerId(sellerId);
-    List<Map<String, Object>> lowStock = new ArrayList<>();
-    for (var prod : sellerProducts) {
-        if (prod == null) continue;
-        String st = prod.getStatus();
-        if (st == null || !"public".equalsIgnoreCase(st.trim())) continue;
-        Long pid = prod.getProductId();
-        int capacity = prod.getQuantity() != null ? prod.getQuantity() : 0;
-        long sold = productLicensesRepository.countByProductViaOrders(pid);
-        long pre = productLicensesRepository.countPreGeneratedForProduct(pid);
-        long remaining = Math.max(0L, (long) capacity - sold - pre);
-        if (remaining <= 5) {
-            Map<String, Object> m = new HashMap<>();
-            m.put("productId", pid);
-            m.put("name", prod.getName());
-            m.put("remaining", remaining);
-            m.put("status", prod.getStatus());
-            lowStock.add(m);
+        // Low stock products (remaining <= 5)
+        List<Products> sellerProducts = productsRepository.findBySellerId(sellerId);
+        List<Map<String, Object>> lowStock = new ArrayList<>();
+        for (var prod : sellerProducts) {
+            if (prod == null)
+                continue;
+            String st = prod.getStatus();
+            if (st == null || !"public".equalsIgnoreCase(st.trim()))
+                continue;
+            Long pid = prod.getProductId();
+            int capacity = prod.getQuantity() != null ? prod.getQuantity() : 0;
+            long sold = productLicensesRepository.countByProductViaOrders(pid);
+            long pre = productLicensesRepository.countPreGeneratedForProduct(pid);
+            long remaining = Math.max(0L, (long) capacity - sold - pre);
+            if (remaining <= 5) {
+                Map<String, Object> m = new HashMap<>();
+                m.put("productId", pid);
+                m.put("name", prod.getName());
+                m.put("remaining", remaining);
+                m.put("status", prod.getStatus());
+                lowStock.add(m);
+            }
         }
-    }
-    // sort by ascending remaining and limit to 10
-    lowStock.sort(Comparator.comparingLong(m -> ((Number) m.getOrDefault("remaining", 0)).longValue()));
-    if (lowStock.size() > 10) lowStock = lowStock.subList(0, 10);
-    long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "public");
+        // sort by ascending remaining and limit to 10
+        lowStock.sort(Comparator.comparingLong(m -> ((Number) m.getOrDefault("remaining", 0)).longValue()));
+        if (lowStock.size() > 10)
+            lowStock = lowStock.subList(0, 10);
+        long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "public");
 
-    // "My products" for initial server-side render: include basic fields (id, name, price, quantity, status)
-    List<Map<String, Object>> myProducts = new ArrayList<>();
-    for (Products prod : sellerProducts) {
-        if (prod == null) continue;
-        Map<String, Object> m = new HashMap<>();
-        m.put("productId", prod.getProductId());
-        m.put("name", prod.getName());
-        m.put("price", prod.getPrice());
-        m.put("quantity", prod.getQuantity());
-        m.put("status", prod.getStatus());
-        myProducts.add(m);
-    }
+        // "My products" for initial server-side render: include basic fields (id, name,
+        // price, quantity, status)
+        List<Map<String, Object>> myProducts = new ArrayList<>();
+        for (Products prod : sellerProducts) {
+            if (prod == null)
+                continue;
+            Map<String, Object> m = new HashMap<>();
+            m.put("productId", prod.getProductId());
+            m.put("name", prod.getName());
+            m.put("price", prod.getPrice());
+            m.put("quantity", prod.getQuantity());
+            m.put("status", prod.getStatus());
+            myProducts.add(m);
+        }
 
         // Seller ranking (revenue-based)
         Integer myRank = productsRepository.sellerRevenueRank(sellerId);
         Long totalSellers = Optional.ofNullable(productsRepository.totalSellers()).orElse(0L);
-        double percentile = (myRank != null && totalSellers > 0) ? (100.0 * (totalSellers - myRank + 1) / totalSellers) : 0.0;
-        List<Map<String,Object>> topSellers = new ArrayList<>();
+        double percentile = (myRank != null && totalSellers > 0) ? (100.0 * (totalSellers - myRank + 1) / totalSellers)
+                : 0.0;
+        List<Map<String, Object>> topSellers = new ArrayList<>();
         for (Object[] row : productsRepository.topSellers()) {
-            Map<String,Object> m = new HashMap<>();
+            Map<String, Object> m = new HashMap<>();
             m.put("sellerId", row[0]);
             m.put("username", row[1]);
             m.put("revenue", row[2]);
@@ -227,25 +234,27 @@ public class SellerDashboardController {
             topSellers.add(m);
         }
 
-    model.addAttribute("sellerId", sellerId);
-        // Also expose userId for clarity: the sellerId is the same as the logged-in user's id
+        model.addAttribute("sellerId", sellerId);
+        // Also expose userId for clarity: the sellerId is the same as the logged-in
+        // user's id
         model.addAttribute("userId", sellerId);
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("totalUnits", totalUnits);
         model.addAttribute("totalOrders", totalOrders);
         model.addAttribute("avgRating", avgRating);
-    model.addAttribute("todayRevenue", todayRev);
-    model.addAttribute("monthRevenue", monthRev);
+        model.addAttribute("todayRevenue", todayRev);
+        model.addAttribute("monthRevenue", monthRev);
         model.addAttribute("dailyRevenueLabels", String.join(",", series.keySet()));
-        model.addAttribute("dailyRevenueData", String.join(",", series.values().stream().map(BigDecimal::toPlainString).toList()));
-    model.addAttribute("topProducts", topProducts);
+        model.addAttribute("dailyRevenueData",
+                String.join(",", series.values().stream().map(BigDecimal::toPlainString).toList()));
+        model.addAttribute("topProducts", topProducts);
         model.addAttribute("recentOrders", recentOrders);
-    model.addAttribute("lowStock", lowStock);
+        model.addAttribute("lowStock", lowStock);
         model.addAttribute("activeProducts", activeProducts);
-    model.addAttribute("myRank", myRank == null ? 0 : myRank);
-    model.addAttribute("totalSellers", totalSellers);
-    model.addAttribute("rankPercentile", percentile);
-    model.addAttribute("topSellers", topSellers);
+        model.addAttribute("myRank", myRank == null ? 0 : myRank);
+        model.addAttribute("totalSellers", totalSellers);
+        model.addAttribute("rankPercentile", percentile);
+        model.addAttribute("topSellers", topSellers);
 
         // Load user profile (assume sellerId == userId for now)
         Users user = usersRepository.findById(sellerId).orElse(null);
@@ -253,7 +262,8 @@ public class SellerDashboardController {
         if (user != null) {
             model.addAttribute("userType", user.getUserType());
         }
-        // Provide server-side product list so the dashboard can render statuses immediately
+        // Provide server-side product list so the dashboard can render statuses
+        // immediately
         model.addAttribute("myProducts", myProducts);
 
         return "pages/seller/seller_dashboard";
@@ -276,10 +286,14 @@ public class SellerDashboardController {
             Object dObj = row[0];
             String dateKey;
             try {
-                if (dObj instanceof java.sql.Date) dateKey = ((java.sql.Date) dObj).toLocalDate().toString();
-                else if (dObj instanceof java.sql.Timestamp) dateKey = ((java.sql.Timestamp) dObj).toLocalDateTime().toLocalDate().toString();
-                else if (dObj instanceof java.time.LocalDate) dateKey = dObj.toString();
-                else if (dObj instanceof java.time.LocalDateTime) dateKey = ((java.time.LocalDateTime) dObj).toLocalDate().toString();
+                if (dObj instanceof java.sql.Date)
+                    dateKey = ((java.sql.Date) dObj).toLocalDate().toString();
+                else if (dObj instanceof java.sql.Timestamp)
+                    dateKey = ((java.sql.Timestamp) dObj).toLocalDateTime().toLocalDate().toString();
+                else if (dObj instanceof java.time.LocalDate)
+                    dateKey = dObj.toString();
+                else if (dObj instanceof java.time.LocalDateTime)
+                    dateKey = ((java.time.LocalDateTime) dObj).toLocalDate().toString();
                 else {
                     String s = java.util.Objects.toString(dObj, "");
                     dateKey = s.length() >= 10 ? s.substring(0, 10) : s;
@@ -289,12 +303,17 @@ public class SellerDashboardController {
             }
             BigDecimal rev = BigDecimal.ZERO;
             if (row.length > 1 && row[1] != null) {
-                if (row[1] instanceof BigDecimal) rev = (BigDecimal) row[1];
+                if (row[1] instanceof BigDecimal)
+                    rev = (BigDecimal) row[1];
                 else {
-                    try { rev = new BigDecimal(row[1].toString()); } catch (Exception ignore) {}
+                    try {
+                        rev = new BigDecimal(row[1].toString());
+                    } catch (Exception ignore) {
+                    }
                 }
             }
-            if (series.containsKey(dateKey)) series.put(dateKey, rev);
+            if (series.containsKey(dateKey))
+                series.put(dateKey, rev);
         }
         var labels = new java.util.ArrayList<>(series.keySet());
         var data = series.values().stream().map(BigDecimal::toPlainString).toList();
