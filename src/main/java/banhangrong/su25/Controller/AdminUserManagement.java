@@ -607,7 +607,7 @@ public class AdminUserManagement {
                 
                         <p style="font-size: 14px; color: #666; line-height: 1.6;">
                             Nếu bạn cần hỗ trợ hoặc có thắc mắc, vui lòng liên hệ:
-                            <a href="mailto:bonhoangncd@gmail.com" style="color: #00A86B; font-weight: bold;">bonhoangncd@gmail.com</a>
+                            <a href="mailto:bonhoangncd@gmail.com" style="color: #00A86B; font-weight: bold;">bonhoangncd@gmail.com </a>
                         </p>
                     </div>
                 
