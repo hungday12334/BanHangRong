@@ -1809,9 +1809,6 @@
 
     .badge {
         font-size: 0.8rem;
-        padding: 5px 10px;
-    }
-}
     padding: 20px 16px;
     background: var(--bg-soft);
     border-radius: 12px;
@@ -2245,5 +2242,5 @@
         width: 100%;
         justify-content: flex-end;
     }
-}
+}}
 
