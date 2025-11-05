@@ -1,6 +1,5 @@
 package banhangrong.su25.Controller;
 
-import banhangrong.su25.DTO.VoucherDTO;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Entity.Vouchers;
 import banhangrong.su25.Entity.VoucherRedemptions;
@@ -10,13 +9,10 @@ import banhangrong.su25.Repository.VouchersRepository;
 import banhangrong.su25.Repository.VoucherRedemptionsRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.service.VoucherService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -106,20 +102,23 @@ public class SellerVoucherApiController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
             }
 
+            // Auto-expire vouchers first
+            voucherService.autoExpireVouchers();
+
             List<Vouchers> vouchers;
 
             if (productId != null) {
-                // Get vouchers for specific product
+                // Get vouchers for specific product - sorted by createdAt DESC (newest first)
                 if (search != null && !search.trim().isEmpty()) {
-                    vouchers = vouchersRepository.findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByUpdatedAtDesc(
+                    vouchers = vouchersRepository.findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByCreatedAtDesc(
                         seller.getUserId(), productId, search.trim());
                 } else {
-                    vouchers = vouchersRepository.findBySellerIdAndProductIdOrderByUpdatedAtDesc(
+                    vouchers = vouchersRepository.findBySellerIdAndProductIdOrderByCreatedAtDesc(
                         seller.getUserId(), productId);
                 }
             } else {
-                // Get all vouchers for seller
-                vouchers = vouchersRepository.findBySellerIdOrderByUpdatedAtDesc(seller.getUserId());
+                // Get all vouchers for seller - sorted by createdAt DESC (newest first)
+                vouchers = vouchersRepository.findBySellerIdOrderByCreatedAtDesc(seller.getUserId());
 
                 if (search != null && !search.trim().isEmpty()) {
                     String searchLower = search.trim().toLowerCase();
@@ -183,10 +182,12 @@ public class SellerVoucherApiController {
             response.put("totalElements", result.size());
             response.put("totalPages", (int) Math.ceil((double) result.size() / size));
             response.put("currentPage", page);
+            response.put("size", size);
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Lỗi khi lấy danh sách voucher: " + e.getMessage());
         }
@@ -253,6 +254,7 @@ public class SellerVoucherApiController {
         public LocalDateTime endAt;
         public Integer maxUses;
         public Integer maxUsesPerUser;
+        public String status; // Added status field
     }
 
     /**
@@ -275,6 +277,38 @@ public class SellerVoucherApiController {
                     .body("Bạn không có quyền tạo voucher cho sản phẩm này");
             }
 
+            // Validate maxUses and maxUsesPerUser
+            if (request.maxUses != null && request.maxUses < 1) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Maximum Total Uses phải lớn hơn hoặc bằng 1");
+            }
+
+            if (request.maxUsesPerUser != null && request.maxUsesPerUser < 1) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Limit per User phải lớn hơn hoặc bằng 1");
+            }
+
+            // Validate relationship between maxUses and maxUsesPerUser
+            if (request.maxUses != null && request.maxUsesPerUser != null) {
+                if (request.maxUses > 0 && request.maxUsesPerUser > request.maxUses) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Limit per User không thể lớn hơn Maximum Total Uses");
+                }
+            }
+
+            // Validate date range
+            if (request.startAt != null && request.endAt != null &&
+                request.endAt.isBefore(request.startAt)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Ngày kết thúc phải sau ngày bắt đầu");
+            }
+
+            // Check if already expired
+            String initialStatus = request.status != null ? request.status : "inactive";
+            if (request.endAt != null && LocalDateTime.now().isAfter(request.endAt)) {
+                initialStatus = "expired";
+            }
+
             // Create voucher
             Vouchers voucher = new Vouchers();
             voucher.setSellerId(seller.getUserId());
@@ -287,7 +321,7 @@ public class SellerVoucherApiController {
             voucher.setEndAt(request.endAt);
             voucher.setMaxUses(request.maxUses);
             voucher.setMaxUsesPerUser(request.maxUsesPerUser);
-            voucher.setStatus("active");
+            voucher.setStatus(initialStatus); // Use status from request or default to inactive
 
             Vouchers saved = voucherService.createVoucher(voucher);
 
@@ -321,6 +355,33 @@ public class SellerVoucherApiController {
                     .body("Bạn không có quyền chỉnh sửa voucher này");
             }
 
+            // Validate maxUses and maxUsesPerUser
+            if (request.maxUses != null && request.maxUses < 1) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Maximum Total Uses phải lớn hơn hoặc bằng 1");
+            }
+
+            if (request.maxUsesPerUser != null && request.maxUsesPerUser < 1) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Limit per User phải lớn hơn hoặc bằng 1");
+            }
+
+            // Validate relationship between maxUses and maxUsesPerUser
+            if (request.maxUses != null && request.maxUsesPerUser != null) {
+                if (request.maxUses > 0 && request.maxUsesPerUser > request.maxUses) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Limit per User không thể lớn hơn Maximum Total Uses");
+                }
+            }
+
+
+            // Validate date range
+            if (request.startAt != null && request.endAt != null &&
+                request.endAt.isBefore(request.startAt)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Ngày kết thúc phải sau ngày bắt đầu");
+            }
+
             // Update voucher
             Vouchers updated = new Vouchers();
             updated.setCode(request.code.trim().toUpperCase());
@@ -331,7 +392,18 @@ public class SellerVoucherApiController {
             updated.setEndAt(request.endAt);
             updated.setMaxUses(request.maxUses);
             updated.setMaxUsesPerUser(request.maxUsesPerUser);
-            updated.setStatus(existing.getStatus());
+
+            // Keep status from request if provided, otherwise keep existing status
+            if (request.status != null && !request.status.trim().isEmpty()) {
+                // Auto-expire if end date is past
+                if (request.endAt != null && LocalDateTime.now().isAfter(request.endAt)) {
+                    updated.setStatus("expired");
+                } else {
+                    updated.setStatus(request.status);
+                }
+            } else {
+                updated.setStatus(existing.getStatus());
+            }
 
             Vouchers saved = voucherService.updateVoucher(voucherId, updated);
 

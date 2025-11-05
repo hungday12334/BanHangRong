@@ -8,21 +8,30 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface VouchersRepository extends JpaRepository<Vouchers, Long> {
-    // Seller queries
-    List<Vouchers> findBySellerIdAndProductId(Long sellerId, Long productId);
+
+    // Find vouchers by code (case-insensitive)
+    List<Vouchers> findByCodeIgnoreCaseOrderByUpdatedAtDesc(String code);
+
+    // Find vouchers by seller and product
+    List<Vouchers> findBySellerIdAndProductIdOrderByCreatedAtDesc(Long sellerId, Long productId);
     List<Vouchers> findBySellerIdAndProductIdOrderByUpdatedAtDesc(Long sellerId, Long productId);
+
+    // Find vouchers by seller and product with code search
+    List<Vouchers> findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByCreatedAtDesc(Long sellerId, Long productId, String code);
     List<Vouchers> findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByUpdatedAtDesc(Long sellerId, Long productId, String code);
-    List<Vouchers> findBySellerIdAndProductIdAndCodeIgnoreCase(Long sellerId, Long productId, String code);
+
+    // Find vouchers by seller only
+    List<Vouchers> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
     List<Vouchers> findBySellerIdOrderByUpdatedAtDesc(Long sellerId);
+
+    // Check if voucher code exists for a seller and product
     boolean existsBySellerIdAndProductIdAndCodeIgnoreCase(Long sellerId, Long productId, String code);
 
-    // Customer-facing: look up voucher by code
-    List<Vouchers> findByCodeIgnoreCaseOrderByUpdatedAtDesc(String code);
-    Optional<Vouchers> findTopByCodeIgnoreCaseOrderByUpdatedAtDesc(String code);
+    // Find by seller, product, and code
+    List<Vouchers> findBySellerIdAndProductIdAndCodeIgnoreCase(Long sellerId, Long productId, String code);
 
     // Find active vouchers
     List<Vouchers> findByStatusIgnoreCase(String status);
@@ -34,8 +43,10 @@ public interface VouchersRepository extends JpaRepository<Vouchers, Long> {
 
     // Find vouchers by seller and status
     List<Vouchers> findBySellerIdAndStatusIgnoreCaseOrderByUpdatedAtDesc(Long sellerId, String status);
+    List<Vouchers> findBySellerIdAndStatusIgnoreCaseOrderByCreatedAtDesc(Long sellerId, String status);
 
     // Count vouchers by seller
     long countBySellerId(Long sellerId);
     long countBySellerIdAndStatusIgnoreCase(Long sellerId, String status);
 }
+

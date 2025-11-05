@@ -1350,7 +1350,7 @@
           <i class="ti ti-x"></i>
         </button>
       </div>
-      <form id="voucherForm" onsubmit="saveVoucher(event)">
+      <form id="voucherForm" onsubmit="saveVoucher(event)" novalidate>
         <div class="modal-body">
           <input type="hidden" id="voucherId" name="voucherId">
 
@@ -1901,17 +1901,47 @@
           url.searchParams.append('status', currentStatus);
         }
 
+        console.log('Loading vouchers from:', url.toString());
+
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to load vouchers');
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Failed to load vouchers:', response.status, errorText);
+          throw new Error(`Failed to load vouchers: ${response.status} - ${errorText}`);
+        }
 
         const data = await response.json();
+        console.log('Loaded vouchers:', data);
+
+        // Check if data has content
+        if (!data || !data.content) {
+          console.error('Invalid data format:', data);
+          throw new Error('Invalid data format received from server');
+        }
+
         vouchers = data.content || [];
 
+        // Sort vouchers by creation date - newest first (safe sort)
+        try {
+          vouchers.sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.updatedAt || 0);
+            const dateB = new Date(b.createdAt || b.updatedAt || 0);
+            return dateB - dateA; // Descending order (newest first)
+          });
+        } catch (sortError) {
+          console.warn('Failed to sort vouchers, using default order:', sortError);
+          // Continue without sorting
+        }
+
+        // Update data.content with sorted vouchers
+        data.content = vouchers;
+
         renderVouchers(data);
-        updateStatistics();
+        updateStatistics(); // Update statistics cards
       } catch (error) {
         console.error('Error loading vouchers:', error);
-        showAlert('Failed to load voucher list', 'error');
+        showAlert('Không thể tải danh sách voucher. Vui lòng thử lại.', 'error');
       } finally {
         hideLoading();
       }
@@ -2273,9 +2303,21 @@
       const modal = document.getElementById('voucherModal');
       const form = document.getElementById('voucherForm');
 
+      // Reset form completely
       form.reset();
       document.getElementById('voucherId').value = '';
       document.getElementById('modalTitle').innerHTML = '<i class="ti ti-ticket"></i> Create New Voucher';
+
+      // Remove all validation states and error messages
+      form.querySelectorAll('.form-control').forEach(input => {
+        input.classList.remove('is-invalid', 'is-valid');
+      });
+      form.querySelectorAll('.error-message').forEach(msg => {
+        msg.remove();
+      });
+      form.querySelectorAll('.success-message').forEach(msg => {
+        msg.remove();
+      });
 
       modal.classList.add('active');
     }
@@ -2329,28 +2371,73 @@
         return;
       }
 
-      showLoading();
-
       const form = document.getElementById('voucherForm');
       const formData = new FormData(form);
+
+      // Client-side validation
+      const code = formData.get('code');
+      if (!code || code.trim() === '') {
+        showAlert('Voucher code is required', 'error');
+        return;
+      }
+
+      const discountValue = parseFloat(formData.get('discountValue'));
+      if (isNaN(discountValue) || discountValue <= 0) {
+        showAlert('Discount value must be greater than 0', 'error');
+        return;
+      }
+
+      const maxUses = formData.get('maxUses') ? parseInt(formData.get('maxUses')) : null;
+      if (maxUses !== null && maxUses < 1) {
+        showAlert('Maximum Total Uses must be at least 1', 'error');
+        return;
+      }
+
+      const maxUsesPerUser = formData.get('maxUsesPerUser') ? parseInt(formData.get('maxUsesPerUser')) : null;
+      if (maxUsesPerUser !== null && maxUsesPerUser < 1) {
+        showAlert('Limit per User must be at least 1', 'error');
+        return;
+      }
+
+      // Validate relationship between maxUses and maxUsesPerUser
+      if (maxUses !== null && maxUsesPerUser !== null) {
+        if (maxUses > 0 && maxUsesPerUser > maxUses) {
+          showAlert('Limit per User cannot be greater than Maximum Total Uses', 'error');
+          return;
+        }
+      }
+
+      // Validate date range
+      const startAt = formData.get('startAt');
+      const endAt = formData.get('endAt');
+      if (startAt && endAt && new Date(endAt) < new Date(startAt)) {
+        showAlert('End date must be after start date', 'error');
+        return;
+      }
+
+      showLoading();
 
       const voucherData = {
         voucherId: formData.get('voucherId') || null,
         productId: selectedProductId,
-        code: formData.get('code'),
+        code: code.trim(),
         discountType: formData.get('discountType'),
-        discountValue: parseFloat(formData.get('discountValue')),
+        discountValue: discountValue,
         minOrder: formData.get('minOrder') ? parseFloat(formData.get('minOrder')) : null,
-        startAt: formData.get('startAt') || null,
-        endAt: formData.get('endAt') || null,
-        maxUses: formData.get('maxUses') ? parseInt(formData.get('maxUses')) : null,
-        maxUsesPerUser: formData.get('maxUsesPerUser') ? parseInt(formData.get('maxUsesPerUser')) : null,
-        status: formData.get('status')
+        startAt: startAt || null,
+        endAt: endAt || null,
+        maxUses: maxUses,
+        maxUsesPerUser: maxUsesPerUser,
+        status: formData.get('status') || 'inactive' // Default to inactive/paused
       };
 
       try {
-        const response = await fetch('/api/seller/vouchers', {
-          method: 'POST',
+        const voucherId = voucherData.voucherId;
+        const url = voucherId ? `/api/seller/vouchers/${voucherId}` : '/api/seller/vouchers';
+        const method = voucherId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method: method,
           headers: {
             'Content-Type': 'application/json',
           },
@@ -2519,7 +2606,6 @@
 
         // Reload vouchers to show updated status
         loadVouchers();
-        updateStatistics();
 
       } catch (error) {
         console.error('Error updating status:', error);
@@ -2533,6 +2619,20 @@
     }
 
     // Utility functions
+    function updateStatistics() {
+      // Count vouchers by status
+      const total = vouchers.length;
+      const active = vouchers.filter(v => v.status === 'active').length;
+      const inactive = vouchers.filter(v => v.status === 'inactive').length;
+      const expired = vouchers.filter(v => v.status === 'expired').length;
+
+      // Update stat cards
+      document.getElementById('totalVouchers').textContent = total;
+      document.getElementById('activeVouchers').textContent = active;
+      document.getElementById('inactiveVouchers').textContent = inactive;
+      document.getElementById('expiredVouchers').textContent = expired;
+    }
+
     function updateDiscountLabel() {
       const type = document.getElementById('discountType').value;
       const label = document.getElementById('discountValueLabel');

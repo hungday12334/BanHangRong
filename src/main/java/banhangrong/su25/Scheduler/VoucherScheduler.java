@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class VoucherScheduler {
 
@@ -34,7 +33,23 @@ public class VoucherScheduler {
     }
 
     /**
-     * Auto-expire vouchers - Runs every hour (for more frequent checks)
+     * Auto-expire vouchers - Runs every minute for real-time expiration
+     * This ensures vouchers expire as soon as their endAt time passes
+     */
+    @Scheduled(cron = "0 * * * * ?")
+    public void autoExpireVouchersMinutely() {
+        try {
+            int expiredCount = voucherService.autoExpireVouchers();
+            if (expiredCount > 0) {
+                logger.info("⏰ Real-time check: Auto-expired {} vouchers", expiredCount);
+            }
+        } catch (Exception e) {
+            logger.error("❌ Error during real-time auto-expire vouchers check", e);
+        }
+    }
+
+    /**
+     * Auto-expire vouchers - Runs every hour (backup check)
      */
     @Scheduled(cron = "0 0 * * * ?")
     public void autoExpireVouchersHourly() {
