@@ -4,22 +4,32 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(profile-management): enhance profile update process with email notification and improved validation messages">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(email-notification): enhance email service with detailed logging and improved password change notification">
       <change afterPath="$PROJECT_DIR$/CATEGORY_IMPROVEMENTS_COMPLETE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DEBUG_PASSWORD_CHANGE_EMAIL.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EDIT_CATEGORY_ANALYSIS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EDIT_CATEGORY_IMPLEMENTATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EMAIL_FIX_SUMMARY.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EMAIL_TROUBLESHOOTING_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GRID_PAGINATION_ENHANCEMENT.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/HUONG_DAN_CAC_TRUONG_MOI.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/PASSWORD_CHANGE_EMAIL_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PRODUCT_SELECTOR_ENHANCEMENT.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/PROFILE_UPDATE_SUMMARY.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/QUICK_EMAIL_TEST.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/TOM_TAT_HOAN_THANH.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_DEVELOPER_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_IMPROVEMENTS_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_SYSTEM_DOCUMENTATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_SYSTEM_README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VOUCHER_TROUBLESHOOTING.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/WHERE_NEW_FIELDS_APPEAR.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerVoucherApiController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Scheduler/VoucherScheduler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/email/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/email/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VouchersApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/VouchersApiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VoucherRedemptionsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VoucherRedemptionsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Su25Application.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Su25Application.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -265,7 +275,7 @@
       <workItem from="1762071570533" duration="875000" />
       <workItem from="1762111402526" duration="8323000" />
       <workItem from="1762138370900" duration="473000" />
-      <workItem from="1762332301596" duration="6123000" />
+      <workItem from="1762332301596" duration="14131000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -491,7 +501,23 @@
       <option name="project" value="LOCAL" />
       <updated>1762354003113</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="feat(email-notification): enhance email service with detailed logging and improved password change notification">
+      <option name="closed" value="true" />
+      <created>1762355270241</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1762355270241</updated>
+    </task>
+    <task id="LOCAL-00030" summary="feat(email-notification): enhance email service with detailed logging and improved password change notification">
+      <option name="closed" value="true" />
+      <created>1762355311231</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1762355311231</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -550,7 +576,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="AdminIndex_Final1" />
     <MESSAGE value="Admin UserManagement Create" />
     <MESSAGE value="Admin User Update&amp;Delete" />
     <MESSAGE value="Admin Product Approve||Cancel" />
@@ -575,6 +600,7 @@
     <MESSAGE value="feat(category-management): add enhanced fields for improved category management" />
     <MESSAGE value="feat(category-management): reorganize category management UI and enhance data attributes for improved usability" />
     <MESSAGE value="feat(profile-management): enhance profile update process with email notification and improved validation messages" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(profile-management): enhance profile update process with email notification and improved validation messages" />
+    <MESSAGE value="feat(email-notification): enhance email service with detailed logging and improved password change notification" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(email-notification): enhance email service with detailed logging and improved password change notification" />
   </component>
 </project>

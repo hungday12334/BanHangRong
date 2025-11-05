@@ -87,8 +87,16 @@
       gap: 8px;
     }
 
+    .product-selector-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
     .product-search-wrapper {
       position: relative;
+      flex: 1;
       max-width: 600px;
     }
 
@@ -133,6 +141,329 @@
     .selected-product-meta {
       font-size: 12px;
       color: var(--muted, #94a3b8);
+    }
+
+    .product-grid-container {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .product-grid-container.active {
+      display: block;
+    }
+
+    .product-grid-header {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border, #334155);
+    }
+
+    .product-grid-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .product-grid-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .product-grid-count {
+      font-size: 14px;
+      color: var(--muted, #94a3b8);
+    }
+
+    .product-grid-search {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .product-grid-search-input {
+      width: 100%;
+      padding: 10px 36px 10px 12px;
+      border: 1px solid var(--border, #334155);
+      border-radius: 6px;
+      background: var(--bg, #0f1219);
+      color: var(--text, #f1f5f9);
+      font-size: 13px;
+    }
+
+    .product-grid-search-input:focus {
+      outline: none;
+      border-color: var(--accent, #3b82f6);
+    }
+
+    .product-grid-search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted, #94a3b8);
+      pointer-events: none;
+    }
+
+    .product-grid-filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .grid-filter-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border, #334155);
+      background: transparent;
+      color: var(--text, #f1f5f9);
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .grid-filter-btn:hover {
+      border-color: var(--accent, #3b82f6);
+      color: var(--accent, #3b82f6);
+    }
+
+    .grid-filter-btn.active {
+      background: var(--accent, #3b82f6);
+      border-color: var(--accent, #3b82f6);
+      color: white;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      max-height: 450px;
+      overflow-y: auto;
+      padding: 4px;
+      margin-bottom: 12px;
+    }
+
+    .product-grid-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--border, #334155);
+    }
+
+    .product-grid-pagination {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .grid-page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--border, #334155);
+      background: transparent;
+      color: var(--text, #f1f5f9);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+
+    .grid-page-btn:hover:not(:disabled) {
+      border-color: var(--accent, #3b82f6);
+      color: var(--accent, #3b82f6);
+    }
+
+    .grid-page-btn.active {
+      background: var(--accent, #3b82f6);
+      border-color: var(--accent, #3b82f6);
+      color: white;
+    }
+
+    .grid-page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .grid-load-more {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: 1px dashed var(--border, #334155);
+      background: transparent;
+      color: var(--text, #f1f5f9);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .grid-load-more:hover {
+      border-color: var(--accent, #3b82f6);
+      color: var(--accent, #3b82f6);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .product-card {
+      background: var(--bg, #0f1219);
+      border: 1px solid var(--border, #334155);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .product-card:hover {
+      border-color: var(--accent, #3b82f6);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .product-card.selected {
+      border-color: var(--accent, #3b82f6);
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .product-card-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    .product-card-name {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 15px;
+      line-height: 1.4;
+      padding-right: 60px;
+    }
+
+    .product-card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--muted, #94a3b8);
+    }
+
+    .product-card-meta-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .product-card-price {
+      font-weight: 600;
+      color: var(--accent, #3b82f6);
+      font-size: 14px;
+    }
+
+    .view-mode-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--bg, #0f1219);
+      border-radius: 6px;
+      padding: 4px;
+    }
+
+    .view-mode-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--muted, #94a3b8);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+    }
+
+    .view-mode-btn:hover {
+      color: var(--text, #f1f5f9);
+    }
+
+    .view-mode-btn.active {
+      background: var(--accent, #3b82f6);
+      color: white;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .product-selector-controls {
+        flex-direction: column;
+      }
+
+      .product-search-wrapper {
+        max-width: 100%;
+      }
+
+      .view-mode-toggle {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .product-grid {
+        grid-template-columns: 1fr;
+        max-height: 500px;
+      }
+
+      .product-card-name {
+        padding-right: 70px;
+      }
+
+      .product-grid-filters {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+
+      .product-grid-footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .product-grid-pagination {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .product-selector-controls {
+        gap: 8px;
+      }
+
+      .view-mode-btn {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      .grid-filter-btn {
+        font-size: 11px;
+        padding: 5px 10px;
+      }
+
+      .grid-page-btn {
+        min-width: 28px;
+        height: 28px;
+        font-size: 12px;
+      }
     }
 
     .voucher-list-section {
@@ -571,17 +902,91 @@
             <h3>
               <i class="ti ti-package"></i> Select Product to Manage Vouchers
             </h3>
-            <div class="product-search-wrapper">
-              <input
-                type="text"
-                id="productSearchInput"
-                class="product-search-input"
-                placeholder="Enter product name or Product ID..."
-                onkeyup="searchProducts()"
-              />
-              <div id="productSearchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev); border-radius: 8px; margin-top: 4px; max-height: 300px; overflow-y: auto; display: none; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
+
+            <!-- Controls Row -->
+            <div class="product-selector-controls">
+              <div class="product-search-wrapper">
+                <input
+                  type="text"
+                  id="productSearchInput"
+                  class="product-search-input"
+                  placeholder="Search product name or ID..."
+                  onkeyup="searchProducts()"
+                  onfocus="showSearchResults()"
+                />
+                <div id="productSearchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev); border-radius: 8px; margin-top: 4px; max-height: 300px; overflow-y: auto; display: none; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
+              </div>
+
+              <!-- View Mode Toggle -->
+              <div class="view-mode-toggle">
+                <button type="button" class="view-mode-btn active" id="searchModeBtn" onclick="toggleViewMode('search')">
+                  <i class="ti ti-search"></i> Search
+                </button>
+                <button type="button" class="view-mode-btn" id="gridModeBtn" onclick="toggleViewMode('grid')">
+                  <i class="ti ti-grid-dots"></i> View All
+                </button>
+              </div>
             </div>
 
+            <!-- Product Grid View -->
+            <div class="product-grid-container" id="productGridContainer">
+              <div class="product-grid-header">
+                <div class="product-grid-title-row">
+                  <div class="product-grid-title">
+                    <i class="ti ti-package"></i>
+                    <span>Your Products</span>
+                    <span class="product-grid-count" id="productGridCount">(0 products)</span>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="toggleViewMode('search')">
+                    <i class="ti ti-x"></i> Close
+                  </button>
+                </div>
+
+                <!-- Search in Grid -->
+                <div class="product-grid-search">
+                  <input
+                    type="text"
+                    class="product-grid-search-input"
+                    id="productGridSearchInput"
+                    placeholder="Search products in grid..."
+                    onkeyup="filterProductGrid()"
+                  />
+                  <i class="ti ti-search product-grid-search-icon"></i>
+                </div>
+
+                <!-- Sort/Filter Options -->
+                <div class="product-grid-filters">
+                  <button type="button" class="grid-filter-btn active" data-sort="name" onclick="sortProductGrid('name')">
+                    <i class="ti ti-sort-ascending"></i> Name
+                  </button>
+                  <button type="button" class="grid-filter-btn" data-sort="price-low" onclick="sortProductGrid('price-low')">
+                    <i class="ti ti-arrow-up"></i> Price: Low
+                  </button>
+                  <button type="button" class="grid-filter-btn" data-sort="price-high" onclick="sortProductGrid('price-high')">
+                    <i class="ti ti-arrow-down"></i> Price: High
+                  </button>
+                  <button type="button" class="grid-filter-btn" data-sort="stock" onclick="sortProductGrid('stock')">
+                    <i class="ti ti-package"></i> Stock
+                  </button>
+                </div>
+              </div>
+
+              <div class="product-grid" id="productGrid">
+                <!-- Products will be loaded here -->
+              </div>
+
+              <!-- Pagination Footer -->
+              <div class="product-grid-footer" id="productGridFooter">
+                <div class="product-grid-pagination" id="productGridPagination">
+                  <!-- Pagination will be rendered here -->
+                </div>
+                <div style="font-size: 12px; color: var(--muted);">
+                  Showing <span id="gridShowingCount">0</span> of <span id="gridTotalCount">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Product Display -->
             <div class="selected-product-display" id="selectedProductDisplay">
               <div class="selected-product-info">
                 <div class="selected-product-name" id="selectedProductName">No product selected</div>
@@ -590,7 +995,7 @@
                   Price: <span id="selectedProductPrice">-</span>
                 </div>
               </div>
-              <button class="btn btn-secondary" onclick="clearProductSelection()">
+              <button type="button" class="btn btn-secondary" onclick="clearProductSelection()">
                 <i class="ti ti-x"></i> Clear
               </button>
             </div>
@@ -820,20 +1225,275 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Load products for search
       loadMyProducts();
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.product-search-wrapper')) {
+          document.getElementById('productSearchResults').style.display = 'none';
+        }
+      });
     });
 
     // Product search functionality
     let productsCache = [];
+    let filteredProducts = [];
+    let currentViewMode = 'search'; // 'search' or 'grid'
+    let currentGridPage = 0;
+    let gridPageSize = 12; // Show 12 products per page
+    let currentSort = 'name';
+    let gridSearchTerm = '';
 
     async function loadMyProducts() {
       try {
-        // This would call your products API - adjust endpoint as needed
-        const response = await fetch('/api/seller/products');
+        // Call the correct voucher products API endpoint
+        const response = await fetch('/api/seller/vouchers/products');
         if (response.ok) {
           productsCache = await response.json();
+          console.log('Loaded products:', productsCache.length);
+
+          // Render product grid
+          renderProductGrid();
+
+          if (productsCache.length === 0) {
+            showAlert('Bạn chưa có sản phẩm nào có trạng thái Public. Vui lòng tạo sản phẩm trước khi tạo voucher.', 'warning');
+          }
+        } else {
+          console.error('Failed to load products:', response.status);
+          const errorText = await response.text();
+          console.error('Error details:', errorText);
+          showAlert('Không thể tải danh sách sản phẩm. Vui lòng thử lại.', 'error');
         }
       } catch (error) {
         console.error('Error loading products:', error);
+        showAlert('Lỗi khi tải danh sách sản phẩm: ' + error.message, 'error');
+      }
+    }
+
+    // Toggle between search and grid view
+    function toggleViewMode(mode) {
+      currentViewMode = mode;
+
+      const searchModeBtn = document.getElementById('searchModeBtn');
+      const gridModeBtn = document.getElementById('gridModeBtn');
+      const gridContainer = document.getElementById('productGridContainer');
+      const searchResults = document.getElementById('productSearchResults');
+
+      if (mode === 'grid') {
+        // Show grid view
+        gridContainer.classList.add('active');
+        gridModeBtn.classList.add('active');
+        searchModeBtn.classList.remove('active');
+        searchResults.style.display = 'none';
+
+        // Reset grid state when opening
+        currentGridPage = 0;
+        gridSearchTerm = '';
+        document.getElementById('productGridSearchInput').value = '';
+
+        // Render grid
+        renderProductGrid();
+      } else {
+        // Show search view
+        gridContainer.classList.remove('active');
+        searchModeBtn.classList.add('active');
+        gridModeBtn.classList.remove('active');
+      }
+    }
+
+    // Render product grid
+    function renderProductGrid() {
+      const gridElement = document.getElementById('productGrid');
+      const countElement = document.getElementById('productGridCount');
+
+      if (!gridElement) return;
+
+      // Apply filter and sort
+      filteredProducts = productsCache.filter(p => {
+        if (!gridSearchTerm) return true;
+        const searchLower = gridSearchTerm.toLowerCase();
+        return p.name.toLowerCase().includes(searchLower) ||
+               p.productId.toString().includes(searchLower);
+      });
+
+      // Sort products
+      sortProducts(filteredProducts, currentSort);
+
+      if (filteredProducts.length === 0) {
+        gridElement.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted);">
+            <i class="ti ti-package-off" style="font-size: 48px; margin-bottom: 12px; display: block;"></i>
+            <h4>${productsCache.length === 0 ? 'Chưa có sản phẩm nào' : 'Không tìm thấy sản phẩm'}</h4>
+            <p style="font-size: 14px; margin-top: 8px;">
+              ${productsCache.length === 0
+                ? 'Tạo sản phẩm với status "Public" để bắt đầu tạo voucher'
+                : 'Thử tìm kiếm với từ khóa khác'}
+            </p>
+          </div>
+        `;
+        countElement.textContent = '(0 products)';
+        document.getElementById('productGridFooter').style.display = 'none';
+        return;
+      }
+
+      // Calculate pagination
+      const totalPages = Math.ceil(filteredProducts.length / gridPageSize);
+      const startIdx = currentGridPage * gridPageSize;
+      const endIdx = Math.min(startIdx + gridPageSize, filteredProducts.length);
+      const pageProducts = filteredProducts.slice(startIdx, endIdx);
+
+      // Update counts
+      countElement.textContent = `(${filteredProducts.length} products)`;
+      document.getElementById('gridTotalCount').textContent = filteredProducts.length;
+      document.getElementById('gridShowingCount').textContent = `${startIdx + 1}-${endIdx}`;
+      document.getElementById('productGridFooter').style.display = 'flex';
+
+      // Render products
+      gridElement.innerHTML = pageProducts.map(p => `
+        <div class="product-card ${selectedProductId === p.productId ? 'selected' : ''}"
+             onclick="selectProductFromGrid(${p.productId}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">
+          <div class="product-card-badge">${p.status || 'Public'}</div>
+          <div class="product-card-name">${p.name}</div>
+          <div class="product-card-meta">
+            <div class="product-card-meta-row">
+              <span>ID: ${p.productId}</span>
+              ${p.quantity ? `<span>Stock: ${p.quantity}</span>` : ''}
+            </div>
+            <div class="product-card-price">${formatCurrency(p.price)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      // Render pagination
+      renderGridPagination(totalPages);
+    }
+
+    // Sort products
+    function sortProducts(products, sortType) {
+      switch(sortType) {
+        case 'name':
+          products.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'price-low':
+          products.sort((a, b) => (a.price || 0) - (b.price || 0));
+          break;
+        case 'price-high':
+          products.sort((a, b) => (b.price || 0) - (a.price || 0));
+          break;
+        case 'stock':
+          products.sort((a, b) => (b.quantity || 0) - (a.quantity || 0));
+          break;
+      }
+    }
+
+    // Sort product grid
+    function sortProductGrid(sortType) {
+      currentSort = sortType;
+      currentGridPage = 0; // Reset to first page
+
+      // Update active button
+      document.querySelectorAll('.grid-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.sort === sortType) {
+          btn.classList.add('active');
+        }
+      });
+
+      renderProductGrid();
+    }
+
+    // Filter product grid
+    function filterProductGrid() {
+      gridSearchTerm = document.getElementById('productGridSearchInput').value;
+      currentGridPage = 0; // Reset to first page
+      renderProductGrid();
+    }
+
+    // Render pagination
+    function renderGridPagination(totalPages) {
+      const paginationElement = document.getElementById('productGridPagination');
+
+      if (totalPages <= 1) {
+        paginationElement.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+
+      // Previous button
+      html += `
+        <button class="grid-page-btn" ${currentGridPage === 0 ? 'disabled' : ''}
+                onclick="changeGridPage(${currentGridPage - 1})">
+          <i class="ti ti-chevron-left"></i>
+        </button>
+      `;
+
+      // Page numbers (show max 5 pages)
+      const maxVisible = 5;
+      let startPage = Math.max(0, currentGridPage - Math.floor(maxVisible / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisible);
+
+      if (endPage - startPage < maxVisible) {
+        startPage = Math.max(0, endPage - maxVisible);
+      }
+
+      if (startPage > 0) {
+        html += `<button class="grid-page-btn" onclick="changeGridPage(0)">1</button>`;
+        if (startPage > 1) {
+          html += `<span style="padding: 0 4px;">...</span>`;
+        }
+      }
+
+      for (let i = startPage; i < endPage; i++) {
+        html += `
+          <button class="grid-page-btn ${i === currentGridPage ? 'active' : ''}"
+                  onclick="changeGridPage(${i})">
+            ${i + 1}
+          </button>
+        `;
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          html += `<span style="padding: 0 4px;">...</span>`;
+        }
+        html += `<button class="grid-page-btn" onclick="changeGridPage(${totalPages - 1})">${totalPages}</button>`;
+      }
+
+      // Next button
+      html += `
+        <button class="grid-page-btn" ${currentGridPage >= totalPages - 1 ? 'disabled' : ''}
+                onclick="changeGridPage(${currentGridPage + 1})">
+          <i class="ti ti-chevron-right"></i>
+        </button>
+      `;
+
+      paginationElement.innerHTML = html;
+    }
+
+    // Change grid page
+    function changeGridPage(page) {
+      currentGridPage = page;
+      renderProductGrid();
+
+      // Scroll to top of grid
+      document.getElementById('productGrid').scrollTop = 0;
+    }
+
+    // Select product from grid
+    function selectProductFromGrid(productId, productName, price) {
+      selectProduct(productId, productName, price);
+
+      // Close grid view and switch to search mode
+      toggleViewMode('search');
+
+      // Update product search input
+      document.getElementById('productSearchInput').value = productName;
+    }
+
+    // Show search results
+    function showSearchResults() {
+      if (currentViewMode === 'search') {
+        searchProducts();
       }
     }
 
@@ -846,13 +1506,25 @@
         return;
       }
 
+      // Show loading state
+      if (productsCache.length === 0) {
+        resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--muted);"><i class="ti ti-loader"></i> Loading products...</div>';
+        resultsDiv.style.display = 'block';
+        return;
+      }
+
       const filtered = productsCache.filter(p =>
         p.name.toLowerCase().includes(searchTerm) ||
         p.productId.toString().includes(searchTerm)
       );
 
       if (filtered.length === 0) {
-        resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--muted);">No products found</div>';
+        resultsDiv.innerHTML = `
+          <div style="padding: 20px; text-align: center; color: var(--muted);">
+            <i class="ti ti-search-off" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
+            <div>Không tìm thấy sản phẩm</div>
+            <div style="font-size: 12px; margin-top: 4px;">Thử tìm kiếm với từ khóa khác</div>
+          </div>`;
         resultsDiv.style.display = 'block';
         return;
       }
@@ -865,6 +1537,8 @@
           <div style="font-weight: 600; margin-bottom: 4px;">${p.name}</div>
           <div style="font-size: 12px; color: var(--muted);">
             ID: ${p.productId} | Giá: ${formatCurrency(p.price)}
+            ${p.quantity ? `| Tồn kho: ${p.quantity}` : ''}
+            <span style="color: #10b981; margin-left: 8px;">● ${p.status || 'Active'}</span>
           </div>
         </div>
       `).join('');
@@ -882,6 +1556,14 @@
       document.getElementById('productSearchResults').style.display = 'none';
       document.getElementById('productSearchInput').value = productName;
 
+      // Update grid cards to show selected state
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.classList.remove('selected');
+        if (card.onclick && card.onclick.toString().includes(`selectProductFromGrid(${productId},`)) {
+          card.classList.add('selected');
+        }
+      });
+
       // Load vouchers for this product
       loadVouchers();
     }
@@ -890,6 +1572,12 @@
       selectedProductId = null;
       document.getElementById('selectedProductDisplay').classList.remove('active');
       document.getElementById('productSearchInput').value = '';
+
+      // Update grid cards to remove selected state
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
       document.getElementById('voucherListContent').innerHTML = `
         <div class="empty-state">
           <i class="ti ti-ticket-off"></i>

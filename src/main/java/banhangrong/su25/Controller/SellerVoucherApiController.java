@@ -1,0 +1,522 @@
+package banhangrong.su25.Controller;
+
+import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.Vouchers;
+import banhangrong.su25.Entity.VoucherRedemptions;
+import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Repository.VouchersRepository;
+import banhangrong.su25.Repository.VoucherRedemptionsRepository;
+import banhangrong.su25.Repository.ProductsRepository;
+import banhangrong.su25.service.VoucherService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * Seller API Controller for Voucher Management
+ * Handles all API endpoints for seller voucher operations
+ */
+@RestController
+@RequestMapping("/api/seller/vouchers")
+public class SellerVoucherApiController {
+
+    private final VoucherService voucherService;
+    private final VouchersRepository vouchersRepository;
+    private final VoucherRedemptionsRepository redemptionsRepository;
+    private final ProductsRepository productsRepository;
+    private final UsersRepository usersRepository;
+
+    public SellerVoucherApiController(VoucherService voucherService,
+                                     VouchersRepository vouchersRepository,
+                                     VoucherRedemptionsRepository redemptionsRepository,
+                                     ProductsRepository productsRepository,
+                                     UsersRepository usersRepository) {
+        this.voucherService = voucherService;
+        this.vouchersRepository = vouchersRepository;
+        this.redemptionsRepository = redemptionsRepository;
+        this.productsRepository = productsRepository;
+        this.usersRepository = usersRepository;
+    }
+
+    /**
+     * Get current authenticated seller
+     */
+    private Users getCurrentSeller() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            return usersRepository.findByUsername(auth.getName()).orElse(null);
+        }
+        return null;
+    }
+
+    /**
+     * Voucher DTO with product information
+     */
+    public static class VoucherWithProductDto {
+        public Long voucherId;
+        public String code;
+        public String discountType;
+        public BigDecimal discountValue;
+        public BigDecimal minOrder;
+        public LocalDateTime startAt;
+        public LocalDateTime endAt;
+        public Integer maxUses;
+        public Integer maxUsesPerUser;
+        public Integer usedCount;
+        public Integer remainingUses;
+        public String status;
+        public LocalDateTime createdAt;
+        public LocalDateTime updatedAt;
+        public ProductInfo product;
+
+        public static class ProductInfo {
+            public Long productId;
+            public String name;
+            public String imageUrl;
+        }
+    }
+
+    /**
+     * Get all vouchers for current seller
+     */
+    @GetMapping
+    public ResponseEntity<?> getSellerVouchers(
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            List<Vouchers> vouchers;
+
+            if (productId != null) {
+                // Get vouchers for specific product
+                if (search != null && !search.trim().isEmpty()) {
+                    vouchers = vouchersRepository.findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByUpdatedAtDesc(
+                        seller.getUserId(), productId, search.trim());
+                } else {
+                    vouchers = vouchersRepository.findBySellerIdAndProductIdOrderByUpdatedAtDesc(
+                        seller.getUserId(), productId);
+                }
+            } else {
+                // Get all vouchers for seller
+                vouchers = vouchersRepository.findBySellerIdOrderByUpdatedAtDesc(seller.getUserId());
+
+                if (search != null && !search.trim().isEmpty()) {
+                    String searchLower = search.trim().toLowerCase();
+                    vouchers = vouchers.stream()
+                        .filter(v -> v.getCode().toLowerCase().contains(searchLower))
+                        .collect(Collectors.toList());
+                }
+            }
+
+            // Filter by status
+            if (status != null && !status.trim().isEmpty()) {
+                vouchers = vouchers.stream()
+                    .filter(v -> status.equalsIgnoreCase(v.getStatus()))
+                    .collect(Collectors.toList());
+            }
+
+            // Convert to DTO with product info
+            List<VoucherWithProductDto> result = vouchers.stream().map(v -> {
+                VoucherWithProductDto dto = new VoucherWithProductDto();
+                dto.voucherId = v.getVoucherId();
+                dto.code = v.getCode();
+                dto.discountType = v.getDiscountType();
+                dto.discountValue = v.getDiscountValue();
+                dto.minOrder = v.getMinOrder();
+                dto.startAt = v.getStartAt();
+                dto.endAt = v.getEndAt();
+                dto.maxUses = v.getMaxUses();
+                dto.maxUsesPerUser = v.getMaxUsesPerUser();
+                dto.usedCount = v.getUsedCount();
+                dto.status = v.getStatus();
+                dto.createdAt = v.getCreatedAt();
+                dto.updatedAt = v.getUpdatedAt();
+
+                // Calculate remaining uses
+                if (v.getMaxUses() != null) {
+                    int used = v.getUsedCount() != null ? v.getUsedCount() : 0;
+                    dto.remainingUses = Math.max(0, v.getMaxUses() - used);
+                }
+
+                // Get product info
+                productsRepository.findById(v.getProductId()).ifPresent(p -> {
+                    VoucherWithProductDto.ProductInfo pInfo = new VoucherWithProductDto.ProductInfo();
+                    pInfo.productId = p.getProductId();
+                    pInfo.name = p.getName();
+                    // Get product image would go here
+                    dto.product = pInfo;
+                });
+
+                return dto;
+            }).collect(Collectors.toList());
+
+            // Apply pagination
+            int start = page * size;
+            int end = Math.min(start + size, result.size());
+            List<VoucherWithProductDto> paginatedResult = start < result.size()
+                ? result.subList(start, end)
+                : List.of();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", paginatedResult);
+            response.put("totalElements", result.size());
+            response.put("totalPages", (int) Math.ceil((double) result.size() / size));
+            response.put("currentPage", page);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi lấy danh sách voucher: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get voucher by ID
+     */
+    @GetMapping("/{voucherId}")
+    public ResponseEntity<?> getVoucher(@PathVariable Long voucherId) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            return vouchersRepository.findById(voucherId)
+                .map(v -> {
+                    if (!v.getSellerId().equals(seller.getUserId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Bạn không có quyền xem voucher này");
+                    }
+
+                    VoucherWithProductDto dto = new VoucherWithProductDto();
+                    dto.voucherId = v.getVoucherId();
+                    dto.code = v.getCode();
+                    dto.discountType = v.getDiscountType();
+                    dto.discountValue = v.getDiscountValue();
+                    dto.minOrder = v.getMinOrder();
+                    dto.startAt = v.getStartAt();
+                    dto.endAt = v.getEndAt();
+                    dto.maxUses = v.getMaxUses();
+                    dto.maxUsesPerUser = v.getMaxUsesPerUser();
+                    dto.usedCount = v.getUsedCount();
+                    dto.status = v.getStatus();
+                    dto.createdAt = v.getCreatedAt();
+                    dto.updatedAt = v.getUpdatedAt();
+
+                    if (v.getMaxUses() != null) {
+                        int used = v.getUsedCount() != null ? v.getUsedCount() : 0;
+                        dto.remainingUses = Math.max(0, v.getMaxUses() - used);
+                    }
+
+                    return ResponseEntity.ok(dto);
+                })
+                .orElse(ResponseEntity.notFound().build());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi lấy thông tin voucher: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Create voucher request
+     */
+    public static class CreateVoucherRequest {
+        public Long productId;
+        public String code;
+        public String discountType;
+        public BigDecimal discountValue;
+        public BigDecimal minOrder;
+        public LocalDateTime startAt;
+        public LocalDateTime endAt;
+        public Integer maxUses;
+        public Integer maxUsesPerUser;
+    }
+
+    /**
+     * Create a new voucher
+     */
+    @PostMapping
+    public ResponseEntity<?> createVoucher(@RequestBody CreateVoucherRequest request) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            // Validate product ownership
+            Products product = productsRepository.findById(request.productId)
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
+
+            if (!product.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền tạo voucher cho sản phẩm này");
+            }
+
+            // Create voucher
+            Vouchers voucher = new Vouchers();
+            voucher.setSellerId(seller.getUserId());
+            voucher.setProductId(request.productId);
+            voucher.setCode(request.code.trim().toUpperCase());
+            voucher.setDiscountType(request.discountType.toUpperCase());
+            voucher.setDiscountValue(request.discountValue);
+            voucher.setMinOrder(request.minOrder);
+            voucher.setStartAt(request.startAt);
+            voucher.setEndAt(request.endAt);
+            voucher.setMaxUses(request.maxUses);
+            voucher.setMaxUsesPerUser(request.maxUsesPerUser);
+            voucher.setStatus("active");
+
+            Vouchers saved = voucherService.createVoucher(voucher);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi tạo voucher: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Update a voucher
+     */
+    @PutMapping("/{voucherId}")
+    public ResponseEntity<?> updateVoucher(@PathVariable Long voucherId,
+                                          @RequestBody CreateVoucherRequest request) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            Vouchers existing = vouchersRepository.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+            if (!existing.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền chỉnh sửa voucher này");
+            }
+
+            // Update voucher
+            Vouchers updated = new Vouchers();
+            updated.setCode(request.code.trim().toUpperCase());
+            updated.setDiscountType(request.discountType.toUpperCase());
+            updated.setDiscountValue(request.discountValue);
+            updated.setMinOrder(request.minOrder);
+            updated.setStartAt(request.startAt);
+            updated.setEndAt(request.endAt);
+            updated.setMaxUses(request.maxUses);
+            updated.setMaxUsesPerUser(request.maxUsesPerUser);
+            updated.setStatus(existing.getStatus());
+
+            Vouchers saved = voucherService.updateVoucher(voucherId, updated);
+
+            return ResponseEntity.ok(saved);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi cập nhật voucher: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Delete/deactivate a voucher
+     */
+    @DeleteMapping("/{voucherId}")
+    public ResponseEntity<?> deleteVoucher(@PathVariable Long voucherId) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            Vouchers voucher = vouchersRepository.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+            if (!voucher.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền xóa voucher này");
+            }
+
+            // Check if voucher has been used
+            long usageCount = redemptionsRepository.countByVoucherId(voucherId);
+            if (usageCount > 0) {
+                // Don't delete, just deactivate
+                voucher.setStatus("inactive");
+                vouchersRepository.save(voucher);
+                return ResponseEntity.ok("Voucher đã được vô hiệu hóa");
+            }
+
+            vouchersRepository.deleteById(voucherId);
+            return ResponseEntity.ok("Voucher đã được xóa");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi xóa voucher: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get voucher redemption history
+     */
+    @GetMapping("/{voucherId}/redemptions")
+    public ResponseEntity<?> getRedemptions(@PathVariable Long voucherId) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            Vouchers voucher = vouchersRepository.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+            if (!voucher.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền xem thông tin này");
+            }
+
+            List<VoucherRedemptions> redemptions = redemptionsRepository
+                .findByVoucherIdOrderByCreatedAtDesc(voucherId);
+
+            return ResponseEntity.ok(redemptions);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi lấy lịch sử sử dụng: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get voucher statistics
+     */
+    @GetMapping("/{voucherId}/statistics")
+    public ResponseEntity<?> getStatistics(@PathVariable Long voucherId) {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            Vouchers voucher = vouchersRepository.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+
+            if (!voucher.getSellerId().equals(seller.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Bạn không có quyền xem thông tin này");
+            }
+
+            VoucherService.VoucherStatistics stats = voucherService.getVoucherStatistics(voucherId);
+
+            return ResponseEntity.ok(stats);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi lấy thống kê: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get seller's products for voucher creation
+     */
+    @GetMapping("/products")
+    public ResponseEntity<?> getSellerProducts() {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            List<Products> products = productsRepository.findBySellerId(seller.getUserId());
+
+            System.out.println("Seller ID: " + seller.getUserId() + ", Found products: " + products.size());
+
+            List<Map<String, Object>> result = products.stream()
+                .filter(p -> {
+                    // Include all products, not just Public status
+                    boolean isValidStatus = p.getStatus() != null &&
+                        (p.getStatus().equalsIgnoreCase("Public") ||
+                         p.getStatus().equalsIgnoreCase("public"));
+                    System.out.println("Product: " + p.getName() + ", Status: " + p.getStatus() + ", Valid: " + isValidStatus);
+                    return isValidStatus;
+                })
+                .map(p -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("productId", p.getProductId());
+                    map.put("name", p.getName());
+                    map.put("price", p.getPrice());
+                    map.put("status", p.getStatus());
+                    map.put("quantity", p.getQuantity());
+                    return map;
+                })
+                .collect(Collectors.toList());
+
+            System.out.println("Returning " + result.size() + " products to frontend");
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi lấy danh sách sản phẩm: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get dashboard statistics for seller
+     */
+    @GetMapping("/dashboard")
+    public ResponseEntity<?> getDashboard() {
+        try {
+            Users seller = getCurrentSeller();
+            if (seller == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập");
+            }
+
+            List<Vouchers> allVouchers = vouchersRepository.findBySellerIdOrderByUpdatedAtDesc(seller.getUserId());
+
+            long activeCount = allVouchers.stream().filter(v -> "active".equalsIgnoreCase(v.getStatus())).count();
+            long inactiveCount = allVouchers.stream().filter(v -> "inactive".equalsIgnoreCase(v.getStatus())).count();
+            long expiredCount = allVouchers.stream().filter(v -> "expired".equalsIgnoreCase(v.getStatus())).count();
+
+            int totalRedemptions = allVouchers.stream()
+                .mapToInt(v -> v.getUsedCount() != null ? v.getUsedCount() : 0)
+                .sum();
+
+            Map<String, Object> dashboard = new HashMap<>();
+            dashboard.put("totalVouchers", allVouchers.size());
+            dashboard.put("activeVouchers", activeCount);
+            dashboard.put("inactiveVouchers", inactiveCount);
+            dashboard.put("expiredVouchers", expiredCount);
+            dashboard.put("totalRedemptions", totalRedemptions);
+
+            return ResponseEntity.ok(dashboard);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi lấy thống kê: " + e.getMessage());
+        }
+    }
+}
+
