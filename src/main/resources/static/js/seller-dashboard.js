@@ -674,14 +674,18 @@
             document.getElementById('pm_description').value = p.description ?? '';
             const st = document.getElementById('pm_status');
             if (st) {
-                const stVal = (p.status || '').toString().toLowerCase();
+                const raw = (p.status || '').toString().toLowerCase().trim();
+                const stVal = raw === 'canceled' ? 'cancelled' : raw; // normalize US -> UK spelling
                 let statusText = 'Pending';
                 let badgeClass = 'badge';
                 if (stVal === 'public') { statusText = 'Public'; badgeClass = 'badge pill good'; }
                 else if (stVal === 'hidden') { statusText = 'Hidden'; badgeClass = 'badge'; }
+                else if (stVal === 'pending') { statusText = 'Pending'; badgeClass = 'badge'; }
+                else if (stVal === 'cancelled') { statusText = 'Cancelled'; badgeClass = 'badge pill danger'; }
+                else { statusText = (p.status || 'Pending'); badgeClass = 'badge'; }
                 st.textContent = statusText;
                 st.className = badgeClass;
-                st.dataset.status = stVal;
+                st.dataset.status = stVal || 'pending';
             }
             __originalProduct = normalizeProductObj(p);
         }

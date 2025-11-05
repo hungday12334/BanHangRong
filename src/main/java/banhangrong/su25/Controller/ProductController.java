@@ -1,9 +1,7 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Products;
-import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Repository.ProductsRepository;
-import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,34 +11,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductsRepository productsRepository;
-    private final ProductImagesRepository productImagesRepository;
-    private final banhangrong.su25.Repository.ProductLicensesRepository productLicensesRepository;
-
-    public ProductController(ProductsRepository productsRepository, ProductImagesRepository productImagesRepository, banhangrong.su25.Repository.ProductLicensesRepository productLicensesRepository) {
-        this.productsRepository = productsRepository;
-        this.productImagesRepository = productImagesRepository;
-        this.productLicensesRepository = productLicensesRepository;
-    }
+    public ProductController(ProductsRepository productsRepository) { this.productsRepository = productsRepository; }
 
     // GET /api/products?sellerId=1 → Lấy products (có thể filter theo seller)
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(name = "sellerId", required = false) Long sellerId) {
         if (sellerId != null) {
-            return ResponseEntity.ok(productsRepository.findBySellerId(sellerId));
+            List<Products> items = productsRepository.findBySellerId(sellerId)
+                    .stream()
+                    .map(ProductController::ensureStandardStatus)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(items);
         }
-        return ResponseEntity.ok(productsRepository.findAll());
+        List<Products> all = productsRepository.findAll()
+                .stream()
+                .map(ProductController::ensureStandardStatus)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(all);
     }
 
     // GET /api/products/{id} → Lấy product by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        return productsRepository.findById(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
+    return productsRepository.findById(id)
+        .<ResponseEntity<?>>map(p -> ResponseEntity.ok(ensureStandardStatus(p)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -176,5 +176,26 @@ public class ProductController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    // --- Helpers ---
+    private static Products ensureStandardStatus(Products p) {
+        String st = p.getStatus();
+        st = (st == null) ? null : st.trim().toLowerCase();
+        if (st == null || st.isBlank()) {
+            // Derive from isActive/wasPublic when status is missing
+            Boolean active = p.getIsActive();
+            Boolean wasPub = p.getWasPublic();
+            if (Boolean.TRUE.equals(active)) st = "public";
+            else if (Boolean.TRUE.equals(wasPub)) st = "hidden"; // was public before but currently not active
+            else st = "pending";
+        } else {
+            // Normalize synonyms that might exist in legacy data
+            if ("active".equals(st)) st = "public";
+            if ("inactive".equals(st)) st = "hidden";
+            if ("canceled".equals(st)) st = "cancelled"; // unify spelling
+        }
+        p.setStatus(st);
+        return p;
     }
 }
