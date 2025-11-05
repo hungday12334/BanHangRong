@@ -5,20 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(license-management): implement category licenses feature for tracking license assignments">
-      <change afterPath="$PROJECT_DIR$/CRITICAL_SESSION_DEBUG.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_SESSION_LOST.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FIX_WEBSOCKET_ERROR.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WEBSOCKET_IMPLEMENTED.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clear-cache-guide.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test-session-debug.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CATEGORY_ADVANCED_FILTERS_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CATEGORY_FILTERS_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CATEGORY_PAGINATION_APPLIED.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE_FILTERS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TEST_CATEGORY_FILTERS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/UPDATE_FILTERS_POSITION.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/seller-dashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/seller-dashboard.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/fragments/scripts.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,7 +33,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="MinhHQ" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -87,56 +83,56 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Database Script.add_sample_products.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.add_vouchers.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.add_withdrawals.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.data_v2.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.fix_old_constraint.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.fix_review_constraint.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.modify_review_system.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.quick_create_seller_test.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.review_system_complete.sql.executor&quot;: &quot;Run&quot;,
-    &quot;Database Script.set_password.sql.executor&quot;: &quot;Run&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Maven.su25 [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.su25 [package].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
-    &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;#6 on MinhHQ&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;/Users/hoangquangminh/Library/Application Support/JetBrains/IntelliJIdea2025.2/node/versions/24.11.0/bin/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Database Script.add_sample_products.sql.executor": "Run",
+    "Database Script.add_vouchers.sql.executor": "Run",
+    "Database Script.add_withdrawals.sql.executor": "Run",
+    "Database Script.data_v2.sql.executor": "Run",
+    "Database Script.fix_old_constraint.sql.executor": "Run",
+    "Database Script.fix_review_constraint.sql.executor": "Run",
+    "Database Script.modify_review_system.sql.executor": "Run",
+    "Database Script.quick_create_seller_test.sql.executor": "Run",
+    "Database Script.review_system_complete.sql.executor": "Run",
+    "Database Script.set_password.sql.executor": "Run",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Maven.su25 [clean].executor": "Run",
+    "Maven.su25 [package].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "Spring Boot.Su25Application.executor": "Run",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "MinhHQ",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "/Users/hoangquangminh/Library/Application Support/JetBrains/IntelliJIdea2025.2/node/versions/24.11.0/bin/node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ],
-    &quot;RunConfigurationTargetLRU&quot;: [
-      &quot;53b38385-a361-4b09-b3fc-e28dbd7b3e5c&quot;
+    "RunConfigurationTargetLRU": [
+      "53b38385-a361-4b09-b3fc-e28dbd7b3e5c"
     ]
   }
-}</component>
+}]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>

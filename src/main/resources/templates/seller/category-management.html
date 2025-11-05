@@ -6,8 +6,9 @@
     <title>Category Management - Seller Dashboard</title>
     <link rel="preload" href="/css/seller-dashboard.css?v=2" as="style" />
     <link rel="stylesheet" href="/css/seller-dashboard.css?v=2" />
-    <link rel="stylesheet" href="/css/category-management.css?v=1" />
+    <link rel="stylesheet" href="/css/category-management.css?v=3" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <!--    <link rel="stylesheet" href="/css/styles.min.css">-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
     <link rel="icon" type="image/png" href="/img/kua654ms.png" />
 </head>
@@ -55,6 +56,7 @@
                         <div class="stat-card-value" th:text="${recentCategories ?: 0}">0</div>
                     </div>
                 </div>
+
 
                 <!-- Alerts -->
                 <div class="alert-container">
@@ -138,6 +140,107 @@
                             <button onclick="deleteSelected()" id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">
                                 <i class="ti ti-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Filters -->
+                    <div class="card" style="margin: 20px 0;">
+                        <div class="card-body">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i class="ti ti-filter"></i> Advanced Filters
+                                </h3>
+                                <button class="btn btn-secondary" id="toggleFilters" style="padding: 8px 16px;" onclick="toggleAdvancedFilters()">
+                                    <i class="ti ti-chevron-down"></i> <span>Show</span>
+                                </button>
+                            </div>
+
+                            <form id="filterForm" style="display: none;" th:action="@{/seller/categories}" method="get">
+                                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                                    <!-- Category ID -->
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                            <i class="ti ti-hash"></i> Category ID
+                                        </label>
+                                        <input type="number" name="categoryId" class="form-control" placeholder="Enter Category ID" th:value="${filterCategoryId}">
+                                    </div>
+
+                                    <!-- Category Name -->
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                            <i class="ti ti-tag"></i> Category Name
+                                        </label>
+                                        <input type="text" name="categoryName" class="form-control" placeholder="Search by name" th:value="${filterCategoryName}">
+                                    </div>
+
+                                    <!-- Product Count From -->
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                            <i class="ti ti-package"></i> Products From
+                                        </label>
+                                        <input type="number" name="productCountFrom" class="form-control" placeholder="Min products" min="0" th:value="${filterProductCountFrom}">
+                                    </div>
+
+                                    <!-- Product Count To -->
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                            <i class="ti ti-package"></i> Products To
+                                        </label>
+                                        <input type="number" name="productCountTo" class="form-control" placeholder="Max products" min="0" th:value="${filterProductCountTo}">
+                                    </div>
+
+                                    <!-- Date From -->
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                            <i class="ti ti-calendar"></i> From Date
+                                        </label>
+                                        <input type="date" name="fromDate" class="form-control" th:value="${filterFromDate}">
+                                    </div>
+
+                                    <!-- Date To -->
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                                            <i class="ti ti-calendar"></i> To Date
+                                        </label>
+                                        <input type="date" name="toDate" class="form-control" th:value="${filterToDate}">
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ti ti-search"></i> Apply Filters
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="clearFilters" onclick="clearCategoryFilters()">
+                                        <i class="ti ti-x"></i> Clear Filters
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Filter Status Display -->
+                    <div th:if="${filterCategoryId != null || filterCategoryName != null || filterProductCountFrom != null || filterProductCountTo != null || filterFromDate != null || filterToDate != null}"
+                         class="card" style="margin-bottom: 16px; background: color-mix(in oklab, var(--accent) 8%, var(--bg-elev));">
+                        <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <i class="ti ti-filter" style="font-size: 20px;"></i>
+                                <span style="font-weight: 500;">Active filters:</span>
+                                <span th:if="${filterCategoryId != null}" class="badge">ID: <span th:text="${filterCategoryId}">0</span></span>
+                                <span th:if="${filterCategoryName != null}" class="badge">Name: <span th:text="${filterCategoryName}">name</span></span>
+                                <span th:if="${filterProductCountFrom != null || filterProductCountTo != null}" class="badge">
+                                    Products:
+                                    <span th:if="${filterProductCountFrom != null}" th:text="${filterProductCountFrom}">0</span>
+                                    <span th:if="${filterProductCountFrom == null}">0</span>
+                                    -
+                                    <span th:if="${filterProductCountTo != null}" th:text="${filterProductCountTo}">∞</span>
+                                    <span th:if="${filterProductCountTo == null}">∞</span>
+                                </span>
+                                <span th:if="${filterFromDate != null}" class="badge">From: <span th:text="${filterFromDate}">date</span></span>
+                                <span th:if="${filterToDate != null}" class="badge">To: <span th:text="${filterToDate}">date</span></span>
+                            </div>
+                            <a href="/seller/categories" class="btn btn-secondary" style="padding: 8px 16px;">
+                                <i class="ti ti-x"></i> Clear filters
+                            </a>
                         </div>
                     </div>
 
@@ -255,40 +358,9 @@
                             </tbody>
                         </table>
 
-                        <!-- Pagination (Review Style) -->
-                        <div class="pagination-wrapper" id="paginationWrapper">
-                            <!-- Previous Button -->
-                            <button type="button" class="pagination-btn prev-btn" id="prevBtn" onclick="goToPage(currentPage - 1)">
-                                <i class="ti ti-chevron-left"></i> Previous
-                            </button>
-
-                            <!-- Page Numbers -->
-                            <div style="display: flex; gap: 4px;" id="pageNumbers">
-                                <!-- Generated by JavaScript -->
-                            </div>
-
-                            <!-- Next Button -->
-                            <button type="button" class="pagination-btn next-btn" id="nextBtn" onclick="goToPage(currentPage + 1)">
-                                Next <i class="ti ti-chevron-right"></i>
-                            </button>
-
-                            <!-- Page Info -->
-                            <span class="pagination-info">
-                                Page <b id="currentPageNum">1</b> / <b id="totalPagesNum">1</b>
-                                (<span id="totalItemsNum">0</span> categories)
-                            </span>
-
-                            <!-- Page Size Selector -->
-                            <div class="page-size-selector">
-                                <label for="pageSizeSelect">Show:</label>
-                                <select id="pageSizeSelect" onchange="changePageSize()">
-                                    <option value="5" selected>5</option>
-                                    <option value="10">10</option>
-                                    <option value="15">15</option>
-                                    <option value="20">20</option>
-                                    <option value="50">50</option>
-                                </select>
-                            </div>
+                        <!-- Pagination (Products Style) -->
+                        <div class="products-pagination" id="categoryPaginationWrapper" style="display: none;">
+                            <!-- Pagination will be generated by JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -588,8 +660,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Products in category: <span id="modalCategoryName"></span></h5>
-
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">&times;</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('viewProductsModal')">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="productsListContent" class="loading-state">
@@ -598,7 +669,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('viewProductsModal')">Close</button>
             </div>
         </div>
     </div>
@@ -606,80 +677,27 @@
 
 <!-- License Manager Modal -->
 <div id="licenseManagerModal" class="modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="ti ti-license"></i> License Management
+                    <i class="ti ti-license"></i> Category Products Management
                 </h5>
                 <button type="button" class="btn btn-secondary" onclick="closeModal('licenseManagerModal')">&times;</button>
             </div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <!-- Add New License Form -->
-                <div class="license-add-section">
+                <!-- Available Products Section -->
+                <div class="available-products-section">
                     <h6 class="section-subtitle">
-                        <i class="ti ti-plus"></i> Add New License
+                        <i class="ti ti-package"></i> Your Products
+                        <span class="badge-count" id="availableProductsCount">(0)</span>
                     </h6>
-                    <div class="license-form">
-                        <div class="form-row">
-                            <div class="form-group" style="flex: 1;">
-                                <label for="newLicenseName">License Name <span class="text-danger">*</span></label>
-                                <input type="text" id="newLicenseName" class="form-control"
-                                       placeholder="e.g: Functional Food" required />
-                            </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label for="newLicenseCode">Code <span class="text-danger">*</span></label>
-                                <input type="text" id="newLicenseCode" class="form-control"
-                                       placeholder="e.g: FOOD_SUPPLEMENT" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="newLicenseDescription">Description</label>
-                            <textarea id="newLicenseDescription" class="form-control" rows="2"
-                                      placeholder="Description of requirements and regulations for products of this type..."></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group" style="flex: 1;">
-                                <label for="newLicenseIcon">Icon</label>
-                                <div class="icon-input-group">
-                                    <input type="text" id="newLicenseIcon" class="form-control"
-                                           placeholder="ti-leaf" value="ti-license"
-                                           onchange="updateLicenseIconPreview('new')" />
-                                    <div class="icon-preview" id="newLicenseIconPreview">
-                                        <i class="ti ti-license"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label for="newLicenseColor">Color</label>
-                                <div class="color-picker-wrapper">
-                                    <input type="color" id="newLicenseColor" class="form-control-color" value="#3b82f6"
-                                           onchange="document.getElementById('newLicenseColorHex').value = this.value" />
-                                    <input type="text" id="newLicenseColorHex" class="form-control" value="#3b82f6"
-                                           onchange="document.getElementById('newLicenseColor').value = this.value" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-primary" onclick="addNewLicense()">
-                                <i class="ti ti-plus"></i> Add License
-                            </button>
-                        </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <input type="text" id="productSearchInput" class="form-control"
+                               placeholder="🔍 Search products by name..."
+                               oninput="filterAvailableProducts()" />
                     </div>
-                </div>
-
-                <hr style="margin: 24px 0; border-color: var(--border);" />
-
-                <!-- License List -->
-                <div class="license-list-section">
-                    <h6 class="section-subtitle">
-                        <i class="ti ti-list"></i> Current Licenses
-                        <span class="badge-count" id="licenseCount">(0)</span>
-                    </h6>
-                    <div id="licenseListContainer" class="license-list">
+                    <div id="availableProductsContainer" class="available-products-list">
                         <!-- Will be populated by JavaScript -->
                     </div>
                 </div>
@@ -699,10 +717,269 @@
 <!-- Page-specific scripts -->
 <script>
     let bulkModeActive = false;
-    let currentFilter = 'all'; // Track current filter state
-    let currentPage = 1;
-    let pageSize = 5;
-    let totalPages = 1;
+    let currentFilter = 'all';
+    // Pagination variables for category list
+    let currentCategoryPage = 1;
+    const categoriesPerPage = 10;
+
+    // Store filtered rows globally
+    let cachedFilteredRows = [];
+
+    // ===== ADVANCED FILTERS FUNCTIONS =====
+
+    function toggleAdvancedFilters() {
+        const filterForm = document.getElementById('filterForm');
+        const toggleBtn = document.getElementById('toggleFilters');
+        const icon = toggleBtn.querySelector('i');
+        const text = toggleBtn.querySelector('span');
+
+        if (filterForm.style.display === 'none' || !filterForm.style.display) {
+            filterForm.style.display = 'block';
+            icon.classList.remove('ti-chevron-down');
+            icon.classList.add('ti-chevron-up');
+            text.textContent = 'Hide';
+        } else {
+            filterForm.style.display = 'none';
+            icon.classList.remove('ti-chevron-up');
+            icon.classList.add('ti-chevron-down');
+            text.textContent = 'Show';
+        }
+    }
+
+    function clearCategoryFilters() {
+        // Clear all filter inputs
+        document.querySelector('input[name="categoryId"]').value = '';
+        document.querySelector('input[name="categoryName"]').value = '';
+        document.querySelector('input[name="productCountFrom"]').value = '';
+        document.querySelector('input[name="productCountTo"]').value = '';
+        document.querySelector('input[name="fromDate"]').value = '';
+        document.querySelector('input[name="toDate"]').value = '';
+
+        // Redirect to clear URL params
+        window.location.href = '/seller/categories';
+    }
+
+    // Auto-expand filters if any filter is active
+    document.addEventListener('DOMContentLoaded', function() {
+        const hasActiveFilters = document.querySelector('.card[style*="color-mix"]');
+        if (hasActiveFilters) {
+            const filterForm = document.getElementById('filterForm');
+            const toggleBtn = document.getElementById('toggleFilters');
+            const icon = toggleBtn.querySelector('i');
+            const text = toggleBtn.querySelector('span');
+
+            filterForm.style.display = 'block';
+            icon.classList.remove('ti-chevron-down');
+            icon.classList.add('ti-chevron-up');
+            text.textContent = 'Hide';
+        }
+    });
+
+    // ===== END ADVANCED FILTERS FUNCTIONS =====
+
+    function initCategoryPagination() {
+        console.log('🔄 Initializing category display with pagination...');
+        refreshCategoryDisplay();
+    }
+
+    function getFilteredRows() {
+        const allRows = Array.from(document.querySelectorAll('.category-row'));
+        let filtered = allRows;
+
+        // Apply stat card filter
+        if (currentFilter === 'hasProducts') {
+            filtered = filtered.filter(row => {
+                const count = parseInt(row.getAttribute('data-product-count') || '0');
+                return count > 0;
+            });
+        } else if (currentFilter === 'recent') {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            filtered = filtered.filter(row => {
+                const dateStr = row.getAttribute('data-created');
+                if (!dateStr) return false;
+                return new Date(dateStr) >= sevenDaysAgo;
+            });
+        }
+
+        // Apply search filter
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        if (searchTerm) {
+            filtered = filtered.filter(row => {
+                const name = (row.getAttribute('data-name') || '').toLowerCase();
+                const desc = (row.getAttribute('data-description') || '').toLowerCase();
+                return name.includes(searchTerm) || desc.includes(searchTerm);
+            });
+        }
+
+        return filtered;
+    }
+
+    function refreshCategoryDisplay() {
+        console.log('📊 Refreshing category display - Page:', currentCategoryPage, 'Filter:', currentFilter);
+
+        // Get all rows
+        const allRows = document.querySelectorAll('.category-row');
+
+        // Get filtered rows
+        cachedFilteredRows = getFilteredRows();
+        const totalFiltered = cachedFilteredRows.length;
+
+        console.log('Total rows:', allRows.length, 'Filtered:', totalFiltered);
+
+        // Calculate pagination
+        const totalPages = totalFiltered > 0 ? Math.ceil(totalFiltered / categoriesPerPage) : 1;
+
+        // Ensure current page is valid
+        if (currentCategoryPage > totalPages) currentCategoryPage = totalPages;
+        if (currentCategoryPage < 1) currentCategoryPage = 1;
+
+        console.log('Total pages:', totalPages, 'Current page:', currentCategoryPage);
+
+        // Hide all rows first
+        allRows.forEach(row => row.style.display = 'none');
+
+        // Show rows for current page
+        if (totalFiltered > 0) {
+            const startIndex = (currentCategoryPage - 1) * categoriesPerPage;
+            const endIndex = Math.min(startIndex + categoriesPerPage, totalFiltered);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                cachedFilteredRows[i].style.display = '';
+            }
+
+            console.log(`Showing rows ${startIndex + 1} to ${endIndex} of ${totalFiltered}`);
+        }
+
+        // Update pagination UI
+        renderCategoryPagination(totalPages, totalFiltered);
+
+        // Update category count badge
+        updateCategoryCountBadge();
+    }
+
+    function renderCategoryPagination(totalPages, totalItems) {
+        const wrapper = document.getElementById('categoryPaginationWrapper');
+        if (!wrapper) {
+            console.warn('⚠️ Pagination wrapper not found');
+            return;
+        }
+
+        // Hide pagination if 0 items or only 1 page
+        if (totalItems === 0 || totalPages <= 1) {
+            wrapper.style.display = 'none';
+            console.log('📍 Hiding pagination - Total pages:', totalPages);
+            return;
+        }
+
+        // Show pagination
+        wrapper.style.display = 'flex';
+        console.log('📍 Showing pagination - Pages:', totalPages);
+
+        // Build pagination HTML (similar to products)
+        let paginationHTML = '';
+
+        // Previous button
+        paginationHTML += `
+            <button type="button" class="pagination-btn ${currentCategoryPage === 1 ? 'disabled' : ''}"
+                    onclick="goToCategoryPage(${currentCategoryPage - 1})"
+                    ${currentCategoryPage === 1 ? 'disabled' : ''}>
+                <i class="ti ti-chevron-left"></i> Trước
+            </button>
+        `;
+
+        // Page numbers
+        paginationHTML += '<div class="pagination-pages">';
+
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentCategoryPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // First page
+        if (startPage > 1) {
+            paginationHTML += `<button type="button" class="pagination-btn" onclick="goToCategoryPage(1)">1</button>`;
+            if (startPage > 2) {
+                paginationHTML += '<span class="pagination-ellipsis">...</span>';
+            }
+        }
+
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <button type="button" class="pagination-btn ${i === currentCategoryPage ? 'active' : ''}"
+                        onclick="goToCategoryPage(${i})">
+                    ${i}
+                </button>
+            `;
+        }
+
+        // Last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += '<span class="pagination-ellipsis">...</span>';
+            }
+            paginationHTML += `<button type="button" class="pagination-btn" onclick="goToCategoryPage(${totalPages})">${totalPages}</button>`;
+        }
+
+        paginationHTML += '</div>';
+
+        // Next button
+        paginationHTML += `
+            <button type="button" class="pagination-btn ${currentCategoryPage === totalPages ? 'disabled' : ''}"
+                    onclick="goToCategoryPage(${currentCategoryPage + 1})"
+                    ${currentCategoryPage === totalPages ? 'disabled' : ''}>
+                Sau <i class="ti ti-chevron-right"></i>
+            </button>
+        `;
+
+        // Page info
+        const startIndex = (currentCategoryPage - 1) * categoriesPerPage + 1;
+        const endIndex = Math.min(currentCategoryPage * categoriesPerPage, totalItems);
+        paginationHTML += `
+            <span class="pagination-info">
+                Hiển thị <strong>${startIndex}-${endIndex}</strong> / <strong>${totalItems}</strong> danh mục
+            </span>
+        `;
+
+        wrapper.innerHTML = paginationHTML;
+    }
+
+    function goToCategoryPage(page) {
+        const totalPages = cachedFilteredRows.length > 0 ? Math.ceil(cachedFilteredRows.length / categoriesPerPage) : 1;
+        if (page < 1 || page > totalPages) return;
+        if (page === currentCategoryPage) return;
+
+        console.log('🔄 Going to page:', page);
+        currentCategoryPage = page;
+        refreshCategoryDisplay();
+
+        // Scroll to top of category list
+        const categorySection = document.querySelector('.category-list-section');
+        if (categorySection) {
+            categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function updateCategoryCountBadge() {
+        const badge = document.getElementById('categoryCount');
+        if (badge) {
+            badge.textContent = `(${cachedFilteredRows.length})`;
+        }
+    }
+
+
+    // Initialize on page load
+    window.addEventListener('load', function() {
+        console.log('🚀 Page loaded, initializing category display...');
+        setTimeout(() => {
+            initCategoryPagination();
+        }, 100);
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         // Character counter for description fields
@@ -750,9 +1027,6 @@
     // ===== STAT CARD FILTER FUNCTIONS =====
 
     function setActiveStatCard(cardId) {
-        // Reset to first page and update pagination
-        currentPage = 1;
-        updatePagination();
         // Remove active class from all cards
         document.querySelectorAll('.stat-card').forEach(card => {
             card.classList.remove('active');
@@ -766,22 +1040,17 @@
 
     // Filter 1: Show all categories
     function filterByAll() {
+        console.log('🔄 Filter: Show all categories');
         currentFilter = 'all';
+        currentCategoryPage = 1;
         setActiveStatCard('statAllCategories');
 
         // Clear search box
         const searchInput = document.getElementById('searchInput');
         if (searchInput) searchInput.value = '';
 
-        // Show all rows
-        const rows = document.querySelectorAll('.category-row');
-        rows.forEach(row => {
-            row.style.display = '';
-        });
-
-        // Reset to first page and update pagination
-        currentPage = 1;
-        updatePagination();
+        // Refresh display
+        refreshCategoryDisplay();
 
         // Show notification
         showNotification('Displaying all categories', 'info');
@@ -789,49 +1058,33 @@
 
     // Filter 2: Show only categories with products
     function filterByHasProducts() {
+        console.log('🔄 Filter: Categories with products');
         currentFilter = 'hasProducts';
+        currentCategoryPage = 1;
         setActiveStatCard('statWithProducts');
 
         // Clear search box
         const searchInput = document.getElementById('searchInput');
         if (searchInput) searchInput.value = '';
 
-        const rows = document.querySelectorAll('.category-row');
-        let visibleCount = 0;
+        // Refresh display
+        refreshCategoryDisplay();
 
-        rows.forEach(row => {
-            const productCount = parseInt(row.getAttribute('data-product-count') || '0');
-            if (productCount > 0) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Update count
-        updateCategoryCount();
-
-        // Reset to first page and update pagination
-        currentPage = 1;
-        updatePagination();
-
-        // Show notification
-        showNotification(`Displaying ${visibleCount} categories with products`, 'success');
+        // Count and show notification
+        const count = cachedFilteredRows.length;
+        showNotification(`Displaying ${count} categories with products`, 'success');
     }
 
     // Filter 3: Sort by product count (descending)
     function sortByProductCount() {
-        currentFilter = 'byProducts';
+        console.log('🔄 Filter: Sort by products');
+        currentFilter = 'all';
+        currentCategoryPage = 1;
         setActiveStatCard('statTotalProducts');
 
         // Clear search box
         const searchInput = document.getElementById('searchInput');
         if (searchInput) searchInput.value = '';
-
-        // Show all rows first
-        const rows = document.querySelectorAll('.category-row');
-        rows.forEach(row => row.style.display = '');
 
         // Set sort dropdown to products-desc
         const sortSelect = document.getElementById('sortSelect');
@@ -840,12 +1093,8 @@
             sortCategories(); // Call existing sort function
         }
 
-        // Update count
-        updateCategoryCount();
-
-        // Reset to first page and update pagination
-        currentPage = 1;
-        updatePagination();
+        // Refresh display
+        refreshCategoryDisplay();
 
         // Show notification
         showNotification('Sorted by product count (most → least)', 'info');
@@ -853,49 +1102,64 @@
 
     // Filter 4: Show recent categories (last 7 days)
     function filterByRecent() {
+        console.log('🔄 Filter: Recent categories');
         currentFilter = 'recent';
+        currentCategoryPage = 1;
         setActiveStatCard('statRecentCategories');
 
         // Clear search box
         const searchInput = document.getElementById('searchInput');
         if (searchInput) searchInput.value = '';
 
-        const rows = document.querySelectorAll('.category-row');
-        let visibleCount = 0;
+        // Refresh display
+        refreshCategoryDisplay();
 
-        // Calculate date 7 days ago
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        rows.forEach(row => {
-            const createdAt = row.getAttribute('data-created');
-            if (createdAt) {
-                const createdDate = new Date(createdAt);
-                if (createdDate >= sevenDaysAgo) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Update count
-        updateCategoryCount();
-
-        // Show notification
-        showNotification(`Displaying ${visibleCount} new categories (last 7 days)`, 'success');
+        // Count and show notification
+        const count = cachedFilteredRows.length;
+        showNotification(`Displaying ${count} new categories (last 7 days)`, 'success');
     }
 
     // Helper function to update category count
     function updateCategoryCount() {
-        const rows = document.querySelectorAll('.category-row');
-        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        const allRows = Array.from(document.querySelectorAll('.category-row'));
+
+        // Count rows that pass current filters
+        let visibleCount = 0;
+
+        allRows.forEach(row => {
+            let isVisible = true;
+
+            // Check filter state
+            if (currentFilter === 'hasProducts') {
+                const productCount = parseInt(row.getAttribute('data-product-count') || '0');
+                isVisible = productCount > 0;
+            } else if (currentFilter === 'recent') {
+                const createdAt = row.getAttribute('data-created');
+                if (!createdAt) {
+                    isVisible = false;
+                } else {
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    const createdDate = new Date(createdAt);
+                    isVisible = createdDate >= sevenDaysAgo;
+                }
+            }
+
+            // Check search filter
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            if (searchTerm && isVisible) {
+                const name = (row.getAttribute('data-name') || '').toLowerCase();
+                const description = (row.getAttribute('data-description') || '').toLowerCase();
+                isVisible = name.includes(searchTerm) || description.includes(searchTerm);
+            }
+
+            if (isVisible) visibleCount++;
+        });
+
         const countEl = document.getElementById('categoryCount');
         if (countEl) {
-            countEl.textContent = `(${visibleRows.length})`;
+            countEl.textContent = `(${visibleCount})`;
         }
     }
 
@@ -983,25 +1247,9 @@
 
     // Filter categories by search term
     function filterCategories() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-        const rows = document.querySelectorAll('.category-row');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const name = row.getAttribute('data-name').toLowerCase();
-            const description = (row.getAttribute('data-description') || '').toLowerCase();
-
-            if (name.includes(searchTerm) || description.includes(searchTerm)) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Reset to first page and update pagination
-        currentPage = 1;
-        updatePagination();
+        // Reset to first page when searching
+        currentCategoryPage = 1;
+        refreshCategoryDisplay();
     }
 
     // Sort categories
@@ -1068,8 +1316,8 @@
         // Re-append sorted rows
         rows.forEach(row => tbody.appendChild(row));
 
-        // Update pagination after sorting
-        updatePagination();
+        // Refresh display after sorting
+        refreshCategoryDisplay();
     }
 
     // Toggle bulk selection mode
@@ -1560,7 +1808,7 @@
                 </div>
                 <div class="stat-card purple">
                     <div class="stat-card-label">Average Price</div>
-                    <div class="stat-card-value" style="font-size: 1.25rem;">${(stats.averagePrice || 0).toLocaleString('en-US')} ₫</div>
+                    <div class="stat-card-value" style="font-size: 1.25rem;">${(stats.averagePrice || 0).toLocaleString('vi-VN')} đ</div>
                 </div>
             </div>
 
@@ -2013,11 +2261,11 @@
                     </div>
                     <div class="stat-card purple">
                         <div class="stat-card-label">Total Value</div>
-                        <div class="stat-card-value">${(stats.totalValue || 0).toLocaleString('en-US')} ₫</div>
+                        <div class="stat-card-value">${(stats.totalValue || 0).toLocaleString('vi-VN')} đ</div>
                     </div>
                     <div class="stat-card pink">
                         <div class="stat-card-label">Avg Price</div>
-                        <div class="stat-card-value">${(stats.averagePrice || 0).toLocaleString('en-US')} ₫</div>
+                        <div class="stat-card-value">${(stats.averagePrice || 0).toLocaleString('vi-VN')} đ</div>
                     </div>
                 </div>
 
@@ -2070,13 +2318,22 @@
 
     // View products in category
     function viewCategoryProducts(button) {
+        console.log('👁️ viewCategoryProducts called');
+
         const categoryId = button.getAttribute('data-id');
         const categoryName = button.getAttribute('data-name');
+
+        console.log('Category ID:', categoryId);
+        console.log('Category Name:', categoryName);
 
         // Show modal
         const modal = document.getElementById('viewProductsModal');
         const modalTitle = document.getElementById('modalCategoryName');
         const modalContent = document.getElementById('productsListContent');
+
+        console.log('Modal element:', modal);
+        console.log('Modal title element:', modalTitle);
+        console.log('Modal content element:', modalContent);
 
         if (modalTitle) modalTitle.textContent = categoryName;
         if (modalContent) {
@@ -2084,19 +2341,25 @@
             modalContent.innerHTML = '<i class="ti ti-loader"></i><div class="loading-state-text">Loading...</div>';
         }
 
-        // Show modal using Bootstrap
-        const bsModal = new bootstrap.Modal(modal);
-        bsModal.show();
+        // Show modal using custom modal function
+        console.log('Opening modal...');
+        openModal('viewProductsModal');
 
         // Fetch products
-        fetch(`/seller/categories/${categoryId}/products`)
+        const url = `/seller/categories/${categoryId}/products`;
+        console.log('Fetching from:', url);
+
+        fetch(url)
             .then(response => {
+                console.log('Response status:', response.status);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(products => {
+                console.log('Products received:', products.length);
+
                 if (products.length === 0) {
                     modalContent.className = 'empty-state';
                     modalContent.innerHTML = '<i class="ti ti-inbox"></i><div class="empty-state-title">No products</div><div class="empty-state-text">This category has no products</div>';
@@ -2106,7 +2369,7 @@
                 let html = '<div class="product-list">';
                 products.forEach(product => {
                     const imageUrl = product.imageUrl || '/img/white.png';
-                    const price = product.price ? parseFloat(product.price).toLocaleString('en-US') + ' ₫' : 'No price';
+                    const price = product.price ? parseFloat(product.price).toLocaleString('vi-VN') + ' ₫' : 'Chưa có giá';
                     const sku = product.sku || 'N/A';
                     const stock = product.stockQuantity !== undefined ? product.stockQuantity : 0;
                     const sold = product.totalSales || 0;
@@ -2127,11 +2390,11 @@
                             <div class="product-stats">
                                 <div class="product-stat">
                                     <i class="ti ti-package"></i>
-                                    Stock: <strong class="${stockClass}">${stock}</strong>
+                                    Kho: <strong class="${stockClass}">${stock}</strong>
                                 </div>
                                 <div class="product-stat">
                                     <i class="ti ti-shopping-cart"></i>
-                                    Sold: <strong>${sold}</strong>
+                                    Đã bán: <strong>${sold}</strong>
                                 </div>
                             </div>
                         </div>
@@ -2140,217 +2403,72 @@
                 html += '</div>';
                 html += `<div class="product-summary">
                     <i class="ti ti-info-circle"></i>
-                    Total: ${products.length} products
+                    Tổng: ${products.length} sản phẩm
                 </div>`;
 
                 modalContent.className = '';
                 modalContent.innerHTML = html;
+                console.log('Products displayed successfully');
             })
             .catch(error => {
                 console.error('Error loading products:', error);
                 modalContent.className = 'error-state';
-                modalContent.innerHTML = '<i class="ti ti-alert-circle"></i><div class="error-state-title">Error loading products</div><div class="error-state-text">Please try again later</div>';
+                modalContent.innerHTML = '<i class="ti ti-alert-circle"></i><div class="error-state-title">Lỗi tải sản phẩm</div><div class="error-state-text">Vui lòng thử lại sau</div>';
             });
     }
 
-    // ===== PAGINATION FUNCTIONS =====
+    // ===== END OF FUNCTIONS =====
 
-    // Initialize pagination
-    function initPagination() {
-        updatePagination();
-    }
-
-    // Get all visible rows (after filtering)
-    function getVisibleRows() {
-        const rows = Array.from(document.querySelectorAll('.category-row'));
-        return rows.filter(row => row.style.display !== 'none');
-    }
-
-    // Update pagination based on visible rows
-    function updatePagination() {
-        const visibleRows = getVisibleRows();
-        const totalItems = visibleRows.length;
-
-        // Calculate total pages
-        totalPages = Math.ceil(totalItems / pageSize);
-
-        // Reset to page 1 if current page is out of bounds
-        if (currentPage > totalPages) {
-            currentPage = 1;
-        }
-        if (currentPage < 1) {
-            currentPage = 1;
-        }
-
-        // Show/hide rows based on current page
-        visibleRows.forEach((row, index) => {
-            const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-
-            if (index >= startIndex && index < endIndex) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Update pagination info
-        updatePaginationInfo(totalItems);
-
-        // Render pagination controls
-        renderPaginationControls();
-
-        // Update select all state
-        updateSelectAllState();
-    }
-
-    // Update pagination info text
-    function updatePaginationInfo(totalItems) {
-        const showingFrom = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-        const showingTo = Math.min(currentPage * pageSize, totalItems);
-
-        document.getElementById('showingFrom').textContent = showingFrom;
-        document.getElementById('showingTo').textContent = showingTo;
-        document.getElementById('totalItems').textContent = totalItems;
-    }
-
-    // Render pagination controls
-    function renderPaginationControls() {
-        const paginationList = document.getElementById('paginationList');
-        if (!paginationList) return;
-
-        paginationList.innerHTML = '';
-
-        if (totalPages <= 1) {
-            // Hide pagination if only 1 page
-            document.getElementById('paginationContainer').style.display = 'none';
-            return;
-        } else {
-            document.getElementById('paginationContainer').style.display = 'flex';
-        }
-
-        // Previous button
-        const prevItem = document.createElement('li');
-        prevItem.className = 'pagination-item';
-        prevItem.innerHTML = `
-            <button type="button" class="pagination-link ${currentPage === 1 ? 'disabled' : ''}" onclick="goToPage(${currentPage - 1})">
-                <i class="ti ti-chevron-left"></i>
-            </button>
-        `;
-        paginationList.appendChild(prevItem);
-
-        // Page numbers
-        const maxVisiblePages = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-        // Adjust start if we're near the end
-        if (endPage - startPage < maxVisiblePages - 1) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
-
-        // First page + ellipsis
-        if (startPage > 1) {
-            const firstItem = document.createElement('li');
-            firstItem.className = 'pagination-item';
-            firstItem.innerHTML = `<button type="button" class="pagination-link" onclick="goToPage(1)">1</button>`;
-            paginationList.appendChild(firstItem);
-
-            if (startPage > 2) {
-                const ellipsisItem = document.createElement('li');
-                ellipsisItem.className = 'pagination-item';
-                ellipsisItem.innerHTML = `<span class="pagination-ellipsis">...</span>`;
-                paginationList.appendChild(ellipsisItem);
-            }
-        }
-
-        // Page numbers
-        for (let i = startPage; i <= endPage; i++) {
-            const pageItem = document.createElement('li');
-            pageItem.className = 'pagination-item';
-            pageItem.innerHTML = `
-                <button type="button" class="pagination-link ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">
-                    ${i}
-                </button>
-            `;
-            paginationList.appendChild(pageItem);
-        }
-
-        // Last page + ellipsis
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                const ellipsisItem = document.createElement('li');
-                ellipsisItem.className = 'pagination-item';
-                ellipsisItem.innerHTML = `<span class="pagination-ellipsis">...</span>`;
-                paginationList.appendChild(ellipsisItem);
-            }
-
-            const lastItem = document.createElement('li');
-            lastItem.className = 'pagination-item';
-            lastItem.innerHTML = `<button type="button" class="pagination-link" onclick="goToPage(${totalPages})">${totalPages}</button>`;
-            paginationList.appendChild(lastItem);
-        }
-
-        // Next button
-        const nextItem = document.createElement('li');
-        nextItem.className = 'pagination-item';
-        nextItem.innerHTML = `
-            <button type="button" class="pagination-link ${currentPage === totalPages ? 'disabled' : ''}" onclick="goToPage(${currentPage + 1})">
-                <i class="ti ti-chevron-right"></i>
-            </button>
-        `;
-        paginationList.appendChild(nextItem);
-    }
-
-    // Go to specific page
-    function goToPage(page) {
-        if (page < 1 || page > totalPages) return;
-        if (page === currentPage) return;
-
-        currentPage = page;
-        updatePagination();
-
-        // Scroll to top of table
-        const categoryList = document.querySelector('.category-list-section');
-        if (categoryList) {
-            categoryList.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
-
-    // Change page size
-    function changePageSize() {
-        const select = document.getElementById('pageSizeSelect');
-        pageSize = parseInt(select.value);
-        currentPage = 1; // Reset to first page
-        updatePagination();
-    }
-
-    // Call initPagination after DOM is ready
+    // Call changePageSize() after DOM is ready
     window.addEventListener('load', function() {
-        initPagination();
+        console.log('🔧 Initializing category display...');
+
+        const allRows = document.querySelectorAll('.category-row');
+        console.log('Total category rows found:', allRows.length);
+
+        if (allRows.length === 0) {
+            console.warn('No category rows found');
+            return;
+        }
+
+        initCategoryPagination();
     });
 
-    // Add CSS for loading animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    `;
-    document.head.appendChild(style);
+
+    // Get all rows that should be visible (based on filters, not pagination)
+    function getAllFilteredRows() {
+        const rows = Array.from(document.querySelectorAll('.category-row'));
+        // Only check if row was hidden by filter (not by pagination)
+        return rows.filter(row => {
+            // If row has data-filtered attribute, respect it
+            const isFiltered = row.getAttribute('data-filtered') === 'true';
+            return !isFiltered;
+        });
+    }
+
 
     // ===== LICENSE MANAGEMENT FUNCTIONS =====
 
     let currentCategoryId = null;
 
+    // Pagination state for products
+    let allProducts = [];
+    let filteredProducts = [];
+    let currentProductPage = 1;
+    const productsPerPage = 9;
+
     // Open License Manager Modal (Global - accessible from header button)
     function openLicenseManager() {
         currentCategoryId = null;
+        currentProductPage = 1;
         const modal = document.getElementById('licenseManagerModal');
         if (modal) {
+            const modalTitle = modal.querySelector('.modal-title');
+            if (modalTitle) {
+                modalTitle.innerHTML = `<i class="ti ti-package"></i> All Your Products`;
+            }
             openModal('licenseManagerModal');
-            loadLicenses();
+            loadAvailableProducts();
         }
     }
 
@@ -2358,16 +2476,338 @@
     function openCategoryLicenseManager(wrapper) {
         currentCategoryId = wrapper.getAttribute('data-id');
         const categoryName = wrapper.getAttribute('data-name');
+        currentProductPage = 1;
 
         const modal = document.getElementById('licenseManagerModal');
         if (modal) {
             const modalTitle = modal.querySelector('.modal-title');
             if (modalTitle) {
-                modalTitle.innerHTML = `<i class="ti ti-license"></i> License Management - ${categoryName}`;
+                modalTitle.innerHTML = `<i class="ti ti-folder"></i> Manage Products - ${categoryName}`;
             }
             openModal('licenseManagerModal');
-            loadLicenses();
+            loadAvailableProducts();
         }
+    }
+
+    // Load all available products for the seller
+    function loadAvailableProducts() {
+        const container = document.getElementById('availableProductsContainer');
+        if (!container) return;
+
+        container.innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Đang tải sản phẩm...</div>';
+
+        fetch('/seller/categories/api/products/all')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.products) {
+                    allProducts = data.products;
+                    filteredProducts = [...allProducts];
+                    currentProductPage = 1;
+                    displayAvailableProducts();
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Lỗi tải dữ liệu</div></div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading products:', error);
+                container.innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i><div class="empty-state-title">Lỗi tải dữ liệu</div></div>';
+            });
+    }
+
+    // Display available products with pagination
+    function displayAvailableProducts() {
+        const container = document.getElementById('availableProductsContainer');
+        if (!container) return;
+
+        if (filteredProducts.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="padding: 40px 20px;">
+                    <i class="ti ti-package" style="font-size: 48px; color: var(--muted); margin-bottom: 12px;"></i>
+                    <div class="empty-state-title">Chưa có sản phẩm</div>
+                    <div class="empty-state-text">Hãy thêm sản phẩm đầu tiên của bạn!</div>
+                    <a href="/seller/products/add" class="btn btn-primary" style="margin-top: 16px;">
+                        <i class="ti ti-plus"></i> Thêm sản phẩm
+                    </a>
+                </div>
+            `;
+            return;
+        }
+
+        // Calculate pagination
+        const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+        const startIndex = (currentProductPage - 1) * productsPerPage;
+        const endIndex = startIndex + productsPerPage;
+        const productsToShow = filteredProducts.slice(startIndex, endIndex);
+
+        // Build product cards HTML
+        const html = productsToShow.map(product => {
+            const imageUrl = product.imageUrl || '/img/white.png';
+            const price = product.price ? parseFloat(product.price).toLocaleString('vi-VN') + ' ₫' : 'Chưa có giá';
+            const isInCategory = currentCategoryId && product.categoryId == currentCategoryId;
+            const isInOtherCategory = product.categoryId && product.categoryId != currentCategoryId;
+            const categoryBadge = product.categoryName ?
+                `<span class="badge-small" style="background: ${isInCategory ? 'var(--good)' : 'var(--muted)'}; margin-left: 8px;">
+                    ${product.categoryName}
+                </span>` : '';
+
+            return `
+                <div class="product-card ${isInCategory ? 'product-assigned' : ''}" data-product-id="${product.productId}" data-product-name="${product.name}">
+                    <img src="${imageUrl}" alt="${product.name}" class="product-card-image" onerror="this.src='/img/white.png'">
+                    <div class="product-card-info">
+                        <div class="product-card-name" title="${product.name}">
+                            ${product.name}
+                            ${categoryBadge}
+                        </div>
+                        <div class="product-card-meta">
+                            <span class="product-card-price">${price}</span>
+                            <span class="product-card-stock">
+                                <i class="ti ti-package"></i> Kho: ${product.stockQuantity || 0}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="product-card-actions">
+                        ${currentCategoryId ? (
+                isInCategory ?
+                    `<button type="button" class="btn btn-sm btn-danger" onclick="removeProductFromCategory(${product.productId})" title="Xóa khỏi danh mục">
+                                <i class="ti ti-x"></i> Xóa
+                            </button>` :
+                    isInOtherCategory ?
+                        `<button type="button" class="btn btn-sm btn-warning" onclick="moveProductToCategory(${product.productId}, '${product.categoryName}')" title="Di chuyển sang danh mục này">
+                                <i class="ti ti-arrow-right"></i> Di chuyển
+                            </button>` :
+                        `<button type="button" class="btn btn-sm btn-primary" onclick="addProductToCategory(${product.productId})" title="Thêm vào danh mục">
+                                <i class="ti ti-plus"></i> Thêm
+                            </button>`
+            ) : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Build pagination HTML
+        const paginationHTML = buildProductPagination(totalPages);
+
+        // Display products grid and pagination
+        container.innerHTML = `
+            <div class="products-grid">${html}</div>
+            ${totalPages > 1 ? paginationHTML : ''}
+        `;
+
+        // Update products count with pagination info
+        updateAvailableProductsCount(filteredProducts.length, startIndex + 1, Math.min(endIndex, filteredProducts.length));
+    }
+
+    // Build pagination controls for products
+    function buildProductPagination(totalPages) {
+        if (totalPages <= 1) return '';
+
+        let paginationHTML = '<div class="products-pagination">';
+
+        // Previous button
+        paginationHTML += `
+            <button type="button" class="pagination-btn ${currentProductPage === 1 ? 'disabled' : ''}"
+                    onclick="goToProductPage(${currentProductPage - 1})"
+                    ${currentProductPage === 1 ? 'disabled' : ''}>
+                <i class="ti ti-chevron-left"></i> Trước
+            </button>
+        `;
+
+        // Page numbers
+        paginationHTML += '<div class="pagination-pages">';
+
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentProductPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // First page
+        if (startPage > 1) {
+            paginationHTML += `<button type="button" class="pagination-btn" onclick="goToProductPage(1)">1</button>`;
+            if (startPage > 2) {
+                paginationHTML += '<span class="pagination-ellipsis">...</span>';
+            }
+        }
+
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <button type="button" class="pagination-btn ${i === currentProductPage ? 'active' : ''}"
+                        onclick="goToProductPage(${i})">
+                    ${i}
+                </button>
+            `;
+        }
+
+        // Last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += '<span class="pagination-ellipsis">...</span>';
+            }
+            paginationHTML += `<button type="button" class="pagination-btn" onclick="goToProductPage(${totalPages})">${totalPages}</button>`;
+        }
+
+        paginationHTML += '</div>';
+
+        // Next button
+        paginationHTML += `
+            <button type="button" class="pagination-btn ${currentProductPage === totalPages ? 'disabled' : ''}"
+                    onclick="goToProductPage(${currentProductPage + 1})"
+                    ${currentProductPage === totalPages ? 'disabled' : ''}>
+                Sau <i class="ti ti-chevron-right"></i>
+            </button>
+        `;
+
+        // Page info
+        paginationHTML += `
+            <span class="pagination-info">
+                Trang <strong>${currentProductPage}</strong> / <strong>${totalPages}</strong>
+            </span>
+        `;
+
+        paginationHTML += '</div>';
+        return paginationHTML;
+    }
+
+    // Go to specific product page
+    function goToProductPage(page) {
+        const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+        if (page < 1 || page > totalPages) return;
+
+        currentProductPage = page;
+        displayAvailableProducts();
+
+        // Scroll to top of products container
+        const container = document.getElementById('availableProductsContainer');
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Filter available products by search term
+    function filterAvailableProducts() {
+        const searchTerm = document.getElementById('productSearchInput').value.toLowerCase().trim();
+
+        if (searchTerm === '') {
+            filteredProducts = [...allProducts];
+        } else {
+            filteredProducts = allProducts.filter(product =>
+                product.name.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        currentProductPage = 1; // Reset to first page when filtering
+        displayAvailableProducts();
+    }
+
+    // Update available products count with pagination info
+    function updateAvailableProductsCount(total, showingFrom = 0, showingTo = 0) {
+        const badge = document.getElementById('availableProductsCount');
+        if (badge) {
+            if (showingFrom > 0) {
+                badge.textContent = `(${showingFrom}-${showingTo} / ${total})`;
+            } else {
+                badge.textContent = `(${total})`;
+            }
+        }
+    }
+
+    // Add product to current category
+    function addProductToCategory(productId) {
+        if (!currentCategoryId) {
+            alert('⚠️ Vui lòng chọn danh mục trước!');
+            return;
+        }
+
+        fetch('/seller/categories/api/products/assign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `productId=${productId}&categoryId=${currentCategoryId}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('✅ Đã thêm sản phẩm vào danh mục!', 'success');
+                    loadAvailableProducts(); // Reload to update UI
+                    // Reload page to update statistics
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert('❌ Lỗi: ' + (data.error || 'Không thể thêm sản phẩm'));
+                }
+            })
+            .catch(error => {
+                console.error('Error adding product:', error);
+                alert('❌ Đã xảy ra lỗi khi thêm sản phẩm!');
+            });
+    }
+
+    // Remove product from current category
+    function removeProductFromCategory(productId) {
+        if (!confirm('⚠️ Bạn có chắc muốn xóa sản phẩm khỏi danh mục này?')) {
+            return;
+        }
+
+        fetch('/seller/categories/api/products/remove', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `productId=${productId}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('✅ Đã xóa sản phẩm khỏi danh mục!', 'success');
+                    loadAvailableProducts(); // Reload to update UI
+                    // Reload page to update statistics
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert('❌ Lỗi: ' + (data.error || 'Không thể xóa sản phẩm'));
+                }
+            })
+            .catch(error => {
+                console.error('Error removing product:', error);
+                alert('❌ Đã xảy ra lỗi khi xóa sản phẩm!');
+            });
+    }
+
+    // Move product from another category to current category
+    function moveProductToCategory(productId, currentCategoryName) {
+        if (!currentCategoryId) {
+            alert('⚠️ Vui lòng chọn danh mục trước!');
+            return;
+        }
+
+        if (!confirm(`⚠️ Di chuyển sản phẩm từ "${currentCategoryName}" sang danh mục này?`)) {
+            return;
+        }
+
+        fetch('/seller/categories/api/products/assign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `productId=${productId}&categoryId=${currentCategoryId}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('✅ Đã di chuyển sản phẩm!', 'success');
+                    loadAvailableProducts(); // Reload to update UI
+                    // Reload page to update statistics
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert('❌ Lỗi: ' + (data.error || 'Không thể di chuyển sản phẩm'));
+                }
+            })
+            .catch(error => {
+                console.error('Error moving product:', error);
+                alert('❌ Đã xảy ra lỗi khi di chuyển sản phẩm!');
+            });
     }
 
     // Load all licenses from server
@@ -2454,13 +2894,13 @@
                         <div class="license-actions">
                             ${currentCategoryId ? `
                                 ${isAssigned ?
-                                    `<button type="button" class="btn btn-sm btn-danger" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Remove from category">
+                `<button type="button" class="btn btn-sm btn-danger" onclick="removeLicenseFromCategory(${license.shopLicenseId})" title="Remove from category">
                                         <i class="ti ti-x"></i> Remove
                                     </button>` :
-                                    `<button type="button" class="btn btn-sm btn-primary" onclick="assignLicenseToCategory(${license.shopLicenseId})" title="Add to category">
+                `<button type="button" class="btn btn-sm btn-primary" onclick="assignLicenseToCategory(${license.shopLicenseId})" title="Add to category">
                                         <i class="ti ti-plus"></i> Add
                                     </button>`
-                                }
+            }
                             ` : ''}
                         </div>
                     </div>
