@@ -15,6 +15,29 @@ public class Categories {
     private String name;
     private String description;
 
+    // ===== NEW FIELDS FOR ENHANCED CATEGORY MANAGEMENT =====
+
+    @Column(name = "slug", length = 100)
+    private String slug;  // URL-friendly name (e.g., "electronics-technology")
+
+    @Column(name = "parent_id")
+    private Long parentId;  // For subcategories (null = root category)
+
+    @Column(name = "icon", length = 50)
+    private String icon;  // Icon class name (e.g., "ti-device-laptop")
+
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;  // Category image URL
+
+    @Column(name = "sort_order")
+    private Integer sortOrder = 0;  // Display order (lower = first)
+
+    @Column(name = "status", length = 20)
+    private String status = "ACTIVE";  // ACTIVE, HIDDEN, DRAFT
+
+    @Column(name = "featured")
+    private Boolean featured = false;  // Featured on homepage
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -33,6 +56,29 @@ public class Categories {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    // ===== NEW GETTERS & SETTERS =====
+
+    public String getSlug() { return slug; }
+    public void setSlug(String slug) { this.slug = slug; }
+
+    public Long getParentId() { return parentId; }
+    public void setParentId(Long parentId) { this.parentId = parentId; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public Integer getSortOrder() { return sortOrder; }
+    public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public Boolean getFeatured() { return featured; }
+    public void setFeatured(Boolean featured) { this.featured = featured; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

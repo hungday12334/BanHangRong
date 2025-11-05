@@ -119,6 +119,59 @@ public class CategoryService {
             }
 
             category.setDescription(categoryDetails.getDescription());
+
+            // ===== UPDATE NEW ENHANCED FIELDS =====
+
+            // Update slug
+            if (categoryDetails.getSlug() != null) {
+                category.setSlug(categoryDetails.getSlug());
+            }
+
+            // Update parentId (subcategory)
+            if (categoryDetails.getParentId() != null) {
+                // Validate parent exists
+                if (categoryDetails.getParentId() > 0) {
+                    Optional<Categories> parent = categoriesRepository.findById(categoryDetails.getParentId());
+                    if (parent.isEmpty()) {
+                        throw new RuntimeException("Parent category không tồn tại");
+                    }
+                    // Prevent circular reference
+                    if (categoryDetails.getParentId().equals(categoryId)) {
+                        throw new RuntimeException("Category không thể là parent của chính nó");
+                    }
+                }
+                category.setParentId(categoryDetails.getParentId());
+            }
+
+            // Update icon
+            if (categoryDetails.getIcon() != null) {
+                category.setIcon(categoryDetails.getIcon());
+            }
+
+            // Update imageUrl
+            if (categoryDetails.getImageUrl() != null) {
+                category.setImageUrl(categoryDetails.getImageUrl());
+            }
+
+            // Update sortOrder
+            if (categoryDetails.getSortOrder() != null) {
+                category.setSortOrder(categoryDetails.getSortOrder());
+            }
+
+            // Update status
+            if (categoryDetails.getStatus() != null) {
+                String status = categoryDetails.getStatus().toUpperCase();
+                if (!status.equals("ACTIVE") && !status.equals("HIDDEN") && !status.equals("DRAFT")) {
+                    throw new RuntimeException("Status không hợp lệ. Chỉ chấp nhận: ACTIVE, HIDDEN, DRAFT");
+                }
+                category.setStatus(status);
+            }
+
+            // Update featured
+            if (categoryDetails.getFeatured() != null) {
+                category.setFeatured(categoryDetails.getFeatured());
+            }
+
             category.setUpdatedAt(LocalDateTime.now());
 
             return categoriesRepository.save(category);

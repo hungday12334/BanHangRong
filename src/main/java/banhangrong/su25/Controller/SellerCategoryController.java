@@ -265,15 +265,69 @@ public class SellerCategoryController {
     public String updateCategory(@RequestParam(value = "categoryId", required = false) Long categoryId,
                                  @RequestParam(value = "name", required = false) String name,
                                  @RequestParam(value = "description", required = false) String description,
+                                 // ===== NEW PARAMETERS FOR ENHANCED FEATURES =====
+                                 @RequestParam(value = "slug", required = false) String slug,
+                                 @RequestParam(value = "parentId", required = false) Long parentId,
+                                 @RequestParam(value = "icon", required = false) String icon,
+                                 @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                                 @RequestParam(value = "sortOrder", required = false) Integer sortOrder,
+                                 @RequestParam(value = "status", required = false) String status,
+                                 @RequestParam(value = "featured", required = false) Boolean featured,
                                  RedirectAttributes redirectAttributes) {
         try {
             if (categoryId == null) {
                 redirectAttributes.addFlashAttribute("error", "Missing categoryId when updating");
                 return "redirect:/seller/categories";
             }
+
             Categories c = new Categories();
             c.setName(name);
             c.setDescription(description);
+
+            // ===== SET NEW FIELDS =====
+
+            // Auto-generate slug from name if not provided
+            if (slug != null && !slug.trim().isEmpty()) {
+                c.setSlug(slug.toLowerCase().replaceAll("[^a-z0-9-]", "-"));
+            } else if (name != null) {
+                // Auto-generate slug from name
+                c.setSlug(name.toLowerCase()
+                    .replaceAll("[^a-z0-9\\s-]", "")
+                    .replaceAll("\\s+", "-")
+                    .replaceAll("-+", "-")
+                    .replaceAll("^-|-$", ""));
+            }
+
+            if (parentId != null && parentId > 0) {
+                c.setParentId(parentId);
+            }
+
+            if (icon != null && !icon.trim().isEmpty()) {
+                c.setIcon(icon);
+            }
+
+            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                c.setImageUrl(imageUrl);
+            }
+
+            if (sortOrder != null) {
+                c.setSortOrder(sortOrder);
+            } else {
+                c.setSortOrder(0);  // Default
+            }
+
+            if (status != null && !status.trim().isEmpty()) {
+                c.setStatus(status.toUpperCase());
+            } else {
+                c.setStatus("ACTIVE");  // Default
+            }
+
+            if (featured != null) {
+                c.setFeatured(featured);
+            } else {
+                c.setFeatured(false);  // Default
+            }
+
             categoryService.updateCategory(categoryId, c);
             redirectAttributes.addFlashAttribute("success", "✅ Category updated successfully");
         } catch (Exception e) {
