@@ -328,6 +328,112 @@ Các mốc bên dưới trỏ chính xác tới file và dòng đã kiểm tra t
   - Withdraw summary: `GET /seller/withdraw/summary` – dòng 1160
 
 
+## Luồng dữ liệu chi tiết trong seller-dashboard.js (có số dòng chính xác)
+
+Mục này liệt kê các luồng dữ liệu đầu–cuối trong file `static/js/seller-dashboard.js`: nguồn dữ liệu (SSR/DOM), điểm gọi API (fetch/WebSocket), và nơi đổ dữ liệu ra UI, kèm mốc dòng để tra cứu nhanh.
+
+1) Xác định danh tính seller trên client
+- Hàm: `getSellerId()` – dòng 70–82 (mốc: 75, 80)
+  - Nguồn: đọc `#userId` (ưu tiên) hoặc `#sellerId` từ DOM
+  - Đầu ra: trả về số `sellerId` dùng cho các API khác
+
+2) Biểu đồ doanh thu theo ngày (Chart.js)
+- Khởi tạo: `initChart()` – đọc SSR từ `<canvas id="revenueChart" data-labels data-data>`; quyết định không fetch nếu thiếu Chart/canvas
+- Cập nhật động: `updateRevenueChart(days)` – dòng 92–116
+  - Gọi API: `GET /api/seller/{sid}/revenue-series?days=N` – dòng 97 (check `res.ok` tại 98)
+  - Map dữ liệu: cập nhật `revenueChart.data.labels` và `datasets[0].data` – dòng 104–105; `revenueChart.update()`; phản chiếu lại về `data-*` trên `<canvas>` để SSR fallback đồng bộ
+- Bộ chọn khoảng ngày: `bindRevenueRange()` – dòng 122–146 (mốc: 125–127, 128–130, 136–140, 144)
+  - Nguồn: `#revenueRange` và `#revenueRangeCustom`
+  - Hành động: gọi `updateRevenueChart(days)` theo lựa chọn
+
+3) “My Products” – danh sách sản phẩm của tôi
+- Hàm: `refreshMyProducts(showToastMsg = true)` – bắt đầu dòng 914
+  - Nguồn: xác định `sellerId` giống `getSellerId()`; yêu cầu seller bắt buộc – dòng 918
+  - API: `GET /api/products?sellerId={sellerId}` – dòng 919
+  - Lọc trạng thái ở client: đọc `#myProductsStatusFilter` → tính `filtered` – dòng 927–943
+  - Render UI: ghi vào `#tbMyProducts` – dòng 946, 954–965; cập nhật `#myProductsCount` – dòng 966; gắn click mở modal – dòng 969–973; phân trang client – dòng 975
+  - Khởi chạy ban đầu: gọi `refreshMyProducts(false)` – dòng 980
+  - Gắn filter động: bind trực tiếp/ủy quyền – dòng 986–987, 988–995
+
+4) Orders – danh sách đơn của seller (panel `#orders`)
+- State & DOM: `ordersPageState` và các phần tử `#tbSellerOrders`, `#pgSellerOrders` – dòng 1816–1822
+- Tải danh sách: `loadSellerOrders(resetPage = false)` – dòng 1824–1895
+  - Thiết lập tham số trang/lọc từ DOM – dòng 1832–1834
+  - API: `GET /api/seller/{sellerId}/orders?...` – dòng 1836
+  - Render bảng: điền `tbody` – dòng 1841–1873; phân trang client làm khung – dòng 1873; override pager để gọi API khi chuyển trang – dòng 1877–1895
+- Bộ lọc/làm mới/xuất CSV – dòng 1900–1908; Enter để tìm – dòng 1905
+- Tự động tải khi mở panel `#orders` – sau 120ms – dòng 1912–1914
+
+5) Order detail – chi tiết đơn (modal)
+- Loader: `loadOrder(id)` – dòng 879–904
+  - API: `GET /api/seller/{sid}/orders/{id}` – mốc 882; một handler khác cũng gọi tại khoảng 1853
+  - Render: điền các trường trong modal; chỉ xem (không CRUD)
+
+6) License Keys (panel `#keys`)
+- State & DOM: `keysPageState`, `#tbSellerKeys`, `#pgSellerKeys` – dòng 1915–1922
+- Tải danh sách: `loadSellerKeys(resetPage=false)` – dòng 1923–1984
+  - Thu thập filter: product/active/search – dòng 1927–1929
+  - API: `GET /api/seller/{sellerId}/licenses?...` – dòng 1931
+  - Render bảng + trống khi rỗng – dòng 1935–1970; phân trang + pager điều hướng – dòng 1973–1984
+- Reset/bind tìm kiếm – dòng 1989–1994
+- Toggle kích hoạt key bằng click badge – dòng 1998, 2001–2014
+- Nạp danh sách sản phẩm để filter – dòng 2018–2022
+- Tự động tải khi mở panel – dòng 2024–2025
+
+7) Products panel (danh sách + lọc tại tab `#products`)
+- Chuẩn bị danh mục: `populateCategoriesOnce()` – dòng 2034–2042
+- Tải danh sách + phân trang server: `loadProductsPanel(resetPage=false)` – dòng 2045–2136
+- Gắn handler bộ lọc có fallback bền bỉ – dòng 2140–2176
+- Tự động tải khi mở panel – dòng 2177–2178
+
+8) Product CRUD (modal sản phẩm)
+- Nạp chi tiết: `loadProduct(id)` – dòng 666–686 (API: `GET /api/products/{id}`)
+- Lưu (create/update), Publish/Send for approval, Delete: các handler submit/click trong khoảng 775–862 với các endpoint:
+  - `POST /api/products` (tạo mới)
+  - `PUT /api/products/{id}` (cập nhật)
+  - `DELETE /api/products/{id}` (xóa)
+  - `POST /api/products/{id}/approval?publish={true|false}` (duyệt/publish/ẩn)
+  - Upload ảnh: `POST /api/uploads/image` (multipart) – khối 733–771
+
+9) Withdraw (rút tiền) – panel `#withdraw`
+- Tóm tắt số dư/tài khoản/fee: `loadWithdrawSummary()` – API `GET /seller/withdraw/summary` – dòng 1160–1161
+- Tìm lịch sử rút: `searchWithdrawals(params)` – API `GET /seller/withdraw/search` – dòng 1172
+- Tạo lệnh rút: `createWithdrawal(payload)` – API `POST /seller/withdraw` – dòng 1177
+- Thêm tài khoản ngân hàng: `addBankAccount(payload)` – API `POST /seller/withdraw/bank-account` – dòng 1182
+- Render UI + phân trang lịch sử, preview phí/net amount – dòng 1200–1268
+- Nạp panel có overlay: `loadWithdrawPanel()` + `withPanelLoading(...)` – dòng 1275–1277; submit form – dòng 1282–1290
+
+10) Check Key (kiểm tra key và lịch sử)
+- Khởi tạo IIFE: `initCheckKeyPanel()` – dòng 1292–1299
+- API chính: `fetchCheck(key, page, size)` – dòng 1450–1459
+- Render chi tiết + lịch sử + phân trang – dòng 1341–1493; xử lý tương tác – dòng 1496–1558
+
+11) Hồ sơ (Profile)
+- Modal hồ sơ: bind cancel/close – dòng 1718–1722
+- Nạp dữ liệu: `loadProfile(id)` – dòng 1730–1739
+- Mở modal: dòng 1741; submit cập nhật – dòng 1744–1770
+- Hiển thị ẩn/hiện panel profile tại chỗ (không rời trang): `showProfile/hideProfile` – dòng 1023–1051
+
+12) WebSocket – thông báo đơn hàng realtime
+- Kết nối: IIFE `initOrderSocket()` – dòng 1774–1811 (connect logic: 1781–1807)
+- URL: `ws(s)://{host}/ws/orders`
+- Chỉ bật trên main dashboard (tránh trùng khi ở panel profile) – dòng 1810–1811
+
+13) Điều hướng nội bộ qua sidebar (in-place panels)
+- Bản đồ panel: `panelMap` – dòng 1085–1093
+- Hiển thị panel theo `hash`: `showPanelByHash(hash)` – dòng 1091–1123 (ẩn dashboard, show panel đích, nạp dữ liệu nếu cần)
+- Bind click anchors, lắng nghe `hashchange` – dòng 1127–1132, 1133–1137, 1138–1141
+
+14) Tiện ích khác ảnh hưởng UI dữ liệu
+- Phân trang bảng client: `paginateTable(...)` – dòng 168–270 (mốc 177, 186–188, 194, 203, 208–209, 215–227, 231–268)
+- Logo fallback: `initLogoFallback()` – dòng 280–309 (mốc 286, 292–309)
+- Chuyển theme: `applyTheme(theme)` – dòng 330–357 (mốc 339–340, 349, 357)
+- Loader + overlay chung cho panel: `withPanelLoading(panelEl, task, ...)` – dòng 441–483
+- Intercept điều hướng để hiệu ứng rời trang mượt: khối 616–631 (mốc 620, 622, 625, 629)
+
+Ghi chú: Một số đoạn được đánh dấu “omitted” trong bản trích dẫn nhưng vẫn có mốc dòng neo (ví dụ 97, 104–105, 114…) để đối chiếu. Các endpoint đều đã được liệt kê cùng vị trí dòng tiêu biểu.
+
+
 ## Trực quan hóa (Mermaid)
 
 ### Sơ đồ dòng dữ liệu tổng quan
