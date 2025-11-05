@@ -5,10 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: fix error approve Products.">
-      <change afterPath="$PROJECT_DIR$/env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerSearchController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-simple.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-simple.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CATEGORY_ADVANCED_FILTERS_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CATEGORY_FILTERS_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CATEGORY_PAGINATION_APPLIED.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHAT_FIX_SUMMARY.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CRITICAL_SESSION_DEBUG.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE_FILTERS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEST_CATEGORY_FILTERS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEST_REVIEW_UPDATES.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEST_SECURITY_ISOLATION.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UPDATE_FILTERS_POSITION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/clear-cache-guide.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/verify-chat-fix.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/verify-chat-fixes.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/verify-csrf-fix.sh" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +37,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="hungnt" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -41,7 +51,7 @@
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/hungday12334/BanHangRong.git",
-    "accountId": "43a70439-d014-4c57-b4ae-bf792be7baff"
+    "accountId": "efd5b86f-5509-426a-a183-1d6d3c55d639"
   }
 }]]></component>
   <component name="MavenImportPreferences">
@@ -75,7 +85,8 @@
     "RunOnceActivity.git.unshallow": "true",
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "Spring Boot.Su25Application.executor": "Run",
-    "git-widget-placeholder": "#8 on main",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "#9 on MinhHQ",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
@@ -171,6 +182,7 @@
       <workItem from="1759915487604" duration="32000" />
       <workItem from="1759915643459" duration="4057000" />
       <workItem from="1762361410330" duration="662000" />
+      <workItem from="1762374651312" duration="871000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
