@@ -193,10 +193,23 @@
 
                     <!-- Search and Filter Controls Toolbar -->
                     <div class="category-toolbar" style="margin: 16px 0;">
-                        <div class="search-box">
+                        <div class="search-box" style="position: relative;">
                             <label for="searchInput" style="display:none;">Search categories</label>
-                            <i class="ti ti-search"></i>
-                            <input type="text" id="searchInput" placeholder="Search categories..." oninput="filterCategories()" />
+                            <i class="ti ti-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none;"></i>
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên, mô tả, hoặc ID..."
+                                   oninput="filterCategories()"
+                                   style="padding-left: 40px; padding-right: 40px;" />
+                            <button type="button" id="clearSearchBtn"
+                                    onclick="clearSearch()"
+                                    style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+                                           background: none; border: none; cursor: pointer;
+                                           color: var(--muted); padding: 4px 8px; display: none;
+                                           transition: color 0.2s;"
+                                    onmouseover="this.style.color='var(--danger)'"
+                                    onmouseout="this.style.color='var(--muted)'"
+                                    title="Xóa tìm kiếm">
+                                <i class="ti ti-x" style="font-size: 18px;"></i>
+                            </button>
                         </div>
 
                         <label for="sortSelect" style="display:none;">Sort</label>
@@ -891,14 +904,11 @@
     function refreshCategoryDisplay() {
         console.log('📊 Refreshing category display - Page:', currentCategoryPage, 'Filter:', currentFilter);
 
-        // Get all rows
-        const allRows = document.querySelectorAll('.category-row');
-
-        // Get filtered rows
+        // Get filtered rows (this will apply both filter and search)
         cachedFilteredRows = getFilteredRows();
         const totalFiltered = cachedFilteredRows.length;
 
-        console.log('Total rows:', allRows.length, 'Filtered:', totalFiltered);
+        console.log('Filtered rows:', totalFiltered);
 
         // Calculate pagination
         const totalPages = totalFiltered > 0 ? Math.ceil(totalFiltered / categoriesPerPage) : 1;
@@ -909,19 +919,34 @@
 
         console.log('Total pages:', totalPages, 'Current page:', currentCategoryPage);
 
+        // Get all rows
+        const allRows = document.querySelectorAll('.category-row');
+
         // Hide all rows first
         allRows.forEach(row => row.style.display = 'none');
 
-        // Show rows for current page
+        // Show rows for current page only
         if (totalFiltered > 0) {
             const startIndex = (currentCategoryPage - 1) * categoriesPerPage;
             const endIndex = Math.min(startIndex + categoriesPerPage, totalFiltered);
 
             for (let i = startIndex; i < endIndex; i++) {
-                cachedFilteredRows[i].style.display = '';
+                if (cachedFilteredRows[i]) {
+                    cachedFilteredRows[i].style.display = '';
+                }
             }
 
             console.log(`Showing rows ${startIndex + 1} to ${endIndex} of ${totalFiltered}`);
+
+            // Remove no results message if exists
+            removeNoResultsMessage();
+        } else {
+            // Show "no results" message if search is active
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value.trim() : '';
+            if (searchTerm) {
+                showNoResultsMessage(searchTerm);
+            }
         }
 
         // Update pagination UI
@@ -1317,11 +1342,175 @@
         return confirm(`⚠️ Are you sure you want to delete "${name}"?\n\n⚠️ Note: Cannot delete categories with products.`);
     }
 
-    // Filter categories by search term
+    // Filter categories by search term (Real-time search)
     function filterCategories() {
         // Reset to first page when searching
         currentCategoryPage = 1;
+
+        // Get search term
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        // Show/hide clear button
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (clearBtn) {
+            clearBtn.style.display = searchTerm ? 'block' : 'none';
+        }
+
+        // Get all rows
+        const allRows = document.querySelectorAll('.category-row');
+        let visibleCount = 0;
+
+        // Filter rows based on search term and current filter
+        allRows.forEach(row => {
+            let shouldShow = true;
+
+            // Apply current filter (all/hasProducts/recent)
+            if (currentFilter === 'hasProducts') {
+                const productCount = parseInt(row.getAttribute('data-product-count') || '0');
+                shouldShow = productCount > 0;
+            } else if (currentFilter === 'recent') {
+                const createdAt = row.getAttribute('data-created');
+                if (!createdAt) {
+                    shouldShow = false;
+                } else {
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    const createdDate = new Date(createdAt);
+                    shouldShow = createdDate >= sevenDaysAgo;
+                }
+            }
+
+            // Apply search filter
+            if (shouldShow && searchTerm) {
+                const name = (row.getAttribute('data-name') || '').toLowerCase();
+                const description = (row.getAttribute('data-description') || '').toLowerCase();
+                const id = (row.getAttribute('data-id') || '').toString();
+
+                // Search in: name, description, and ID
+                shouldShow = name.includes(searchTerm) ||
+                            description.includes(searchTerm) ||
+                            id.includes(searchTerm);
+            }
+
+            // Show/hide row
+            if (shouldShow) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update category count badge
+        const countEl = document.getElementById('categoryCount');
+        if (countEl) {
+            countEl.textContent = `(${visibleCount})`;
+        }
+
+        // Refresh pagination
         refreshCategoryDisplay();
+
+        // Show message if no results
+        if (visibleCount === 0 && searchTerm) {
+            showNoResultsMessage(searchTerm);
+        } else {
+            removeNoResultsMessage();
+        }
+    }
+
+    // Show "no results" message
+    function showNoResultsMessage(searchTerm) {
+        removeNoResultsMessage(); // Remove existing first
+
+        const tbody = document.querySelector('#categoryTable tbody');
+        if (!tbody) return;
+
+        const noResultsRow = document.createElement('tr');
+        noResultsRow.id = 'noResultsRow';
+        noResultsRow.innerHTML = `
+            <td colspan="10" style="text-align: center; padding: 40px 20px;">
+                <div style="color: var(--muted);">
+                    <i class="ti ti-search-off" style="font-size: 48px; display: block; margin-bottom: 16px;"></i>
+                    <strong style="font-size: 18px; display: block; margin-bottom: 8px;">
+                        Không tìm thấy kết quả
+                    </strong>
+                    <p style="margin: 0;">
+                        Không có danh mục nào khớp với "<strong>${searchTerm}</strong>"
+                    </p>
+                    <button onclick="clearSearch()" class="btn btn-secondary" style="margin-top: 16px;">
+                        <i class="ti ti-x"></i> Xóa tìm kiếm
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(noResultsRow);
+    }
+
+    // Remove "no results" message
+    function removeNoResultsMessage() {
+        const existingMsg = document.getElementById('noResultsRow');
+        if (existingMsg) {
+            existingMsg.remove();
+        }
+    }
+
+    // Clear search box
+    function clearSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearchBtn');
+
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.focus(); // Focus back to search box
+        }
+
+        if (clearBtn) {
+            clearBtn.style.display = 'none';
+        }
+
+        // Trigger filter to refresh results
+        filterCategories();
+    }
+
+    // Helper function to get filtered rows (used by pagination)
+    function getFilteredRows() {
+        const allRows = Array.from(document.querySelectorAll('.category-row'));
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        return allRows.filter(row => {
+            let shouldShow = true;
+
+            // Apply current filter
+            if (currentFilter === 'hasProducts') {
+                const productCount = parseInt(row.getAttribute('data-product-count') || '0');
+                shouldShow = productCount > 0;
+            } else if (currentFilter === 'recent') {
+                const createdAt = row.getAttribute('data-created');
+                if (!createdAt) {
+                    shouldShow = false;
+                } else {
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    const createdDate = new Date(createdAt);
+                    shouldShow = createdDate >= sevenDaysAgo;
+                }
+            }
+
+            // Apply search filter
+            if (shouldShow && searchTerm) {
+                const name = (row.getAttribute('data-name') || '').toLowerCase();
+                const description = (row.getAttribute('data-description') || '').toLowerCase();
+                const id = (row.getAttribute('data-id') || '').toString();
+
+                shouldShow = name.includes(searchTerm) ||
+                            description.includes(searchTerm) ||
+                            id.includes(searchTerm);
+            }
+
+            return shouldShow;
+        });
     }
 
     // Sort categories
