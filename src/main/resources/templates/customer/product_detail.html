@@ -322,7 +322,6 @@
 					</button>
 					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
 						<a class="item" th:if="${user != null}" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
-						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
 						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
 						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
 						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>

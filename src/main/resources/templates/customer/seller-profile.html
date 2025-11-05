@@ -446,43 +446,6 @@
 			color: var(--muted);
 		}
 
-		.reviews-section {
-			background: white;
-			border-radius: 12px;
-			padding: 24px;
-			margin-top: 24px;
-			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-		}
-
-		.review-item {
-			border-bottom: 1px solid var(--line);
-			padding: 16px 0;
-		}
-
-		.review-item:last-child {
-			border-bottom: none;
-		}
-
-		.review-header {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 8px;
-		}
-
-		.review-author {
-			font-weight: 600;
-			color: #111827;
-		}
-
-		.review-rating {
-			color: #f59e0b;
-		}
-
-		.review-text {
-			color: #4b5563;
-			line-height: 1.6;
-		}
-
 		.empty-state {
 			text-align: center;
 			padding: 60px 20px;
@@ -524,7 +487,6 @@
 					</button>
 					<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
 						<a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
-						<a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
 						<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
 						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
 						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
@@ -556,7 +518,7 @@
 							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
 					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
 		</div>
@@ -604,7 +566,7 @@
 
 					<!-- Column 3: Sales Stats -->
 					<div class="seller-sales">
-						<div class="sales-label">đã bán</div>
+						<div class="sales-label">sold</div>
 						<div class="sales-value" th:text="${totalSales != null ? totalSales : '0'}">100</div>
 						<div class="sales-unit">product</div>
 					</div>
@@ -645,31 +607,6 @@
 				<h3>No products available</h3>
 				<p>This seller hasn't listed any products yet.</p>
 			</div>
-
-			<!-- Reviews Section -->
-			<div class="reviews-section">
-				<div class="section-title">Customer Reviews</div>
-				
-				<div th:if="${reviews != null and !reviews.empty}">
-					<div class="review-item" th:each="review : ${reviews}">
-						<div class="review-header">
-							<span class="review-author" th:text="${review.username != null ? review.username : 'Anonymous'}">Customer123</span>
-							<span class="review-rating">
-								<span th:each="i : ${#numbers.sequence(1, review.rating)}">⭐</span>
-							</span>
-						</div>
-						<p class="review-text" th:text="${review.comment}">Great seller! Fast delivery and excellent service.</p>
-						<small style="color: var(--muted);" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">24/10/2025 14:30</small>
-					</div>
-				</div>
-
-				<!-- Empty State for Reviews -->
-				<div class="empty-state" th:if="${reviews == null or reviews.empty}">
-					<div class="empty-state-icon">⭐</div>
-					<h3>No reviews yet</h3>
-					<p>Be the first to review products from this seller!</p>
-				</div>
-			</div>
 		</div>
 	</div>
 
@@ -688,13 +625,13 @@
 		// Top-up prompt
 		function topupPrompt(event) {
 			event.preventDefault();
-			const amount = prompt('Nhập số tiền bạn muốn nạp (VND):');
+			const amount = prompt('Enter the amount you want to top up (VND):');
 			if (amount && !isNaN(amount) && parseInt(amount) > 0) {
 				document.getElementById('topupAmountInput').value = amount;
 				event.target.submit();
 				return true;
 			}
-			alert('Vui lòng nhập số tiền hợp lệ');
+			alert('Please enter a valid amount');
 			return false;
 		}
 	</script>

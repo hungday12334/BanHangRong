@@ -1,0 +1,937 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Notifications - Customer</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+	<style>
+		:root {
+			--bg: #f5f7fb;
+			--card: #ffffff;
+			--ink: #0f172a;
+			--muted: #6b7280;
+			--brand: #0ea5e9;
+			--chip: #e5e7eb;
+			--line: #eaeef4;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			color: var(--ink);
+			background: var(--bg);
+		}
+
+		.wrapper {
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.topbar {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			padding: 10px 16px;
+			border-bottom: 1px solid var(--line);
+			background: var(--card);
+			flex-wrap: nowrap;
+		}
+
+		.brand {
+			font-weight: 800;
+			letter-spacing: .2px;
+		}
+
+	.top-actions {
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		position: relative;
+		flex-wrap: nowrap;
+	}
+
+	.notification-link:hover {
+		background: #f3f4f6;
+		color: #111827;
+	}
+
+	.user-btn {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		cursor: pointer;
+		color: #111827;
+		border: 1px solid var(--line);
+		padding: 6px 8px;
+		border-radius: 8px;
+		background: #fff;
+		white-space: nowrap;
+	}
+	
+	.user-btn .wallet-badge {
+		margin-left: 4px;
+		padding: 3px 6px;
+			background: #f0f9ff;
+			border: 1px solid #bae6fd;
+			border-radius: 6px;
+			font-weight: 600;
+			color: #0369a1;
+			font-size: 12px;
+		}
+		
+		@media (max-width: 768px) {
+			.user-btn .wallet-badge {
+				display: none;
+			}
+		}
+
+		.user-menu {
+			position: absolute;
+			right: 0;
+			top: 48px;
+			background: #fff;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+			width: 200px;
+			display: none;
+			z-index: 5
+		}
+
+		.user-menu .item {
+			display: block;
+			padding: 10px 12px;
+			color: #111827;
+			text-decoration: none
+		}
+
+		.user-menu .item:hover {
+			background: #f3f4f6
+		}
+
+		.cart {
+			position: relative;
+			width: 28px;
+			height: 28px;
+			display: grid;
+			place-items: center;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			text-decoration: none;
+			color: #111827;
+		}
+
+		.cart .badge {
+			position: absolute;
+			top: -6px;
+			right: -6px;
+			background: #ef4444;
+			color: #fff;
+			min-width: 18px;
+			height: 18px;
+			border-radius: 9px;
+			font-size: 11px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0 5px;
+		}
+
+		.nav {
+			display: flex;
+			gap: 16px;
+			padding: 12px 16px;
+			border-bottom: 1px solid var(--line);
+			background: var(--card);
+			overflow-x: auto;
+		}
+
+		.nav a {
+			text-decoration: none;
+			color: var(--muted);
+			font-size: 14px;
+			white-space: nowrap;
+			padding: 6px 12px;
+			border-radius: 8px;
+			transition: all 0.2s;
+		}
+
+		.nav a:hover,
+		.nav a.active {
+			background: #e0f2fe;
+			color: var(--brand);
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 20px;
+			flex: 1;
+		}
+
+		.page-header {
+			margin-bottom: 24px;
+		}
+
+		.page-title {
+			font-size: 28px;
+			font-weight: 700;
+			margin: 0 0 8px 0;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.unread-badge {
+			background: #ef4444;
+			color: #fff;
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 14px;
+			font-weight: 600;
+		}
+
+		.filters-section {
+			background: var(--card);
+			border-radius: 12px;
+			padding: 20px;
+			margin-bottom: 20px;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+
+		.filters-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		.filter-group {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.filter-group label {
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--ink);
+		}
+
+		.filter-group select,
+		.filter-group input {
+			padding: 10px 12px;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			font-size: 14px;
+			outline: none;
+			transition: border-color 0.2s;
+		}
+
+		.filter-group select:focus,
+		.filter-group input:focus {
+			border-color: var(--brand);
+		}
+
+		.filter-actions {
+			display: flex;
+			gap: 12px;
+			justify-content: flex-end;
+		}
+
+		.btn {
+			padding: 10px 20px;
+			border: none;
+			border-radius: 8px;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+			text-decoration: none;
+			display: inline-block;
+		}
+
+		.btn-primary {
+			background: var(--brand);
+			color: #fff;
+		}
+
+		.btn-primary:hover {
+			background: #0284c7;
+		}
+
+		.btn-secondary {
+			background: #f3f4f6;
+			color: var(--ink);
+		}
+
+		.btn-secondary:hover {
+			background: #e5e7eb;
+		}
+
+		.notifications-list {
+			background: var(--card);
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+
+		.notification-item {
+			padding: 20px;
+			border-bottom: 1px solid var(--line);
+			display: flex;
+			gap: 16px;
+			transition: background 0.2s;
+			position: relative;
+		}
+
+		.notification-item:last-child {
+			border-bottom: none;
+		}
+
+		.notification-item:hover {
+			background: #f9fafb;
+		}
+
+		.notification-item.unread {
+			background: #eff6ff;
+		}
+
+		.notification-item.unread::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 4px;
+			background: var(--brand);
+		}
+
+		.notification-icon {
+			width: 48px;
+			height: 48px;
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 24px;
+			flex-shrink: 0;
+		}
+
+		.notification-icon.order {
+			background: #dbeafe;
+			color: #1e40af;
+		}
+
+		.notification-icon.review {
+			background: #fef3c7;
+			color: #b45309;
+		}
+
+		.notification-icon.system {
+			background: #f3e8ff;
+			color: #7c3aed;
+		}
+
+		.notification-content {
+			flex: 1;
+		}
+
+		.notification-title {
+			font-size: 16px;
+			font-weight: 600;
+			margin: 0 0 8px 0;
+			color: var(--ink);
+		}
+
+		.notification-message {
+			font-size: 14px;
+			color: var(--muted);
+			margin: 0 0 8px 0;
+			line-height: 1.5;
+		}
+
+		.notification-meta {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			font-size: 13px;
+			color: var(--muted);
+		}
+
+		.notification-actions {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			align-items: flex-end;
+		}
+
+		.btn-icon {
+			padding: 6px 12px;
+			font-size: 13px;
+			background: transparent;
+			border: 1px solid var(--line);
+			color: var(--muted);
+		}
+
+		.btn-icon:hover {
+			background: #f3f4f6;
+			color: var(--ink);
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+		}
+
+		.empty-icon {
+			font-size: 64px;
+			margin-bottom: 16px;
+			opacity: 0.5;
+		}
+
+		.empty-title {
+			font-size: 20px;
+			font-weight: 600;
+			margin: 0 0 8px 0;
+		}
+
+		.empty-message {
+			color: var(--muted);
+		}
+
+		.pagination {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			margin-top: 24px;
+		}
+
+		.pagination a,
+		.pagination span {
+			padding: 8px 12px;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			text-decoration: none;
+			color: var(--ink);
+			font-size: 14px;
+			transition: all 0.2s;
+		}
+
+		.pagination a:hover {
+			background: var(--brand);
+			color: #fff;
+			border-color: var(--brand);
+		}
+
+		.pagination span.active {
+			background: var(--brand);
+			color: #fff;
+			border-color: var(--brand);
+		}
+
+		.bulk-actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 16px 20px;
+			background: #f9fafb;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.bulk-actions-info {
+			font-size: 14px;
+			color: var(--muted);
+		}
+
+		@media (max-width: 768px) {
+			.filters-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.notification-item {
+				flex-direction: column;
+			}
+
+			.notification-actions {
+				flex-direction: row;
+				align-items: center;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="wrapper">
+		<!-- Header -->
+		<div class="topbar">
+			<div class="brand">BanHangRong</div>
+			<nav class="nav" aria-label="Main">
+			<a href="/customer/dashboard">Home</a>
+			<a href="/categories">Category</a>
+			<a href="#">License Software</a>
+			<a href="#">Game Keys</a>
+			<a href="#">Voucher</a>
+			<a href="/customer/chat">💬 Chat</a>
+			<a href="#">Support</a>
+			</nav>
+			<div class="top-actions">
+				<a href="/customer/notifications" class="notification-link" style="position:relative;font-size:20px;color:#6b7280;text-decoration:none;padding:6px 8px;border-radius:8px;transition:all 0.2s;" title="Notifications">ðŸ””<span th:if="${unreadCount != null and unreadCount > 0}" class="notification-badge" th:text="${unreadCount}" style="position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:10px;padding:2px 5px;border-radius:10px;font-weight:700;min-width:16px;text-align:center;">0</span></a>
+				<div class="user" style="position:relative">
+					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+						<span th:text="${currentUser != null ? currentUser.username : 'User123456'}">User123456</span>
+						<span class="wallet-badge">
+							💰 <span th:text="${currentUser != null and currentUser.balance != null ? #numbers.formatDecimal(currentUser.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
+						</span>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round" />
+						</svg>
+					</button>
+				<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+					<a class="item" th:href="@{'/customer/profile/' + ${currentUser.username}}" role="menuitem">My Account</a>
+					<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
+						<a class="item" href="/customer/chat" role="menuitem">💬 Chat</a>
+						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
+						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
+						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+							style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
+							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+								th:value="${_csrf.token}" />
+							<input type="hidden" name="amount" id="topupAmountInput" />
+							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+								(VNPay)</button>
+						</form>
+						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
+						<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+							style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
+							Become a Seller</a>
+						<a class="item" href="#" role="menuitem"
+							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+					</div>
+					<form id="logoutForm" method="post" action="/logout" style="display:none;">
+					</form>
+				</div>
+			<div class="search">
+				<form method="GET" action="/customer/dashboard" style="display:flex;gap:3px;">
+					<input type="search" name="search" placeholder="search" aria-label="Search"
+						style="height:34px;width:180px;padding:0 10px;border:1px solid var(--line);border-radius:8px;outline:none;font-size:14px;">
+					<button type="submit"
+						style="padding:6px 10px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
+				</form>
+			</div>
+				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
+					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
+			</div>
+		</div>
+
+		<!-- Main Content -->
+		<div class="container">
+			<!-- Page Header -->
+			<div class="page-header">
+				<h1 class="page-title">
+					🔔 Notifications
+					<span class="unread-badge" th:if="${unreadCount > 0}" th:text="${unreadCount}">0</span>
+				</h1>
+			</div>
+
+			<!-- Filters -->
+			<div class="filters-section">
+				<form method="get" action="/customer/notifications">
+					<div class="filters-grid">
+						<div class="filter-group">
+							<label>Sort By</label>
+							<select name="sortBy">
+								<option value="newest" th:selected="${currentSortBy == 'newest' or currentSortBy == null}">
+									Newest</option>
+								<option value="oldest" th:selected="${currentSortBy == 'oldest'}">Oldest</option>
+							</select>
+						</div>
+
+						<div class="filter-group">
+							<label>Notification Type</label>
+							<select name="type">
+								<option value="" th:selected="${currentType == null}">All</option>
+								<option value="ORDER" th:selected="${currentType == 'ORDER'}">Order</option>
+								<option value="REVIEW" th:selected="${currentType == 'REVIEW'}">Review</option>
+								<option value="SYSTEM" th:selected="${currentType == 'SYSTEM'}">System</option>
+							</select>
+						</div>
+
+						<div class="filter-group">
+							<label>Status</label>
+							<select name="isRead">
+								<option value="" th:selected="${currentIsRead == null or currentIsRead == ''}">All</option>
+								<option value="false" th:selected="${currentIsRead == 'false'}">Unread</option>
+								<option value="true" th:selected="${currentIsRead == 'true'}">Read</option>
+							</select>
+						</div>
+
+						<div class="filter-group">
+							<label>From Date</label>
+							<input type="date" name="startDate" th:value="${currentStartDate}">
+						</div>
+
+						<div class="filter-group">
+							<label>To Date</label>
+							<input type="date" name="endDate" th:value="${currentEndDate}">
+						</div>
+					</div>
+
+					<div class="filter-actions">
+						<button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+						<button type="submit" class="btn btn-primary">Apply</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- Bulk Actions -->
+			<div class="bulk-actions" th:if="${unreadCount > 0}">
+				<span class="bulk-actions-info">
+					<strong th:text="${unreadCount}">0</strong> unread notifications
+				</span>
+				<button class="btn btn-secondary btn-icon" onclick="markAllAsRead()">
+					✓ Mark All as Read
+				</button>
+			</div>
+
+			<!-- Notifications List -->
+			<div class="notifications-list">
+				<div th:if="${notifications.content.empty}" class="empty-state">
+					<div class="empty-icon">🔔</div>
+					<h3 class="empty-title">No Notifications</h3>
+					<p class="empty-message">You don't have any notifications yet.</p>
+				</div>
+
+				<div th:each="notification : ${notifications.content}" class="notification-item"
+					th:classappend="${!notification.isRead} ? 'unread' : ''">
+					<div class="notification-icon"
+						th:classappend="${notification.type == 'ORDER'} ? 'order' : (${notification.type == 'REVIEW'} ? 'review' : 'system')">
+						<span
+							th:text="${notification.type == 'ORDER'} ? '📦' : (${notification.type == 'REVIEW'} ? '⭐' : '🔔')">📦</span>
+					</div>
+
+					<div class="notification-content">
+						<h3 class="notification-title" th:text="${notification.title}">Title</h3>
+						<p class="notification-message" th:text="${notification.message}">Message content</p>
+						<div class="notification-meta">
+							<span
+								th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+							<span th:if="${!notification.isRead}"
+								style="color: var(--brand); font-weight: 600;">● Unread</span>
+						</div>
+					</div>
+
+					<div class="notification-actions">
+						<button th:if="${!notification.isRead}" class="btn btn-icon"
+							th:onclick="'markAsRead(' + ${notification.notificationId} + ')'">
+							✓ Mark as Read
+						</button>
+						<button class="btn btn-icon"
+							th:onclick="'deleteNotification(' + ${notification.notificationId} + ')'">
+							🗑️ Delete
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Pagination -->
+			<div class="pagination" th:if="${totalPages > 1}">
+				<a th:if="${currentPage > 0}"
+					th:href="${'/customer/notifications?page=' + (currentPage - 1) + '&size=' + (size != null ? size : 4) + (currentSortBy != null and currentSortBy != '' ? '&sortBy=' + currentSortBy : '') + (currentType != null and currentType != '' ? '&type=' + currentType : '') + (currentIsRead != null and currentIsRead != '' ? '&isRead=' + currentIsRead : '') + (currentStartDate != null and currentStartDate != '' ? '&startDate=' + currentStartDate : '') + (currentEndDate != null and currentEndDate != '' ? '&endDate=' + currentEndDate : '')}">«
+					Previous</a>
+
+				<th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+					<span th:if="${i == currentPage}" class="active" th:text="${i + 1}">1</span>
+					<a th:if="${i != currentPage}"
+						th:href="${'/customer/notifications?page=' + i + '&size=' + (size != null ? size : 4) + (currentSortBy != null and currentSortBy != '' ? '&sortBy=' + currentSortBy : '') + (currentType != null and currentType != '' ? '&type=' + currentType : '') + (currentIsRead != null and currentIsRead != '' ? '&isRead=' + currentIsRead : '') + (currentStartDate != null and currentStartDate != '' ? '&startDate=' + currentStartDate : '') + (currentEndDate != null and currentEndDate != '' ? '&endDate=' + currentEndDate : '')}"
+						th:text="${i + 1}">1</a>
+				</th:block>
+
+				<a th:if="${currentPage < totalPages - 1}"
+					th:href="${'/customer/notifications?page=' + (currentPage + 1) + '&size=' + (size != null ? size : 4) + (currentSortBy != null and currentSortBy != '' ? '&sortBy=' + currentSortBy : '') + (currentType != null and currentType != '' ? '&type=' + currentType : '') + (currentIsRead != null and currentIsRead != '' ? '&isRead=' + currentIsRead : '') + (currentStartDate != null and currentStartDate != '' ? '&startDate=' + currentStartDate : '') + (currentEndDate != null and currentEndDate != '' ? '&endDate=' + currentEndDate : '')}">Sau
+					»</a>
+			</div>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+		function toggleUserMenu() {
+			const menu = document.getElementById('userMenu');
+			menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+		}
+
+		document.addEventListener('click', function (event) {
+			const userBtn = document.querySelector('.user-btn');
+			const userMenu = document.getElementById('userMenu');
+			if (!userBtn.contains(event.target)) {
+				userMenu.style.display = 'none';
+			}
+		});
+
+		function clearFilters() {
+			window.location.href = '/customer/notifications';
+		}
+
+		function getCsrfToken() {
+			return document.querySelector('meta[name="_csrf"]')?.content || '';
+		}
+
+		function getCsrfHeader() {
+			return document.querySelector('meta[name="_csrf_header"]')?.content || '';
+		}
+
+	function markAsRead(notificationId) {
+		const csrfToken = getCsrfToken();
+		const csrfHeader = getCsrfHeader();
+
+		console.log('Marking as read:', notificationId);
+		console.log('CSRF Token:', csrfToken);
+		console.log('CSRF Header:', csrfHeader);
+
+		const headers = {
+			'Content-Type': 'application/json'
+		};
+		
+		// Only add CSRF header if both token and header name exist
+		if (csrfToken && csrfHeader) {
+			headers[csrfHeader] = csrfToken;
+		}
+
+		fetch(`/customer/notifications/${notificationId}/mark-read`, {
+			method: 'POST',
+			headers: headers
+		})
+			.then(response => response.json())
+			.then(data => {
+				console.log('Mark as read response:', data);
+				if (data.success) {
+					// Find button by onclick attribute
+					const allNotifications = document.querySelectorAll('.notification-item');
+					let targetNotification = null;
+					
+					allNotifications.forEach(item => {
+						const markBtn = item.querySelector(`button[onclick*="markAsRead(${notificationId})"]`);
+						if (markBtn) {
+							targetNotification = item;
+						}
+					});
+
+				if (targetNotification) {
+					console.log('Found notification item, updating...');
+					targetNotification.classList.remove('unread');
+					
+					const markBtn = targetNotification.querySelector(`button[onclick*="markAsRead(${notificationId})"]`);
+					if (markBtn) {
+						markBtn.remove();
+						console.log('Removed mark as read button');
+					}
+					
+					// Find ALL spans in notification-meta and remove the one with "Unread"
+					const allSpans = targetNotification.querySelectorAll('.notification-meta span');
+					allSpans.forEach(span => {
+						if (span.textContent.includes('Unread')) {
+							span.remove();
+							console.log('Removed unread indicator');
+						}
+					});
+				}
+					
+					// Update unread count badge
+					if (data.unreadCount !== undefined) {
+						const unreadBadge = document.querySelector('.unread-badge');
+						const topBadge = document.querySelector('.notification-badge');
+						
+						if (data.unreadCount > 0) {
+							if (unreadBadge) unreadBadge.textContent = data.unreadCount;
+							if (topBadge) topBadge.textContent = data.unreadCount;
+						} else {
+							if (unreadBadge) unreadBadge.remove();
+							if (topBadge) topBadge.remove();
+						}
+						
+						// Update bulk actions info
+						const bulkInfo = document.querySelector('.bulk-actions-info strong');
+						if (bulkInfo) {
+							bulkInfo.textContent = data.unreadCount;
+						}
+						
+						// Hide bulk actions if no unread
+						if (data.unreadCount === 0) {
+							const bulkActions = document.querySelector('.bulk-actions');
+							if (bulkActions) bulkActions.style.display = 'none';
+						}
+					}
+				}
+			})
+			.catch(error => {
+				console.error('Error marking as read:', error);
+			});
+	}
+
+	function markAllAsRead() {
+		const csrfToken = getCsrfToken();
+		const csrfHeader = getCsrfHeader();
+
+		console.log('Marking all as read...');
+		console.log('CSRF Token:', csrfToken);
+		console.log('CSRF Header:', csrfHeader);
+
+		const headers = {
+			'Content-Type': 'application/json'
+		};
+		
+		// Only add CSRF header if both token and header name exist
+		if (csrfToken && csrfHeader) {
+			headers[csrfHeader] = csrfToken;
+		}
+
+		fetch('/customer/notifications/mark-all-read', {
+			method: 'POST',
+			headers: headers
+		})
+			.then(response => response.json())
+			.then(data => {
+				console.log('Mark all response:', data);
+				if (data.success) {
+					// Update UI without reload
+					const notificationItems = document.querySelectorAll('.notification-item.unread');
+					console.log('Found unread items:', notificationItems.length);
+					
+				notificationItems.forEach(item => {
+					item.classList.remove('unread');
+					const markBtn = item.querySelector('button[onclick*="markAsRead"]');
+					if (markBtn) markBtn.remove();
+					
+					// Find ALL spans in notification-meta and remove the one with "Unread"
+					const allSpans = item.querySelectorAll('.notification-meta span');
+					allSpans.forEach(span => {
+						if (span.textContent.includes('Unread')) {
+							span.remove();
+						}
+					});
+				});
+					
+					// Hide unread badges
+					const unreadBadge = document.querySelector('.unread-badge');
+					const topBadge = document.querySelector('.notification-badge');
+					if (unreadBadge) unreadBadge.remove();
+					if (topBadge) topBadge.remove();
+					
+					// Hide bulk actions
+					const bulkActions = document.querySelector('.bulk-actions');
+					if (bulkActions) bulkActions.style.display = 'none';
+				}
+			})
+			.catch(error => {
+				console.error('Error marking all as read:', error);
+			});
+	}
+
+	function deleteNotification(notificationId) {
+		const csrfToken = getCsrfToken();
+		const csrfHeader = getCsrfHeader();
+
+		console.log('Deleting notification:', notificationId);
+		console.log('CSRF Token:', csrfToken);
+		console.log('CSRF Header:', csrfHeader);
+
+		const headers = {
+			'Content-Type': 'application/json'
+		};
+		
+		// Only add CSRF header if both token and header name exist
+		if (csrfToken && csrfHeader) {
+			headers[csrfHeader] = csrfToken;
+		}
+
+		fetch(`/customer/notifications/${notificationId}`, {
+			method: 'DELETE',
+			headers: headers
+		})
+			.then(response => response.json())
+			.then(data => {
+				console.log('Delete response:', data);
+				if (data.success) {
+					// Find notification item
+					const allNotifications = document.querySelectorAll('.notification-item');
+					let targetNotification = null;
+					
+					allNotifications.forEach(item => {
+						const deleteBtn = item.querySelector(`button[onclick*="deleteNotification(${notificationId})"]`);
+						if (deleteBtn) {
+							targetNotification = item;
+						}
+					});
+
+					if (targetNotification) {
+						targetNotification.style.transition = 'opacity 0.3s, transform 0.3s';
+						targetNotification.style.opacity = '0';
+						targetNotification.style.transform = 'translateX(20px)';
+						setTimeout(() => {
+							targetNotification.remove();
+							// Check if list is empty
+							const remainingItems = document.querySelectorAll('.notification-item');
+							if (remainingItems.length === 0) {
+								const emptyState = document.querySelector('.empty-state');
+								if (emptyState) emptyState.style.display = 'block';
+							}
+						}, 300);
+					}
+				}
+			})
+			.catch(error => {
+				console.error('Error deleting notification:', error);
+			});
+	}
+	</script>
+
+	<script>
+		// User menu toggle (from dashboard)
+		(function () {
+			const btn = document.getElementById('userMenuBtn');
+			const menu = document.getElementById('userDropdown');
+			function close() { if (menu) { menu.style.display = 'none'; btn && btn.setAttribute('aria-expanded', 'false'); } }
+			function toggle() { if (!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block' : 'none'; btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false'); }
+			if (btn) { btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); }); }
+			document.addEventListener('click', close);
+			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+		})();
+
+		// VNPay topup function (from dashboard)
+		function topupPrompt(e) {
+			e.preventDefault();
+			const v = prompt('Enter amount to top up (VND):', '200000');
+			if (!v) return false;
+			const clean = v.replace(/[^0-9]/g, '');
+			if (!clean) {
+				alert('Please enter a valid amount');
+				return false;
+			}
+			document.getElementById('topupAmountInput').value = clean;
+			e.target.submit();
+			return true;
+		}
+	</script>
+</body>
+
+</html>
+

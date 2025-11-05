@@ -10,6 +10,10 @@ import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -22,6 +26,8 @@ import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Controller
 public class CustomerReviewsController {
@@ -36,13 +42,24 @@ public class CustomerReviewsController {
     private ProductReviewsRepository productReviewsRepository;
     
     @Autowired
+    private banhangrong.su25.Repository.NotificationRepository notificationRepository;
+    
+    @Autowired
     private ProductsRepository productsRepository;
     
     @Autowired
     private ProductImagesRepository productImagesRepository;
 
     @GetMapping("/customer/reviews")
-    public String reviews(Model model) {
+    public String reviews(
+            @RequestParam(defaultValue = "newest") String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
+            @RequestParam(required = false) String search,
+            Model model) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
@@ -54,10 +71,66 @@ public class CustomerReviewsController {
             
             Users user = userOptional.get();
             
-            // Lấy tất cả reviews của user hiện tại
-            List<ProductReviews> userReviews = productReviewsRepository.findByUserIdOrderByCreatedAtDesc(user.getUserId());
+            // Normalize filter parameters (convert empty strings to null)
+            Integer ratingFilter = (rating != null) ? rating : null;
+            String fromDateFilter = (fromDate != null && !fromDate.trim().isEmpty()) ? fromDate : null;
+            String toDateFilter = (toDate != null && !toDate.trim().isEmpty()) ? toDate : null;
+            String searchFilter = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
             
-            // Lấy thông tin sản phẩm cho mỗi review
+            // Convert date strings to LocalDateTime for query (at start/end of day)
+            LocalDateTime fromDateTime = null;
+            if (fromDateFilter != null) {
+                try {
+                    LocalDate date = LocalDate.parse(fromDateFilter);
+                    fromDateTime = date.atStartOfDay();
+                } catch (Exception e) {
+                    // Ignore parsing errors
+                }
+            }
+            
+            LocalDateTime toDateTime = null;
+            if (toDateFilter != null) {
+                try {
+                    LocalDate date = LocalDate.parse(toDateFilter);
+                    toDateTime = date.atTime(23, 59, 59);
+                } catch (Exception e) {
+                    // Ignore parsing errors
+                }
+            }
+            
+            // Determine sorting
+            Sort sort;
+            switch (sortBy) {
+                case "oldest":
+                    sort = Sort.by("createdAt").ascending();
+                    break;
+                case "rating_high":
+                    sort = Sort.by("rating").descending().and(Sort.by("createdAt").descending());
+                    break;
+                case "rating_low":
+                    sort = Sort.by("rating").ascending().and(Sort.by("createdAt").descending());
+                    break;
+                case "newest":
+                default:
+                    sort = Sort.by("createdAt").descending();
+                    break;
+            }
+            
+            // Create pageable with sorting
+            Pageable pageable = PageRequest.of(page, size, sort);
+            
+            // Get reviews of current user with pagination and filters
+            Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserIdWithFilters(
+                user.getUserId(),
+                ratingFilter,
+                fromDateTime,
+                toDateTime,
+                searchFilter,
+                pageable
+            );
+            List<ProductReviews> userReviews = reviewsPage.getContent();
+            
+            // Get product information for each review
             Map<Long, Products> productsMap = new HashMap<>();
             Map<Long, String> productImagesMap = new HashMap<>();
             
@@ -67,10 +140,10 @@ public class CustomerReviewsController {
                         productsMap.put(review.getProductId(), product);
                     });
                     
-                    // Lấy hình ảnh chính của sản phẩm
+                    // Get primary image of the product
                     List<ProductImages> primaryImages = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(review.getProductId());
                     if (primaryImages.isEmpty()) {
-                        // Nếu không có hình chính, lấy hình đầu tiên
+                        // If no primary image, get the first image
                         List<ProductImages> firstImages = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(review.getProductId());
                         if (!firstImages.isEmpty()) {
                             productImagesMap.put(review.getProductId(), firstImages.get(0).getImageUrl());
@@ -86,9 +159,23 @@ public class CustomerReviewsController {
             
             model.addAttribute("user", user);
             model.addAttribute("cartCount", cartCount);
+            model.addAttribute("unreadCount", notificationRepository.countByUserIdAndIsRead(user.getUserId(), false));
             model.addAttribute("reviews", userReviews);
             model.addAttribute("productsMap", productsMap);
             model.addAttribute("productImagesMap", productImagesMap);
+            
+            // Pagination attributes
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", reviewsPage.getTotalPages());
+            model.addAttribute("totalItems", reviewsPage.getTotalElements());
+            model.addAttribute("pageSize", size);
+            model.addAttribute("sortBy", sortBy);
+            
+            // Filter attributes
+            model.addAttribute("filterRating", ratingFilter);
+            model.addAttribute("filterFromDate", fromDateFilter);
+            model.addAttribute("filterToDate", toDateFilter);
+            model.addAttribute("search", searchFilter);
             
             return "customer/reviews";
         } catch (Exception e) {
