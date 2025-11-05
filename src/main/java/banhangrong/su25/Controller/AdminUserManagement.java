@@ -375,19 +375,67 @@ public class AdminUserManagement {
             redirectAttributes.addFlashAttribute("error", "User is already deactivated");
             return "redirect:/admin/user";
         }
+        String reason = request.getParameter("reason");
         userService.deactiveUserById(user);
         redirectAttributes.addFlashAttribute("success", "Deactivated user successfully");
-
         String subject = "BanHangRong - Your Account Has Been Deactivated";
         String message = """
                     <div style="font-family: Arial,sans-serif; color:#333;">
                         <h3 style="color:#d9534f;">⚠️ Tài khoản của bạn đã bị vô hiệu hóa</h3>
                         <p>Xin chào <b>%s</b>,</p>
-                        <p>Tài khoản của bạn trên hệ thống <b>BanHangRong</b> đã bị <b>vô hiệu hóa (deactivated)</b> bởi quản trị viên.</p>
+                        <p>Tài khoản của bạn trên hệ thống <b>BanHangRong</b> đã bị <b>vô hiệu hóa (deactivated)</b> bởi quản trị viên. Tại vì: </p>
+                        <p>%s</p>
                         <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
                             <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
                         </p>
                         <p>Bạn sẽ không thể đăng nhập cho đến khi tài khoản được kích hoạt lại.</p>
+                        <hr>
+                        <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ <b>BanHangRong</b></p>
+                    </div>
+                """.formatted(user.getUsername(),reason);
+
+        try {
+            emailService.sendEmail(new Email(user.getEmail(), subject, message));
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while sending email: " + e.getMessage());
+        }
+
+        return "redirect:/admin/user";
+    }
+    @PostMapping("/active")
+    public String activeUser(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        String sId = request.getParameter("id");
+
+        if (sId == null || sId.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "User not found");
+            return "redirect:/admin/user";
+        }
+
+        Long id = Long.parseLong(sId);
+        Users user = userService.findById(id);
+
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "User not found");
+            return "redirect:/admin/user";
+        }
+        if (user.getIsActive()) {
+            redirectAttributes.addFlashAttribute("error", "User is already activated");
+            return "redirect:/admin/user";
+        }
+        user.setIsActive(true);
+        userService.save(user) ;
+        redirectAttributes.addFlashAttribute("success", "Activated user successfully");
+
+        String subject = "BanHangRong - Your Account Has Been Activated";
+        String message = """
+                    <div style="font-family: Arial,sans-serif; color:#333;">
+                        <h3 style="color:#00A86B;"> Tài khoản của bạn đã được mở lại.</h3>
+                        <p>Xin chào <b>%s</b>,</p>
+                        <p>Tài khoản của bạn trên hệ thống <b>BanHangRong</b> đã được <b>mở lại </b> bởi quản trị viên.</p>
+                        <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc cần được hỗ trợ, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi qua email:
+                            <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a>.
+                        </p>
+                        <p>Bây giờ bạn có thể đăng nhập lại và sử dụng như bình thường.</p>
                         <hr>
                         <p style="font-size:13px;color:#777;">Trân trọng,<br>Đội ngũ <b>BanHangRong</b></p>
                     </div>
@@ -401,6 +449,5 @@ public class AdminUserManagement {
 
         return "redirect:/admin/user";
     }
-
 
 }
