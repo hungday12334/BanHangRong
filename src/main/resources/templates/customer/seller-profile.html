@@ -518,7 +518,7 @@
 							style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 					</form>
 				</div>
-				<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge"
+				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
 					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
 			</div>
 		</div>
@@ -566,7 +566,7 @@
 
 					<!-- Column 3: Sales Stats -->
 					<div class="seller-sales">
-						<div class="sales-label">đã bán</div>
+						<div class="sales-label">sold</div>
 						<div class="sales-value" th:text="${totalSales != null ? totalSales : '0'}">100</div>
 						<div class="sales-unit">product</div>
 					</div>
@@ -625,13 +625,13 @@
 		// Top-up prompt
 		function topupPrompt(event) {
 			event.preventDefault();
-			const amount = prompt('Nhập số tiền bạn muốn nạp (VND):');
+			const amount = prompt('Enter the amount you want to top up (VND):');
 			if (amount && !isNaN(amount) && parseInt(amount) > 0) {
 				document.getElementById('topupAmountInput').value = amount;
 				event.target.submit();
 				return true;
 			}
-			alert('Vui lòng nhập số tiền hợp lệ');
+			alert('Please enter a valid amount');
 			return false;
 		}
 	</script>

@@ -59,7 +59,7 @@ public class CustomerDashboardController {
                                     @RequestParam(name = "size", required = false, defaultValue = "15") int size,
                                     @RequestParam(name = "search", required = false) String search,
                                     Model model) {
-        // Kiểm tra email verified cho CUSTOMER
+        // Check email verification for CUSTOMER
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Users currentUser = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -134,7 +134,7 @@ public class CustomerDashboardController {
                                @RequestParam(name = "status", required = false) String status,
                                Model model) {
         try {
-            // Kiểm tra authentication
+            // Check authentication
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             Users currentUser = null;
             if (auth != null && auth.isAuthenticated()) {
@@ -142,12 +142,12 @@ public class CustomerDashboardController {
                 currentUser = usersRepository.findByUsername(username).orElse(null);
                 if (currentUser == null) {
                     return "redirect:/login";
-                }
-            } else {
-                return "redirect:/login";
             }
+        } else {
+            return "redirect:/login";
+        }
 
-        // Lấy danh sách orders của user hiện tại với search và filter
+        // Get list of orders for current user with search and filter
         PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
                 Sort.by(Sort.Order.desc("createdAt")));
         
@@ -168,7 +168,7 @@ public class CustomerDashboardController {
         
         orders = ordersPage.getContent();
 
-        // Lấy order items cho mỗi order
+        // Get order items for each order
         java.util.Map<Long, List<OrderItems>> orderItemsMap = new java.util.HashMap<>();
         java.util.Map<Long, String> productNamesMap = new java.util.HashMap<>();
         java.util.Map<Long, Products> productsMap = new java.util.HashMap<>();
@@ -177,7 +177,7 @@ public class CustomerDashboardController {
             List<OrderItems> items = orderItemsRepository.findByOrderId(order.getOrderId());
             orderItemsMap.put(order.getOrderId(), items);
             
-            // Lấy tên sản phẩm và thông tin sản phẩm
+            // Get product name and product information
             for (OrderItems item : items) {
                 if (item.getProductId() != null) {
                     productsRepository.findById(item.getProductId()).ifPresent(product -> {

@@ -657,7 +657,7 @@
 			<div class="pagination" th:if="${totalPages > 1}">
 				<a th:if="${currentPage > 0}"
 					th:href="${'/customer/notifications?page=' + (currentPage - 1) + '&size=' + (size != null ? size : 4) + (currentSortBy != null and currentSortBy != '' ? '&sortBy=' + currentSortBy : '') + (currentType != null and currentType != '' ? '&type=' + currentType : '') + (currentIsRead != null and currentIsRead != '' ? '&isRead=' + currentIsRead : '') + (currentStartDate != null and currentStartDate != '' ? '&startDate=' + currentStartDate : '') + (currentEndDate != null and currentEndDate != '' ? '&endDate=' + currentEndDate : '')}">«
-					Trước</a>
+					Previous</a>
 
 				<th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
 					<span th:if="${i == currentPage}" class="active" th:text="${i + 1}">1</span>

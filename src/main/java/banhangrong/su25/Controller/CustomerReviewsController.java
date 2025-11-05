@@ -119,7 +119,7 @@ public class CustomerReviewsController {
             // Create pageable with sorting
             Pageable pageable = PageRequest.of(page, size, sort);
             
-            // Lấy reviews của user hiện tại với pagination và filters
+            // Get reviews of current user with pagination and filters
             Page<ProductReviews> reviewsPage = productReviewsRepository.findByUserIdWithFilters(
                 user.getUserId(),
                 ratingFilter,
@@ -130,7 +130,7 @@ public class CustomerReviewsController {
             );
             List<ProductReviews> userReviews = reviewsPage.getContent();
             
-            // Lấy thông tin sản phẩm cho mỗi review
+            // Get product information for each review
             Map<Long, Products> productsMap = new HashMap<>();
             Map<Long, String> productImagesMap = new HashMap<>();
             
@@ -140,10 +140,10 @@ public class CustomerReviewsController {
                         productsMap.put(review.getProductId(), product);
                     });
                     
-                    // Lấy hình ảnh chính của sản phẩm
+                    // Get primary image of the product
                     List<ProductImages> primaryImages = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(review.getProductId());
                     if (primaryImages.isEmpty()) {
-                        // Nếu không có hình chính, lấy hình đầu tiên
+                        // If no primary image, get the first image
                         List<ProductImages> firstImages = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(review.getProductId());
                         if (!firstImages.isEmpty()) {
                             productImagesMap.put(review.getProductId(), firstImages.get(0).getImageUrl());

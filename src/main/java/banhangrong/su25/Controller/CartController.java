@@ -312,7 +312,7 @@ public class CartController {
         Orders savedOrder = ordersRepository.save(order);
         System.out.println("[Demo Checkout] Created order: " + savedOrder.getOrderId());
         
-        // Gửi thông báo đặt hàng thành công
+        // Send order success notification
         try {
             String orderCode = "ORD" + savedOrder.getOrderId();
             notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);

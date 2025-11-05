@@ -984,10 +984,10 @@
                             <!-- Search Box -->
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
-                                    🔎 Tìm kiếm
+                                    🔎 Search
                                 </label>
                                 <input type="text" name="search" class="form-control" 
-                                       placeholder="Tên sản phẩm..." 
+                                       placeholder="Product name..." 
                                        th:value="${search}" />
             </div>
             
@@ -1009,7 +1009,7 @@
                             <!-- Date From -->
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
-                                    📅 Từ ngày
+                                    📅 From Date
                                 </label>
                                 <input type="date" name="fromDate" class="form-control" th:value="${filterFromDate}">
                     </div>
@@ -1017,7 +1017,7 @@
                             <!-- Date To -->
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
-                                    📅 Đến ngày
+                                    📅 To Date
                                 </label>
                                 <input type="date" name="toDate" class="form-control" th:value="${filterToDate}">
                     </div>
@@ -1025,13 +1025,13 @@
                             <!-- Sort By -->
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">
-                                    📊 Sắp xếp
+                                    📊 Sort By
                                 </label>
                                 <select name="sortBy" class="form-control">
-                                    <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
-                                    <option value="oldest" th:selected="${sortBy == 'oldest'}">Cũ nhất</option>
-                                    <option value="rating_high" th:selected="${sortBy == 'rating_high'}">Rating cao → thấp</option>
-                                    <option value="rating_low" th:selected="${sortBy == 'rating_low'}">Rating thấp → cao</option>
+                                    <option value="newest" th:selected="${sortBy == 'newest'}">Newest</option>
+                                    <option value="oldest" th:selected="${sortBy == 'oldest'}">Oldest</option>
+                                    <option value="rating_high" th:selected="${sortBy == 'rating_high'}">Rating High → Low</option>
+                                    <option value="rating_low" th:selected="${sortBy == 'rating_low'}">Rating Low → High</option>
                                 </select>
                 </div>
                         </div>
@@ -1041,10 +1041,10 @@
 
                         <div style="display: flex; gap: 12px; justify-content: center;">
                             <button type="submit" class="btn-primary">
-                                🔍 Tìm kiếm
+                                🔍 Search
                             </button>
                             <button type="button" class="btn-secondary" id="clearFilters">
-                                ✕ Xóa bộ lọc
+                                ✕ Clear Filters
                             </button>
                         </div>
                     </form>
@@ -1052,9 +1052,9 @@
 
                 <!-- Reviews Stats -->
                 <div class="reviews-summary" th:if="${reviews != null and !#lists.isEmpty(reviews)}">
-                    <h3>Tổng số đánh giá: <span th:text="${totalItems}">0</span> 
+                    <h3>Total Reviews: <span th:text="${totalItems}">0</span> 
                         <span style="color: var(--muted); font-size: 14px; font-weight: normal;">
-                            (Trang <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>)
+                            (Page <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>)
                         </span>
                     </h3>
             </div>
@@ -1115,20 +1115,20 @@
                 <!-- Pagination -->
                 <div class="pagination" th:if="${reviews != null and !#lists.isEmpty(reviews) and totalPages > 1}">
                     <div class="pagination-info">
-                        Hiển thị <span th:text="${#lists.size(reviews)}">0</span> trong tổng số <span th:text="${totalItems}">0</span> đánh giá
+                        Showing <span th:text="${#lists.size(reviews)}">0</span> of <span th:text="${totalItems}">0</span> reviews
                     </div>
                     <div class="pagination-controls">
                         <!-- First Page -->
                         <a th:href="${'/customer/reviews?page=0&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage == 0} ? 'disabled' : ''"
                            class="page-btn"
-                           title="Trang đầu">«</a>
+                           title="First Page">«</a>
                         
                         <!-- Previous Page -->
                         <a th:href="${'/customer/reviews?page=' + (currentPage - 1) + '&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage == 0} ? 'disabled' : ''"
                            class="page-btn"
-                           title="Trang trước">‹</a>
+                           title="Previous Page">‹</a>
                         
                         <!-- Page Numbers -->
                         <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
@@ -1143,13 +1143,13 @@
                         <a th:href="${'/customer/reviews?page=' + (currentPage + 1) + '&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
                            class="page-btn"
-                           title="Trang sau">›</a>
+                           title="Next Page">›</a>
                         
                         <!-- Last Page -->
                         <a th:href="${'/customer/reviews?page=' + (totalPages - 1) + '&size=' + (pageSize != null ? pageSize : 10) + '&sortBy=' + (sortBy != null ? sortBy : 'newest') + (filterRating != null ? '&rating=' + filterRating : '') + (filterFromDate != null and filterFromDate != '' ? '&fromDate=' + filterFromDate : '') + (filterToDate != null and filterToDate != '' ? '&toDate=' + filterToDate : '') + (search != null and search != '' ? '&search=' + search : '')}" 
                            th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
                            class="page-btn"
-                           title="Trang cuối">»</a>
+                           title="Last Page">»</a>
                     </div>
                 </div>
             </div>
@@ -1308,7 +1308,7 @@
 
                     if (fromDate > toDate) {
                         e.preventDefault();
-                        alert('Từ ngày phải nhỏ hơn hoặc bằng Đến ngày');
+                        alert('From date must be less than or equal to To date');
                         fromDateInput.focus();
                         return false;
                     }
