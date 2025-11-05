@@ -7,37 +7,37 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface ProductReviewsRepository extends JpaRepository<ProductReviews, Long> {
     List<ProductReviews> findByProductIdOrderByCreatedAtDesc(Long productId);
 
-    // Tìm tất cả review cho sản phẩm của seller (JOIN với products)
+    // Find all reviews for seller's products (JOIN with products)
     @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId ORDER BY pr.createdAt DESC")
     List<ProductReviews> findBySellerId(@Param("sellerId") Long sellerId);
 
-    // PERF-01: Pagination cho findBySellerId
+    // PERF-01: Pagination for findBySellerId
     @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId")
     Page<ProductReviews> findBySellerId(@Param("sellerId") Long sellerId, Pageable pageable);
 
-    // Tìm review chưa được phản hồi
+    // Find reviews that haven't been responded to
     @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId AND pr.sellerResponse IS NULL ORDER BY pr.createdAt DESC")
     List<ProductReviews> findUnansweredReviews(@Param("sellerId") Long sellerId);
 
-    // PERF-01: Pagination cho findUnansweredReviews
+    // PERF-01: Pagination for findUnansweredReviews
     @Query("SELECT pr FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId AND pr.sellerResponse IS NULL")
     Page<ProductReviews> findUnansweredReviews(@Param("sellerId") Long sellerId, Pageable pageable);
 
-    // Đếm số review chưa phản hồi
+    // Count number of unanswered reviews
     @Query("SELECT COUNT(pr) FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId AND pr.sellerResponse IS NULL")
     Long countUnansweredReviews(@Param("sellerId") Long sellerId);
 
-    // Đếm tổng số review của seller
+    // Count total number of reviews for seller
     @Query("SELECT COUNT(pr) FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE p.sellerId = :sellerId")
     Long countBySellerId(@Param("sellerId") Long sellerId);
 
-    // Filter reviews với nhiều điều kiện (updated with rating range and customer name)
+    // Filter reviews with multiple conditions (updated with rating range and customer name)
     @Query("SELECT pr FROM ProductReviews pr " +
            "JOIN Products p ON pr.productId = p.productId " +
            "LEFT JOIN Users u ON pr.userId = u.userId " +
@@ -61,22 +61,40 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
                                         @Param("customerName") String customerName,
                                         Pageable pageable);
 
-    // Tìm review theo productId
+    // Find review by productId
     List<ProductReviews> findByProductId(Long productId);
 
-    // Tìm review theo userId
+    // Find review by userId
     List<ProductReviews> findByUserId(Long userId);
+    
+    // Find review by userId with pagination and sorting
+    Page<ProductReviews> findByUserId(Long userId, Pageable pageable);
+    
+    // Custom query for customer reviews with filters including search
+    @Query("SELECT pr FROM ProductReviews pr " +
+           "LEFT JOIN Products p ON pr.productId = p.productId " +
+           "WHERE pr.userId = :userId " +
+           "AND (:rating IS NULL OR pr.rating = :rating) " +
+           "AND (:fromDate IS NULL OR pr.createdAt >= :fromDate) " +
+           "AND (:toDate IS NULL OR pr.createdAt <= :toDate) " +
+           "AND (:search IS NULL OR :search = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<ProductReviews> findByUserIdWithFilters(@Param("userId") Long userId,
+                                                   @Param("rating") Integer rating,
+                                                   @Param("fromDate") LocalDateTime fromDate,
+                                                   @Param("toDate") LocalDateTime toDate,
+                                                   @Param("search") String search,
+                                                   Pageable pageable);
 
-    // Tìm review theo userId và sắp xếp theo thời gian tạo giảm dần
+    // Find review by userId and sort by creation time descending
     List<ProductReviews> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    // Kiểm tra sự tồn tại của review theo order item
+    // Check existence of review by order item
     boolean existsByOrderItemId(Long orderItemId);
 
-    // Kiểm tra sự tồn tại của review theo user và product
+    // Check existence of review by user and product
     boolean existsByUserIdAndProductId(Long userId, Long productId);
 
-    // FIX SEC-03: Check xem review có thuộc về seller này không
+    // FIX SEC-03: Check if review belongs to this seller
     @Query("SELECT CASE WHEN COUNT(pr) > 0 THEN true ELSE false END FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE pr.reviewId = :reviewId AND p.sellerId = :sellerId")
     boolean existsByReviewIdAndSellerId(@Param("reviewId") Long reviewId, @Param("sellerId") Long sellerId);
 }

@@ -101,9 +101,16 @@ public class ProductSearchController {
                     .map(String::toLowerCase)
                     .collect(Collectors.toSet());
             if (!wanted.isEmpty()) {
+                final boolean wantCancelGroup = wanted.contains("canceller") || wanted.contains("cancel") || wanted.contains("cancelled") || wanted.contains("canceled");
+                final boolean wantPending = wanted.contains("pending");
                 all = all.stream().filter(p -> {
                     String pst = Optional.ofNullable(p.getStatus()).orElse("").trim().toLowerCase();
-                    return wanted.contains(pst);
+                    String cmp = pst.isEmpty() ? "pending" : pst; // legacy rows treat empty as pending
+                    if (wanted.contains(cmp)) return true;
+                    if (wantCancelGroup && pst.contains("cancel")) return true; // group all cancel-like statuses
+                    // If explicitly asked for 'pending', also include truly empty/null statuses
+                    if (wantPending && pst.isEmpty()) return true;
+                    return false;
                 }).collect(Collectors.toList());
             }
         }
@@ -132,7 +139,7 @@ public class ProductSearchController {
         List<ProductListItem> content = slice.stream()
                 .map(p -> map(p, catName.getOrDefault(p.getProductId(), null)))
                 .collect(Collectors.toList());
-        return new PageImpl<>(content, PageRequest.of(Math.max(0,page), Math.max(1,size)), all.size());
+    return new PageImpl<ProductListItem>(content, PageRequest.of(Math.max(0,page), Math.max(1,size)), all.size());
     }
 
     // Categories for filter dropdown

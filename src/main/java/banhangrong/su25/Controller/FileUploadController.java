@@ -1,4 +1,4 @@
-package banhangrong.su25.ontroller;
+package banhangrong.su25.Controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

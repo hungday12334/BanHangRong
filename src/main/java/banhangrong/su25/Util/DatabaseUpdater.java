@@ -20,10 +20,10 @@ public class DatabaseUpdater implements CommandLineRunner {
         try {
             System.out.println("Setting up complete review system database...");
             
-            // Đọc script SQL từ file sql/review_system_complete.sql
+            // Read SQL script from file sql/review_system_complete.sql
             String sqlScript = new String(Files.readAllBytes(Paths.get("sql/review_system_complete.sql")));
             
-            // Chia script thành các câu lệnh riêng biệt
+            // Split script into separate statements
             String[] statements = sqlScript.split(";");
             
             for (String statement : statements) {

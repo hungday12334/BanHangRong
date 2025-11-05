@@ -29,6 +29,7 @@
         return s.split(',').map(x => x.trim()).filter(Boolean);
     }
 
+    let revenueChart = null;
     function initChart() {
         const canvas = document.getElementById('revenueChart');
         if (!canvas || typeof Chart === 'undefined') return;
@@ -39,7 +40,7 @@
         // Resize height gently on small screens
         if (window.innerWidth < 820) canvas.height = 160;
 
-        new Chart(ctx, {
+        revenueChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels,
@@ -60,11 +61,88 @@
                 plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
                 scales: {
                     x: { display: true, grid: { display: false }, ticks: { color: '#a8b0d3', maxTicksLimit: 8 } },
-                    y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => `$${Number(v).toLocaleString('en-US')}` } }
+                    y: { display: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#a8b0d3', callback: v => `${Number(v).toLocaleString('vi-VN')} đ` } }
                 },
                 elements: { line: { cubicInterpolationMode: 'monotone' } }
             }
         });
+    }
+
+    function getSellerId() {
+        const userIdEl = document.getElementById('userId');
+        if (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) {
+            const v = Number(userIdEl.textContent.trim());
+            if (!Number.isNaN(v)) return v;
+        }
+        const sellerIdEl = document.getElementById('sellerId');
+        if (sellerIdEl && sellerIdEl.textContent && sellerIdEl.textContent.trim()) {
+            const v = Number(sellerIdEl.textContent.trim());
+            if (!Number.isNaN(v)) return v;
+        }
+        return null;
+    }
+
+    async function updateRevenueChart(days) {
+        const sid = getSellerId();
+        const canvas = document.getElementById('revenueChart');
+        if (!sid || !canvas || !window.fetch || !window.Chart || !revenueChart) return;
+        const body = canvas.closest('.card');
+        const overlay = document.createElement('div');
+        overlay.className = 'panel-loading-overlay';
+        overlay.innerHTML = '<div class="mini-spinner"></div><div>Loading...</div>';
+        try {
+            body && body.appendChild(overlay);
+        } catch(_){}
+        try {
+            const res = await fetch(`/api/seller/${sid}/revenue-series?days=${encodeURIComponent(days)}`);
+            if (!res.ok) throw new Error('Failed to load revenue series');
+            const json = await res.json();
+            const labels = Array.isArray(json.labels) ? json.labels : [];
+            const data = Array.isArray(json.data) ? json.data.map(Number) : [];
+            revenueChart.data.labels = labels;
+            if (revenueChart.data.datasets && revenueChart.data.datasets[0]) {
+                revenueChart.data.datasets[0].data = data;
+            }
+            revenueChart.update();
+            // Also mirror back to data-* so SSR fallback stays roughly in sync
+            canvas.setAttribute('data-labels', labels.join(','));
+            canvas.setAttribute('data-data', data.join(','));
+        } catch (e) {
+            console.error(e);
+            showToast && showToast('Không tải được dữ liệu doanh thu', 'error');
+        } finally {
+            try { overlay.style.opacity = '0'; setTimeout(()=> overlay.remove(), 200); } catch(_){}
+        }
+    }
+
+    function bindRevenueRange() {
+        const sel = document.getElementById('revenueRange');
+        const custom = document.getElementById('revenueRangeCustom');
+        if (!sel) return;
+        function apply(val) {
+            let days = 15;
+            if (val === 'custom' && custom && custom.value) {
+                const n = Number(custom.value);
+                if (!Number.isNaN(n) && n > 0) days = Math.min(n, 365);
+            } else {
+                const n = Number(val);
+                if (!Number.isNaN(n) && n > 0) days = n;
+            }
+            updateRevenueChart(days);
+        }
+        sel.addEventListener('change', () => {
+            const v = sel.value;
+            if (v === 'custom') {
+                if (custom) { custom.style.display = ''; custom.focus(); }
+            } else {
+                if (custom) custom.style.display = 'none';
+                apply(v);
+            }
+        });
+        if (custom) {
+            custom.addEventListener('change', () => apply('custom'));
+            custom.addEventListener('keyup', (e) => { if (e.key === 'Enter') apply('custom'); });
+        }
     }
 
     // Toast utility
@@ -340,6 +418,7 @@
                 // Start animations AFTER loader removed
                 document.querySelectorAll('[data-count]').forEach(animateCount);
                 initChart();
+                bindRevenueRange();
                 document.querySelectorAll('.progress span').forEach(span => {
                     const w = span.getAttribute('data-target-width') || span.style.width || '0%';
                     span.style.width = '0%'; requestAnimationFrame(()=> span.style.width = w);
@@ -595,14 +674,18 @@
             document.getElementById('pm_description').value = p.description ?? '';
             const st = document.getElementById('pm_status');
             if (st) {
-                const stVal = (p.status || '').toString().toLowerCase();
+                const raw = (p.status || '').toString().toLowerCase().trim();
+                const stVal = raw === 'canceled' ? 'cancelled' : raw; // normalize US -> UK spelling
                 let statusText = 'Pending';
                 let badgeClass = 'badge';
                 if (stVal === 'public') { statusText = 'Public'; badgeClass = 'badge pill good'; }
                 else if (stVal === 'hidden') { statusText = 'Hidden'; badgeClass = 'badge'; }
+                else if (stVal === 'pending') { statusText = 'Pending'; badgeClass = 'badge'; }
+                else if (stVal === 'cancelled') { statusText = 'Cancelled'; badgeClass = 'badge pill danger'; }
+                else { statusText = (p.status || 'Pending'); badgeClass = 'badge'; }
                 st.textContent = statusText;
                 st.className = badgeClass;
-                st.dataset.status = stVal;
+                st.dataset.status = stVal || 'pending';
             }
             __originalProduct = normalizeProductObj(p);
         }
@@ -771,7 +854,15 @@
                 if (!confirm('Delete this product?')) return;
                 const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
                 if (res.ok) { closeModal(productModal); showToast('Product deleted', 'success'); setTimeout(() => refreshMyProducts(), 350); }
-                else { showToast('Failed to delete product', 'error'); }
+                else {
+                    try {
+                        const body = await res.json().catch(()=>({}));
+                        const msg = body && (body.message || body.error) ? (body.message || body.error) : 'Failed to delete product';
+                        showToast(msg, 'error');
+                    } catch(_) {
+                        showToast('Failed to delete product', 'error');
+                    }
+                }
             });
         }
 
@@ -802,7 +893,7 @@
                 document.getElementById('om_userId').textContent = user.username || (user.userId ? `User #${user.userId}` : '');
                 // In seller view, show sellerAmount if present; fallback to totalAmount
                 const amtVal = (o.sellerAmount != null ? o.sellerAmount : o.totalAmount);
-                const amt = (amtVal == null) ? '' : Number(amtVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const amt = (amtVal == null) ? '' : `${Number(amtVal).toLocaleString('vi-VN')} đ`;
                 document.getElementById('om_totalAmount').textContent = amt;
                 document.getElementById('om_createdAt').textContent = o.createdAt ?? '';
                 const items = Array.isArray(data.items) ? data.items : (data.items && data.items.content ? data.items.content : []);
@@ -823,6 +914,47 @@
             // View-only: no save/delete handlers for orders
         }
 
+        // ===== My Products: sorting state + helpers =====
+        const myProductsSort = { key: 'productId', dir: 'asc' }; // dir: 'asc' | 'desc'
+        function sortProducts(list) {
+            const key = myProductsSort.key || 'productId';
+            const dir = myProductsSort.dir === 'desc' ? -1 : 1;
+            const toNum = (v) => {
+                const n = Number(v);
+                return Number.isFinite(n) ? n : 0;
+            };
+            const get = (p) => {
+                if (key === 'name') return (p.name || '').toString();
+                if (key === 'price') return toNum(p.price);
+                if (key === 'quantity') return toNum(p.quantity);
+                return toNum(p.productId); // default productId
+            };
+            return (Array.isArray(list) ? list.slice() : []).sort((a,b) => {
+                const va = get(a);
+                const vb = get(b);
+                if (typeof va === 'string' || typeof vb === 'string') {
+                    return va.toString().localeCompare(vb.toString(), undefined, { sensitivity: 'base' }) * dir;
+                }
+                if (va < vb) return -1 * dir;
+                if (va > vb) return 1 * dir;
+                return 0;
+            });
+        }
+        function updateMyProductsSortIndicators() {
+            document.querySelectorAll('#sectionMyProducts th.sortable').forEach(th => {
+                const span = th.querySelector('.sort-indicator');
+                const k = th.getAttribute('data-sort');
+                if (!span) return;
+                if (k === myProductsSort.key) {
+                    th.classList.add('sorted');
+                    span.textContent = myProductsSort.dir === 'desc' ? '▼' : '▲';
+                } else {
+                    th.classList.remove('sorted');
+                    span.textContent = '';
+                }
+            });
+        }
+
         // Load "My Products" list (reusable for refresh after CRUD)
         async function refreshMyProducts(showToastMsg = true) {
             const sellerIdEl = document.getElementById('sellerId');
@@ -832,11 +964,40 @@
             const res = await fetch(`/api/products?sellerId=${sellerId}`);
             if (!res.ok) { showToast('Failed to load your product list', 'error'); return; }
             const list = await res.json();
+            // Apply client-side status filter from dropdown (all/public/pending/hidden)
+            const statusSel = document.getElementById('myProductsStatusFilter');
+            const statusVal = (statusSel && statusSel.value) ? statusSel.value.toString().trim().toLowerCase() : 'all';
+            let filtered;
+            if (statusVal === 'all' || statusVal === '') {
+                // No filtering
+                filtered = list;
+            } else if (statusVal.startsWith('cancel')) {
+                // Group all variants that indicate cancellation (cancelled/canceled/canceller)
+                filtered = list.filter(p => ((p.status || '').toString().toLowerCase().includes('cancel')));
+            } else if (statusVal === 'pending') {
+                // Treat null/empty status as 'pending' for legacy rows
+                filtered = list.filter(p => {
+                    const pst = ((p.status || '').toString().trim().toLowerCase());
+                    return pst === 'pending' || pst === '';
+                });
+            } else {
+                filtered = list.filter(p => {
+                    const pst = ((p.status || '').toString().trim().toLowerCase());
+                    return pst === statusVal;
+                });
+            }
+            // Apply current sorting before rendering
+            filtered = sortProducts(filtered);
             const tbody = document.getElementById('tbMyProducts');
             const counter = document.getElementById('myProductsCount');
             if (!tbody) return;
             tbody.innerHTML = '';
-            list.forEach(p => {
+            if (!filtered.length) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" class="footer-note">Không có sản phẩm theo trạng thái đã chọn.</td>';
+                tbody.appendChild(tr);
+            }
+            filtered.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.setAttribute('data-product-id', p.productId);
@@ -844,25 +1005,132 @@
                 let statusHtml = '<span class="badge">Pending</span>';
                 if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
                 else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-                const price = (p.price ?? 0).toLocaleString('en-US');
-                tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>$${price}</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
+                else if (stVal.indexOf('cancel') !== -1) statusHtml = '<span class="badge warn">Cancelled</span>';
+                const price = (p.price ?? 0).toLocaleString('vi-VN');
+                tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
                 tbody.appendChild(tr);
             });
-            if (counter) counter.textContent = list.length;
+            if (counter) counter.textContent = filtered.length;
             // rebind row click to open product modal
             document.querySelectorAll('#tbMyProducts [data-product-id]').forEach(row => {
-                row.addEventListener('click', () => {
+                  row.addEventListener('click', () => {
                     const id = row.getAttribute('data-product-id');
                     loadProduct(id).then(() => openModal(productModal));
                 });
             });
             const pager = document.getElementById('pgMyProducts');
             if (pager) paginateTable(tbody, pager, 5);
-            if (showToastMsg) showToast(`Loaded ${list.length} of your products`, 'info', { duration: 2000 });
+            updateMyProductsSortIndicators();
+            if (showToastMsg) showToast(`Loaded ${filtered.length} of your products`, 'info', { duration: 2000 });
         }
 
-        // initial load
+    // initial load
         refreshMyProducts(false);
+    // Bind status filter change for My products
+    // Use direct listener when element exists, otherwise add a delegated fallback so dynamic insertion won't break filtering
+    (function bindMyProductsStatusFilter(){
+        const el = document.getElementById('myProductsStatusFilter');
+        if (el) {
+            el.addEventListener('change', () => refreshMyProducts(false));
+        } else {
+            // delegated fallback: listen for change events on document
+            document.addEventListener('change', function delegatedMyProdFilter(e){
+                const t = e.target || e.srcElement;
+                if (t && t.id === 'myProductsStatusFilter') {
+                    refreshMyProducts(false);
+                }
+            });
+        }
+    })();
+
+        // Bind sorting on My Products header
+        document.querySelectorAll('#sectionMyProducts th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.getAttribute('data-sort');
+                if (!key) return;
+                if (myProductsSort.key === key) {
+                    myProductsSort.dir = (myProductsSort.dir === 'asc') ? 'desc' : 'asc';
+                } else {
+                    myProductsSort.key = key; myProductsSort.dir = 'asc';
+                }
+                updateMyProductsSortIndicators();
+                refreshMyProducts(false);
+            });
+        });
+
+        // ===== Recent Orders: sorting =====
+        const recentOrdersSort = { key: 'date', dir: 'desc' };
+        function parseDateGuess(s) {
+            if (!s) return 0;
+            const t = s.toString().trim();
+            const n = Date.parse(t);
+            if (!Number.isNaN(n)) return n;
+            const m = t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+            if (m) {
+                const d = Number(m[1]); const mo = Number(m[2]); const y = Number(m[3].length===2? ('20'+m[3]) : m[3]);
+                const hh = Number(m[4]||0); const mm = Number(m[5]||0); const ss = Number(m[6]||0);
+                return new Date(y, mo-1, d, hh, mm, ss).getTime();
+            }
+            return 0;
+        }
+        function numFromText(el) {
+            const txt = (el && (el.innerText||el.textContent)) ? (el.innerText||el.textContent) : '';
+            const cleaned = txt.replace(/[^0-9.,-]/g,'').replace(/,/g,'');
+            const n = Number(cleaned);
+            return Number.isFinite(n) ? n : 0;
+        }
+        function sortRecentOrdersTable() {
+            const tbody = document.getElementById('tbRecentOrders');
+            const pager = document.getElementById('pgRecentOrders');
+            if (!tbody) return;
+            const rows = Array.from(tbody.querySelectorAll('tr'))
+                .filter(tr => !tr.classList.contains('filler-row') && !tr.querySelector('td.footer-note'));
+            const key = recentOrdersSort.key;
+            const dir = recentOrdersSort.dir === 'desc' ? -1 : 1;
+            rows.sort((a,b) => {
+                const tda = a.children;
+                const tdb = b.children;
+                let va=0, vb=0;
+                if (key === 'orderId') { va = numFromText(tda[0]); vb = numFromText(tdb[0]); }
+                else if (key === 'date') { va = parseDateGuess(tda[1]?.textContent); vb = parseDateGuess(tdb[1]?.textContent); }
+                else if (key === 'items') { va = numFromText(tda[2]); vb = numFromText(tdb[2]); }
+                else if (key === 'amount') { va = numFromText(tda[3]); vb = numFromText(tdb[3]); }
+                if (va < vb) return -1*dir; if (va > vb) return 1*dir; return 0;
+            });
+            // Re-render
+            tbody.innerHTML = '';
+            rows.forEach(tr => tbody.appendChild(tr));
+            if (pager) paginateTable(tbody, pager, 5);
+            updateRecentOrdersSortIndicators();
+        }
+        function updateRecentOrdersSortIndicators() {
+            document.querySelectorAll('#sectionTopAndRecent [data-block="recent-orders"] th.sortable').forEach(th => {
+                const span = th.querySelector('.sort-indicator');
+                const k = th.getAttribute('data-sort');
+                if (!span) return;
+                if (k === recentOrdersSort.key) {
+                    th.classList.add('sorted');
+                    span.textContent = recentOrdersSort.dir === 'desc' ? '▼' : '▲';
+                } else {
+                    th.classList.remove('sorted');
+                    span.textContent = '';
+                }
+            });
+        }
+        document.querySelectorAll('#sectionTopAndRecent [data-block="recent-orders"] th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.getAttribute('data-sort');
+                if (!key) return;
+                if (recentOrdersSort.key === key) {
+                    recentOrdersSort.dir = (recentOrdersSort.dir === 'asc') ? 'desc' : 'asc';
+                } else {
+                    recentOrdersSort.key = key; recentOrdersSort.dir = 'desc'; // default newest/highest first
+                }
+                sortRecentOrdersTable();
+            });
+        });
+        // Initialize indicators once (no re-render yet)
+        updateRecentOrdersSortIndicators();
 
         // === Avatar edit button hover ===
         const avatarWrap = document.querySelector('.avatar-edit-wrap');
@@ -948,6 +1216,7 @@
             '#profile': 'profilePanel',
             '#orders': 'ordersPanel',
             '#keys': 'keysPanel',
+            '#check-key': 'checkKeyPanel',
             '#products': 'productsPanel',
             '#gen-keys': 'generateKeysPanel',
             '#withdraw': 'withdrawPanel',
@@ -1157,6 +1426,274 @@
                 renderWithdrawUI(data);
             } catch(err) { showToast(String(err), 'error'); }
         });
+
+        // ===== Check Key panel logic =====
+        (function initCheckKeyPanel(){
+            const panel = document.getElementById('checkKeyPanel');
+            if (!panel) return;
+            const input = document.getElementById('ck_key');
+            const btnCheck = document.getElementById('ck_btnCheck');
+            const btnReset = document.getElementById('ck_btnReset');
+            const detailsBox = document.getElementById('ck_details');
+            const resultWrap = document.getElementById('ck_result');
+            const helper = document.getElementById('ck_helper');
+            const historyBody = document.getElementById('ck_history');
+            const historyPager = document.getElementById('ck_history_pager');
+            const productBox = document.getElementById('ck_product_display');
+
+            const dev = {
+                id: document.getElementById('ck_device_id'),
+                host: document.getElementById('ck_device_host'),
+                platform: document.getElementById('ck_device_platform'),
+                cpu: document.getElementById('ck_device_cpu'),
+                cores: document.getElementById('ck_device_cores'),
+                memory: document.getElementById('ck_device_memory'),
+                path: document.getElementById('ck_device_path'),
+                lastUsed: document.getElementById('ck_device_lastUsed'),
+                activated: document.getElementById('ck_device_activated')
+            };
+
+            const sellerIdEl = document.getElementById('sellerId');
+            const userIdEl = document.getElementById('userId');
+            const sellerId = (userIdEl && userIdEl.textContent && userIdEl.textContent.trim()) ? Number(userIdEl.textContent.trim()) : (sellerIdEl ? Number(sellerIdEl.textContent.trim()) : null);
+
+            let currentKey = '';
+            let lastLicenseId = null;
+
+            function setDevicePath(fullUrl, maxLen = 48){
+                try{
+                    const a = dev.path;
+                    if(!a) return;
+                    if(!fullUrl){ a.href = '#'; a.title = ''; a.textContent = '-'; return; }
+                    a.href = fullUrl; a.title = fullUrl;
+                    if(fullUrl.length <= maxLen){ a.textContent = fullUrl; return; }
+                    const keep = Math.max(8, Math.floor((maxLen - 3) / 2));
+                    const start = fullUrl.slice(0, keep);
+                    const end = fullUrl.slice(fullUrl.length - keep);
+                    a.textContent = start + '...' + end;
+                }catch(e){}
+            }
+
+            function renderDetails(d){
+                const safe = (v, def='-') => (v === null || v === undefined || String(v).trim?.() === '') ? def : v;
+                const active = !!(d.isActive ?? d.active);
+                const statusBadge = active ? '<span class="pill good">Active</span>' : '<span class="badge">Inactive</span>';
+                const price = (d.price ?? d.productPrice);
+                const priceHtml = (price != null) ? `${Number(price).toLocaleString('vi-VN')} đ` : '-';
+                // Expire: derive from licenseKey pattern PRD<productId>-yyyyMMdd-<random> if backend doesn't provide
+                function formatExpireFromAny(exp){
+                    if (!exp) return null;
+                    // Accept yyyyMMdd or yyyy-MM-dd
+                    try {
+                        let y,m,dd;
+                        if (/^\d{8}$/.test(exp)) { y = exp.slice(0,4); m = exp.slice(4,6); dd = exp.slice(6,8); }
+                        else if (/^\d{4}-\d{2}-\d{2}$/.test(exp)) { const [Y,M,D] = exp.split('-'); y=Y; m=M; dd=D; }
+                        else return null;
+                        return `${dd}/${m}/${y}`;
+                    } catch(_) { return null; }
+                }
+                function formatExpireFromKey(key){
+                    if (!key) return null;
+                    const parts = String(key).split('-');
+                    if (parts.length >= 2) {
+                        const raw = parts[1];
+                        if (raw && raw !== 'N/A' && /^\d{8}$/.test(raw)) {
+                            return `${raw.slice(6,8)}/${raw.slice(4,6)}/${raw.slice(0,4)}`;
+                        }
+                    }
+                    return null;
+                }
+                const backendExpireRaw = d.expireDate || d.expire || d.expirationDate;
+                const expire = formatExpireFromAny(backendExpireRaw) || formatExpireFromKey(d.licenseKey);
+                const activatedAt = d.activationDate || d.activatedAt;
+                detailsBox.innerHTML = `
+                    <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:8px;">
+                      <div><div class="label">License ID</div><div class="value">${safe(d.licenseId)}</div></div>
+                      <div><div class="label">Status</div><div class="value">${statusBadge}</div></div>
+                      <div style="grid-column:1/span 2"><div class="label">Key</div><div class="value" style="font-family:monospace;word-break:break-all;">${safe(d.licenseKey)}</div></div>
+                      <div><div class="label">Product</div><div class="value">${safe(d.productName)}</div></div>
+                      <div><div class="label">Price</div><div class="value">${priceHtml}</div></div>
+                      <div><div class="label">Order</div><div class="value">${safe(d.orderId)}</div></div>
+                      <div><div class="label">User</div><div class="value">${safe(d.username || d.userName)}</div></div>
+                      <div><div class="label">Expire</div><div class="value">${safe(expire)}</div></div>
+                      <div><div class="label">Activated</div><div class="value">${safe(activatedAt)}</div></div>
+                    </div>`;
+                // Product card (if available)
+                const img = d.productImage || d.imageUrl;
+                productBox.innerHTML = '';
+                if (d.productId || d.productName || img) {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.style.padding = '10px';
+                    div.innerHTML = `
+                        <div style="font-weight:700;margin-bottom:6px;">Product</div>
+                        <div class="thumb" style="width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:10px;background:#0e1430;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
+                          ${img ? `<img src="${img}" alt="${safe(d.productName,'Product')}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;" />` : '<span class="footer-note">No image</span>'}
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                           <div style="font-weight:600;">${safe(d.productName,'-')}</div>
+                           <div class="footer-note">ID: ${safe(d.productId)}</div>
+                           <div style="color:#7c9eff;font-weight:700;">${priceHtml}</div>
+                        </div>`;
+                    productBox.appendChild(div);
+                }
+                // Device with smart fallback parsing from deviceIdentifier format:
+                // <id>|host=<h>;plat=<p>;cpu=<c>;cores=<n>;mem=<m>|<path>
+                let idRaw = d.deviceIdentifier || d.deviceId || '';
+                let host = d.deviceHost || d.hostname || '';
+                let platform = d.devicePlatform || d.platform || '';
+                let cpu = d.deviceCpu || d.cpu || '';
+                let cores = d.deviceCores || d.cores || '';
+                let memory = d.deviceMemory || d.memory || '';
+                let dpath = d.devicePath || d.path || '';
+                try {
+                    if ((!host || !platform || !cpu || !cores || !memory || !dpath) && idRaw && idRaw.includes('|')) {
+                        const parts = String(idRaw).split('|');
+                        const kvStr = parts[1] || '';
+                        const pth = parts[2] || '';
+                        if (!dpath && pth) dpath = pth;
+                        if (kvStr) {
+                            kvStr.split(';').forEach(seg => {
+                                const eq = seg.indexOf('=');
+                                if (eq > 0) {
+                                    const k = seg.slice(0, eq).trim();
+                                    const v = seg.slice(eq + 1).trim();
+                                    if (!host && k === 'host') host = v;
+                                    else if (!platform && (k === 'plat' || k === 'platform')) platform = v;
+                                    else if (!cpu && k === 'cpu') cpu = v;
+                                    else if (!cores && k === 'cores') cores = v;
+                                    else if (!memory && (k === 'mem' || k === 'memory')) memory = v;
+                                }
+                            });
+                        }
+                    }
+                } catch(_) {}
+                // Show only the pure ID (before the first '|'), keep full string as tooltip
+                let idDisplay = idRaw;
+                if (idDisplay && idDisplay.includes('|')) idDisplay = idDisplay.split('|')[0];
+                dev.id.textContent = safe(idDisplay);
+                if (idRaw) try { dev.id.title = idRaw; } catch(_) {}
+                dev.host.textContent = safe(host);
+                dev.platform.textContent = safe(platform);
+                dev.cpu.textContent = safe(cpu);
+                dev.cores.textContent = safe(cores);
+                dev.memory.textContent = safe(memory);
+                setDevicePath(dpath);
+                dev.lastUsed.textContent = safe(d.lastUsedAt || d.lastUsed);
+                dev.activated.textContent = safe(activatedAt);
+            }
+
+            async function fetchCheck(key, page=0, size=10){
+                // Backend supports only GET /api/licenses/check with optional sellerId filter
+                const url = new URL('/api/licenses/check', window.location.origin);
+                url.searchParams.set('key', key);
+                url.searchParams.set('page', page);
+                url.searchParams.set('size', size);
+                if (sellerId) url.searchParams.set('sellerId', sellerId);
+                const res = await fetch(url.toString());
+                if (!res.ok) throw new Error(await res.text().catch(()=> 'Check failed'));
+                return await res.json();
+            }
+
+            function renderHistory(hist){
+                if (!historyBody) return;
+                historyBody.innerHTML = '';
+                const list = hist && Array.isArray(hist.content) ? hist.content : (Array.isArray(hist) ? hist : []);
+                if (!list.length) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = '<td colspan="5" class="footer-note">No history.</td>';
+                    historyBody.appendChild(tr);
+                } else {
+                    list.forEach(h => {
+                        const tr = document.createElement('tr');
+                        const t = h.time || h.createdAt || h.timestamp || '';
+                        const action = h.action || h.type || '-';
+                        const user = h.username || (h.userId ? ('#'+h.userId) : '-');
+                        const ip = h.ip || h.ipAddress || '-';
+                        const device = h.deviceIdentifier || h.device || '-';
+                        tr.innerHTML = `<td>${t}</td><td>${action}</td><td>${user}</td><td>${ip}</td><td>${device}</td>`;
+                        historyBody.appendChild(tr);
+                    });
+                }
+                // pager
+                const total = typeof hist?.totalPages === 'number' ? hist.totalPages : 1;
+                const number = typeof hist?.number === 'number' ? hist.number : 0;
+                historyPager.innerHTML = '';
+                if (total > 1){
+                    const mk=(label,p,dis,cur)=>{ const b=document.createElement('button'); b.type='button'; b.className='btn'; b.textContent=label; b.disabled=dis; if(cur) b.setAttribute('aria-current','page'); b.addEventListener('click',()=> doCheck(currentKey, p)); return b; };
+                    historyPager.appendChild(mk('«', Math.max(0, number-1), number===0,false));
+                    const w=10; let start=0; if(total>w){ start = Math.max(0, number-(w-1)); if (start > total-w) start = total - w; }
+                    const end=Math.min(total-1, start+w-1);
+                    for (let i=start;i<=end;i++){ const btn=mk(String(i+1), i, false, i===number); btn.classList.add('page-btn'); if(i===number) btn.classList.add('active'); historyPager.appendChild(btn); }
+                    historyPager.appendChild(mk('»', Math.min(total-1, number+1), number===total-1,false));
+                }
+            }
+
+            async function doCheck(key, page=0){
+                if (!key || !key.trim()) { showToast && showToast('Vui lòng nhập key', 'error'); return; }
+                currentKey = key.trim();
+                try {
+                    // Loading indicator
+                    if (detailsBox) detailsBox.innerHTML = '<div class="panel-loading-overlay" style="position:relative;inset:auto;"><div class="mini-spinner"></div><div>Checking...</div></div>';
+                    const data = await fetchCheck(currentKey, page, 10);
+                    const lic = data.license || data; // support plain object
+                    lastLicenseId = lic.licenseId ?? lic.id ?? null;
+                    renderDetails({
+                        licenseId: lic.licenseId ?? lic.id,
+                        licenseKey: lic.licenseKey ?? currentKey,
+                        isActive: lic.isActive ?? lic.active,
+                        expireDate: lic.expireDate ?? lic.expirationDate,
+                        activationDate: lic.activationDate ?? lic.activatedAt,
+                        productId: lic.productId ?? data.productId,
+                        productName: lic.productName ?? data.productName,
+                        productPrice: lic.productPrice ?? data.productPrice,
+                        productImage: lic.productImage || data.productImage,
+                        orderId: lic.orderId ?? data.orderId,
+                        username: lic.username ?? data.username,
+                        deviceIdentifier: lic.deviceIdentifier ?? data.deviceIdentifier,
+                        deviceHost: lic.deviceHost ?? data.deviceHost,
+                        devicePlatform: lic.devicePlatform ?? data.devicePlatform,
+                        deviceCpu: lic.deviceCpu ?? data.deviceCpu,
+                        deviceCores: lic.deviceCores ?? data.deviceCores,
+                        deviceMemory: lic.deviceMemory ?? data.deviceMemory,
+                        devicePath: lic.devicePath ?? data.devicePath,
+                        lastUsed: lic.lastUsedAt ?? data.lastUsedAt
+                    });
+                    resultWrap.style.display = '';
+                    helper.style.display = 'none';
+                    const hist = data.history || data.logs || null;
+                    if (hist) {
+                        document.getElementById('ck_history_wrap').style.display = '';
+                        // Adapt backend shape (history array + page metadata at top-level)
+                        const histObj = Array.isArray(hist)
+                            ? { content: hist, totalPages: (typeof data.totalPages==='number'? data.totalPages : 1), number: (typeof data.page==='number'? data.page : 0) }
+                            : hist;
+                        renderHistory(histObj);
+                    } else {
+                        document.getElementById('ck_history_wrap').style.display = 'none';
+                    }
+                    showToast && showToast('Đã kiểm tra key', 'success', { duration: 1500 });
+                } catch (e) {
+                    if (detailsBox) detailsBox.innerHTML = '<div class="footer-note">Không tìm thấy hoặc lỗi kiểm tra.</div>';
+                    resultWrap.style.display = '';
+                    helper.style.display = '';
+                    document.getElementById('ck_history_wrap').style.display = 'none';
+                    showToast && showToast(String(e.message || e), 'error');
+                }
+            }
+
+            btnCheck?.addEventListener('click', () => doCheck(input.value));
+            btnReset?.addEventListener('click', () => { input.value=''; resultWrap.style.display='none'; helper.style.display=''; historyPager.innerHTML=''; historyBody.innerHTML=''; productBox.innerHTML=''; });
+            input?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); doCheck(input.value); } });
+
+            // auto-check when navigating with hash containing key param: #check-key=XXXX
+            try {
+                if (window.location.hash.startsWith('#check-key=')){
+                    const k = decodeURIComponent(window.location.hash.split('=')[1]||'');
+                    if (k) { input.value = k; setTimeout(()=> doCheck(k), 100); }
+                }
+            } catch(_){}
+        })();
 
         // ===== Bank account modal =====
         function openBankAccountModal() {
@@ -1386,7 +1923,7 @@
                         if (data && data.type === 'new-order' && data.data) {
                             const id = data.data.orderId;
                             const amt = data.data.totalAmount;
-                            const formatted = (amt == null) ? '' : ('$' + Number(amt).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                            const formatted = (amt == null) ? '' : (`${Number(amt).toLocaleString('vi-VN')} đ`);
                             showToast(`New order #${id} ${formatted}`, 'success');
                             // Optionally: refresh recent orders list (lightweight approach: reload after short delay)
                             // Could implement incremental prepend instead of reload; keep simple first.
@@ -1443,7 +1980,7 @@
                     `<td>${o.createdAt ? o.createdAt.replace('T',' ') : ''}</td>` +
                     `<td>${o.buyerUsername ? o.buyerUsername : (o.buyerUserId ? ('User #' + o.buyerUserId) : '')}</td>` +
                     `<td>${o.sellerItems ?? 0}</td>` +
-                    `<td>$${(o.sellerAmount ?? 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
+                    `<td>${Number(o.sellerAmount ?? 0).toLocaleString('vi-VN')} đ</td>`;
                 tr.className = 'clickable';
                 tr.addEventListener('click', () => { // open seller-scoped order detail
                     const id = o.orderId;
@@ -1689,7 +2226,8 @@
                     let statusHtml = '<span class="badge">Pending</span>';
                     if (st === 'public') statusHtml = '<span class="pill good">Public</span>';
                     else if (st === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
-                    const price = (p.price ?? 0).toLocaleString('en-US');
+                    else if (st.indexOf('cancel') !== -1) statusHtml = '<span class="badge warn">Cancelled</span>';
+                    const price = (p.price ?? 0).toLocaleString('vi-VN');
                     const rating = (p.averageRating != null) ? Number(p.averageRating).toFixed(1) : '-';
                     const totalSales = (p.totalSales != null) ? p.totalSales : 0;
                     const img = (p.imageUrl && p.imageUrl.trim().length) ? p.imageUrl : '/img/no-image.png';
@@ -1700,7 +2238,7 @@
             <div class="meta" style="padding:8px 2px;display:flex;flex-direction:column;gap:6px;">
               <div class="line" style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
                 <div class="name" title="${p.name ?? ''}" style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name ?? ''}</div>
-                <div class="price" style="color:#7c9eff;font-weight:700;">$${price}</div>
+                <div class="price" style="color:#7c9eff;font-weight:700;">${price} đ</div>
               </div>
               <div class="sub" style="display:flex;gap:10px;font-size:12px;color:#a8b0d3;">
                   <span title="Sold">🛒 ${totalSales}</span>
@@ -1734,18 +2272,45 @@
             }
         }
 
-        document.getElementById('prd_btnFilter')?.addEventListener('click', () => loadProductsPanel(true));
-        document.getElementById('prd_btnReset')?.addEventListener('click', () => {
-            const s=document.getElementById('prd_search'); if (s) s.value='';
-            if (prdCategorySel) prdCategorySel.value='';
-            const r=document.getElementById('prd_rating'); if (r) r.value='';
-            const d=document.getElementById('prd_downloads'); if (d) d.value='';
-            const st=document.getElementById('prd_status'); if (st) st.value='';
-            loadProductsPanel(true);
-        });
-        document.getElementById('prd_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadProductsPanel(true);} });
-        // Auto apply when changing status
-        document.getElementById('prd_status')?.addEventListener('change', () => loadProductsPanel(true));
+        // Bind products panel filters with resilient fallbacks in case elements are rendered after this script runs
+        (function bindProductsPanelFilters(){
+            const applyReset = function(){
+                const s = document.getElementById('prd_search'); if (s) s.value = '';
+                if (prdCategorySel) prdCategorySel.value = '';
+                const r = document.getElementById('prd_rating'); if (r) r.value = '';
+                const d = document.getElementById('prd_downloads'); if (d) d.value = '';
+                const st = document.getElementById('prd_status'); if (st) st.value = '';
+                loadProductsPanel(true);
+            };
+
+            const btnFilter = document.getElementById('prd_btnFilter');
+            const btnReset = document.getElementById('prd_btnReset');
+            const searchInput = document.getElementById('prd_search');
+            const statusSel = document.getElementById('prd_status');
+
+            if (btnFilter) btnFilter.addEventListener('click', () => loadProductsPanel(true));
+            if (btnReset) btnReset.addEventListener('click', applyReset);
+            if (searchInput) searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadProductsPanel(true); } });
+            if (statusSel) statusSel.addEventListener('change', () => loadProductsPanel(true));
+
+            // Delegated fallback: if controls aren't present yet, capture interactions at document level
+            if (!btnFilter || !btnReset || !searchInput || !statusSel) {
+                document.addEventListener('click', function delegatedPrdClick(e){
+                    const btn = e.target.closest && e.target.closest('button');
+                    if (!btn) return;
+                    if (btn.id === 'prd_btnFilter') { loadProductsPanel(true); }
+                    else if (btn.id === 'prd_btnReset') { applyReset(); }
+                });
+                document.addEventListener('keydown', function delegatedPrdKey(e){
+                    const t = e.target || e.srcElement;
+                    if (t && t.id === 'prd_search' && e.key === 'Enter') { e.preventDefault(); loadProductsPanel(true); }
+                });
+                document.addEventListener('change', function delegatedPrdChange(e){
+                    const t = e.target || e.srcElement;
+                    if (t && t.id === 'prd_status') { loadProductsPanel(true); }
+                });
+            }
+        })();
         if (window.location.hash === '#products') setTimeout(() => loadProductsPanel(true), 120);
         window.addEventListener('hashchange', () => { if (window.location.hash === '#products') loadProductsPanel(false); });
 

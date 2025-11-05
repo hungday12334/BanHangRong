@@ -441,13 +441,30 @@
                             <a th:href="@{'/admin/user/update?id=' + ${u.userId}}">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <form th:action="@{'/admin/user/deactive'}" method="post" class="deactivate-form" style="display:inline;">
-                                <input type="hidden" name="id" th:value="${u.userId}">
-                                <button type="button" class="btn btn-outline-danger btn-sm btn-deactivate">
-                                    <i class="bi bi-person-x"></i>
-                                </button>
-                            </form>
+                            <!-- Nếu user đang active => hiện nút Deactivate -->
+                            <div th:if="${u.isActive}">
+                                <form th:action="@{'/admin/user/deactive'}" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" th:value="${u.userId}">
+                                    <button type="submit"
+                                            class="btn btn-outline-danger btn-sm btn-deactivate"
+                                            title="Deactivate">
+                                        <i class="bi bi-person-x-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
 
+                            <!-- Nếu user đang inactive => hiện nút Activate -->
+                            <div th:if="${!u.isActive}">
+                                <form th:action="@{'/admin/user/active'}" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" th:value="${u.userId}">
+                                    <button type="submit"
+                                            class="btn btn-outline-success btn-sm btn-activate"
+                                            title="Activate"
+                                            style="background-color: #00A86B">
+                                        <i class="bi bi-person-check-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </td>
                     <td th:text="${u.userId}"></td>
@@ -474,6 +491,7 @@
                 </tr>
                 </tbody>
             </table>
+            <!-- ========================= -->
             <!-- Confirm Deactivate Modal -->
             <div class="modal fade" id="confirmDeactivateModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
@@ -487,6 +505,16 @@
                         <div class="modal-body text-center">
                             <p class="fs-5 mb-2">Are you sure you want to deactivate this user?</p>
                             <p class="text-muted mb-0">The user will no longer be able to log in.</p>
+                            <!-- Ô nhập lý do -->
+                            <div class="mb-3">
+                                <label for="deactivateReason" class="form-label text-start d-block fw-semibold">Reason for deactivation <span class="text-danger">*</span></label>
+                                <textarea
+                                        class="form-control"
+                                        id="deactivateReason"
+                                        rows="3"
+                                        placeholder="Enter reason (required)"
+                                        required></textarea>
+                            </div>
                         </div>
                         <div class="modal-footer justify-content-center">
                             <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
@@ -497,25 +525,85 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ========================= -->
+            <!-- Confirm Activate Modal -->
+            <div class="modal fade" id="confirmActivateModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">
+                                <i class="bi bi-person-check-fill me-2"></i> Confirm Activation
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <p class="fs-5 mb-2">Are you sure you want to activate this user?</p>
+                            <p class="text-muted mb-0">The user will be able to log in again.</p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-success text-white px-4" id="confirmActivateBtn">
+                                Yes, Activate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ========================= -->
         </div>
     </div>
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         let selectedForm = null;
-        const modal = new bootstrap.Modal(document.getElementById('confirmDeactivateModal'));
-        const confirmButton = document.getElementById('confirmDeactivateBtn');
 
-        // Khi click nút deactivate → mở modal
+        // --- Deactivate modal ---
+        const deactivateModal = new bootstrap.Modal(document.getElementById('confirmDeactivateModal'));
+        const confirmDeactivateBtn = document.getElementById('confirmDeactivateBtn');
+        const reasonInput = document.getElementById('deactivateReason'); // Lấy textarea
+
         document.querySelectorAll('.btn-deactivate').forEach(button => {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
                 selectedForm = this.closest('form');
-                modal.show();
+                reasonInput.value = ''; // Reset lý do mỗi lần mở
+                deactivateModal.show();
             });
         });
 
-        // Khi xác nhận → submit form thật
-        confirmButton.addEventListener('click', function () {
+        confirmDeactivateBtn.addEventListener('click', function () {
+            if (!selectedForm) return;
+
+            const reason = reasonInput.value.trim();
+            if (!reason) {
+                alert('Please enter a reason for deactivation.');
+                return;
+            }
+
+            // Tạo input ẩn để gửi lý do
+            const reasonInputHidden = document.createElement('input');
+            reasonInputHidden.type = 'hidden';
+            reasonInputHidden.name = 'reason'; // Tên field backend sẽ nhận
+            reasonInputHidden.value = reason;
+
+            selectedForm.appendChild(reasonInputHidden);
+            selectedForm.submit(); // Gửi form + lý do
+        });
+
+        // --- Activate modal (giữ nguyên, không cần lý do) ---
+        const activateModal = new bootstrap.Modal(document.getElementById('confirmActivateModal'));
+        const confirmActivateBtn = document.getElementById('confirmActivateBtn');
+
+        document.querySelectorAll('.btn-activate').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                selectedForm = this.closest('form');
+                activateModal.show();
+            });
+        });
+
+        confirmActivateBtn.addEventListener('click', function () {
             if (selectedForm) selectedForm.submit();
         });
     });

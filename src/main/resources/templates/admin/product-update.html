@@ -50,7 +50,6 @@
         }
 
 
-
         a {
             text-decoration: none;
         }
@@ -120,7 +119,7 @@
         }
 
         /* Màu cho ô readonly */
-        input[readonly],textarea[readonly],
+        input[readonly], textarea[readonly],
         select[readonly] {
             background-color: #e9ecef;
             font-weight: bold;
@@ -145,6 +144,7 @@
             color: #28a745;
             border: 2px solid #1e7e34;
         }
+
         .submit-btn:hover {
             color: #fff;
             background-color: #28a745;
@@ -158,6 +158,7 @@
             color: #d9534f;
             border: 2px solid #b52b27;
         }
+
         .cancel-btn:hover {
             color: #fff;
             background-color: #d9534f;
@@ -165,6 +166,7 @@
             transform: scale(1.05);
             box-shadow: 0 0 8px rgba(217, 83, 79, 0.4);
         }
+
         .form-container {
             display: flex;
             justify-content: center; /* căn giữa ngang */
@@ -172,14 +174,21 @@
             gap: 35px; /* khoảng cách giữa hai form */
             margin-top: 20px;
         }
-        .sidebar-item { position: relative; list-style: none; }
+
+        .sidebar-item {
+            position: relative;
+            list-style: none;
+        }
+
         .sidebar-item > ul {
             display: none;
             margin-left: 1.5rem;
         }
+
         .sidebar-item:hover > ul {
             display: block;
         }
+
         .badge {
             background-color: #dc3545;
             color: #fff;
@@ -215,95 +224,206 @@
         <h2>Update</h2>
 
 
-            <div class="form-group">
-                <label>Product ID:</label>
-                <input readonly type="text" name="productId" th:value="${product != null ? product.productId : ''}">
-            </div>
+        <div class="form-group">
+            <label>Product ID:</label>
+            <input readonly type="text" name="productId" th:value="${product != null ? product.productId : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Seller ID:</label>
-                <input readonly type="text" name="sellerId" th:value="${product != null ? product.sellerId : ''}">
-            </div>
+        <div class="form-group">
+            <label>Seller ID:</label>
+            <input readonly type="text" name="sellerId" th:value="${product != null ? product.sellerId : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Name:</label>
-                <input readonly type="text" name="name" th:value="${product != null ? product.name : ''}">
-            </div>
+        <div class="form-group">
+            <label>Name:</label>
+            <input readonly type="text" name="name" th:value="${product != null ? product.name : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Description:</label>
-                <textarea readonly name="description" rows="3" th:text="${product != null ? product.description : ''}"></textarea>
-            </div>
+        <div class="form-group">
+            <label>Description:</label>
+            <textarea readonly name="description" rows="3"
+                      th:text="${product != null ? product.description : ''}"></textarea>
+        </div>
 
-            <div class="form-group">
-                <label>Price:</label>
-                <input readonly type="number" step="0.01" name="price" th:value="${product != null ? product.price : ''}">
-            </div>
+        <div class="form-group">
+            <label>Price:</label>
+            <input readonly type="number" step="0.01" name="price" th:value="${product != null ? product.price : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Sale Price:</label>
-                <input readonly type="number" step="0.01" name="salePrice" th:value="${product != null ? product.salePrice : ''}">
-            </div>
+        <div class="form-group">
+            <label>Sale Price:</label>
+            <input readonly type="number" step="0.01" name="salePrice"
+                   th:value="${product != null ? product.salePrice : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Quantity:</label>
-                <input readonly type="number" name="quantity" th:value="${product != null ? product.quantity : ''}">
-            </div>
+        <div class="form-group">
+            <label>Quantity:</label>
+            <input readonly type="number" name="quantity" th:value="${product != null ? product.quantity : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Download URL:</label>
-                <input readonly type="text" name="downloadUrl" th:value="${product != null ? product.downloadUrl : ''}">
-            </div>
+        <div class="form-group">
+            <label>Download URL:</label>
+            <input readonly type="text" name="downloadUrl" th:value="${product != null ? product.downloadUrl : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Total Sales:</label>
-                <input readonly type="number" name="totalSales" th:value="${product != null ? product.totalSales : ''}">
-            </div>
+        <div class="form-group">
+            <label>Total Sales:</label>
+            <input readonly type="number" name="totalSales" th:value="${product != null ? product.totalSales : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Average Rating:</label>
-                <input readonly type="number" step="0.1" name="averageRating" th:value="${product != null ? product.averageRating : ''}">
-            </div>
+        <div class="form-group">
+            <label>Average Rating:</label>
+            <input readonly type="number" step="0.1" name="averageRating"
+                   th:value="${product != null ? product.averageRating : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Status:</label>
-                <select readonly name="status" class="form-control">
-                    <option value="public" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'public')}">Public</option>
-                    <option value="pending" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'pending')}">Pending</option>
-                    <option value="hidden" th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'hidden')}">Hidden</option>
-                </select>
+        <div class="form-group">
+            <label>Status:</label>
+            <select readonly name="status" class="form-control">
+                <option value="public"
+                        th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'public')}">Public
+                </option>
+                <option value="pending"
+                        th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'pending')}">Pending
+                </option>
+                <option value="hidden"
+                        th:selected="${product != null and #strings.equalsIgnoreCase(product.status,'hidden')}">Hidden
+                </option>
+            </select>
 
-            </div>
+        </div>
 
-            <div class="form-group">
-                <label>Created At:</label>
-                <input readonly type="text" name="createdAt"
-                       th:value="${product != null ? #temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm') : ''}">
-            </div>
+        <div class="form-group">
+            <label>Created At:</label>
+            <input readonly type="text" name="createdAt"
+                   th:value="${product != null ? #temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm') : ''}">
+        </div>
 
-            <div class="form-group">
-                <label>Updated At:</label>
-                <input readonly type="text" name="updatedAt"
-                       th:value="${product != null ? #temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm') : ''}">
-            </div>
+        <div class="form-group">
+            <label>Updated At:</label>
+            <input readonly type="text" name="updatedAt"
+                   th:value="${product != null ? #temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm') : ''}">
+        </div>
         <div class="form-container">
-            <form  th:action="@{/admin/product/update}" method="post" enctype="multipart/form-data">
+            <!-- Approve Form -->
+            <form id="approveForm" th:action="@{/admin/product/update}" method="post" style="display:inline;">
                 <input type="hidden" name="productId" th:value="${product.productId}">
-                <div class="form-actions">
-
-                    <button type="submit"  class="submit-btn" onclick="return confirm('Do you really want to approve this product?')">Approve</button>
-                </div>
-
+                <button type="button" class="submit-btn btn-approve">Approve</button>
             </form>
-            <form th:action="@{/admin/product/cancel}" method="post" style="text-align:center;">
+
+            <!-- Cancel Form -->
+            <form id="cancelForm" th:action="@{/admin/product/cancel}" method="post" style="display:inline;">
                 <input type="hidden" name="productId" th:value="${product.productId}">
-                <div class="form-actions">
-                    <button type="submit"  class="cancel-btn" onclick="return confirm('Do you really want to cancel this product?')">Cancel</button>
-                </div>
+                <button type="button" class="cancel-btn btn-cancel">Cancel</button>
             </form>
         </div>
     </div>
 </div>
+<!-- Approve Confirmation Modal (Xanh lá) -->
+<div class="modal fade" id="confirmApproveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle-fill me-2"></i> Confirm Approval
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="fs-5 mb-2">Do you want to approve this product?</p>
+                <p class="text-muted mb-0">It will be visible to all users.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-success px-4" id="confirmApproveBtn">Yes, Approve</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Confirmation Modal (Đỏ + Lý do) -->
+<div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> Confirm Cancellation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="fs-5 mb-2">Do you really want to cancel this product?</p>
+                <p class="text-muted mb-3">This action cannot be undone.</p>
+
+                <!-- Ô nhập lý do -->
+                <div class="mb-3">
+                    <label for="cancelReason" class="form-label text-start d-block fw-semibold">
+                        Reason for cancellation <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control" id="cancelReason" rows="3" placeholder="Enter reason (required)"
+                              required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No, Keep</button>
+                <button type="button" class="btn btn-danger px-4" id="confirmCancelBtn">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // === Approve Modal (Không cần lý do) ===
+        const approveModal = new bootstrap.Modal(document.getElementById('confirmApproveModal'));
+        const confirmApproveBtn = document.getElementById('confirmApproveBtn');
+        const approveForm = document.getElementById('approveForm');
+
+        document.querySelectorAll('.btn-approve').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                approveModal.show();
+            });
+        });
+
+        confirmApproveBtn.addEventListener('click', function () {
+            approveForm.submit();
+        });
+
+        // === Cancel Modal (Có lý do) ===
+        const cancelModal = new bootstrap.Modal(document.getElementById('confirmCancelModal'));
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        const cancelForm = document.getElementById('cancelForm');
+        const reasonInput = document.getElementById('cancelReason');
+
+        document.querySelectorAll('.btn-cancel').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                reasonInput.value = ''; // Reset
+                cancelModal.show();
+            });
+        });
+
+        confirmCancelBtn.addEventListener('click', function () {
+            const reason = reasonInput.value.trim();
+            if (!reason) {
+                alert('Please enter a reason for cancellation.');
+                return;
+            }
+
+            // Thêm lý do vào form
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'reason';
+            hiddenInput.value = reason;
+            cancelForm.appendChild(hiddenInput);
+
+            cancelForm.submit();
+        });
+
+        // Focus vào textarea khi mở modal cancel
+        cancelModal._element.addEventListener('shown.bs.modal', () => reasonInput.focus());
+    });
+</script>
 <script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
 <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>

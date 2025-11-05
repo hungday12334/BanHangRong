@@ -189,9 +189,18 @@ public class ProductsApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        if (!productsRepository.existsById(id)) return ResponseEntity.notFound().build();
-        productsRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return productsRepository.findById(id).map(p -> {
+            Boolean everPublic = p.getWasPublic();
+            String status = p.getStatus() != null ? p.getStatus().toLowerCase() : null;
+            if (Boolean.TRUE.equals(everPublic) || "public".equals(status)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of(
+                        "error", "cannot_delete_public_product",
+                        "message", "Product that has been public cannot be deleted. Please hide it instead."
+                ));
+            }
+            productsRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // Admin approval: publish/unpublish
@@ -206,6 +215,7 @@ public class ProductsApiController {
         return productsRepository.findById(id).map(p -> {
             // When publishing, normalize status to public; otherwise hidden
             p.setStatus(publish ? "public" : "hidden");
+            if (publish) p.setWasPublic(Boolean.TRUE);
             Products saved = productsRepository.save(p);
             return ResponseEntity.ok(toDto(saved));
         }).orElse(ResponseEntity.notFound().build());

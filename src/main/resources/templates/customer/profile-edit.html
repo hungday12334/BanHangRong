@@ -319,7 +319,6 @@
                     </button>
                     <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                         <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
-                        <a class="item" href="/customer/notifications" role="menuitem">🔔 Notifications</a>
                         <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
                         <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
                         <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
@@ -358,9 +357,9 @@
 
         <div class="layout">
             <aside class="sidebar" aria-label="Profile navigation">
-                <div class="title">Tài Khoản Của Tôi</div>
-                <a th:href="@{'/customer/profile/' + ${user.username}}">Hồ sơ</a>
-                <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}">Đổi Mật khẩu</a>
+                <div class="title">My Account</div>
+                <a th:href="@{'/customer/profile/' + ${user.username}}">Profile</a>
+                <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}">Change Password</a>
             </aside>
             <section class="card main">
                 <h2 style="margin-top:0;">Edit Profile</h2>
