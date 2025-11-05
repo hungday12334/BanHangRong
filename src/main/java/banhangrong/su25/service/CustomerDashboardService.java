@@ -6,11 +6,18 @@ import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.UsersRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +33,9 @@ public class CustomerDashboardService {
     private final ProductImagesRepository productImagesRepository;
     private final ShoppingCartRepository shoppingCartRepository;
     private final UsersRepository usersRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public CustomerDashboardService(
             ProductsRepository productsRepository,
@@ -131,6 +141,20 @@ public class CustomerDashboardService {
         return shoppingCartRepository.countByUserId(userId);
     }
 
+    /**
+     * Lấy thông tin user hiện tại từ SecurityContext
+     * 
+     * @return Users object nếu đã đăng nhập, null nếu chưa đăng nhập
+     */
+    public Users getCurrentUserOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName() == null) {
+            return null;
+        }
+        String username = auth.getName();
+        return usersRepository.findByUsername(username).orElse(null);
+    }
+
     public Users getUserByUsername(String username) {
         if (username == null || username.isEmpty()) {
             return null;
@@ -152,6 +176,87 @@ public class CustomerDashboardService {
             return true; // Nếu không phải CUSTOMER thì không cần check email
         }
         return Boolean.TRUE.equals(user.getIsEmailVerified());
+    }
+
+    public Page<Products> getFilteredProducts(int page, int size, String search, Long categoryId, 
+                                               BigDecimal minPrice, BigDecimal maxPrice, 
+                                               BigDecimal minRating, String sortBy) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
+
+        StringBuilder jpql = new StringBuilder("SELECT p FROM Products p WHERE LOWER(p.status) = 'public'");
+        
+        if (search != null && !search.trim().isEmpty()) {
+            jpql.append(" AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))");
+        }
+        
+        if (categoryId != null) {
+            jpql.append(" AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)");
+        }
+        
+        if (minPrice != null) {
+            jpql.append(" AND (p.salePrice IS NOT NULL AND p.salePrice >= :minPrice OR p.salePrice IS NULL AND p.price >= :minPrice)");
+        }
+        
+        if (maxPrice != null) {
+            jpql.append(" AND (p.salePrice IS NOT NULL AND p.salePrice <= :maxPrice OR p.salePrice IS NULL AND p.price <= :maxPrice)");
+        }
+        
+        if (minRating != null) {
+            jpql.append(" AND (p.averageRating IS NOT NULL AND p.averageRating >= :minRating)");
+        }
+
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            switch (sortBy.toLowerCase()) {
+                case "price_asc":
+                    jpql.append(" ORDER BY COALESCE(p.salePrice, p.price) ASC");
+                    break;
+                case "price_desc":
+                    jpql.append(" ORDER BY COALESCE(p.salePrice, p.price) DESC");
+                    break;
+                case "rating":
+                    jpql.append(" ORDER BY p.averageRating DESC NULLS LAST");
+                    break;
+                case "newest":
+                    jpql.append(" ORDER BY p.createdAt DESC");
+                    break;
+                case "sales":
+                    jpql.append(" ORDER BY p.totalSales DESC");
+                    break;
+                default:
+                    jpql.append(" ORDER BY p.totalSales DESC, p.createdAt DESC");
+            }
+        } else {
+            jpql.append(" ORDER BY p.totalSales DESC, p.createdAt DESC");
+        }
+
+        Query query = entityManager.createQuery(jpql.toString(), Products.class);
+        
+        if (search != null && !search.trim().isEmpty()) {
+            query.setParameter("search", search.trim());
+        }
+        if (categoryId != null) {
+            query.setParameter("categoryId", categoryId);
+        }
+        if (minPrice != null) {
+            query.setParameter("minPrice", minPrice);
+        }
+        if (maxPrice != null) {
+            query.setParameter("maxPrice", maxPrice);
+        }
+        if (minRating != null) {
+            query.setParameter("minRating", minRating);
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Products> allProducts = (List<Products>) query.getResultList();
+        int total = allProducts.size();
+        
+        int start = safePage * safeSize;
+        int end = Math.min(start + safeSize, total);
+        List<Products> pageProducts = start < total ? allProducts.subList(start, end) : new java.util.ArrayList<>();
+
+        return new PageImpl<>(pageProducts, PageRequest.of(safePage, safeSize), total);
     }
 }
 

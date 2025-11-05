@@ -52,7 +52,14 @@ public class CartService {
             Users u = getCurrentUserOrNull();
             if (u != null) return u.getUserId();
         } catch (Exception ignored) {}
-        return 2L; // fallback for demo
+        return 2L;
+    }
+
+    public Long getCartCount(Long userId) {
+        if (userId == null) {
+            return 0L;
+        }
+        return cartRepository.countByUserId(userId);
     }
 
     public String getPrimaryOrAnyImageUrl(Long productId) {

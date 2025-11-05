@@ -24,16 +24,21 @@ public class CartController {
         if (user == null) {
             return "redirect:/login";
         }
+        
         Map<String,Object> applied = (Map<String,Object>) session.getAttribute("appliedVoucher");
+        
         Map<String,Object> view = cartService.buildCartView(user, applied);
+        
         model.addAttribute("user", user);
         model.addAttribute("items", view.get("items"));
         model.addAttribute("discount", view.get("discount"));
         model.addAttribute("total", view.get("total"));
         model.addAttribute("cartCount", view.get("cartCount"));
+        
         if (view.get("appliedVoucher") != null) {
             model.addAttribute("appliedVoucher", view.get("appliedVoucher"));
         }
+        
         return "customer/cart";
     }
 
@@ -41,13 +46,13 @@ public class CartController {
     public String addToCart(@RequestParam("productId") Long productId,
                             @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity) {
         cartService.addToCart(productId, quantity);
+        
         return "redirect:/cart";
     }
 
     @PostMapping("/cart/apply-voucher")
     public String applyVoucher(@RequestParam("code") String code, HttpSession session) {
         if (code == null || code.trim().isEmpty()) return "redirect:/cart?voucher=invalid";
-        // Simply store code to session; validation and discount computed in viewCart
         Map<String,Object> m = new HashMap<>();
         m.put("code", code.trim());
         session.setAttribute("appliedVoucher", m);
@@ -59,7 +64,6 @@ public class CartController {
         session.removeAttribute("appliedVoucher");
         return "redirect:/cart?voucher=removed";
     }
-
 
     @PostMapping("/cart/update")
     @ResponseBody
@@ -84,7 +88,9 @@ public class CartController {
 
     @GetMapping("/cart/remove")
     public String removeFromCartGet(@RequestParam("productId") Long productId) {
-        try { cartService.removeFromCart(productId); } catch (Exception ignored) {}
+        try { 
+            cartService.removeFromCart(productId); 
+        } catch (Exception ignored) {}
         return "redirect:/cart";
     }
 

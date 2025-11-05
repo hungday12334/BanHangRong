@@ -19,22 +19,25 @@ public class ProductDetailController {
 
     @GetMapping("/product/{id}")
     public String productDetail(@PathVariable("id") Long id, Model model) {
-        // Get current user for header (via Service)
+
         Users currentUser = productDetailService.getCurrentUserOrNull();
         
-        // Get product details
-        Products p = productDetailService.getProductById(id);
-        if (p == null) return "redirect:/customer/dashboard";
+        Products product = productDetailService.getProductById(id);
+        if (product == null) {
+            return "redirect:/customer/dashboard";
+        }
         
-        model.addAttribute("product", p);
+        model.addAttribute("product", product);
+        
         model.addAttribute("images", productDetailService.getPrimaryImages(id));
+        
         model.addAttribute("reviews", productDetailService.getReviewsByProduct(id));
         
-        // Add user data for header
         if (currentUser != null) {
             model.addAttribute("user", currentUser);
             try {
-                model.addAttribute("cartCount", productDetailService.getCartCount(currentUser.getUserId()));
+                Long cartCount = productDetailService.getCartCount(currentUser.getUserId());
+                model.addAttribute("cartCount", cartCount);
             } catch (Exception ignored) {}
         }
         

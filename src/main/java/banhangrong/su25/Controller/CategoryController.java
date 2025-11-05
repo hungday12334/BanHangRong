@@ -4,13 +4,14 @@ import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.service.CategoryViewService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.data.domain.Page;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +31,11 @@ public class CategoryController {
         }
 
         List<Categories> categories = categoryViewService.listCategoriesWithPublicProducts();
-        Map<Long, Long> productCountByCategory = new java.util.HashMap<>();
+        
+        Map<Long, Long> productCountByCategory = new HashMap<>();
         for (Categories category : categories) {
-            productCountByCategory.put(category.getCategoryId(), categoryViewService.countPublicProductsInCategory(category.getCategoryId()));
+            Long count = categoryViewService.countPublicProductsInCategory(category.getCategoryId());
+            productCountByCategory.put(category.getCategoryId(), count);
         }
 
         Users currentUser = categoryViewService.getCurrentUserOrNull();
@@ -63,6 +66,7 @@ public class CategoryController {
 
         Page<Products> productsPage = categoryViewService.getProductsPage(categoryId, page, size, search);
         List<Products> products = productsPage.getContent();
+        
         Map<Long, String> primaryImageByProduct = categoryViewService.buildPrimaryImageMap(products);
 
         Users currentUser = categoryViewService.getCurrentUserOrNull();
