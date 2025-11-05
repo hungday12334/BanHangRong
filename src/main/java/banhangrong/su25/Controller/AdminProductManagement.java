@@ -81,6 +81,10 @@ public class AdminProductManagement {
             return "redirect:/admin/products";
         }
         Users seller = userService.findById(product.getSellerId());
+        if(seller !=null && !seller.getIsActive()){
+            redirectAttributes.addFlashAttribute("error", "Seller is inactive so can't approve");
+            return "redirect:/admin/products";
+        }
         product.setStatus("public");
         product.setUpdatedAt(LocalDateTime.now());
         adminProductService.save(product);
@@ -173,6 +177,10 @@ public class AdminProductManagement {
             return "redirect:/admin/products";
         }
         Users seller = userService.findById(product.getSellerId());
+        if(seller !=null && !seller.getIsActive()){
+            redirectAttributes.addFlashAttribute("error", "Seller is inactive so can't cancel");
+            return "redirect:/admin/products";
+        }
         String reason = request.getParameter("reason");
         product.setStatus("Cancelled");
         product.setUpdatedAt(LocalDateTime.now());
