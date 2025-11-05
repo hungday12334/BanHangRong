@@ -11,6 +11,7 @@ import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.Repository.NotificationRepository;
 import banhangrong.su25.service.NotificationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,6 +41,8 @@ public class CartController {
     private final OrderItemsRepository orderItemsRepository;
     private final VouchersRepository vouchersRepository;
     private final VoucherRedemptionsRepository voucherRedemptionsRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
 
     public CartController(ShoppingCartRepository cartRepository,
                           ProductsRepository productsRepository,
@@ -48,7 +51,9 @@ public class CartController {
                           OrdersRepository ordersRepository,
                           OrderItemsRepository orderItemsRepository,
                           VouchersRepository vouchersRepository,
-                          VoucherRedemptionsRepository voucherRedemptionsRepository) {
+                          VoucherRedemptionsRepository voucherRedemptionsRepository,
+                          NotificationRepository notificationRepository,
+                          NotificationService notificationService) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
@@ -57,6 +62,8 @@ public class CartController {
         this.orderItemsRepository = orderItemsRepository;
         this.vouchersRepository = vouchersRepository;
         this.voucherRedemptionsRepository = voucherRedemptionsRepository;
+        this.notificationRepository = notificationRepository;
+        this.notificationService = notificationService;
     }
 
     // Get current user ID from authentication
