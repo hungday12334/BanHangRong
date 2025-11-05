@@ -26,7 +26,7 @@ public class Products {
     @Column(name = "average_rating")
     private BigDecimal averageRating;
     @Column(name = "status")
-    private String status; // "pending", "public", "hidden"
+    private String status; // "pending", "public", "hidden","canceller"
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")

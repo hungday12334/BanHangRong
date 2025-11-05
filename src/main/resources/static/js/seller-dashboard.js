@@ -922,7 +922,25 @@
             // Apply client-side status filter from dropdown (all/public/pending/hidden)
             const statusSel = document.getElementById('myProductsStatusFilter');
             const statusVal = (statusSel && statusSel.value) ? statusSel.value.toString().trim().toLowerCase() : 'all';
-            const filtered = (statusVal === 'all') ? list : list.filter(p => ((p.status || '').toString().toLowerCase() === statusVal));
+            let filtered;
+            if (statusVal === 'all' || statusVal === '') {
+                // No filtering
+                filtered = list;
+            } else if (statusVal.startsWith('cancel')) {
+                // Group all variants that indicate cancellation (cancelled/canceled/canceller)
+                filtered = list.filter(p => ((p.status || '').toString().toLowerCase().includes('cancel')));
+            } else if (statusVal === 'pending') {
+                // Treat null/empty status as 'pending' for legacy rows
+                filtered = list.filter(p => {
+                    const pst = ((p.status || '').toString().trim().toLowerCase());
+                    return pst === 'pending' || pst === '';
+                });
+            } else {
+                filtered = list.filter(p => {
+                    const pst = ((p.status || '').toString().trim().toLowerCase());
+                    return pst === statusVal;
+                });
+            }
             const tbody = document.getElementById('tbMyProducts');
             const counter = document.getElementById('myProductsCount');
             if (!tbody) return;
@@ -940,6 +958,7 @@
                 let statusHtml = '<span class="badge">Pending</span>';
                 if (stVal === 'public') statusHtml = '<span class="pill good">Public</span>';
                 else if (stVal === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
+                else if (stVal.indexOf('cancel') !== -1) statusHtml = '<span class="badge warn">Cancelled</span>';
                 const price = (p.price ?? 0).toLocaleString('vi-VN');
                 tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td class="hide-md">${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
                 tbody.appendChild(tr);
@@ -947,7 +966,7 @@
             if (counter) counter.textContent = filtered.length;
             // rebind row click to open product modal
             document.querySelectorAll('#tbMyProducts [data-product-id]').forEach(row => {
-                row.addEventListener('click', () => {
+                  row.addEventListener('click', () => {
                     const id = row.getAttribute('data-product-id');
                     loadProduct(id).then(() => openModal(productModal));
                 });
@@ -960,7 +979,21 @@
     // initial load
         refreshMyProducts(false);
     // Bind status filter change for My products
-    document.getElementById('myProductsStatusFilter')?.addEventListener('change', () => refreshMyProducts(false));
+    // Use direct listener when element exists, otherwise add a delegated fallback so dynamic insertion won't break filtering
+    (function bindMyProductsStatusFilter(){
+        const el = document.getElementById('myProductsStatusFilter');
+        if (el) {
+            el.addEventListener('change', () => refreshMyProducts(false));
+        } else {
+            // delegated fallback: listen for change events on document
+            document.addEventListener('change', function delegatedMyProdFilter(e){
+                const t = e.target || e.srcElement;
+                if (t && t.id === 'myProductsStatusFilter') {
+                    refreshMyProducts(false);
+                }
+            });
+        }
+    })();
 
         // === Avatar edit button hover ===
         const avatarWrap = document.querySelector('.avatar-edit-wrap');
@@ -2056,6 +2089,7 @@
                     let statusHtml = '<span class="badge">Pending</span>';
                     if (st === 'public') statusHtml = '<span class="pill good">Public</span>';
                     else if (st === 'hidden') statusHtml = '<span class="badge">Hidden</span>';
+                    else if (st.indexOf('cancel') !== -1) statusHtml = '<span class="badge warn">Cancelled</span>';
                     const price = (p.price ?? 0).toLocaleString('vi-VN');
                     const rating = (p.averageRating != null) ? Number(p.averageRating).toFixed(1) : '-';
                     const totalSales = (p.totalSales != null) ? p.totalSales : 0;
@@ -2101,18 +2135,45 @@
             }
         }
 
-        document.getElementById('prd_btnFilter')?.addEventListener('click', () => loadProductsPanel(true));
-        document.getElementById('prd_btnReset')?.addEventListener('click', () => {
-            const s=document.getElementById('prd_search'); if (s) s.value='';
-            if (prdCategorySel) prdCategorySel.value='';
-            const r=document.getElementById('prd_rating'); if (r) r.value='';
-            const d=document.getElementById('prd_downloads'); if (d) d.value='';
-            const st=document.getElementById('prd_status'); if (st) st.value='';
-            loadProductsPanel(true);
-        });
-        document.getElementById('prd_search')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); loadProductsPanel(true);} });
-        // Auto apply when changing status
-        document.getElementById('prd_status')?.addEventListener('change', () => loadProductsPanel(true));
+        // Bind products panel filters with resilient fallbacks in case elements are rendered after this script runs
+        (function bindProductsPanelFilters(){
+            const applyReset = function(){
+                const s = document.getElementById('prd_search'); if (s) s.value = '';
+                if (prdCategorySel) prdCategorySel.value = '';
+                const r = document.getElementById('prd_rating'); if (r) r.value = '';
+                const d = document.getElementById('prd_downloads'); if (d) d.value = '';
+                const st = document.getElementById('prd_status'); if (st) st.value = '';
+                loadProductsPanel(true);
+            };
+
+            const btnFilter = document.getElementById('prd_btnFilter');
+            const btnReset = document.getElementById('prd_btnReset');
+            const searchInput = document.getElementById('prd_search');
+            const statusSel = document.getElementById('prd_status');
+
+            if (btnFilter) btnFilter.addEventListener('click', () => loadProductsPanel(true));
+            if (btnReset) btnReset.addEventListener('click', applyReset);
+            if (searchInput) searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadProductsPanel(true); } });
+            if (statusSel) statusSel.addEventListener('change', () => loadProductsPanel(true));
+
+            // Delegated fallback: if controls aren't present yet, capture interactions at document level
+            if (!btnFilter || !btnReset || !searchInput || !statusSel) {
+                document.addEventListener('click', function delegatedPrdClick(e){
+                    const btn = e.target.closest && e.target.closest('button');
+                    if (!btn) return;
+                    if (btn.id === 'prd_btnFilter') { loadProductsPanel(true); }
+                    else if (btn.id === 'prd_btnReset') { applyReset(); }
+                });
+                document.addEventListener('keydown', function delegatedPrdKey(e){
+                    const t = e.target || e.srcElement;
+                    if (t && t.id === 'prd_search' && e.key === 'Enter') { e.preventDefault(); loadProductsPanel(true); }
+                });
+                document.addEventListener('change', function delegatedPrdChange(e){
+                    const t = e.target || e.srcElement;
+                    if (t && t.id === 'prd_status') { loadProductsPanel(true); }
+                });
+            }
+        })();
         if (window.location.hash === '#products') setTimeout(() => loadProductsPanel(true), 120);
         window.addEventListener('hashchange', () => { if (window.location.hash === '#products') loadProductsPanel(false); });
 

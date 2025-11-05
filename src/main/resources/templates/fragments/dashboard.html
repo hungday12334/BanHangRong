@@ -21,19 +21,19 @@
   </header>
   <section class="grid kpi" data-block="kpi">
     <div class="card" data-kpi="revenue-total">
-    <div class="label">Total revenue</div>
-    <div class="value">đ<span data-count th:attr="data-count=${totalRevenue}"
-      th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
-    <div class="delta pill good">Today: đ<span
-      th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',0,'POINT')}">0</span></div>
+      <div class="label">Total revenue</div>
+      <div class="value">đ<span data-count th:attr="data-count=${totalRevenue}"
+          th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}">0</span></div>
+      <div class="delta pill good">Today: đ<span
+          th:text="${#numbers.formatDecimal(todayRevenue,1,'COMMA',0,'POINT')}">0</span></div>
       <div class="orb one"></div>
       <div class="orb two"></div>
     </div>
     <div class="card" data-kpi="orders-total">
-    <div class="label">Orders</div>
+      <div class="label">Orders</div>
       <div class="value"><span data-count th:attr="data-count=${totalOrders}" th:text="${totalOrders}">0</span></div>
-    <div class="delta badge">This month: đ<span
-      th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',0,'POINT')}">0</span></div>
+      <div class="delta badge">This month: đ<span
+          th:text="${#numbers.formatDecimal(monthRevenue,1,'COMMA',0,'POINT')}">0</span></div>
     </div>
     <div class="card" data-kpi="products-active">
       <div class="label">Products on sale</div>
@@ -62,7 +62,7 @@
         </div>
         <div class="chip hide-md" style="display:flex;gap:8px;align-items:center;">
           <label for="revenueRange" style="font-weight:600;margin-right:6px;">Range:</label>
-          <select id="revenueRange" class="input" style="min-width:120px;"> 
+          <select id="revenueRange" class="input" style="min-width:120px;">
             <option value="7">7 days</option>
             <option value="15" selected>15 days</option>
             <option value="30">30 days</option>
@@ -70,7 +70,8 @@
             <option value="365">1 year</option>
             <option value="custom">Custom</option>
           </select>
-          <input id="revenueRangeCustom" type="number" min="1" placeholder="days" class="input" style="width:80px;display:none;margin-left:6px;" />
+          <input id="revenueRangeCustom" type="number" min="1" placeholder="days" class="input"
+            style="width:80px;display:none;margin-left:6px;" />
         </div>
       </div>
       <div class="body"><canvas id="revenueChart" class="sparkline"
@@ -119,6 +120,7 @@
             <option value="public">Public</option>
             <option value="pending">Pending</option>
             <option value="hidden">Hidden</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>
@@ -127,16 +129,30 @@
           <table class="table">
             <thead>
               <tr>
-                  <th data-sort="productId" class="sortable">ID <span class="sort-indicator"></span></th>
-                  <th data-sort="name" class="sortable">Name <span class="sort-indicator"></span></th>
-                  <th data-sort="price" class="sortable">Price <span class="sort-indicator"></span></th>
-                  <th data-sort="quantity" class="hide-md sortable">Qty <span class="sort-indicator"></span></th>
+                <th data-sort="productId" class="sortable">ID <span class="sort-indicator"></span></th>
+                <th data-sort="name" class="sortable">Name <span class="sort-indicator"></span></th>
+                <th data-sort="price" class="sortable">Price <span class="sort-indicator"></span></th>
+                <th data-sort="quantity" class="hide-md sortable">Qty <span class="sort-indicator"></span></th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody id="tbMyProducts">
-              <tr class="footer-note">
-                <td colspan="5">Loading...</td>
+              <!-- Server-side render of seller's products when available -->
+              <tr th:each="p : ${myProducts}" th:attr="data-product-id=${p.productId}" class="clickable">
+                <td th:text="${p.productId}">1</td>
+                <td th:text="${p.name}">Product name</td>
+                <td>đ<span th:text="${#numbers.formatDecimal(p.price,1,'COMMA',0,'POINT')}">0</span></td>
+                <td class="hide-md" th:text="${p.quantity}">0</td>
+                <td>
+                  <span th:if="${p.status == null or p.status == ''}">Pending</span>
+                  <span th:if="${p.status != null and #strings.equalsIgnoreCase(p.status, 'public')}" class="pill good">Public</span>
+                  <span th:if="${p.status != null and #strings.equalsIgnoreCase(p.status, 'hidden')}" class="badge">Hidden</span>
+                  <span th:if="${p.status != null and #strings.toLowerCase(p.status).contains('cancel')}" class="badge warn">Cancelled</span>
+                  <span th:if="${p.status != null and !(#strings.equalsIgnoreCase(p.status,'public') or #strings.equalsIgnoreCase(p.status,'hidden') or #strings.toLowerCase(p.status).contains('cancel'))}" th:text="${p.status}">Pending</span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(myProducts)}">
+                <td colspan="5" class="footer-note">Không có sản phẩm.</td>
               </tr>
             </tbody>
           </table>

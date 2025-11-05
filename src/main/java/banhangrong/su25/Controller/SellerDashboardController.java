@@ -200,6 +200,19 @@ public class SellerDashboardController {
     if (lowStock.size() > 10) lowStock = lowStock.subList(0, 10);
     long activeProducts = productsRepository.countBySellerIdAndStatus(sellerId, "public");
 
+    // "My products" for initial server-side render: include basic fields (id, name, price, quantity, status)
+    List<Map<String, Object>> myProducts = new ArrayList<>();
+    for (Products prod : sellerProducts) {
+        if (prod == null) continue;
+        Map<String, Object> m = new HashMap<>();
+        m.put("productId", prod.getProductId());
+        m.put("name", prod.getName());
+        m.put("price", prod.getPrice());
+        m.put("quantity", prod.getQuantity());
+        m.put("status", prod.getStatus());
+        myProducts.add(m);
+    }
+
         // Seller ranking (revenue-based)
         Integer myRank = productsRepository.sellerRevenueRank(sellerId);
         Long totalSellers = Optional.ofNullable(productsRepository.totalSellers()).orElse(0L);
@@ -240,6 +253,8 @@ public class SellerDashboardController {
         if (user != null) {
             model.addAttribute("userType", user.getUserType());
         }
+        // Provide server-side product list so the dashboard can render statuses immediately
+        model.addAttribute("myProducts", myProducts);
 
         return "pages/seller/seller_dashboard";
     }
