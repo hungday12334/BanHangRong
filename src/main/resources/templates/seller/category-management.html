@@ -114,36 +114,9 @@
                             Category List
                             <span class="category-count" id="categoryCount" th:text="'(' + ${categories.size()} + ')'">(0)</span>
                         </h3>
-
-                        <!-- Search and Filter Controls -->
-                        <div class="category-toolbar">
-                            <div class="search-box">
-                                <label for="searchInput" style="display:none;">Search categories</label>
-                                <i class="ti ti-search"></i>
-                                <input type="text" id="searchInput" placeholder="Search categories..." oninput="filterCategories()" />
-                            </div>
-
-                            <label for="sortSelect" style="display:none;">Sort</label>
-                            <select id="sortSelect" class="sort-select" onchange="sortCategories()">
-                                <option value="name-asc">Name (A-Z)</option>
-                                <option value="name-desc">Name (Z-A)</option>
-                                <option value="date-desc">Newest</option>
-                                <option value="date-asc">Oldest</option>
-                                <option value="products-desc">Most Products</option>
-                                <option value="products-asc">Least Products</option>
-                            </select>
-
-                            <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Select multiple">
-                                <i class="ti ti-checkbox"></i> Select Multiple
-                            </button>
-
-                            <button onclick="deleteSelected()" id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">
-                                <i class="ti ti-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
-                            </button>
-                        </div>
                     </div>
 
-                    <!-- Advanced Filters -->
+                    <!-- Advanced Filters - Moved here to be right below Category List heading -->
                     <div class="card" style="margin: 20px 0;">
                         <div class="card-body">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -218,6 +191,34 @@
                         </div>
                     </div>
 
+                    <!-- Search and Filter Controls Toolbar -->
+                    <div class="category-toolbar" style="margin: 16px 0;">
+                        <div class="search-box">
+                            <label for="searchInput" style="display:none;">Search categories</label>
+                            <i class="ti ti-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search categories..." oninput="filterCategories()" />
+                        </div>
+
+                        <label for="sortSelect" style="display:none;">Sort</label>
+                        <select id="sortSelect" class="sort-select" onchange="sortCategories()">
+                            <option value="sortOrder-asc">Sort Order (Default)</option>
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="date-desc">Newest</option>
+                            <option value="date-asc">Oldest</option>
+                            <option value="products-desc">Most Products</option>
+                            <option value="products-asc">Least Products</option>
+                        </select>
+
+                        <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Select multiple">
+                            <i class="ti ti-checkbox"></i> Select Multiple
+                        </button>
+
+                        <button onclick="deleteSelected()" id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">
+                            <i class="ti ti-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+                        </button>
+                    </div>
+
                     <!-- Filter Status Display -->
                     <div th:if="${filterCategoryId != null || filterCategoryName != null || filterProductCountFrom != null || filterProductCountTo != null || filterFromDate != null || filterToDate != null}"
                          class="card" style="margin-bottom: 16px; background: color-mix(in oklab, var(--accent) 8%, var(--bg-elev));">
@@ -258,32 +259,100 @@
                                     <label for="selectAll" style="display:none;">Select all</label>
                                     <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
                                 </th>
-                                <th style="width:60px;">ID</th>
+                                <th style="width:50px;">ID</th>
+                                <th style="width:40px;text-align:center;" title="Icon">📌</th>
                                 <th>Category Name</th>
-                                <th>Description</th>
-                                <th style="width:140px;text-align:center;">Product Count</th>
-                                <th style="width:160px;">Created Date</th>
+                                <th style="width:150px;">Slug</th>
+                                <th style="width:100px;text-align:center;">Status</th>
+                                <th style="width:80px;text-align:center;" title="Sort Order">Sort</th>
+                                <th style="width:100px;text-align:center;">Products</th>
+                                <th style="width:140px;">Created</th>
                                 <th style="width:180px;">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="category : ${categories}" class="category-row"
-                                th:attr="data-id=${category.categoryId}, data-name=${category.name}, data-description=${category.description}, data-created=${category.createdAt}, data-product-count=${productCountByCategory.get(category.categoryId) ?: 0}">
+                                th:attr="data-id=${category.categoryId},
+                                         data-name=${category.name},
+                                         data-description=${category.description},
+                                         data-created=${category.createdAt},
+                                         data-product-count=${productCountByCategory.get(category.categoryId) ?: 0},
+                                         data-slug=${category.slug},
+                                         data-parent-id=${category.parentId},
+                                         data-icon=${category.icon},
+                                         data-image-url=${category.imageUrl},
+                                         data-sort-order=${category.sortOrder ?: 0},
+                                         data-status=${category.status ?: 'ACTIVE'},
+                                         data-featured=${category.featured ?: false}">
                                 <td class="bulk-select-col" data-bulk-only>
                                     <input type="checkbox" class="category-checkbox" th:value="${category.categoryId}" onchange="updateSelectedCount()" th:attr="aria-label='Select ' + ${category.name}" />
                                 </td>
                                 <td th:text="${category.categoryId}"></td>
+
+                                <!-- Icon Column -->
+                                <td style="text-align:center; font-size:20px;">
+                                    <i th:if="${category.icon != null and !category.icon.isEmpty()}"
+                                       th:class="${'ti ' + category.icon}"
+                                       th:title="${category.icon}"></i>
+                                    <span th:unless="${category.icon != null and !category.icon.isEmpty()}"
+                                          style="color:var(--muted);">—</span>
+                                </td>
+
+                                <!-- Category Name with Featured Star and Hierarchy -->
                                 <td>
-                                    <div class="category-name">
+                                    <div class="category-name" style="display:flex; align-items:center; gap:8px;">
+                                        <!-- Hierarchy Indicator -->
+                                        <span th:if="${category.parentId != null}" style="color:var(--muted); margin-right:4px;">└─</span>
+
+                                        <!-- Featured Star -->
+                                        <span th:if="${category.featured != null and category.featured}"
+                                              style="color:#fbbf24; font-size:18px;"
+                                              title="Featured Category">⭐</span>
+
+                                        <!-- Name -->
                                         <strong th:text="${category.name}"></strong>
                                     </div>
+                                    <!-- Description (small, muted) -->
+                                    <div th:if="${category.description}"
+                                         style="font-size:0.875rem; color:var(--muted); margin-top:4px;"
+                                         th:text="${#strings.abbreviate(category.description, 50)}"></div>
                                 </td>
+
+                                <!-- Slug Column -->
                                 <td>
-                                    <div class="category-description">
-                                        <span th:if="${category.description}" th:text="${category.description}"></span>
-                                        <span th:unless="${category.description}" style="color:var(--muted);">---</span>
-                                    </div>
+                                    <code th:if="${category.slug != null and !category.slug.isEmpty()}"
+                                          style="font-size:0.875rem; background:var(--bg-elev); padding:2px 6px; border-radius:4px;"
+                                          th:text="${category.slug}"></code>
+                                    <span th:unless="${category.slug != null and !category.slug.isEmpty()}"
+                                          style="color:var(--muted);">—</span>
                                 </td>
+
+                                <!-- Status Badge -->
+                                <td style="text-align:center;">
+                                    <span th:if="${category.status == null or category.status == 'ACTIVE'}"
+                                          class="badge"
+                                          style="background:#10b981; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem;">
+                                        🟢 Active
+                                    </span>
+                                    <span th:if="${category.status == 'HIDDEN'}"
+                                          class="badge"
+                                          style="background:#f59e0b; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem;">
+                                        🟡 Hidden
+                                    </span>
+                                    <span th:if="${category.status == 'DRAFT'}"
+                                          class="badge"
+                                          style="background:#6b7280; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem;">
+                                        📝 Draft
+                                    </span>
+                                </td>
+
+                                <!-- Sort Order -->
+                                <td style="text-align:center;">
+                                    <span th:text="${category.sortOrder ?: 0}"
+                                          style="font-family:monospace; font-weight:500;"></span>
+                                </td>
+
+                                <!-- Product Count -->
                                 <td style="text-align:center;">
                                     <span class="product-count-badge" th:text="${productCountByCategory.get(category.categoryId) ?: 0}">0</span>
                                     <button th:if="${(productCountByCategory.get(category.categoryId) ?: 0) > 0}"
@@ -295,10 +364,14 @@
                                         <i class="ti ti-eye"></i>
                                     </button>
                                 </td>
+
+                                <!-- Created Date -->
                                 <td>
                                     <span th:if="${category.createdAt != null}" th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-                                    <span th:unless="${category.createdAt != null}" style="color:var(--muted);">---</span>
+                                    <span th:unless="${category.createdAt != null}" style="color:var(--muted);">—</span>
                                 </td>
+
+                                <!-- Actions -->
                                 <td>
                                     <div class="action-buttons-wrapper"
                                          th:data-id="${category.categoryId}"
@@ -553,6 +626,19 @@
 
                         <!-- Settings Tab -->
                         <div class="tab-pane fade" id="settingsTab">
+                            <!-- Featured Category - Made more prominent -->
+                            <div class="form-group" style="background: color-mix(in oklab, var(--accent) 8%, var(--bg-elev)); padding: 16px; border-radius: 8px; border: 2px solid var(--accent);">
+                                <label class="form-check-label" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                    <input type="checkbox" name="featured" id="editFeatured" class="form-check-input" style="width: 20px; height: 20px;" />
+                                    <div>
+                                        <strong style="font-size: 1.1rem;">⭐ Featured Category</strong>
+                                        <div class="form-text" style="margin-top: 4px;">
+                                            Display this category in priority position on homepage and featured sections
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
                             <div class="form-group">
                                 <label>Status</label>
                                 <div class="form-check-group">
@@ -604,16 +690,6 @@
                                 </label>
                                 <div class="form-text">
                                     <i class="ti ti-shield-check"></i> New products need admin approval before going public
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-check-label">
-                                    <input type="checkbox" name="featured" id="editFeatured" class="form-check-input" />
-                                    <strong>Featured Category</strong>
-                                </label>
-                                <div class="form-text">
-                                    <i class="ti ti-star"></i> Display in priority position on homepage
                                 </div>
                             </div>
 
@@ -765,13 +841,13 @@
         if (hasActiveFilters) {
             const filterForm = document.getElementById('filterForm');
             const toggleBtn = document.getElementById('toggleFilters');
-            const icon = toggleBtn.querySelector('i');
-            const text = toggleBtn.querySelector('span');
+            const toggleIcon = toggleBtn.querySelector('i');
+            const toggleText = toggleBtn.querySelector('span');
 
             filterForm.style.display = 'block';
-            icon.classList.remove('ti-chevron-down');
-            icon.classList.add('ti-chevron-up');
-            text.textContent = 'Hide';
+            toggleIcon.classList.remove('ti-chevron-down');
+            toggleIcon.classList.add('ti-chevron-up');
+            toggleText.textContent = 'Hide';
         }
     });
 
@@ -779,15 +855,11 @@
 
     function initCategoryPagination() {
         console.log('🔄 Initializing category display with pagination...');
-        refreshCategoryDisplay();
-    }
-
-    function getFilteredRows() {
-        const allRows = Array.from(document.querySelectorAll('.category-row'));
-        let filtered = allRows;
 
         // Apply stat card filter
-        if (currentFilter === 'hasProducts') {
+        let filtered = Array.from(allRows);
+
+        if (currentFilter === 'withProducts') {
             filtered = filtered.filter(row => {
                 const count = parseInt(row.getAttribute('data-product-count') || '0');
                 return count > 0;
@@ -1536,11 +1608,20 @@
         event.stopPropagation();
     }
 
-    // Smart Edit Modal - Advanced version with tabs
+    // Smart Edit Modal - Enhanced version with all fields
     function openSmartEditModal(wrapper) {
         const categoryId = wrapper.getAttribute('data-id');
         const categoryName = wrapper.getAttribute('data-name');
         const categoryDescription = wrapper.getAttribute('data-description') || '';
+
+        // Get new field values from data attributes
+        const dataSlug = wrapper.getAttribute('data-slug') || '';
+        const dataParentId = wrapper.getAttribute('data-parent-id') || '';
+        const dataIcon = wrapper.getAttribute('data-icon') || '';
+        const dataImageUrl = wrapper.getAttribute('data-image-url') || '';
+        const dataSortOrder = wrapper.getAttribute('data-sort-order') || '0';
+        const dataStatus = wrapper.getAttribute('data-status') || 'ACTIVE';
+        const dataFeatured = wrapper.getAttribute('data-featured') === 'true';
 
         // Populate basic fields
         document.getElementById('editCategoryId').value = categoryId;
@@ -1548,19 +1629,69 @@
         document.getElementById('editCategoryDescription').value = categoryDescription;
         document.getElementById('editDescCharCount').textContent = categoryDescription.length;
 
-        // Auto-generate slug from name
-        const slug = categoryName.toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
-            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-        document.getElementById('editCategorySlug').value = slug;
+        // Populate slug (or auto-generate if empty)
+        if (dataSlug && dataSlug !== 'null') {
+            document.getElementById('editCategorySlug').value = dataSlug;
+        } else {
+            const autoSlug = categoryName.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            document.getElementById('editCategorySlug').value = autoSlug;
+        }
 
-        // Reset other fields to default
+        // Populate parent category
+        const parentSelect = document.getElementById('editCategoryParent');
+        if (parentSelect) {
+            parentSelect.value = (dataParentId && dataParentId !== 'null') ? dataParentId : '';
+        }
+
+        // Populate icon
+        const iconInput = document.getElementById('editCategoryIcon');
+        const iconPreview = document.getElementById('editIconPreview');
+        if (dataIcon && dataIcon !== 'null') {
+            iconInput.value = dataIcon;
+            iconPreview.innerHTML = `<i class="ti ${dataIcon}"></i>`;
+        } else {
+            iconInput.value = '';
+            iconPreview.innerHTML = '<i class="ti ti-circle-dashed"></i>';
+        }
+
+        // Populate image URL
+        const imageUrlInput = document.getElementById('editCategoryImage');
+        if (imageUrlInput) {
+            imageUrlInput.value = (dataImageUrl && dataImageUrl !== 'null') ? dataImageUrl : '';
+        }
+
+        // Populate sort order
+        const sortOrderInput = document.getElementById('editCategorySortOrder');
+        if (sortOrderInput) {
+            sortOrderInput.value = dataSortOrder;
+        }
+
+        // Populate status
+        const statusActive = document.getElementById('editStatusActive');
+        const statusHidden = document.getElementById('editStatusHidden');
+        const statusDraft = document.getElementById('editStatusDraft');
+
+        if (dataStatus === 'HIDDEN' && statusHidden) {
+            statusHidden.checked = true;
+        } else if (dataStatus === 'DRAFT' && statusDraft) {
+            statusDraft.checked = true;
+        } else if (statusActive) {
+            statusActive.checked = true;
+        }
+
+        // Populate featured
+        const featuredCheckbox = document.getElementById('editFeatured');
+        if (featuredCheckbox) {
+            featuredCheckbox.checked = dataFeatured;
+        }
+
+        // Reset color to default
         document.getElementById('editCategoryColor').value = '#3b82f6';
         document.getElementById('editColorHex').value = '#3b82f6';
-        document.getElementById('editCategoryIcon').value = '';
-        document.getElementById('editIconPreview').innerHTML = '<i class="ti ti-circle-dashed"></i>';
 
         // Reset to first tab
         switchTab('basicTab', document.querySelector('.nav-link'));

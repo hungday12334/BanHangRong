@@ -4,16 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(license-management): implement category licenses feature for tracking license assignments">
-      <change afterPath="$PROJECT_DIR$/CATEGORY_ADVANCED_FILTERS_GUIDE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CATEGORY_FILTERS_SUMMARY.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CATEGORY_PAGINATION_APPLIED.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/IMPLEMENTATION_COMPLETE_FILTERS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TEST_CATEGORY_FILTERS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/UPDATE_FILTERS_POSITION.md" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(category-management): add enhanced fields for improved category management">
+      <change afterPath="$PROJECT_DIR$/CATEGORY_IMPROVEMENTS_COMPLETE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EDIT_CATEGORY_ANALYSIS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EDIT_CATEGORY_IMPLEMENTATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/HUONG_DAN_CAC_TRUONG_MOI.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TOM_TAT_HOAN_THANH.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WHERE_NEW_FIELDS_APPEAR.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/category-management.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,6 +57,16 @@
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
     &quot;accountId&quot;: &quot;efd5b86f-5509-426a-a183-1d6d3c55d639&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;hungday12334&quot;,
+    &quot;repository&quot;: &quot;BanHangRong&quot;
   }
 }</component>
   <component name="KubernetesApiPersistence">{}</component>
@@ -83,56 +91,56 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Database Script.add_sample_products.sql.executor": "Run",
-    "Database Script.add_vouchers.sql.executor": "Run",
-    "Database Script.add_withdrawals.sql.executor": "Run",
-    "Database Script.data_v2.sql.executor": "Run",
-    "Database Script.fix_old_constraint.sql.executor": "Run",
-    "Database Script.fix_review_constraint.sql.executor": "Run",
-    "Database Script.modify_review_system.sql.executor": "Run",
-    "Database Script.quick_create_seller_test.sql.executor": "Run",
-    "Database Script.review_system_complete.sql.executor": "Run",
-    "Database Script.set_password.sql.executor": "Run",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Maven.su25 [clean].executor": "Run",
-    "Maven.su25 [package].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
-    "Spring Boot.Su25Application.executor": "Run",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "MinhHQ",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_interpreter_path": "/Users/hoangquangminh/Library/Application Support/JetBrains/IntelliJIdea2025.2/node/versions/24.11.0/bin/node",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Database Script.add_sample_products.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_vouchers.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.add_withdrawals.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.data_v2.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_old_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.fix_review_constraint.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.modify_review_system.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.quick_create_seller_test.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.review_system_complete.sql.executor&quot;: &quot;Run&quot;,
+    &quot;Database Script.set_password.sql.executor&quot;: &quot;Run&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Maven.su25 [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.su25 [package].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Su25Application.executor&quot;: &quot;Run&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#9 on MinhHQ&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;/Users/hoangquangminh/Library/Application Support/JetBrains/IntelliJIdea2025.2/node/versions/24.11.0/bin/node&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ],
-    "RunConfigurationTargetLRU": [
-      "53b38385-a361-4b09-b3fc-e28dbd7b3e5c"
+    &quot;RunConfigurationTargetLRU&quot;: [
+      &quot;53b38385-a361-4b09-b3fc-e28dbd7b3e5c&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -250,6 +258,7 @@
       <workItem from="1762071570533" duration="875000" />
       <workItem from="1762111402526" duration="8323000" />
       <workItem from="1762138370900" duration="473000" />
+      <workItem from="1762332301596" duration="2292000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -435,7 +444,31 @@
       <option name="project" value="LOCAL" />
       <updated>1762118397188</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="feat(category-management): implement advanced filters and pagination for improved category management experience">
+      <option name="closed" value="true" />
+      <created>1762322568885</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1762322568885</updated>
+    </task>
+    <task id="LOCAL-00025" summary="feat(category-management): implement advanced filters and pagination for improved category management experience">
+      <option name="closed" value="true" />
+      <created>1762322913936</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1762322913936</updated>
+    </task>
+    <task id="LOCAL-00026" summary="feat(category-management): add enhanced fields for improved category management">
+      <option name="closed" value="true" />
+      <created>1762328318538</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1762328318538</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -515,6 +548,8 @@
     <MESSAGE value="feat(profile): add password validation to prevent spaces and enhance response handling" />
     <MESSAGE value="feat(license-management): implement category licenses feature for managing licenses per category" />
     <MESSAGE value="feat(license-management): implement category licenses feature for tracking license assignments" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(license-management): implement category licenses feature for tracking license assignments" />
+    <MESSAGE value="feat(category-management): implement advanced filters and pagination for improved category management experience" />
+    <MESSAGE value="feat(category-management): add enhanced fields for improved category management" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(category-management): add enhanced fields for improved category management" />
   </component>
 </project>
