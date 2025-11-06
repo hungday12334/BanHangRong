@@ -33,11 +33,22 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Tạo authorities dựa trên userType
         List<GrantedAuthority> authorities = new ArrayList<>();
         String userType = user.getUserType();
+        
         if (userType != null) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + userType.toUpperCase()));
+            String normalizedType = userType.trim().toUpperCase();
+            
+            // Xử lý USER như CUSTOMER
+            if ("USER".equals(normalizedType)) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+            } else {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + normalizedType));
+            }
+        } else {
+            // Nếu userType null, mặc định là CUSTOMER
+            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
         }
         
-        // Thêm role USER mặc định
+        // Thêm role USER mặc định cho tất cả user đã đăng nhập
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
         // Tạo UserDetails object

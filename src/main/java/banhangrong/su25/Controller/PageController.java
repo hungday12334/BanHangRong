@@ -43,13 +43,21 @@ public class PageController {
             String username = auth.getName();
             Users user = usersRepository.findByUsername(username).orElse(null);
             if (user == null) return null;
-            switch (user.getUserType()) {
-                case "ADMIN": return "redirect:/admin/dashboard";
-                case "SELLER": return "redirect:/seller/dashboard";
-                case "CUSTOMER":
-                    return Boolean.TRUE.equals(user.getIsEmailVerified()) ? "redirect:/customer/dashboard" : "redirect:/verify-email-required";
-                default: return null;
+            
+            String userType = user.getUserType();
+            if (userType != null) {
+                userType = userType.trim().toUpperCase();
             }
+            
+            if ("ADMIN".equals(userType)) {
+                return "redirect:/admin/dashboard";
+            } else if ("SELLER".equals(userType)) {
+                return "redirect:/seller/dashboard";
+            } else if ("CUSTOMER".equals(userType) || "USER".equals(userType)) {
+                // USER được coi như CUSTOMER
+                return Boolean.TRUE.equals(user.getIsEmailVerified()) ? "redirect:/customer/dashboard" : "redirect:/verify-email-required";
+            }
+            return null;
         } catch (Exception e) {
             logger.debug("Error checking authenticated user for homepage redirect", e);
             return null;

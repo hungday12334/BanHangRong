@@ -38,6 +38,16 @@
         .btn-secondary { background: #f3f4f6; color: #6b7280; }
         .btn-secondary:hover { background: #e5e7eb; color: #374151; }
         .note { margin-top: 20px; padding: 15px; background: #eff6ff; border-radius: 8px; font-size: 13px; color: #1e40af; text-align: center; }
+        
+        /* Popup Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 16px; padding: 30px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; }
+        .modal-icon { font-size: 64px; margin-bottom: 20px; }
+        .modal-title { font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 15px; }
+        .modal-message { font-size: 16px; color: #6b7280; margin-bottom: 25px; line-height: 1.6; }
+        .modal-button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 32px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+        .modal-button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+        
         @media (max-width: 768px) { .header h1 { font-size: 24px; } .content { padding: 30px 20px; } .actions { flex-direction: column; } }
     </style>
 </head>
@@ -64,6 +74,10 @@
                     <label>Loại tài khoản hiện tại:</label>
                     <span th:text="${user.userType}">CUSTOMER</span>
                 </div>
+                <div class="user-info-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #d1d5db;">
+                    <label style="font-size: 16px; color: #059669;">💰 Số dư ví hiện tại:</label>
+                    <span style="font-size: 18px; font-weight: 700; color: #059669;" th:text="${user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
+                </div>
             </div>
 
             <div class="benefits">
@@ -77,25 +91,104 @@
             <div class="terms">
                 <h3>📜 Điều khoản & Trách nhiệm</h3>
                 <ul>
+                    <li>Thánh ttoán trước 200.000 VNĐ để được nâng cấp lên seller</li>
+                    <li>Sau khi nâng cấp thành công, bạn sẽ được tạo tài khoản seller và có thể bán sản phẩm</li>
+                    <li>Mỗi lần rút tiền, bạn sẽ bị triết khấu 2% giá trị rút tiền để phục vự chi phí duy trì nền tảng</li>
                     <li>Chỉ bán sản phẩm hợp pháp và có bản quyền</li>
                     <li>Cung cấp thông tin sản phẩm chính xác và đầy đủ</li>
-                    <li>Giao hàng đúng hẹn và hỗ trợ khách hàng tốt</li>
                     <li>Tuân thủ chính sách và quy định của nền tảng</li>
                     <li>Chịu trách nhiệm về chất lượng sản phẩm</li>
                 </ul>
             </div>
 
-            <form method="POST" action="/become-seller/upgrade" th:action="@{/become-seller/upgrade}">
+            <form method="POST" action="/become-seller/upgrade" th:action="@{/become-seller/upgrade}" id="upgradeForm" onsubmit="return validateForm(event)">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                
+                <!-- Checkbox đồng ý điều khoản -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="agreeTerms" name="agreeTerms" required style="margin-top: 3px; width: 18px; height: 18px; cursor: pointer; accent-color: #667eea;">
+                        <span style="font-size: 14px; color: #374151; line-height: 1.5;">
+                            Tôi đồng ý với mọi điều khoản của BanHangRong đưa ra
+                        </span>
+                    </label>
+                    <div id="termsError" style="color: #ef4444; font-size: 13px; margin-top: 8px; display: none;">
+                        ⚠️ Vui lòng đồng ý với điều khoản để tiếp tục
+                    </div>
+                </div>
+                
                 <div class="actions">
                     <a href="/customer/dashboard" class="btn btn-secondary">Hủy bỏ</a>
-                    <button type="submit" class="btn btn-primary">Xác nhận nâng cấp</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Xác nhận nâng cấp</button>
                 </div>
             </form>
 
             <div class="note">ℹ Bạn có thể chuyển đổi giữa Seller và Customer dashboard bất cứ lúc nào</div>
         </div>
     </div>
+
+    <!-- Popup Modal - Không đủ số dư -->
+    <div id="insufficientBalanceModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <div class="modal-title">Số dư không đủ</div>
+            <div class="modal-message">
+                Số dư quý khách không đủ. Xin vui lòng nạp thêm để tiếp tục nâng cấp lên seller.
+                <br><br>
+                <strong>Số dư hiện tại:</strong> 
+                <span th:text="${currentBalance != null ? #numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}" style="color: #ef4444;">0₫</span>
+                <br>
+                <strong>Số tiền cần:</strong> 
+                <span th:text="${requiredAmount != null ? #numbers.formatDecimal(requiredAmount, 0, 'COMMA', 0, 'POINT') + '₫' : '200,000₫'}" style="color: #059669;">200,000₫</span>
+            </div>
+            <a href="/customer/dashboard" class="modal-button">Quay trở lại Customer Dashboard</a>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Kiểm tra và hiển thị popup nếu không đủ số dư
+        var insufficientBalance = /*[[${insufficientBalance != null ? insufficientBalance : false}]]*/ false;
+        
+        if (insufficientBalance === true) {
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('insufficientBalanceModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
+            });
+        }
+        
+        // Đóng modal khi click vào overlay
+        var modalElement = document.getElementById('insufficientBalanceModal');
+        if (modalElement) {
+            modalElement.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    window.location.href = '/customer/dashboard';
+                }
+            });
+        }
+        
+        function validateForm(event) {
+            const agreeTerms = document.getElementById('agreeTerms');
+            const termsError = document.getElementById('termsError');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!agreeTerms.checked) {
+                event.preventDefault();
+                termsError.style.display = 'block';
+                agreeTerms.focus();
+                return false;
+            }
+            
+            // Disable button để tránh double submit
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang xử lý...';
+            
+            return true;
+        }
+        /*]]>*/
+    </script>
 </body>
 </html>
 

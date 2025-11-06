@@ -303,7 +303,22 @@
         
         <div id="successMessage" class="success-message">
             <i class="fas fa-check-circle"></i>
-            <span>Login successful!</span>
+            <span id="successText">Login successful!</span>
+        </div>
+        
+        <!-- Flash message từ redirectAttributes -->
+        <div th:if="${upgradeSuccess}" 
+             class="success-message" 
+             style="display: flex; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 16px; border-radius: 8px; margin-top: 20px;">
+            <i class="fas fa-check-circle" style="font-size: 20px; margin-right: 10px;"></i>
+            <span th:text="${upgradeSuccess}" style="font-weight: 500; line-height: 1.5;"></span>
+        </div>
+        
+        <div th:if="${error}" 
+             class="error-message" 
+             style="display: flex; background: #fff3f3; color: #c82333; border: 1px solid #f5c6cb; padding: 16px; border-radius: 8px; margin-top: 20px;">
+            <i class="fas fa-exclamation-circle" style="font-size: 20px; margin-right: 10px;"></i>
+            <span th:text="${error}" style="font-weight: 500; line-height: 1.5;"></span>
         </div>
     </div>
 
@@ -333,14 +348,10 @@
         }
         if (urlParams.get('logout')) {
             const successDiv = document.getElementById('successMessage');
-            successDiv.querySelector('span').textContent = 'Logged out successfully!';
+            document.getElementById('successText').textContent = 'Logged out successfully!';
             successDiv.style.display = 'flex';
         }
-        if (urlParams.get('upgrade')) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.querySelector('span').textContent = '🎉 Chúc mừng! Bạn đã trở thành Seller! Vui lòng đăng nhập lại để sử dụng tính năng seller.';
-            successDiv.style.display = 'flex';
-        }
+        // Note: upgradeSuccess message được hiển thị qua flash message ở trên, không cần hiển thị lại ở đây
     </script>
 </body>
 </html>
