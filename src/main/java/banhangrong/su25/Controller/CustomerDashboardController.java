@@ -62,6 +62,7 @@ public class CustomerDashboardController {
 
     @GetMapping("/customer/dashboard")
     public String customerDashboard(
+            @RequestParam(name = "purchase", required = false) String purchase,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "15") int size,
             @RequestParam(name = "search", required = false) String search,
@@ -92,7 +93,9 @@ public class CustomerDashboardController {
             model.addAttribute("cartCount", cartCount);
             model.addAttribute("user", currentUser);
         }
-        
+        if(purchase != null && purchase.equalsIgnoreCase("success")) {
+            model.addAttribute("purchaseSuccess", true);
+        }
         return "customer/dashboard";
     }
 
@@ -177,23 +180,9 @@ public class CustomerDashboardController {
     }
 
     @GetMapping("/notification")
-    public String notification(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        Optional<Users> userOptional = usersRepository.findByUsername(username);
-        
-        if (userOptional.isEmpty()) {
-            return "redirect:/login";
-        }
-        
-        Users user = userOptional.get();
-        
-        Long cartCount = shoppingCartRepository.countByUserId(user.getUserId());
-        
-        model.addAttribute("user", user);
-        model.addAttribute("cartCount", cartCount);
-        
-        return "customer/notification";
+    public String notification() {
+        // Redirect to main notifications page
+        return "redirect:/customer/notifications";
     }
 
     @GetMapping("/customer/seller/{sellerId}")

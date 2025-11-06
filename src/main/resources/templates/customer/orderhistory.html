@@ -737,7 +737,7 @@ body {
           <div th:text="'Order Total: ' + ${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'" style="font-weight: 600; color: #111827;">Order Total: 1,100,000₫</div>
           <div class="order-actions">
             <button class="rate-btn" th:attr="data-order-item-id=${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty ? orderItemsMap[order.orderId][0].orderItemId : 1}" onclick="openRateModal(this)">Rate</button>
-            <button class="contact-btn">Contact Seller</button>
+            <button class="contact-btn">Liscense Key</button>
             <button class="buy-again-btn" th:attr="data-product-id=${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty ? orderItemsMap[order.orderId][0].productId : 0}">Buy again</button>
                         </div>
                         </div>

@@ -44,142 +44,6 @@
 			flex-direction: column;
 		}
 
-		.topbar {
-			display: flex;
-			align-items: center;
-			gap: 14px;
-			padding: 10px 16px;
-			border-bottom: 1px solid var(--line);
-			background: var(--card);
-			flex-wrap: nowrap;
-		}
-
-		.brand {
-			font-weight: 800;
-			letter-spacing: .2px;
-		}
-
-	.top-actions {
-		margin-left: auto;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		position: relative;
-		flex-wrap: nowrap;
-	}
-
-	.notification-link:hover {
-		background: #f3f4f6;
-		color: #111827;
-	}
-
-	.user-btn {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		cursor: pointer;
-		color: #111827;
-		border: 1px solid var(--line);
-		padding: 6px 8px;
-		border-radius: 8px;
-		background: #fff;
-		white-space: nowrap;
-	}
-	
-	.user-btn .wallet-badge {
-		margin-left: 4px;
-		padding: 3px 6px;
-			background: #f0f9ff;
-			border: 1px solid #bae6fd;
-			border-radius: 6px;
-			font-weight: 600;
-			color: #0369a1;
-			font-size: 12px;
-		}
-		
-		@media (max-width: 768px) {
-			.user-btn .wallet-badge {
-				display: none;
-			}
-		}
-
-		.user-menu {
-			position: absolute;
-			right: 0;
-			top: 48px;
-			background: #fff;
-			border: 1px solid var(--line);
-			border-radius: 10px;
-			box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
-			width: 200px;
-			display: none;
-			z-index: 5
-		}
-
-		.user-menu .item {
-			display: block;
-			padding: 10px 12px;
-			color: #111827;
-			text-decoration: none
-		}
-
-		.user-menu .item:hover {
-			background: #f3f4f6
-		}
-
-		.cart {
-			position: relative;
-			width: 28px;
-			height: 28px;
-			display: grid;
-			place-items: center;
-			border: 1px solid var(--line);
-			border-radius: 8px;
-			text-decoration: none;
-			color: #111827;
-		}
-
-		.cart .badge {
-			position: absolute;
-			top: -6px;
-			right: -6px;
-			background: #ef4444;
-			color: #fff;
-			min-width: 18px;
-			height: 18px;
-			border-radius: 9px;
-			font-size: 11px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0 5px;
-		}
-
-		.nav {
-			display: flex;
-			gap: 16px;
-			padding: 12px 16px;
-			border-bottom: 1px solid var(--line);
-			background: var(--card);
-			overflow-x: auto;
-		}
-
-		.nav a {
-			text-decoration: none;
-			color: var(--muted);
-			font-size: 14px;
-			white-space: nowrap;
-			padding: 6px 12px;
-			border-radius: 8px;
-			transition: all 0.2s;
-		}
-
-		.nav a:hover,
-		.nav a.active {
-			background: #e0f2fe;
-			color: var(--brand);
-		}
-
 		.container {
 			max-width: 1200px;
 			margin: 0 auto;
@@ -481,67 +345,7 @@
 
 <body>
 	<div class="wrapper">
-		<!-- Header -->
-		<div class="topbar">
-			<div class="brand">BanHangRong</div>
-			<nav class="nav" aria-label="Main">
-			<a href="/customer/dashboard">Home</a>
-			<a href="/categories">Category</a>
-			<a href="#">License Software</a>
-			<a href="#">Game Keys</a>
-			<a href="#">Voucher</a>
-			<a href="/customer/chat">💬 Chat</a>
-			<a href="#">Support</a>
-			</nav>
-			<div class="top-actions">
-				<a href="/customer/notifications" class="notification-link" style="position:relative;font-size:20px;color:#6b7280;text-decoration:none;padding:6px 8px;border-radius:8px;transition:all 0.2s;" title="Notifications">ðŸ””<span th:if="${unreadCount != null and unreadCount > 0}" class="notification-badge" th:text="${unreadCount}" style="position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:10px;padding:2px 5px;border-radius:10px;font-weight:700;min-width:16px;text-align:center;">0</span></a>
-				<div class="user" style="position:relative">
-					<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-						<span th:text="${currentUser != null ? currentUser.username : 'User123456'}">User123456</span>
-						<span class="wallet-badge">
-							💰 <span th:text="${currentUser != null and currentUser.balance != null ? #numbers.formatDecimal(currentUser.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
-						</span>
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
-								stroke-linejoin="round" />
-						</svg>
-					</button>
-				<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-					<a class="item" th:href="@{'/customer/profile/' + ${currentUser.username}}" role="menuitem">My Account</a>
-					<a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
-						<a class="item" href="/customer/chat" role="menuitem">💬 Chat</a>
-						<a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
-						<a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
-						<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
-							style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
-							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-								th:value="${_csrf.token}" />
-							<input type="hidden" name="amount" id="topupAmountInput" />
-							<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
-								(VNPay)</button>
-						</form>
-						<a class="item" href="/orderhistory" role="menuitem">My Orders</a>
-						<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
-							style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
-							Become a Seller</a>
-						<a class="item" href="#" role="menuitem"
-							onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
-					</div>
-					<form id="logoutForm" method="post" action="/logout" style="display:none;">
-					</form>
-				</div>
-			<div class="search">
-				<form method="GET" action="/customer/dashboard" style="display:flex;gap:3px;">
-					<input type="search" name="search" placeholder="search" aria-label="Search"
-						style="height:34px;width:180px;padding:0 10px;border:1px solid var(--line);border-radius:8px;outline:none;font-size:14px;">
-					<button type="submit"
-						style="padding:6px 10px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-				</form>
-			</div>
-				<a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
-					th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
-			</div>
-		</div>
+		<div th:replace="~{customer/fragments/header :: header}"></div>
 
 		<!-- Main Content -->
 		<div class="container">
@@ -555,11 +359,11 @@
 
 			<!-- Filters -->
 			<div class="filters-section">
-				<form method="get" action="/customer/notifications">
+				<form method="get" action="/customer/notifications" id="filterForm" onsubmit="return ensurePageReset()">
 					<div class="filters-grid">
 						<div class="filter-group">
 							<label>Sort By</label>
-							<select name="sortBy">
+							<select name="sortBy" id="sortBySelect">
 								<option value="newest" th:selected="${currentSortBy == 'newest' or currentSortBy == null}">
 									Newest</option>
 								<option value="oldest" th:selected="${currentSortBy == 'oldest'}">Oldest</option>
@@ -674,21 +478,34 @@
 	</div>
 
 	<script th:inline="javascript">
-		function toggleUserMenu() {
-			const menu = document.getElementById('userMenu');
-			menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-		}
-
-		document.addEventListener('click', function (event) {
-			const userBtn = document.querySelector('.user-btn');
-			const userMenu = document.getElementById('userMenu');
-			if (!userBtn.contains(event.target)) {
-				userMenu.style.display = 'none';
-			}
-		});
-
 		function clearFilters() {
 			window.location.href = '/customer/notifications';
+		}
+
+		let previousSortBy = /*[[${currentSortBy != null ? currentSortBy : 'newest'}]]*/ 'newest';
+		
+		function ensurePageReset() {
+			// Đảm bảo reset về trang đầu tiên khi submit form với sortBy mới
+			const sortBySelect = document.getElementById('sortBySelect');
+			if (sortBySelect) {
+				const newSortBy = sortBySelect.value;
+				// Kiểm tra nếu sortBy đã thay đổi
+				if (previousSortBy !== newSortBy) {
+					const form = document.getElementById('filterForm');
+					if (form) {
+						let pageInput = document.getElementById('pageInput');
+						if (!pageInput) {
+							pageInput = document.createElement('input');
+							pageInput.type = 'hidden';
+							pageInput.name = 'page';
+							pageInput.id = 'pageInput';
+							form.appendChild(pageInput);
+						}
+						pageInput.value = '0';
+					}
+				}
+			}
+			return true;
 		}
 
 		function getCsrfToken() {
@@ -905,31 +722,130 @@
 	</script>
 
 	<script>
-		// User menu toggle (from dashboard)
-		(function () {
-			const btn = document.getElementById('userMenuBtn');
-			const menu = document.getElementById('userDropdown');
-			function close() { if (menu) { menu.style.display = 'none'; btn && btn.setAttribute('aria-expanded', 'false'); } }
-			function toggle() { if (!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block' : 'none'; btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false'); }
-			if (btn) { btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); }); }
-			document.addEventListener('click', close);
-			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-		})();
+		// Auto-refresh notifications và badge notification
+		let lastNotificationCount = 0;
+		let notificationCheckInterval = null;
 
-		// VNPay topup function (from dashboard)
-		function topupPrompt(e) {
-			e.preventDefault();
-			const v = prompt('Enter amount to top up (VND):', '200000');
-			if (!v) return false;
-			const clean = v.replace(/[^0-9]/g, '');
-			if (!clean) {
-				alert('Please enter a valid amount');
-				return false;
+		function updateNotificationBadge() {
+			const csrfToken = getCsrfToken();
+			const csrfHeader = getCsrfHeader();
+			
+			const headers = {
+				'Content-Type': 'application/json'
+			};
+			
+			if (csrfToken && csrfHeader) {
+				headers[csrfHeader] = csrfToken;
 			}
-			document.getElementById('topupAmountInput').value = clean;
-			e.target.submit();
-			return true;
+
+			fetch('/customer/notifications/unread-count', {
+				method: 'GET',
+				headers: headers
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success && data.count !== undefined) {
+						const unreadBadge = document.querySelector('.unread-badge');
+						const topBadge = document.querySelector('.notification-badge');
+						
+						// Cập nhật badge ở header
+						if (data.count > 0) {
+							if (topBadge) {
+								topBadge.textContent = data.count;
+								topBadge.style.display = 'inline-block';
+							} else {
+								// Tạo badge mới nếu chưa có
+								const notificationLink = document.querySelector('.notification-link');
+								if (notificationLink) {
+									const badge = document.createElement('span');
+									badge.className = 'notification-badge';
+									badge.textContent = data.count;
+									badge.style.cssText = 'position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:10px;padding:2px 5px;border-radius:10px;font-weight:700;min-width:16px;text-align:center;';
+									notificationLink.appendChild(badge);
+								}
+							}
+						} else {
+							if (topBadge) topBadge.remove();
+						}
+						
+						// Cập nhật badge ở trang notifications
+						if (data.count > 0) {
+							if (unreadBadge) {
+								unreadBadge.textContent = data.count;
+								unreadBadge.style.display = 'inline-block';
+							} else {
+								// Tạo badge mới nếu chưa có
+								const pageTitle = document.querySelector('.page-title');
+								if (pageTitle) {
+									const badge = document.createElement('span');
+									badge.className = 'unread-badge';
+									badge.textContent = data.count;
+									badge.style.cssText = 'background:#ef4444;color:#fff;padding:4px 12px;border-radius:12px;font-size:14px;font-weight:600;margin-left:8px;';
+									pageTitle.appendChild(badge);
+								}
+							}
+						} else {
+							if (unreadBadge) unreadBadge.remove();
+						}
+						
+						// Kiểm tra nếu có notification mới thì reload trang
+						if (data.count > lastNotificationCount && lastNotificationCount > 0) {
+							// Có notification mới, reload trang để hiển thị
+							console.log('New notification detected, reloading page...');
+							window.location.reload();
+						}
+						
+						lastNotificationCount = data.count;
+						
+						// Cập nhật bulk actions info
+						const bulkInfo = document.querySelector('.bulk-actions-info strong');
+						if (bulkInfo) {
+							bulkInfo.textContent = data.count;
+						}
+						
+						// Hide bulk actions nếu không còn unread
+						const bulkActions = document.querySelector('.bulk-actions');
+						if (bulkActions) {
+							if (data.count === 0) {
+								bulkActions.style.display = 'none';
+							} else {
+								bulkActions.style.display = 'flex';
+							}
+						}
+					}
+				})
+				.catch(error => {
+					console.error('Error updating notification badge:', error);
+				});
 		}
+
+		// Bắt đầu polling mỗi 30 giây
+		document.addEventListener('DOMContentLoaded', function() {
+			// Lấy số lượng notification ban đầu
+			const initialBadge = document.querySelector('.unread-badge');
+			if (initialBadge) {
+				lastNotificationCount = parseInt(initialBadge.textContent) || 0;
+			}
+			
+			// Kiểm tra badge ở header
+			const topBadge = document.querySelector('.notification-badge');
+			if (topBadge) {
+				lastNotificationCount = parseInt(topBadge.textContent) || 0;
+			}
+			
+			// Cập nhật badge ngay lập tức
+			updateNotificationBadge();
+			
+			// Thiết lập polling mỗi 30 giây
+			notificationCheckInterval = setInterval(updateNotificationBadge, 30000);
+		});
+
+		// Dừng polling khi rời khỏi trang
+		window.addEventListener('beforeunload', function() {
+			if (notificationCheckInterval) {
+				clearInterval(notificationCheckInterval);
+			}
+		});
 	</script>
 </body>
 

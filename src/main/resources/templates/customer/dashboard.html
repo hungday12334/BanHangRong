@@ -120,6 +120,88 @@
 			}
 		}
 
+		.alert {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			padding: 16px 20px;
+			border-radius: 10px;
+			font-weight: 500;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			z-index: 10000;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+			animation: slideInRight 0.3s ease-out;
+			max-width: 400px;
+		}
+
+		.alert-success {
+			background: #10b981;
+			color: white;
+			border: none;
+		}
+
+		.alert-success::before {
+			content: "✓";
+			font-size: 20px;
+			font-weight: bold;
+		}
+
+		.alert-close {
+			background: none;
+			border: none;
+			color: white;
+			font-size: 20px;
+			font-weight: bold;
+			cursor: pointer;
+			padding: 0;
+			margin-left: auto;
+			width: 24px;
+			height: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 4px;
+			transition: background-color 0.2s;
+			z-index: 10001;
+			position: relative;
+		}
+
+		.alert-close:hover {
+			background-color: rgba(255, 255, 255, 0.2);
+		}
+
+		.alert-close:active {
+			background-color: rgba(255, 255, 255, 0.3);
+		}
+
+		@keyframes slideInRight {
+			from {
+				transform: translateX(400px);
+				opacity: 0;
+			}
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		@keyframes slideOutRight {
+			from {
+				transform: translateX(0);
+				opacity: 1;
+			}
+			to {
+				transform: translateX(400px);
+				opacity: 0;
+			}
+		}
+
+		.alert.hiding {
+			animation: slideOutRight 0.3s ease-out forwards;
+		}
+
 		.card {
 			background: var(--card);
 			border: 1px solid var(--line);
@@ -233,6 +315,10 @@
 <body>
 	<div class="wrapper">
 		<div th:replace="~{customer/fragments/header :: header}"></div>
+        <div th:if="${purchaseSuccess}" class="alert alert-success" role="alert">
+            <span>Purchase successful! Thank you for your trust</span>
+            <button class="alert-close" aria-label="Close">×</button>
+        </div>
 
 		<section class="hero">
 			<h1>Trusted platform for buying and selling licenses</h1>
@@ -384,31 +470,8 @@
 			</div>
 		</div>
 
-		<script>
-			let __topupForm = null;
-			function topupPrompt(e) {
-				e.preventDefault();
-				__topupForm = e.target;
-				const ask = document.getElementById('topupAsk');
-				const field = document.getElementById('topupAmountField');
-				const err = document.getElementById('topupErr');
-				if (ask) { ask.style.display = 'flex'; setTimeout(() => { try { field.focus(); } catch (_) { } }, 0); }
-				function confirm() {
-					const v = field.value || '';
-					const clean = v.replace(/[^0-9]/g, '');
-					if (!clean) { err.textContent = 'Invalid amount'; return; }
-					document.getElementById('topupAmountInput').value = clean;
-					ask.style.display = 'none';
-					__topupForm.submit();
-				}
-				const okBtn = document.getElementById('topupConfirmBtn');
-				const cancelBtn = document.getElementById('topupCancelBtn');
-				const close = () => { ask.style.display = 'none'; };
-				if (okBtn) okBtn.onclick = confirm;
-				if (cancelBtn) cancelBtn.onclick = close;
-				if (field) field.onkeydown = (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); confirm(); } };
-			return false;
-		}
+	<script>
+		// topupPrompt function is already defined in header fragment
 
 		(function () {
 				const params = new URLSearchParams(window.location.search);
@@ -435,6 +498,42 @@
 					show();
 				}
 			})();
+
+		// Function to close alert
+		function closeAlert(alertElement) {
+			if (alertElement) {
+				// Clear auto-hide timeout if exists
+				if (alertElement.dataset.timeoutId) {
+					clearTimeout(parseInt(alertElement.dataset.timeoutId));
+				}
+				alertElement.classList.add('hiding');
+				setTimeout(function() {
+					alertElement.remove();
+				}, 300); // Remove after animation completes
+			}
+		}
+
+		// Initialize purchase success alert
+		document.addEventListener('DOMContentLoaded', function() {
+			const alert = document.querySelector('.alert-success');
+			if (alert) {
+				// Add click event listener to close button
+				const closeButton = alert.querySelector('.alert-close');
+				if (closeButton) {
+					closeButton.addEventListener('click', function(e) {
+						e.preventDefault();
+						e.stopPropagation();
+						closeAlert(alert);
+					});
+				}
+				
+				const timeoutId = setTimeout(function() {
+					closeAlert(alert);
+				}, 3000); // Hide after 3 seconds
+				// Store timeout ID so we can clear it if user clicks X
+				alert.dataset.timeoutId = timeoutId;
+			}
+		});
 		</script>
 
 	</div>

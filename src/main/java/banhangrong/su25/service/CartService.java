@@ -2,6 +2,7 @@ package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.*;
 import banhangrong.su25.Repository.*;
+import banhangrong.su25.email.EmailService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ public class CartService {
     private final OrderItemsRepository orderItemsRepository;
     private final VouchersRepository vouchersRepository;
     private final VoucherRedemptionsRepository voucherRedemptionsRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public CartService(ShoppingCartRepository cartRepository,
                        ProductsRepository productsRepository,
@@ -30,7 +33,9 @@ public class CartService {
                        OrdersRepository ordersRepository,
                        OrderItemsRepository orderItemsRepository,
                        VouchersRepository vouchersRepository,
-                       VoucherRedemptionsRepository voucherRedemptionsRepository) {
+                       VoucherRedemptionsRepository voucherRedemptionsRepository,
+                       NotificationService notificationService,
+                       EmailService emailService) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
@@ -39,6 +44,8 @@ public class CartService {
         this.orderItemsRepository = orderItemsRepository;
         this.vouchersRepository = vouchersRepository;
         this.voucherRedemptionsRepository = voucherRedemptionsRepository;
+        this.notificationService = notificationService;
+        this.emailService = emailService;
     }
 
     public Users getCurrentUserOrNull() {
@@ -147,6 +154,9 @@ public class CartService {
         int stock = productsRepository.findById(productId)
                 .map(p -> p.getQuantity() != null ? p.getQuantity() : 0).orElse(0);
         var existing = cartRepository.findByUserIdAndProductId(getCurrentUserIdOrFallback(), productId);
+        Long userId = getCurrentUserIdOrFallback();
+        boolean isNewItem = false;
+        
         if (existing.isPresent()) {
             ShoppingCart it = existing.get();
             int current = it.getQuantity() == null ? 0 : it.getQuantity();
@@ -155,11 +165,25 @@ public class CartService {
             cartRepository.save(it);
         } else {
             ShoppingCart item = new ShoppingCart();
-            item.setUserId(getCurrentUserIdOrFallback());
+            item.setUserId(userId);
             item.setProductId(productId);
             int applied = Math.min(qty, stock);
             item.setQuantity(applied);
             cartRepository.save(item);
+            isNewItem = true;
+        }
+        
+        // Gửi thông báo khi thêm vào giỏ hàng (chỉ khi thêm mới, không phải cập nhật số lượng)
+        if (isNewItem) {
+            try {
+                Products product = productsRepository.findById(productId).orElse(null);
+                if (product != null) {
+                    String productName = product.getName() != null ? product.getName() : "Product";
+                    notificationService.createCartNotification(userId, productId, productName, qty);
+                }
+            } catch (Exception e) {
+                System.err.println("[CartService] Failed to send add to cart notification: " + e.getMessage());
+            }
         }
     }
 
@@ -224,6 +248,14 @@ public class CartService {
         order.setSellerId(1L);
         Orders savedOrder = ordersRepository.save(order);
 
+        // Gửi thông báo đặt hàng thành công
+        try {
+            String orderCode = "ORD" + savedOrder.getOrderId();
+            notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
+        } catch (Exception e) {
+            System.err.println("[CartService] Failed to send notification: " + e.getMessage());
+        }
+
         for (ShoppingCart it : items) {
             Products product = productsRepository.findById(it.getProductId()).orElse(null);
             if (product != null) {
@@ -253,6 +285,46 @@ public class CartService {
 
         for (ShoppingCart it : items) {
             try { cartRepository.delete(it); } catch (Exception ignored) {}
+        }
+
+        // Gửi email xác nhận đơn hàng
+        try {
+            String orderCode = "ORD" + savedOrder.getOrderId();
+            String customerName = user.getFullName() != null && !user.getFullName().isEmpty() 
+                ? user.getFullName() : user.getUsername();
+            String customerEmail = user.getEmail();
+            
+            if (customerEmail != null && !customerEmail.isEmpty()) {
+                // Lấy danh sách order items để gửi email
+                List<OrderItems> orderItemsList = orderItemsRepository.findByOrderId(savedOrder.getOrderId());
+                List<EmailService.OrderItemInfo> emailOrderItems = new ArrayList<>();
+                
+                for (OrderItems orderItem : orderItemsList) {
+                    Products product = productsRepository.findById(orderItem.getProductId()).orElse(null);
+                    if (product != null) {
+                        emailOrderItems.add(new EmailService.OrderItemInfo(
+                            product.getName(),
+                            orderItem.getQuantity(),
+                            orderItem.getPriceAtTime()
+                        ));
+                    }
+                }
+                
+                emailService.sendOrderConfirmationEmail(
+                    customerEmail,
+                    customerName,
+                    orderCode,
+                    savedOrder.getOrderId(),
+                    savedOrder.getTotalAmount(),
+                    savedOrder.getCreatedAt(),
+                    emailOrderItems
+                );
+                System.out.println("[CartService] Order confirmation email sent to: " + customerEmail);
+            }
+        } catch (Exception e) {
+            System.err.println("[CartService] Failed to send order confirmation email: " + e.getMessage());
+            e.printStackTrace();
+            // Không fail transaction nếu email không gửi được
         }
 
         try {

@@ -42,20 +42,6 @@
 			position: relative;
 		}
 
-		.support-link {
-			font-size: 14px;
-			color: var(--muted);
-			text-decoration: none;
-			padding: 6px 10px;
-			border-radius: 8px;
-			transition: all 0.2s;
-		}
-
-		.support-link:hover {
-			background: #f3f4f6;
-			color: #111827;
-		}
-
 		.user-btn {
 			display: flex;
 			align-items: center;
@@ -220,7 +206,6 @@
 			<a href="#">Support</a>
 		</nav>
 		<div class="top-actions">
-			<a href="/customer/support" class="support-link">Support</a>
 			<div class="user" style="position:relative">
 				<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
 					<span th:text="${user != null ? user.username : 'Guest'}">Guest</span>
@@ -251,7 +236,7 @@
 							(VNPay)</button>
 					</form>
 					<a class="item" href="/orderhistory" role="menuitem" th:if="${user != null}">My Orders</a>
-					<a class="item seller-apply" href="/seller/dashboard" role="menuitem"
+					<a class="item seller-apply" href="/become-seller" role="menuitem"
 						style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;" th:if="${user != null}">
 						📈 Become a Seller</a>
 					<a class="item" href="#" role="menuitem"
@@ -358,6 +343,76 @@
 			}
 
 			setInterval(loadUnreadChatCount, 30000);
+		})();
+
+		// Auto-refresh notification badge
+		(function() {
+			const currentUser = /*[[${user}]]*/ null;
+			if (!currentUser || !currentUser.userId) return;
+
+			function getCsrfToken() {
+				const meta = document.querySelector('meta[name="_csrf"]');
+				return meta ? meta.content : '';
+			}
+
+			function getCsrfHeader() {
+				const meta = document.querySelector('meta[name="_csrf_header"]');
+				return meta ? meta.content : '';
+			}
+
+			function updateNotificationBadge() {
+				const csrfToken = getCsrfToken();
+				const csrfHeader = getCsrfHeader();
+				
+				const headers = {
+					'Content-Type': 'application/json'
+				};
+				
+				if (csrfToken && csrfHeader) {
+					headers[csrfHeader] = csrfToken;
+				}
+
+				fetch('/customer/notifications/unread-count', {
+					method: 'GET',
+					headers: headers
+				})
+					.then(response => response.json())
+					.then(data => {
+						if (data.success && data.count !== undefined) {
+							const topBadge = document.querySelector('.notification-badge');
+							
+							if (data.count > 0) {
+								if (topBadge) {
+									topBadge.textContent = data.count;
+									topBadge.style.display = 'inline-block';
+								} else {
+									// Tạo badge mới nếu chưa có
+									const notificationLink = document.querySelector('.notification-link');
+									if (notificationLink) {
+										const badge = document.createElement('span');
+										badge.className = 'notification-badge';
+										badge.textContent = data.count;
+										badge.style.cssText = 'position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:10px;padding:2px 5px;border-radius:10px;font-weight:700;min-width:16px;text-align:center;';
+										notificationLink.appendChild(badge);
+									}
+								}
+							} else {
+								if (topBadge) topBadge.remove();
+							}
+						}
+					})
+					.catch(error => {
+						console.error('Error updating notification badge:', error);
+					});
+			}
+
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+			} else {
+				updateNotificationBadge();
+			}
+
+			setInterval(updateNotificationBadge, 30000);
 		})();
 	</script>
 </div>

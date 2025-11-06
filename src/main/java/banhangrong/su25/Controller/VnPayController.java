@@ -3,12 +3,15 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.ShoppingCart;
 import banhangrong.su25.Entity.Orders;
 import banhangrong.su25.Entity.OrderItems;
+import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
 import banhangrong.su25.service.NotificationService;
+import banhangrong.su25.email.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,6 +47,9 @@ public class VnPayController {
     
     @Autowired
     private NotificationService notificationService;
+    
+    @Autowired
+    private EmailService emailService;
 
     // Deprecated hardcoded values; kept for reference. Use VnPayConfig instead.
     // legacy constants removed; use values from VnPayConfig
@@ -448,6 +454,46 @@ public class VnPayController {
                     // Clear cart
                     for (ShoppingCart it : items) { 
                         try { cartRepository.delete(it); } catch (Exception ignored) {} 
+                    }
+                    
+                    // Gửi email xác nhận đơn hàng
+                    try {
+                        String orderCode = "ORD" + savedOrder.getOrderId();
+                        String customerName = user.getFullName() != null && !user.getFullName().isEmpty() 
+                            ? user.getFullName() : user.getUsername();
+                        String customerEmail = user.getEmail();
+                        
+                        if (customerEmail != null && !customerEmail.isEmpty()) {
+                            // Lấy danh sách order items để gửi email
+                            List<OrderItems> orderItemsList = orderItemsRepository.findByOrderId(savedOrder.getOrderId());
+                            List<EmailService.OrderItemInfo> emailOrderItems = new ArrayList<>();
+                            
+                            for (OrderItems orderItem : orderItemsList) {
+                                Products product = productsRepository.findById(orderItem.getProductId()).orElse(null);
+                                if (product != null) {
+                                    emailOrderItems.add(new EmailService.OrderItemInfo(
+                                        product.getName(),
+                                        orderItem.getQuantity(),
+                                        orderItem.getPriceAtTime()
+                                    ));
+                                }
+                            }
+                            
+                            emailService.sendOrderConfirmationEmail(
+                                customerEmail,
+                                customerName,
+                                orderCode,
+                                savedOrder.getOrderId(),
+                                savedOrder.getTotalAmount(),
+                                savedOrder.getCreatedAt(),
+                                emailOrderItems
+                            );
+                            System.out.println("[VNPay] Order confirmation email sent to: " + customerEmail);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("[VNPay] Failed to send order confirmation email: " + e.getMessage());
+                        e.printStackTrace();
+                        // Không fail transaction nếu email không gửi được
                     }
                     
                     return "redirect:/customer/dashboard?purchase=success";
