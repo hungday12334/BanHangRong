@@ -52,9 +52,11 @@ body {
   background:#fff;
   border:1px solid var(--line);
   border-radius:12px;
-  padding:20px 24px;
+  padding:12px 16px;
   margin-bottom:24px;
-  gap:20px;
+  gap:12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 .search-box {
   position:relative;
@@ -70,11 +72,11 @@ body {
   height:16px;
 }
 .search-box input {
-  padding:10px 12px 10px 40px;
+  padding:8px 12px 8px 40px;
   border:1px solid var(--line);
   border-radius:8px;
-  width:280px;
-  font-size:16px;
+  width:240px;
+  font-size:15px;
   outline:none;
 }
 .search-box input:focus {
@@ -83,20 +85,24 @@ body {
 }
 .tab-buttons {
   display:flex;
-  gap:12px;
-  flex:1;
+  gap:6px;
+  flex-shrink: 0;
   justify-content:flex-end;
+  flex-wrap: nowrap;
 }
 .tab-btn {
   border:1px solid var(--line);
   background:#fff;
-  padding:10px 24px;
+  padding:8px 16px;
   border-radius:8px;
   cursor:pointer;
   font-weight:500;
-  font-size:16px;
+  font-size:14px;
   transition:all 0.2s;
-  min-width:100px;
+  min-width:110px;
+  white-space:nowrap;
+  text-align:center;
+  flex-shrink: 0;
 }
 .tab-btn:hover {
   background:#f3f4f6;
@@ -106,6 +112,45 @@ body {
   background:var(--brand);
   color:#fff;
   border-color:var(--brand);
+}
+
+.sort-select {
+  flex-shrink: 0;
+}
+
+.date-filter-select {
+  flex-shrink: 0;
+}
+
+.sort-dropdown {
+  padding: 8px 32px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: all 0.2s;
+  min-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sort-dropdown:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.sort-dropdown:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
 /* ---------- ORDER CARD ---------- */
@@ -154,6 +199,11 @@ body {
   align-items:flex-start;
   gap:16px;
   margin-top:10px;
+}
+.product-line:last-child {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
         .product-image {
   width:80px;height:80px;
@@ -613,6 +663,57 @@ body {
     font-size: 13px;
   }
 }
+
+/* Responsive filter section */
+@media (max-width: 1200px) {
+  .filter-section {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .search-box input {
+    width: 200px;
+  }
+  
+  .sort-dropdown {
+    min-width: 130px;
+  }
+  
+  .tab-btn {
+    min-width: 100px;
+    padding: 8px 14px;
+  }
+}
+
+@media (max-width: 992px) {
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .tab-buttons {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+  
+  .search-box input {
+    width: 100%;
+  }
+  
+  .sort-select,
+  .date-filter-select {
+    width: 100%;
+  }
+  
+  .sort-dropdown {
+    width: 100%;
+    min-width: auto;
+  }
+}
 	</style>
 </head>
 <body>
@@ -692,6 +793,23 @@ body {
                         </svg>
                         <input type="text" placeholder="search" id="searchInput" th:value="${search}">
                     </div>
+                    <div class="sort-select">
+                        <select id="sortSelect" class="sort-dropdown">
+                            <option value="newest" th:selected="${sort == null or sort == 'newest'}">Mới nhất → Cũ nhất</option>
+                            <option value="oldest" th:selected="${sort == 'oldest'}">Cũ nhất → Mới nhất</option>
+                        </select>
+                    </div>
+                    <div class="date-filter-select">
+                        <select id="dateFilterSelect" class="sort-dropdown">
+                            <option value="all" th:selected="${dateFilter == null or dateFilter == 'all'}">Tất cả thời gian</option>
+                            <option value="today" th:selected="${dateFilter == 'today'}">Hôm nay</option>
+                            <option value="this_week" th:selected="${dateFilter == 'this_week'}">Tuần này</option>
+                            <option value="this_month" th:selected="${dateFilter == 'this_month'}">Tháng này</option>
+                            <option value="last_3_months" th:selected="${dateFilter == 'last_3_months'}">3 tháng gần đây</option>
+                            <option value="last_6_months" th:selected="${dateFilter == 'last_6_months'}">6 tháng gần đây</option>
+                            <option value="this_year" th:selected="${dateFilter == 'this_year'}">Năm nay</option>
+                        </select>
+                    </div>
       <div class="tab-buttons">
         <button class="tab-btn" th:class="${status == null or status == '' or status == 'all' ? 'tab-btn active' : 'tab-btn'}">All</button>
         <button class="tab-btn" th:class="${status == 'completed' ? 'tab-btn active' : 'tab-btn'}">Completed</button>
@@ -711,35 +829,39 @@ body {
                         </div>
           <div class="status" th:class="${'status ' + order.status.toLowerCase()}" th:text="'Status: ' + ${order.status}">Status: Completed</div>
                         </div>
-        <div class="product-line">
+        <!-- Loop through all order items -->
+        <div th:each="orderItem : ${orderItemsMap[order.orderId]}" class="product-line" style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line);" th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}">
           <div class="product-image">📦</div>
           <div class="product-info">
-                            <div class="product-name" th:if="${productNamesMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="${productNamesMap[orderItemsMap[order.orderId][0].productId]}">Name tools</div>
-            <div th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Quantities: ' + ${orderItemsMap[order.orderId][0].quantity}">Quantities: 1</div>
+            <div class="product-name" th:if="${productNamesMap != null and productNamesMap[orderItem.productId] != null}" th:text="${productNamesMap[orderItem.productId]}">Name tools</div>
+            <div th:text="'Quantities: ' + ${orderItem.quantity}">Quantities: 1</div>
             <!-- Product Description -->
-            <div class="product-description" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="${productsMap[orderItemsMap[order.orderId][0].productId].description}">Comprehensive protection: Antivirus, VPN, Password Manager. 5 devices, 12 months.</div>
+            <div class="product-description" th:if="${productsMap != null and productsMap[orderItem.productId] != null}" th:text="${productsMap[orderItem.productId].description}">Comprehensive protection: Antivirus, VPN, Password Manager. 5 devices, 12 months.</div>
             
             <div class="price-info" style="margin-top: 8px;">
-              <span th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
-                <span class="sale-price" style="color: #ef4444; font-weight: 600;" th:text="'Sale Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].salePrice, 0, 'COMMA', 0, 'POINT')} + '₫'">Sale Price: 1,100,000₫</span>
+              <span th:if="${productsMap != null and productsMap[orderItem.productId] != null and productsMap[orderItem.productId].salePrice != null and productsMap[orderItem.productId].salePrice != productsMap[orderItem.productId].price}">
+                <span class="sale-price" style="color: #ef4444; font-weight: 600;" th:text="'Sale Price: ' + ${#numbers.formatDecimal(productsMap[orderItem.productId].salePrice, 0, 'COMMA', 0, 'POINT')} + '₫'">Sale Price: 1,100,000₫</span>
                 <br>
-                <span class="original-price" style="color: #6b7280; text-decoration: line-through; font-size: 14px;" th:text="'Original Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 'COMMA', 0, 'POINT')} + '₫'">Original Price: 1,250,000₫</span>
+                <span class="original-price" style="color: #6b7280; text-decoration: line-through; font-size: 14px;" th:text="'Original Price: ' + ${#numbers.formatDecimal(productsMap[orderItem.productId].price, 0, 'COMMA', 0, 'POINT')} + '₫'">Original Price: 1,250,000₫</span>
               </span>
-              <span th:unless="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != null and productsMap[orderItemsMap[order.orderId][0].productId].salePrice != productsMap[orderItemsMap[order.orderId][0].productId].price}">
-                <span class="regular-price" style="color: #111827; font-weight: 600;" th:if="${productsMap != null and orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty and productsMap[orderItemsMap[order.orderId][0].productId] != null}" th:text="'Price: ' + ${#numbers.formatDecimal(productsMap[orderItemsMap[order.orderId][0].productId].price, 0, 'COMMA', 0, 'POINT')} + '₫'">Price: 1,250,000₫</span>
+              <span th:unless="${productsMap != null and productsMap[orderItem.productId] != null and productsMap[orderItem.productId].salePrice != null and productsMap[orderItem.productId].salePrice != productsMap[orderItem.productId].price}">
+                <span class="regular-price" style="color: #111827; font-weight: 600;" th:if="${productsMap != null and productsMap[orderItem.productId] != null}" th:text="'Price: ' + ${#numbers.formatDecimal(productsMap[orderItem.productId].price, 0, 'COMMA', 0, 'POINT')} + '₫'">Price: 1,250,000₫</span>
               </span>
               <br>
-              <span class="price-at-time" style="color: #059669; font-weight: 500; font-size: 14px;" th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}" th:text="'Purchased at: ' + ${#numbers.formatDecimal(orderItemsMap[order.orderId][0].priceAtTime, 0, 'COMMA', 0, 'POINT')} + '₫'">Purchased at: 1,100,000₫</span>
+              <span class="price-at-time" style="color: #059669; font-weight: 500; font-size: 14px;" th:text="'Purchased at: ' + ${#numbers.formatDecimal(orderItem.priceAtTime, 0, 'COMMA', 0, 'POINT')} + '₫'">Purchased at: 1,100,000₫</span>
             </div>
-                        </div>
-                    </div>
+            
+            <!-- Action buttons for each product -->
+            <div class="order-actions" style="margin-top: 12px;">
+              <button class="rate-btn" th:attr="data-order-item-id=${orderItem.orderItemId}" onclick="openRateModal(this)">Rate</button>
+              <button class="contact-btn" th:attr="data-order-item-id=${orderItem.orderItemId}">License Key</button>
+              <button class="buy-again-btn" th:attr="data-product-id=${orderItem.productId}">Buy again</button>
+            </div>
+          </div>
+        </div>
                     <div class="order-bottom">
           <div th:text="'Order Total: ' + ${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'" style="font-weight: 600; color: #111827;">Order Total: 1,100,000₫</div>
-          <div class="order-actions">
-            <button class="rate-btn" th:attr="data-order-item-id=${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty ? orderItemsMap[order.orderId][0].orderItemId : 1}" onclick="openRateModal(this)">Rate</button>
-            <button class="contact-btn">Liscense Key</button>
-            <button class="buy-again-btn" th:attr="data-product-id=${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty ? orderItemsMap[order.orderId][0].productId : 0}">Buy again</button>
-                        </div>
+          <div style="color: #6b7280; font-size: 14px;" th:text="'Total Items: ' + ${orderItemsMap[order.orderId] != null ? orderItemsMap[order.orderId].size() : 0}">Total Items: 1</div>
                         </div>
                     </div>
                 </div>
@@ -756,7 +878,7 @@ body {
         <div class="pagination">
             <!-- Previous Button -->
             <a th:if="${page > 0}" 
-               th:href="@{/orderhistory(page=${page - 1}, size=${size}, search=${search}, status=${status})}" 
+               th:href="@{/orderhistory(page=${page - 1}, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}" 
                class="pagination-btn prev-btn">
                 <span>←</span>
                 <span>Previous</span>
@@ -770,14 +892,14 @@ body {
             <div class="page-numbers">
                 <th:block th:if="${totalPages <= 7}">
                     <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                       th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                       th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}"
                        th:class="${'page-number' + (i == page ? ' active' : '')}"
                        th:text="${i + 1}">1</a>
                 </th:block>
                 
                 <th:block th:if="${totalPages > 7}">
                     <!-- First page -->
-                    <a th:href="@{/orderhistory(page=0, size=${size}, search=${search}, status=${status})}"
+                    <a th:href="@{/orderhistory(page=0, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}"
                        th:class="${'page-number' + (page == 0 ? ' active' : '')}"
                        th:text="1">1</a>
                     
@@ -787,21 +909,21 @@ body {
                     <!-- Middle pages -->
                     <th:block th:if="${page <= 3}">
                         <a th:each="i : ${#numbers.sequence(1, 4)}"
-                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}"
                            th:class="${'page-number' + (i == page ? ' active' : '')}"
                            th:text="${i + 1}">2</a>
                     </th:block>
                     
                     <th:block th:if="${page > 3 and page < totalPages - 4}">
                         <a th:each="i : ${#numbers.sequence(page - 1, page + 1)}"
-                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}"
                            th:class="${'page-number' + (i == page ? ' active' : '')}"
                            th:text="${i + 1}">5</a>
                     </th:block>
                     
                     <th:block th:if="${page >= totalPages - 4}">
                         <a th:each="i : ${#numbers.sequence(totalPages - 5, totalPages - 2)}"
-                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status})}"
+                           th:href="@{/orderhistory(page=${i}, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}"
                            th:class="${'page-number' + (i == page ? ' active' : '')}"
                            th:text="${i + 1}">6</a>
                     </th:block>
@@ -811,7 +933,7 @@ body {
                     
                     <!-- Last page -->
                     <a th:if="${totalPages > 1}"
-                       th:href="@{/orderhistory(page=${totalPages - 1}, size=${size}, search=${search}, status=${status})}"
+                       th:href="@{/orderhistory(page=${totalPages - 1}, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}"
                        th:class="${'page-number' + (page == totalPages - 1 ? ' active' : '')}"
                        th:text="${totalPages}">10</a>
                 </th:block>
@@ -819,7 +941,7 @@ body {
 
             <!-- Next Button -->
             <a th:if="${page < totalPages - 1}" 
-               th:href="@{/orderhistory(page=${page + 1}, size=${size}, search=${search}, status=${status})}" 
+               th:href="@{/orderhistory(page=${page + 1}, size=${size}, search=${search}, status=${status}, sort=${sort}, dateFilter=${dateFilter})}" 
                class="pagination-btn next-btn">
                 <span>Next</span>
                 <span>→</span>
@@ -1086,6 +1208,24 @@ body {
             }
         });
 
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            const sortValue = this.value;
+            const url = new URL(window.location);
+            url.searchParams.set('sort', sortValue);
+            url.searchParams.set('page', '0'); // Reset to first page when sorting changes
+            window.location.href = url.toString();
+        });
+
+        // Date filter functionality
+        document.getElementById('dateFilterSelect').addEventListener('change', function() {
+            const dateFilterValue = this.value;
+            const url = new URL(window.location);
+            url.searchParams.set('dateFilter', dateFilterValue);
+            url.searchParams.set('page', '0'); // Reset to first page when date filter changes
+            window.location.href = url.toString();
+        });
+
         // Filter functionality
   document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1102,17 +1242,23 @@ body {
         // Search functionality - redirect to search with pagination
         document.getElementById('searchInput').addEventListener('input', function() {
             const searchTerm = this.value.trim();
+            const url = new URL(window.location);
+            const currentSort = url.searchParams.get('sort') || 'newest';
+            const currentDateFilter = url.searchParams.get('dateFilter') || 'all';
+            
             if (searchTerm.length > 0) {
                 // Redirect to search with pagination
-                const url = new URL(window.location);
                 url.searchParams.set('search', searchTerm);
                 url.searchParams.set('page', '0'); // Reset to first page
+                url.searchParams.set('sort', currentSort); // Keep current sort
+                url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
                 window.location.href = url.toString();
             } else {
                 // Clear search
-                const url = new URL(window.location);
                 url.searchParams.delete('search');
                 url.searchParams.set('page', '0');
+                url.searchParams.set('sort', currentSort); // Keep current sort
+                url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
                 window.location.href = url.toString();
             }
         });
@@ -1120,12 +1266,17 @@ body {
         function filterOrders(status) {
             // Redirect to filter with pagination
             const url = new URL(window.location);
+            const currentSort = url.searchParams.get('sort') || 'newest';
+            const currentDateFilter = url.searchParams.get('dateFilter') || 'all';
+            
             if (status === 'all') {
                 url.searchParams.delete('status');
             } else {
                 url.searchParams.set('status', status);
             }
             url.searchParams.set('page', '0'); // Reset to first page
+            url.searchParams.set('sort', currentSort); // Keep current sort
+            url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
             window.location.href = url.toString();
         }
 
@@ -1134,8 +1285,12 @@ body {
             // Keep for backward compatibility but redirect to server search
             if (searchTerm.length > 0) {
                 const url = new URL(window.location);
+                const currentSort = url.searchParams.get('sort') || 'newest';
+                const currentDateFilter = url.searchParams.get('dateFilter') || 'all';
                 url.searchParams.set('search', searchTerm);
                 url.searchParams.set('page', '0');
+                url.searchParams.set('sort', currentSort); // Keep current sort
+                url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
                 window.location.href = url.toString();
             }
         }

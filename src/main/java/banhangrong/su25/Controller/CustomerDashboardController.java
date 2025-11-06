@@ -16,6 +16,7 @@ import banhangrong.su25.service.CustomerDashboardService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import java.time.LocalDateTime;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -109,6 +110,8 @@ public class CustomerDashboardController {
                                @RequestParam(name = "size", required = false, defaultValue = "3") int size,
                                @RequestParam(name = "search", required = false) String search,
                                @RequestParam(name = "status", required = false) String status,
+                               @RequestParam(name = "sort", required = false, defaultValue = "newest") String sort,
+                               @RequestParam(name = "dateFilter", required = false, defaultValue = "all") String dateFilter,
                                Model model) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -123,18 +126,87 @@ public class CustomerDashboardController {
                 return "redirect:/login";
             }
 
+        // Determine sort direction based on sort parameter
+        Sort.Direction sortDirection = "oldest".equalsIgnoreCase(sort) 
+            ? Sort.Direction.ASC 
+            : Sort.Direction.DESC;
+        
         PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
-                Sort.by(Sort.Order.desc("createdAt")));
+                Sort.by(sortDirection, "createdAt"));
+        
+        // Calculate start date based on dateFilter
+        LocalDateTime startDate = null;
+        if (dateFilter != null && !dateFilter.equalsIgnoreCase("all")) {
+            LocalDateTime now = LocalDateTime.now();
+            switch (dateFilter.toLowerCase()) {
+                case "today":
+                    startDate = now.toLocalDate().atStartOfDay();
+                    break;
+                case "this_week":
+                    startDate = now.toLocalDate().atStartOfDay().minusDays(now.getDayOfWeek().getValue() - 1);
+                    break;
+                case "this_month":
+                    startDate = now.toLocalDate().withDayOfMonth(1).atStartOfDay();
+                    break;
+                case "last_3_months":
+                    startDate = now.minusMonths(3).toLocalDate().atStartOfDay();
+                    break;
+                case "last_6_months":
+                    startDate = now.minusMonths(6).toLocalDate().atStartOfDay();
+                    break;
+                case "this_year":
+                    startDate = now.toLocalDate().withDayOfYear(1).atStartOfDay();
+                    break;
+                default:
+                    startDate = null;
+            }
+        }
         
         Page<Orders> ordersPage;
         List<Orders> orders;
         
         if (search != null && !search.trim().isEmpty()) {
-            ordersPage = ordersRepository.findByUserIdAndSearchTerm(currentUser.getUserId(), search.trim(), pageable);
+            if (startDate != null) {
+                if ("oldest".equalsIgnoreCase(sort)) {
+                    ordersPage = ordersRepository.findByUserIdAndSearchTermAndCreatedAtAfterAsc(currentUser.getUserId(), search.trim(), startDate, pageable);
+                } else {
+                    ordersPage = ordersRepository.findByUserIdAndSearchTermAndCreatedAtAfter(currentUser.getUserId(), search.trim(), startDate, pageable);
+                }
+            } else {
+                if ("oldest".equalsIgnoreCase(sort)) {
+                    ordersPage = ordersRepository.findByUserIdAndSearchTermAsc(currentUser.getUserId(), search.trim(), pageable);
+                } else {
+                    ordersPage = ordersRepository.findByUserIdAndSearchTerm(currentUser.getUserId(), search.trim(), pageable);
+                }
+            }
         } else if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
-            ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
+            if (startDate != null) {
+                if ("oldest".equalsIgnoreCase(sort)) {
+                    ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), startDate, pageable);
+                } else {
+                    ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), startDate, pageable);
+                }
+            } else {
+                if ("oldest".equalsIgnoreCase(sort)) {
+                    ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), pageable);
+                } else {
+                    ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
+                }
+            }
         } else {
-            ordersPage = ordersRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+            if (startDate != null) {
+                if ("oldest".equalsIgnoreCase(sort)) {
+                    ordersPage = ordersRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
+                } else {
+                    ordersPage = ordersRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
+                }
+            } else {
+                if ("oldest".equalsIgnoreCase(sort)) {
+                    ordersPage = ordersRepository.findByUserIdOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
+                } else {
+                    ordersPage = ordersRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+                }
+            }
         }
         
         orders = ordersPage.getContent();
@@ -167,6 +239,8 @@ public class CustomerDashboardController {
         model.addAttribute("user", currentUser);
         model.addAttribute("search", search);
         model.addAttribute("status", status);
+        model.addAttribute("sort", sort);
+        model.addAttribute("dateFilter", dateFilter);
         
         try {
             model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));

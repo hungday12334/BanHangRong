@@ -91,9 +91,9 @@
             <div class="terms">
                 <h3>📜 Điều khoản & Trách nhiệm</h3>
                 <ul>
-                    <li>Thánh ttoán trước 200.000 VNĐ để được nâng cấp lên seller</li>
-                    <li>Sau khi nâng cấp thành công, bạn sẽ được tạo tài khoản seller và có thể bán sản phẩm</li>
-                    <li>Mỗi lần rút tiền, bạn sẽ bị triết khấu 2% giá trị rút tiền để phục vự chi phí duy trì nền tảng</li>
+                    <li>Thanh toán trước <strong>200.000 VNĐ</strong> để được nâng cấp lên Seller</li>
+                    <li>Sau khi nâng cấp thành công, bạn sẽ được tạo tài khoản Seller và có thể bán sản phẩm</li>
+                    <li>Mỗi lần rút tiền, bạn sẽ bị triết khấu <strong>2%</strong> giá trị rút tiền để phục vụ chi phí duy trì nền tảng</li>
                     <li>Chỉ bán sản phẩm hợp pháp và có bản quyền</li>
                     <li>Cung cấp thông tin sản phẩm chính xác và đầy đủ</li>
                     <li>Tuân thủ chính sách và quy định của nền tảng</li>
@@ -139,7 +139,7 @@
                 <span th:text="${currentBalance != null ? #numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}" style="color: #ef4444;">0₫</span>
                 <br>
                 <strong>Số tiền cần:</strong> 
-                <span th:text="${requiredAmount != null ? #numbers.formatDecimal(requiredAmount, 0, 'COMMA', 0, 'POINT') + '₫' : '200,000₫'}" style="color: #059669;">200,000₫</span>
+                <span th:text="${requiredAmount != null ? #numbers.formatDecimal(requiredAmount, 0, 'COMMA', 0, 'POINT') + '₫' : '200,000₫'}" style="color: #059669; font-weight: 700;">200,000₫</span>
             </div>
             <a href="/customer/dashboard" class="modal-button">Quay trở lại Customer Dashboard</a>
         </div>

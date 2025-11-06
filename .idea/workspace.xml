@@ -6,12 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: fix error approve Products.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/env" beforeDir="false" afterPath="$PROJECT_DIR$/env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/NotificationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/notification.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/notifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/notifications.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ShoppingCart.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ShoppingCart.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrdersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/OrdersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-simple.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-simple.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/become-seller.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/become-seller.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/orderhistory.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/orderhistory.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -42,12 +42,12 @@
     &quot;assignee&quot;: &quot;hungday12334&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/hungday12334/BanHangRong.git",
-    "accountId": "e0255c87-1891-4a10-ac00-ab7ed3312585"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
+    &quot;accountId&quot;: &quot;e0255c87-1891-4a10-ac00-ab7ed3312585&quot;
   }
-}]]></component>
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -80,7 +80,7 @@
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "Spring Boot.Su25Application.executor": "Run",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "#11 on Hungnv",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
@@ -188,6 +188,7 @@
       <workItem from="1762361410330" duration="662000" />
       <workItem from="1762374651312" duration="871000" />
       <workItem from="1762410570161" duration="2570000" />
+      <workItem from="1762432973629" duration="7668000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -275,5 +276,16 @@
     <MESSAGE value="Admin Product Approve||Cancel" />
     <MESSAGE value="fix: fix error approve Products." />
     <option name="LAST_COMMIT_MESSAGE" value="fix: fix error approve Products." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html</url>
+          <line>498</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
