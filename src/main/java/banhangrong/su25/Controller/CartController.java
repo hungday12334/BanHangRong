@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 import jakarta.servlet.http.HttpSession;
 
@@ -37,6 +38,24 @@ public class CartController {
         
         if (view.get("appliedVoucher") != null) {
             model.addAttribute("appliedVoucher", view.get("appliedVoucher"));
+        }
+        
+        // Kiểm tra và truyền thông tin về số dư không đủ
+        Boolean insufficientBalance = (Boolean) session.getAttribute("insufficientBalance");
+        if (insufficientBalance != null && insufficientBalance) {
+            model.addAttribute("insufficientBalance", true);
+            BigDecimal currentBalance = (BigDecimal) session.getAttribute("currentBalance");
+            BigDecimal requiredAmount = (BigDecimal) session.getAttribute("requiredAmount");
+            if (currentBalance != null) {
+                model.addAttribute("currentBalance", currentBalance);
+            }
+            if (requiredAmount != null) {
+                model.addAttribute("requiredAmount", requiredAmount);
+            }
+            // Xóa các attribute sau khi đã truyền vào model
+            session.removeAttribute("insufficientBalance");
+            session.removeAttribute("currentBalance");
+            session.removeAttribute("requiredAmount");
         }
         
         return "customer/cart";

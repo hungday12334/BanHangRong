@@ -233,6 +233,12 @@ public class CartService {
 
         BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
         if (currentBalance.compareTo(totalAmount) < 0) {
+            // Lưu thông tin vào session để hiển thị popup
+            if (session != null) {
+                session.setAttribute("insufficientBalance", true);
+                session.setAttribute("currentBalance", currentBalance);
+                session.setAttribute("requiredAmount", totalAmount);
+            }
             return "redirect:/cart?error=insufficient_balance";
         }
 
