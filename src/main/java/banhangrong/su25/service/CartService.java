@@ -27,6 +27,8 @@ public class CartService {
     private final VoucherRedemptionsRepository voucherRedemptionsRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final ProductLicensesRepository productLicensesRepository;
+    private final LicenseUsageLogService licenseUsageLogService;
 
     public CartService(ShoppingCartRepository cartRepository,
                        ProductsRepository productsRepository,
@@ -37,7 +39,7 @@ public class CartService {
                        VouchersRepository vouchersRepository,
                        VoucherRedemptionsRepository voucherRedemptionsRepository,
                        NotificationService notificationService,
-                       EmailService emailService) {
+                       EmailService emailService, ProductLicensesRepository productLicensesRepository, LicenseUsageLogService licenseUsageLogService) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
@@ -48,6 +50,8 @@ public class CartService {
         this.voucherRedemptionsRepository = voucherRedemptionsRepository;
         this.notificationService = notificationService;
         this.emailService = emailService;
+        this.productLicensesRepository = productLicensesRepository;
+        this.licenseUsageLogService = licenseUsageLogService;
     }
 
     public Users getCurrentUserOrNull() {
@@ -271,7 +275,7 @@ public class CartService {
         Long uid = getCurrentUserIdOrFallback();
         List<ShoppingCart> items = cartRepository.findByUserId(uid);
 
-        // Chỉ lấy các sản phẩm có status là "Public"
+        // 🔹 Chỉ lấy các sản phẩm có status là "Public"
         List<ShoppingCart> validItems = new ArrayList<>();
         for (ShoppingCart it : items) {
             Optional<Products> productOpt = productsRepository.findById(it.getProductId());
@@ -287,24 +291,30 @@ public class CartService {
             return "redirect:/cart?pay=empty";
         }
 
-        BigDecimal totalAmount = validItems.stream()
-            .map(it -> {
-                Products p = productsRepository.findById(it.getProductId()).orElse(null);
-                if (p != null) {
-                    BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
-                    int qty = it.getQuantity() != null ? it.getQuantity() : 1;
-                    return unitPrice.multiply(BigDecimal.valueOf(qty));
-                }
-                return BigDecimal.ZERO;
-            })
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 🔹 Tính tổng tiền chỉ cho sản phẩm Public
+        final BigDecimal totalAmount = validItems.stream()
+                .map(it -> {
+                    Products p = productsRepository.findById(it.getProductId()).orElse(null);
+                    if (p != null) {
+                        BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                        int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                        return unitPrice.multiply(BigDecimal.valueOf(qty));
+                    }
+                    return BigDecimal.ZERO;
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Users user = usersRepository.findById(uid).orElse(null);
-        if (user == null) return "redirect:/cart?pay=empty";
+        if (user == null) return "redirect:/cart?error=user_not_found";
 
         BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
         if (currentBalance.compareTo(totalAmount) < 0) {
-            return "redirect:/cart?pay=insufficient";
+            if (session != null) {
+                session.setAttribute("insufficientBalance", true);
+                session.setAttribute("currentBalance", currentBalance);
+                session.setAttribute("requiredAmount", totalAmount);
+            }
+            return "redirect:/cart?error=insufficient_balance";
         }
 
         user.setBalance(currentBalance.subtract(totalAmount));
@@ -319,6 +329,8 @@ public class CartService {
         order.setSellerId(1L);
         Orders savedOrder = ordersRepository.save(order);
 
+        // 🔹 Save order items (chỉ Public) và map để tạo license
+        java.util.Map<Long, OrderItems> savedItemsByProduct = new java.util.HashMap<>();
         for (ShoppingCart it : validItems) {
             Products product = productsRepository.findById(it.getProductId()).orElse(null);
             if (product != null) {
@@ -328,11 +340,14 @@ public class CartService {
                 orderItem.setQuantity(it.getQuantity());
                 orderItem.setPriceAtTime(product.getSalePrice() != null ? product.getSalePrice() : product.getPrice());
                 orderItem.setCreatedAt(LocalDateTime.now());
-                orderItemsRepository.save(orderItem);
+                OrderItems savedItem = orderItemsRepository.save(orderItem);
+                savedItemsByProduct.put(savedItem.getProductId(), savedItem);
             }
         }
 
-        for (ShoppingCart it : items) {
+        // 🔹 Update stock & generate licenses
+        java.util.List<ProductLicenses> toInsert = new java.util.ArrayList<>();
+        for (ShoppingCart it : validItems) {
             productsRepository.findById(it.getProductId()).ifPresent(p -> {
                 int stock = p.getQuantity() != null ? p.getQuantity() : 0;
                 int want = it.getQuantity() != null ? it.getQuantity() : 0;
@@ -342,16 +357,144 @@ public class CartService {
                     Integer sold = p.getTotalSales();
                     p.setTotalSales((sold != null ? sold : 0) + buy);
                     productsRepository.save(p);
+
+                    // Create licenses for each purchased unit
+                    OrderItems savedItem = savedItemsByProduct.get(p.getProductId());
+                    if (savedItem != null) {
+                        LocalDateTime nowTs = LocalDateTime.now();
+                        String expStr = LocalDate.now().plusDays(30).format(DateTimeFormatter.BASIC_ISO_DATE);
+                        for (int i = 0; i < buy; i++) {
+                            String random = java.util.UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12).toUpperCase();
+                            String key = "PRD" + p.getProductId() + '-' + expStr + '-' + random;
+                            ProductLicenses lic = new ProductLicenses();
+                            lic.setOrderItemId(savedItem.getOrderItemId());
+                            lic.setUserId(uid);
+                            lic.setLicenseKey(key);
+                            lic.setIsActive(true);
+                            lic.setActivationDate(null);
+                            lic.setLastUsedDate(null);
+                            lic.setDeviceIdentifier(null);
+                            lic.setCreatedAt(nowTs);
+                            lic.setUpdatedAt(nowTs);
+                            toInsert.add(lic);
+                        }
+                    }
                 }
             });
         }
 
-        // Xóa tất cả items trong cart (cả Public và không Public)
-        for (ShoppingCart it : items) {
-            cartRepository.delete(it);
+        if (!toInsert.isEmpty()) {
+            var savedList = productLicensesRepository.saveAll(toInsert);
+            try {
+                for (ProductLicenses lic : savedList) {
+                    try { licenseUsageLogService.append(lic.getLicenseId(), "generated", lic.getUserId(), null, null, null); } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {}
         }
 
-        return "redirect:/cart?pay=success";
+        // 🔹 Xóa tất cả cart (Public & non-Public)
+        for (ShoppingCart it : items) {
+            try { cartRepository.delete(it); } catch (Exception ignored) {}
+        }
+
+        // 🔹 Gửi thông báo đặt hàng thành công
+        try {
+            String orderCode = "ORD" + savedOrder.getOrderId();
+            notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
+        } catch (Exception e) {
+            System.err.println("[CartService] Failed to send notification: " + e.getMessage());
+        }
+
+        // 🔹 Gửi email xác nhận đơn hàng + license keys
+        try {
+            String orderCode = "ORD" + savedOrder.getOrderId();
+            String customerName = user.getFullName() != null && !user.getFullName().isEmpty()
+                    ? user.getFullName() : user.getUsername();
+            String customerEmail = user.getEmail();
+
+            if (customerEmail != null && !customerEmail.isEmpty()) {
+                List<OrderItems> orderItemsList = orderItemsRepository.findByOrderId(savedOrder.getOrderId());
+                List<EmailService.OrderItemInfo> emailOrderItems = new ArrayList<>();
+
+                for (OrderItems orderItem : orderItemsList) {
+                    Products product = productsRepository.findById(orderItem.getProductId()).orElse(null);
+                    if (product != null) {
+                        emailOrderItems.add(new EmailService.OrderItemInfo(
+                                product.getName(),
+                                orderItem.getQuantity(),
+                                orderItem.getPriceAtTime()
+                        ));
+                    }
+                }
+
+                java.util.List<EmailService.LicenseKeyInfo> emailLicenseKeys = new ArrayList<>();
+                try {
+                    org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
+                    var licensesPage = productLicensesRepository.findByOrderId(savedOrder.getOrderId(), pageable);
+                    for (var licenseView : licensesPage.getContent()) {
+                        String productName = null;
+                        if (licenseView.getOrderItemId() != null) {
+                            var orderItemOpt = orderItemsRepository.findById(licenseView.getOrderItemId());
+                            if (orderItemOpt.isPresent()) {
+                                var productOpt = productsRepository.findById(orderItemOpt.get().getProductId());
+                                if (productOpt.isPresent()) {
+                                    productName = productOpt.get().getName();
+                                }
+                            }
+                        }
+                        emailLicenseKeys.add(new EmailService.LicenseKeyInfo(
+                                licenseView.getLicenseKey(),
+                                productName != null ? productName : (licenseView.getProductName() != null ? licenseView.getProductName() : "Product"),
+                                licenseView.getIsActive()
+                        ));
+                    }
+                } catch (Exception e) {
+                    System.err.println("[CartService] Failed to load license keys for email: " + e.getMessage());
+                }
+
+                emailService.sendOrderConfirmationEmail(
+                        customerEmail,
+                        customerName,
+                        orderCode,
+                        savedOrder.getOrderId(),
+                        savedOrder.getTotalAmount(),
+                        savedOrder.getCreatedAt(),
+                        emailOrderItems,
+                        emailLicenseKeys
+                );
+                System.out.println("[CartService] Order confirmation email sent to: " + customerEmail);
+            }
+        } catch (Exception e) {
+            System.err.println("[CartService] Failed to send order confirmation email: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 🔹 Xử lý voucher nếu có
+        try {
+            if (session != null) {
+                Map<String, Object> applied = (Map<String, Object>) session.getAttribute("appliedVoucher");
+                if (applied != null) {
+                    String code = Objects.toString(applied.get("code"), null);
+                    if (code != null) {
+                        var candidates = vouchersRepository.findByCodeIgnoreCaseOrderByUpdatedAtDesc(code);
+                        Vouchers v = candidates.isEmpty() ? null : candidates.get(0);
+                        if (v != null) {
+                            VoucherRedemptions rec = new VoucherRedemptions();
+                            rec.setVoucherId(v.getVoucherId());
+                            rec.setOrderId(savedOrder.getOrderId());
+                            rec.setUserId(uid);
+                            rec.setDiscountAmount(java.math.BigDecimal.ZERO);
+                            voucherRedemptionsRepository.save(rec);
+                            v.setUsedCount((v.getUsedCount() == null ? 0 : v.getUsedCount()) + 1);
+                            vouchersRepository.save(v);
+                            session.removeAttribute("appliedVoucher");
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        return "redirect:/customer/dashboard?purchase=success";
     }
 }
 

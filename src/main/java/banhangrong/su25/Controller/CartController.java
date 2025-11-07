@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -25,20 +26,20 @@ public class CartController {
         if (user == null) {
             return "redirect:/login";
         }
-        
+
         @SuppressWarnings("unchecked")
         Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
         if (appliedVouchers == null) {
             appliedVouchers = new HashMap<>();
         }
-        
+
         Map<String, Object> view = cartService.buildCartView(user, appliedVouchers);
 
         model.addAttribute("user", user);
         model.addAttribute("items", view.get("items"));
         model.addAttribute("total", view.get("total"));
         model.addAttribute("cartCount", view.get("cartCount"));
-        
+
         return "customer/cart";
     }
 
@@ -50,9 +51,9 @@ public class CartController {
         if (user == null) {
             return "redirect:/login?redirect=/product/" + productId;
         }
-        
+
         cartService.addToCart(productId, quantity);
-        
+
         // Nếu đến từ product detail page thì quay lại đó, không thì về cart
         if (referer != null && referer.contains("/product/")) {
             return "redirect:/product/" + productId + "?added=success";
@@ -86,7 +87,8 @@ public class CartController {
     public String removeFromCartGet(@RequestParam("productId") Long productId) {
         try {
             cartService.removeFromCart(productId);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return "redirect:/cart";
     }
 
@@ -97,23 +99,23 @@ public class CartController {
                                             HttpSession session) {
         Map<String, Object> result = cartService.applyVoucherForProduct(productId, code);
         if (Boolean.TRUE.equals(result.get("ok"))) {
+//            @SuppressWarnings("unchecked")
             @SuppressWarnings("unchecked")
-            @SuppressWarnings("unchecked")
-        Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+            Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
             if (appliedVouchers == null) {
                 appliedVouchers = new HashMap<>();
             }
             appliedVouchers.put(productId, code);
             session.setAttribute("appliedVouchers", appliedVouchers);
         }
-        
+
         return result;
     }
 
     @PostMapping("/cart/remove-voucher")
     @ResponseBody
     public Map<String, Object> removeVoucher(@RequestParam("productId") Long productId,
-                                              HttpSession session) {
+                                             HttpSession session) {
         Map<String, Object> res = new HashMap<>();
         @SuppressWarnings("unchecked")
         Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
