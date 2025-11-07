@@ -246,7 +246,7 @@ public class ProductLicenseController {
                 return ResponseEntity.badRequest().body("invalid expireDate");
             }
         } else {
-            expStr = "N/A";
+            expStr = java.time.LocalDate.now().plusDays(30).format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
         }
 
         LocalDateTime now = LocalDateTime.now();
