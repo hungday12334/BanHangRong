@@ -184,28 +184,35 @@ public class CustomerDashboardService {
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(size, 1);
 
+        // Base query: chỉ lấy sản phẩm Public
         StringBuilder jpql = new StringBuilder("SELECT p FROM Products p WHERE LOWER(p.status) = 'public'");
         
+        // Filter: Search
         if (search != null && !search.trim().isEmpty()) {
             jpql.append(" AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%')))");
         }
         
+        // Filter: Category
         if (categoryId != null) {
             jpql.append(" AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)");
         }
         
+        // Filter: Min Price
         if (minPrice != null) {
-            jpql.append(" AND (p.salePrice IS NOT NULL AND p.salePrice >= :minPrice OR p.salePrice IS NULL AND p.price >= :minPrice)");
+            jpql.append(" AND (COALESCE(p.salePrice, p.price) >= :minPrice)");
         }
         
+        // Filter: Max Price
         if (maxPrice != null) {
-            jpql.append(" AND (p.salePrice IS NOT NULL AND p.salePrice <= :maxPrice OR p.salePrice IS NULL AND p.price <= :maxPrice)");
+            jpql.append(" AND (COALESCE(p.salePrice, p.price) <= :maxPrice)");
         }
         
+        // Filter: Min Rating
         if (minRating != null) {
             jpql.append(" AND (p.averageRating IS NOT NULL AND p.averageRating >= :minRating)");
         }
 
+        // Sort
         if (sortBy != null && !sortBy.trim().isEmpty()) {
             switch (sortBy.toLowerCase()) {
                 case "price_asc":
@@ -230,8 +237,8 @@ public class CustomerDashboardService {
             jpql.append(" ORDER BY p.totalSales DESC, p.createdAt DESC");
         }
 
+        // Execute query
         Query query = entityManager.createQuery(jpql.toString(), Products.class);
-        
         if (search != null && !search.trim().isEmpty()) {
             query.setParameter("search", search.trim());
         }
@@ -248,8 +255,9 @@ public class CustomerDashboardService {
             query.setParameter("minRating", minRating);
         }
 
+        // Get all results and paginate manually
         @SuppressWarnings("unchecked")
-        List<Products> allProducts = (List<Products>) query.getResultList();
+        List<Products> allProducts = query.getResultList();
         int total = allProducts.size();
         
         int start = safePage * safeSize;

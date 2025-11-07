@@ -1,19 +1,12 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Categories;
-import banhangrong.su25.Entity.Products;
-import banhangrong.su25.Entity.Users;
 import banhangrong.su25.service.CategoryViewService;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 public class CategoryController {
@@ -30,20 +23,12 @@ public class CategoryController {
             return "redirect:/verify-email-required";
         }
 
-        List<Categories> categories = categoryViewService.listCategoriesWithPublicProducts();
-        
-        Map<Long, Long> productCountByCategory = new HashMap<>();
-        for (Categories category : categories) {
-            Long count = categoryViewService.countPublicProductsInCategory(category.getCategoryId());
-            productCountByCategory.put(category.getCategoryId(), count);
-        }
-
-        Users currentUser = categoryViewService.getCurrentUserOrNull();
-        Long cartCount = currentUser != null ? categoryViewService.getCartCount(currentUser.getUserId()) : 0L;
+        var categories = categoryViewService.listCategoriesWithPublicProducts();
+        var currentUser = categoryViewService.getCurrentUserOrNull();
 
         model.addAttribute("categories", categories);
-        model.addAttribute("productCountByCategory", productCountByCategory);
-        model.addAttribute("cartCount", cartCount);
+        model.addAttribute("productCountByCategory", categoryViewService.getProductCountByCategory(categories));
+        model.addAttribute("cartCount", currentUser != null ? categoryViewService.getCartCount(currentUser.getUserId()) : 0L);
         model.addAttribute("user", currentUser);
 
         return "customer/categories";
@@ -51,8 +36,6 @@ public class CategoryController {
 
     @GetMapping("/category/{categoryId}")
     public String categoryProducts(@PathVariable Long categoryId,
-                                @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                                @RequestParam(name = "size", required = false, defaultValue = "15") int size,
                                 @RequestParam(name = "search", required = false) String search,
                                 Model model) {
         if (categoryViewService.shouldRedirectVerifyForCustomer()) {
@@ -64,23 +47,14 @@ public class CategoryController {
             return "redirect:/categories";
         }
 
-        Page<Products> productsPage = categoryViewService.getProductsPage(categoryId, page, size, search);
-        List<Products> products = productsPage.getContent();
-        
-        Map<Long, String> primaryImageByProduct = categoryViewService.buildPrimaryImageMap(products);
-
-        Users currentUser = categoryViewService.getCurrentUserOrNull();
-        Long cartCount = currentUser != null ? categoryViewService.getCartCount(currentUser.getUserId()) : 0L;
+        var products = categoryViewService.getProducts(categoryId, search);
+        var currentUser = categoryViewService.getCurrentUserOrNull();
 
         model.addAttribute("category", category);
         model.addAttribute("products", products);
-        model.addAttribute("primaryImageByProduct", primaryImageByProduct);
-        model.addAttribute("page", page);
-        model.addAttribute("size", size);
+        model.addAttribute("productImages", categoryViewService.getProductImagesForProducts(products));
         model.addAttribute("search", search);
-        model.addAttribute("totalPages", productsPage.getTotalPages());
-        model.addAttribute("totalElements", productsPage.getTotalElements());
-        model.addAttribute("cartCount", cartCount);
+        model.addAttribute("cartCount", currentUser != null ? categoryViewService.getCartCount(currentUser.getUserId()) : 0L);
         model.addAttribute("user", currentUser);
 
         return "customer/category-products";

@@ -1,6 +1,7 @@
 package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.Categories;
+import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Repository.*;
@@ -59,11 +60,31 @@ public class CategoryViewService {
     }
 
     public Categories getCategoryById(Long categoryId) {
+        if (categoryId == null) return null;
         return categoriesRepository.findById(categoryId).orElse(null);
     }
 
     public long countPublicProductsInCategory(Long categoryId) {
         return productsRepository.countByCategoryIdAndStatus(categoryId, "Public");
+    }
+
+    public Map<String, Long> countPublicProductsInCategories(List<Categories> categories) {
+        Map<String, Long> result = new HashMap<>();
+        for (Categories c : categories) {
+            result.put(c.getName(), productsRepository.countByCategoryIdAndStatus(c.getCategoryId(), "Public"));
+        }
+        return result;
+    }
+
+    public Map<Long, Long> getProductCountByCategory(List<Categories> categories) {
+        Map<Long, Long> result = new HashMap<>();
+        for (Categories category : categories) {
+            Long categoryId = category.getCategoryId();
+            if (categoryId != null) {
+                result.put(categoryId, countPublicProductsInCategory(categoryId));
+            }
+        }
+        return result;
     }
 
     public Page<Products> getProductsPage(Long categoryId, int page, int size, String search) {
@@ -73,6 +94,21 @@ public class CategoryViewService {
             return productsRepository.findByCategoryIdAndStatusAndSearch(categoryId, "Public", search.trim(), pageable);
         }
         return productsRepository.findByCategoryIdAndStatus(categoryId, "Public", pageable);
+    }
+
+    public List<Products> getProducts(Long categoryId, String search) {
+        if (search != null && !search.trim().isEmpty()) {
+            // Lấy tất cả products có search, sau đó sort
+            var page = productsRepository.findByCategoryIdAndStatusAndSearch(
+                    categoryId, "Public", search.trim(), 
+                    PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt"))));
+            return page.getContent();
+        }
+        // Lấy tất cả products, sau đó sort
+        var page = productsRepository.findByCategoryIdAndStatus(
+                categoryId, "Public", 
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("totalSales"), Sort.Order.desc("createdAt"))));
+        return page.getContent();
     }
 
     public Map<Long, String> buildPrimaryImageMap(List<Products> products) {
@@ -94,6 +130,22 @@ public class CategoryViewService {
         if (userId == null) return 0L;
         // Hiển thị số lượng dòng trong giỏ ở header theo logic cũ
         return shoppingCartRepository.countByUserId(userId);
+    }
+
+    public List<ProductImages> getProductImagesForProducts(List<Products> products) {
+        if (products == null || products.isEmpty()) {
+            return List.of();
+        }
+        List<Long> productIds = products.stream()
+                .map(Products::getProductId)
+                .filter(id -> id != null)
+                .toList();
+        if (productIds.isEmpty()) {
+            return List.of();
+        }
+        return productImagesRepository.findAll().stream()
+                .filter(img -> productIds.contains(img.getProductId()))
+                .toList();
     }
 }
 

@@ -6,7 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -25,45 +26,40 @@ public class CartController {
             return "redirect:/login";
         }
         
-        Map<String,Object> applied = (Map<String,Object>) session.getAttribute("appliedVoucher");
+        @SuppressWarnings("unchecked")
+        Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+        if (appliedVouchers == null) {
+            appliedVouchers = new HashMap<>();
+        }
         
-        Map<String,Object> view = cartService.buildCartView(user, applied);
-        
+        Map<String, Object> view = cartService.buildCartView(user, appliedVouchers);
+
         model.addAttribute("user", user);
         model.addAttribute("items", view.get("items"));
-        model.addAttribute("discount", view.get("discount"));
         model.addAttribute("total", view.get("total"));
         model.addAttribute("cartCount", view.get("cartCount"));
-        
-        if (view.get("appliedVoucher") != null) {
-            model.addAttribute("appliedVoucher", view.get("appliedVoucher"));
-        }
         
         return "customer/cart";
     }
 
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam("productId") Long productId,
-                            @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity) {
+                            @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity,
+                            @RequestHeader(value = "Referer", required = false) String referer) {
+        Users user = cartService.getCurrentUserOrNull();
+        if (user == null) {
+            return "redirect:/login?redirect=/product/" + productId;
+        }
+        
         cartService.addToCart(productId, quantity);
         
+        // Nếu đến từ product detail page thì quay lại đó, không thì về cart
+        if (referer != null && referer.contains("/product/")) {
+            return "redirect:/product/" + productId + "?added=success";
+        }
         return "redirect:/cart";
     }
 
-    @PostMapping("/cart/apply-voucher")
-    public String applyVoucher(@RequestParam("code") String code, HttpSession session) {
-        if (code == null || code.trim().isEmpty()) return "redirect:/cart?voucher=invalid";
-        Map<String,Object> m = new HashMap<>();
-        m.put("code", code.trim());
-        session.setAttribute("appliedVoucher", m);
-        return "redirect:/cart?voucher=applied";
-    }
-
-    @PostMapping("/cart/remove-voucher")
-    public String removeVoucher(HttpSession session) {
-        session.removeAttribute("appliedVoucher");
-        return "redirect:/cart?voucher=removed";
-    }
 
     @PostMapping("/cart/update")
     @ResponseBody
@@ -75,7 +71,7 @@ public class CartController {
     @PostMapping("/cart/remove")
     @ResponseBody
     public Map<String, Object> removeFromCart(@RequestParam("productId") Long productId) {
-        Map<String,Object> res = new HashMap<>();
+        Map<String, Object> res = new HashMap<>();
         try {
             cartService.removeFromCart(productId);
             res.put("ok", true);
@@ -88,15 +84,49 @@ public class CartController {
 
     @GetMapping("/cart/remove")
     public String removeFromCartGet(@RequestParam("productId") Long productId) {
-        try { 
-            cartService.removeFromCart(productId); 
+        try {
+            cartService.removeFromCart(productId);
         } catch (Exception ignored) {}
         return "redirect:/cart";
     }
 
+    @PostMapping("/cart/apply-voucher")
+    @ResponseBody
+    public Map<String, Object> applyVoucher(@RequestParam("productId") Long productId,
+                                            @RequestParam("code") String code,
+                                            HttpSession session) {
+        Map<String, Object> result = cartService.applyVoucherForProduct(productId, code);
+        if (Boolean.TRUE.equals(result.get("ok"))) {
+            @SuppressWarnings("unchecked")
+            @SuppressWarnings("unchecked")
+        Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+            if (appliedVouchers == null) {
+                appliedVouchers = new HashMap<>();
+            }
+            appliedVouchers.put(productId, code);
+            session.setAttribute("appliedVouchers", appliedVouchers);
+        }
+        
+        return result;
+    }
+
+    @PostMapping("/cart/remove-voucher")
+    @ResponseBody
+    public Map<String, Object> removeVoucher(@RequestParam("productId") Long productId,
+                                              HttpSession session) {
+        Map<String, Object> res = new HashMap<>();
+        @SuppressWarnings("unchecked")
+        Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+        if (appliedVouchers != null) {
+            appliedVouchers.remove(productId);
+            session.setAttribute("appliedVouchers", appliedVouchers);
+        }
+        res.put("ok", true);
+        return res;
+    }
+
     @PostMapping("/cart/checkout-demo")
-    public String checkoutDemo() {
-        jakarta.servlet.http.HttpSession session = ((org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes()).getRequest().getSession(false);
+    public String checkoutDemo(HttpSession session) {
         return cartService.checkoutDemoAndReturnRedirect(session);
     }
 }

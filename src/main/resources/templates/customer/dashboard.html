@@ -1,443 +1,71 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Customer Dashboard</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="/css/styles.min.css">
-	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
-	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
-	<style>
-		:root {
-			--bg: #f5f7fb;
-			--card: #ffffff;
-			--ink: #0f172a;
-			--muted: #6b7280;
-			--brand: #0ea5e9;
-			--chip: #e5e7eb;
-			--line: #eaeef4;
-		}
-
-		* {
-			box-sizing: border-box;
-		}
-
-		html,
-		body {
-			height: 100%;
-		}
-
-		body {
-			margin: 0;
-			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-			color: var(--ink);
-			background: var(--bg);
-		}
-
-		.wrapper {
-			min-height: 100%;
-			display: flex;
-			flex-direction: column;
-		}
-
-
-		.hero {
-			margin: 18px auto 12px;
-			max-width: 1200px;
-			background: linear-gradient(180deg, #f8fbff, #eef6ff);
-			border: 1px solid var(--line);
-			border-radius: 14px;
-			padding: 24px;
-		}
-
-		.hero h1 {
-			margin: 0 0 8px;
-			font-size: 26px;
-		}
-
-		.hero p {
-			margin: 0 0 16px;
-			color: var(--muted);
-			max-width: 720px;
-		}
-
-		.btn {
-			display: inline-block;
-			padding: 10px 16px;
-			background: var(--brand);
-			color: #fff;
-			border: none;
-			border-radius: 10px;
-			text-decoration: none;
-			font-weight: 600;
-			box-shadow: 0 6px 18px rgba(14, 165, 233, .25);
-		}
-
-		.btn:hover {
-			filter: brightness(.98);
-		}
-
-		.section-title {
-			max-width: 1200px;
-			margin: 10px auto;
-			color: #6b7280;
-			font-weight: 600;
-			text-align: center;
-		}
-
-		.grid {
-			max-width: 1200px;
-			margin: 0 auto 40px;
-			display: grid;
-			grid-template-columns: repeat(5, 1fr);
-			gap: 14px;
-			padding: 0 10px;
-		}
-
-		@media (max-width: 1100px) {
-			.grid {
-				grid-template-columns: repeat(4, 1fr);
-			}
-		}
-
-		@media (max-width: 900px) {
-			.grid {
-				grid-template-columns: repeat(3, 1fr);
-			}
-
-			.search input {
-				width: 180px;
-			}
-		}
-
-		@media (max-width: 680px) {
-			.grid {
-				grid-template-columns: repeat(2, 1fr);
-			}
-		}
-
-		.card {
-			background: var(--card);
-			border: 1px solid var(--line);
-			border-radius: 12px;
-			overflow: hidden;
-			display: flex;
-			flex-direction: column;
-		}
-
-		.thumb {
-			height: 160px;
-			background: #eef2f7;
-			display: grid;
-			place-items: center;
-			color: #94a3b8;
-			font-size: 12px;
-			position: relative;
-			overflow: hidden;
-		}
-
-		.thumb img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-
-		.card .body {
-			padding: 12px;
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-			flex: 1;
-		}
-
-		.title {
-			font-size: 15px;
-			font-weight: 600;
-			line-height: 1.4;
-			min-height: 42px;
-			color: #1f2937;
-		}
-
-		.meta {
-			font-size: 13px;
-			color: var(--muted);
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			flex-wrap: wrap;
-		}
-
-		.rating {
-			display: inline-flex;
-			align-items: center;
-			gap: 4px;
-			color: #f59e0b;
-			font-weight: 500;
-		}
-
-		.sales {
-			color: #6b7280;
-		}
-
-		.price {
-			margin-top: auto;
-			font-weight: 700;
-			font-size: 18px;
-			color: #0ea5e9;
-		}
-
-		.price-original {
-			text-decoration: line-through;
-			color: #9ca3af;
-			font-weight: 500;
-			font-size: 14px;
-			margin-left: 6px;
-		}
-
-		.badge-sale {
-			position: absolute;
-			top: 8px;
-			right: 8px;
-			background: #ef4444;
-			color: #fff;
-			padding: 4px 8px;
-			border-radius: 6px;
-			font-size: 11px;
-			font-weight: 700;
-			z-index: 2;
-		}
-
-		.badge-out {
-			position: absolute;
-			top: 8px;
-			left: 8px;
-			background: #6b7280;
-			color: #fff;
-			padding: 4px 8px;
-			border-radius: 6px;
-			font-size: 11px;
-			font-weight: 700;
-			z-index: 2;
-		}
-
-		.card.disabled {
-			opacity: .65;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/custonmer/dashboard.css}">
 </head>
-
 <body>
-	<div class="wrapper">
-		<div th:replace="~{customer/fragments/header :: header}"></div>
+<div th:replace="~{customer/fragments/header :: header}"></div>
+<div class="container">
+    <h2 class="title">Feature License</h2>
 
-		<section class="hero">
-			<h1>Trusted platform for buying and selling licenses</h1>
-			<p>Buy game keys, software licenses, and vouchers from trusted sellers. Explore featured deals and start
-				shopping now.</p>
-			<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-				<a href="#productGrid" class="btn">Explore</a>
-				<a href="/become-seller" class="btn"
-					style="background:#10b981;box-shadow:0 6px 18px rgba(16,185,129,.25);">📈 Become a Seller</a>
-			</div>
-		</section>
+    <section class="grid" id="productGrid" >
+        <!-- Loop qua danh sách products -->
+        <a class="card clickable"
+           th:each="p : ${products}"
+           th:if="${p.status == 'public'}"
+           th:href="@{'/product/' + ${p.productId}}">
 
-		<div class="section-title">Feature License</div>
-		<section class="grid" id="productGrid">
-			<a class="card clickable" th:each="p : ${featuredProducts}" th:unless="${#lists.isEmpty(featuredProducts)}"
-				th:href="@{'/product/' + ${p.productId}}"
-				th:classappend="${p.quantity != null and p.quantity <= 0} ? ' disabled' : ''" th:attr="data-product-id=${p.productId},
-						data-name=${p.name},
-						data-description=${p.description},
-						data-price=${p.price},
-						data-sale-price=${p.salePrice},
-						data-quantity=${p.quantity},
-						data-total-sales=${p.totalSales},
-						data-average-rating=${p.averageRating}">
-				<div class="thumb">
-					<span th:if="${p.quantity != null and p.quantity <= 0}" class="badge-out">Out of Stock</span>
-					<span th:if="${p.salePrice != null}" class="badge-sale">SALE</span>
-					<img th:if="${primaryImageByProduct != null and primaryImageByProduct[p.productId] != null}"
-						th:src="${primaryImageByProduct[p.productId]}" th:alt="${p.name}"
-						onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" loading="lazy">
-					<img th:unless="${primaryImageByProduct != null and primaryImageByProduct[p.productId] != null}"
-						src="/img/avatar_default.jpg" th:alt="${p.name}">
-				</div>
-				<div class="body">
-					<div class="title" th:text="${p.name}">Product Title</div>
-					<div class="meta">
-						<span class="rating">⭐ <span
-								th:text="${p.averageRating != null ? #numbers.formatDecimal(p.averageRating,1,'COMMA',1,'POINT') : '0.0'}">4.5</span></span>
-						<span class="sales">•</span>
-						<span class="sales">Sold: <span th:text="${p.totalSales}">0</span></span>
-					</div>
-					<div class="price">
-						<span th:if="${p.salePrice != null}">
-							<span th:text="${#numbers.formatDecimal(p.salePrice,0,'COMMA',0,'POINT')}">0</span>₫
-							<span class="price-original"><span
-									th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}">0</span>₫</span>
-						</span>
-						<span th:if="${p.salePrice == null}">
-							<span th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}">0</span>₫
-						</span>
-					</div>
-				</div>
-			</a>
+            <div class="thumb">
+                <!-- Badge Out of Stock -->
+                <span th:if="${p.quantity != null and p.quantity <= 0}"
+                      class="badge-out">Out of Stock</span>
 
-			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
-				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
-				<div class="body">
-					<div class="title">Microsoft Office 2021 Pro Plus</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 520</span></div>
-					<div class="price">1,250,000₫</div>
-				</div>
-			</div>
-			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
-				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
-				<div class="body">
-					<div class="title">Adobe Creative Cloud All Apps</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 450</span></div>
-					<div class="price">850,000₫</div>
-				</div>
-			</div>
-			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
-				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
-				<div class="body">
-					<div class="title">Norton 360 Deluxe 2023</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 410</span></div>
-					<div class="price">650,000₫</div>
-				</div>
-			</div>
-			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
-				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
-				<div class="body">
-					<div class="title">FIFA 23 - Steam Key</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 280</span></div>
-					<div class="price">1,100,000₫</div>
-				</div>
-			</div>
-			<div class="card" th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
-				<div class="thumb"><img src="/img/avatar_default.jpg" alt="Placeholder"></div>
-				<div class="body">
-					<div class="title">Windows 11 Pro OEM</div>
-					<div class="meta"><span class="rating">⭐ 4.5</span> <span class="sales">• Sold: 380</span></div>
-					<div class="price">900,000₫</div>
-				</div>
-			</div>
-		</section>
+                <!-- Badge Sale -->
+                <span th:if="${p.salePrice != null}"
+                      class="badge-sale">SALE</span>
 
-		<div
-			style="max-width:1200px;margin:16px auto 32px;display:flex;justify-content:center;gap:6px;align-items:center;">
-			<a th:if="${totalPages > 1 and page > 0}"
-				th:href="@{'/customer/dashboard'(page=${page - 1}, size=${size}, search=${search})}"
-				style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">«
-					Previous</a>
-            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <a th:href="@{'/customer/dashboard'(page=${i}, size=${size}, search=${search})}"
-                   th:text="${i + 1}"
-                   th:classappend="${i == page} ? ' active' : ''"
-                   style="margin:0 2px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827"></a>
-            </span>
-			<a th:if="${totalPages > 1 and page < totalPages - 1}"
-				th:href="@{'/customer/dashboard'(page=${page + 1}, size=${size}, search=${search})}"
-				style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;color:#111827">Sau
-				»</a>
-		</div>
+                <!-- Tìm và hiển thị ảnh của product này -->
+                <img th:each="img : ${productImages}"
+                     th:if="${img.productId == p.productId}"
+                     th:src="${img.imageUrl}"
+                     th:alt="${p.name}"
+                     onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
+                     loading="lazy">
+            </div>
 
-		<div id="topupPopup"
-			style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
-			<div
-				style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
-				<div id="topupIcon"
-					style="width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:6px auto 12px auto;border:2px solid #10b981;color:#10b981;font-size:34px">
-					✓</div>
-				<h3 id="topupTitle" style="margin:0 0 6px 0;color:#111827;font-size:18px">Top Up Successful</h3>
-				<div id="topupMsg" style="color:#6b7280;font-size:14px">Amount has been added to your wallet.</div>
-				<div style="margin-top:14px;display:flex;gap:8px;justify-content:center">
-					<a href="/cart" class="btn"
-						style="background:#111827;color:#fff;border:none;padding:8px 12px;border-radius:10px">Back to
-						Cart</a>
-					<button type="button" id="topupClose" class="btn"
-						style="padding:8px 12px;border-radius:10px">Close</button>
-				</div>
-			</div>
-		</div>
+            <div class="body">
+                <!-- Tên sản phẩm -->
+                <div class="title" th:text="${p.name}">Product Title</div>
 
-		<div id="topupAsk"
-			style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
-			<div
-				style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
-				<h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">VNPay Top Up</h3>
-				<div style="color:#6b7280;font-size:14px;margin-bottom:8px">Enter amount to top up (VND)</div>
-				<input id="topupAmountField" type="text" inputmode="numeric" placeholder="200000"
-					style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;font-weight:600" />
-				<div id="topupErr" style="color:#ef4444;font-size:12px;height:16px;margin-top:6px"></div>
-				<div style="margin-top:10px;display:flex;gap:8px;justify-content:center">
-					<button type="button" id="topupCancelBtn" class="btn"
-						style="padding:8px 12px;border-radius:10px">Cancel</button>
-					<button type="button" id="topupConfirmBtn" class="btn"
-						style="background:#0ea5e9;color:#fff;border:none;padding:8px 12px;border-radius:10px">Top Up</button>
-				</div>
-			</div>
-		</div>
+                <!-- Rating và số lượng đã bán -->
+                <div class="meta">
+                <span class="rating">⭐
+                    <span th:text="${p.averageRating}">4.5</span>
+                </span>
+                    <span class="sales">• Sold:
+                    <span th:text="${p.totalSales != null ? p.totalSales : 0}">0</span>
+                </span>
+                </div>
 
-		<script>
-			let __topupForm = null;
-			function topupPrompt(e) {
-				e.preventDefault();
-				__topupForm = e.target;
-				const ask = document.getElementById('topupAsk');
-				const field = document.getElementById('topupAmountField');
-				const err = document.getElementById('topupErr');
-				if (ask) { ask.style.display = 'flex'; setTimeout(() => { try { field.focus(); } catch (_) { } }, 0); }
-				function confirm() {
-					const v = field.value || '';
-					const clean = v.replace(/[^0-9]/g, '');
-					if (!clean) { err.textContent = 'Invalid amount'; return; }
-					document.getElementById('topupAmountInput').value = clean;
-					ask.style.display = 'none';
-					__topupForm.submit();
-				}
-				const okBtn = document.getElementById('topupConfirmBtn');
-				const cancelBtn = document.getElementById('topupCancelBtn');
-				const close = () => { ask.style.display = 'none'; };
-				if (okBtn) okBtn.onclick = confirm;
-				if (cancelBtn) cancelBtn.onclick = close;
-				if (field) field.onkeydown = (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); confirm(); } };
-			return false;
-		}
-
-		(function () {
-				const params = new URLSearchParams(window.location.search);
-				const topup = params.get('topup');
-				if (!topup) return;
-				const amount = params.get('amount');
-				const el = document.getElementById('topupPopup');
-				const icon = document.getElementById('topupIcon');
-				const title = document.getElementById('topupTitle');
-				const msg = document.getElementById('topupMsg');
-				const closeBtn = document.getElementById('topupClose');
-				function show() { el.style.display = 'flex'; }
-				function hide() { el.style.display = 'none'; }
-				if (closeBtn) closeBtn.addEventListener('click', hide);
-				if (topup === 'success') {
-					if (icon) { icon.style.borderColor = '#10b981'; icon.style.color = '#10b981'; icon.textContent = '✓'; }
-					if (title) title.textContent = 'Top Up Successful';
-					if (msg) msg.textContent = 'Added ' + (amount ? Number(amount).toLocaleString('en-US') + '₫' : 'amount') + ' to your wallet.';
-					show();
-				} else {
-					if (icon) { icon.style.borderColor = '#ef4444'; icon.style.color = '#ef4444'; icon.textContent = '!'; }
-					if (title) title.textContent = 'Top Up Failed';
-					if (msg) msg.textContent = 'Error code: ' + (params.get('code') || '');
-					show();
-				}
-			})();
-		</script>
-
-	</div>
+                <!-- Giá -->
+                <div class="price">
+                    <!-- Nếu có giá sale -->
+                    <span th:if="${p.salePrice != null}">
+                    <span th:text="${p.salePrice}">0</span>₫
+                    <span class="price-original">
+                        <span th:text="${p.price}">0</span>₫
+                    </span>
+                </span>
+                    <!-- Nếu không có giá sale -->
+                    <span th:if="${p.salePrice == null}">
+                    <span th:text="${p.price}">0</span>₫
+                </span>
+                </div>
+            </div>
+        </a>
+    </section>
+</div>
 </body>
-
 </html>

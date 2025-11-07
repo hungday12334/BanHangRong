@@ -1,10 +1,6 @@
 package banhangrong.su25.Controller;
 
-import banhangrong.su25.Entity.Products;
-import banhangrong.su25.Entity.Orders;
-import banhangrong.su25.Entity.OrderItems;
-import banhangrong.su25.Entity.ProductReviews;
-import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.*;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.ShoppingCartRepository;
@@ -13,6 +9,8 @@ import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
 import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.service.CustomerDashboardService;
+import banhangrong.su25.service.ProductImageService;
+import banhangrong.su25.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -41,6 +39,8 @@ public class CustomerDashboardController {
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final ProductReviewsRepository productReviewsRepository;
+    private final ProductService productService;
+    private final ProductImageService productImageService;
 
     public CustomerDashboardController(CustomerDashboardService customerDashboardService,
                                        ProductsRepository productsRepository,
@@ -49,7 +49,7 @@ public class CustomerDashboardController {
                                        UsersRepository usersRepository,
                                        OrdersRepository ordersRepository,
                                        OrderItemsRepository orderItemsRepository,
-                                       ProductReviewsRepository productReviewsRepository) {
+                                       ProductReviewsRepository productReviewsRepository, ProductService productService, ProductImageService productImageService) {
         this.customerDashboardService = customerDashboardService;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
@@ -58,41 +58,18 @@ public class CustomerDashboardController {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productReviewsRepository = productReviewsRepository;
+        this.productService = productService;
+        this.productImageService = productImageService;
     }
 
     @GetMapping("/customer/dashboard")
-    public String customerDashboard(
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "15") int size,
-            @RequestParam(name = "search", required = false) String search,
-            Model model) {
-        
-        Users currentUser = customerDashboardService.getCurrentUserOrNull();
-        
-        if (currentUser != null) {
-            if (!customerDashboardService.isCustomerEmailVerified(currentUser)) {
-                return "redirect:/verify-email-required";
-            }
-        }
-        
-        Page<Products> featuredPage = customerDashboardService.getPublicProducts(page, size, search);
-        List<Products> featured = featuredPage.getContent();
-        
-        Map<Long, String> primaryImageByProduct = customerDashboardService.getProductImages(featured);
-        
-        model.addAttribute("featuredProducts", featured);
-        model.addAttribute("page", featuredPage.getNumber());
-        model.addAttribute("totalPages", featuredPage.getTotalPages());
-        model.addAttribute("size", featuredPage.getSize());
-        model.addAttribute("primaryImageByProduct", primaryImageByProduct);
-        model.addAttribute("search", search);
-        
-        if (currentUser != null) {
-            Long cartCount = customerDashboardService.getCartCount(currentUser.getUserId());
-            model.addAttribute("cartCount", cartCount);
-            model.addAttribute("user", currentUser);
-        }
-        
+    public String customerDashboard(Model model){
+        List<Products> productsList = productService.getAllProducts();
+        List<ProductImages> productImagesList = productImageService.getAllProductImages();
+        //send product to view
+        model.addAttribute("products", productsList);
+        //send product images to view
+        model.addAttribute("productImages", productImagesList);
         return "customer/dashboard";
     }
 

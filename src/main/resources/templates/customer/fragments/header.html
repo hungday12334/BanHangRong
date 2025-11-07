@@ -209,18 +209,15 @@
 		<a href="/customer/dashboard" class="brand">BanHangRong</a>
 		<nav class="nav" aria-label="Main">
 			<a href="/customer/dashboard">Home</a>
-			<a href="/categories">Category</a>
-			<a href="#">License Software</a>
-			<a href="#">Game Keys</a>
+			<a href="/customer/categories">Category</a>
 			<a href="/vouchers">Voucher</a>
 			<a href="/customer/chat" style="position: relative;">
 				💬 Chat
 				<span class="badge bg-danger" id="unreadChatCount" style="display: none; position: absolute; top: -8px; right: -12px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); align-items: center; justify-content: center;">0</span>
 			</a>
-			<a href="#">Support</a>
+			<a href="/customer/support">Support</a>
 		</nav>
 		<div class="top-actions">
-			<a href="/customer/support" class="support-link">Support</a>
 			<div class="user" style="position:relative">
 				<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
 					<span th:text="${user != null ? user.username : 'Guest'}">Guest</span>
@@ -263,12 +260,12 @@
 				</form>
 			</div>
 			<div class="search">
-				<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+				<form method="GET" action="/products" style="display:flex;gap:4px;">
 					<input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
 						style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
 					<button type="submit"
 						style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-					<a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
+					<a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/products}"
 						style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 				</form>
 			</div>
