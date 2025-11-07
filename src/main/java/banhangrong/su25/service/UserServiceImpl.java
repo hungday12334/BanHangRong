@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
         if (user.getUserType().equalsIgnoreCase("SELLER")) {
             List<Products> listProduct = adminProductService.findBySellerIdAndStatusIgnoreCase(user.getUserId(), "public");
             for (Products p : listProduct) {
-                p.setStatus("Cancelled");
+                p.setStatus("unPublic");
                 adminProductService.save(p);
             }
         }
@@ -174,5 +174,19 @@ public class UserServiceImpl implements UserService {
         query.setParameter("updatedTo", filter.getUpdatedTo());
 
         return query.getResultList();
+    }
+
+    @Override
+    public void activeUserById(Users user) {
+        user.setIsActive(true);
+        user.setUpdatedAt(LocalDateTime.now());
+        if (user.getUserType().equalsIgnoreCase("SELLER")) {
+            List<Products> listProduct = adminProductService.findBySellerIdAndStatusIgnoreCase(user.getUserId(), "unPublic");
+            for (Products p : listProduct) {
+                p.setStatus("Public");
+                adminProductService.save(p);
+            }
+        }
+        usersRepository.save(user);
     }
 }

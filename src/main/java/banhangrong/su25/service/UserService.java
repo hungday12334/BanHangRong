@@ -18,4 +18,5 @@ public interface UserService {
     public void setExpireSessionByUsername( String username);
     public void deactiveUserById(Users user);
     public List<Users> filter(UserFilter filter);
+    public void activeUserById(Users user);
 }

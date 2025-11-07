@@ -39,7 +39,7 @@ public class EmailService {
             helper.setFrom("Ban Hang Rong <bonhoangncd@gmail.com>");
             helper.setTo(email.getToEmail());
             helper.setSubject(email.getSubject());
-            helper.setText(email.getBody(), false);
+            helper.setText(email.getBody(), true);
 
             System.out.println("📧 Sending email...");
             mailSender.send(message);
