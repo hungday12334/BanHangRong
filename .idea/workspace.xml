@@ -4,39 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix: fix error approve Products.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerCategoryController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryProductService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductImageService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/static/css/custonmer/categories.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/static/css/custonmer/dashboard.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/test/test-product.html" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="update theme,logic in customer screen">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/env" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProductsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProductsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerVouchersController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerVouchersController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ShoppingCart.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Entity/ShoppingCart.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesProductsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesProductsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/CategoriesRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryViewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CategoryViewService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-simple.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-simple.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/change-password.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/change-password.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/vouchers.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/vouchers.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/homepage.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/homepage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomAccessDeniedHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomAccessDeniedHandler.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,6 +43,10 @@
     &quot;accountId&quot;: &quot;43a70439-d014-4c57-b4ae-bf792be7baff&quot;
   }
 }</component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -210,7 +184,9 @@
       <workItem from="1762412057838" duration="6060000" />
       <workItem from="1762418586658" duration="21000" />
       <workItem from="1762442234715" duration="4563000" />
-      <workItem from="1762488348451" duration="2835000" />
+      <workItem from="1762488348451" duration="3772000" />
+      <workItem from="1762496710501" duration="5000" />
+      <workItem from="1762502308301" duration="628000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -252,7 +228,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760059391483</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="update theme,logic in customer screen">
+      <option name="closed" value="true" />
+      <created>1762491474973</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1762491474973</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -297,6 +281,7 @@
     <MESSAGE value="Admin User Update&amp;Delete" />
     <MESSAGE value="Admin Product Approve||Cancel" />
     <MESSAGE value="fix: fix error approve Products." />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: fix error approve Products." />
+    <MESSAGE value="update theme,logic in customer screen" />
+    <option name="LAST_COMMIT_MESSAGE" value="update theme,logic in customer screen" />
   </component>
 </project>
