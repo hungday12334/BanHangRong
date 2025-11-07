@@ -1,10 +1,6 @@
 package banhangrong.su25.Controller;
 
-import banhangrong.su25.Entity.Products;
-import banhangrong.su25.Entity.Orders;
-import banhangrong.su25.Entity.OrderItems;
-import banhangrong.su25.Entity.ProductReviews;
-import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.*;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.ShoppingCartRepository;
@@ -14,10 +10,11 @@ import banhangrong.su25.Repository.OrderItemsRepository;
 import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.service.CustomerDashboardService;
+import banhangrong.su25.service.ProductImageService;
+import banhangrong.su25.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import java.time.LocalDateTime;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -27,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +41,8 @@ public class CustomerDashboardController {
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final ProductReviewsRepository productReviewsRepository;
+    private final ProductService productService;
+    private final ProductImageService productImageService;
     private final ProductLicensesRepository productLicensesRepository;
 
     public CustomerDashboardController(CustomerDashboardService customerDashboardService,
@@ -53,6 +53,8 @@ public class CustomerDashboardController {
                                        OrdersRepository ordersRepository,
                                        OrderItemsRepository orderItemsRepository,
                                        ProductReviewsRepository productReviewsRepository,
+                                       ProductService productService,
+                                       ProductImageService productImageService,
                                        ProductLicensesRepository productLicensesRepository) {
         this.customerDashboardService = customerDashboardService;
         this.productsRepository = productsRepository;
@@ -62,45 +64,20 @@ public class CustomerDashboardController {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productReviewsRepository = productReviewsRepository;
+        this.productService = productService;
+        this.productImageService = productImageService;
         this.productLicensesRepository = productLicensesRepository;
     }
 
+
     @GetMapping("/customer/dashboard")
-    public String customerDashboard(
-            @RequestParam(name = "purchase", required = false) String purchase,
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "15") int size,
-            @RequestParam(name = "search", required = false) String search,
-            Model model) {
-        
-        Users currentUser = customerDashboardService.getCurrentUserOrNull();
-        
-        if (currentUser != null) {
-            if (!customerDashboardService.isCustomerEmailVerified(currentUser)) {
-                return "redirect:/verify-email-required";
-            }
-        }
-        
-        Page<Products> featuredPage = customerDashboardService.getPublicProducts(page, size, search);
-        List<Products> featured = featuredPage.getContent();
-        
-        Map<Long, String> primaryImageByProduct = customerDashboardService.getProductImages(featured);
-        
-        model.addAttribute("featuredProducts", featured);
-        model.addAttribute("page", featuredPage.getNumber());
-        model.addAttribute("totalPages", featuredPage.getTotalPages());
-        model.addAttribute("size", featuredPage.getSize());
-        model.addAttribute("primaryImageByProduct", primaryImageByProduct);
-        model.addAttribute("search", search);
-        
-        if (currentUser != null) {
-            Long cartCount = customerDashboardService.getCartCount(currentUser.getUserId());
-            model.addAttribute("cartCount", cartCount);
-            model.addAttribute("user", currentUser);
-        }
-        if(purchase != null && purchase.equalsIgnoreCase("success")) {
-            model.addAttribute("purchaseSuccess", true);
-        }
+    public String customerDashboard(Model model){
+        List<Products> productsList = productService.getAllProducts();
+        List<ProductImages> productImagesList = productImageService.getAllProductImages();
+        //send product to view
+        model.addAttribute("products", productsList);
+        //send product images to view
+        model.addAttribute("productImages", productImagesList);
         return "customer/dashboard";
     }
 
@@ -130,179 +107,179 @@ public class CustomerDashboardController {
                 return "redirect:/login";
             }
 
-        // Determine sort direction based on sort parameter
-        Sort.Direction sortDirection = "oldest".equalsIgnoreCase(sort) 
-            ? Sort.Direction.ASC 
-            : Sort.Direction.DESC;
-        
-        PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
-                Sort.by(sortDirection, "createdAt"));
-        
-        // Calculate start date based on dateFilter
-        LocalDateTime startDate = null;
-        if (dateFilter != null && !dateFilter.equalsIgnoreCase("all")) {
-            LocalDateTime now = LocalDateTime.now();
-            switch (dateFilter.toLowerCase()) {
-                case "today":
-                    startDate = now.toLocalDate().atStartOfDay();
-                    break;
-                case "this_week":
-                    startDate = now.toLocalDate().atStartOfDay().minusDays(now.getDayOfWeek().getValue() - 1);
-                    break;
-                case "this_month":
-                    startDate = now.toLocalDate().withDayOfMonth(1).atStartOfDay();
-                    break;
-                case "last_3_months":
-                    startDate = now.minusMonths(3).toLocalDate().atStartOfDay();
-                    break;
-                case "last_6_months":
-                    startDate = now.minusMonths(6).toLocalDate().atStartOfDay();
-                    break;
-                case "this_year":
-                    startDate = now.toLocalDate().withDayOfYear(1).atStartOfDay();
-                    break;
-                default:
-                    startDate = null;
-            }
-        }
-        
-        Page<Orders> ordersPage;
-        List<Orders> orders;
-        
-        if (search != null && !search.trim().isEmpty()) {
-            if (startDate != null) {
-                if ("oldest".equalsIgnoreCase(sort)) {
-                    ordersPage = ordersRepository.findByUserIdAndSearchTermAndCreatedAtAfterAsc(currentUser.getUserId(), search.trim(), startDate, pageable);
-                } else {
-                    ordersPage = ordersRepository.findByUserIdAndSearchTermAndCreatedAtAfter(currentUser.getUserId(), search.trim(), startDate, pageable);
-                }
-            } else {
-                if ("oldest".equalsIgnoreCase(sort)) {
-                    ordersPage = ordersRepository.findByUserIdAndSearchTermAsc(currentUser.getUserId(), search.trim(), pageable);
-                } else {
-                    ordersPage = ordersRepository.findByUserIdAndSearchTerm(currentUser.getUserId(), search.trim(), pageable);
-                }
-            }
-        } else if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
-            String statusLower = status.trim().toLowerCase();
-            if ("active".equals(statusLower) || "expired".equals(statusLower)) {
-                // Filter by license key status
-                if (startDate != null) {
-                    if ("oldest".equalsIgnoreCase(sort)) {
-                        if ("active".equals(statusLower)) {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
-                        } else {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
-                        }
-                    } else {
-                        if ("active".equals(statusLower)) {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
-                        } else {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
-                        }
-                    }
-                } else {
-                    if ("oldest".equalsIgnoreCase(sort)) {
-                        if ("active".equals(statusLower)) {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
-                        } else {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
-                        }
-                    } else {
-                        if ("active".equals(statusLower)) {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
-                        } else {
-                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
-                        }
-                    }
-                }
-            } else {
-                // Original order status filter (for backward compatibility)
-                if (startDate != null) {
-                    if ("oldest".equalsIgnoreCase(sort)) {
-                        ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), startDate, pageable);
-                    } else {
-                        ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), startDate, pageable);
-                    }
-                } else {
-                    if ("oldest".equalsIgnoreCase(sort)) {
-                        ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), pageable);
-                    } else {
-                        ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
-                    }
-                }
-            }
-        } else {
-            if (startDate != null) {
-                if ("oldest".equalsIgnoreCase(sort)) {
-                    ordersPage = ordersRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
-                } else {
-                    ordersPage = ordersRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
-                }
-            } else {
-                if ("oldest".equalsIgnoreCase(sort)) {
-                    ordersPage = ordersRepository.findByUserIdOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
-                } else {
-                    ordersPage = ordersRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
-                }
-            }
-        }
-        
-        orders = ordersPage.getContent();
+            // Determine sort direction based on sort parameter
+            Sort.Direction sortDirection = "oldest".equalsIgnoreCase(sort)
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC;
 
-        java.util.Map<Long, List<OrderItems>> orderItemsMap = new java.util.HashMap<>();
-        java.util.Map<Long, String> productNamesMap = new java.util.HashMap<>();
-        java.util.Map<Long, Products> productsMap = new java.util.HashMap<>();
-        java.util.Map<Long, String> orderLicenseStatusMap = new java.util.HashMap<>();
-        
-        for (Orders order : orders) {
-            List<OrderItems> items = orderItemsRepository.findByOrderId(order.getOrderId());
-            orderItemsMap.put(order.getOrderId(), items);
-            
-            // Calculate license status for this order
-            boolean hasActiveLicense = false;
-            try {
-                var licensesPage = productLicensesRepository.findByOrderId(order.getOrderId(), 
-                    org.springframework.data.domain.PageRequest.of(0, 1000));
-                for (var licenseView : licensesPage.getContent()) {
-                    if (licenseView.getIsActive() != null && licenseView.getIsActive()) {
-                        hasActiveLicense = true;
+            PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
+                    Sort.by(sortDirection, "createdAt"));
+
+            // Calculate start date based on dateFilter
+            LocalDateTime startDate = null;
+            if (dateFilter != null && !dateFilter.equalsIgnoreCase("all")) {
+                LocalDateTime now = LocalDateTime.now();
+                switch (dateFilter.toLowerCase()) {
+                    case "today":
+                        startDate = now.toLocalDate().atStartOfDay();
                         break;
-                    }
-                }
-            } catch (Exception ignored) {}
-            orderLicenseStatusMap.put(order.getOrderId(), hasActiveLicense ? "Active" : "Expired");
-            
-            for (OrderItems item : items) {
-                if (item.getProductId() != null) {
-                    productsRepository.findById(item.getProductId()).ifPresent(product -> {
-                        productNamesMap.put(item.getProductId(), product.getName());
-                        productsMap.put(item.getProductId(), product);
-                    });
+                    case "this_week":
+                        startDate = now.toLocalDate().atStartOfDay().minusDays(now.getDayOfWeek().getValue() - 1);
+                        break;
+                    case "this_month":
+                        startDate = now.toLocalDate().withDayOfMonth(1).atStartOfDay();
+                        break;
+                    case "last_3_months":
+                        startDate = now.minusMonths(3).toLocalDate().atStartOfDay();
+                        break;
+                    case "last_6_months":
+                        startDate = now.minusMonths(6).toLocalDate().atStartOfDay();
+                        break;
+                    case "this_year":
+                        startDate = now.toLocalDate().withDayOfYear(1).atStartOfDay();
+                        break;
+                    default:
+                        startDate = null;
                 }
             }
-        }
 
-        model.addAttribute("orders", orders);
-        model.addAttribute("orderItemsMap", orderItemsMap);
-        model.addAttribute("productNamesMap", productNamesMap);
-        model.addAttribute("productsMap", productsMap);
-        model.addAttribute("orderLicenseStatusMap", orderLicenseStatusMap);
-        model.addAttribute("page", ordersPage.getNumber());
-        model.addAttribute("totalPages", ordersPage.getTotalPages());
-        model.addAttribute("size", ordersPage.getSize());
-        model.addAttribute("user", currentUser);
-        model.addAttribute("search", search);
-        model.addAttribute("status", status);
-        model.addAttribute("sort", sort);
-        model.addAttribute("dateFilter", dateFilter);
-        
-        try {
-            model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
-            model.addAttribute("cartItemCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
-        } catch (Exception ignored) {}
+            Page<Orders> ordersPage;
+            List<Orders> orders;
 
-        return "customer/orderhistory";
+            if (search != null && !search.trim().isEmpty()) {
+                if (startDate != null) {
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        ordersPage = ordersRepository.findByUserIdAndSearchTermAndCreatedAtAfterAsc(currentUser.getUserId(), search.trim(), startDate, pageable);
+                    } else {
+                        ordersPage = ordersRepository.findByUserIdAndSearchTermAndCreatedAtAfter(currentUser.getUserId(), search.trim(), startDate, pageable);
+                    }
+                } else {
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        ordersPage = ordersRepository.findByUserIdAndSearchTermAsc(currentUser.getUserId(), search.trim(), pageable);
+                    } else {
+                        ordersPage = ordersRepository.findByUserIdAndSearchTerm(currentUser.getUserId(), search.trim(), pageable);
+                    }
+                }
+            } else if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
+                String statusLower = status.trim().toLowerCase();
+                if ("active".equals(statusLower) || "expired".equals(statusLower)) {
+                    // Filter by license key status
+                    if (startDate != null) {
+                        if ("oldest".equalsIgnoreCase(sort)) {
+                            if ("active".equals(statusLower)) {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseActiveAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
+                            } else {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseExpiredAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
+                            }
+                        } else {
+                            if ("active".equals(statusLower)) {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseActiveAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
+                            } else {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseExpiredAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
+                            }
+                        }
+                    } else {
+                        if ("oldest".equalsIgnoreCase(sort)) {
+                            if ("active".equals(statusLower)) {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseActiveOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
+                            } else {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseExpiredOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
+                            }
+                        } else {
+                            if ("active".equals(statusLower)) {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseActiveOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+                            } else {
+                                ordersPage = ordersRepository.findByUserIdAndLicenseExpiredOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+                            }
+                        }
+                    }
+                } else {
+                    // Original order status filter (for backward compatibility)
+                    if (startDate != null) {
+                        if ("oldest".equalsIgnoreCase(sort)) {
+                            ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), startDate, pageable);
+                        } else {
+                            ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), startDate, pageable);
+                        }
+                    } else {
+                        if ("oldest".equalsIgnoreCase(sort)) {
+                            ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), pageable);
+                        } else {
+                            ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
+                        }
+                    }
+                }
+            } else {
+                if (startDate != null) {
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        ordersPage = ordersRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
+                    } else {
+                        ordersPage = ordersRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
+                    }
+                } else {
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        ordersPage = ordersRepository.findByUserIdOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
+                    } else {
+                        ordersPage = ordersRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+                    }
+                }
+            }
+
+            orders = ordersPage.getContent();
+
+            java.util.Map<Long, List<OrderItems>> orderItemsMap = new java.util.HashMap<>();
+            java.util.Map<Long, String> productNamesMap = new java.util.HashMap<>();
+            java.util.Map<Long, Products> productsMap = new java.util.HashMap<>();
+            java.util.Map<Long, String> orderLicenseStatusMap = new java.util.HashMap<>();
+
+            for (Orders order : orders) {
+                List<OrderItems> items = orderItemsRepository.findByOrderId(order.getOrderId());
+                orderItemsMap.put(order.getOrderId(), items);
+
+                // Calculate license status for this order
+                boolean hasActiveLicense = false;
+                try {
+                    var licensesPage = productLicensesRepository.findByOrderId(order.getOrderId(),
+                            org.springframework.data.domain.PageRequest.of(0, 1000));
+                    for (var licenseView : licensesPage.getContent()) {
+                        if (licenseView.getIsActive() != null && licenseView.getIsActive()) {
+                            hasActiveLicense = true;
+                            break;
+                        }
+                    }
+                } catch (Exception ignored) {}
+                orderLicenseStatusMap.put(order.getOrderId(), hasActiveLicense ? "Active" : "Expired");
+
+                for (OrderItems item : items) {
+                    if (item.getProductId() != null) {
+                        productsRepository.findById(item.getProductId()).ifPresent(product -> {
+                            productNamesMap.put(item.getProductId(), product.getName());
+                            productsMap.put(item.getProductId(), product);
+                        });
+                    }
+                }
+            }
+
+            model.addAttribute("orders", orders);
+            model.addAttribute("orderItemsMap", orderItemsMap);
+            model.addAttribute("productNamesMap", productNamesMap);
+            model.addAttribute("productsMap", productsMap);
+            model.addAttribute("orderLicenseStatusMap", orderLicenseStatusMap);
+            model.addAttribute("page", ordersPage.getNumber());
+            model.addAttribute("totalPages", ordersPage.getTotalPages());
+            model.addAttribute("size", ordersPage.getSize());
+            model.addAttribute("user", currentUser);
+            model.addAttribute("search", search);
+            model.addAttribute("status", status);
+            model.addAttribute("sort", sort);
+            model.addAttribute("dateFilter", dateFilter);
+
+            try {
+                model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+                model.addAttribute("cartItemCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+            } catch (Exception ignored) {}
+
+            return "customer/orderhistory";
         } catch (Exception e) {
             e.printStackTrace();
             return "redirect:/customer/dashboard?error=orderhistory_error";

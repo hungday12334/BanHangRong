@@ -25,4 +25,7 @@ public interface CategoriesProductsRepository extends JpaRepository<CategoriesPr
     @Transactional
     @Query("DELETE FROM CategoriesProducts cp WHERE cp.product.productId = :productId")
     int deleteByProductId(@Param("productId") Long productId);
+
+    @Query("SELECT COUNT(cp) FROM CategoriesProducts cp WHERE cp.product.productId = :productId")
+    int countByProductId(@Param("productId") Long productId);
 }

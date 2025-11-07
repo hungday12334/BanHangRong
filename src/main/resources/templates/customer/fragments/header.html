@@ -231,9 +231,7 @@
 		<a href="/customer/dashboard" class="brand">BanHangRong</a>
 		<nav class="nav" aria-label="Main">
 			<a href="/customer/dashboard">Home</a>
-			<a href="/categories">Category</a>
-			<a href="#">License Software</a>
-			<a href="#">Game Keys</a>
+			<a href="/customer/categories">Category</a>
 			<a href="/vouchers">Voucher</a>
 			<a href="/customer/chat" style="position: relative;">
 				💬 Chat
@@ -284,12 +282,12 @@
 				</form>
 			</div>
 			<div class="search">
-				<form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
+				<form method="GET" action="/products" style="display:flex;gap:4px;">
 					<input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
 						style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
 					<button type="submit"
 						style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-					<a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
+					<a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/products}"
 						style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
 				</form>
 			</div>

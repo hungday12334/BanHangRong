@@ -43,20 +43,10 @@ public class CustomerVouchersController {
     }
 
     @GetMapping("/vouchers")
-    public Object vouchers(Model model,
+    public String vouchers(Model model,
                            @org.springframework.web.bind.annotation.RequestParam(name = "q", required = false) String q,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "from", required = false) String from,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "to", required = false) String to,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "expire", required = false) String expire,
                            @org.springframework.web.bind.annotation.RequestParam(name = "productId", required = false) Long productIdFilter,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "type", required = false) String discountType,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "minValue", required = false) java.math.BigDecimal minValue,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "maxValue", required = false) java.math.BigDecimal maxValue,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "minOrderMin", required = false) java.math.BigDecimal minOrderMin,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "minOrderMax", required = false) java.math.BigDecimal minOrderMax,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "minRemaining", required = false) Integer minRemaining,
-                           @org.springframework.web.bind.annotation.RequestParam(name = "export", required = false) String export
-                           ) {
+                           @org.springframework.web.bind.annotation.RequestParam(name = "type", required = false) String discountType) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Users user = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -118,19 +108,7 @@ public class CustomerVouchersController {
             model.addAttribute("walletVouchers", wallet);
         } catch (Exception ignored) {}
 
-        // Build customer-facing vouchers list with filters (no user/order columns)
-        java.time.LocalDate fromDate = null;
-        java.time.LocalDate toDate = null;
-        try { if (from != null && !from.isBlank()) fromDate = java.time.LocalDate.parse(from.trim()); } catch (Exception ignored) {}
-        try { if (to != null && !to.isBlank()) toDate = java.time.LocalDate.parse(to.trim()); } catch (Exception ignored) {}
-        // If a single expire date is provided, use it for both from/to (exact match day)
-        try {
-            if (expire != null && !expire.isBlank()) {
-                java.time.LocalDate d = java.time.LocalDate.parse(expire.trim());
-                fromDate = d; toDate = d;
-            }
-        } catch (Exception ignored) {}
-
+        // Build customer-facing vouchers list with simple filters
         java.util.List<java.util.Map<String,Object>> tx = new java.util.ArrayList<>();
         try {
             java.util.List<Vouchers> allV = vouchersRepository.findAll();
@@ -138,18 +116,14 @@ public class CustomerVouchersController {
                 if (v == null) continue;
                 if (v.getStatus() != null && !"active".equalsIgnoreCase(v.getStatus())) continue;
                 if (v.getEndAt() != null && v.getEndAt().isBefore(java.time.LocalDateTime.now())) continue;
+                
+                // Simple filters
                 if (q != null && !q.isBlank()) {
                     String code = v.getCode() == null ? "" : v.getCode();
                     if (!code.toLowerCase().contains(q.trim().toLowerCase())) continue;
                 }
                 if (productIdFilter != null && !java.util.Objects.equals(v.getProductId(), productIdFilter)) continue;
                 if (discountType != null && !discountType.isBlank() && v.getDiscountType() != null && !v.getDiscountType().equalsIgnoreCase(discountType.trim())) continue;
-                if (minValue != null && v.getDiscountValue() != null && v.getDiscountValue().compareTo(minValue) < 0) continue;
-                if (maxValue != null && v.getDiscountValue() != null && v.getDiscountValue().compareTo(maxValue) > 0) continue;
-                if (minOrderMin != null && v.getMinOrder() != null && v.getMinOrder().compareTo(minOrderMin) < 0) continue;
-                if (minOrderMax != null && v.getMinOrder() != null && v.getMinOrder().compareTo(minOrderMax) > 0) continue;
-                if (fromDate != null && v.getEndAt() != null && v.getEndAt().toLocalDate().isBefore(fromDate)) continue;
-                if (toDate != null && v.getEndAt() != null && v.getEndAt().toLocalDate().isAfter(toDate)) continue;
 
                 int remaining = -1;
                 try {
@@ -157,12 +131,12 @@ public class CustomerVouchersController {
                     int used = v.getUsedCount() != null ? v.getUsedCount() : 0;
                     remaining = (max != null) ? Math.max(0, max - used) : -1;
                 } catch (Exception ignored) {}
-                if (minRemaining != null) {
-                    int remCheck = remaining < 0 ? Integer.MAX_VALUE : remaining;
-                    if (remCheck < minRemaining) continue;
-                }
 
-                Products prod = null; try { prod = productsRepository.findById(v.getProductId()).orElse(null); } catch (Exception ignored) {}
+                Products prod = null; 
+                try { 
+                    prod = productsRepository.findById(v.getProductId()).orElse(null); 
+                } catch (Exception ignored) {}
+                
                 java.util.Map<String,Object> row = new java.util.LinkedHashMap<>();
                 row.put("createdAt", v.getUpdatedAt() != null ? v.getUpdatedAt() : v.getCreatedAt());
                 row.put("code", v.getCode());
@@ -178,55 +152,20 @@ public class CustomerVouchersController {
             tx.sort((a,b) -> {
                 java.time.LocalDateTime da = (java.time.LocalDateTime) a.get("createdAt");
                 java.time.LocalDateTime db = (java.time.LocalDateTime) b.get("createdAt");
-                if (da == null && db == null) return 0; if (da == null) return 1; if (db == null) return -1;
+                if (da == null && db == null) return 0; 
+                if (da == null) return 1; 
+                if (db == null) return -1;
                 return db.compareTo(da);
             });
         } catch (Exception ignored) {}
-
-        if ("csv".equalsIgnoreCase(export)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Date,Code,Product,DiscountType,Value,MinOrder,ValidTo,Remaining\n");
-            for (java.util.Map<String,Object> r : tx) {
-                String date = java.util.Objects.toString(r.get("createdAt"), "");
-                String code = java.util.Objects.toString(r.get("code"), "");
-                String prod = java.util.Objects.toString(r.get("productName"), "");
-                String discountTypeCsv = java.util.Objects.toString(r.get("discountType"), "");
-                String value = java.util.Objects.toString(r.get("voucherValue"), "");
-                String minOrderCsv = java.util.Objects.toString(r.get("minOrder"), "");
-                String validTo = java.util.Objects.toString(r.get("endAt"), "");
-                String remaining = java.util.Objects.toString(r.get("remaining"), "");
-                sb.append(String.join(",",
-                        date.replace(","," "),
-                        code.replace(","," "),
-                        prod.replace(","," "),
-                        discountTypeCsv,
-                        value,
-                        minOrderCsv,
-                        validTo.replace(","," "),
-                        remaining)).append("\n");
-            }
-            return org.springframework.http.ResponseEntity
-                    .ok()
-                    .header("Content-Type", "text/csv; charset=UTF-8")
-                    .header("Content-Disposition", "attachment; filename=voucher_transactions.csv")
-                    .body(sb.toString());
-        }
 
         // Limit to 200 for UI
         if (tx.size() > 200) tx = tx.subList(0, 200);
         model.addAttribute("transactions", tx);
         java.util.Map<String,Object> filtersMap = new java.util.LinkedHashMap<>();
         if (q != null) filtersMap.put("q", q);
-        if (from != null) filtersMap.put("from", from);
-        if (to != null) filtersMap.put("to", to);
-        if (expire != null) filtersMap.put("expire", expire);
         if (productIdFilter != null) filtersMap.put("productId", productIdFilter);
         if (discountType != null) filtersMap.put("type", discountType);
-        if (minValue != null) filtersMap.put("minValue", minValue);
-        if (maxValue != null) filtersMap.put("maxValue", maxValue);
-        if (minOrderMin != null) filtersMap.put("minOrderMin", minOrderMin);
-        if (minOrderMax != null) filtersMap.put("minOrderMax", minOrderMax);
-        if (minRemaining != null) filtersMap.put("minRemaining", minRemaining);
         model.addAttribute("filters", filtersMap);
         return "customer/vouchers";
     }

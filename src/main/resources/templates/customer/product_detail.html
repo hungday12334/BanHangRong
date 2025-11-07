@@ -8,8 +8,6 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/styles.min.css">
-	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
-	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
 	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
 	<style>
 		:root {
@@ -167,7 +165,7 @@
 						<input type="number" name="quantity" min="1" value="1" th:attr="max=${product.quantity}"
 							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
 					<button class="btn primary" type="submit"
-						th:disabled="${product.quantity == null or product.quantity <= 0}">Add to Cart</button>
+						th:disabled="${product.quantity == null or product.quantity <= 0 or product.status == null or (!#strings.equalsIgnoreCase(product.status, 'Public'))}">Add to Cart</button>
 					<a th:if="${product.sellerId != null}"
 					   th:href="@{/customer/chat(sellerId=${product.sellerId},productId=${product.productId},productName=${product.name},productPrice=${product.salePrice != null ? product.salePrice : product.price})}"
 					   class="btn"

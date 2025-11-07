@@ -43,6 +43,143 @@
             flex-direction: column;
         }
 
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--line);
+            background: var(--card);
+            flex-wrap: nowrap;
+        }
+
+        .brand {
+            font-weight: 800;
+            letter-spacing: .2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand:hover {
+            color: var(--brand);
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            margin: 0 12px;
+            flex: 1;
+            overflow: auto;
+            white-space: nowrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #111827;
+            font-weight: 500;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+
+        .nav a:hover {
+            background: #f3f4f6;
+        }
+
+        .top-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            flex-wrap: nowrap;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #111827;
+            border: 1px solid var(--line);
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #fff
+        }
+
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: 48px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+            width: 200px;
+            display: none;
+            z-index: 5
+        }
+
+        .user-menu .item {
+            display: block;
+            padding: 10px 12px;
+            color: #111827;
+            text-decoration: none
+        }
+
+        .user-menu .item:hover {
+            background: #f3f4f6
+        }
+
+        .search {
+            position: relative;
+        }
+
+        .search input {
+            height: 34px;
+            width: 220px;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .cart {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            text-decoration: none;
+            color: #111827;
+        }
+
+        .cart .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #fff;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
         .card {
             max-width: 1000px;
             margin: 18px auto;
@@ -158,6 +295,7 @@
     <div class="wrapper">
         <div th:replace="~{customer/fragments/header :: header}"></div>
 
+
         <div class="layout">
             <aside class="sidebar" aria-label="Profile navigation">
                 <div class="title">My Account</div>
@@ -255,6 +393,43 @@
             </section>
         </div>
     </div>
+    
+    <script>
+        // User menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+
+        // VNPay topup function
+        function topupPrompt(e) {
+            e.preventDefault();
+            const v = prompt('Enter amount to top up (VND):', '200000');
+            if (!v) return false;
+            const clean = v.replace(/[^0-9]/g, '');
+            if (!clean) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+            document.getElementById('topupAmountInput').value = clean;
+            e.target.submit();
+            return true;
+        }
+    </script>
 </body>
 
 </html>

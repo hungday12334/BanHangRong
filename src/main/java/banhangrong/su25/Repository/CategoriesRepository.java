@@ -28,7 +28,7 @@ public interface CategoriesRepository extends JpaRepository<Categories, Long> {
     @Query("SELECT c FROM Categories c ORDER BY c.name ASC")
     List<Categories> findAllOrderByNameAsc();
 
-    // Tìm categories có ít nhất một product public
+
     @Query("SELECT c FROM Categories c WHERE EXISTS (SELECT 1 FROM Products p WHERE LOWER(p.status) = LOWER('Public') AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = c.categoryId)) ORDER BY c.name ASC")
     List<Categories> findCategoriesWithPublicProducts();
 }

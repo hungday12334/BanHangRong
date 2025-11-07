@@ -21,8 +21,7 @@ public class CustomerProductsController {
     private final CustomerDashboardService customerDashboardService;
     private final CategoryViewService categoryViewService;
 
-    public CustomerProductsController(CustomerDashboardService customerDashboardService,
-                                      CategoryViewService categoryViewService) {
+    public CustomerProductsController(CustomerDashboardService customerDashboardService, CategoryViewService categoryViewService) {
         this.customerDashboardService = customerDashboardService;
         this.categoryViewService = categoryViewService;
     }
@@ -40,11 +39,8 @@ public class CustomerProductsController {
             Model model) {
 
         Users currentUser = customerDashboardService.getCurrentUserOrNull();
-        
-        if (currentUser != null) {
-            if (!customerDashboardService.isCustomerEmailVerified(currentUser)) {
-                return "redirect:/verify-email-required";
-            }
+        if (currentUser != null && !customerDashboardService.isCustomerEmailVerified(currentUser)) {
+            return "redirect:/verify-email-required";
         }
 
         Page<Products> productsPage = customerDashboardService.getFilteredProducts(
@@ -76,5 +72,6 @@ public class CustomerProductsController {
 
         return "customer/products";
     }
+
 }
 
