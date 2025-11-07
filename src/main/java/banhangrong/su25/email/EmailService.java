@@ -71,7 +71,7 @@ public class EmailService {
      */
     public void sendOrderConfirmationEmail(String toEmail, String customerName, String orderCode, 
                                           Long orderId, BigDecimal totalAmount, LocalDateTime orderDate,
-                                          List<OrderItemInfo> orderItems) {
+                                          List<OrderItemInfo> orderItems, List<LicenseKeyInfo> licenseKeys) {
         String subject = "Xác nhận đơn hàng thành công - " + orderCode;
         
         // Format số tiền
@@ -98,6 +98,10 @@ public class EmailService {
                     .order-item { padding: 10px; border-bottom: 1px solid #eee; }
                     .order-item:last-child { border-bottom: none; }
                     .total { font-size: 18px; font-weight: bold; color: #0ea5e9; margin-top: 15px; }
+                    .license-section { background: #f0fdf4; border: 2px solid #10b981; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                    .license-item { background: white; padding: 12px; margin: 8px 0; border-radius: 6px; border-left: 4px solid #10b981; }
+                    .license-key { font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #059669; word-break: break-all; }
+                    .license-product { font-weight: 600; color: #111827; margin-bottom: 4px; }
                     .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
                 </style>
             </head>
@@ -134,7 +138,44 @@ public class EmailService {
                                 <p>Tổng tiền: %s</p>
                             </div>
                         </div>
-                        
+            """, formattedAmount));
+        
+        // Thêm phần license keys nếu có
+        if (licenseKeys != null && !licenseKeys.isEmpty()) {
+            htmlBody.append("""
+                        <div class="license-section">
+                            <h2 style="color: #059669; margin-top: 0;">🔑 License Keys của bạn</h2>
+                            <p style="margin-bottom: 15px;">Dưới đây là các license keys cho đơn hàng của bạn:</p>
+            """);
+            
+            int sequenceNumber = 1;
+            for (LicenseKeyInfo license : licenseKeys) {
+                htmlBody.append(String.format("""
+                            <div class="license-item">
+                                <div class="license-product">%d. %s</div>
+                                <div class="license-key">%s</div>
+                                <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                                    Trạng thái: <span style="color: %s; font-weight: 600;">%s</span>
+                                </div>
+                            </div>
+                """, 
+                    sequenceNumber++,
+                    license.getProductName() != null ? license.getProductName() : "Product",
+                    license.getLicenseKey(),
+                    license.getIsActive() ? "#059669" : "#dc2626",
+                    license.getIsActive() ? "Active" : "Inactive"
+                ));
+            }
+            
+            htmlBody.append("""
+                            <p style="margin-top: 15px; font-size: 14px; color: #374151;">
+                                <strong>Lưu ý:</strong> Vui lòng lưu lại các license keys này. Bạn có thể xem lại chúng trong trang "Orders History" của tài khoản.
+                            </p>
+                        </div>
+            """);
+        }
+        
+        htmlBody.append("""
                         <p>Đơn hàng của bạn đã được xử lý thành công. Chúng tôi sẽ gửi thông tin chi tiết về việc giao hàng trong thời gian sớm nhất.</p>
                         
                         <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email: <a href="mailto:bonhoangncd@gmail.com">bonhoangncd@gmail.com</a></p>
@@ -147,7 +188,7 @@ public class EmailService {
                 </div>
             </body>
             </html>
-            """, formattedAmount));
+            """);
         
         Email email = new Email(toEmail, subject, htmlBody.toString());
         // Gửi email HTML
@@ -209,5 +250,24 @@ public class EmailService {
         public String getProductName() { return productName; }
         public Integer getQuantity() { return quantity; }
         public BigDecimal getPrice() { return price; }
+    }
+    
+    /**
+     * Class để chứa thông tin license key
+     */
+    public static class LicenseKeyInfo {
+        private String licenseKey;
+        private String productName;
+        private Boolean isActive;
+        
+        public LicenseKeyInfo(String licenseKey, String productName, Boolean isActive) {
+            this.licenseKey = licenseKey;
+            this.productName = productName;
+            this.isActive = isActive;
+        }
+        
+        public String getLicenseKey() { return licenseKey; }
+        public String getProductName() { return productName; }
+        public Boolean getIsActive() { return isActive; }
     }
 }

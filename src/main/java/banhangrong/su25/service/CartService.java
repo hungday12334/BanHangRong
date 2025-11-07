@@ -3,6 +3,9 @@ package banhangrong.su25.service;
 import banhangrong.su25.Entity.*;
 import banhangrong.su25.Repository.*;
 import banhangrong.su25.email.EmailService;
+import banhangrong.su25.Entity.ProductLicenses;
+import banhangrong.su25.Repository.ProductLicensesRepository;
+import banhangrong.su25.service.LicenseUsageLogService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -10,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -25,6 +30,8 @@ public class CartService {
     private final VoucherRedemptionsRepository voucherRedemptionsRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final ProductLicensesRepository productLicensesRepository;
+    private final LicenseUsageLogService licenseUsageLogService;
 
     public CartService(ShoppingCartRepository cartRepository,
                        ProductsRepository productsRepository,
@@ -35,7 +42,9 @@ public class CartService {
                        VouchersRepository vouchersRepository,
                        VoucherRedemptionsRepository voucherRedemptionsRepository,
                        NotificationService notificationService,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       ProductLicensesRepository productLicensesRepository,
+                       LicenseUsageLogService licenseUsageLogService) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
@@ -46,6 +55,8 @@ public class CartService {
         this.voucherRedemptionsRepository = voucherRedemptionsRepository;
         this.notificationService = notificationService;
         this.emailService = emailService;
+        this.productLicensesRepository = productLicensesRepository;
+        this.licenseUsageLogService = licenseUsageLogService;
     }
 
     public Users getCurrentUserOrNull() {
@@ -156,7 +167,7 @@ public class CartService {
         var existing = cartRepository.findByUserIdAndProductId(getCurrentUserIdOrFallback(), productId);
         Long userId = getCurrentUserIdOrFallback();
         boolean isNewItem = false;
-        
+
         if (existing.isPresent()) {
             ShoppingCart it = existing.get();
             int current = it.getQuantity() == null ? 0 : it.getQuantity();
@@ -172,7 +183,7 @@ public class CartService {
             cartRepository.save(item);
             isNewItem = true;
         }
-        
+
         // Gửi thông báo khi thêm vào giỏ hàng (chỉ khi thêm mới, không phải cập nhật số lượng)
         if (isNewItem) {
             try {
@@ -254,14 +265,8 @@ public class CartService {
         order.setSellerId(1L);
         Orders savedOrder = ordersRepository.save(order);
 
-        // Gửi thông báo đặt hàng thành công
-        try {
-            String orderCode = "ORD" + savedOrder.getOrderId();
-            notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
-        } catch (Exception e) {
-            System.err.println("[CartService] Failed to send notification: " + e.getMessage());
-        }
-
+        // Save order items and keep a map for later license generation
+        java.util.Map<Long, OrderItems> savedItemsByProduct = new java.util.HashMap<>();
         for (ShoppingCart it : items) {
             Products product = productsRepository.findById(it.getProductId()).orElse(null);
             if (product != null) {
@@ -271,10 +276,13 @@ public class CartService {
                 orderItem.setQuantity(it.getQuantity());
                 orderItem.setPriceAtTime(product.getSalePrice() != null ? product.getSalePrice() : product.getPrice());
                 orderItem.setCreatedAt(LocalDateTime.now());
-                orderItemsRepository.save(orderItem);
+                OrderItems savedItem = orderItemsRepository.save(orderItem);
+                savedItemsByProduct.put(savedItem.getProductId(), savedItem);
             }
         }
 
+        // Update stock and generate licenses equal to the actual purchased quantity (buy)
+        java.util.List<ProductLicenses> toInsert = new java.util.ArrayList<>();
         for (ShoppingCart it : items) {
             productsRepository.findById(it.getProductId()).ifPresent(p -> {
                 int stock = p.getQuantity() != null ? p.getQuantity() : 0;
@@ -285,26 +293,66 @@ public class CartService {
                     Integer sold = p.getTotalSales();
                     p.setTotalSales((sold != null ? sold : 0) + buy);
                     productsRepository.save(p);
+
+                    // Create licenses for this order item
+                    OrderItems savedItem = savedItemsByProduct.get(p.getProductId());
+                    if (savedItem != null) {
+                        LocalDateTime nowTs = LocalDateTime.now();
+                        String expStr = LocalDate.now().plusDays(30).format(DateTimeFormatter.BASIC_ISO_DATE);
+                        for (int i = 0; i < buy; i++) {
+                            String random = java.util.UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12).toUpperCase();
+                            String key = "PRD" + p.getProductId() + '-' + expStr + '-' + random;
+                            ProductLicenses lic = new ProductLicenses();
+                            lic.setOrderItemId(savedItem.getOrderItemId());
+                            lic.setUserId(uid);
+                            lic.setLicenseKey(key);
+                            lic.setIsActive(true);
+                            lic.setActivationDate(null);
+                            lic.setLastUsedDate(null);
+                            lic.setDeviceIdentifier(null);
+                            lic.setCreatedAt(nowTs);
+                            lic.setUpdatedAt(nowTs);
+                            toInsert.add(lic);
+                        }
+                    }
                 }
             });
+        }
+
+        if (!toInsert.isEmpty()) {
+            var savedList = productLicensesRepository.saveAll(toInsert);
+            // Append usage logs (best-effort, ignore failures)
+            try {
+                for (ProductLicenses lic : savedList) {
+                    try { licenseUsageLogService.append(lic.getLicenseId(), "generated", lic.getUserId(), null, null, null); } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {}
         }
 
         for (ShoppingCart it : items) {
             try { cartRepository.delete(it); } catch (Exception ignored) {}
         }
 
-        // Gửi email xác nhận đơn hàng
+        // Gửi thông báo đặt hàng thành công
         try {
             String orderCode = "ORD" + savedOrder.getOrderId();
-            String customerName = user.getFullName() != null && !user.getFullName().isEmpty() 
+            notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
+        } catch (Exception e) {
+            System.err.println("[CartService] Failed to send notification: " + e.getMessage());
+        }
+
+        // Gửi email xác nhận đơn hàng với license keys
+        try {
+            String orderCode = "ORD" + savedOrder.getOrderId();
+            String customerName = user.getFullName() != null && !user.getFullName().isEmpty()
                 ? user.getFullName() : user.getUsername();
             String customerEmail = user.getEmail();
-            
+
             if (customerEmail != null && !customerEmail.isEmpty()) {
                 // Lấy danh sách order items để gửi email
                 List<OrderItems> orderItemsList = orderItemsRepository.findByOrderId(savedOrder.getOrderId());
                 List<EmailService.OrderItemInfo> emailOrderItems = new ArrayList<>();
-                
+
                 for (OrderItems orderItem : orderItemsList) {
                     Products product = productsRepository.findById(orderItem.getProductId()).orElse(null);
                     if (product != null) {
@@ -315,7 +363,33 @@ public class CartService {
                         ));
                     }
                 }
-                
+
+                // Lấy license keys cho email
+                java.util.List<EmailService.LicenseKeyInfo> emailLicenseKeys = new ArrayList<>();
+                try {
+                    org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
+                    var licensesPage = productLicensesRepository.findByOrderId(savedOrder.getOrderId(), pageable);
+                    for (var licenseView : licensesPage.getContent()) {
+                        String productName = null;
+                        if (licenseView.getOrderItemId() != null) {
+                            var orderItemOpt = orderItemsRepository.findById(licenseView.getOrderItemId());
+                            if (orderItemOpt.isPresent()) {
+                                var productOpt = productsRepository.findById(orderItemOpt.get().getProductId());
+                                if (productOpt.isPresent()) {
+                                    productName = productOpt.get().getName();
+                                }
+                            }
+                        }
+                        emailLicenseKeys.add(new EmailService.LicenseKeyInfo(
+                            licenseView.getLicenseKey(),
+                            productName != null ? productName : (licenseView.getProductName() != null ? licenseView.getProductName() : "Product"),
+                            licenseView.getIsActive()
+                        ));
+                    }
+                } catch (Exception e) {
+                    System.err.println("[CartService] Failed to load license keys for email: " + e.getMessage());
+                }
+
                 emailService.sendOrderConfirmationEmail(
                     customerEmail,
                     customerName,
@@ -323,7 +397,8 @@ public class CartService {
                     savedOrder.getOrderId(),
                     savedOrder.getTotalAmount(),
                     savedOrder.getCreatedAt(),
-                    emailOrderItems
+                    emailOrderItems,
+                    emailLicenseKeys
                 );
                 System.out.println("[CartService] Order confirmation email sent to: " + customerEmail);
             }

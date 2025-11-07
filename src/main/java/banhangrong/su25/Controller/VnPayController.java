@@ -11,6 +11,9 @@ import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
 import banhangrong.su25.service.NotificationService;
+import banhangrong.su25.service.LicenseUsageLogService;
+import banhangrong.su25.Entity.ProductLicenses;
+import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.email.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -25,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import banhangrong.su25.Entity.Products;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -44,6 +49,8 @@ public class VnPayController {
     private final UsersRepository usersRepository;
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
+    private final ProductLicensesRepository productLicensesRepository;
+    private final LicenseUsageLogService licenseUsageLogService;
     
     @Autowired
     private NotificationService notificationService;
@@ -54,12 +61,14 @@ public class VnPayController {
     // Deprecated hardcoded values; kept for reference. Use VnPayConfig instead.
     // legacy constants removed; use values from VnPayConfig
 
-    public VnPayController(ShoppingCartRepository cartRepository, ProductsRepository productsRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository) {
+    public VnPayController(ShoppingCartRepository cartRepository, ProductsRepository productsRepository, UsersRepository usersRepository, OrdersRepository ordersRepository, OrderItemsRepository orderItemsRepository, ProductLicensesRepository productLicensesRepository, LicenseUsageLogService licenseUsageLogService) {
         this.cartRepository = cartRepository;
         this.productsRepository = productsRepository;
         this.usersRepository = usersRepository;
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
+        this.productLicensesRepository = productLicensesRepository;
+        this.licenseUsageLogService = licenseUsageLogService;
     }
 
     // Optional: VNPay IPN endpoint for server-to-server confirmation
@@ -413,15 +422,8 @@ public class VnPayController {
                     Orders savedOrder = ordersRepository.save(order);
                     System.out.println("[VNPay] Created order: " + savedOrder.getOrderId());
                     
-                    // Gửi thông báo đặt hàng thành công
-                    try {
-                        String orderCode = "ORD" + savedOrder.getOrderId();
-                        notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
-                    } catch (Exception e) {
-                        System.err.println("[VNPay] Failed to send notification: " + e.getMessage());
-                    }
-                    
-                    // Create order items
+                    // Create order items and keep for license generation
+                    java.util.Map<Long, OrderItems> savedItemsByProduct = new java.util.HashMap<>();
                     for (ShoppingCart it : items) {
                         Products product = productsRepository.findById(it.getProductId()).orElse(null);
                         if (product != null) {
@@ -431,12 +433,14 @@ public class VnPayController {
                             orderItem.setQuantity(it.getQuantity());
                             orderItem.setPriceAtTime(product.getSalePrice() != null ? product.getSalePrice() : product.getPrice());
                             orderItem.setCreatedAt(LocalDateTime.now());
-                            orderItemsRepository.save(orderItem);
+                            OrderItems savedItem = orderItemsRepository.save(orderItem);
+                            savedItemsByProduct.put(savedItem.getProductId(), savedItem);
                             System.out.println("[VNPay] Created order item: " + orderItem.getOrderItemId());
                         }
                     }
                     
-                    // Update product stock and sales
+                    // Update product stock and sales, and generate license keys for actual purchased quantity
+                    java.util.List<ProductLicenses> toInsert = new java.util.ArrayList<>();
                     for (ShoppingCart it : items) {
                         productsRepository.findById(it.getProductId()).ifPresent(p -> {
                             int stock = p.getQuantity() != null ? p.getQuantity() : 0;
@@ -447,8 +451,38 @@ public class VnPayController {
                                 Integer sold = p.getTotalSales();
                                 p.setTotalSales((sold != null ? sold : 0) + buy);
                                 productsRepository.save(p);
+
+                                OrderItems savedItem = savedItemsByProduct.get(p.getProductId());
+                                if (savedItem != null) {
+                                    LocalDateTime nowTs = LocalDateTime.now();
+                                    String expStr = LocalDate.now().plusDays(30).format(DateTimeFormatter.BASIC_ISO_DATE);
+                                    for (int i = 0; i < buy; i++) {
+                                        String random = java.util.UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12).toUpperCase();
+                                        String key = "PRD" + p.getProductId() + '-' + expStr + '-' + random;
+                                        ProductLicenses lic = new ProductLicenses();
+                                        lic.setOrderItemId(savedItem.getOrderItemId());
+                                        lic.setUserId(uid);
+                                        lic.setLicenseKey(key);
+                                        lic.setIsActive(true);
+                                        lic.setActivationDate(null);
+                                        lic.setLastUsedDate(null);
+                                        lic.setDeviceIdentifier(null);
+                                        lic.setCreatedAt(nowTs);
+                                        lic.setUpdatedAt(nowTs);
+                                        toInsert.add(lic);
+                                    }
+                                }
                             }
                         });
+                    }
+
+                    if (!toInsert.isEmpty()) {
+                        var savedLicenses = productLicensesRepository.saveAll(toInsert);
+                        try {
+                            for (ProductLicenses lic : savedLicenses) {
+                                try { licenseUsageLogService.append(lic.getLicenseId(), "generated", lic.getUserId(), null, null, null); } catch (Exception ignored) {}
+                            }
+                        } catch (Exception ignored) {}
                     }
                     
                     // Clear cart
@@ -456,7 +490,15 @@ public class VnPayController {
                         try { cartRepository.delete(it); } catch (Exception ignored) {} 
                     }
                     
-                    // Gửi email xác nhận đơn hàng
+                    // Gửi thông báo đặt hàng thành công
+                    try {
+                        String orderCode = "ORD" + savedOrder.getOrderId();
+                        notificationService.createOrderNotification(uid, savedOrder.getOrderId(), orderCode);
+                    } catch (Exception e) {
+                        System.err.println("[VNPay] Failed to send notification: " + e.getMessage());
+                    }
+                    
+                    // Gửi email xác nhận đơn hàng với license keys
                     try {
                         String orderCode = "ORD" + savedOrder.getOrderId();
                         String customerName = user.getFullName() != null && !user.getFullName().isEmpty() 
@@ -479,6 +521,32 @@ public class VnPayController {
                                 }
                             }
                             
+                            // Lấy license keys cho email
+                            java.util.List<EmailService.LicenseKeyInfo> emailLicenseKeys = new ArrayList<>();
+                            try {
+                                org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
+                                var licensesPage = productLicensesRepository.findByOrderId(savedOrder.getOrderId(), pageable);
+                                for (var licenseView : licensesPage.getContent()) {
+                                    String productName = null;
+                                    if (licenseView.getOrderItemId() != null) {
+                                        var orderItemOpt = orderItemsRepository.findById(licenseView.getOrderItemId());
+                                        if (orderItemOpt.isPresent()) {
+                                            var productOpt = productsRepository.findById(orderItemOpt.get().getProductId());
+                                            if (productOpt.isPresent()) {
+                                                productName = productOpt.get().getName();
+                                            }
+                                        }
+                                    }
+                                    emailLicenseKeys.add(new EmailService.LicenseKeyInfo(
+                                        licenseView.getLicenseKey(),
+                                        productName != null ? productName : (licenseView.getProductName() != null ? licenseView.getProductName() : "Product"),
+                                        licenseView.getIsActive()
+                                    ));
+                                }
+                            } catch (Exception e) {
+                                System.err.println("[VNPay] Failed to load license keys for email: " + e.getMessage());
+                            }
+                            
                             emailService.sendOrderConfirmationEmail(
                                 customerEmail,
                                 customerName,
@@ -486,7 +554,8 @@ public class VnPayController {
                                 savedOrder.getOrderId(),
                                 savedOrder.getTotalAmount(),
                                 savedOrder.getCreatedAt(),
-                                emailOrderItems
+                                emailOrderItems,
+                                emailLicenseKeys
                             );
                             System.out.println("[VNPay] Order confirmation email sent to: " + customerEmail);
                         }

@@ -48,108 +48,7 @@
             flex-direction: column;
         }
 
-        /* Enhanced topbar with better spacing and shadow */
-        .topbar {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--line);
-            background: var(--card);
-            flex-wrap: nowrap;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        }
-
-        .brand {
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            font-size: 18px;
-            color: var(--brand);
-            white-space: nowrap;
-        }
-
-        .nav {
-            display: flex;
-            gap: 8px;
-            margin: 0 12px;
-            flex: 1;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: #111827;
-            font-weight: 500;
-            font-size: 14px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .nav a:hover {
-            background: #f3f4f6;
-            color: var(--brand);
-        }
-
-        .top-actions {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            color: #111827;
-            border: 1px solid var(--line);
-            padding: 8px 12px;
-            border-radius: 6px;
-            background: #fff;
-            white-space: nowrap;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .user-btn:hover {
-            border-color: var(--brand);
-            background: #f0f9ff;
-        }
-
-        .wallet-badge {
-            margin-left: 4px;
-            padding: 4px 8px;
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            border-radius: 4px;
-            font-weight: 600;
-            color: #0369a1;
-            font-size: 12px;
-        }
-
-        .cart {
-            position: relative;
-            width: 36px;
-            height: 36px;
-            display: grid;
-            place-items: center;
-            border: 1px solid var(--line);
-            border-radius: 6px;
-            text-decoration: none;
-            color: #111827;
-            font-size: 18px;
-            transition: all 0.2s;
-        }
-
-        .cart:hover {
-            border-color: var(--brand);
-            background: #f0f9ff;
-        }
-
-        /* Improved chat page layout with proper flex */
+        /* Loader Styles */
         .chat-page {
             padding: 16px;
             flex: 1;
@@ -1374,19 +1273,6 @@
 
         /* Added responsive design for mobile and tablet */
         @media (max-width: 768px) {
-            .topbar {
-                padding: 10px 12px;
-                gap: 8px;
-            }
-
-            .brand {
-                font-size: 16px;
-            }
-
-            .nav {
-                display: none;
-            }
-
             .chat-page {
                 padding: 8px;
             }
@@ -1420,23 +1306,6 @@
 
             .chat-page {
                 padding: 0;
-            }
-
-            .topbar {
-                padding: 8px 10px;
-            }
-
-            .top-actions {
-                gap: 8px;
-            }
-
-            .user-btn {
-                padding: 6px 8px;
-                font-size: 12px;
-            }
-
-            .wallet-badge {
-                display: none;
             }
         }
 
@@ -1781,26 +1650,7 @@
 
 <!-- Customer Header -->
 <div class="wrapper">
-    <div class="topbar">
-        <div class="brand">BanHangRong</div>
-        <nav class="nav">
-            <a href="/customer/dashboard">Home</a>
-            <a href="/categories">Category</a>
-            <a href="/customer/chat" style="font-weight: 600; color: #0ea5e9;">💬 Chat</a>
-            <a href="/customer/support">Support</a>
-        </nav>
-        <div class="top-actions">
-            <div class="user">
-                <button id="userMenuBtn" class="user-btn" type="button">
-                    <span th:text="${user != null ? user.username : 'User'}">User</span>
-                    <span class="wallet-badge" th:if="${user != null}">
-                        💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
-                    </span>
-                </button>
-            </div>
-            <a href="/cart" class="cart">🛒</a>
-        </div>
-    </div>
+    <div th:replace="~{customer/fragments/header :: header}"></div>
 
     <!-- Chat Content -->
     <div class="chat-page">

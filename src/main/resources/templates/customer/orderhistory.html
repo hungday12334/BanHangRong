@@ -9,7 +9,7 @@
 	<link rel="stylesheet" href="/css/styles.min.css">
 	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
 	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
-<title>History Order - BanHangRong</title>
+<title>Order History - BanHangRong</title>
 	<style>
 :root {
   --bg:#f5f7fb; --card:#ffffff; --line:#e5e7eb;
@@ -236,6 +236,19 @@ body {
         .rate-btn {
   background:#ef4444;color:#fff;border:1px solid #ef4444;
   border-radius:8px;padding:8px 14px;
+}
+.license-key-btn {
+  background: #0ea5e9;
+  color: #fff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.license-key-btn:hover {
+  background: #0284c7;
+  border-color: #0284c7;
 }
 .contact-btn, .buy-again-btn {
   border:1px solid var(--line);
@@ -718,73 +731,10 @@ body {
 </head>
 <body>
 	<div class="wrapper">
-		<!-- Header từ layout chung -->
-        <div class="topbar">
-            <a href="/customer/dashboard" class="brand">
-                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
-                BanHangRong
-            </a>
-            <nav class="nav" aria-label="Main">
-                <a href="/customer/dashboard">Home</a>
-                <a href="/categories">Category</a>
-                <a href="#">License Software</a>
-                <a href="#">Game Keys</a>
-                <a href="#">Voucher</a>
-                <a href="/customer/support">Support</a>
-            </nav>
-            <div class="top-actions">
-                <a href="/customer/notifications" class="notification-link" style="position:relative;font-size:20px;color:#6b7280;text-decoration:none;padding:6px 8px;border-radius:8px;transition:all 0.2s;" title="Notifications">ðŸ””<span th:if="${unreadCount != null and unreadCount > 0}" class="notification-badge" th:text="${unreadCount}" style="position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:10px;padding:2px 5px;border-radius:10px;font-weight:700;min-width:16px;text-align:center;">0</span></a>
-                <div class="user" style="position:relative">
-                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
-                        <span class="wallet-badge" th:if="${user != null}">
-                            💰 <span th:text="${user != null and user.balance != null ? #numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}">0₫</span>
-                        </span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </button>
-                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
-                        <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
-                        <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
-                        <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
-                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
-                            style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
-                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-                                th:value="${_csrf.token}" />
-                            <input type="hidden" name="amount" id="topupAmountInput" />
-                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
-                                (VNPay)</button>
-                        </form>
-                        <a class="item" href="/orderhistory" role="menuitem">My Orders</a>
-                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
-                            style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
-                            Become a Seller</a>
-                        <a class="item" href="#" role="menuitem"
-                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
-                    </div>
-                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
-                    </form>
-                </div>
-                <div class="search">
-                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
-                        <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
-                            style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
-                        <button type="submit"
-                            style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-                        <a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
-                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
-                    </form>
-                </div>
-                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
-                        th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
-            </div>
-        </div>
+		<div th:replace="~{customer/fragments/header :: header}"></div>
 
         <div class="order-history-container">
-                <h1 class="page-title">History Order</h1>
+                <h1 class="page-title">Order History</h1>
 
             <div class="filter-section">
                     <div class="search-box">
@@ -812,8 +762,8 @@ body {
                     </div>
       <div class="tab-buttons">
         <button class="tab-btn" th:class="${status == null or status == '' or status == 'all' ? 'tab-btn active' : 'tab-btn'}">All</button>
-        <button class="tab-btn" th:class="${status == 'completed' ? 'tab-btn active' : 'tab-btn'}">Completed</button>
-        <button class="tab-btn" th:class="${status == 'cancelled' ? 'tab-btn active' : 'tab-btn'}">Cancelled</button>
+        <button class="tab-btn" th:class="${status == 'active' ? 'tab-btn active' : 'tab-btn'}">Active</button>
+        <button class="tab-btn" th:class="${status == 'expired' ? 'tab-btn active' : 'tab-btn'}">Expired</button>
                 </div>
             </div>
 
@@ -827,7 +777,7 @@ body {
                             <button class="action-btn chat-btn">Chat</button>
                             <button class="action-btn view-seller-btn" th:attr="data-seller-id=${order.sellerId}">View seller</button>
                         </div>
-          <div class="status" th:class="${'status ' + order.status.toLowerCase()}" th:text="'Status: ' + ${order.status}">Status: Completed</div>
+          <div class="status" th:class="${'status ' + (orderLicenseStatusMap != null and orderLicenseStatusMap[order.orderId] != null ? orderLicenseStatusMap[order.orderId].toLowerCase() : 'expired')}" th:text="'Status: ' + ${orderLicenseStatusMap != null and orderLicenseStatusMap[order.orderId] != null ? orderLicenseStatusMap[order.orderId] : 'Expired'}">Status: Active</div>
                         </div>
         <!-- Loop through all order items -->
         <div th:each="orderItem : ${orderItemsMap[order.orderId]}" class="product-line" style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line);" th:if="${orderItemsMap[order.orderId] != null and !orderItemsMap[order.orderId].empty}">
@@ -854,7 +804,7 @@ body {
             <!-- Action buttons for each product -->
             <div class="order-actions" style="margin-top: 12px;">
               <button class="rate-btn" th:attr="data-order-item-id=${orderItem.orderItemId}" onclick="openRateModal(this)">Rate</button>
-              <button class="contact-btn" th:attr="data-order-item-id=${orderItem.orderItemId}">License Key</button>
+              <button class="license-key-btn" th:attr="data-order-id=${order.orderId}">License Key</button>
               <button class="buy-again-btn" th:attr="data-product-id=${orderItem.productId}">Buy again</button>
             </div>
           </div>
@@ -958,6 +908,40 @@ body {
             <span th:text="'(' + ${orders.size()} + ' orders on this page)'">(3 orders on this page)</span>
         </div>
     </div>
+        </div>
+    </div>
+
+    <!-- License Keys Modal -->
+    <div id="licenseKeysModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>License Keys</h2>
+                <button class="close-btn" onclick="closeLicenseKeysModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="licenseKeysLoading" style="text-align: center; padding: 20px; color: #6b7280;">
+                    Đang tải license keys...
+                </div>
+                <div id="licenseKeysContent" style="display: none;">
+                    <div id="licenseKeysList" style="margin-bottom: 20px;">
+                        <!-- License keys will be rendered here -->
+                    </div>
+                    <div id="licenseKeysPagination" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 20px;">
+                        <!-- Pagination will be rendered here -->
+                    </div>
+                </div>
+                <div id="licenseKeysEmpty" style="display: none; text-align: center; padding: 40px; color: #6b7280;">
+                    <p>Không có license key nào cho đơn hàng này.</p>
+                </div>
+                <div id="licenseKeysError" style="display: none; text-align: center; padding: 20px; color: #ef4444;">
+                    <p id="licenseKeysErrorMsg">Đã xảy ra lỗi khi tải license keys.</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeLicenseKeysModal()">Close</button>
+            </div>
         </div>
     </div>
 
@@ -1188,26 +1172,6 @@ body {
             }, 300);
         }
 
-        // User dropdown functionality
-        document.getElementById('userMenuBtn').addEventListener('click', function() {
-            const dropdown = document.getElementById('userDropdown');
-            const isExpanded = this.getAttribute('aria-expanded') === 'true';
-            
-            this.setAttribute('aria-expanded', !isExpanded);
-            dropdown.style.display = isExpanded ? 'none' : 'block';
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const userMenu = document.querySelector('.user');
-            const dropdown = document.getElementById('userDropdown');
-            
-            if (!userMenu.contains(event.target)) {
-                dropdown.style.display = 'none';
-                document.getElementById('userMenuBtn').setAttribute('aria-expanded', 'false');
-            }
-        });
-
         // Sort functionality
         document.getElementById('sortSelect').addEventListener('change', function() {
             const sortValue = this.value;
@@ -1234,7 +1198,13 @@ body {
                 // Add active class to clicked button
                 this.classList.add('active');
                 
-      const status = this.textContent.toLowerCase();
+      const btnText = this.textContent.trim().toLowerCase();
+      let status = 'all';
+      if (btnText === 'active') {
+          status = 'active';
+      } else if (btnText === 'expired') {
+          status = 'expired';
+      }
                 filterOrders(status);
             });
         });
@@ -1303,8 +1273,8 @@ body {
                 viewSeller(event.target);
             } else if (event.target.classList.contains('rate-btn')) {
                 openRateModal(event.target);
-            } else if (event.target.classList.contains('contact-btn')) {
-                showNotification('Coming Soon', 'Contact seller functionality coming soon!', 'warning');
+            } else if (event.target.classList.contains('license-key-btn')) {
+                openLicenseKeysModal(event.target);
             } else if (event.target.classList.contains('buy-again-btn')) {
                 buyAgain(event.target);
             }
@@ -1565,43 +1535,176 @@ body {
                 closeRateModal();
             }
         });
-    </script>
-    
-    <script>
-        // User menu toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const userMenuBtn = document.getElementById('userMenuBtn');
-            const userDropdown = document.getElementById('userDropdown');
-            
-            if (userMenuBtn && userDropdown) {
-                userMenuBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    userDropdown.classList.toggle('show');
-                });
-                
-                // Close menu when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                        userDropdown.classList.remove('show');
+
+        // License Keys Modal Functions
+        let currentOrderId = null;
+        let licenseKeysPage = 0;
+        const licenseKeysPageSize = 10;
+
+        function openLicenseKeysModal(button) {
+            const orderId = button.getAttribute('data-order-id');
+            if (!orderId) {
+                showNotification('Error', 'Order ID not found', 'error');
+                return;
+            }
+            currentOrderId = orderId;
+            licenseKeysPage = 0;
+            document.getElementById('licenseKeysModal').style.display = 'flex';
+            loadLicenseKeys(orderId, 0);
+        }
+
+        function closeLicenseKeysModal() {
+            document.getElementById('licenseKeysModal').style.display = 'none';
+            currentOrderId = null;
+            licenseKeysPage = 0;
+            document.getElementById('licenseKeysContent').style.display = 'none';
+            document.getElementById('licenseKeysLoading').style.display = 'none';
+            document.getElementById('licenseKeysEmpty').style.display = 'none';
+            document.getElementById('licenseKeysError').style.display = 'none';
+        }
+
+        function loadLicenseKeys(orderId, page) {
+            const loadingEl = document.getElementById('licenseKeysLoading');
+            const contentEl = document.getElementById('licenseKeysContent');
+            const emptyEl = document.getElementById('licenseKeysEmpty');
+            const errorEl = document.getElementById('licenseKeysError');
+            const listEl = document.getElementById('licenseKeysList');
+            const paginationEl = document.getElementById('licenseKeysPagination');
+
+            // Show loading
+            loadingEl.style.display = 'block';
+            contentEl.style.display = 'none';
+            emptyEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            fetch(`/api/orders/${orderId}/licenses?page=${page}&size=${licenseKeysPageSize}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(text || 'Failed to load license keys');
+                        });
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    loadingEl.style.display = 'none';
+
+                    if (!data.content || data.content.length === 0) {
+                        emptyEl.style.display = 'block';
+                        return;
+                    }
+
+                    // Render license keys
+                    listEl.innerHTML = '';
+                    data.content.forEach((license, index) => {
+                        const sequenceNumber = page * licenseKeysPageSize + index + 1;
+                        const keyItem = document.createElement('div');
+                        keyItem.style.cssText = 'padding: 12px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 8px; background: #f9fafb;';
+                        keyItem.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">
+                                        ${sequenceNumber}. ${license.productName || 'Product'}
+                                    </div>
+                                    <div style="font-family: monospace; font-size: 14px; color: #374151; word-break: break-all;">
+                                        ${license.licenseKey}
+                                    </div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                                        Status: <span style="color: ${license.isActive ? '#059669' : '#dc2626'}; font-weight: 600;">
+                                            ${license.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button class="copy-key-btn" data-key="${license.licenseKey}" style="padding: 6px 12px; background: var(--brand); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; white-space: nowrap;">
+                                    Copy
+                                </button>
+                            </div>
+                        `;
+                        listEl.appendChild(keyItem);
+                    });
+
+                    // Render pagination
+                    paginationEl.innerHTML = '';
+                    const totalPages = data.totalPages || 0;
+                    if (totalPages > 1) {
+                        // Previous button
+                        const prevBtn = document.createElement('button');
+                        prevBtn.className = 'pagination-btn';
+                        prevBtn.textContent = '← Previous';
+                        prevBtn.disabled = page === 0;
+                        prevBtn.onclick = () => {
+                            if (page > 0) {
+                                licenseKeysPage = page - 1;
+                                loadLicenseKeys(orderId, licenseKeysPage);
+                            }
+                        };
+                        paginationEl.appendChild(prevBtn);
+
+                        // Page numbers
+                        const pageNumbers = document.createElement('div');
+                        pageNumbers.className = 'page-numbers';
+                        for (let i = 0; i < totalPages; i++) {
+                            const pageBtn = document.createElement('button');
+                            pageBtn.className = `page-number ${i === page ? 'active' : ''}`;
+                            pageBtn.textContent = i + 1;
+                            pageBtn.onclick = () => {
+                                licenseKeysPage = i;
+                                loadLicenseKeys(orderId, licenseKeysPage);
+                            };
+                            pageNumbers.appendChild(pageBtn);
+                        }
+                        paginationEl.appendChild(pageNumbers);
+
+                        // Next button
+                        const nextBtn = document.createElement('button');
+                        nextBtn.className = 'pagination-btn';
+                        nextBtn.textContent = 'Next →';
+                        nextBtn.disabled = page >= totalPages - 1;
+                        nextBtn.onclick = () => {
+                            if (page < totalPages - 1) {
+                                licenseKeysPage = page + 1;
+                                loadLicenseKeys(orderId, licenseKeysPage);
+                            }
+                        };
+                        paginationEl.appendChild(nextBtn);
+                    }
+
+                    contentEl.style.display = 'block';
+                })
+                .catch(error => {
+                    loadingEl.style.display = 'none';
+                    errorEl.style.display = 'block';
+                    document.getElementById('licenseKeysErrorMsg').textContent = error.message || 'Đã xảy ra lỗi khi tải license keys.';
                 });
+        }
+
+        // Copy key functionality
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('copy-key-btn')) {
+                const key = event.target.getAttribute('data-key');
+                if (key) {
+                    navigator.clipboard.writeText(key).then(() => {
+                        const originalText = event.target.textContent;
+                        event.target.textContent = 'Copied!';
+                        event.target.style.background = '#059669';
+                        setTimeout(() => {
+                            event.target.textContent = originalText;
+                            event.target.style.background = 'var(--brand)';
+                        }, 2000);
+                        showNotification('Success', 'License key copied to clipboard!', 'success');
+                    }).catch(() => {
+                        showNotification('Error', 'Failed to copy license key', 'error');
+                    });
+                }
             }
         });
 
-        // VNPay topup function
-        function topupPrompt(e) {
-            e.preventDefault();
-            const v = prompt('Enter amount to top up (VND):', '200000');
-            if (!v) return false;
-            const clean = v.replace(/[^0-9]/g, '');
-            if (!clean) {
-                alert('Please enter a valid amount');
-                return false;
+        // Close license keys modal when clicking outside
+        document.getElementById('licenseKeysModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLicenseKeysModal();
             }
-            document.getElementById('topupAmountInput').value = clean;
-            e.target.submit();
-            return true;
-        }
+        });
     </script>
 </body>
 </html>

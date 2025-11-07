@@ -13,6 +13,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import banhangrong.su25.Repository.UsersRepository;
+import banhangrong.su25.Entity.Users;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,17 +34,20 @@ public class ProductLicenseController {
     private final OrderItemsRepository orderItemsRepository;
     private final OrdersRepository ordersRepository;
     private final LicenseUsageLogService usageLogService;
+    private final UsersRepository usersRepository;
 
     public ProductLicenseController(ProductLicensesRepository licensesRepository,
                                     ProductsRepository productsRepository,
                                     OrderItemsRepository orderItemsRepository,
                                     OrdersRepository ordersRepository,
-                                    LicenseUsageLogService usageLogService) {
+                                    LicenseUsageLogService usageLogService,
+                                    UsersRepository usersRepository) {
         this.licensesRepository = licensesRepository;
         this.productsRepository = productsRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.ordersRepository = ordersRepository;
         this.usageLogService = usageLogService;
+        this.usersRepository = usersRepository;
     }
 
     @GetMapping("/api/seller/{sellerId}/licenses")
@@ -246,7 +253,7 @@ public class ProductLicenseController {
                 return ResponseEntity.badRequest().body("invalid expireDate");
             }
         } else {
-            expStr = "N/A";
+            expStr = java.time.LocalDate.now().plusDays(30).format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -372,5 +379,55 @@ public class ProductLicenseController {
             out.put("totalElements", 0);
         }
         return ResponseEntity.ok(out);
+    }
+
+    /**
+     * Get license keys for a specific order (customer only)
+     * Example: GET /api/orders/{orderId}/licenses?page=0&size=10
+     */
+    @GetMapping("/api/orders/{orderId}/licenses")
+    public ResponseEntity<?> getOrderLicenses(@PathVariable Long orderId,
+                                             @RequestParam(name = "page", defaultValue = "0") int page,
+                                             @RequestParam(name = "size", defaultValue = "10") int size) {
+        // Get current user
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        
+        String username = auth.getName();
+        Optional<Users> userOpt = usersRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).body("User not found");
+        }
+        Long userId = userOpt.get().getUserId();
+        
+        // Verify order belongs to current user
+        Optional<Orders> orderOpt = ordersRepository.findById(orderId);
+        if (orderOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Order not found");
+        }
+        
+        Orders order = orderOpt.get();
+        if (order.getUserId() == null || !order.getUserId().equals(userId)) {
+            return ResponseEntity.status(403).body("You don't have permission to view this order's licenses");
+        }
+        
+        // Get licenses with pagination
+        if (size > 100) size = 100;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductLicensesRepository.LicenseView> licensesPage = licensesRepository.findByOrderId(orderId, pageable);
+        
+        // Log for debugging
+        System.out.println("[ProductLicenseController] Getting licenses for orderId: " + orderId + ", found: " + licensesPage.getTotalElements());
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", licensesPage.getContent());
+        response.put("page", licensesPage.getNumber());
+        response.put("size", licensesPage.getSize());
+        response.put("totalPages", licensesPage.getTotalPages());
+        response.put("totalElements", licensesPage.getTotalElements());
+        
+        return ResponseEntity.ok(response);
     }
 }

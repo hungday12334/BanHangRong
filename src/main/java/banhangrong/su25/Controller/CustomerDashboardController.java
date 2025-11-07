@@ -11,6 +11,7 @@ import banhangrong.su25.Repository.ShoppingCartRepository;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Repository.OrdersRepository;
 import banhangrong.su25.Repository.OrderItemsRepository;
+import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Repository.ProductReviewsRepository;
 import banhangrong.su25.service.CustomerDashboardService;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,7 @@ public class CustomerDashboardController {
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final ProductReviewsRepository productReviewsRepository;
+    private final ProductLicensesRepository productLicensesRepository;
 
     public CustomerDashboardController(CustomerDashboardService customerDashboardService,
                                        ProductsRepository productsRepository,
@@ -50,7 +52,8 @@ public class CustomerDashboardController {
                                        UsersRepository usersRepository,
                                        OrdersRepository ordersRepository,
                                        OrderItemsRepository orderItemsRepository,
-                                       ProductReviewsRepository productReviewsRepository) {
+                                       ProductReviewsRepository productReviewsRepository,
+                                       ProductLicensesRepository productLicensesRepository) {
         this.customerDashboardService = customerDashboardService;
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
@@ -59,6 +62,7 @@ public class CustomerDashboardController {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productReviewsRepository = productReviewsRepository;
+        this.productLicensesRepository = productLicensesRepository;
     }
 
     @GetMapping("/customer/dashboard")
@@ -180,17 +184,52 @@ public class CustomerDashboardController {
                 }
             }
         } else if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
-            if (startDate != null) {
-                if ("oldest".equalsIgnoreCase(sort)) {
-                    ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), startDate, pageable);
+            String statusLower = status.trim().toLowerCase();
+            if ("active".equals(statusLower) || "expired".equals(statusLower)) {
+                // Filter by license key status
+                if (startDate != null) {
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        if ("active".equals(statusLower)) {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
+                        } else {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), startDate, pageable);
+                        }
+                    } else {
+                        if ("active".equals(statusLower)) {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
+                        } else {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), startDate, pageable);
+                        }
+                    }
                 } else {
-                    ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), startDate, pageable);
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        if ("active".equals(statusLower)) {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
+                        } else {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredOrderByCreatedAtAsc(currentUser.getUserId(), pageable);
+                        }
+                    } else {
+                        if ("active".equals(statusLower)) {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseActiveOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+                        } else {
+                            ordersPage = ordersRepository.findByUserIdAndLicenseExpiredOrderByCreatedAtDesc(currentUser.getUserId(), pageable);
+                        }
+                    }
                 }
             } else {
-                if ("oldest".equalsIgnoreCase(sort)) {
-                    ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), pageable);
+                // Original order status filter (for backward compatibility)
+                if (startDate != null) {
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), startDate, pageable);
+                    } else {
+                        ordersPage = ordersRepository.findByUserIdAndStatusAndCreatedAtAfterOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), startDate, pageable);
+                    }
                 } else {
-                    ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
+                    if ("oldest".equalsIgnoreCase(sort)) {
+                        ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtAsc(currentUser.getUserId(), status.trim(), pageable);
+                    } else {
+                        ordersPage = ordersRepository.findByUserIdAndStatusOrderByCreatedAtDesc(currentUser.getUserId(), status.trim(), pageable);
+                    }
                 }
             }
         } else {
@@ -214,10 +253,25 @@ public class CustomerDashboardController {
         java.util.Map<Long, List<OrderItems>> orderItemsMap = new java.util.HashMap<>();
         java.util.Map<Long, String> productNamesMap = new java.util.HashMap<>();
         java.util.Map<Long, Products> productsMap = new java.util.HashMap<>();
+        java.util.Map<Long, String> orderLicenseStatusMap = new java.util.HashMap<>();
         
         for (Orders order : orders) {
             List<OrderItems> items = orderItemsRepository.findByOrderId(order.getOrderId());
             orderItemsMap.put(order.getOrderId(), items);
+            
+            // Calculate license status for this order
+            boolean hasActiveLicense = false;
+            try {
+                var licensesPage = productLicensesRepository.findByOrderId(order.getOrderId(), 
+                    org.springframework.data.domain.PageRequest.of(0, 1000));
+                for (var licenseView : licensesPage.getContent()) {
+                    if (licenseView.getIsActive() != null && licenseView.getIsActive()) {
+                        hasActiveLicense = true;
+                        break;
+                    }
+                }
+            } catch (Exception ignored) {}
+            orderLicenseStatusMap.put(order.getOrderId(), hasActiveLicense ? "Active" : "Expired");
             
             for (OrderItems item : items) {
                 if (item.getProductId() != null) {
@@ -233,6 +287,7 @@ public class CustomerDashboardController {
         model.addAttribute("orderItemsMap", orderItemsMap);
         model.addAttribute("productNamesMap", productNamesMap);
         model.addAttribute("productsMap", productsMap);
+        model.addAttribute("orderLicenseStatusMap", orderLicenseStatusMap);
         model.addAttribute("page", ordersPage.getNumber());
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("size", ordersPage.getSize());
@@ -244,6 +299,7 @@ public class CustomerDashboardController {
         
         try {
             model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
+            model.addAttribute("cartItemCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
         } catch (Exception ignored) {}
 
         return "customer/orderhistory";

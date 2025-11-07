@@ -226,52 +226,6 @@
                 </div>
             </a>
         </section>
-
-        <script>
-            (function () {
-                const btn = document.getElementById('userMenuBtn');
-                const menu = document.getElementById('userDropdown');
-                function close() { if (menu) { menu.style.display = 'none'; btn && btn.setAttribute('aria-expanded', 'false'); } }
-                function toggle() { if (!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block' : 'none'; btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false'); }
-                if (btn) { btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); }); }
-                document.addEventListener('click', close);
-                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-            })();
-        </script>
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const userMenuBtn = document.getElementById('userMenuBtn');
-                const userDropdown = document.getElementById('userDropdown');
-                
-                if (userMenuBtn && userDropdown) {
-                    userMenuBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        userDropdown.classList.toggle('show');
-                    });
-                    
-                    document.addEventListener('click', function(e) {
-                        if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                            userDropdown.classList.remove('show');
-                        }
-                    });
-                }
-            });
-
-            function topupPrompt(e) {
-                e.preventDefault();
-                const v = prompt('Enter amount to top up (VND):', '200000');
-                if (!v) return false;
-                const clean = v.replace(/[^0-9]/g, '');
-                if (!clean) {
-                    alert('Please enter a valid amount');
-                    return false;
-                }
-                document.getElementById('topupAmountInput').value = clean;
-                e.target.submit();
-                return true;
-            }
-        </script>
     </div>
 </body>
 

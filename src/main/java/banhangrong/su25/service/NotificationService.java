@@ -46,6 +46,28 @@ public class NotificationService {
     }
 
     /**
+     * Create notification when order is placed successfully with license keys
+     */
+    @Transactional
+    public void createOrderNotificationWithLicenses(Long userId, Long orderId, String orderCode, java.util.List<String> licenseKeys) {
+        String title = "Order Placed Successfully";
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append(String.format("Your order #%s has been placed successfully!\n\n", orderCode));
+        
+        if (licenseKeys != null && !licenseKeys.isEmpty()) {
+            messageBuilder.append("🔑 Your License Keys:\n");
+            for (int i = 0; i < licenseKeys.size(); i++) {
+                messageBuilder.append(String.format("%d. %s\n", i + 1, licenseKeys.get(i)));
+            }
+            messageBuilder.append("\nYou can also view these keys in 'Orders History' section.");
+        } else {
+            messageBuilder.append("Please wait for seller confirmation.");
+        }
+        
+        createNotification(userId, title, messageBuilder.toString(), "ORDER", orderId);
+    }
+
+    /**
      * Create notification when review is submitted successfully
      */
     @Transactional
