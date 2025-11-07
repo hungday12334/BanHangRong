@@ -56,6 +56,16 @@ public class NotificationService {
     }
 
     /**
+     * Create notification when product is added to cart
+     */
+    @Transactional
+    public void createCartNotification(Long userId, Long productId, String productName, Integer quantity) {
+        String title = "Product Added to Cart";
+        String message = String.format("You have added %d x \"%s\" to your cart. Continue shopping or proceed to checkout.", quantity, productName);
+        createNotification(userId, title, message, "SYSTEM", productId);
+    }
+
+    /**
      * Get notifications list with filters
      */
     public Page<Notification> getNotificationsWithFilters(

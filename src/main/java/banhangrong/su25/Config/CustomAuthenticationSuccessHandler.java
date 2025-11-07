@@ -45,33 +45,35 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         // Set session timeout to 8 hours
         request.getSession().setMaxInactiveInterval(28800);
-
-        // Debug logging
-        System.out.println("=== Authentication Success ===");
-        System.out.println("Username: " + username);
-        System.out.println("User ID: " + user.getUserId());
-        System.out.println("User Type: " + user.getUserType());
-        System.out.println("Authorities: " + authentication.getAuthorities());
-        System.out.println("Session ID: " + request.getSession().getId());
-        System.out.println("Session MaxInactiveInterval: " + request.getSession().getMaxInactiveInterval() + " seconds");
-        System.out.println("Remote Address: " + request.getRemoteAddr());
-        System.out.println("================================");
         
         // Redirect based on user type
         String userType = user.getUserType();
-        if ("ADMIN".equalsIgnoreCase(userType) || "admin".equals(userType)) {
-            response.sendRedirect("/admin/dashboard");
-        } else if ("SELLER".equalsIgnoreCase(userType) || "seller".equals(userType)) {
-            response.sendRedirect("/seller/dashboard");
-        } else if ("CUSTOMER".equalsIgnoreCase(userType) || "customer".equals(userType)) {
-            // Customer phải verify email mới vào được dashboard
+        String redirectUrl = null;
+        
+        if (userType == null || userType.trim().isEmpty()) {
+            userType = "CUSTOMER";
+        } else {
+            userType = userType.trim().toUpperCase();
+        }
+        
+        if ("ADMIN".equals(userType)) {
+            redirectUrl = "/admin/dashboard";
+        } else if ("SELLER".equals(userType)) {
+            redirectUrl = "/seller/dashboard";
+        } else if ("CUSTOMER".equals(userType) || "USER".equals(userType)) {
             if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
-                response.sendRedirect("/customer/dashboard");
+                redirectUrl = "/customer/dashboard";
             } else {
-                response.sendRedirect("/verify-email-required");
+                redirectUrl = "/verify-email-required";
             }
         } else {
-            response.sendRedirect("/customer/dashboard");
+            if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
+                redirectUrl = "/customer/dashboard";
+            } else {
+                redirectUrl = "/verify-email-required";
+            }
         }
+        
+        response.sendRedirect(redirectUrl);
     }
 }

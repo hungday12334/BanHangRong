@@ -11,10 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -29,36 +31,27 @@ public class BecomeSellerController {
      */
     @GetMapping("/become-seller")
     public String becomeSellerPage(Model model, HttpSession session) {
-        System.out.println("=== BECOME SELLER PAGE LOADING ===");
-
         // Lấy thông tin user hiện tại
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            System.out.println("⚠ User not authenticated");
             return "redirect:/login?error=Please login first";
         }
 
         String username = auth.getName();
-        System.out.println("ℹ Username: " + username);
-
         Optional<Users> userOpt = usersRepository.findByUsername(username);
 
         if (userOpt.isEmpty()) {
-            System.out.println("⚠ User not found in database");
             return "redirect:/login?error=User not found";
         }
 
         Users user = userOpt.get();
-        System.out.println("ℹ User found: " + user.getUsername() + ", Type: " + user.getUserType());
 
         // Kiểm tra nếu đã là seller rồi
         if ("SELLER".equalsIgnoreCase(user.getUserType())) {
-            System.out.println("✅ User is already a seller, redirecting to seller dashboard");
             return "redirect:/seller/dashboard";
         }
 
         model.addAttribute("user", user);
-        System.out.println("✅ Returning become-seller view");
         return "customer/become-seller";
     }
 
@@ -66,6 +59,7 @@ public class BecomeSellerController {
      * Xử lý nâng cấp lên seller
      */
     @PostMapping("/become-seller/upgrade")
+    @Transactional
     public String upgradeToSeller(RedirectAttributes redirectAttributes,
                                   HttpServletRequest request,
                                   HttpServletResponse response,
@@ -99,22 +93,68 @@ public class BecomeSellerController {
             return "redirect:/customer/dashboard";
         }
 
-        try {
-            // Nâng cấp role lên SELLER
-            user.setUserType("SELLER");
-            user.setUpdatedAt(LocalDateTime.now());
-            usersRepository.save(user);
+        // Kiểm tra checkbox đồng ý điều khoản
+        String agreeTerms = request.getParameter("agreeTerms");
+        if (agreeTerms == null || !"on".equals(agreeTerms)) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng đồng ý với điều khoản để tiếp tục");
+            return "redirect:/become-seller";
+        }
 
-            System.out.println("ℹ User upgraded to SELLER: " + username);
+        // Kiểm tra số dư - cần 200,000 VNĐ
+        BigDecimal requiredAmount = new BigDecimal("200000");
+        BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+        
+        if (currentBalance.compareTo(requiredAmount) < 0) {
+            // Không đủ tiền, trả về trang với thông báo
+            redirectAttributes.addFlashAttribute("insufficientBalance", true);
+            redirectAttributes.addFlashAttribute("currentBalance", currentBalance);
+            redirectAttributes.addFlashAttribute("requiredAmount", requiredAmount);
+            return "redirect:/become-seller";
+        }
+
+        try {
+            // Reload user từ database trong transaction để đảm bảo có dữ liệu mới nhất
+            Users userToUpdate = usersRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+            
+            // QUAN TRỌNG: Lưu password hiện tại để đảm bảo không bị mất khi save
+            String currentPassword = userToUpdate.getPassword();
+            if (currentPassword == null || currentPassword.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Lỗi: Password không hợp lệ. Vui lòng liên hệ admin.");
+                return "redirect:/customer/dashboard";
+            }
+            
+            // Lấy số dư mới nhất từ database
+            BigDecimal latestBalance = userToUpdate.getBalance() != null ? userToUpdate.getBalance() : BigDecimal.ZERO;
+            
+            // Trừ tiền từ số dư
+            BigDecimal newBalance = latestBalance.subtract(requiredAmount);
+            userToUpdate.setBalance(newBalance);
+            
+            // Nâng cấp role lên SELLER
+            userToUpdate.setUserType("SELLER");
+            userToUpdate.setUpdatedAt(LocalDateTime.now());
+            
+            // Đảm bảo password không bị mất
+            userToUpdate.setPassword(currentPassword);
+            
+            // Save và flush ngay để đảm bảo balance được cập nhật vào database
+            usersRepository.saveAndFlush(userToUpdate);
+
+            // Lấy tên user để hiển thị trong thông báo
+            String displayName = userToUpdate.getFullName() != null && !userToUpdate.getFullName().trim().isEmpty() 
+                ? userToUpdate.getFullName() 
+                : userToUpdate.getUsername();
 
             // Logout để Spring Security refresh authorities
             new SecurityContextLogoutHandler().logout(request, response, auth);
 
-            redirectAttributes.addFlashAttribute("upgradeSuccess", "Chúc mừng! Bạn đã trở thành seller thành công! 🎉 Vui lòng đăng nhập lại để sử dụng các tính năng seller.");
+            // Thông báo chúc mừng với tên user
+            String successMessage = String.format("Chúc mừng %s đã trở thành seller thành công! 🎉 Vui lòng đăng nhập lại để sử dụng các tính năng seller.", displayName);
+            redirectAttributes.addFlashAttribute("upgradeSuccess", successMessage);
             return "redirect:/login?upgrade=success";
 
         } catch (Exception e) {
-            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/customer/dashboard";
         }

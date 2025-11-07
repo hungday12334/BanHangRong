@@ -93,6 +93,9 @@ public class NotificationController {
             page,
             size
         );
+        
+        // Debug log
+        System.out.println("[NotificationController] SortBy: " + sortBy + ", Page: " + page + ", Total: " + notifications.getTotalElements() + ", Content size: " + notifications.getContent().size());
 
         // Đếm số notification chưa đọc
         Long unreadCount = notificationService.countUnreadNotifications(currentUser.getUserId());
@@ -103,10 +106,12 @@ public class NotificationController {
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("cartCount", cartCount);
+        model.addAttribute("cartItemCount", cartCount); // For header fragment
         model.addAttribute("currentPage", page);
         model.addAttribute("size", size);
         model.addAttribute("totalPages", notifications.getTotalPages());
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("user", currentUser); // For header fragment
         
         // Bộ lọc hiện tại (giữ nguyên format string để hiển thị trong form)
         model.addAttribute("currentType", type);

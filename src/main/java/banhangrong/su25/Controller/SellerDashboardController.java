@@ -43,9 +43,60 @@ public class SellerDashboardController {
             Principal principal,
             HttpSession session) {
 
+        // ⭐ SECURITY CHECK: Kiểm tra user có phải SELLER không
+        Users currentUser = null;
+        if (principal != null && principal.getName() != null) {
+            var opt = usersRepository.findByUsername(principal.getName());
+            if (opt.isPresent()) {
+                currentUser = opt.get();
+            }
+        }
+        
+        // Nếu không tìm được từ principal, thử từ session
+        if (currentUser == null && session != null) {
+            Object userObj = session.getAttribute("user");
+            if (userObj instanceof Users) {
+                currentUser = (Users) userObj;
+            } else {
+                Object userIdObj = session.getAttribute("userId");
+                if (userIdObj != null) {
+                    Long userId = userIdObj instanceof Long ? (Long) userIdObj : 
+                                 userIdObj instanceof Integer ? ((Integer) userIdObj).longValue() : null;
+                    if (userId != null) {
+                        var opt = usersRepository.findById(userId);
+                        if (opt.isPresent()) {
+                            currentUser = opt.get();
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Kiểm tra userType
+        if (currentUser != null) {
+            String userType = currentUser.getUserType();
+            if (userType != null) {
+                userType = userType.trim().toUpperCase();
+            }
+            
+            if (!"SELLER".equals(userType) && !"ADMIN".equals(userType)) {
+                // Nếu không phải SELLER hoặc ADMIN, redirect về customer dashboard
+                System.out.println("⚠ Access denied: User " + currentUser.getUsername() + 
+                                 " (userType: " + currentUser.getUserType() + ") tried to access seller dashboard");
+                return "redirect:/customer/dashboard?error=access_denied";
+            }
+        } else {
+            // Nếu không tìm được user, redirect về login
+            System.out.println("⚠ No user found, redirecting to login");
+            return "redirect:/login?error=session_expired";
+        }
+
         if (sellerId == null) {
-            // Try principal
-            if (principal != null && principal.getName() != null) {
+            // Sử dụng userId của user hiện tại
+            sellerId = currentUser.getUserId();
+            
+            // Try principal (fallback)
+            if (sellerId == null && principal != null && principal.getName() != null) {
                 String name = principal.getName();
                 try {
                     sellerId = Long.parseLong(name);
@@ -57,23 +108,20 @@ public class SellerDashboardController {
                 }
             }
 
-            // Try session attributes
+            // Try session attributes (fallback)
             if (sellerId == null && session != null) {
                 Object uid = session.getAttribute("userId");
                 if (uid instanceof Long)
                     sellerId = (Long) uid;
                 else if (uid instanceof Integer)
                     sellerId = ((Integer) uid).longValue();
-                else {
-                    Object userObj = session.getAttribute("user");
-                    if (userObj instanceof Users)
-                        sellerId = ((Users) userObj).getUserId();
-                }
             }
-
-            // final fallback
-            if (sellerId == null)
-                sellerId = 6L; // assumption: demo seller
+        }
+        
+        // Đảm bảo sellerId không null
+        if (sellerId == null) {
+            System.out.println("⚠ SellerId is null, redirecting to customer dashboard");
+            return "redirect:/customer/dashboard?error=invalid_seller";
         }
 
         // KPIs

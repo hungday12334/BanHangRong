@@ -343,12 +343,169 @@
             transform: translateY(-2px);
         }
 
+        /* Modal Popup */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .modal-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, var(--brand), #0284c7);
+            color: white;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 28px;
+            overflow-y: auto;
+            flex: 1;
+            line-height: 1.8;
+            color: var(--ink);
+        }
+        
+        .modal-body p {
+            margin: 0 0 16px 0;
+        }
+        
+        .modal-body ol,
+        .modal-body ul {
+            margin: 0 0 16px 0;
+            padding-left: 24px;
+        }
+        
+        .modal-body li {
+            margin-bottom: 8px;
+        }
+        
+        .modal-body strong {
+            color: var(--brand);
+            font-weight: 600;
+        }
+        
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: flex-end;
+            background: var(--gray-light);
+        }
+        
+        .modal-btn {
+            background: var(--brand);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+        }
+        
+        .modal-btn:hover {
+            background: #0284c7;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .support-hero h1 { font-size: 28px; }
             .support-hero p { font-size: 16px; }
             .categories-grid { grid-template-columns: 1fr; }
             .support-content { padding: 20px 10px; }
+            .modal-container {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 16px 16px 0 0;
+            }
+            .modal-header {
+                padding: 20px;
+            }
+            .modal-body {
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -420,14 +577,14 @@
 
         <!-- Support Hero Section -->
         <section class="support-hero">
-            <h1>Hello, how can BanHangRong help you?</h1>
-            <p>We are always ready to support you with any issues</p>
+            <h1>Xin chào, BanHangRong có thể giúp gì cho bạn?</h1>
+            <p>Chúng tôi luôn sẵn sàng hỗ trợ bạn về license keys, game keys và software licenses</p>
             <div class="support-search">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <input type="text" placeholder="Enter keywords or content to search" id="supportSearch">
-                <button class="search-btn" onclick="searchSupport()">Search</button>
+                <input type="text" placeholder="Tìm kiếm: license key, kích hoạt, game key, hoàn tiền..." id="supportSearch">
+                <button class="search-btn" onclick="searchSupport()">Tìm kiếm</button>
             </div>
         </section>
 
@@ -437,35 +594,45 @@
             <section class="categories-section">
                 <h2 class="section-title">Categories</h2>
                 <div class="categories-grid">
-                    <a href="#" class="category-card" onclick="showCategory('shopping')">
-                        <div class="category-icon">🛒</div>
-                        <div class="category-title">Shopping with BanHangRong</div>
-                        <div class="category-desc">Shopping guide, product search and payment</div>
+                    <a href="#" class="category-card" onclick="showCategory('license-activation')">
+                        <div class="category-icon">🔑</div>
+                        <div class="category-title">License Key Activation</div>
+                        <div class="category-desc">Hướng dẫn kích hoạt license key, game key và software license</div>
                     </a>
-                    <a href="#" class="category-card" onclick="showCategory('promotions')">
-                        <div class="category-icon">🏷️</div>
-                        <div class="category-title">Promotions & Offers</div>
-                        <div class="category-desc">Information about promotional programs and discount codes</div>
+                    <a href="#" class="category-card" onclick="showCategory('product-delivery')">
+                        <div class="category-icon">📥</div>
+                        <div class="category-title">Product Delivery</div>
+                        <div class="category-desc">Cách nhận license key sau khi thanh toán thành công</div>
                     </a>
                     <a href="#" class="category-card" onclick="showCategory('payment')">
                         <div class="category-icon">💳</div>
-                        <div class="category-title">Payment</div>
-                        <div class="category-desc">Payment guide and e-wallet management</div>
+                        <div class="category-title">Payment & Wallet</div>
+                        <div class="category-desc">Hướng dẫn thanh toán, nạp tiền vào ví và quản lý số dư</div>
                     </a>
                     <a href="#" class="category-card" onclick="showCategory('orders')">
-                        <div class="category-icon">📦</div>
-                        <div class="category-title">Orders & Shipping</div>
-                        <div class="category-desc">Order tracking and shipping information</div>
+                        <div class="category-icon">📋</div>
+                        <div class="category-title">Order Management</div>
+                        <div class="category-desc">Xem lịch sử đơn hàng, kiểm tra trạng thái đơn hàng</div>
                     </a>
-                    <a href="#" class="category-card" onclick="showCategory('returns')">
-                        <div class="category-icon">🔄</div>
-                        <div class="category-title">Returns & Refunds</div>
-                        <div class="category-desc">Return and refund policy</div>
+                    <a href="#" class="category-card" onclick="showCategory('key-issues')">
+                        <div class="category-icon">⚠️</div>
+                        <div class="category-title">License Key Issues</div>
+                        <div class="category-desc">Xử lý khi key không hoạt động, đã được sử dụng hoặc hết hạn</div>
                     </a>
-                    <a href="#" class="category-card" onclick="showCategory('general')">
-                        <div class="category-icon">❓</div>
-                        <div class="category-title">General Information</div>
-                        <div class="category-desc">Frequently asked questions and general information</div>
+                    <a href="#" class="category-card" onclick="showCategory('refunds')">
+                        <div class="category-icon">💰</div>
+                        <div class="category-title">Refunds & Returns</div>
+                        <div class="category-desc">Chính sách hoàn tiền cho license key không sử dụng được</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('seller')">
+                        <div class="category-icon">👨‍💼</div>
+                        <div class="category-title">Become a Seller</div>
+                        <div class="category-desc">Hướng dẫn đăng ký bán license key và quản lý shop</div>
+                    </a>
+                    <a href="#" class="category-card" onclick="showCategory('security')">
+                        <div class="category-icon">🔒</div>
+                        <div class="category-title">Security & Safety</div>
+                        <div class="category-desc">Bảo mật tài khoản và mua hàng an toàn trên BanHangRong</div>
                     </a>
                 </div>
             </section>
@@ -476,38 +643,132 @@
                 <div class="faq-list">
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>[Fraud Warning] Safe Shopping with BanHangRong</span>
+                            <span>🔑 Làm thế nào để nhận license key sau khi mua hàng?</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            BanHangRong is committed to protecting your personal information and transactions. Always check seller information, read product descriptions carefully and use our secure payment system.
+                            Sau khi thanh toán thành công, license key sẽ được gửi tự động vào email của bạn và hiển thị trong mục "My Orders". Bạn có thể copy key từ email hoặc từ trang chi tiết đơn hàng. Key thường được gửi trong vòng vài phút sau khi thanh toán.
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>[Service] How to contact Customer Care, Hotline, BanHangRong Call Center</span>
+                            <span>🎮 Làm thế nào để kích hoạt game key trên Steam/Epic Games?</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            You can contact us via: Email: support@banhangrong.com, Hotline: 1900-xxxx, or use the online chat feature on the website.
+                            <strong>Steam:</strong> Mở Steam → Games → Activate a Product on Steam → Nhập key → Next → Follow instructions.<br>
+                            <strong>Epic Games:</strong> Đăng nhập Epic Games Launcher → Store → Redeem Code → Nhập key → Redeem.<br>
+                            <strong>Origin/EA:</strong> Mở Origin → My Game Library → Add a Game → Redeem Product Code → Nhập key.
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>How to register a BanHangRong account?</span>
+                            <span>💻 Làm thế nào để kích hoạt software license key?</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            You can register an account by clicking the "Register" button in the top right corner of the screen, filling in all information and verifying your email to complete registration.
+                            Mỗi phần mềm có cách kích hoạt khác nhau. Thông thường bạn cần:<br>
+                            1. Tải và cài đặt phần mềm từ website chính thức của nhà phát triển<br>
+                            2. Mở phần mềm và tìm mục "Activate" hoặc "Enter License Key"<br>
+                            3. Nhập license key đã mua từ BanHangRong<br>
+                            4. Làm theo hướng dẫn trên màn hình để hoàn tất kích hoạt<br>
+                            Chi tiết cụ thể sẽ được gửi kèm trong email đơn hàng.
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>How to become a seller on BanHangRong?</span>
+                            <span>⚠️ License key không hoạt động hoặc đã được sử dụng - phải làm sao?</span>
                             <span>+</span>
                         </div>
                         <div class="faq-answer">
-                            To become a seller, you need to register an account, verify your identity, provide business information and wait for approval from the BanHangRong team.
+                            Nếu key không hoạt động, vui lòng:<br>
+                            1. Kiểm tra lại key đã copy đúng chưa (không có khoảng trắng thừa)<br>
+                            2. Xác nhận key chưa được sử dụng trên tài khoản khác<br>
+                            3. Kiểm tra key còn hạn sử dụng không<br>
+                            4. Liên hệ seller qua hệ thống chat hoặc email<br>
+                            5. Nếu seller không phản hồi, liên hệ support@banhangrong.com với mã đơn hàng để được hỗ trợ hoàn tiền
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>⏰ License key có thời hạn sử dụng không?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Tùy loại sản phẩm:<br>
+                            <strong>Game keys:</strong> Thường không có thời hạn, nhưng một số game có thể giới hạn thời gian kích hoạt<br>
+                            <strong>Software licenses:</strong> Có thể là lifetime hoặc theo subscription (1 năm, vĩnh viễn, etc.)<br>
+                            <strong>Voucher codes:</strong> Thường có thời hạn sử dụng<br>
+                            Thông tin chi tiết về thời hạn sẽ được hiển thị trong mô tả sản phẩm trước khi mua.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>💰 Có được hoàn tiền nếu license key không sử dụng được không?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Có, bạn sẽ được hoàn tiền trong các trường hợp sau:<br>
+                            - Key không hoạt động hoặc đã được sử dụng<br>
+                            - Key không đúng với mô tả sản phẩm<br>
+                            - Key đã hết hạn sử dụng<br>
+                            - Seller không giao key trong thời gian quy định<br>
+                            Vui lòng liên hệ support@banhangrong.com với mã đơn hàng và bằng chứng để được xử lý trong vòng 24-48 giờ.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>💳 Các phương thức thanh toán được hỗ trợ?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            BanHangRong hỗ trợ thanh toán qua:<br>
+                            - <strong>Ví điện tử:</strong> Nạp tiền vào ví BanHangRong và thanh toán trực tiếp<br>
+                            - <strong>VNPay:</strong> Thanh toán qua thẻ ngân hàng, ví điện tử VNPay<br>
+                            - <strong>Voucher codes:</strong> Sử dụng mã giảm giá khi thanh toán<br>
+                            Tất cả giao dịch đều được mã hóa và bảo mật.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>👨‍💼 Làm thế nào để trở thành seller và bán license key?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Để trở thành seller:<br>
+                            1. Đăng ký tài khoản và xác thực email<br>
+                            2. Nạp 200,000 VNĐ vào ví để nâng cấp lên seller<br>
+                            3. Điền thông tin shop và chấp nhận điều khoản<br>
+                            4. Bắt đầu đăng sản phẩm license key để bán<br>
+                            Truy cập trang "Become a Seller" để bắt đầu ngay hôm nay!
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>🔒 Làm sao để đảm bảo mua license key an toàn?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Để mua hàng an toàn:<br>
+                            - Chỉ mua từ seller có đánh giá tốt và nhiều đơn hàng thành công<br>
+                            - Đọc kỹ mô tả sản phẩm và điều kiện sử dụng<br>
+                            - Kiểm tra đánh giá từ khách hàng khác<br>
+                            - Không chia sẻ license key với người khác<br>
+                            - Sử dụng hệ thống thanh toán của BanHangRong, không chuyển khoản trực tiếp cho seller<br>
+                            - Báo cáo ngay nếu phát hiện gian lận
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>📞 Làm thế nào để liên hệ hỗ trợ khách hàng?</span>
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Bạn có thể liên hệ chúng tôi qua:<br>
+                            - <strong>Email:</strong> support@banhangrong.com<br>
+                            - <strong>Hotline:</strong> 1900-xxxx (Giờ làm việc: 8:00 - 22:00 hàng ngày)<br>
+                            - <strong>Chat trực tuyến:</strong> Sử dụng tính năng chat trên website<br>
+                            - <strong>Ticket hỗ trợ:</strong> Tạo ticket trong mục "My Orders" → Chọn đơn hàng → "Contact Support"
                         </div>
                     </div>
                 </div>
@@ -515,13 +776,33 @@
 
             <!-- Contact Section -->
             <section class="contact-section">
-                <h3 class="contact-title">Do you want to find more information?</h3>
-                <p class="contact-desc">Our support team is always ready to help you</p>
-                <a href="#" class="contact-btn" onclick="contactSupport()">
-                    <span>📞</span>
-                    <span>Contact BanHangRong</span>
+                <h3 class="contact-title">Bạn cần hỗ trợ thêm?</h3>
+                <p class="contact-desc">Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ bạn về license keys, game keys và các vấn đề khác</p>
+                <a href="/customer/chat" class="contact-btn">
+                    <span>💬</span>
+                    <span>Liên hệ hỗ trợ trực tuyến</span>
                 </a>
+                <div style="margin-top: 20px; font-size: 14px; color: var(--muted);">
+                    <p>📧 Email: support@banhangrong.com</p>
+                    <p>📞 Hotline: 1900-xxxx (8:00 - 22:00 hàng ngày)</p>
+                </div>
             </section>
+        </div>
+    </div>
+
+    <!-- Modal Popup -->
+    <div id="infoModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modalTitle">Thông tin</h2>
+                <button class="modal-close" onclick="closeModal()" aria-label="Đóng">×</button>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <!-- Content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="closeModal()">Đã hiểu</button>
+            </div>
         </div>
     </div>
 
@@ -562,30 +843,156 @@
             }
         }
 
+        // Modal functions
+        function showModal(title, content) {
+            const modal = document.getElementById('infoModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTitle.textContent = title;
+            
+            // Convert text with \n to HTML with proper formatting
+            let html = '';
+            const lines = content.split('\n');
+            let inList = false;
+            let listType = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (!line) {
+                    if (inList) {
+                        html += listType === 'ol' ? '</ol>' : '</ul>';
+                        inList = false;
+                        listType = null;
+                    }
+                    html += '<p></p>';
+                    continue;
+                }
+                
+                // Check for numbered list (1. 2. 3.)
+                if (/^\d+\.\s+/.test(line)) {
+                    if (!inList || listType !== 'ol') {
+                        if (inList) {
+                            html += listType === 'ol' ? '</ol>' : '</ul>';
+                        }
+                        html += '<ol>';
+                        inList = true;
+                        listType = 'ol';
+                    }
+                    const text = line.replace(/^\d+\.\s+/, '');
+                    html += `<li>${text}</li>`;
+                }
+                // Check for bullet list (- or •)
+                else if (/^[-•]\s+/.test(line)) {
+                    if (!inList || listType !== 'ul') {
+                        if (inList) {
+                            html += listType === 'ol' ? '</ol>' : '</ul>';
+                        }
+                        html += '<ul>';
+                        inList = true;
+                        listType = 'ul';
+                    }
+                    const text = line.replace(/^[-•]\s+/, '');
+                    html += `<li>${text}</li>`;
+                }
+                // Regular paragraph
+                else {
+                    if (inList) {
+                        html += listType === 'ol' ? '</ol>' : '</ul>';
+                        inList = false;
+                        listType = null;
+                    }
+                    html += `<p>${line}</p>`;
+                }
+            }
+            
+            // Close any open list
+            if (inList) {
+                html += listType === 'ol' ? '</ol>' : '</ul>';
+            }
+            
+            modalContent.innerHTML = html || '<p>' + content + '</p>';
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('infoModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        // Close modal when clicking overlay
+        document.getElementById('infoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
         // Search functionality
         function searchSupport() {
             const searchTerm = document.getElementById('supportSearch').value;
             if (searchTerm.trim()) {
-                alert('Search: ' + searchTerm + '\nSearch feature is under development!');
+                showModal('Tìm kiếm', 'Tính năng tìm kiếm đang được phát triển. Vui lòng sử dụng các danh mục bên dưới để tìm thông tin bạn cần.');
             }
         }
 
         // Category functionality
         function showCategory(category) {
-            const categoryNames = {
-                'shopping': 'Shopping with BanHangRong',
-                'promotions': 'Promotions & Offers',
-                'payment': 'Payment',
-                'orders': 'Orders & Shipping',
-                'returns': 'Returns & Refunds',
-                'general': 'General Information'
+            const categoryInfo = {
+                'license-activation': {
+                    title: '🔑 License Key Activation',
+                    content: 'Hướng dẫn chi tiết:\n\n1. Game Keys (Steam/Epic/Origin):\n   - Steam: Games → Activate a Product\n   - Epic: Store → Redeem Code\n   - Origin: My Game Library → Redeem Code\n\n2. Software Licenses:\n   - Tải phần mềm từ website chính thức\n   - Mở phần mềm → Activate/Enter License Key\n   - Nhập key đã mua\n\n3. Voucher Codes:\n   - Copy code từ email đơn hàng\n   - Áp dụng khi thanh toán hoặc trong phần Account'
+                },
+                'product-delivery': {
+                    title: '📥 Product Delivery',
+                    content: 'Sau khi thanh toán thành công:\n\n1. License key sẽ được gửi tự động vào email đăng ký\n2. Key cũng hiển thị trong "My Orders" → Chi tiết đơn hàng\n3. Thời gian giao key: Ngay lập tức hoặc trong vòng 24 giờ (tùy seller)\n4. Nếu chưa nhận được key sau 24 giờ, vui lòng liên hệ seller hoặc support'
+                },
+                'payment': {
+                    title: '💳 Payment & Wallet',
+                    content: 'Các phương thức thanh toán:\n\n1. Ví BanHangRong:\n   - Nạp tiền vào ví qua VNPay\n   - Thanh toán nhanh chóng, không cần nhập thông tin\n\n2. VNPay:\n   - Thanh toán trực tiếp qua thẻ ngân hàng\n   - Hỗ trợ nhiều ngân hàng\n\n3. Voucher Codes:\n   - Sử dụng mã giảm giá khi thanh toán\n   - Áp dụng tại trang checkout'
+                },
+                'orders': {
+                    title: '📋 Order Management',
+                    content: 'Quản lý đơn hàng:\n\n1. Xem lịch sử: Vào "My Orders"\n2. Chi tiết đơn hàng: Click vào đơn hàng để xem license key\n3. Copy key: Click vào key để copy tự động\n4. Liên hệ seller: Sử dụng nút "Contact Seller"\n5. Đánh giá: Đánh giá sản phẩm sau khi sử dụng'
+                },
+                'key-issues': {
+                    title: '⚠️ License Key Issues',
+                    content: 'Xử lý khi gặp vấn đề:\n\n1. Key không hoạt động:\n   - Kiểm tra lại đã copy đúng chưa\n   - Xác nhận key chưa được sử dụng\n   - Liên hệ seller để được hỗ trợ\n\n2. Key đã được sử dụng:\n   - Liên hệ seller ngay lập tức\n   - Nếu seller không phản hồi, liên hệ support để hoàn tiền\n\n3. Key hết hạn:\n   - Kiểm tra mô tả sản phẩm về thời hạn\n   - Liên hệ support nếu không được thông báo trước'
+                },
+                'refunds': {
+                    title: '💰 Refunds & Returns',
+                    content: 'Chính sách hoàn tiền:\n\nĐược hoàn tiền trong các trường hợp:\n- Key không hoạt động hoặc đã được sử dụng\n- Key không đúng mô tả\n- Key đã hết hạn\n- Seller không giao key\n\nThời gian xử lý: 24-48 giờ\nLiên hệ: support@banhangrong.com với mã đơn hàng'
+                },
+                'seller': {
+                    title: '👨‍💼 Become a Seller',
+                    content: 'Để trở thành seller:\n\n1. Đăng ký tài khoản và xác thực email\n2. Nạp 200,000 VNĐ vào ví\n3. Vào "Become a Seller" và chấp nhận điều khoản\n4. Bắt đầu đăng sản phẩm license key\n\nLợi ích:\n- Bán license key, game keys, software\n- Quản lý shop chuyên nghiệp\n- Nhận tiền ngay sau khi bán\n- Phí rút tiền chỉ 2%'
+                },
+                'security': {
+                    title: '🔒 Security & Safety',
+                    content: 'Bảo mật và an toàn:\n\n1. Chỉ mua từ seller uy tín\n2. Đọc kỹ mô tả và đánh giá\n3. Sử dụng hệ thống thanh toán của BanHangRong\n4. Không chia sẻ license key\n5. Báo cáo gian lận ngay lập tức\n\nBảo vệ thông tin:\n- Mã hóa SSL/TLS\n- Không lưu thông tin thẻ ngân hàng\n- Xác thực 2 lớp cho tài khoản'
+                }
             };
-            alert('Selected category: ' + categoryNames[category] + '\nFeature is under development!');
+            
+            const info = categoryInfo[category];
+            if (info) {
+                showModal(info.title, info.content);
+            } else {
+                showModal('Thông báo', 'Tính năng này đang được phát triển!');
+            }
         }
 
         // Contact functionality
         function contactSupport() {
-            alert('Contact Support:\n📧 Email: support@banhangrong.com\n📞 Hotline: 1900-xxxx\n💬 Online Chat: Under development');
+            showModal('📞 Liên hệ hỗ trợ', '📧 Email: support@banhangrong.com\n📞 Hotline: 1900-xxxx\n💬 Online Chat: Sử dụng tính năng chat trên website');
         }
 
         // Search on Enter key

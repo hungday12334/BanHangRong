@@ -18,9 +18,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler successHandler;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(CustomAuthenticationSuccessHandler successHandler) {
+    public SecurityConfig(CustomAuthenticationSuccessHandler successHandler,
+                         CustomAccessDeniedHandler accessDeniedHandler) {
         this.successHandler = successHandler;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -57,6 +60,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/email-verification/**").authenticated()
                     .requestMatchers("/api/database/**").permitAll()
                     .requestMatchers("/api/password-hash/**").permitAll()
+                    .requestMatchers("/api/debug/**").authenticated() // Debug endpoint - cần authenticated
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
                     // Guest-browsable catalog
@@ -72,8 +76,11 @@ public class SecurityConfig {
                 // Customer pages
                 .requestMatchers("/customer/**", "/cart/**").authenticated()
                 
-                // Seller pages - IMPORTANT: Only require authenticated, role check done in controller
-                .requestMatchers("/seller/**").authenticated()
+                // Seller pages - CHỈ SELLER mới vào được
+                .requestMatchers("/seller/**").hasRole("SELLER")
+                
+                // Seller API endpoints - CHỈ SELLER mới vào được
+                .requestMatchers("/api/seller/**").hasRole("SELLER")
 
                 // Admin pages
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -101,6 +108,11 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
+            )
+            
+            // Xử lý Access Denied (403)
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedHandler(accessDeniedHandler)
             );
 
         return http.build();
