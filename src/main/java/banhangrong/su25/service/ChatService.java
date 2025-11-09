@@ -113,6 +113,7 @@ public class ChatService {
         conv.setUnreadCount(0);
         conv.setCreatedAt(LocalDateTime.now());
         conv.setUpdatedAt(LocalDateTime.now());
+        conv.setLastMessageTime(LocalDateTime.now()); // Set initial last message time
 
         return conversationRepository.save(conv);
     }
