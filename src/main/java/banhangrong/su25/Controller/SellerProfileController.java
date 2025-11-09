@@ -72,7 +72,6 @@ public class SellerProfileController {
             model.addAttribute("user", user);
             model.addAttribute("sellerId", sellerId);
 
-            // === THÊM DEBUG LOG ===
             System.out.println("=== PROFILE PAGE DATA ===");
             System.out.println("User ID: " + user.getUserId());
             System.out.println("Username: " + user.getUsername());
@@ -86,7 +85,6 @@ public class SellerProfileController {
         return "seller/profile";
     }
 
-    // GIỮ NGUYÊN
     @GetMapping("/profile/edit")
     public String showEditProfileForm(Model model) {
         Long sellerId = getCurrentSellerId();
@@ -108,7 +106,7 @@ public class SellerProfileController {
             Long sellerId = getCurrentSellerId();
             Users currentUser = userProfileService.getSellerProfile(sellerId);
 
-            // ===== SECURITY: NGĂN CHẶN CẬP NHẬT TÊN VÀ EMAIL =====
+            // ===== SECURITY: Prevent changing username or email =====
             // Nếu client cố gắng gửi username hoặc email, REJECT ngay
             if (username != null && !username.equals(currentUser.getUsername())) {
                 System.out.println("⚠️ SECURITY ALERT: Attempt to change username detected!");
@@ -223,7 +221,7 @@ public class SellerProfileController {
         return gender.equals("male") || gender.equals("female") || gender.equals("other");
     }
 
-    // === UPLOAD AVATAR VỚI ĐẦY ĐỦ VALIDATION VÀ XÓA ẢNH CŨ ===
+
     @PostMapping("/profile/upload-avatar")
     @ResponseBody
     public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile file) {
@@ -435,15 +433,13 @@ public class SellerProfileController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Confirmation password does not match"));
             }
 
-            // ===== VALIDATION 7: Check if new password is same as current =====
+            // ===== VALIDATION 7: Check new password is different from current =====
             if (userProfileService.verifyPassword(newPassword, user.getPassword())) {
                 return ResponseEntity.badRequest().body(Map.of("error", "The new password must be different from the current password."));
             }
 
-            // ===== SECURITY: Sanitize password (prevent XSS in logs) =====
-            // Don't log actual passwords, just log that change is happening
 
-            // Đổi mật khẩu
+            // Cập nhật mật khẩu mới
             userProfileService.changePassword(sellerId, newPassword);
 
             System.out.println("✅ Password changed successfully for user: " + user.getUsername());
@@ -453,7 +449,6 @@ public class SellerProfileController {
 
             // Gửi email thông báo đổi mật khẩu thành công
             try {
-                // Validate email address
                 String userEmail = user.getEmail();
                 if (userEmail == null || userEmail.isEmpty()) {
                     System.err.println("❌ WARNING: User email is NULL or EMPTY!");
@@ -497,7 +492,6 @@ public class SellerProfileController {
                     System.out.println("=================================================================");
                 }
             } catch (Exception emailEx) {
-                // Log chi tiết lỗi
                 System.err.println("=================================================================");
                 System.err.println("❌❌❌ FAILED TO SEND EMAIL NOTIFICATION! ❌❌❌");
                 System.err.println("=================================================================");
@@ -506,7 +500,6 @@ public class SellerProfileController {
                 System.err.println("Stack trace:");
                 emailEx.printStackTrace();
                 System.err.println("=================================================================");
-                // Không fail request - user vẫn đã đổi mật khẩu thành công
             }
 
             return ResponseEntity.ok(Map.of(
