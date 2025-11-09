@@ -217,13 +217,8 @@ public class AuthService {
 
         passwordResetTokenRepository.save(resetToken);
 
-        // Send email
-        Email mail = new Email(
-                user.getEmail(),
-                "Password Reset Request",
-                "Click the following link to reset your password: http://localhost:8080/reset-password?token=" + token
-        );
-        emailService.sendEmail(mail);
+        // Send email với HTML template đẹp
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
     }
 
     // ✅ Reset password

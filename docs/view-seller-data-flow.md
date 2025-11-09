@@ -36,6 +36,9 @@ Người dùng xem trang **Order History** (`/customer/orderhistory`), trong m�
 
 ```778:778:src/main/resources/templates/customer/orderhistory.html
                             <button class="action-btn view-seller-btn" th:attr="data-seller-id=${order.sellerId}">View seller</button>
+                            // class="action-btn view-seller-btn" → Định nghĩa style và identifier cho button
+                            // th:attr="data-seller-id=${order.sellerId}" → Gán seller ID vào data attribute để JS đọc
+                            // "View seller" → Text hiển thị trên button
 ```
 
 **Giải thích**:
@@ -47,16 +50,16 @@ Người dùng xem trang **Order History** (`/customer/orderhistory`), trong m�
 
 ```1283:1294:src/main/resources/templates/customer/orderhistory.html
         // View Seller function
-        function viewSeller(button) {
-            const sellerId = button.getAttribute('data-seller-id');
+        function viewSeller(button) {                                    // Định nghĩa hàm xử lý khi click button View Seller
+            const sellerId = button.getAttribute('data-seller-id');         // Lấy seller ID từ data attribute của button
             
-            if (!sellerId) {
-                showNotification('Error', 'Seller information not available', 'error');
-                return;
+            if (!sellerId) {                                              // Kiểm tra nếu không có seller ID
+                showNotification('Error', 'Seller information not available', 'error');  // Hiển thị thông báo lỗi
+                return;                                                   // Dừng hàm, không thực hiện redirect
             }
             
             // Redirect to seller profile page
-            window.location.href = '/customer/seller/' + sellerId;
+            window.location.href = '/customer/seller/' + sellerId;         // Chuyển hướng đến trang seller profile với seller ID
         }
 ```
 
@@ -74,101 +77,101 @@ Người dùng xem trang **Order History** (`/customer/orderhistory`), trong m�
 #### 2.1. Controller method xử lý
 
 ```295:391:src/main/java/banhangrong/su25/Controller/CustomerDashboardController.java
-    @GetMapping("/customer/seller/{sellerId}")
-    public String viewSeller(@PathVariable Long sellerId, Model model) {
+    @GetMapping("/customer/seller/{sellerId}")                            // Định nghĩa endpoint GET để xem seller profile
+    public String viewSeller(@PathVariable Long sellerId, Model model) {  // sellerId: ID seller từ URL, model: để truyền dữ liệu sang view
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            Users currentUser = null;
-            if (auth != null && auth.isAuthenticated()) {
-                String username = auth.getName();
-                currentUser = usersRepository.findByUsername(username).orElse(null);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();  // Lấy thông tin authentication hiện tại
+            Users currentUser = null;                                      // Khởi tạo biến lưu user đang đăng nhập
+            if (auth != null && auth.isAuthenticated()) {                  // Kiểm tra user đã đăng nhập chưa
+                String username = auth.getName();                          // Lấy username từ authentication
+                currentUser = usersRepository.findByUsername(username).orElse(null);  // Tìm user trong DB theo username
             }
             
-            Optional<Users> sellerOptional = usersRepository.findById(sellerId);
-            if (sellerOptional.isEmpty()) {
-                return "redirect:/customer/dashboard?error=seller_not_found";
+            Optional<Users> sellerOptional = usersRepository.findById(sellerId);  // Tìm seller trong DB theo ID
+            if (sellerOptional.isEmpty()) {                                // Nếu không tìm thấy seller
+                return "redirect:/customer/dashboard?error=seller_not_found";  // Redirect về dashboard với thông báo lỗi
             }
             
-            Users seller = sellerOptional.get();
+            Users seller = sellerOptional.get();                            // Lấy seller object từ Optional
             
-            List<Products> products = productsRepository.findBySellerId(sellerId);
+            List<Products> products = productsRepository.findBySellerId(sellerId);  // Lấy tất cả sản phẩm của seller
             
-            Map<Long, String> productImages = new HashMap<>();
-            for (Products product : products) {
+            Map<Long, String> productImages = new HashMap<>();              // Tạo Map để lưu hình ảnh sản phẩm (key: productId, value: imageUrl)
+            for (Products product : products) {                             // Duyệt qua từng sản phẩm
                 try {
-                    var primary = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(product.getProductId());
-                    if (primary != null && !primary.isEmpty()) {
-                        productImages.put(product.getProductId(), primary.get(0).getImageUrl());
-                    } else {
-                        var any = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(product.getProductId());
-                        if (any != null && !any.isEmpty()) {
-                            productImages.put(product.getProductId(), any.get(0).getImageUrl());
+                    var primary = productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(product.getProductId());  // Tìm ảnh primary của sản phẩm
+                    if (primary != null && !primary.isEmpty()) {           // Nếu có ảnh primary
+                        productImages.put(product.getProductId(), primary.get(0).getImageUrl());  // Lưu URL ảnh primary vào Map
+                    } else {                                               // Nếu không có ảnh primary
+                        var any = productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(product.getProductId());  // Tìm ảnh bất kỳ của sản phẩm
+                        if (any != null && !any.isEmpty()) {               // Nếu có ảnh
+                            productImages.put(product.getProductId(), any.get(0).getImageUrl());  // Lưu URL ảnh vào Map
                         }
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {}                             // Bỏ qua lỗi nếu không lấy được ảnh
             }
             
-            Long totalProducts = (long) products.size();
-            Long totalSales = productsRepository.totalUnitsSoldBySeller(sellerId);
+            Long totalProducts = (long) products.size();                    // Đếm tổng số sản phẩm
+            Long totalSales = productsRepository.totalUnitsSoldBySeller(sellerId);  // Tính tổng số lượng sản phẩm đã bán
             
-            List<ProductReviews> reviews = new java.util.ArrayList<>();
-            for (Products product : products) {
-                List<ProductReviews> productReviews = productReviewsRepository.findByProductIdOrderByCreatedAtDesc(product.getProductId());
-                for (ProductReviews review : productReviews) {
-                    usersRepository.findById(review.getUserId()).ifPresent(user -> {
-                        review.setUsername(user.getUsername());
+            List<ProductReviews> reviews = new java.util.ArrayList<>();     // Tạo list để lưu tất cả reviews
+            for (Products product : products) {                            // Duyệt qua từng sản phẩm
+                List<ProductReviews> productReviews = productReviewsRepository.findByProductIdOrderByCreatedAtDesc(product.getProductId());  // Lấy reviews của sản phẩm (mới nhất trước)
+                for (ProductReviews review : productReviews) {              // Duyệt qua từng review
+                    usersRepository.findById(review.getUserId()).ifPresent(user -> {  // Tìm user đã viết review
+                        review.setUsername(user.getUsername());             // Gán username vào review object
                     });
                 }
-                reviews.addAll(productReviews);
+                reviews.addAll(productReviews);                             // Thêm tất cả reviews của sản phẩm vào list tổng
             }
-            Long totalReviews = (long) reviews.size();
+            Long totalReviews = (long) reviews.size();                      // Đếm tổng số reviews
             
-            BigDecimal averageProductRating = BigDecimal.ZERO;
-            BigDecimal averageServiceRating = BigDecimal.ZERO;
+            BigDecimal averageProductRating = BigDecimal.ZERO;              // Khởi tạo rating trung bình sản phẩm = 0
+            BigDecimal averageServiceRating = BigDecimal.ZERO;               // Khởi tạo rating trung bình dịch vụ = 0
             
-            if (!reviews.isEmpty()) {
-                double productSum = reviews.stream()
-                    .filter(r -> r.getRating() != null)
-                    .mapToInt(ProductReviews::getRating)
-                    .average()
-                    .orElse(0.0);
-                averageProductRating = BigDecimal.valueOf(productSum);
+            if (!reviews.isEmpty()) {                                      // Nếu có reviews
+                double productSum = reviews.stream()                        // Tạo stream từ list reviews
+                    .filter(r -> r.getRating() != null)                    // Lọc chỉ lấy reviews có rating không null
+                    .mapToInt(ProductReviews::getRating)                    // Chuyển thành stream số nguyên (rating)
+                    .average()                                              // Tính trung bình
+                    .orElse(0.0);                                           // Nếu không có thì trả về 0.0
+                averageProductRating = BigDecimal.valueOf(productSum);      // Chuyển double thành BigDecimal
                 
-                double serviceSum = reviews.stream()
-                    .filter(r -> r.getServiceRating() != null)
-                    .mapToInt(ProductReviews::getServiceRating)
-                    .average()
-                    .orElse(0.0);
-                averageServiceRating = BigDecimal.valueOf(serviceSum);
+                double serviceSum = reviews.stream()                         // Tạo stream từ list reviews
+                    .filter(r -> r.getServiceRating() != null)             // Lọc chỉ lấy reviews có service rating không null
+                    .mapToInt(ProductReviews::getServiceRating)             // Chuyển thành stream số nguyên (service rating)
+                    .average()                                              // Tính trung bình
+                    .orElse(0.0);                                           // Nếu không có thì trả về 0.0
+                averageServiceRating = BigDecimal.valueOf(serviceSum);       // Chuyển double thành BigDecimal
             }
             
-            reviews.sort((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()));
-            if (reviews.size() > 10) {
-                reviews = reviews.subList(0, 10);
+            reviews.sort((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()));  // Sắp xếp reviews theo thời gian tạo (mới nhất trước)
+            if (reviews.size() > 10) {                                      // Nếu có nhiều hơn 10 reviews
+                reviews = reviews.subList(0, 10);                           // Chỉ lấy 10 reviews đầu tiên
             }
             
-            model.addAttribute("seller", seller);
-            model.addAttribute("products", products);
-            model.addAttribute("productImages", productImages);
-            model.addAttribute("totalProducts", totalProducts);
-            model.addAttribute("totalSales", totalSales);
-            model.addAttribute("averageProductRating", averageProductRating);
-            model.addAttribute("averageServiceRating", averageServiceRating);
-            model.addAttribute("totalReviews", totalReviews);
-            model.addAttribute("reviews", reviews);
+            model.addAttribute("seller", seller);                           // Thêm thông tin seller vào model
+            model.addAttribute("products", products);                        // Thêm danh sách sản phẩm vào model
+            model.addAttribute("productImages", productImages);              // Thêm Map hình ảnh vào model
+            model.addAttribute("totalProducts", totalProducts);              // Thêm tổng số sản phẩm vào model
+            model.addAttribute("totalSales", totalSales);                   // Thêm tổng số lượng đã bán vào model
+            model.addAttribute("averageProductRating", averageProductRating);  // Thêm rating trung bình sản phẩm vào model
+            model.addAttribute("averageServiceRating", averageServiceRating);  // Thêm rating trung bình dịch vụ vào model
+            model.addAttribute("totalReviews", totalReviews);                // Thêm tổng số reviews vào model
+            model.addAttribute("reviews", reviews);                          // Thêm danh sách reviews vào model
             
-            if (currentUser != null) {
-                model.addAttribute("user", currentUser);
+            if (currentUser != null) {                                      // Nếu user đã đăng nhập
+                model.addAttribute("user", currentUser);                    // Thêm thông tin user vào model
                 try {
-                    model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));
-                } catch (Exception ignored) {}
+                    model.addAttribute("cartCount", shoppingCartRepository.countByUserId(currentUser.getUserId()));  // Đếm số sản phẩm trong giỏ hàng và thêm vào model
+                } catch (Exception ignored) {}                               // Bỏ qua lỗi nếu không đếm được
             }
             
-            return "customer/seller-profile";
+            return "customer/seller-profile";                                // Trả về tên template để Spring render
             
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "redirect:/customer/dashboard?error=seller_view_error";
+        } catch (Exception e) {                                              // Bắt mọi exception
+            e.printStackTrace();                                             // In stack trace ra console để debug
+            return "redirect:/customer/dashboard?error=seller_view_error";  // Redirect về dashboard với thông báo lỗi
         }
     }
 ```
@@ -403,9 +406,9 @@ SELECT COUNT(*) FROM shopping_cart WHERE user_id = ?
 #### 4.2. Hiển thị thông tin Seller
 
 ```319:322:src/main/resources/templates/customer/seller-profile.html
-					<div class="seller-profile">
-						<div class="seller-avatar" th:text="${seller != null ? seller.username.substring(0,1).toUpperCase() : 'S'}">S</div>
-						<h1 class="seller-name" th:text="${seller != null ? seller.username : 'Seller name'}">Seller name</h1>
+					<div class="seller-profile">                                                                    // Container chứa thông tin seller
+						<div class="seller-avatar" th:text="${seller != null ? seller.username.substring(0,1).toUpperCase() : 'S'}">S</div>  // Hiển thị chữ cái đầu username (uppercase), mặc định 'S'
+						<h1 class="seller-name" th:text="${seller != null ? seller.username : 'Seller name'}">Seller name</h1>  // Hiển thị username của seller, mặc định 'Seller name'
 					</div>
 ```
 
@@ -419,30 +422,30 @@ SELECT COUNT(*) FROM shopping_cart WHERE user_id = ?
 #### 4.3. Hiển thị Rating
 
 ```326:351:src/main/resources/templates/customer/seller-profile.html
-						<div class="rating-item">
-							<div class="rating-label">Product Average Rating</div>
-							<div class="rating-stars">
-								<span class="stars" th:if="${averageProductRating != null and averageProductRating > 0}">
-									<th:block th:each="i : ${#numbers.sequence(1, 5)}">
-										<span th:if="${i <= averageProductRating}">★</span>
-										<span th:unless="${i <= averageProductRating}" style="color: #d1d5db;">★</span>
+						<div class="rating-item">                                                                  // Container một loại rating
+							<div class="rating-label">Product Average Rating</div>                                 // Label "Product Average Rating"
+							<div class="rating-stars">                                                              // Container chứa sao và số rating
+								<span class="stars" th:if="${averageProductRating != null and averageProductRating > 0}">  // Hiển thị sao nếu có rating > 0
+									<th:block th:each="i : ${#numbers.sequence(1, 5)}">                              // Lặp 5 lần (từ 1 đến 5)
+										<span th:if="${i <= averageProductRating}">★</span>                          // Sao vàng nếu i <= rating
+										<span th:unless="${i <= averageProductRating}" style="color: #d1d5db;">★</span>  // Sao xám nếu i > rating
 									</th:block>
 								</span>
-								<span class="stars" th:unless="${averageProductRating != null and averageProductRating > 0}" style="color: #d1d5db;">★★★★★</span>
-								<span class="rating-value" th:text="${averageProductRating != null ? #numbers.formatDecimal(averageProductRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">0.0</span>
+								<span class="stars" th:unless="${averageProductRating != null and averageProductRating > 0}" style="color: #d1d5db;">★★★★★</span>  // 5 sao xám nếu không có rating
+								<span class="rating-value" th:text="${averageProductRating != null ? #numbers.formatDecimal(averageProductRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">0.0</span>  // Số rating (format 1 chữ số thập phân)
 							</div>
 						</div>
-						<div class="rating-item">
-							<div class="rating-label">Service Average Rating</div>
-							<div class="rating-stars">
-								<span class="stars" th:if="${averageServiceRating != null and averageServiceRating > 0}">
-									<th:block th:each="i : ${#numbers.sequence(1, 5)}">
-										<span th:if="${i <= averageServiceRating}">★</span>
-										<span th:unless="${i <= averageServiceRating}" style="color: #d1d5db;">★</span>
+						<div class="rating-item">                                                                  // Container một loại rating
+							<div class="rating-label">Service Average Rating</div>                                 // Label "Service Average Rating"
+							<div class="rating-stars">                                                              // Container chứa sao và số rating
+								<span class="stars" th:if="${averageServiceRating != null and averageServiceRating > 0}">  // Hiển thị sao nếu có rating > 0
+									<th:block th:each="i : ${#numbers.sequence(1, 5)}">                              // Lặp 5 lần (từ 1 đến 5)
+										<span th:if="${i <= averageServiceRating}">★</span>                          // Sao vàng nếu i <= rating
+										<span th:unless="${i <= averageServiceRating}" style="color: #d1d5db;">★</span>  // Sao xám nếu i > rating
 									</th:block>
 								</span>
-								<span class="stars" th:unless="${averageServiceRating != null and averageServiceRating > 0}" style="color: #d1d5db;">★★★★★</span>
-								<span class="rating-value" th:text="${averageServiceRating != null ? #numbers.formatDecimal(averageServiceRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">0.0</span>
+								<span class="stars" th:unless="${averageServiceRating != null and averageServiceRating > 0}" style="color: #d1d5db;">★★★★★</span>  // 5 sao xám nếu không có rating
+								<span class="rating-value" th:text="${averageServiceRating != null ? #numbers.formatDecimal(averageServiceRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">0.0</span>  // Số rating (format 1 chữ số thập phân)
 							</div>
 						</div>
 ```
@@ -457,10 +460,10 @@ SELECT COUNT(*) FROM shopping_cart WHERE user_id = ?
 #### 4.4. Hiển thị số lượng đã bán
 
 ```355:359:src/main/resources/templates/customer/seller-profile.html
-					<div class="seller-sales">
-						<div class="sales-label">sold</div>
-						<div class="sales-value" th:text="${totalSales != null ? totalSales : '0'}">100</div>
-						<div class="sales-unit">product</div>
+					<div class="seller-sales">                                                                    // Container hiển thị thống kê bán hàng
+						<div class="sales-label">sold</div>                                                      // Label "sold"
+						<div class="sales-value" th:text="${totalSales != null ? totalSales : '0'}">100</div>  // Hiển thị số lượng đã bán từ model, mặc định '0'
+						<div class="sales-unit">product</div>                                                    // Đơn vị "product"
 					</div>
 ```
 
@@ -471,21 +474,21 @@ SELECT COUNT(*) FROM shopping_cart WHERE user_id = ?
 #### 4.5. Hiển thị danh sách sản phẩm
 
 ```371:389:src/main/resources/templates/customer/seller-profile.html
-			<div class="products-grid" th:if="${products != null and !products.empty}">
-				<a class="product-card" th:each="product : ${products}" th:href="@{'/product/' + ${product.productId}}">
-					<div class="product-image">
-						<img th:if="${productImages != null and productImages[product.productId] != null}" 
-						     th:src="${productImages[product.productId]}" 
-						     th:alt="${product.name}"
-						     onerror="this.style.display='none'; this.parentElement.innerHTML='📦';">
-						<span th:unless="${productImages != null and productImages[product.productId] != null}">📦</span>
+			<div class="products-grid" th:if="${products != null and !products.empty}">                        // Grid hiển thị sản phẩm, chỉ hiện khi có sản phẩm
+				<a class="product-card" th:each="product : ${products}" th:href="@{'/product/' + ${product.productId}}">  // Link đến chi tiết sản phẩm, lặp qua từng sản phẩm
+					<div class="product-image">                                                                  // Container chứa hình ảnh sản phẩm
+						<img th:if="${productImages != null and productImages[product.productId] != null}"      // Hiển thị ảnh nếu có trong Map
+						     th:src="${productImages[product.productId]}"                                        // URL ảnh từ Map productImages
+						     th:alt="${product.name}"                                                           // Alt text = tên sản phẩm
+						     onerror="this.style.display='none'; this.parentElement.innerHTML='📦';">           // Nếu ảnh lỗi thì hiển thị icon 📦
+						<span th:unless="${productImages != null and productImages[product.productId] != null}">📦</span>  // Hiển thị icon nếu không có ảnh
 					</div>
-					<div class="product-info">
-						<div class="product-name" th:text="${product.name}">Microsoft Office 2021</div>
-						<div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">1,250,000₫</div>
-						<div class="product-meta">
-							<span>⭐ <span th:text="${product.averageRating != null ? #numbers.formatDecimal(product.averageRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">4.5</span></span>
-							<span>Sold: <span th:text="${product.totalSales != null ? product.totalSales : 0}">0</span></span>
+					<div class="product-info">                                                                  // Container thông tin sản phẩm
+						<div class="product-name" th:text="${product.name}">Microsoft Office 2021</div>        // Tên sản phẩm
+						<div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">1,250,000₫</div>  // Giá sản phẩm (format số với dấu phẩy + ₫)
+						<div class="product-meta">                                                               // Container metadata (rating, số lượng bán)
+							<span>⭐ <span th:text="${product.averageRating != null ? #numbers.formatDecimal(product.averageRating, 1, 'COMMA', 1, 'POINT') : '0.0'}">4.5</span></span>  // Rating trung bình (format 1 chữ số thập phân)
+							<span>Sold: <span th:text="${product.totalSales != null ? product.totalSales : 0}">0</span></span>  // Số lượng đã bán
 						</div>
 					</div>
 				</a>

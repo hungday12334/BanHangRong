@@ -40,12 +40,22 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<?> forgotPassword(@RequestParam(required = false) String email) {
         try {
-            authService.forgotPassword(email);
-            return ResponseEntity.ok(Map.of("message", "Email đặt lại mật khẩu đã được gửi đến " + email));
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
+            }
+            
+            authService.forgotPassword(email.trim());
+            return ResponseEntity.ok(Map.of("message", "Password reset email has been sent to " + email));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            String errorMessage = e.getMessage();
+            if (errorMessage == null || errorMessage.isEmpty()) {
+                errorMessage = "An error occurred. Please try again later.";
+            }
+            return ResponseEntity.badRequest().body(Map.of("error", errorMessage));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "An unexpected error occurred. Please try again later."));
         }
     }
 
