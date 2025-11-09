@@ -141,6 +141,15 @@ public class ChatController {
             messagingTemplate.convertAndSend(conversationTopic, responseMessage);
             System.out.println("✅ Message broadcasted to conversation");
 
+            // 🔔 THÊM: Gửi notification đến receiver để cập nhật badge và last message
+            // Điều này giúp cập nhật realtime ngay cả khi receiver đang ở Welcome screen hoặc conversation khác
+            if (savedMessage.getReceiverId() != null) {
+                String receiverTopic = "/topic/user/" + savedMessage.getReceiverId() + "/messages";
+                messagingTemplate.convertAndSend(receiverTopic, responseMessage);
+                System.out.println("🔔 Notification sent to receiver: " + receiverTopic);
+            }
+
+
             System.out.println("🎉 Message delivered successfully");
 
         } catch (Exception e) {

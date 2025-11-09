@@ -218,9 +218,7 @@
         }
 
         .conversation-item.active {
-            background: var(--card, rgba(59, 130, 246, 0.15));
-            border-left: 3px solid var(--accent, #3b82f6);
-            box-shadow: inset 0 0 10px var(--accent, rgba(59, 130, 246, 0.08));
+            background: var(--bg-elev, rgba(255, 255, 255, 0.08));
         }
 
         /* Pinned conversation indicator */
@@ -1777,7 +1775,7 @@
                         <div class="conversations-header">
                             <h2><i class="ti ti-messages"></i> Messages</h2>
                         </div>
-                        <div class="user-info">
+                        <div class="user-info" onclick="window.location.href='/seller/chat'" style="cursor: pointer;">
                             <div class="avatar" id="currentUserAvatar">
                                 <img th:if="${user != null && user.avatarUrl != null}"
                                      th:src="@{${user.avatarUrl}}" alt="Avatar" />
@@ -2095,7 +2093,22 @@
 
         let totalUnread = 0;
 
-        conversations.forEach(conv => {
+        console.log('🔄 Rendering conversations list, total:', conversations.length);
+
+        // Sort conversations: Pinned first, then by lastMessageTime (most recent first)
+        const sortedConversations = [...conversations].sort((a, b) => {
+            // Pinned conversations come first
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+
+            // Both pinned or both not pinned: sort by lastMessageTime
+            const timeA = a.lastMessageTime ? new Date(a.lastMessageTime) : new Date(a.createdAt || 0);
+            const timeB = b.lastMessageTime ? new Date(b.lastMessageTime) : new Date(b.createdAt || 0);
+            return timeB - timeA; // Most recent first
+        });
+
+        sortedConversations.forEach(conv => {
+            // ...existing code...
             const isCustomer = currentUser.userType === 'CUSTOMER';
             const otherPartyName = isCustomer ? conv.sellerName : conv.customerName;
             const avatar = otherPartyName ? otherPartyName.substring(0, 2).toUpperCase() : '?';
@@ -2114,11 +2127,13 @@
 
             // Calculate unread
             const unreadCount = conv.unreadCount || 0;
-            totalUnread += unreadCount;
+            const isActiveConv = currentConversation && currentConversation.id === conv.id;
+            // Don't count unread for active conversation in total, but still show it
+            totalUnread += isActiveConv ? 0 : unreadCount;
 
             const item = document.createElement('div');
             item.className = 'conversation-item';
-            if (currentConversation && currentConversation.id === conv.id) {
+            if (isActiveConv) {
                 item.classList.add('active');
             }
 
@@ -2127,8 +2142,11 @@
                 item.classList.add('pinned');
             }
 
-            // Format unread badge - show "9+" if more than 9
+            // Format unread badge - show "9+" if more than 9, but don't show for active conversation
             const unreadBadgeText = unreadCount > 9 ? '9+' : unreadCount;
+            const shouldShowBadge = unreadCount > 0 && !isActiveConv;
+
+            console.log(`Conv ${conv.id} (${otherPartyName}): unread=${unreadCount}, isActive=${isActiveConv}, showBadge=${shouldShowBadge}`);
 
             item.innerHTML = `
                 <span class="pin-indicator">📌</span>
@@ -2140,7 +2158,7 @@
                     </div>
                     <div class="conversation-last-message" style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="flex:1;">${escapeHtml(lastMessagePreview)}</span>
-                        ${unreadCount > 0 ? `<span class="unread-badge" data-conversation-id="${conv.id}">${unreadBadgeText}</span>` : ''}
+                        ${shouldShowBadge ? `<span class="unread-badge" data-conversation-id="${conv.id}">${unreadBadgeText}</span>` : ''}
                     </div>
                 </div>
                 <div class="conversation-actions">
@@ -2641,8 +2659,10 @@
     }
 
     function handleNewMessage(msg) {
-        console.log('🆕 Handling new message from:', msg.senderName);
+        console.log('🆕 Handling new message from:', msg.senderName, 'conversationId:', msg.conversationId);
+        console.log('📍 Current conversation:', currentConversation ? currentConversation.id : 'NONE (Welcome screen)');
 
+        // Play notification sound if message is from someone else
         if (msg.senderId !== currentUser.userId) {
             playNotificationSound();
 
@@ -2654,14 +2674,66 @@
             }
         }
 
-        if (currentConversation && msg.conversationId === currentConversation.id) {
-            displayMessage(msg);
-            // Mark as read immediately if conversation is open
-            markAsRead();
-        } else {
-            // Update unread count for other conversations
+        // Find the conversation in memory
+        const conv = conversations.find(c => c.id === msg.conversationId);
+
+        if (!conv) {
+            // New conversation or not loaded yet - fetch from API
+            console.log('⚠️ Conversation not found in memory, loading from API...');
             loadConversations();
+            return;
         }
+
+        // Update conversation data
+        conv.lastMessage = msg.content;
+        conv.lastMessageTime = msg.timestamp;
+        console.log('✅ Updated lastMessage:', msg.content.substring(0, 30) + '...');
+
+        // Check if this message is for the currently open conversation
+        const isCurrentConversation = currentConversation && msg.conversationId === currentConversation.id;
+
+        if (isCurrentConversation) {
+            // Message is for the open conversation
+            console.log('💬 Message is for current conversation - displaying...');
+
+            // Check if message already exists (to prevent duplicates)
+            const messageId = msg.id || msg.messageId;
+            const existingMessage = document.querySelector(`[data-message-id="${messageId}"]`);
+
+            if (existingMessage) {
+                console.log('⚠️ Message already displayed, skipping duplicate');
+                // If it's a temp message, update it with real data
+                if (messageId.toString().startsWith('temp_')) {
+                    existingMessage.setAttribute('data-message-id', msg.id);
+                    console.log('✅ Updated temp message with real ID:', msg.id);
+                }
+            } else {
+                // Display new message
+                displayMessage(msg);
+            }
+
+            markAsRead();
+            // Don't increase unread count
+        } else {
+            // Message is for another conversation - increase unread count
+            console.log('📨 Message is for another conversation - updating badge...');
+            conv.unreadCount = (conv.unreadCount || 0) + 1;
+            console.log('✅ Updated unread count:', conv.unreadCount);
+
+            // 🔔 THÊM: Add message to conversation.messages array để khi mở conversation sẽ thấy ngay
+            if (!conv.messages) {
+                conv.messages = [];
+            }
+            // Check if message already exists in array
+            const existsInArray = conv.messages.some(m => m.id === msg.id);
+            if (!existsInArray) {
+                conv.messages.push(msg);
+                console.log('✅ Added message to conversation.messages array');
+            }
+        }
+
+        // Always re-render the sidebar to show updated badge/message
+        renderConversationsList();
     }
 
     function scrollToBottom(forceInstant = false) {
