@@ -741,7 +741,7 @@ body {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <input type="text" placeholder="search" id="searchInput" th:value="${search}">
+                        <input type="text" placeholder="Search by product name or seller ID" id="searchInput" th:value="${search}">
                     </div>
                     <div class="sort-select">
                         <select id="sortSelect" class="sort-dropdown">
@@ -1209,26 +1209,60 @@ body {
             });
         });
 
-        // Search functionality - redirect to search with pagination
+        // Search functionality with debounce - redirect to search with pagination
+        let searchTimeout = null;
         document.getElementById('searchInput').addEventListener('input', function() {
-            const searchTerm = this.value.trim();
-            const url = new URL(window.location);
-            const currentSort = url.searchParams.get('sort') || 'newest';
-            const currentDateFilter = url.searchParams.get('dateFilter') || 'all';
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
             
-            if (searchTerm.length > 0) {
-                // Redirect to search with pagination
-                url.searchParams.set('search', searchTerm);
-                url.searchParams.set('page', '0'); // Reset to first page
-                url.searchParams.set('sort', currentSort); // Keep current sort
-                url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
-                window.location.href = url.toString();
-            } else {
-                // Clear search
-                url.searchParams.delete('search');
+            // Set new timeout - wait 500ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                const searchTerm = this.value.trim();
+                const url = new URL(window.location);
+                const currentSort = url.searchParams.get('sort') || 'newest';
+                const currentDateFilter = url.searchParams.get('dateFilter') || 'all';
+                
+                if (searchTerm.length > 0) {
+                    // Redirect to search with pagination
+                    url.searchParams.set('search', searchTerm);
+                    url.searchParams.set('page', '0'); // Reset to first page
+                    url.searchParams.set('sort', currentSort); // Keep current sort
+                    url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
+                    window.location.href = url.toString();
+                } else {
+                    // Clear search
+                    url.searchParams.delete('search');
+                    url.searchParams.set('page', '0');
+                    url.searchParams.set('sort', currentSort); // Keep current sort
+                    url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
+                    window.location.href = url.toString();
+                }
+            }, 500); // Wait 500ms after user stops typing
+        });
+        
+        // Also handle Enter key for immediate search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                // Clear timeout if user presses Enter
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                
+                const searchTerm = this.value.trim();
+                const url = new URL(window.location);
+                const currentSort = url.searchParams.get('sort') || 'newest';
+                const currentDateFilter = url.searchParams.get('dateFilter') || 'all';
+                
+                if (searchTerm.length > 0) {
+                    url.searchParams.set('search', searchTerm);
+                } else {
+                    url.searchParams.delete('search');
+                }
                 url.searchParams.set('page', '0');
-                url.searchParams.set('sort', currentSort); // Keep current sort
-                url.searchParams.set('dateFilter', currentDateFilter); // Keep current date filter
+                url.searchParams.set('sort', currentSort);
+                url.searchParams.set('dateFilter', currentDateFilter);
                 window.location.href = url.toString();
             }
         });

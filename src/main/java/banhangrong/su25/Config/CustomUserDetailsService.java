@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
         // Kiểm tra user có active không
-        if (!user.getIsActive()) {
+        if (user.getIsActive() == null || !user.getIsActive()) {
             throw new UsernameNotFoundException("User is not active: " + username);
         }
 

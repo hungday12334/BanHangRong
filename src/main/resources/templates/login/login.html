@@ -341,7 +341,11 @@
 
         // Show error message if present in URL
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('error')) {
+        if (urlParams.get('error') === 'account_deactivated') {
+            const errorDiv = document.getElementById('errorMessage');
+            document.getElementById('errorText').textContent = 'Your account has been deactivated by admin. Contact email for more information.';
+            errorDiv.style.display = 'flex';
+        } else if (urlParams.get('error')) {
             const errorDiv = document.getElementById('errorMessage');
             document.getElementById('errorText').textContent = 'Invalid username or password!';
             errorDiv.style.display = 'flex';
