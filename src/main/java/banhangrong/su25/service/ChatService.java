@@ -238,7 +238,7 @@ public class ChatService {
 
             System.out.println("✅ Conversation found: " + conversation.getId());
 
-            // 🚨 QUAN TRỌNG: Đảm bảo receiverId được set đúng
+            // Đảm bảo receiverId được set đúng
             if (message.getReceiverId() == null) {
                 if (message.getSenderId().equals(conversation.getCustomerId())) {
                     message.setReceiverId(conversation.getSellerId());
@@ -248,7 +248,6 @@ public class ChatService {
                 System.out.println("✅ Auto-set receiver: " + message.getReceiverId());
             }
 
-            // Set các field bắt buộc khác
             if (message.getCreatedAt() == null) {
                 message.setCreatedAt(LocalDateTime.now());
             }
@@ -268,7 +267,7 @@ public class ChatService {
 
             System.out.println("💽 Saving message to database...");
 
-            // 🚨 LƯU VÀO DATABASE
+
             ChatMessage savedMessage = messageRepository.save(message);
             System.out.println("✅ Message saved with ID: " + savedMessage.getId());
 
@@ -289,7 +288,7 @@ public class ChatService {
         }
     }
 
-    // 🚨 THÊM METHOD ĐỂ TẠO CONVERSATION NẾU CHƯA CÓ
+    // Tạo conversation mới từ message nếu chưa có
     private Conversation createConversationFromMessage(ChatMessage message) {
         System.out.println("🆕 Creating new conversation for message...");
 

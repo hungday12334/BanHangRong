@@ -43,13 +43,13 @@ public class ChatController {
         try {
             System.out.println("=== 🚀 WEBSOCKET MESSAGE RECEIVED ===");
 
-            // 🚨 CHUYỂN ĐỔI từ Map sang ChatMessage
+            // chuyen từ Map sang ChatMessage
             ChatMessage message = new ChatMessage();
             message.setConversationId((String) messageData.get("conversationId"));
             message.setSenderId(Long.valueOf(messageData.get("senderId").toString()));
             message.setContent((String) messageData.get("content"));
 
-            // Set các field khác
+
             if (messageData.get("receiverId") != null) {
                 message.setReceiverId(Long.valueOf(messageData.get("receiverId").toString()));
             }
@@ -60,14 +60,12 @@ public class ChatController {
                 message.setSenderRole((String) messageData.get("senderRole"));
             }
 
-            // Set message type (TEXT, IMAGE, FILE)
             if (messageData.get("messageType") != null) {
                 message.setMessageType((String) messageData.get("messageType"));
             } else {
                 message.setMessageType("TEXT");
             }
 
-            // Set file attachment fields if present
             if (messageData.get("fileUrl") != null) {
                 message.setFileUrl((String) messageData.get("fileUrl"));
             }
@@ -81,7 +79,6 @@ public class ChatController {
                 message.setFileSize(Long.valueOf(messageData.get("fileSize").toString()));
             }
 
-            // Set reply fields if present (NEW)
             if (messageData.get("replyToMessageId") != null) {
                 message.setReplyToMessageId((String) messageData.get("replyToMessageId"));
             }
@@ -92,12 +89,12 @@ public class ChatController {
                 message.setReplyToContent((String) messageData.get("replyToContent"));
             }
 
-            // 🚨 LƯU VÀO DATABASE
+            // luu vao database
             System.out.println("💾 Saving message to database...");
             ChatMessage savedMessage = chatService.addMessage(message);
             System.out.println("✅ Message saved to DB with ID: " + savedMessage.getId());
 
-            // 🚨 Gửi tin nhắn đến CẢ HAI người - CHỈ 1 LẦN
+            // gui tin nhan de ca 2 ng
             String conversationTopic = "/topic/conversation/" + savedMessage.getConversationId();
 
             System.out.println("📤 Broadcasting to: " + conversationTopic);
@@ -137,12 +134,11 @@ public class ChatController {
             responseMessage.put("reactions", reactionsObj);
             responseMessage.put("deleted", savedMessage.getDeleted());
 
-            // 🚨 Gửi DUY NHẤT 1 lần đến conversation topic
+            // gui duy nhat 1 lan den conversation topic
             messagingTemplate.convertAndSend(conversationTopic, responseMessage);
             System.out.println("✅ Message broadcasted to conversation");
 
-            // 🔔 THÊM: Gửi notification đến receiver để cập nhật badge và last message
-            // Điều này giúp cập nhật realtime ngay cả khi receiver đang ở Welcome screen hoặc conversation khác
+            // Gui thong bao den nguoi nhan neu co
             if (savedMessage.getReceiverId() != null) {
                 String receiverTopic = "/topic/user/" + savedMessage.getReceiverId() + "/messages";
                 messagingTemplate.convertAndSend(receiverTopic, responseMessage);
@@ -503,9 +499,7 @@ public class ChatController {
 
     // ===== ENHANCED CHAT FEATURES =====
 
-    /**
-     * Add emoji reaction to a message
-     */
+    // Add emoji reaction to a message
     @MessageMapping("/chat.addReaction")
     public void addReaction(@Payload MessageReactionDTO reactionDTO) {
         try {
@@ -540,9 +534,7 @@ public class ChatController {
         }
     }
 
-    /**
-     * Remove emoji reaction from a message
-     */
+    // Remove emoji reaction from a message
     @MessageMapping("/chat.removeReaction")
     public void removeReaction(@Payload MessageReactionDTO reactionDTO) {
         try {
@@ -577,9 +569,7 @@ public class ChatController {
         }
     }
 
-    /**
-     * Soft delete a message (mark as deleted)
-     */
+    // Soft delete a message
     @MessageMapping("/chat.deleteMessage")
     public void deleteMessage(@Payload MessageDeleteDTO deleteDTO) {
         try {
@@ -607,9 +597,7 @@ public class ChatController {
         }
     }
 
-    /**
-     * Permanently delete a message
-     */
+    // Permanent delete a message
     @MessageMapping("/chat.permanentDeleteMessage")
     public void permanentDeleteMessage(@Payload MessageDeleteDTO deleteDTO) {
         try {
@@ -636,9 +624,7 @@ public class ChatController {
         }
     }
 
-    /**
-     * Helper method to parse reactions JSON string to Object for proper emoji display
-     */
+    // Phương pháp trợ giúp để phân tích chuỗi JSON phản ứng thành Đối tượng
     private Object parseReactionsJson(String reactionsJson) {
         if (reactionsJson == null || reactionsJson.trim().isEmpty() || "null".equals(reactionsJson)) {
             return null;
@@ -655,10 +641,7 @@ public class ChatController {
 
     // ===== CONVERSATION ACTIONS API (PIN & DELETE) =====
 
-    /**
-     * Pin a conversation for the current user
-     * POST /api/conversations/{conversationId}/pin
-     */
+    // Pin a conversation for the current user
     @PostMapping("/api/conversations/{conversationId}/pin")
     @ResponseBody
     public ResponseEntity<?> pinConversation(
