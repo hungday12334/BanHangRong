@@ -1338,20 +1338,6 @@ body {
             });
         }
 
-        // VNPay topup function
-        function topupPrompt(e){
-            e.preventDefault();
-            const v = prompt('Enter amount to top up (VND):', '200000');
-            if(!v) return false;
-            const clean = v.replace(/[^0-9]/g,'');
-            if(!clean){ 
-                showNotification('Invalid Input', 'Please enter a valid amount', 'error');
-                return false; 
-            }
-            document.getElementById('topupAmountInput').value = clean;
-            e.target.submit();
-            return true;
-        }
 
         // Rate Modal Functions
         let currentOrderCard = null;

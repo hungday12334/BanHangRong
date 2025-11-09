@@ -2,446 +2,522 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="header">
-	<style>
-		:root {
-			--bg: #f5f7fb;
-			--card: #ffffff;
-			--ink: #0f172a;
-			--muted: #6b7280;
-			--brand: #0ea5e9;
-			--chip: #e5e7eb;
-			--line: #eaeef4;
-		}
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #0ea5e9;
+            --chip: #e5e7eb;
+            --line: #eaeef4;
+        }
 
-		.topbar {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			padding: 10px 12px;
-			border-bottom: 1px solid var(--line);
-			background: var(--card);
-			flex-wrap: nowrap;
-		}
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
+            background: var(--card);
+            flex-wrap: nowrap;
+        }
 
-		.brand {
-			font-weight: 800;
-			letter-spacing: .2px;
-			text-decoration: none;
-			color: inherit;
-		}
+        .brand {
+            font-weight: 800;
+            letter-spacing: .2px;
+            text-decoration: none;
+            color: inherit;
+        }
 
-		.brand:hover {
-			color: var(--brand);
-		}
+        .brand:hover {
+            color: var(--brand);
+        }
 
-		.top-actions {
-			margin-left: auto;
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			position: relative;
-		}
+        .top-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
 
-		.user-btn {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			cursor: pointer;
-			color: #111827;
-			border: 1px solid var(--line);
-			padding: 6px 10px;
-			border-radius: 8px;
-			background: #fff;
-			white-space: nowrap;
-		}
-		
-		.user-btn .wallet-badge {
-			margin-left: 8px;
-			padding: 4px 8px;
-			background: #f0f9ff;
-			border: 1px solid #bae6fd;
-			border-radius: 6px;
-			font-weight: 600;
-			color: #0369a1;
-			font-size: 12px;
-		}
-		
-		@media (max-width: 768px) {
-			.user-btn .wallet-badge {
-				display: none;
-			}
-		}
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #111827;
+            border: 1px solid var(--line);
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #fff;
+            white-space: nowrap;
+        }
 
-		.user-menu {
-			position: absolute;
-			right: 0;
-			top: 48px;
-			background: #fff;
-			border: 1px solid var(--line);
-			border-radius: 10px;
-			box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
-			width: 200px;
-			display: none;
-			z-index: 5;
-		}
+        .user-btn .wallet-badge {
+            margin-left: 8px;
+            padding: 4px 8px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #0369a1;
+            font-size: 12px;
+        }
 
-		.user-menu .item {
-			display: block;
-			padding: 10px 12px;
-			color: #111827;
-			text-decoration: none;
-		}
+        @media (max-width: 768px) {
+            .user-btn .wallet-badge {
+                display: none;
+            }
+        }
 
-		.user-menu .item:hover {
-			background: #f3f4f6;
-		}
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: 48px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+            width: 200px;
+            display: none;
+            z-index: 5;
+        }
 
-		.search {
-			position: relative;
-		}
+        .user-menu .item {
+            display: block;
+            padding: 10px 12px;
+            color: #111827;
+            text-decoration: none;
+        }
 
-		.search input {
-			height: 34px;
-			width: 220px;
-			padding: 0 12px;
-			border: 1px solid var(--line);
-			border-radius: 8px;
-			outline: none;
-		}
+        .user-menu .item:hover {
+            background: #f3f4f6;
+        }
 
-		.search button {
-			padding: 8px 12px;
-			background: var(--brand);
-			color: #fff;
-			border: none;
-			border-radius: 8px;
-			cursor: pointer;
-		}
+        .search {
+            position: relative;
+        }
 
-		.search a {
-			padding: 8px 12px;
-			background: #6b7280;
-			color: #fff;
-			text-decoration: none;
-			border-radius: 8px;
-			display: flex;
-			align-items: center;
-		}
+        .search input {
+            height: 34px;
+            width: 220px;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            outline: none;
+        }
 
-		.cart {
-			position: relative;
-			width: 28px;
-			height: 28px;
-			display: grid;
-			place-items: center;
-			border: 1px solid var(--line);
-			border-radius: 8px;
-			text-decoration: none;
-			color: #111827;
-		}
+        .search button {
+            padding: 8px 12px;
+            background: var(--brand);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
-		.cart .badge {
-			position: absolute;
-			top: -6px;
-			right: -6px;
-			background: #ef4444;
-			color: #fff;
-			min-width: 18px;
-			height: 18px;
-			border-radius: 9px;
-			font-size: 11px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0 5px;
-		}
+        .search a {
+            padding: 8px 12px;
+            background: #6b7280;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
 
-		.notification-icon {
-			position: relative;
-			width: 28px;
-			height: 28px;
-			display: grid;
-			place-items: center;
-			border: 1px solid var(--line);
-			border-radius: 8px;
-			text-decoration: none;
-			color: #111827;
-			font-size: 18px;
-			background: #fff;
-		}
+        .cart {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            text-decoration: none;
+            color: #111827;
+        }
 
-		.notification-icon:hover {
-			background: #f3f4f6;
-		}
+        .cart .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #fff;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
 
-		.notification-icon .badge {
-			position: absolute;
-			top: -6px;
-			right: -6px;
-			background: #ef4444;
-			color: #fff;
-			min-width: 18px;
-			height: 18px;
-			border-radius: 9px;
-			font-size: 11px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0 5px;
-			font-weight: 700;
-		}
+        .notification-icon {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            text-decoration: none;
+            color: #111827;
+            font-size: 18px;
+            background: #fff;
+        }
 
-		.nav {
-			display: flex;
-			gap: 6px;
-			margin: 0 8px;
-			flex: 1;
-			overflow: auto;
-			white-space: nowrap;
-		}
+        .notification-icon:hover {
+            background: #f3f4f6;
+        }
 
-		.nav a {
-			text-decoration: none;
-			color: #111827;
-			font-weight: 500;
-			padding: 6px 8px;
-			border-radius: 8px;
-			background: none !important;
-			white-space: nowrap;
-		}
+        .notification-icon .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #fff;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            font-weight: 700;
+        }
 
-		.nav a:hover {
-			background: #f3f4f6 !important;
-			color: #111827 !important;
-		}
+        .nav {
+            display: flex;
+            gap: 6px;
+            margin: 0 8px;
+            flex: 1;
+            overflow: auto;
+            white-space: nowrap;
+        }
 
-		.nav a.active {
-			background: var(--brand) !important;
-			color: #fff !important;
-		}
+        .nav a {
+            text-decoration: none;
+            color: #111827;
+            font-weight: 500;
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: none !important;
+            white-space: nowrap;
+        }
 
-		@media (max-width: 900px) {
-			.search input {
-				width: 180px;
-			}
-		}
-	</style>
+        .nav a:hover {
+            background: #f3f4f6 !important;
+            color: #111827 !important;
+        }
 
-	<div class="topbar">
-		<a href="/customer/dashboard" class="brand">BanHangRong</a>
-		<nav class="nav" aria-label="Main">
-			<a href="/customer/dashboard">Home</a>
-			<a href="/customer/categories">Category</a>
-			<a href="/vouchers">Voucher</a>
-			<a href="/customer/chat" style="position: relative;">
-				💬 Chat
-				<span class="badge bg-danger" id="unreadChatCount" style="display: none; position: absolute; top: -8px; right: -12px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); align-items: center; justify-content: center;">0</span>
-			</a>
-			<a href="/customer/support">Support</a>
-		</nav>
-		<div class="top-actions">
-			<a href="/customer/notifications" class="notification-icon" title="Notifications" aria-label="Notifications" th:if="${user != null}">
-				🔔
-				<span class="badge" id="notificationBadge" style="display: none;">0</span>
-			</a>
-			<div class="user" style="position:relative">
-				<button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-					<span th:text="${user != null ? user.username : 'Guest'}">Guest</span>
-					<span class="wallet-badge" th:if="${user != null and user.balance != null}">
-						💰 <span th:text="${#numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
+        .nav a.active {
+            background: var(--brand) !important;
+            color: #fff !important;
+        }
+
+        @media (max-width: 900px) {
+            .search input {
+                width: 180px;
+            }
+        }
+    </style>
+
+    <div class="topbar">
+        <a href="/customer/dashboard" class="brand">BanHangRong</a>
+        <nav class="nav" aria-label="Main">
+            <a href="/customer/dashboard">Home</a>
+            <a href="/customer/categories">Category</a>
+            <a href="/vouchers">Voucher</a>
+            <a href="/customer/chat" style="position: relative;">
+                💬 Chat
+                <span class="badge bg-danger" id="unreadChatCount"
+                      style="display: none; position: absolute; top: -8px; right: -12px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); align-items: center; justify-content: center;">0</span>
+            </a>
+            <a href="/customer/support">Support</a>
+        </nav>
+        <div class="top-actions">
+            <a href="/customer/notifications" class="notification-icon" title="Notifications" aria-label="Notifications"
+               th:if="${user != null}">
+                🔔
+                <span class="badge" id="notificationBadge" style="display: none;">0</span>
+            </a>
+            <div class="user" style="position:relative">
+                <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                    <span th:text="${user != null ? user.username : 'Guest'}">Guest</span>
+                    <span class="wallet-badge" th:if="${user != null and user.balance != null}">
+						💰 <span
+                            th:text="${#numbers.formatDecimal(user.balance, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
 					</span>
-					<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
-							stroke-linejoin="round" />
-					</svg>
-				</button>
-				<div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-					<a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem" th:if="${user != null}">My Account</a>
-					<a class="item" href="/customer/wishlist" role="menuitem" th:if="${user != null}">💝 Wishlist</a>
-					<a class="item" href="/customer/chat" role="menuitem" style="position: relative;" th:if="${user != null}">
-						💬 Chat
-						<span class="badge bg-danger" id="unreadChatCountMenu" style="display: none; margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); align-items: center; justify-content: center;">0</span>
-					</a>
-					<a class="item" href="/customer/reviews" role="menuitem" th:if="${user != null}">⭐ My Reviews</a>
-					<a class="item" href="/customer/settings" role="menuitem" th:if="${user != null}">⚙️ Settings</a>
-					<form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
-						style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)" th:if="${user != null}">
-						<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-							th:value="${_csrf.token}" />
-						<input type="hidden" name="amount" id="topupAmountInput" />
-						<button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
-							(VNPay)</button>
-					</form>
-					<a class="item" href="/orderhistory" role="menuitem" th:if="${user != null}">Orders History</a>
-					<a class="item" href="#" role="menuitem"
-						onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" th:if="${user != null}">Logout</a>
-					<a class="item" href="/login" role="menuitem" th:if="${user == null}">Login</a>
-				</div>
-				<form id="logoutForm" method="post" action="/logout" style="display:none;">
-					<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-				</form>
-			</div>
-			<div class="search">
-				<form method="GET" action="/products" style="display:flex;gap:4px;">
-					<input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
-						style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
-					<button type="submit"
-						style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-					<a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/products}"
-						style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
-				</form>
-			</div>
-			<a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">
-				🛒
-				<span class="badge" th:text="${cartItemCount}" th:if="${cartItemCount != null and cartItemCount > 0}">0</span>
-			</a>
-		</div>
-	</div>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
+                              stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
+                    <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem"
+                       th:if="${user != null}">My Account</a>
+                    <a class="item" href="/customer/wishlist" role="menuitem" th:if="${user != null}">💝 Wishlist</a>
+                    <a class="item" href="/customer/chat" role="menuitem" style="position: relative;"
+                       th:if="${user != null}">
+                        💬 Chat
+                        <span class="badge bg-danger" id="unreadChatCountMenu"
+                              style="display: none; margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); align-items: center; justify-content: center;">0</span>
+                    </a>
+                    <a class="item" href="/customer/reviews" role="menuitem" th:if="${user != null}">⭐ My Reviews</a>
+                    <a class="item" href="/customer/settings" role="menuitem" th:if="${user != null}">⚙️ Settings</a>
+                    <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
+                          style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)"
+                          th:if="${user != null}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}"/>
+                        <input type="hidden" name="amount" id="topupAmountInput"/>
+                        <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
+                            (VNPay)
+                        </button>
+                    </form>
+                    <a class="item" href="/orderhistory" role="menuitem" th:if="${user != null}">Orders History</a>
+                    <a class="item" href="#" role="menuitem"
+                       onclick="event.preventDefault(); document.getElementById('logoutForm').submit();"
+                       th:if="${user != null}">Logout</a>
+                    <a class="item" href="/login" role="menuitem" th:if="${user == null}">Login</a>
+                </div>
+                <form id="logoutForm" method="post" action="/logout" style="display:none;">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}"/>
+                </form>
+            </div>
+            <div class="search">
+                <form method="GET" action="/products" style="display:flex;gap:4px;">
+                    <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
+                           style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
+                    <button type="submit"
+                            style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">
+                        🔍
+                    </button>
+                    <a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/products}"
+                       style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
+                </form>
+            </div>
+            <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">
+                🛒
+                <span class="badge" th:text="${cartItemCount}"
+                      th:if="${cartItemCount != null and cartItemCount > 0}">0</span>
+            </a>
+        </div>
+    </div>
 
-	<script th:inline="javascript">
-		(function () {
-			const btn = document.getElementById('userMenuBtn');
-			const menu = document.getElementById('userDropdown');
-			function close() { if (menu) { menu.style.display = 'none'; btn && btn.setAttribute('aria-expanded', 'false'); } }
-			function toggle() { if (!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block' : 'none'; btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false'); }
-			if (btn) { btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); }); }
-			document.addEventListener('click', close);
-			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-		})();
+    <script th:inline="javascript">
+        (function () {
+            const btn = document.getElementById('userMenuBtn');
+            const menu = document.getElementById('userDropdown');
 
-		let __topupForm = null;
-		function topupPrompt(e) {
-			e.preventDefault();
-			__topupForm = e.target;
-			const ask = document.getElementById('topupAsk');
-			const field = document.getElementById('topupAmountField');
-			const err = document.getElementById('topupErr');
-			if (ask) { ask.style.display = 'flex'; setTimeout(() => { try { field.focus(); } catch (_) { } }, 0); }
-			function confirm() {
-				const v = field.value || '';
-				const clean = v.replace(/[^0-9]/g, '');
-				if (!clean) { err.textContent = 'Invalid amount'; return; }
-				document.getElementById('topupAmountInput').value = clean;
-				ask.style.display = 'none';
-				__topupForm.submit();
-			}
-			const okBtn = document.getElementById('topupConfirmBtn');
-			const cancelBtn = document.getElementById('topupCancelBtn');
-			const close = () => { ask.style.display = 'none'; };
-			if (okBtn) okBtn.onclick = confirm;
-			if (cancelBtn) cancelBtn.onclick = close;
-			if (field) field.onkeydown = (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); confirm(); } };
-			return false;
-		}
+            function close() {
+                if (menu) {
+                    menu.style.display = 'none';
+                    btn && btn.setAttribute('aria-expanded', 'false');
+                }
+            }
 
-		(function() {
-			const currentUser = /*[[${user}]]*/ null;
-			if (!currentUser || !currentUser.userId) return;
+            function toggle() {
+                if (!menu) return;
+                const show = menu.style.display !== 'block';
+                menu.style.display = show ? 'block' : 'none';
+                btn && btn.setAttribute('aria-expanded', show ? 'true' : 'false');
+            }
 
-			function loadUnreadChatCount() {
-				fetch(`/api/conversations/${currentUser.userId}`)
-					.then(res => res.json())
-					.then(conversations => {
-						let totalUnread = 0;
-						conversations.forEach(conv => {
-							totalUnread += (conv.unreadCount || 0);
-						});
+            if (btn) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggle();
+                });
+            }
+            document.addEventListener('click', close);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') close();
+            });
+        })();
 
-						const badge = document.getElementById('unreadChatCount');
-						const badgeMenu = document.getElementById('unreadChatCountMenu');
+        let __topupForm = null;
 
-						if (totalUnread > 0) {
-							const displayText = totalUnread > 9 ? '9+' : totalUnread.toString();
-							if (badge) {
-								badge.textContent = displayText;
-								badge.style.display = 'inline-flex';
-							}
-							if (badgeMenu) {
-								badgeMenu.textContent = displayText;
-								badgeMenu.style.display = 'inline-flex';
-							}
-						} else {
-							if (badge) badge.style.display = 'none';
-							if (badgeMenu) badgeMenu.style.display = 'none';
-						}
-					})
-					.catch(err => {
-						console.error('Failed to load unread count:', err);
-					});
-			}
+        function topupPrompt(e) {
+            e.preventDefault();
+            __topupForm = e.target;
+            const ask = document.getElementById('topupAsk');
+            const field = document.getElementById('topupAmountField');
+            const err = document.getElementById('topupErr');
+            if (ask) {
+                ask.style.display = 'flex';
+                setTimeout(() => {
+                    try {
+                        field.focus();
+                    } catch (_) {
+                    }
+                }, 0);
+            }
 
-			if (document.readyState === 'loading') {
-				document.addEventListener('DOMContentLoaded', loadUnreadChatCount);
-			} else {
-				loadUnreadChatCount();
-			}
+            function confirm() {
+                const v = field.value || '';
+                const clean = v.replace(/[^0-9]/g, '');
+                if (!clean) {
+                    err.textContent = 'Invalid amount';
+                    return;
+                }
+                document.getElementById('topupAmountInput').value = clean;
+                ask.style.display = 'none';
+                __topupForm.submit();
+            }
 
-			setInterval(loadUnreadChatCount, 30000);
-		})();
+            const okBtn = document.getElementById('topupConfirmBtn');
+            const cancelBtn = document.getElementById('topupCancelBtn');
+            const close = () => {
+                ask.style.display = 'none';
+            };
+            if (okBtn) okBtn.onclick = confirm;
+            if (cancelBtn) cancelBtn.onclick = close;
+            if (field) field.onkeydown = (ev) => {
+                if (ev.key === 'Enter') {
+                    ev.preventDefault();
+                    confirm();
+                }
+            };
+            return false;
+        }
 
-		// Auto-refresh notification badge
-		(function() {
-			const currentUser = /*[[${user}]]*/ null;
-			if (!currentUser || !currentUser.userId) return;
+        (function () {
+            const currentUser = /*[[${user}]]*/ null;
+            if (!currentUser || !currentUser.userId) return;
 
-			function getCsrfToken() {
-				const meta = document.querySelector('meta[name="_csrf"]');
-				return meta ? meta.content : '';
-			}
+            function loadUnreadChatCount() {
+                fetch(`/api/conversations/${currentUser.userId}`)
+                    .then(res => res.json())
+                    .then(conversations => {
+                        let totalUnread = 0;
+                        conversations.forEach(conv => {
+                            totalUnread += (conv.unreadCount || 0);
+                        });
 
-			function getCsrfHeader() {
-				const meta = document.querySelector('meta[name="_csrf_header"]');
-				return meta ? meta.content : '';
-			}
+                        const badge = document.getElementById('unreadChatCount');
+                        const badgeMenu = document.getElementById('unreadChatCountMenu');
 
-			function updateNotificationBadge() {
-				const csrfToken = getCsrfToken();
-				const csrfHeader = getCsrfHeader();
-				
-				const headers = {
-					'Content-Type': 'application/json'
-				};
-				
-				if (csrfToken && csrfHeader) {
-					headers[csrfHeader] = csrfToken;
-				}
+                        if (totalUnread > 0) {
+                            const displayText = totalUnread > 9 ? '9+' : totalUnread.toString();
+                            if (badge) {
+                                badge.textContent = displayText;
+                                badge.style.display = 'inline-flex';
+                            }
+                            if (badgeMenu) {
+                                badgeMenu.textContent = displayText;
+                                badgeMenu.style.display = 'inline-flex';
+                            }
+                        } else {
+                            if (badge) badge.style.display = 'none';
+                            if (badgeMenu) badgeMenu.style.display = 'none';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to load unread count:', err);
+                    });
+            }
 
-				fetch('/customer/notifications/unread-count', {
-					method: 'GET',
-					headers: headers
-				})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success && data.count !== undefined) {
-							const badge = document.getElementById('notificationBadge');
-							
-							if (data.count > 0) {
-								if (badge) {
-									const displayText = data.count > 99 ? '99+' : data.count.toString();
-									badge.textContent = displayText;
-									badge.style.display = 'flex';
-								}
-							} else {
-								if (badge) {
-									badge.style.display = 'none';
-								}
-							}
-						}
-					})
-					.catch(error => {
-						console.error('Error updating notification badge:', error);
-					});
-			}
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadUnreadChatCount);
+            } else {
+                loadUnreadChatCount();
+            }
 
-			if (document.readyState === 'loading') {
-				document.addEventListener('DOMContentLoaded', updateNotificationBadge);
-			} else {
-				updateNotificationBadge();
-			}
+            setInterval(loadUnreadChatCount, 30000);
+        })();
 
-			setInterval(updateNotificationBadge, 30000);
-		})();
-	</script>
+        // Auto-refresh notification badge
+        (function () {
+            const currentUser = /*[[${user}]]*/ null;
+            if (!currentUser || !currentUser.userId) return;
+
+            function getCsrfToken() {
+                const meta = document.querySelector('meta[name="_csrf"]');
+                return meta ? meta.content : '';
+            }
+
+            function getCsrfHeader() {
+                const meta = document.querySelector('meta[name="_csrf_header"]');
+                return meta ? meta.content : '';
+            }
+
+            function updateNotificationBadge() {
+                const csrfToken = getCsrfToken();
+                const csrfHeader = getCsrfHeader();
+
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+
+                fetch('/customer/notifications/unread-count', {
+                    method: 'GET',
+                    headers: headers
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.count !== undefined) {
+                            const badge = document.getElementById('notificationBadge');
+
+                            if (data.count > 0) {
+                                if (badge) {
+                                    const displayText = data.count > 99 ? '99+' : data.count.toString();
+                                    badge.textContent = displayText;
+                                    badge.style.display = 'flex';
+                                }
+                            } else {
+                                if (badge) {
+                                    badge.style.display = 'none';
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating notification badge:', error);
+                    });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+            } else {
+                updateNotificationBadge();
+            }
+
+            setInterval(updateNotificationBadge, 30000);
+        })();
+    </script>
+    <!-- ================== MODAL TOP-UP ================== -->
+    <div id="topupAsk"
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:12px;padding:20px;width:90%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+            <h3 style="margin:0 0 12px;font-size:18px;">Nạp tiền vào ví</h3>
+            <p style="margin:0 0 16px;color:#6b7280;font-size:14px;">Nhập số tiền (tối thiểu 20.000₫)</p>
+            <input type="text" id="topupAmountField" placeholder="20,000"
+                   style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none;"
+                   oninput="this.value = this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+            <p id="topupErr" style="color:#ef4444;font-size:13px;margin:8px 0 0;display:none;"></p>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+                <button id="topupCancelBtn"
+                        style="flex:1;padding:10px;background:#f3f4f6;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">
+                    Hủy
+                </button>
+                <button id="topupConfirmBtn"
+                        style="flex:1;padding:10px;background:#0ea5e9;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+                    Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 </html>

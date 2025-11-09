@@ -297,19 +297,6 @@
 			}
 		});
 
-		function topupPrompt(e) {
-			e.preventDefault();
-			const v = prompt('Enter amount to top up (VND):', '200000');
-			if (!v) return false;
-			const clean = v.replace(/[^0-9]/g, '');
-			if (!clean) {
-				alert('Please enter a valid amount');
-				return false;
-			}
-			document.getElementById('topupAmountInput').value = clean;
-			e.target.submit();
-			return true;
-		}
 
 		function updateChatUnreadCount() {
 			const userIdElement = document.querySelector('[th\\:text="${user.userId}"]');
