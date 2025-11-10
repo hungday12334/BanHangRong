@@ -370,6 +370,15 @@
       font-weight: 600;
       color: var(--accent, #3b82f6);
       font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .product-card-price .sale-price {
+      color: #ef4444;
+      font-size: 16px;
+      font-weight: 700;
     }
 
     .view-mode-toggle {
@@ -1433,27 +1442,39 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="maxUses">Maximum Total Uses</label>
+              <label for="maxUses">Maximum Total Uses <span style="color: #ef4444;">*</span></label>
               <input
                 type="number"
                 id="maxUses"
                 name="maxUses"
                 class="form-control"
-                placeholder="Unlimited"
+                placeholder="Nhập số từ 1 đến 1000"
                 min="1"
+                max="1000"
+                required
+                step="1"
+                oninput="validateSingleField('maxUses')"
+                onblur="validateSingleField('maxUses')"
               />
+<!--              <small class="form-text text-muted">Bắt buộc nhập. Giá trị từ 1 đến 1000.</small>-->
             </div>
 
             <div class="form-group">
-              <label for="maxUsesPerUser">Limit per User</label>
+              <label for="maxUsesPerUser">Limit per User <span style="color: #ef4444;">*</span></label>
               <input
                 type="number"
                 id="maxUsesPerUser"
                 name="maxUsesPerUser"
                 class="form-control"
-                placeholder="Unlimited"
+                placeholder="Nhập số từ 1 đến 1000"
                 min="1"
+                max="1000"
+                required
+                step="1"
+                oninput="validateSingleField('maxUsesPerUser')"
+                onblur="validateSingleField('maxUsesPerUser')"
               />
+<!--              <small class="form-text text-muted">Bắt buộc nhập. Giá trị từ 1 đến 1000, không vượt quá tổng số lần sử dụng.</small>-->
             </div>
           </div>
 
@@ -1646,7 +1667,7 @@
       // Render products
       gridElement.innerHTML = pageProducts.map(p => `
         <div class="product-card ${selectedProductId === p.productId ? 'selected' : ''}"
-             onclick="selectProductFromGrid(${p.productId}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">
+             onclick="selectProductFromGrid(${p.productId}, '${p.name.replace(/'/g, "\\'")}', ${p.salePrice || p.price}, ${p.price}, ${p.salePrice || 0})">
           <div class="product-card-badge">${p.status || 'Public'}</div>
           <div class="product-card-name">${p.name}</div>
           <div class="product-card-meta">
@@ -1654,7 +1675,14 @@
               <span>ID: ${p.productId}</span>
               ${p.quantity ? `<span>Stock: ${p.quantity}</span>` : ''}
             </div>
-            <div class="product-card-price">${formatCurrency(p.price)}</div>
+            <div class="product-card-price">
+              ${p.salePrice && p.salePrice > 0 ? `
+                <span class="sale-price">${formatCurrency(p.salePrice)}</span>
+                <span class="original-price">${formatCurrency(p.price)}</span>
+              ` : `
+                <span>${formatCurrency(p.price)}</span>
+              `}
+            </div>
           </div>
         </div>
       `).join('');
@@ -1670,10 +1698,18 @@
           products.sort((a, b) => a.name.localeCompare(b.name));
           break;
         case 'price-low':
-          products.sort((a, b) => (a.price || 0) - (b.price || 0));
+          products.sort((a, b) => {
+            const priceA = a.salePrice || a.price || 0;
+            const priceB = b.salePrice || b.price || 0;
+            return priceA - priceB;
+          });
           break;
         case 'price-high':
-          products.sort((a, b) => (b.price || 0) - (a.price || 0));
+          products.sort((a, b) => {
+            const priceA = a.salePrice || a.price || 0;
+            const priceB = b.salePrice || b.price || 0;
+            return priceB - priceA;
+          });
           break;
         case 'stock':
           products.sort((a, b) => (b.quantity || 0) - (a.quantity || 0));
@@ -1776,8 +1812,8 @@
     }
 
     // Select product from grid
-    function selectProductFromGrid(productId, productName, price) {
-      selectProduct(productId, productName, price);
+    function selectProductFromGrid(productId, productName, displayPrice, originalPrice, salePrice) {
+      selectProduct(productId, productName, displayPrice, originalPrice, salePrice);
 
       // Close grid view and switch to search mode
       toggleViewMode('search');
@@ -1829,11 +1865,17 @@
         <div style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.2s;"
              onmouseover="this.style.background='var(--bg)'"
              onmouseout="this.style.background='transparent'"
-             onclick="selectProduct(${p.productId}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">
+             onclick="selectProduct(${p.productId}, '${p.name.replace(/'/g, "\\'")}', ${p.salePrice || p.price}, ${p.price}, ${p.salePrice || 0})">
           <div style="font-weight: 600; margin-bottom: 4px;">${p.name}</div>
-          <div style="font-size: 12px; color: var(--muted);">
-            ID: ${p.productId} | Giá: ${formatCurrency(p.price)}
-            ${p.quantity ? `| Tồn kho: ${p.quantity}` : ''}
+          <div style="font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px;">
+            <span>ID: ${p.productId}</span>
+            <span>|</span>
+            ${p.salePrice && p.salePrice > 0 ? `
+              <span>Giá: <span style="color: #ef4444; font-weight: 600;">${formatCurrency(p.salePrice)}</span> <span style="text-decoration: line-through; color: #64748b;">${formatCurrency(p.price)}</span></span>
+            ` : `
+              <span>Giá: ${formatCurrency(p.price)}</span>
+            `}
+            ${p.quantity ? `<span>| Tồn kho: ${p.quantity}</span>` : ''}
             <span style="color: #10b981; margin-left: 8px;">● ${p.status || 'Active'}</span>
           </div>
         </div>
@@ -1842,12 +1884,23 @@
       resultsDiv.style.display = 'block';
     }
 
-    function selectProduct(productId, productName, price) {
+    function selectProduct(productId, productName, displayPrice, originalPrice, salePrice) {
       selectedProductId = productId;
 
       document.getElementById('selectedProductName').textContent = productName;
       document.getElementById('selectedProductId').textContent = productId;
-      document.getElementById('selectedProductPrice').textContent = formatCurrency(price);
+
+      // Display price with sale price if available
+      const priceElement = document.getElementById('selectedProductPrice');
+      if (salePrice && salePrice > 0) {
+        priceElement.innerHTML = `
+          <span style="color: #ef4444; font-weight: 700; font-size: 16px;">${formatCurrency(salePrice)}</span>
+          <span style="color: #94a3b8; font-size: 12px; text-decoration: line-through; margin-left: 6px;">${formatCurrency(originalPrice)}</span>
+        `;
+      } else {
+        priceElement.textContent = formatCurrency(displayPrice);
+      }
+
       document.getElementById('selectedProductDisplay').classList.add('active');
       document.getElementById('productSearchResults').style.display = 'none';
       document.getElementById('productSearchInput').value = productName;
@@ -2387,24 +2440,57 @@
         return;
       }
 
-      const maxUses = formData.get('maxUses') ? parseInt(formData.get('maxUses')) : null;
-      if (maxUses !== null && maxUses < 1) {
-        showAlert('Maximum Total Uses must be at least 1', 'error');
+      const maxUsesValue = formData.get('maxUses');
+      if (!maxUsesValue || maxUsesValue.trim() === '') {
+        showAlert('Số lần sử dụng tối đa không được để trống', 'error');
         return;
       }
 
-      const maxUsesPerUser = formData.get('maxUsesPerUser') ? parseInt(formData.get('maxUsesPerUser')) : null;
-      if (maxUsesPerUser !== null && maxUsesPerUser < 1) {
-        showAlert('Limit per User must be at least 1', 'error');
+      // Check if contains non-numeric characters (letters, special chars)
+      if (/[^0-9]/.test(maxUsesValue)) {
+        showAlert('Số lần sử dụng tối đa chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt', 'error');
+        return;
+      }
+
+      const maxUses = parseInt(maxUsesValue);
+      if (isNaN(maxUses)) {
+        showAlert('Số lần sử dụng tối đa phải là số nguyên hợp lệ', 'error');
+        return;
+      }
+
+      if (maxUses < 1 || maxUses > 1000) {
+        showAlert('Số lần sử dụng tối đa phải từ 1 đến 1000', 'error');
+        return;
+      }
+
+      // ✅ maxUsesPerUser is REQUIRED, must be integer from 1 to 1000
+      const maxUsesPerUserValue = formData.get('maxUsesPerUser');
+      if (!maxUsesPerUserValue || maxUsesPerUserValue.trim() === '') {
+        showAlert('Số lần sử dụng tối đa/người không được để trống', 'error');
+        return;
+      }
+
+      // Check if contains non-numeric characters (letters, special chars)
+      if (/[^0-9]/.test(maxUsesPerUserValue)) {
+        showAlert('Số lần sử dụng tối đa/người chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt', 'error');
+        return;
+      }
+
+      const maxUsesPerUser = parseInt(maxUsesPerUserValue);
+      if (isNaN(maxUsesPerUser)) {
+        showAlert('Số lần sử dụng tối đa/người phải là số nguyên hợp lệ', 'error');
+        return;
+      }
+
+      if (maxUsesPerUser < 1 || maxUsesPerUser > 1000) {
+        showAlert('Số lần sử dụng tối đa/người phải từ 1 đến 1000', 'error');
         return;
       }
 
       // Validate relationship between maxUses and maxUsesPerUser
-      if (maxUses !== null && maxUsesPerUser !== null) {
-        if (maxUses > 0 && maxUsesPerUser > maxUses) {
-          showAlert('Limit per User cannot be greater than Maximum Total Uses', 'error');
-          return;
-        }
+      if (maxUsesPerUser > maxUses) {
+        showAlert('Số lần sử dụng/người không được vượt quá tổng số lần sử dụng', 'error');
+        return;
       }
 
       // Validate date range
@@ -2647,6 +2733,10 @@
     }
 
     function formatCurrency(amount) {
+      // Handle null, undefined, or invalid values
+      if (amount === null || amount === undefined || isNaN(amount)) {
+        return '0₫';
+      }
       return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
         currency: 'VND'

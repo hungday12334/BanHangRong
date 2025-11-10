@@ -250,17 +250,17 @@ public class VoucherService {
     @Transactional
     public int autoExpireVouchers() {
         LocalDateTime now = LocalDateTime.now();
-        List<Vouchers> activeVouchers = vouchersRepository.findAll().stream()
-            .filter(v -> "active".equalsIgnoreCase(v.getStatus()))
-            .filter(v -> v.getEndAt() != null && now.isAfter(v.getEndAt()))
-            .toList();
+        List<Vouchers> activeVouchers = vouchersRepository.findAll().stream() //Lấy toàn bộ voucher trong database. //.stream() → Duyệt qua từng voucher dưới dạng luồng.
+            .filter(v -> "active".equalsIgnoreCase(v.getStatus())) //Giữ lại chỉ những voucher đang ở trạng thái “active”
+            .filter(v -> v.getEndAt() != null && now.isAfter(v.getEndAt())) //Giữ lại chỉ những voucher mà đã qua thời gian kết thúc
+            .toList();//stream về lại dạng List.
 
         for (Vouchers voucher : activeVouchers) {
-            voucher.setStatus("expired");
+            voucher.setStatus("expired"); //Cập nhật trạng thái từ "active" → "expired".
             vouchersRepository.save(voucher);
         }
 
-        return activeVouchers.size();
+        return activeVouchers.size();//Cho biết có bao nhiêu voucher đã được cập nhật trong lần chạy nà
     }
 
     /**

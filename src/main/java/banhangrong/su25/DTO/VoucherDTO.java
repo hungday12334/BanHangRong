@@ -4,10 +4,6 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * Data Transfer Object for Voucher creation and update
- * Contains comprehensive validation rules for e-commerce voucher system
- */
 public class VoucherDTO {
 
     // ============================================================
@@ -22,86 +18,45 @@ public class VoucherDTO {
     @NotNull(message = "Product ID không được để trống")
     private Long productId;
 
-    /**
-     * Rule E: Voucher code validation
-     * - Required
-     * - 3-20 characters
-     * - Must be unique per seller (checked in service layer)
-     */
     @NotBlank(message = "Mã voucher không được để trống")
     @Size(min = 3, max = 20, message = "Mã voucher phải từ 3-20 ký tự")
     @Pattern(regexp = "^[A-Z0-9]+$", message = "Mã voucher chỉ được chứa chữ IN HOA và số")
     private String code;
 
-    /**
-     * Rule E: Discount type validation
-     * - Required
-     * - Must be "PERCENT" or "AMOUNT"
-     */
+
     @NotBlank(message = "Loại giảm giá không được để trống")
     @Pattern(regexp = "^(PERCENT|AMOUNT)$", message = "Loại giảm giá phải là PERCENT hoặc AMOUNT")
     private String discountType;
 
-    /**
-     * Rule B (4, 5): Discount value validation
-     * - Required
-     * - Must be > 0
-     * - If PERCENT: must be <= 100
-     * - If AMOUNT: must be <= product price or minOrderValue
-     */
+
     @NotNull(message = "Giá trị giảm giá không được để trống")
     @DecimalMin(value = "0.01", message = "Giá trị giảm giá phải lớn hơn 0")
     private BigDecimal discountValue;
 
-    /**
-     * Rule C (7, 8): Minimum order value validation
-     * - Must be >= 0
-     * - Must be <= 10,000,000 VND
-     */
+
     @DecimalMin(value = "0", message = "Giá trị đơn hàng tối thiểu phải >= 0")
-    @DecimalMax(value = "10000000", message = "Giá trị đơn hàng tối thiểu không được vượt quá 10,000,000 VNĐ")
+    @DecimalMax(value = "1000000", message = "Giá trị đơn hàng tối thiểu không được vượt quá 1,000,000 VNĐ")
     private BigDecimal minOrder;
 
-    /**
-     * Rule A (1, 2): Start date validation
-     * - Required
-     * - Must not be in the past
-     * - Must be before endDate
-     */
+
     @NotNull(message = "Ngày bắt đầu không được để trống")
     @Future(message = "Ngày bắt đầu phải là ngày trong tương lai")
     private LocalDateTime startAt;
 
-    /**
-     * Rule A (2, 3): End date validation
-     * - Required
-     * - Must be after startDate
-     * - Duration should not exceed 1 year
-     */
+
     @NotNull(message = "Ngày kết thúc không được để trống")
     @Future(message = "Ngày kết thúc phải là ngày trong tương lai")
     private LocalDateTime endAt;
 
-    /**
-     * Rule D (10): Max uses validation
-     * - Must be >= 0 (0 means unlimited)
-     */
-    @Min(value = 0, message = "Số lần sử dụng tối đa phải >= 0 (0 = không giới hạn)")
+
+    @Min(value = 1, message = "Số lần sử dụng tối đa phải >= 1")
     private Integer maxUses;
 
-    /**
-     * Rule D (10, 11): Limit per user validation
-     * - Must be >= 0 (0 means unlimited)
-     * - Must be <= maxUses (if maxUses > 0)
-     */
-    @Min(value = 0, message = "Số lần sử dụng tối đa/người phải >= 0 (0 = không giới hạn)")
+
+    @Min(value = 1, message = "Số lần sử dụng tối đa/người phải >= 1")
     private Integer maxUsesPerUser;
 
-    /**
-     * Rule E: Status validation
-     * - Required
-     * - Must be "active" or "inactive"
-     */
+
     @NotBlank(message = "Trạng thái không được để trống")
     @Pattern(regexp = "^(active|inactive)$", message = "Trạng thái phải là 'active' hoặc 'inactive'")
     private String status;
