@@ -547,9 +547,9 @@
             font-size: 14px;
             line-height: 1.4;
         }
-            background: var(--bg-elev, white);
+
         .message.received .message-bubble {
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            background: var(--bg-elev, white);
             color: var(--text, #0f172a);
             border-bottom-left-radius: 4px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -2001,7 +2001,14 @@
             }
 
             // Calculate unread
-            const unreadCount = conv.unreadCount || 0;
+            let unreadCount = conv.unreadCount || 0;
+
+            // If this is the currently open conversation, don't show unread count
+            if (currentConversation && currentConversation.id === conv.id) {
+                unreadCount = 0;
+                conv.unreadCount = 0; // Update the conversation object too
+            }
+
             totalUnread += unreadCount;
 
             const item = document.createElement('div');
@@ -2703,8 +2710,9 @@
             }
         }
 
-        // Reload conversations để update unread counts
-        loadConversations();
+        // 🔧 FIX: Don't reload conversations here
+        // handleNewMessage already handles updating conversation list properly
+        console.log('✅ Message displayed for current conversation');
     }
 
     function sendMessage() {
@@ -2787,19 +2795,35 @@
         renderMessages();
         markAsRead();
 
+        // Update conversation's unreadCount to 0
+        conv.unreadCount = 0;
+
         // Hide unread badge for this conversation
         const badge = document.querySelector(`.unread-badge[data-conversation-id="${conv.id}"]`);
         if (badge) {
+            const currentUnread = parseInt(badge.textContent.replace('+', '')) || 0;
             badge.style.display = 'none';
+            badge.remove(); // Remove the badge element completely
 
             // Update total unread count in dashboard
-            const currentUnread = parseInt(badge.textContent.replace('+', '')) || 0;
             const dashboardBadge = document.getElementById('unreadChatCount');
             if (dashboardBadge && dashboardBadge.style.display !== 'none') {
                 const totalUnread = parseInt(dashboardBadge.textContent.replace('+', '')) || 0;
                 const newTotal = Math.max(0, totalUnread - currentUnread);
                 updateDashboardUnreadBadge(newTotal);
             }
+        }
+
+        // Update the active state in sidebar
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        const activeItem = Array.from(document.querySelectorAll('.conversation-item')).find(item => {
+            return item.querySelector(`.unread-badge[data-conversation-id="${conv.id}"]`) ||
+                   item.querySelector('.conversation-name')?.textContent.includes(otherPartyName);
+        });
+        if (activeItem) {
+            activeItem.classList.add('active');
         }
 
         // Focus input
@@ -2812,9 +2836,10 @@
     }
 
     function handleNewMessage(msg) {
-        console.log('🆕 Handling new message from:', msg.senderName);
+        console.log('🆕 Handling new message from:', msg.senderName, 'conversationId:', msg.conversationId);
+        console.log('📍 Current conversation:', currentConversation ? currentConversation.id : 'NONE');
 
-        // Only process if not from current user (to avoid duplicates)
+        // Play notification sound if message is from someone else
         if (msg.senderId !== currentUser.userId) {
             playNotificationSound();
 
@@ -2826,14 +2851,42 @@
             }
         }
 
-        // If this message belongs to current conversation, display it
+        // 🔧 FIX: Don't display message if it's for current conversation
+        // The /topic/conversation subscription (handleIncomingMessage) already handles that
         if (currentConversation && msg.conversationId === currentConversation.id) {
-            displayMessage(msg);
-            // Mark as read immediately if conversation is open
+            console.log('💬 Message for current conversation - already handled by handleIncomingMessage, skipping');
+            // Just mark as read, don't display again
             markAsRead();
         } else {
-            // Update unread count for other conversations
-            loadConversations();
+            // Message is for another conversation
+            console.log('📨 Message from other conversation, updating...');
+
+            // Find conversation and update it
+            const conv = conversations.find(c => c.id === msg.conversationId);
+            if (conv) {
+                // Update last message and time
+                conv.lastMessage = msg.content;
+                conv.lastMessageTime = msg.timestamp;
+                conv.unreadCount = (conv.unreadCount || 0) + 1;
+
+                // 🔔 THÊM: Add message to conversation.messages array
+                if (!conv.messages) {
+                    conv.messages = [];
+                }
+                // Check if message already exists in array
+                const existsInArray = conv.messages.some(m => m.id === msg.id);
+                if (!existsInArray) {
+                    conv.messages.push(msg);
+                    console.log('✅ Added message to conversation.messages array');
+                }
+
+                // Re-render conversations list
+                renderConversationsList();
+            } else {
+                // Conversation not found, load from API
+                console.log('⚠️ Conversation not found, loading from API...');
+                loadConversations();
+            }
         }
     }
 
@@ -2925,6 +2978,20 @@
 
     // Setup emoji category buttons
     document.addEventListener('DOMContentLoaded', () => {
+        // Add navigation to chat page when clicking on username button
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        if (userMenuBtn) {
+            // Override the default behavior to navigate to chat page
+            userMenuBtn.addEventListener('click', (e) => {
+                // If we're already on chat page, reload it to show full chat interface
+                if (window.location.pathname === '/customer/chat') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = '/customer/chat';
+                }
+            });
+        }
+
         document.querySelectorAll('.emoji-category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 loadEmojis(btn.dataset.category);

@@ -261,6 +261,11 @@
                 <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
                     <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem"
                        th:if="${user != null}">My Account</a>
+                    <a class="item" th:href="${user != null and user.userType == 'SELLER' ? '/seller/dashboard' : '/become-seller'}" 
+                       role="menuitem" th:if="${user != null}">
+                        <span th:if="${user != null and user.userType == 'SELLER'}">🏪 Seller Dashboard</span>
+                        <span th:unless="${user != null and user.userType == 'SELLER'}">🏪 Become Seller</span>
+                    </a>
                     <a class="item" href="/customer/wishlist" role="menuitem" th:if="${user != null}">💝 Wishlist</a>
                     <a class="item" href="/customer/chat" role="menuitem" style="position: relative;"
                        th:if="${user != null}">

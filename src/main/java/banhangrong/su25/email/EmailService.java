@@ -56,14 +56,149 @@ public class EmailService {
         }
     }
 
-    // Gửi email reset password (AuthController đang dùng)
+    // Gửi email reset password với HTML template đẹp
     public void sendPasswordResetEmail(String to, String token) {
-        String subject = "Password Reset Request";
+        String subject = "Password Reset Request - BanHangRong";
         String resetLink = "http://localhost:8080/reset-password?token=" + token;
-        String body = "Click the link to reset your password: " + resetLink;
+        
+        // Tạo HTML email body với template đẹp
+        String htmlBody = """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                        background-color: #f4f4f4;
+                    }
+                    .email-container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background-color: #ffffff;
+                    }
+                    .email-header {
+                        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+                        padding: 40px 30px;
+                        text-align: center;
+                        border-radius: 10px 10px 0 0;
+                    }
+                    .email-header h1 {
+                        color: #ffffff;
+                        margin: 0;
+                        font-size: 28px;
+                        font-weight: 700;
+                    }
+                    .email-content {
+                        padding: 40px 30px;
+                        background-color: #ffffff;
+                    }
+                    .email-content p {
+                        margin: 0 0 20px 0;
+                        color: #555;
+                        font-size: 16px;
+                    }
+                    .reset-button-container {
+                        text-align: center;
+                        margin: 30px 0;
+                    }
+                    .reset-button {
+                        display: inline-block;
+                        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+                        color: #ffffff !important;
+                        text-decoration: none;
+                        padding: 16px 40px;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        font-size: 16px;
+                        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+                        transition: transform 0.2s;
+                    }
+                    .reset-button:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+                    }
+                    .reset-link {
+                        margin-top: 20px;
+                        padding: 20px;
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        word-break: break-all;
+                        font-size: 12px;
+                        color: #666;
+                        border-left: 4px solid #0ea5e9;
+                    }
+                    .email-footer {
+                        background-color: #f8f9fa;
+                        padding: 30px;
+                        text-align: center;
+                        border-radius: 0 0 10px 10px;
+                        border-top: 1px solid #e5e7eb;
+                    }
+                    .email-footer p {
+                        margin: 5px 0;
+                        color: #6b7280;
+                        font-size: 14px;
+                    }
+                    .security-notice {
+                        background-color: #fef3c7;
+                        border-left: 4px solid #f59e0b;
+                        padding: 15px;
+                        margin: 20px 0;
+                        border-radius: 6px;
+                    }
+                    .security-notice p {
+                        margin: 0;
+                        color: #92400e;
+                        font-size: 14px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="email-header">
+                        <h1>🔐 Password Reset Request</h1>
+                    </div>
+                    <div class="email-content">
+                        <p>Hello,</p>
+                        <p>We received a request to reset your password for your BanHangRong account.</p>
+                        <p>Click the button below to reset your password:</p>
+                        
+                        <div class="reset-button-container">
+                            <a href="{{RESET_LINK}}" class="reset-button">Reset Password</a>
+                        </div>
+                        
+                        <div class="reset-link">
+                            <strong>Or copy and paste this link into your browser:</strong><br>
+                            {{RESET_LINK}}
+                        </div>
+                        
+                        <div class="security-notice">
+                            <p><strong>⚠️ Security Notice:</strong> This link will expire in 30 minutes. If you didn't request this password reset, please ignore this email.</p>
+                        </div>
+                        
+                        <p>If you have any questions, please contact us at <a href="mailto:bonhoangncd@gmail.com" style="color: #0ea5e9;">bonhoangncd@gmail.com</a></p>
+                    </div>
+                    <div class="email-footer">
+                        <p><strong>BanHangRong Team</strong></p>
+                        <p>© 2025 BanHangRong. All rights reserved.</p>
+                        <p style="font-size: 12px; color: #9ca3af;">This is an automated email, please do not reply.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """;
+        
+        // Replace placeholder with actual reset link (safer than format string)
+        htmlBody = htmlBody.replace("{{RESET_LINK}}", resetLink);
 
-        Email email = new Email(to, subject, body);
-        sendEmail(email);
+        Email email = new Email(to, subject, htmlBody);
+        sendHtmlEmail(email);
     }
 
     /**

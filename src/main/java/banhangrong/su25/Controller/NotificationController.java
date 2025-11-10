@@ -57,15 +57,18 @@ public class NotificationController {
         }
 
         // Parse và xử lý các tham số filter
+        // Convert empty string to null for "All" option
+        String typeFilter = (type != null && !type.trim().isEmpty()) ? type.trim() : null;
+        
         Boolean isReadFilter = null;
-        if (isRead != null && !isRead.isEmpty()) {
-            isReadFilter = Boolean.parseBoolean(isRead);
+        if (isRead != null && !isRead.trim().isEmpty()) {
+            isReadFilter = Boolean.parseBoolean(isRead.trim());
         }
 
         LocalDateTime startDateTime = null;
-        if (startDate != null && !startDate.isEmpty()) {
+        if (startDate != null && !startDate.trim().isEmpty()) {
             try {
-                LocalDate date = LocalDate.parse(startDate);
+                LocalDate date = LocalDate.parse(startDate.trim());
                 startDateTime = date.atStartOfDay();
             } catch (Exception e) {
                 // Ignore parsing errors
@@ -73,9 +76,9 @@ public class NotificationController {
         }
 
         LocalDateTime endDateTime = null;
-        if (endDate != null && !endDate.isEmpty()) {
+        if (endDate != null && !endDate.trim().isEmpty()) {
             try {
-                LocalDate date = LocalDate.parse(endDate);
+                LocalDate date = LocalDate.parse(endDate.trim());
                 endDateTime = date.atTime(23, 59, 59);
             } catch (Exception e) {
                 // Ignore parsing errors
@@ -85,7 +88,7 @@ public class NotificationController {
         // Lấy danh sách notification với bộ lọc
         Page<Notification> notifications = notificationService.getNotificationsWithFilters(
             currentUser.getUserId(),
-            type,
+            typeFilter,
             isReadFilter,
             startDateTime,
             endDateTime,
@@ -114,7 +117,7 @@ public class NotificationController {
         model.addAttribute("user", currentUser); // For header fragment
         
         // Bộ lọc hiện tại (giữ nguyên format string để hiển thị trong form)
-        model.addAttribute("currentType", type);
+        model.addAttribute("currentType", typeFilter);
         model.addAttribute("currentIsRead", isRead);
         model.addAttribute("currentStartDate", startDate);
         model.addAttribute("currentEndDate", endDate);

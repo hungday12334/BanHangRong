@@ -293,13 +293,13 @@ public class CustomerDashboardController {
     }
 
     @GetMapping("/customer/seller/{sellerId}")
-    public String viewSeller(@PathVariable Long sellerId, Model model) {
+    public String viewSeller(@PathVariable Long sellerId, Model model) {    //sellerID: ID seller từ URL, model đẻ truyền dữ liệu sang view
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication(); //lấy thông tin authentication hiện tại
             Users currentUser = null;
             if (auth != null && auth.isAuthenticated()) {
                 String username = auth.getName();
-                currentUser = usersRepository.findByUsername(username).orElse(null);
+                currentUser = usersRepository.findByUsername(username).orElse(null); //tìm User trong database theo username
             }
             
             Optional<Users> sellerOptional = usersRepository.findById(sellerId);
