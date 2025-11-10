@@ -1,14 +1,14 @@
-# Seller Dashboard – Luồng dữ liệu (bản ngắn gọn & chính xác)
+# Seller Dashboard – Luồng dữ liệu (phiên bản đầy đủ)
 
-Tài liệu này tóm tắt đường đi của dữ liệu cho trang Seller Dashboard: DB → Repository → Controller → Thymeleaf (SSR) → JavaScript (client) → UI. Mục tiêu: ai đọc cũng hình dung nhanh “dữ liệu nào đến từ đâu và hiển thị ở đâu”.
+Tài liệu này mô tả chi tiết đường đi của dữ liệu cho trang Seller Dashboard: DB → Repository → Controller → Thymeleaf (SSR) → JavaScript (client) → UI và chiều ngược lại với các thao tác CRUD. Mục tiêu: cung cấp cái nhìn end‑to‑end rõ ràng, hỗ trợ onboard và tối ưu.
 
 
 ## Trang, code và nơi dữ liệu chảy qua
 - View chính: `src/main/resources/templates/pages/seller/seller_dashboard.html`
-- Controllers liên quan: `SellerDashboardController`, `SellerOrderController`, `ProductController`, `UploadController`, `WithdrawalController`
-- Repositories: `ProductsRepository`, `SellerOrderRepository`, `UsersRepository`, `ProductLicensesRepository`
-- Fragments UI: `fragments/sidebar.html`, `fragments/dashboard.html`, `fragments/panels.html`, `fragments/scripts.html`
-- JS client: `src/main/resources/static/js/seller-dashboard.js`
+- Controllers liên quan: `SellerDashboardController`, `SellerOrderController`, `ProductController`, `ProductsApiController`, `WithdrawalController`, `SellerProfileController`, `SellerLicenseController`, `UsersApiController`
+- Repositories: `ProductsRepository`, `SellerOrderRepository`, `UsersRepository`, `ProductLicensesRepository`, `WithdrawalRequestRepository`, `ShopLicensesRepository`, `VouchersRepository`
+- Fragments UI: `fragments/sidebar.html`, `fragments/dashboard.html`, `fragments/panels.html`, `fragments/modals.html`, `fragments/scripts.html`
+- JS client: `static/js/seller-dashboard.js` (pagination, chart, modals, theme, CRUD, toast)
 
 
 ## Sơ đồ luồng dữ liệu (tổng quan)
@@ -57,35 +57,24 @@ flowchart LR
 
 
 ## Xác định danh tính seller (sellerId)
-`SellerDashboardController#dashboard` xác định `sellerId` theo thứ tự ưu tiên:
-1) Query `?sellerId=` (chỉ phục vụ test/override)
-2) Từ `Principal`:
-   - Nếu `principal.getName()` là số → parse thành `userId`
-   - Nếu là username → dùng `UsersRepository.findByUsername(name)` để lấy `userId`
-3) Từ `HttpSession`: đọc `userId` (Long/Integer) hoặc `user` (kiểu `Users`)
-4) Fallback demo: `6L`
+`SellerDashboardController.dashboard()` xác định `sellerId` theo thứ tự:
+1. Query param `sellerId` (debug/test).
+2. Principal: lấy username → `UsersRepository.findByUsername()`; nếu là chuỗi số cố parse Long.
+3. Session: thuộc tính `user` (Users) hoặc `userId` (Long/Integer).
+4. Fallback nếu vẫn null → redirect an toàn (không dùng giá trị cứng trong production).
 
-`sellerId` được gắn vào Model (đồng thời set `userId = sellerId`) để client dùng thống nhất.
+Gắn `sellerId` + `userId` vào Model để phía client dùng thống nhất (JS ưu tiên `#userId`). Bổ sung kiểm tra `userType` not SELLER/ADMIN → redirect customer dashboard.
 
 
 ## Dữ liệu chính hiển thị và nguồn
-- KPI tổng quan:
-  - `totalRevenue` ← `ProductsRepository.totalRevenueBySeller`
-  - `totalUnits` ← `ProductsRepository.totalUnitsSoldBySeller`
-  - `totalOrders` ← `ProductsRepository.totalOrdersBySeller`
-  - `avgRating` ← `ProductsRepository.averageRatingBySeller`
-  - `todayRevenue`, `monthRevenue` ← các query tương ứng trong `ProductsRepository`
-- Biểu đồ doanh thu theo ngày (mặc định 15 ngày, server tự fill 0 ngày thiếu):
-  - Model: `dailyRevenueLabels` (yyyy-MM-dd), `dailyRevenueData`
-  - Nguồn: `ProductsRepository.dailyRevenueFrom(sellerId, fromDate)` + chuẩn hóa ngày ở controller
-- Top sản phẩm: `topProducts` (id, name, units, revenue, rating) ← `ProductsRepository.topProducts`
-- Đơn gần đây (phạm vi seller): `recentOrders` ← `SellerOrderRepository.findSellerOrders(... size=8)`
-- Hàng sắp hết: `lowStock` dựa trên `remaining = quantity - sold - preGenerated`
-  - `sold` ← `ProductLicensesRepository.countByProductViaOrders(productId)`
-  - `preGenerated` ← `ProductLicensesRepository.countPreGeneratedForProduct(productId)`
-  - Đồng thời đếm `activeProducts` (sản phẩm `public`)
-- Danh sách “My products” (SSR ban đầu): `myProducts` ← `ProductsRepository.findBySellerId(...)`
-- Xếp hạng seller: `myRank`, `totalSellers`, `rankPercentile`, `topSellers` ← các query trong `ProductsRepository`
+- KPI: `totalRevenue`, `totalUnits`, `totalOrders`, `avgRating`, `todayRevenue`, `monthRevenue` ← các native query trong `ProductsRepository`.
+- Biểu đồ doanh thu: `dailyRevenueLabels`, `dailyRevenueData` ← build từ `dailyRevenueFrom()` + fill 0 ngày trống.
+- Top products: `topProducts` ← `ProductsRepository.topProducts()`.
+- Recent orders: `recentOrders` ← Page đầu `SellerOrderRepository.findSellerOrders()` (limit 8).
+- Low stock: lọc sản phẩm public `quantity <= 5`; remaining nâng cao tính qua keys (sold + pre-generated) nếu dùng endpoint.
+- Active products count: `countBySellerIdAndStatus`.
+- My products SSR: `findBySellerId()` (trả bản rút gọn để hiển thị nhanh).
+- Ranking: `sellerRevenueRank()` + `totalSellers()` + tính percentile + `topSellers()`.
 
 Trên UI (Thymeleaf, `fragments/dashboard.html`):
 - KPI hiển thị trực tiếp từ model
@@ -144,31 +133,37 @@ sequenceDiagram
 
 
 ## Bảo mật & phạm vi dữ liệu
-- Tất cả truy vấn doanh thu/đơn hàng đều lọc theo `seller_id` và trạng thái đơn `COMPLETED`.
-- API chi tiết đơn chỉ trả về phần thuộc seller hiện hành (lọc theo `product` của seller trong `order_items`).
-- Ở production, ưu tiên xác định `sellerId` từ principal/session; query param chỉ để kiểm thử.
+- Dashboard: chặn truy cập nếu userType không SELLER/ADMIN.
+- Orders: native query có điều kiện `p.seller_id = :sellerId AND UPPER(o.status)='COMPLETED'` + HAVING đảm bảo chỉ đơn có item của seller.
+- Product delete: cấm nếu `was_public=true` hoặc status `public`.
+- Publish: bắt buộc header `X-User-Type=ADMIN`.
+- Withdraw & Profile: dùng `SecurityUtil.getCurrentUser()` hoặc SecurityContext.
+- Upload avatar: kiểm tra MIME + magic bytes + filename sanitize.
 
 
 ## Edge cases đã xử lý
-- Chuỗi doanh thu luôn liền mạch: server pre-fill 0 cho ngày thiếu và chuẩn hóa key `yyyy-MM-dd`.
-- “Low stock” dựa trên số key thực tế (đã bán + đã tạo sẵn), không chỉ dựa vào `quantity`.
-- Trạng thái sản phẩm null/"" được hiểu là “Pending” để thân thiện với UI.
+- Daily revenue: pre-fill 0 tránh chart gãy.
+- Date normalization đa kiểu (Timestamp, Date, LocalDateTime, String) vào yyyy-MM-dd.
+- Low stock: tránh hiển thị sản phẩm không public.
+- Product status null/blank normalize thành `pending`; `canceled` -> `cancelled`; `active` -> `public`.
+- Giới hạn page size một số API (<=100) tránh tải quá lớn.
 
 
 ## Debug nhanh (gợi ý)
-- Không thấy dữ liệu KPI/Chart: kiểm tra `sellerId` trong model/DOM và truy vấn `dailyRevenueFrom`.
-- Bảng “My products” rỗng: xác minh `GET /api/products?sellerId=...` có trả dữ liệu và filter client không ẩn hết.
-- Recent orders trống: đảm bảo có order `COMPLETED` gắn với sản phẩm của seller.
+- KPI 0 toàn bộ: kiểm tra userType đúng và có đơn status COMPLETED.
+- Chart trống: kiểm tra endpoint `/api/seller/{id}/revenue-series` trả labels hay lỗi 403.
+- Product không đổi status sau update: verify logic sensitiveChanged (name/description/downloadUrl).
+- Withdraw fail: kiểm tra balance < amount hoặc fee calculation.
 
 
 ## Tệp quan trọng (tham chiếu)
-- Controllers: `src/main/java/banhangrong/su25/Controller/{SellerDashboardController, SellerOrderController, ProductController, UploadController, WithdrawalController}.java`
-- Repositories: `src/main/java/banhangrong/su25/Repository/{ProductsRepository, SellerOrderRepository, UsersRepository, ProductLicensesRepository}.java`
-- Views/Fragments: `src/main/resources/templates/pages/seller/seller_dashboard.html`, `src/main/resources/templates/fragments/*.html`
-- JS: `src/main/resources/static/js/seller-dashboard.js`
+- Controllers: `SellerDashboardController`, `SellerOrderController`, `ProductsApiController`, `ProductController`, `SellerProfileController`, `WithdrawalController`, `SellerLicenseController`, `UsersApiController`.
+- Repositories: `ProductsRepository`, `SellerOrderRepository`, `ProductLicensesRepository`, `UsersRepository`, `WithdrawalRequestRepository`, `ShopLicensesRepository`, `VouchersRepository`.
+- Views/Fragments: pages/seller + fragments (dashboard / panels / modals / sidebar / scripts).
+- JS: `static/js/seller-dashboard.js`.
 
 
-— Tài liệu này cố ý lược bỏ chỉ số dòng để tránh lỗi thời. Khi cần truy vết, mở các file nêu trên theo tên class/tệp.
+— Tài liệu này cố ý lược bỏ chỉ số dòng cố định để tránh lỗi thời; ưu tiên tra cứu bằng tên class & phương thức.
 
 
 ## Trực quan hóa (Mermaid)
@@ -256,6 +251,20 @@ sequenceDiagram
 ```
 
 
-## Cách đọc chú giải dòng
-- Mỗi mục liệt kê: “dòng X–Y” nghĩa là khối mã chính nằm trong khoảng đó; các lệnh `addAttribute` hoặc `return` quan trọng cũng được nêu dòng chính xác để tra cứu nhanh.
-- Các dòng trùng lặp trong grep (hiển thị hai lần) là do công cụ tìm kiếm liệt kê lặp; số dòng vẫn chính xác theo file trong repo.
+## Cách đọc chú giải
+Tài liệu đã chuyển sang mô tả logic thay vì trích dẫn dòng cụ thể để giảm độ giòn khi code thay đổi. Khi cần kiểm chứng: dùng IDE tìm theo tên phương thức.
+
+## Phụ lục: Quy tắc trạng thái sản phẩm (tóm tắt)
+| Current | Thay đổi chỉ price/sale/quantity | Thay đổi name/desc/downloadUrl | Kết quả |
+|---------|----------------------------------|--------------------------------|--------|
+| public  | giữ public                       | chuyển hidden                  | public/hidden |
+| hidden  | bất kỳ                           | bất kỳ                         | hidden |
+| pending | bất kỳ                           | bất kỳ                         | hidden |
+| khác    | bất kỳ                           | bất kỳ                         | hidden |
+
+## Phụ lục: Đề xuất cải tiến
+- Thêm cache ngắn hạn (Caffeine) cho KPI / topProducts.
+- Chuẩn hoá error response `{code, message}`.
+- Hợp nhất `ProductsApiController` & `ProductController` tránh lặp logic status.
+- Thêm test đơn vị cho quy tắc chuyển trạng thái sản phẩm.
+- Unique composite index (seller_id + lower(name)).

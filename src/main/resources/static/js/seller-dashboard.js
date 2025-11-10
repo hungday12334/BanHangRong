@@ -1248,7 +1248,7 @@
             tbody.innerHTML = '';
             if (!filtered.length) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = '<td colspan="6" class="footer-note">Không có sản phẩm theo trạng thái đã chọn.</td>';
+                tr.innerHTML = '<td colspan="5" class="footer-note">Không có sản phẩm theo trạng thái đã chọn.</td>';
                 tbody.appendChild(tr);
             }
             filtered.forEach(p => {
@@ -1262,7 +1262,7 @@
                 else if (stVal.indexOf('cancel') !== -1) statusHtml = '<span class="badge warn">Cancelled</span>';
                 const price = (p.price ?? 0).toLocaleString('vi-VN');
                 const salePrice = (p.salePrice == null ? '-' : `${Number(p.salePrice).toLocaleString('vi-VN')} đ`);
-                tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td>${salePrice}</td><td class='hide-md'>${p.quantity ?? 0}</td><td>${downloadUrl}</td><td>${statusHtml}</td>`;
+                tr.innerHTML = `<td>${p.productId}</td><td>${p.name ?? ''}</td><td>${price} đ</td><td class='hide-md'>${p.quantity ?? 0}</td><td>${statusHtml}</td>`;
                 tbody.appendChild(tr);
             });
             if (counter) counter.textContent = filtered.length;
