@@ -114,6 +114,9 @@
 <body>
     <div class="wrapper">
         <div th:replace="~{customer/fragments/header :: header}"></div>
+        
+        <!-- Toast notification -->
+        <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
 
         <section class="layout">
             <aside class="sidebar">
@@ -129,7 +132,7 @@
                     <div class="value" th:text="${profileUser.username}">datbautroi11</div>
 
                     <div class="label">Full Name</div>
-                    <div class="value" th:text="'-'">-</div>
+                    <div class="value" th:text="${profileUser.fullName != null && !profileUser.fullName.isEmpty() ? profileUser.fullName : '-'}">-</div>
 
                     <div class="label">Email</div>
                     <div class="value" th:text="${maskedEmail != null ? maskedEmail : profileUser.email}">
@@ -158,6 +161,42 @@
             </div>
         </section>
     </div>
+    
+    <script th:inline="javascript">
+        (function() {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            const show = (msg, bg) => {
+                toast.textContent = msg;
+                toast.style.background = bg;
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 4500);
+            };
+            
+            // Hiển thị thông báo từ URL parameters
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.get('updated') === '1') {
+                /*[# th:if="${successMessage}"]*/
+                const successMsg = /*[[${successMessage}]]*/ '';
+                if (successMsg) {
+                    show(successMsg, '#065f46');
+                } else {
+                    show('Cập nhật thông tin thành công!', '#065f46');
+                }
+                /*[/]*/
+            }
+            
+            if (params.get('passwordChanged') === '1') {
+                show('Đổi mật khẩu thành công!', '#065f46');
+            }
+            
+            if (params.get('verified') === '1') {
+                show('Email đã được xác thực thành công!', '#065f46');
+            }
+        })();
+    </script>
 </body>
 
 </html>

@@ -7,8 +7,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,12 +16,9 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler successHandler;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(CustomAuthenticationSuccessHandler successHandler,
-                         CustomAccessDeniedHandler accessDeniedHandler) {
+    public SecurityConfig(CustomAuthenticationSuccessHandler successHandler) {
         this.successHandler = successHandler;
-        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -37,55 +32,42 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // CSRF - Keep disabled for now
-            .csrf(csrf -> csrf.disable())
-
-            // Session management - CRITICAL for maintaining session
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers("/payment/**")
+            )
+            
+            // Cấu hình session management
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .sessionFixation().migrateSession() // Migrate session on authentication
-                .invalidSessionUrl("/login?expired=true")
-                .maximumSessions(5)
+                .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
-                .expiredUrl("/login?expired=true")
-                .sessionRegistry(sessionRegistry)
             )
-
-            // Authorization rules
+            
+            // Cấu hình authorization
             .authorizeHttpRequests(auth -> auth
                     // Public endpoints
                     .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/email-verification/**").authenticated()
                     .requestMatchers("/api/database/**").permitAll()
                     .requestMatchers("/api/password-hash/**").permitAll()
-                    .requestMatchers("/api/debug/**").authenticated() // Debug endpoint - cần authenticated
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
+                    // VNPay callback and payment endpoints must be public
+                    .requestMatchers("/payment/**").permitAll()
                     .requestMatchers("/", "/login", "/register", "/forgot-password", "/find-account", "/reset-password", "/verify-email-required").permitAll()
                     // Guest-browsable catalog
                     .requestMatchers("/categories", "/category/**", "/product/**").permitAll()
                     .requestMatchers("/db", "/api/database/**").permitAll()
-
-                // Chat endpoints - CHỈ CẦN AUTHENTICATED
-                .requestMatchers("/chat", "/customer/chat", "/seller/chat").authenticated()
-                .requestMatchers("/api/conversation/**", "/api/conversations/**").authenticated()
-                .requestMatchers("/api/users/**", "/api/sellers/**").authenticated()
-                .requestMatchers("/ws/**").authenticated()
                 
-                // Customer pages
+                // Customer pages - cho phép tất cả authenticated users
                 .requestMatchers("/customer/**", "/cart/**").authenticated()
                 
-                // Seller pages - CHỈ SELLER mới vào được
-                .requestMatchers("/seller/**").hasRole("SELLER")
-                
-                // Seller API endpoints - CHỈ SELLER mới vào được
-                .requestMatchers("/api/seller/**").hasRole("SELLER")
-
-                // Admin pages
+                // Role-based access
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/user/**").authenticated()
-
+                .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers("/api/user/**").hasAnyRole("USER", "SELLER", "ADMIN")
+                
                 // Default: require authentication
                 .anyRequest().authenticated()
             )
@@ -108,17 +90,8 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
-            )
-            
-            // Xử lý Access Denied (403)
-            .exceptionHandling(exceptions -> exceptions
-                .accessDeniedHandler(accessDeniedHandler)
             );
 
         return http.build();
-    }
-    @Bean
-    SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
     }
 }

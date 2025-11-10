@@ -310,7 +310,7 @@ public class VnPayController {
 
     @GetMapping("/payment/vnpay/return")
     @Transactional
-    public String paymentReturn(HttpServletRequest request, Model model) {
+    public synchronized String paymentReturn(HttpServletRequest request, Model model) {
         try {
             Map<String,String[]> fields = request.getParameterMap();
             Map<String,String> vnp = new HashMap<>();
@@ -377,8 +377,40 @@ public class VnPayController {
                     Long uid = getCurrentUserId();
                     List<ShoppingCart> items = cartRepository.findByUserId(uid);
                     
+                    // 🔹 Kiểm tra nếu có bất kỳ item nào có quantity = 0 hoặc < 0 thì báo lỗi
+                    for (ShoppingCart it : items) {
+                        if (it.getQuantity() == null || it.getQuantity() <= 0) {
+                            return "redirect:/customer/dashboard?purchase=failure&reason=invalid_quantity";
+                        }
+                    }
+                    
+                    // 🔹 Lọc items có quantity > 0
+                    List<ShoppingCart> validItems = new ArrayList<>();
+                    for (ShoppingCart it : items) {
+                        if (it.getQuantity() != null && it.getQuantity() > 0) {
+                            validItems.add(it);
+                        }
+                    }
+                    
+                    if (validItems.isEmpty()) {
+                        return "redirect:/customer/dashboard?purchase=failure&reason=empty_cart";
+                    }
+                    
+                    // 🔹 Kiểm tra tồn kho trước (với pessimistic lock để tránh race condition)
+                    for (ShoppingCart it : validItems) {
+                        Products p = productsRepository.findByIdWithLock(it.getProductId()).orElse(null);
+                        if (p == null) {
+                            return "redirect:/customer/dashboard?purchase=failure&reason=product_not_found";
+                        }
+                        int stock = p.getQuantity() != null ? p.getQuantity() : 0;
+                        int requestQty = it.getQuantity() != null ? it.getQuantity() : 0;
+                        if (stock < requestQty) {
+                            return "redirect:/customer/dashboard?purchase=failure&reason=insufficient_stock";
+                        }
+                    }
+                    
                     // Calculate total amount to deduct from wallet
-                    final BigDecimal totalAmount = items.stream()
+                    final BigDecimal totalAmount = validItems.stream()
                         .map(it -> {
                             Products p = productsRepository.findById(it.getProductId()).orElse(null);
                             if (p != null) {
@@ -424,7 +456,7 @@ public class VnPayController {
 
                     // Create order items and keep for license generation
                     java.util.Map<Long, OrderItems> savedItemsByProduct = new java.util.HashMap<>();
-                    for (ShoppingCart it : items) {
+                    for (ShoppingCart it : validItems) {
                         Products product = productsRepository.findById(it.getProductId()).orElse(null);
                         if (product != null) {
                             OrderItems orderItem = new OrderItems();
@@ -441,7 +473,7 @@ public class VnPayController {
 
                     // Update product stock and sales, and generate license keys for actual purchased quantity
                     java.util.List<ProductLicenses> toInsert = new java.util.ArrayList<>();
-                    for (ShoppingCart it : items) {
+                    for (ShoppingCart it : validItems) {
                         productsRepository.findById(it.getProductId()).ifPresent(p -> {
                             int stock = p.getQuantity() != null ? p.getQuantity() : 0;
                             int want = it.getQuantity() != null ? it.getQuantity() : 0;

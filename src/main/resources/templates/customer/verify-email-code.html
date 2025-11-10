@@ -12,27 +12,6 @@
 	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title>Verify Email</title>
     <style>
-        .brand {
-            font-weight: 800;
-            letter-spacing: .2px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .brand:hover {
-            color: var(--brand);
-        }
-
-        .logo {
-            height: 32px;
-            width: auto;
-        }
-    </style>
-    <style>
         :root {
             --bg: #f5f7fb;
             --card: #ffffff;
@@ -111,72 +90,23 @@
 </head>
 
 <body>
-    <div class="wrapper">
-        <!-- Header từ layout chung -->
-        <div class="topbar">
-            <a href="/customer/dashboard" class="brand">
-                <img src="/img/logo.jpg" alt="BanHangRong Logo" class="logo">
-                BanHangRong
-            </a>
-            <nav class="nav" aria-label="Main">
-                <a href="/customer/dashboard">Home</a>
-                <a href="/categories">Category</a>
-                <a href="#">License Software</a>
-                <a href="#">Game Keys</a>
-                <a href="#">Voucher</a>
-                <a href="#">Support</a>
-            </nav>
-            <div class="top-actions">
-                <div class="notif">Notification</div>
-                <div class="user" style="position:relative">
-                    <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-                        <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </button>
-                    <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                        <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">My Account</a>
-                        <a class="item" href="/customer/wishlist" role="menuitem">💝 Wishlist</a>
-                        <a class="item" href="/customer/reviews" role="menuitem">⭐ My Reviews</a>
-                        <a class="item" href="/customer/settings" role="menuitem">⚙️ Settings</a>
-                        <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem"
-                            style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
-                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-                                th:value="${_csrf.token}" />
-                            <input type="hidden" name="amount" id="topupAmountInput" />
-                            <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Top Up
-                                (VNPay)</button>
-                        </form>
-                        <a class="item" href="/orderhistory" role="menuitem">Orders History</a>
-                        <a class="item seller-apply" href="/seller/dashboard" role="menuitem"
-                            style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈
-                            Become a Seller</a>
-                        <a class="item" href="#" role="menuitem"
-                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
-                    </div>
-                    <form id="logoutForm" method="post" action="/logout" style="display:none;">
-                    </form>
-                </div>
-                <div class="search">
-                    <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;">
-                        <input type="search" name="search" placeholder="search" aria-label="Search" th:value="${search}"
-                            style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
-                        <button type="submit"
-                            style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-                        <a th:if="${search != null and !search.trim().isEmpty()}" th:href="@{/customer/dashboard}"
-                            style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
-                    </form>
-                </div>
-                <a href="/cart" class="cart" title="Shopping Cart" aria-label="Shopping Cart">🛒<span class="badge"
-                        th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
-            </div>
-        </div>
+<div class="wrapper">
+    <div th:replace="~{customer/fragments/header :: header}"></div>
+        <!-- Toast notification -->
+        <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
         
         <div class="container">
         <div class="title">Email Verification</div>
-        <div class="desc">Enter the 6-digit code sent to your email.</div>
+        <div class="desc">
+            Enter the 6-digit code sent to your email: 
+            <strong th:if="${user != null and user.email != null}" th:text="${user.email}">your-email@example.com</strong>
+        </div>
+        
+        <!-- Success message khi đổi email -->
+        <div th:if="${successMessage != null}" 
+            style="color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:10px 12px;border-radius:8px;margin-bottom:12px;"
+            th:text="${successMessage}">Email đã được thay đổi thành công!</div>
+        
         <div th:if="${error != null}" class="notice" th:text="${error}">Invalid code</div>
         <form method="post" action="/customer/verify-code">
             <input type="text" name="code" placeholder="Enter 6-digit code" maxlength="6" pattern="[0-9]{6}" required>
@@ -194,7 +124,9 @@
                 </div>
             </div>
         </form>
+        
         <script>
+            // Countdown timer cho resend button
             (function () {
                 var rem = parseInt(new URLSearchParams(window.location.search).get('remaining') || '0');
                 if (!isNaN(rem) && rem > 0) {
@@ -215,41 +147,35 @@
             }
         </script>
         
-        <script>
-            // User menu toggle
-            document.addEventListener('DOMContentLoaded', function() {
-                const userMenuBtn = document.getElementById('userMenuBtn');
-                const userDropdown = document.getElementById('userDropdown');
+        <script th:inline="javascript">
+            // Toast notification cho email changed
+            (function() {
+                const toast = document.getElementById('toast');
+                if (!toast) return;
                 
-                if (userMenuBtn && userDropdown) {
-                    userMenuBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        userDropdown.classList.toggle('show');
-                    });
-                    
-                    // Close menu when clicking outside
-                    document.addEventListener('click', function(e) {
-                        if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                            userDropdown.classList.remove('show');
-                        }
-                    });
+                const show = (msg, bg) => {
+                    toast.textContent = msg;
+                    toast.style.background = bg;
+                    toast.style.display = 'block';
+                    setTimeout(() => { toast.style.display = 'none'; }, 5000);
+                };
+                
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('emailChanged') === '1') {
+                    /*[# th:if="${successMessage}"]*/
+                    const successMsg = /*[[${successMessage}]]*/ '';
+                    if (successMsg) {
+                        show(successMsg, '#065f46');
+                    } else {
+                        show('Email đã được thay đổi! Vui lòng nhập mã xác thực đã được gửi về email mới.', '#065f46');
+                    }
+                    /*[/]*/
                 }
-            });
-
-            // VNPay topup function
-            function topupPrompt(e) {
-                e.preventDefault();
-                const v = prompt('Enter amount to top up (VND):', '200000');
-                if (!v) return false;
-                const clean = v.replace(/[^0-9]/g, '');
-                if (!clean) {
-                    alert('Please enter a valid amount');
-                    return false;
+                
+                if (params.get('sent') === '1') {
+                    show('Mã xác thực đã được gửi về email của bạn!', '#065f46');
                 }
-                document.getElementById('topupAmountInput').value = clean;
-                e.target.submit();
-                return true;
-            }
+            })();
         </script>
     </div>
 </body>

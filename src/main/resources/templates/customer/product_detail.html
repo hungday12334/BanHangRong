@@ -130,6 +130,9 @@
 	<div class="wrapper">
 		<div th:replace="~{customer/fragments/header :: header}"></div>
 		
+		<!-- Toast notification -->
+		<div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
+		
 		<div class="container">
 		<div class="breadcrumb"><a href="/customer/dashboard">← Back to List</a></div>
 		<div class="detail">
@@ -160,9 +163,9 @@
 				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Product
 					description...</div>
 				<div class="section">
-					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" onsubmit="return validateAddToCart(event)">
 						<input type="hidden" name="productId" th:value="${product.productId}" />
-						<input type="number" name="quantity" min="1" value="1" th:attr="max=${product.quantity}"
+						<input type="number" name="quantity" id="productQuantity" min="0" value="1" th:attr="max=${product.quantity}"
 							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
 					<button class="btn primary" type="submit"
 						th:disabled="${product.quantity == null or product.quantity <= 0 or product.status == null or (!#strings.equalsIgnoreCase(product.status, 'Public'))}">Add to Cart</button>
@@ -230,6 +233,20 @@
 	</div>
 
 	<script>
+		// Validate quantity khi thêm vào giỏ hàng
+		function validateAddToCart(event) {
+			const qtyInput = document.getElementById('productQuantity');
+			const qty = parseInt(qtyInput.value || '0', 10);
+			
+			if (qty === 0 || qty < 0) {
+				alert('Số lượng phải lớn hơn 0');
+				event.preventDefault();
+				return false;
+			}
+			
+			return true;
+		}
+		
 		document.addEventListener('DOMContentLoaded', function() {
 			const productId = window.location.pathname.split('/').pop();
 			loadRatingStats(productId);
@@ -327,6 +344,30 @@
 			updateChatUnreadCount();
 			setInterval(updateChatUnreadCount, 30000);
 		});
+	</script>
+	
+	<script th:inline="javascript">
+		(function() {
+			const toast = document.getElementById('toast');
+			if (!toast) return;
+			
+			const show = (msg, bg) => {
+				toast.textContent = msg;
+				toast.style.background = bg;
+				toast.style.display = 'block';
+				setTimeout(() => { toast.style.display = 'none'; }, 4500);
+			};
+			
+			// Hiển thị thông báo từ flash attributes (thêm sản phẩm vào giỏ hàng)
+			/*[# th:if="${cartMessage}"]*/
+			const cartMessage = /*[[${cartMessage}]]*/ '';
+			const cartMessageType = /*[[${cartMessageType}]]*/ 'success';
+			if (cartMessage) {
+				const bg = cartMessageType === 'success' ? '#065f46' : '#991b1b';
+				show(cartMessage, bg);
+			}
+			/*[/]*/
+		})();
 	</script>
 	</div>
 </body>

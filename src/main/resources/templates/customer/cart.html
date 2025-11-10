@@ -243,7 +243,7 @@
                         th:text="${#numbers.formatDecimal(it.unitPrice,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <div class="col center">
                     <div class="qty">
-                        <input type="number" min="1" th:value="${it.quantity}"
+                        <input type="number" min="0" th:value="${it.quantity}"
                             th:attr="data-product-id=${it.product.productId}" class="qty-input">
                     </div>
                     <div class="errmsg" th:attr="id=${'err-' + it.product.productId}"></div>
@@ -301,6 +301,17 @@
                         alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
                         return false;
                     }
+                    
+                    // Kiểm tra tất cả quantity input
+                    const qtyInputs = document.querySelectorAll('.qty-input');
+                    for (let input of qtyInputs) {
+                        const qty = parseInt(input.value || '0', 10);
+                        if (qty === 0 || qty < 0) {
+                            alert('Số lượng sản phẩm phải lớn hơn 0. Vui lòng kiểm tra lại giỏ hàng.');
+                            return false;
+                        }
+                    }
+                    
                     return true;
                 };
                 
@@ -312,6 +323,18 @@
                             e.stopPropagation();
                             alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
                             return false;
+                        }
+                        
+                        // Kiểm tra tất cả quantity input, không cho phép quantity = 0
+                        const qtyInputs = document.querySelectorAll('.qty-input');
+                        for (let input of qtyInputs) {
+                            const qty = parseInt(input.value || '0', 10);
+                            if (qty === 0 || qty < 0) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                alert('Số lượng sản phẩm phải lớn hơn 0. Vui lòng kiểm tra lại giỏ hàng.');
+                                return false;
+                            }
                         }
                     });
                 }
@@ -348,17 +371,31 @@
                 inputs.forEach(inp => {
                     inp.addEventListener('change', () => {
                         const pid = inp.getAttribute('data-product-id');
-                        let val = parseInt(inp.value || '1', 10);
-                        if (!val || val < 1) val = 1;
+                        let val = parseInt(inp.value || '0', 10);
+                        
+                        // Kiểm tra nếu quantity = 0 thì hiển thị lỗi
+                        const err = document.getElementById('err-' + pid);
+                        if (val === 0) {
+                            err.textContent = 'Số lượng phải lớn hơn 0';
+                            err.style.color = '#ef4444';
+                            return;
+                        }
+                        
+                        if (!val || val < 0) val = 1;
                         
                         fetch('/cart/update', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: `productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
                         }).then(r => r.json()).then(d => {
-                            const err = document.getElementById('err-' + pid);
+                            if (!d.ok) {
+                                // Hiển thị lỗi từ backend
+                                err.textContent = d.error || 'Có lỗi xảy ra';
+                                err.style.color = '#ef4444';
+                                return;
+                            }
                             if (d.over) {
-                                err.textContent = `Exceeds stock (${d.stock}). Set to ${d.appliedQty}.`;
+                                err.textContent = `Vượt quá tồn kho (${d.stock}). Đặt về ${d.appliedQty}.`;
                             } else {
                                 err.textContent = '';
                             }
@@ -426,18 +463,57 @@
         </div>
     </div>
     
-    <script>
+    <script th:inline="javascript">
         (function () {
-            const params = new URLSearchParams(window.location.search);
-            const pay = params.get('pay');
-            if (!pay) return;
             const toast = document.getElementById('toast');
             if (!toast) return;
-            const show = (msg, bg) => { toast.textContent = msg; toast.style.background = bg; toast.style.display = 'block'; setTimeout(() => { toast.style.display = 'none'; }, 3500); };
-            if (pay === 'success') show('Payment successful with balance.', '#065f46');
-            else if (pay === 'insufficient') show('Insufficient balance. Please top up.', '#991b1b');
-            else if (pay === 'empty') show('Cart is empty or invalid.', '#b45309');
-            else if (pay === 'auth') show('Please login again.', '#1f2937');
+            const show = (msg, bg) => { 
+                toast.textContent = msg; 
+                toast.style.background = bg; 
+                toast.style.display = 'block'; 
+                setTimeout(() => { toast.style.display = 'none'; }, 4000); 
+            };
+            
+            // Hiển thị thông báo từ flash attributes (thêm sản phẩm vào giỏ hàng)
+            /*[# th:if="${cartMessage}"]*/
+            const cartMessage = /*[[${cartMessage}]]*/ '';
+            const cartMessageType = /*[[${cartMessageType}]]*/ 'success';
+            if (cartMessage) {
+                const bg = cartMessageType === 'success' ? '#065f46' : '#991b1b';
+                show(cartMessage, bg);
+            }
+            /*[/]*/
+            
+            // Hiển thị thông báo từ URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const pay = params.get('pay');
+            if (pay) {
+                if (pay === 'success') show('Thanh toán thành công bằng số dư.', '#065f46');
+                else if (pay === 'insufficient') show('Số dư không đủ. Vui lòng nạp thêm tiền.', '#991b1b');
+                else if (pay === 'empty') show('Giỏ hàng rỗng hoặc không hợp lệ.', '#b45309');
+                else if (pay === 'auth') show('Vui lòng đăng nhập lại.', '#1f2937');
+            }
+            
+            const error = params.get('error');
+            if (error === 'insufficient_balance') {
+                show('Số dư không đủ để thanh toán. Vui lòng nạp thêm tiền vào ví.', '#991b1b');
+            } else if (error === 'insufficient_stock') {
+                const product = params.get('product');
+                if (product) {
+                    show('Sản phẩm "' + decodeURIComponent(product) + '" không đủ hàng trong kho.', '#991b1b');
+                } else {
+                    show('Một số sản phẩm không đủ hàng trong kho.', '#991b1b');
+                }
+            } else if (error === 'product_not_found') {
+                show('Sản phẩm không tồn tại.', '#991b1b');
+            } else if (error === 'invalid_quantity') {
+                const product = params.get('product');
+                if (product) {
+                    show('Sản phẩm "' + decodeURIComponent(product) + '" có số lượng không hợp lệ (phải lớn hơn 0).', '#991b1b');
+                } else {
+                    show('Có sản phẩm có số lượng không hợp lệ. Vui lòng kiểm tra lại.', '#991b1b');
+                }
+            }
         })();
     </script>
 </body>

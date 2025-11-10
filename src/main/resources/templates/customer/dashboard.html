@@ -8,6 +8,10 @@
 <body>
 <div class="wrapper">
 <div th:replace="~{customer/fragments/header :: header}"></div>
+
+<!-- Toast notification -->
+<div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
+
 <div class="container">
     <h2 class="title">Feature License</h2>
 
@@ -69,5 +73,54 @@
     </section>
 </div>
 </div>
+
+<script th:inline="javascript">
+    (function() {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        const show = (msg, bg) => {
+            toast.textContent = msg;
+            toast.style.background = bg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 4500);
+        };
+        
+        const params = new URLSearchParams(window.location.search);
+        
+        // Thông báo nạp tiền thành công
+        const topup = params.get('topup');
+        if (topup === 'success') {
+            const amount = params.get('amount');
+            if (amount) {
+                const formattedAmount = new Intl.NumberFormat('vi-VN').format(amount);
+                show('Bạn đã nạp ' + formattedAmount + ' VNĐ thành công vào ví!', '#065f46');
+            } else {
+                show('Nạp tiền vào ví thành công!', '#065f46');
+            }
+        } else if (topup === 'failure') {
+            const code = params.get('code');
+            show('Nạp tiền thất bại' + (code ? ' (Mã lỗi: ' + code + ')' : ''), '#991b1b');
+        }
+        
+        // Thông báo thanh toán thành công
+        const purchase = params.get('purchase');
+        if (purchase === 'success') {
+            show('Thanh toán đơn hàng thành công!', '#065f46');
+        } else if (purchase === 'failure') {
+            const reason = params.get('reason');
+            if (reason === 'insufficient_balance') {
+                show('Thanh toán thất bại: Số dư không đủ. Vui lòng nạp thêm tiền.', '#991b1b');
+            } else if (reason === 'invalid_quantity') {
+                show('Thanh toán thất bại: Có sản phẩm có số lượng không hợp lệ (phải lớn hơn 0).', '#991b1b');
+            } else if (reason === 'empty_cart') {
+                show('Thanh toán thất bại: Giỏ hàng trống.', '#991b1b');
+            } else {
+                show('Thanh toán đơn hàng thất bại. Vui lòng thử lại.', '#991b1b');
+            }
+        }
+    })();
+</script>
+
 </body>
 </html>

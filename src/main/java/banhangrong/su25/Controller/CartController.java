@@ -5,6 +5,7 @@ import banhangrong.su25.service.CartService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,17 +47,27 @@ public class CartController {
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam("productId") Long productId,
                             @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity,
-                            @RequestHeader(value = "Referer", required = false) String referer) {
+                            @RequestHeader(value = "Referer", required = false) String referer,
+                            RedirectAttributes redirectAttributes) {
         Users user = cartService.getCurrentUserOrNull();
         if (user == null) {
             return "redirect:/login?redirect=/product/" + productId;
         }
 
-        cartService.addToCart(productId, quantity);
+        Map<String, Object> result = cartService.addToCart(productId, quantity);
+        
+        // Thêm thông báo vào flash attributes
+        if (Boolean.TRUE.equals(result.get("success"))) {
+            redirectAttributes.addFlashAttribute("cartMessage", result.get("message"));
+            redirectAttributes.addFlashAttribute("cartMessageType", "success");
+        } else {
+            redirectAttributes.addFlashAttribute("cartMessage", result.get("message"));
+            redirectAttributes.addFlashAttribute("cartMessageType", "error");
+        }
 
         // Nếu đến từ product detail page thì quay lại đó, không thì về cart
         if (referer != null && referer.contains("/product/")) {
-            return "redirect:/product/" + productId + "?added=success";
+            return "redirect:/product/" + productId;
         }
         return "redirect:/cart";
     }

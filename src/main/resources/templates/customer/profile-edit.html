@@ -304,17 +304,19 @@
             </aside>
             <section class="card main">
                 <h2 style="margin-top:0;">Edit Profile</h2>
+                
+                <!-- Toast notification -->
+                <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
+                
                 <div th:if="${emailError != null}" class="notice"
-                    style="margin-bottom:12px;color:#dc2626;background:#fef2f2;border-color:#fecaca;"
+                    style="margin-bottom:12px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:10px;border-radius:8px;"
                     th:text="${emailError}">Email đã tồn tại, vui lòng chọn email khác.</div>
-                <div th:if="${saveError != null}" class="notice" style="margin-bottom:12px;" th:text="${saveError}">
-                    Không thể lưu thay đổi. Vui lòng thử lại.</div>
-                <div th:if="${pwdError != null}" class="notice"
-                    style="margin-bottom:12px;color:#dc2626;background:#fef2f2;border-color:#fecaca;"
-                    th:text="${pwdError}">Lỗi đổi mật khẩu.</div>
-                <div th:if="${updated}" class="notice"
-                    style=" margin-bottom:12px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46;">Đã lưu thay đổi.
-                </div>
+                <div th:if="${successMessage != null}" class="notice"
+                    style="margin-bottom:12px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:10px;border-radius:8px;"
+                    th:text="${successMessage}">Cập nhật thành công!</div>
+                <div th:if="${errorMessage != null}" class="notice"
+                    style="margin-bottom:12px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:10px;border-radius:8px;"
+                    th:text="${errorMessage}">Có lỗi xảy ra.</div>
                 <form th:action="@{'/customer/profile/' + ${user.username} + '/edit'}" method="post">
                     <div class="form-grid">
                         <div class="form-group">
@@ -323,8 +325,8 @@
                         </div>
                         <div class="form-group">
                             <label>Full Name</label>
-                            <input type="text" name="fullName" value=""
-                                placeholder="Full name" disabled>
+                            <input type="text" name="fullName" th:value="${profileUser.fullName}"
+                                placeholder="Full name">
                         </div>
                         <div class="form-group">
                             <label>Email</label>
@@ -362,33 +364,36 @@
                     </div>
                 </form>
                 
-                <script>
+                <script th:inline="javascript">
                     function goBack() {
                         window.history.back();
                     }
                     
-                    // Handle form submission
-                    document.querySelector('form').addEventListener('submit', function(e) {
-                        e.preventDefault();
+                    // Hiển thị toast notification nếu có
+                    (function() {
+                        const toast = document.getElementById('toast');
+                        if (!toast) return;
                         
-                        const formData = new FormData(this);
+                        const show = (msg, bg) => {
+                            toast.textContent = msg;
+                            toast.style.background = bg;
+                            toast.style.display = 'block';
+                            setTimeout(() => { toast.style.display = 'none'; }, 4500);
+                        };
                         
-                        fetch(this.action, {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                window.location.href = response.url;
+                        // Hiển thị thông báo từ URL parameters
+                        const params = new URLSearchParams(window.location.search);
+                        if (params.get('updated') === '1') {
+                            /*[# th:if="${successMessage}"]*/
+                            const successMsg = /*[[${successMessage}]]*/ '';
+                            if (successMsg) {
+                                show(successMsg, '#065f46');
                             } else {
-                                throw new Error('Save failed');
+                                show('Cập nhật thông tin thành công!', '#065f46');
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Lỗi khi lưu thông tin: ' + error.message);
-                        });
-                    });
+                            /*[/]*/
+                        }
+                    })();
                 </script>
             </section>
         </div>

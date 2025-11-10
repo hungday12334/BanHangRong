@@ -24,7 +24,7 @@ public class CustomerProfileController {
     }
 
     @GetMapping("/customer/profile/{username}")
-    public String profile(@PathVariable("username") String username, Model model) {
+    public String profile(@PathVariable("username") String username, Model model, RedirectAttributes redirectAttributes) {
         Users currentUser = profileService.getCurrentUserOrNull();
 
         Users profileUser = profileService.findByUsernameOrNull(username);
@@ -65,18 +65,27 @@ public class CustomerProfileController {
 
     @PostMapping("/customer/profile/{username}/edit")
     public String editProfileSubmit(@PathVariable("username") String username,
+                                    @RequestParam(name = "fullName", required = false) String fullName,
                                     @RequestParam(name = "avatarUrl", required = false) String avatarUrl,
                                     @RequestParam(name = "email", required = false) String email,
                                     @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
                                     @RequestParam(name = "gender", required = false) String gender,
                                     @RequestParam(name = "birthDate", required = false) String birthDateStr,
-                                    Model model) {
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
         Users currentUser = profileService.getCurrentUserOrNull();
         if (currentUser == null || !username.equalsIgnoreCase(currentUser.getUsername())) {
             return "redirect:/customer/profile/" + username;
         }
+        
+        // Lưu email cũ để gửi thông báo nếu có thay đổi
+        String oldEmail = currentUser.getEmail();
+        boolean emailChanged = false;
 
         // Update allowed fields only
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            currentUser.setFullName(fullName.trim());
+        }
         if (avatarUrl != null) currentUser.setAvatarUrl(avatarUrl.trim());
         if (email != null && !email.trim().isEmpty() && !email.trim().equalsIgnoreCase(currentUser.getEmail())) {
             String newEmail = email.trim();
@@ -89,6 +98,29 @@ public class CustomerProfileController {
                 model.addAttribute("emailError", "Email đã tồn tại, vui lòng chọn email khác.");
                 return "customer/profile-edit";
             }
+            
+            emailChanged = true;
+            
+            // Gửi email thông báo về email CŨ
+            if (oldEmail != null && !oldEmail.trim().isEmpty()) {
+                String userName = currentUser.getFullName() != null && !currentUser.getFullName().trim().isEmpty() 
+                    ? currentUser.getFullName() 
+                    : currentUser.getUsername();
+                String oldEmailSubject = "Thông báo thay đổi email";
+                String oldEmailBody = String.format(
+                    "Xin chào %s,\n\n" +
+                    "Email của bạn đã được thay đổi từ %s sang %s.\n\n" +
+                    "Nếu đây không phải là bạn, vui lòng liên hệ ngay với chúng tôi.\n\n" +
+                    "Trân trọng,\nBán Hàng Rong Team",
+                    userName, oldEmail, newEmail
+                );
+                try {
+                    profileService.sendEmailSafe(oldEmail, oldEmailSubject, oldEmailBody);
+                } catch (Exception e) {
+                    System.err.println("Failed to send notification to old email: " + e.getMessage());
+                }
+            }
+            
             // Persist the new email immediately using update query to avoid stale entity issues
             profileService.updateEmailAndUnverify(currentUser.getUserId(), newEmail);
             // Refresh in-memory user for the same request
@@ -101,9 +133,22 @@ public class CustomerProfileController {
             try {
                 String token = String.format("%06d", new java.util.Random().nextInt(1_000_000));
                 EmailVerificationToken evt = profileService.createAndSaveToken(currentUser.getUserId(), token);
-                // send email with code
-                profileService.sendEmailSafe(currentUser.getEmail(), "Your verification code", "Your code is: " + token + " (valid 24 hours)");
-            } catch (Exception ignored) {
+                
+                // Gửi email xác thực về email MỚI
+                String userName = currentUser.getFullName() != null && !currentUser.getFullName().trim().isEmpty() 
+                    ? currentUser.getFullName() 
+                    : currentUser.getUsername();
+                String newEmailSubject = "Xác thực email mới của bạn";
+                String newEmailBody = String.format(
+                    "Xin chào %s,\n\n" +
+                    "Email của bạn đã được thay đổi từ %s sang %s.\n\n" +
+                    "Mã xác thực của bạn là: %s (có hiệu lực trong 24 giờ)\n\n" +
+                    "Trân trọng,\nBán Hàng Rong Team",
+                    userName, oldEmail, newEmail, token
+                );
+                profileService.sendEmailSafe(currentUser.getEmail(), newEmailSubject, newEmailBody);
+            } catch (Exception e) {
+                System.err.println("Failed to send verification code to new email: " + e.getMessage());
                 // tolerate missing token table or other issues in dev
             }
         }
@@ -113,12 +158,27 @@ public class CustomerProfileController {
             java.time.LocalDate bd = profileService.parseDateOrNull(birthDateStr);
             if (bd != null) currentUser.setBirthDate(bd);
         }
-        try { profileService.saveAndFlushUser(currentUser); } catch (Exception e) {
-            addHeader(model, currentUser);
-            model.addAttribute("profileUser", currentUser);
-            model.addAttribute("saveError", "Không thể lưu thay đổi. Vui lòng thử lại.");
-            return "customer/profile-edit";
+        
+        try { 
+            profileService.saveAndFlushUser(currentUser);
+            
+            // Thêm thông báo thành công
+            if (emailChanged) {
+                redirectAttributes.addFlashAttribute("successMessage", 
+                    "Cập nhật thông tin thành công! Email đã được thay đổi, vui lòng nhập mã xác thực đã được gửi về email mới.");
+                // Redirect đến trang verify-code để nhập mã
+                return "redirect:/customer/verify-code?emailChanged=1";
+            } else {
+                redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin thành công!");
+            }
+            
+        } catch (Exception e) {
+            // Thông báo lỗi
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Không thể lưu thay đổi. Vui lòng thử lại. Lỗi: " + e.getMessage());
+            return "redirect:/customer/profile/" + currentUser.getUsername() + "/edit";
         }
+        
         return "redirect:/customer/profile/" + currentUser.getUsername() + "?updated=1";
     }
 

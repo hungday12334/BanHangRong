@@ -198,36 +198,73 @@ public class CartService {
         return res;
     }
 
-    public void addToCart(Long productId, Integer quantity) {
+    public Map<String, Object> addToCart(Long productId, Integer quantity) {
+        Map<String, Object> result = new HashMap<>();
+        
         Optional<Products> productOpt = productsRepository.findById(productId);
         if (productOpt.isEmpty()) {
-            return;
+            result.put("success", false);
+            result.put("message", "Sản phẩm không tồn tại");
+            return result;
         }
 
         Products product = productOpt.get();
         // Chỉ cho phép thêm sản phẩm có status là "Public"
         if (product.getStatus() == null || !"Public".equalsIgnoreCase(product.getStatus())) {
-            return;
+            result.put("success", false);
+            result.put("message", "Sản phẩm không khả dụng");
+            return result;
+        }
+        
+        // Kiểm tra số lượng trong kho
+        int stock = product.getQuantity() != null ? product.getQuantity() : 0;
+        if (stock <= 0) {
+            result.put("success", false);
+            result.put("message", "Sản phẩm \"" + product.getName() + "\" đã hết hàng");
+            return result;
+        }
+        
+        // Kiểm tra quantity phải > 0
+        if (quantity == null || quantity <= 0) {
+            result.put("success", false);
+            result.put("message", "Số lượng phải lớn hơn 0");
+            return result;
         }
 
-        int qty = (quantity != null && quantity > 0) ? quantity : 1;
-        int stock = product.getQuantity() != null ? product.getQuantity() : 0;
+        int qty = quantity;
         Optional<ShoppingCart> existing = cartRepository.findByUserIdAndProductId(getCurrentUserIdOrFallback(), productId);
         
+        int appliedQty;
         if (existing.isPresent()) {
+            // Nếu đã có trong cart, cộng thêm số lượng
             ShoppingCart it = existing.get();
             int current = it.getQuantity() != null ? it.getQuantity() : 0;
-            int applied = Math.min(current + qty, stock);
-            it.setQuantity(applied);
+            appliedQty = Math.min(current + qty, stock);
+            
+            // Nếu không thể thêm thêm (đã đạt max stock)
+            if (appliedQty == current) {
+                result.put("success", false);
+                result.put("message", "Sản phẩm \"" + product.getName() + "\" đã đạt số lượng tối đa trong kho (" + stock + ")");
+                return result;
+            }
+            
+            it.setQuantity(appliedQty);
             cartRepository.save(it);
         } else {
+            // Thêm mới vào cart
             ShoppingCart item = new ShoppingCart();
             item.setUserId(getCurrentUserIdOrFallback());
             item.setProductId(productId);
-            int applied = Math.min(qty, stock);
-            item.setQuantity(applied);
+            appliedQty = Math.min(qty, stock);
+            item.setQuantity(appliedQty);
             cartRepository.save(item);
         }
+        
+        result.put("success", true);
+        result.put("productName", product.getName());
+        result.put("quantity", appliedQty);
+        result.put("message", "Sản phẩm \"" + product.getName() + "\" đã được thêm vào giỏ hàng với số lượng " + appliedQty);
+        return result;
     }
 
     public Map<String, Object> updateQuantity(Long productId, Integer quantity) {
@@ -246,8 +283,15 @@ public class CartService {
             res.put("error", "Product is not available");
             return res;
         }
+        
+        // Kiểm tra quantity phải > 0
+        if (quantity == null || quantity <= 0) {
+            res.put("ok", false);
+            res.put("error", "Số lượng phải lớn hơn 0");
+            return res;
+        }
 
-        int requested = quantity != null && quantity > 0 ? quantity : 1;
+        int requested = quantity;
         int stock = product.getQuantity() != null ? product.getQuantity() : 0;
         int applied = Math.min(requested, stock);
         Optional<ShoppingCart> existing = cartRepository.findByUserIdAndProductId(getCurrentUserIdOrFallback(), productId);
@@ -271,11 +315,20 @@ public class CartService {
     }
 
     @Transactional
-    public String checkoutDemoAndReturnRedirect(jakarta.servlet.http.HttpSession session) {
+    public synchronized String checkoutDemoAndReturnRedirect(jakarta.servlet.http.HttpSession session) {
         Long uid = getCurrentUserIdOrFallback();
         List<ShoppingCart> items = cartRepository.findByUserId(uid);
 
-        // 🔹 Chỉ lấy các sản phẩm có status là "Public"
+        // 🔹 Kiểm tra nếu có bất kỳ item nào có quantity = 0 hoặc < 0 thì báo lỗi
+        for (ShoppingCart it : items) {
+            if (it.getQuantity() == null || it.getQuantity() <= 0) {
+                Products p = productsRepository.findById(it.getProductId()).orElse(null);
+                String productName = p != null ? p.getName() : "Sản phẩm";
+                return "redirect:/cart?error=invalid_quantity&product=" + productName;
+            }
+        }
+
+        // 🔹 Chỉ lấy các sản phẩm có status là "Public" và quantity > 0
         List<ShoppingCart> validItems = new ArrayList<>();
         for (ShoppingCart it : items) {
             Optional<Products> productOpt = productsRepository.findById(it.getProductId());
@@ -289,6 +342,19 @@ public class CartService {
 
         if (validItems.isEmpty()) {
             return "redirect:/cart?pay=empty";
+        }
+
+        // 🔹 Kiểm tra tồn kho trước khi tính tiền (với pessimistic lock để tránh race condition)
+        for (ShoppingCart it : validItems) {
+            Products p = productsRepository.findByIdWithLock(it.getProductId()).orElse(null);
+            if (p == null) {
+                return "redirect:/cart?error=product_not_found";
+            }
+            int stock = p.getQuantity() != null ? p.getQuantity() : 0;
+            int requestQty = it.getQuantity() != null ? it.getQuantity() : 0;
+            if (stock < requestQty) {
+                return "redirect:/cart?error=insufficient_stock&product=" + p.getName();
+            }
         }
 
         // 🔹 Tính tổng tiền chỉ cho sản phẩm Public
