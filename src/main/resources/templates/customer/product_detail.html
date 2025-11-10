@@ -163,7 +163,7 @@
 				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Product
 					description...</div>
 				<div class="section">
-					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" onsubmit="return validateAddToCart(event)">
+					<form method="post" th:action="@{/cart/add}" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" onsubmit="return validateAddToCart(event)">
 						<input type="hidden" name="productId" th:value="${product.productId}" />
 						<input type="number" name="quantity" id="productQuantity" min="0" value="1" th:attr="max=${product.quantity}"
 							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
