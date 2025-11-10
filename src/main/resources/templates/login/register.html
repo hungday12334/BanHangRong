@@ -587,6 +587,13 @@
 
                     if (response.ok) {
                         console.log('Registration successful!');
+
+                        // ✅ Store JWT token for authenticated session
+                        if (result.token) {
+                            localStorage.setItem('jwtToken', result.token);
+                            console.log('JWT token stored');
+                        }
+
                         showMessage('Registration successful! Redirecting to verification page...', 'success');
 
                         setTimeout(() => {

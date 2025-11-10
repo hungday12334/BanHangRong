@@ -418,13 +418,17 @@ public class SellerProfileController {
             }
 
             // ===== VALIDATION 4: Check password maximum length =====
-            if (newPassword.length() > 100) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Password must not exceed 100 characters"));
+            if (newPassword.length() < 8) {
+                return ResponseEntity.badRequest().body(Map.of("error", "New password must be at least 8 characters"));
             }
 
             // ===== VALIDATION 5: Check password does not contain spaces =====
             if (newPassword.contains(" ")) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Password cannot contain spaces"));
+            }
+
+            if (!newPassword.matches("^(?=.*[A-Za-z])(?=.*\\d).+$")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Password must contain both letters and numbers"));
             }
 
             // ===== VALIDATION 6: Check password confirmation match =====
