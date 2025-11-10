@@ -18,19 +18,20 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     // ========================= SẢN PHẨM CHUNG =========================
 
     Page<Products> findByStatus(String status, Pageable pageable);
+
     List<Products> findBySellerIdAndIsActiveTrue(Long sellerId);
 
-    @Query(value = "SELECT p FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)",
-            countQuery = "SELECT COUNT(p) FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)")
-    Page<Products> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndStatus(@Param("name") String name, @Param("desc") String desc, @Param("status") String status, Pageable pageable);
+    @Query(value = "SELECT p FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)", countQuery = "SELECT COUNT(p) FROM Products p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :desc, '%'))) AND LOWER(p.status) = LOWER(:status)")
+    Page<Products> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndStatus(@Param("name") String name,
+            @Param("desc") String desc, @Param("status") String status, Pageable pageable);
 
-    @Query(value = "SELECT p FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)",
-            countQuery = "SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
-    Page<Products> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status, Pageable pageable);
+    @Query(value = "SELECT p FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)", countQuery = "SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    Page<Products> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status,
+            Pageable pageable);
 
-    @Query(value = "SELECT p FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)",
-            countQuery = "SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
-    Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId, @Param("status") String status, @Param("search") String search, Pageable pageable);
+    @Query(value = "SELECT p FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)", countQuery = "SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    Page<Products> findByCategoryIdAndStatusAndSearch(@Param("categoryId") Long categoryId,
+            @Param("status") String status, @Param("search") String search, Pageable pageable);
 
     List<Products> findBySellerId(Long sellerId);
 
@@ -38,50 +39,52 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     List<Products> findByCategoryIdAnyStatus(@Param("categoryId") Long categoryId);
 
     @Query("SELECT p FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status) AND p.quantity <= :threshold ORDER BY p.quantity ASC")
-    List<Products> findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(@Param("sellerId") Long sellerId, @Param("status") String status, @Param("threshold") Integer threshold);
+    List<Products> findTop10BySellerIdAndStatusAndQuantityLessThanEqualOrderByQuantityAsc(
+            @Param("sellerId") Long sellerId, @Param("status") String status, @Param("threshold") Integer threshold);
 
     @Query("SELECT COUNT(p) FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status)")
     long countBySellerIdAndStatus(@Param("sellerId") Long sellerId, @Param("status") String status);
 
-        @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
+    @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
     BigDecimal totalRevenueBySeller(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT COALESCE(SUM(oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
+    @Query(value = "SELECT COALESCE(SUM(oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
     Long totalUnitsSoldBySeller(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND oi.created_at >= :fromDate GROUP BY CAST(oi.created_at AS DATE) ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
+    @Query(value = "SELECT CAST(oi.created_at AS DATE) as d, COALESCE(SUM(oi.price_at_time * oi.quantity),0) as revenue FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND oi.created_at >= :fromDate GROUP BY CAST(oi.created_at AS DATE) ORDER BY CAST(oi.created_at AS DATE)", nativeQuery = true)
     List<Object[]> dailyRevenueFrom(@Param("sellerId") Long sellerId, @Param("fromDate") LocalDateTime fromDate);
 
-        @Query(value = "SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED'", nativeQuery = true)
     Long totalOrdersBySeller(@Param("sellerId") Long sellerId);
 
     @Query(value = "SELECT COALESCE(AVG(pr.rating),0) FROM product_reviews pr JOIN products p ON p.product_id = pr.product_id WHERE p.seller_id = :sellerId", nativeQuery = true)
     BigDecimal averageRatingBySeller(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT p.product_id, p.name, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN oi.quantity ELSE 0 END),0) AS units, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.quantity * oi.price_at_time) ELSE 0 END),0) AS revenue, COALESCE(AVG(pr.rating),0) AS rating FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id LEFT JOIN orders o ON o.order_id = oi.order_id LEFT JOIN product_reviews pr ON pr.product_id = p.product_id WHERE p.seller_id = :sellerId GROUP BY p.product_id, p.name ORDER BY revenue DESC LIMIT 5", nativeQuery = true)
+    @Query(value = "SELECT p.product_id, p.name, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN oi.quantity ELSE 0 END),0) AS units, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.quantity * oi.price_at_time) ELSE 0 END),0) AS revenue, COALESCE(AVG(pr.rating),0) AS rating FROM products p LEFT JOIN order_items oi ON oi.product_id = p.product_id LEFT JOIN orders o ON o.order_id = oi.order_id LEFT JOIN product_reviews pr ON pr.product_id = p.product_id WHERE p.seller_id = :sellerId GROUP BY p.product_id, p.name ORDER BY revenue DESC LIMIT 5", nativeQuery = true)
     List<Object[]> topProducts(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT o.order_id, o.created_at, COALESCE(SUM(oi.quantity * oi.price_at_time),0) AS amount, COALESCE(SUM(oi.quantity),0) AS items FROM orders o JOIN order_items oi ON oi.order_id = o.order_id JOIN products p ON p.product_id = oi.product_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' GROUP BY o.order_id, o.created_at ORDER BY o.created_at DESC LIMIT 8", nativeQuery = true)
+    @Query(value = "SELECT o.order_id, o.created_at, COALESCE(SUM(oi.quantity * oi.price_at_time),0) AS amount, COALESCE(SUM(oi.quantity),0) AS items FROM orders o JOIN order_items oi ON oi.order_id = o.order_id JOIN products p ON p.product_id = oi.product_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' GROUP BY o.order_id, o.created_at ORDER BY o.created_at DESC LIMIT 8", nativeQuery = true)
     List<Object[]> recentOrders(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND CAST(o.created_at AS DATE) = CURRENT_DATE", nativeQuery = true)
+    @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND CAST(o.created_at AS DATE) = CURRENT_DATE", nativeQuery = true)
     BigDecimal todayRevenue(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND YEAR(o.created_at) = YEAR(CURRENT_DATE) AND MONTH(o.created_at) = MONTH(CURRENT_DATE)", nativeQuery = true)
+    @Query(value = "SELECT COALESCE(SUM(oi.price_at_time * oi.quantity),0) FROM order_items oi JOIN products p ON p.product_id = oi.product_id JOIN orders o ON o.order_id = oi.order_id WHERE p.seller_id = :sellerId AND UPPER(o.status) = 'COMPLETED' AND YEAR(o.created_at) = YEAR(CURRENT_DATE) AND MONTH(o.created_at) = MONTH(CURRENT_DATE)", nativeQuery = true)
     BigDecimal thisMonthRevenue(@Param("sellerId") Long sellerId);
 
-        @Query(value = "SELECT p.seller_id, u.username, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.price_at_time * oi.quantity) ELSE 0 END),0) AS revenue, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN oi.quantity ELSE 0 END),0) AS units FROM products p JOIN users u ON u.user_id = p.seller_id LEFT JOIN order_items oi ON oi.product_id = p.product_id LEFT JOIN orders o ON o.order_id = oi.order_id GROUP BY p.seller_id, u.username ORDER BY revenue DESC LIMIT 10", nativeQuery = true)
+    @Query(value = "SELECT p.seller_id, u.username, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.price_at_time * oi.quantity) ELSE 0 END),0) AS revenue, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN oi.quantity ELSE 0 END),0) AS units FROM products p JOIN users u ON u.user_id = p.seller_id LEFT JOIN order_items oi ON oi.product_id = p.product_id LEFT JOIN orders o ON o.order_id = oi.order_id GROUP BY p.seller_id, u.username ORDER BY revenue DESC LIMIT 10", nativeQuery = true)
     List<Object[]> topSellers();
 
     @Query(value = "SELECT r.seller_rank FROM (" +
-        "  SELECT seller_id, DENSE_RANK() OVER (ORDER BY revenue DESC) AS seller_rank FROM (" +
-        "    SELECT p.seller_id AS seller_id, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.price_at_time * oi.quantity) ELSE 0 END),0) AS revenue " +
-        "    FROM products p " +
-        "    LEFT JOIN order_items oi ON oi.product_id = p.product_id " +
-        "    LEFT JOIN orders o ON o.order_id = oi.order_id " +
-        "    GROUP BY p.seller_id" +
-        "  ) s" +
-        ") r WHERE r.seller_id = :sellerId", nativeQuery = true)
+            "  SELECT seller_id, DENSE_RANK() OVER (ORDER BY revenue DESC) AS seller_rank FROM (" +
+            "    SELECT p.seller_id AS seller_id, COALESCE(SUM(CASE WHEN UPPER(o.status) = 'COMPLETED' THEN (oi.price_at_time * oi.quantity) ELSE 0 END),0) AS revenue "
+            +
+            "    FROM products p " +
+            "    LEFT JOIN order_items oi ON oi.product_id = p.product_id " +
+            "    LEFT JOIN orders o ON o.order_id = oi.order_id " +
+            "    GROUP BY p.seller_id" +
+            "  ) s" +
+            ") r WHERE r.seller_id = :sellerId", nativeQuery = true)
     Integer sellerRevenueRank(@Param("sellerId") Long sellerId);
 
     @Query(value = "SELECT COUNT(DISTINCT seller_id) FROM products", nativeQuery = true)
@@ -98,7 +101,8 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     @Query("SELECT p FROM Products p WHERE EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
     List<Products> findByCategoryId(@Param("categoryId") Long categoryId);
 
-    // ========================= SELLER-SPECIFIC QUERIES FOR CATEGORY MANAGEMENT =========================
+    // ========================= SELLER-SPECIFIC QUERIES FOR CATEGORY MANAGEMENT
+    // =========================
 
     // Count products by category AND seller (any status)
     @Query("SELECT COUNT(p) FROM Products p WHERE p.sellerId = :sellerId AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
@@ -110,10 +114,11 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     // Count products by category, seller and status
     @Query("SELECT COUNT(p) FROM Products p WHERE p.sellerId = :sellerId AND LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
-    Long countByCategoryIdAndSellerIdAndStatus(@Param("categoryId") Long categoryId, @Param("sellerId") Long sellerId, @Param("status") String status);
+    Long countByCategoryIdAndSellerIdAndStatus(@Param("categoryId") Long categoryId, @Param("sellerId") Long sellerId,
+            @Param("status") String status);
 
-
-    // ========================= CÁC HÀM MỚI CHO SHOP DESIGN =========================
+    // ========================= CÁC HÀM MỚI CHO SHOP DESIGN
+    // =========================
 
     // 1. Bán chạy nhất (có limit)
     @Query("SELECT p FROM Products p WHERE p.sellerId = :sellerId AND p.isActive = true ORDER BY p.totalSales DESC")
@@ -129,16 +134,16 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     // 4. Custom filter (native)
     @Query(value = """
-        SELECT p.* FROM products p 
-        LEFT JOIN categories_products cp ON p.product_id = cp.product_id 
-        WHERE p.seller_id = :sellerId 
-        AND p.is_active = true 
-        AND (:categoryId IS NULL OR cp.category_id = :categoryId)
-        AND (:minPrice IS NULL OR p.price >= :minPrice)
-        AND (:maxPrice IS NULL OR p.price <= :maxPrice)
-        ORDER BY p.created_at DESC 
-        LIMIT :limit
-        """, nativeQuery = true)
+            SELECT p.* FROM products p
+            LEFT JOIN categories_products cp ON p.product_id = cp.product_id
+            WHERE p.seller_id = :sellerId
+            AND p.is_active = true
+            AND (:categoryId IS NULL OR cp.category_id = :categoryId)
+            AND (:minPrice IS NULL OR p.price >= :minPrice)
+            AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+            ORDER BY p.created_at DESC
+            LIMIT :limit
+            """, nativeQuery = true)
     List<Products> findWithCustomFiltersNative(
             @Param("sellerId") Long sellerId,
             @Param("categoryId") Long categoryId,
@@ -148,8 +153,8 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
 
     // 5. Theo ID list (featured)
     @Query("SELECT p FROM Products p WHERE p.productId IN :productIds AND p.sellerId = :sellerId AND p.isActive = true")
-    List<Products> findByProductIdInAndSellerId(@Param("productIds") List<Long> productIds, @Param("sellerId") Long sellerId);
-
+    List<Products> findByProductIdInAndSellerId(@Param("productIds") List<Long> productIds,
+            @Param("sellerId") Long sellerId);
 
     // ========================= HÀM TỪ PHIÊN BẢN BỔ SUNG =========================
 
@@ -178,8 +183,7 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
             @Param("sellerId") Long sellerId,
             @Param("categoryId") Long categoryId,
             @Param("minPrice") BigDecimal minPrice,
-            @Param("maxPrice") BigDecimal maxPrice
-    );
+            @Param("maxPrice") BigDecimal maxPrice);
 
     // Featured products (bản rút gọn)
     @Query("SELECT p FROM Products p WHERE p.productId IN :productIds AND p.sellerId = :sellerId AND p.isActive = true")
