@@ -156,37 +156,15 @@ public class AuthService {
         newUser.setBirthDate(registerRequest.getBirthDate());
         newUser.setUserType("CUSTOMER");
         newUser.setBalance(new BigDecimal("0.00")); // Khởi tạo balance = 0
-        newUser.setIsActive(true);
+        newUser.setIsActive(false); // ⚠️ Account is inactive until email verification
         newUser.setIsEmailVerified(false);
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setUpdatedAt(LocalDateTime.now());
 
         usersRepository.save(newUser);
 
-        // Create verification token (valid for 2 minutes)
-        String verificationCode = String.format("%06d", new Random().nextInt(1_000_000));
-        EmailVerificationToken verificationToken = new EmailVerificationToken();
-        verificationToken.setUserId(newUser.getUserId());
-        verificationToken.setToken(verificationCode);
-        verificationToken.setExpiresAt(LocalDateTime.now().plusMinutes(2));
-        verificationToken.setIsUsed(false);
-        verificationToken.setCreatedAt(LocalDateTime.now());
-        emailVerificationTokenRepository.save(verificationToken);
-
-        // Send welcome email with verification code
-        String emailContent = "Hello " + newUser.getUsername() + ",\n\n" +
-                "Thank you for registering an account!\n\n" +
-                "Your email verification code is: " + verificationCode + "\n" +
-                "This code is valid for 2 minutes only.\n\n" +
-                "Please enter this code at: http://localhost:8080/verify-email-required\n\n" +
-                "If you didn't create this account, please ignore this email.";
-
-        Email mail = new Email(
-                newUser.getEmail(),
-                "Welcome to BanHangRong - Verify Your Email",
-                emailContent
-        );
-        emailService.sendEmail(mail);
+        // ✅ DO NOT send verification email automatically
+        // User will request the code manually on verification page
 
         return new AuthResponse(
                 UUID.randomUUID().toString(),

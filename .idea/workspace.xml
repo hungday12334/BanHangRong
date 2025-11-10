@@ -4,12 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="refactor(profile): improve code readability and update comments in SellerProfileController">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="refactor(chat): streamline message handling and improve logging in chat functionality">
       <change afterPath="$PROJECT_DIR$/docs/seller-profile-flow-analysis.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/docs/seller-reviews-flow-analysis.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/seller-voucher-flow-analysis.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/verify-email-required.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,7 +195,7 @@
       <workItem from="1762488348451" duration="3772000" />
       <workItem from="1762496710501" duration="5000" />
       <workItem from="1762502308301" duration="628000" />
-      <workItem from="1762703072720" duration="14460000" />
+      <workItem from="1762703072720" duration="23899000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -272,7 +277,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762711975924</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="refactor(chat): streamline message handling and improve logging in chat functionality">
+      <option name="closed" value="true" />
+      <created>1762743634766</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1762743634766</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,6 +335,7 @@
     <MESSAGE value="feat(chat): improve unread message handling and conversation sorting" />
     <MESSAGE value="refactor(chat): clean up comments and improve readability in ChatController, ChatMessageDTO, ChatService, and MessageRepository" />
     <MESSAGE value="refactor(profile): improve code readability and update comments in SellerProfileController" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor(profile): improve code readability and update comments in SellerProfileController" />
+    <MESSAGE value="refactor(chat): streamline message handling and improve logging in chat functionality" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(chat): streamline message handling and improve logging in chat functionality" />
   </component>
 </project>
