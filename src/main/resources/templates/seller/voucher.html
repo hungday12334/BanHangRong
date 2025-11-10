@@ -1453,8 +1453,6 @@
                 max="1000"
                 required
                 step="1"
-                oninput="validateSingleField('maxUses')"
-                onblur="validateSingleField('maxUses')"
               />
 <!--              <small class="form-text text-muted">Bắt buộc nhập. Giá trị từ 1 đến 1000.</small>-->
             </div>
@@ -1471,8 +1469,6 @@
                 max="1000"
                 required
                 step="1"
-                oninput="validateSingleField('maxUsesPerUser')"
-                onblur="validateSingleField('maxUsesPerUser')"
               />
 <!--              <small class="form-text text-muted">Bắt buộc nhập. Giá trị từ 1 đến 1000, không vượt quá tổng số lần sử dụng.</small>-->
             </div>
@@ -2434,7 +2430,20 @@
         return;
       }
 
-      const discountValue = parseFloat(formData.get('discountValue'));
+      // Validate discountValue
+      const discountValueRaw = formData.get('discountValue');
+      if (!discountValueRaw || discountValueRaw.trim() === '') {
+        showAlert('Giá trị giảm giá không được để trống', 'error');
+        return;
+      }
+
+      // Check if contains non-numeric characters (except dot)
+      if (/[^0-9.]/.test(discountValueRaw) || (discountValueRaw.match(/\./g) || []).length > 1) {
+        showAlert('Giá trị giảm giá chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt', 'error');
+        return;
+      }
+
+      const discountValue = parseFloat(discountValueRaw);
       if (isNaN(discountValue) || discountValue <= 0) {
         showAlert('Discount value must be greater than 0', 'error');
         return;
@@ -2491,6 +2500,38 @@
       if (maxUsesPerUser > maxUses) {
         showAlert('Số lần sử dụng/người không được vượt quá tổng số lần sử dụng', 'error');
         return;
+      }
+
+      // Validate minOrder if provided
+      const minOrderInput = document.getElementById('minOrder');
+      const minOrderRaw = formData.get('minOrder');
+      const userTypedMinOrder = minOrderInput?.getAttribute('data-user-typed') === 'true';
+      const hasInvalidMinOrder = minOrderInput?.validity?.badInput === true;
+
+      console.log('🔍 minOrder validation:', {
+        minOrderRaw,
+        userTypedMinOrder,
+        hasInvalidMinOrder,
+        validity: minOrderInput?.validity
+      });
+
+      // Check if user typed something (even if browser rejected it)
+      if (userTypedMinOrder && (!minOrderRaw || minOrderRaw.trim() === '' || hasInvalidMinOrder)) {
+        console.log('❌ minOrder validation failed - user typed non-numeric value');
+        showAlert('Giá trị đơn hàng tối thiểu chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt', 'error');
+        return;
+      } else if (minOrderRaw && minOrderRaw.trim() !== '') {
+        // Check if contains non-numeric characters (except dot)
+        if (/[^0-9.]/.test(minOrderRaw) || (minOrderRaw.match(/\./g) || []).length > 1) {
+          showAlert('Giá trị đơn hàng tối thiểu chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt', 'error');
+          return;
+        }
+
+        const minOrder = parseFloat(minOrderRaw);
+        if (isNaN(minOrder) || minOrder < 0) {
+          showAlert('Giá trị đơn hàng tối thiểu phải là số hợp lệ và >= 0', 'error');
+          return;
+        }
       }
 
       // Validate date range

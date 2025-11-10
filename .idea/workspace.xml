@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(auth): enhance email verification and password reset emails with HTML formatting; allow login for unverified accounts">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(voucher): enhance validation and UI for maxUses and maxUsesPerUser; improve price display logic">
       <change afterPath="$PROJECT_DIR$/docs/seller-profile-flow-analysis.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/docs/seller-reviews-flow-analysis.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/docs/seller-voucher-flow-analysis.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/VoucherDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/VoucherDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
     </list>
@@ -194,7 +192,7 @@
       <workItem from="1762488348451" duration="3772000" />
       <workItem from="1762496710501" duration="5000" />
       <workItem from="1762502308301" duration="628000" />
-      <workItem from="1762703072720" duration="46965000" />
+      <workItem from="1762703072720" duration="50066000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -300,7 +298,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762756315652</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="feat(voucher): enhance validation and UI for maxUses and maxUsesPerUser; improve price display logic">
+      <option name="closed" value="true" />
+      <created>1762788591340</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1762788591340</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -352,6 +358,7 @@
     <MESSAGE value="refactor(profile): improve code readability and update comments in SellerProfileController" />
     <MESSAGE value="refactor(chat): streamline message handling and improve logging in chat functionality" />
     <MESSAGE value="feat(auth): enhance email verification and password reset emails with HTML formatting; allow login for unverified accounts" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(auth): enhance email verification and password reset emails with HTML formatting; allow login for unverified accounts" />
+    <MESSAGE value="feat(voucher): enhance validation and UI for maxUses and maxUsesPerUser; improve price display logic" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(voucher): enhance validation and UI for maxUses and maxUsesPerUser; improve price display logic" />
   </component>
 </project>

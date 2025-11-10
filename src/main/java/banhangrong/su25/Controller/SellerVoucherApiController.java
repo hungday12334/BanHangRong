@@ -304,6 +304,25 @@ public class SellerVoucherApiController {
                     .body("Số lần sử dụng/người không được vượt quá tổng số lần sử dụng");
             }
 
+            // Validate minOrder: optional but if provided, must be >= 0 and <= 1,000,000
+            if (request.minOrder != null) {
+                if (request.minOrder.compareTo(BigDecimal.ZERO) < 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Giá trị đơn hàng tối thiểu phải >= 0");
+                }
+                if (request.minOrder.compareTo(new BigDecimal("1000000")) > 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Giá trị đơn hàng tối thiểu không được vượt quá 1,000,000 VNĐ");
+                }
+                // For AMOUNT type, minOrder must be >= discountValue
+                if ("AMOUNT".equalsIgnoreCase(request.discountType) && request.discountValue != null) {
+                    if (request.minOrder.compareTo(request.discountValue) < 0) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Giá trị đơn hàng tối thiểu phải >= giá trị giảm giá (với loại AMOUNT)");
+                    }
+                }
+            }
+
             // Validate date range
             if (request.startAt != null && request.endAt != null &&
                 request.endAt.isBefore(request.startAt)) {
@@ -390,6 +409,24 @@ public class SellerVoucherApiController {
                     .body("Số lần sử dụng/người không được vượt quá tổng số lần sử dụng");
             }
 
+            // Validate minOrder: optional but if provided, must be >= 0 and <= 1,000,000
+            if (request.minOrder != null) {
+                if (request.minOrder.compareTo(BigDecimal.ZERO) < 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Giá trị đơn hàng tối thiểu phải >= 0");
+                }
+                if (request.minOrder.compareTo(new BigDecimal("1000000")) > 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Giá trị đơn hàng tối thiểu không được vượt quá 1,000,000 VNĐ");
+                }
+                // For AMOUNT type, minOrder must be >= discountValue
+                if ("AMOUNT".equalsIgnoreCase(request.discountType) && request.discountValue != null) {
+                    if (request.minOrder.compareTo(request.discountValue) < 0) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Giá trị đơn hàng tối thiểu phải >= giá trị giảm giá (với loại AMOUNT)");
+                    }
+                }
+            }
 
             // Validate date range
             if (request.startAt != null && request.endAt != null &&
