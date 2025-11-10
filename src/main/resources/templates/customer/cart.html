@@ -433,6 +433,11 @@
                     a.addEventListener('click', (e) => {
                         e.preventDefault();
                         const pid = a.getAttribute('data-product-id');
+                        const row = a.closest('.cart-row');
+                        
+                        // Visual feedback: disable button
+                        a.disabled = true;
+                        a.textContent = 'Removing...';
                         
                         const headers = {
                             'Content-Type': 'application/x-www-form-urlencoded'
@@ -447,11 +452,38 @@
                             method: 'POST',
                             headers: headers,
                             body: `productId=${encodeURIComponent(pid)}`
-                        }).then(r => r.json()).then(() => {
-                            a.closest('.cart-row')?.remove();
-                            recomputeTotals();
-                        }).catch(() => {
-                            window.location.href = '/cart/remove?productId=' + encodeURIComponent(pid);
+                        })
+                        .then(r => {
+                            if (!r.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return r.json();
+                        })
+                        .then(data => {
+                            if (data.ok) {
+                                // Remove row from DOM with animation
+                                if (row) {
+                                    row.style.opacity = '0.5';
+                                    row.style.transition = 'opacity 0.3s';
+                                    setTimeout(() => {
+                                        row.remove();
+                                        recomputeTotals();
+                                        
+                                        // Check if cart is empty
+                                        const remainingRows = document.querySelectorAll('.cart-row');
+                                        if (remainingRows.length === 0) {
+                                            window.location.reload();
+                                        }
+                                    }, 300);
+                                }
+                            } else {
+                                throw new Error(data.error || 'Failed to remove item');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Remove failed:', err);
+                            // Fallback: reload page
+                            window.location.href = '/cart';
                         });
                     });
                 });
