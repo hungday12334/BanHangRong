@@ -157,19 +157,22 @@ public class CartService {
     public Map<String, Object> applyVoucherForProduct(Long productId, String code) {
         Map<String, Object> res = new HashMap<>();
 
+        // 1. Kiểm tra code có empty không
         if (code == null || code.trim().isEmpty()) {
             res.put("ok", false);
-            res.put("error", "Voucher code is required");
+            res.put("error", "Vui lòng nhập mã voucher");
             return res;
         }
 
+        // 2. Kiểm tra product có tồn tại không
         Optional<Products> productOpt = productsRepository.findById(productId);
         if (productOpt.isEmpty()) {
             res.put("ok", false);
-            res.put("error", "Product not found");
+            res.put("error", "Sản phẩm không tồn tại");
             return res;
         }
 
+        // 3. Tìm voucher theo productId và code
         List<Vouchers> vouchers = vouchersRepository.findByProductIdAndStatusIgnoreCase(productId, "active");
         Vouchers voucher = null;
         for (Vouchers v : vouchers) {
@@ -181,18 +184,42 @@ public class CartService {
 
         if (voucher == null) {
             res.put("ok", false);
-            res.put("error", "Voucher not found or invalid");
+            res.put("error", "Mã voucher không hợp lệ hoặc không áp dụng cho sản phẩm này");
             return res;
         }
 
+        // 4. Kiểm tra thời gian hiệu lực
         LocalDateTime now = LocalDateTime.now();
         if ((voucher.getStartAt() != null && now.isBefore(voucher.getStartAt())) ||
             (voucher.getEndAt() != null && now.isAfter(voucher.getEndAt()))) {
             res.put("ok", false);
-            res.put("error", "Voucher is expired or not yet active");
+            res.put("error", "Voucher đã hết hạn hoặc chưa có hiệu lực");
             return res;
         }
 
+        // 5. Kiểm tra maxUses (tổng số lần dùng)
+        if (voucher.getMaxUses() != null) {
+            int usedCount = voucher.getUsedCount() != null ? voucher.getUsedCount() : 0;
+            if (usedCount >= voucher.getMaxUses()) {
+                res.put("ok", false);
+                res.put("error", "Voucher đã hết lượt sử dụng");
+                return res;
+            }
+        }
+
+        // 6. Kiểm tra maxUsesPerUser (số lần user này đã dùng voucher)
+        if (voucher.getMaxUsesPerUser() != null) {
+            Long userId = getCurrentUserIdOrFallback();
+            long userUsedCount = voucherRedemptionsRepository.countByVoucherIdAndUserId(voucher.getVoucherId(), userId);
+            
+            if (userUsedCount >= voucher.getMaxUsesPerUser()) {
+                res.put("ok", false);
+                res.put("error", "Bạn đã sử dụng hết lượt áp dụng voucher này");
+                return res;
+            }
+        }
+
+        // 7. Voucher hợp lệ
         res.put("ok", true);
         res.put("code", voucher.getCode());
         return res;
