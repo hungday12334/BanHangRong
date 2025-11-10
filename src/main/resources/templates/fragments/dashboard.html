@@ -277,6 +277,8 @@
                 <th data-sort="date" class="sortable">Date <span class="sort-indicator"></span></th>
                 <th data-sort="items" class="hide-md sortable">Items <span class="sort-indicator"></span></th>
                 <th data-sort="amount" class="sortable">Amount <span class="sort-indicator"></span></th>
+                <!-- <th data-sort="buyer" class="sortable">Buyer <span class="sort-indicator"></span></th> -->
+
               </tr>
             </thead>
             <tbody id="tbRecentOrders">
@@ -285,6 +287,7 @@
                 <td th:text="${o.createdAtStr}">27/09/2025</td>
                 <td class="hide-md" th:text="${o.items}">0</td>
                 <td>đ<span th:text="${#numbers.formatDecimal(o.amount,1,'COMMA',0,'POINT')}">0</span></td>
+                <!-- <td th:text="${o.userId}">user123</td> -->
               </tr>
               <tr th:if="${#lists.isEmpty(recentOrders)}">
                 <td colspan="4" class="footer-note">No recent orders.</td>

@@ -221,6 +221,7 @@ public class SellerDashboardController {
             m.put("createdAtStr", createdAtStr);
             m.put("amount", s.getSellerAmount());
             m.put("items", s.getSellerItems());
+            //m.put("userId", s.getBuyerUsername());
             recentOrders.add(m);
         }
         // Low stock products based on product quantity directly (quantity <= 5)
@@ -260,6 +261,8 @@ public class SellerDashboardController {
             m.put("price", prod.getPrice());
             m.put("quantity", prod.getQuantity());
             m.put("status", prod.getStatus());
+           // m.put("salePrice", prod.getSalePrice());
+           // m.put("downloadUrl", prod.getDownloadUrl());
             myProducts.add(m);
         }
 
