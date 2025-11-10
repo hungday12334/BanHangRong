@@ -1,72 +1,375 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/styles.min.css">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
 	<style>
-		.container{max-width:1100px;margin:20px auto;padding:0 10px}
-		.breadcrumb{font-size:14px;color:#6b7280;margin-bottom:10px}
-		.detail{display:grid;grid-template-columns:1.2fr 1.8fr;gap:20px}
-		.gallery{background:#fff;border:1px solid #eaeef4;border-radius:12px;display:grid;place-items:center;min-height:360px}
-		.gallery img{max-width:100%;max-height:100%;object-fit:cover;border-radius:10px}
-		.info{background:#fff;border:1px solid #eaeef4;border-radius:12px;padding:16px}
-		.title{font-size:22px;font-weight:700;margin:0 0 6px}
-		.price{font-size:24px;color:#0ea5e9;font-weight:800}
-		.price-old{margin-left:8px;color:#9ca3af;text-decoration:line-through}
-		.btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none}
-		.btn.primary{background:#0ea5e9;color:#fff}
-		.section{margin-top:18px}
-		.review{border-top:1px solid #eaeef4;padding:12px 0}
+		:root {
+			--bg: #f5f7fb;
+			--card: #ffffff;
+			--ink: #0f172a;
+			--muted: #6b7280;
+			--brand: #0ea5e9;
+			--chip: #e5e7eb;
+			--line: #eaeef4;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			color: var(--ink);
+			background: var(--bg);
+		}
+
+		.wrapper {
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
+		}
+
+	</style>
+	<style>
+		.container {
+			max-width: 1100px;
+			margin: 20px auto;
+			padding: 0 10px
+		}
+
+		.breadcrumb {
+			font-size: 14px;
+			color: #6b7280;
+			margin-bottom: 10px
+		}
+
+		.detail {
+			display: grid;
+			grid-template-columns: 1.2fr 1.8fr;
+			gap: 20px
+		}
+
+		.gallery {
+			background: #fff;
+			border: 1px solid #eaeef4;
+			border-radius: 12px;
+			display: grid;
+			place-items: center;
+			min-height: 360px
+		}
+
+		.gallery img {
+			max-width: 100%;
+			max-height: 100%;
+			object-fit: cover;
+			border-radius: 10px
+		}
+
+		.info {
+			background: #fff;
+			border: 1px solid #eaeef4;
+			border-radius: 12px;
+			padding: 16px
+		}
+
+		.title {
+			font-size: 22px;
+			font-weight: 700;
+			margin: 0 0 6px
+		}
+
+		.price {
+			font-size: 24px;
+			color: #0ea5e9;
+			font-weight: 800
+		}
+
+		.price-old {
+			margin-left: 8px;
+			color: #9ca3af;
+			text-decoration: line-through
+		}
+
+		.btn {
+			display: inline-block;
+			padding: 10px 14px;
+			border-radius: 10px;
+			text-decoration: none
+		}
+
+		.btn.primary {
+			background: #0ea5e9;
+			color: #fff
+		}
+
+		.section {
+			margin-top: 18px
+		}
+
+		.review {
+			border-top: 1px solid #eaeef4;
+			padding: 12px 0
+		}
 	</style>
 </head>
+
 <body>
-    <div class="container">
-		<div class="breadcrumb"><a href="/customer/dashboard">← Quay lại danh sách</a></div>
+	<div class="wrapper">
+		<div th:replace="~{customer/fragments/header :: header}"></div>
+		
+		<!-- Toast notification -->
+		<div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
+		
+		<div class="container">
+		<div class="breadcrumb"><a href="/customer/dashboard">← Back to List</a></div>
 		<div class="detail">
 			<div class="gallery">
-				<img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images.get(0).imageUrl}" alt="Image" onerror="this.onerror=null;this.src='/img/avatar_default.jpg'">
-				<img th:unless="${images != null and !#lists.isEmpty(images)}" src="/img/avatar_default.jpg" alt="Image">
+				<img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images.get(0).imageUrl}"
+					alt="Image" onerror="this.onerror=null;this.src='/img/avatar_default.jpg'">
+				<img th:unless="${images != null and !#lists.isEmpty(images)}" src="/img/avatar_default.jpg"
+					alt="Image">
 			</div>
 			<div class="info">
-                <div class="title" th:text="${product.name}">Tên sản phẩm</div>
-                <div style="color:#6b7280">Đã bán: <b th:text="${product.totalSales}">0</b> • ⭐ <b th:text="${#numbers.formatDecimal(product.averageRating,1,'COMMA',1,'POINT')}">0</b></div>
-                <div style="color:#374151;margin-top:4px">
-                    Còn lại trong kho: <b th:text="${product.quantity}">0</b>
-                    <span th:if="${product.quantity != null and product.quantity <= 0}" style="background:#6b7280;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px;font-size:12px;">Hết hàng</span>
-                </div>
-                <div class="section">
-                    <span class="price" th:if="${product.salePrice != null}" th:text="${#numbers.formatDecimal(product.salePrice,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
-                    <span class="price-old" th:if="${product.salePrice != null}" th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
-                    <span class="price" th:if="${product.salePrice == null}" th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
-                </div>
-                <div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Mô tả...</div>
-                <div class="section">
-                    <form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <input type="hidden" name="productId" th:value="${product.productId}" />
-                        <input type="number" name="quantity" min="1" value="1" th:attr="max=${product.quantity}" style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
-                        <button class="btn primary" type="submit" th:disabled="${product.quantity == null or product.quantity <= 0}">Thêm vào giỏ</button>
-                    </form>
-                </div>
+				<div class="title" th:text="${product.name}">Tên sản phẩm</div>
+				<div style="color:#6b7280">Sold: <b th:text="${product.totalSales}">0</b> • ⭐ <b
+					th:text="${#numbers.formatDecimal(product.averageRating,1,'COMMA',1,'POINT')}">0</b></div>
+				<div style="color:#374151;margin-top:4px">
+					Stock: <b th:text="${product.quantity}">0</b>
+					<span th:if="${product.quantity != null and product.quantity <= 0}"
+						style="background:#6b7280;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px;font-size:12px;">Out of
+						Stock</span>
+				</div>
+				<div class="section">
+					<span class="price" th:if="${product.salePrice != null}"
+						th:text="${#numbers.formatDecimal(product.salePrice,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
+					<span class="price-old" th:if="${product.salePrice != null}"
+						th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
+					<span class="price" th:if="${product.salePrice == null}"
+						th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
+				</div>
+				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Product
+					description...</div>
+				<div class="section">
+					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" onsubmit="return validateAddToCart(event)">
+						<input type="hidden" name="productId" th:value="${product.productId}" />
+						<input type="number" name="quantity" id="productQuantity" min="0" value="1" th:attr="max=${product.quantity}"
+							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
+					<button class="btn primary" type="submit"
+						th:disabled="${product.quantity == null or product.quantity <= 0 or product.status == null or (!#strings.equalsIgnoreCase(product.status, 'Public'))}">Add to Cart</button>
+					<a th:if="${product.sellerId != null}"
+					   th:href="@{/customer/chat(sellerId=${product.sellerId},productId=${product.productId},productName=${product.name},productPrice=${product.salePrice != null ? product.salePrice : product.price})}"
+					   class="btn"
+					   style="background:#10b981;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px"
+					   title="Chat with seller">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+						</svg>
+						💬 Chat với Shop
+					</a>
+					<span th:if="${product.sellerId == null}"
+					      style="padding:10px 14px;background:#f3f4f6;color:#6b7280;border-radius:10px;font-size:14px;">
+						⚠️ Seller not available
+					</span>
+					</form>
+				</div>
 			</div>
 		</div>
 
-        <div class="section" style="margin-top:24px">
-			<h3 style="margin:0 0 8px">Đánh giá từ khách hàng</h3>
-			<div th:if="${reviews != null and !#lists.isEmpty(reviews)}">
-				<div class="review" th:each="rv : ${reviews}">
-					<div style="font-weight:600">⭐ <span th:text="${rv.rating}">5</span> • <span style="color:#6b7280" th:text="${#temporals.format(rv.createdAt,'dd/MM/yyyy HH:mm')}">-</span></div>
-					<div th:text="${rv.comment}">Nội dung bình luận...</div>
+		<div class="section" style="margin-top:24px">
+		<h3 style="margin:0 0 8px">Customer Reviews</h3>
+		
+		<div id="ratingStats" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-bottom:16px;">
+			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+				<div>
+					<span style="font-size:24px;font-weight:700;color:#111827" id="averageRatingDisplay">0.0</span>
+					<span style="color:#6b7280;margin-left:8px">out of 5</span>
+				</div>
+				<div style="text-align:right;">
+					<div style="font-size:14px;color:#6b7280">Based on</div>
+					<div style="font-size:18px;font-weight:600;color:#111827" id="totalReviewsDisplay">0</div>
+					<div style="font-size:14px;color:#6b7280">reviews</div>
 				</div>
 			</div>
-			<div class="review" th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280">Chưa có đánh giá nào.</div>
-        </div>
+			<div id="ratingDistribution" style="display:flex;flex-direction:column;gap:4px;">
+			</div>
+		</div>
+		
+		<div th:if="${reviews != null and !#lists.isEmpty(reviews)}">
+			<div class="review" th:each="rv : ${reviews}">
+				<div style="font-weight:600">⭐ <span th:text="${rv.rating}">5</span> • <span style="color:#6b7280"
+						th:text="${#temporals.format(rv.createdAt,'dd/MM/yyyy HH:mm')}">-</span></div>
+				<div th:text="${rv.comment}">Nội dung bình luận...</div>
+				<div th:if="${rv.mediaUrls != null and !rv.mediaUrls.isEmpty()}" style="margin-top:8px;">
+					<div style="display:flex;gap:8px;flex-wrap:wrap;">
+						<div th:each="mediaUrl : ${#strings.arraySplit(rv.mediaUrls, ',')}" style="width:60px;height:60px;border-radius:4px;overflow:hidden;border:1px solid #e5e7eb;">
+							<img th:if="${!#strings.contains(mediaUrl, '.mp4') and !#strings.contains(mediaUrl, '.avi') and !#strings.contains(mediaUrl, '.mov')}" 
+								 th:src="${mediaUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Review image">
+							<video th:if="${#strings.contains(mediaUrl, '.mp4') or #strings.contains(mediaUrl, '.avi') or #strings.contains(mediaUrl, '.mov')}" 
+								   style="width:100%;height:100%;object-fit:cover;" controls>
+								<source th:src="${mediaUrl}" type="video/mp4">
+							</video>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280;text-align:center;padding:20px">
+			No reviews yet
+		</div>
+		</div>
+	</div>
+
+	<script>
+		// Validate quantity khi thêm vào giỏ hàng
+		function validateAddToCart(event) {
+			const qtyInput = document.getElementById('productQuantity');
+			const qty = parseInt(qtyInput.value || '0', 10);
+			
+			if (qty === 0 || qty < 0) {
+				alert('Số lượng phải lớn hơn 0');
+				event.preventDefault();
+				return false;
+			}
+			
+			return true;
+		}
+		
+		document.addEventListener('DOMContentLoaded', function() {
+			const productId = window.location.pathname.split('/').pop();
+			loadRatingStats(productId);
+		});
+
+		function loadRatingStats(productId) {
+			fetch(`/api/rating/stats/${productId}`)
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						updateRatingDisplay(data);
+					}
+				})
+				.catch(error => {
+					console.error('Error loading rating stats:', error);
+				});
+		}
+
+	function updateRatingDisplay(data) {
+		document.getElementById('averageRatingDisplay').textContent = data.averageRating;
+		
+		document.getElementById('totalReviewsDisplay').textContent = data.totalReviews;
+		
+		const distribution = data.ratingDistribution;
+			const container = document.getElementById('ratingDistribution');
+			
+			let html = '';
+			for (let i = 4; i >= 0; i--) {
+				const rating = i + 1;
+				const count = distribution[i] || 0;
+				const percentage = data.totalReviews > 0 ? (count / data.totalReviews) * 100 : 0;
+				
+				html += `
+					<div style="display:flex;align-items:center;gap:8px;">
+						<span style="font-size:12px;color:#6b7280;min-width:20px;">${rating}</span>
+						<span style="color:#fbbf24;">★</span>
+						<div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
+							<div style="height:100%;background:#fbbf24;width:${percentage}%;transition:width 0.3s;"></div>
+						</div>
+						<span style="font-size:12px;color:#6b7280;min-width:30px;">${count}</span>
+					</div>
+				`;
+			}
+			
+			container.innerHTML = html;
+		}
+	</script>
+	
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const userMenuBtn = document.getElementById('userMenuBtn');
+			const userDropdown = document.getElementById('userDropdown');
+			
+			if (userMenuBtn && userDropdown) {
+				userMenuBtn.addEventListener('click', function(e) {
+					e.stopPropagation();
+					userDropdown.classList.toggle('show');
+				});
+				
+				document.addEventListener('click', function(e) {
+					if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+						userDropdown.classList.remove('show');
+					}
+				});
+			}
+		});
+
+
+		function updateChatUnreadCount() {
+			const userIdElement = document.querySelector('[th\\:text="${user.userId}"]');
+			const userId = userIdElement ? userIdElement.textContent.trim() : null;
+
+			if (userId) {
+				fetch(`/api/conversations/${userId}`)
+					.then(res => res.json())
+					.then(conversations => {
+						let totalUnread = 0;
+						conversations.forEach(conv => {
+							totalUnread += (conv.unreadCount || 0);
+						});
+
+						const badge = document.getElementById('chatUnreadBadge');
+						if (badge && totalUnread > 0) {
+							badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+							badge.style.display = 'block';
+						} else if (badge) {
+							badge.style.display = 'none';
+						}
+					})
+					.catch(err => console.error('Error loading chat unread count:', err));
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', function() {
+			updateChatUnreadCount();
+			setInterval(updateChatUnreadCount, 30000);
+		});
+	</script>
+	
+	<script th:inline="javascript">
+		(function() {
+			const toast = document.getElementById('toast');
+			if (!toast) return;
+			
+			const show = (msg, bg) => {
+				toast.textContent = msg;
+				toast.style.background = bg;
+				toast.style.display = 'block';
+				setTimeout(() => { toast.style.display = 'none'; }, 4500);
+			};
+			
+			// Hiển thị thông báo từ flash attributes (thêm sản phẩm vào giỏ hàng)
+			/*[# th:if="${cartMessage}"]*/
+			const cartMessage = /*[[${cartMessage}]]*/ '';
+			const cartMessageType = /*[[${cartMessageType}]]*/ 'success';
+			if (cartMessage) {
+				const bg = cartMessageType === 'success' ? '#065f46' : '#991b1b';
+				show(cartMessage, bg);
+			}
+			/*[/]*/
+		})();
+	</script>
 	</div>
 </body>
+
 </html>
-
-

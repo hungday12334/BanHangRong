@@ -1,178 +1,202 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:text="${profileUser.username} + ' - Profile'">Profile</title>
-    <link rel="stylesheet" href="/css/styles.min.css">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <style>
-        :root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --line:#eaeef4; }
-        * { box-sizing:border-box; }
-        html,body { height:100%; }
-        body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
-        .wrapper { min-height:100%; display:flex; flex-direction:column; }
-        .topbar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--card); flex-wrap:nowrap; }
-        .brand { font-weight:800; letter-spacing:.2px; }
-        .nav { display:flex; gap:16px; margin:0 12px; flex:1; overflow:auto; white-space:nowrap; }
-        .nav a { text-decoration:none; color:#111827; font-weight:500; padding:8px 10px; border-radius:8px; }
-        .nav a:hover { background:#f3f4f6; }
-        .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; position:relative; flex-wrap:nowrap; }
-        .user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:#111827;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
-        .user-menu{position:absolute; right:0; top:48px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,.08); width:200px; display:none; z-index:5}
-        .user-menu .item{display:block; padding:10px 12px; color:#111827; text-decoration:none}
-        .user-menu .item:hover{background:#f3f4f6}
-        .search { position:relative; }
-        .search input { height:34px; width:220px; padding:0 12px; border:1px solid var(--line); border-radius:8px; outline:none; }
-        .cart { position:relative; width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; text-decoration:none; color:#111827; }
-        .cart .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
-        .content { max-width:1000px; margin:18px auto; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; }
-        .profile-row { display:flex; gap:24px; align-items:flex-start; }
-        .profile-left { flex:0 0 30%; max-width:30%; display:flex; justify-content:center; border-right:1px solid var(--line); padding-right:24px; }
-        .profile-right { flex:0 0 70%; max-width:70%; padding-left:24px; }
-        .avatar { width:100%; max-width:180px; aspect-ratio:1/1; height:auto; border-radius:50%; object-fit:cover; border:1px solid var(--line); }
-        .label { color:var(--muted); font-size:13px; }
-        .value { font-weight:600; margin-bottom:12px; }
-        .notice { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:8px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; font-size:13px; }
-        @media (max-width: 768px) {
-            .profile-left { flex:0 0 100%; max-width:100%; border-right:none; padding-right:0; justify-content:flex-start; margin-bottom:16px; }
-            .profile-right { flex:0 0 100%; max-width:100%; padding-left:0; }
-            .profile-row { flex-direction:column; }
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #0ea5e9;
+            --line: #eaeef4;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        .wrapper {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            max-width: 1000px;
+            margin: 18px auto;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            position: sticky;
+            top: 18px;
+            align-self: flex-start;
+        }
+
+        .sidebar .title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #111827;
+            text-decoration: none;
+        }
+
+        .sidebar a.active,
+        .sidebar a:hover {
+            background: #f3f4f6;
+        }
+
+        .card {
+            flex: 1;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .value {
+            font-weight: 600;
+        }
+
+        .notice {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
         }
     </style>
 </head>
+
 <body>
-<div class="wrapper">
-        <div class="topbar" style="display:flex;align-items:center;gap:14px;">
-        <div class="brand">BanHangRong</div>
-        <nav class="nav" aria-label="Main">
-            <a href="/customer/dashboard">Home</a>
-            <a href="/categories">Category</a>
-            <a href="#">License Software</a>
-            <a href="#">Game Keys</a>
-            <a href="#">Voucher</a>
-            <a href="#">Support</a>
-        </nav>
-        <div class="top-actions">
-            <div class="notif">Notification</div>
-            <div class="user" style="position:relative">
-                <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-                    <span th:text="${user != null ? user.username : 'User123456'}">User123456</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div id="userDropdown" class="user-menu" role="menu" aria-label="User menu">
-                    <a class="item" th:href="@{'/customer/profile/' + ${user.username}}" role="menuitem">Tài khoản của tôi</a>
-                    <form class="item" method="post" action="/wallet/vnpay/create" role="menuitem" style="display:flex;gap:8px;align-items:center" onsubmit="return topupPrompt(event)">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <input type="hidden" name="amount" id="topupAmountInput" />
-                        <button type="submit" style="all:unset;cursor:pointer;color:#0ea5e9">💳 Nạp tiền (VNPay)</button>
-                    </form>
-                    <a class="item" href="#" role="menuitem">Đơn mua</a>
-                    <a class="item seller-apply" href="/seller/dashboard" role="menuitem" style="background:#f8fafc;border-top:1px solid #e2e8f0;color:#0ea5e9;font-weight:600;">📈 Applied to become a seller</a>
-                    <a class="item" href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng xuất</a>
+    <div class="wrapper">
+        <div th:replace="~{customer/fragments/header :: header}"></div>
+        
+        <!-- Toast notification -->
+        <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
+
+        <section class="layout">
+            <aside class="sidebar">
+                <div class="title">My Account</div>
+                <a th:href="@{'/customer/profile/' + ${user.username}}" class="active">Profile</a>
+                <a th:href="@{'/customer/profile/' + ${user.username} + '/change-password'}">Change Password</a>
+            </aside>
+            <div class="card">
+                <h2 style="margin:0 0 8px 0">My Profile</h2>
+                <div style="color:#6b7280;margin-bottom:16px">Manage your profile information to secure your account</div>
+                <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;align-items:center">
+                    <div class="label">Username</div>
+                    <div class="value" th:text="${profileUser.username}">datbautroi11</div>
+
+                    <div class="label">Full Name</div>
+                    <div class="value" th:text="${profileUser.fullName != null && !profileUser.fullName.isEmpty() ? profileUser.fullName : '-'}">-</div>
+
+                    <div class="label">Email</div>
+                    <div class="value" th:text="${maskedEmail != null ? maskedEmail : profileUser.email}">
+                        td*********@gmail.com</div>
+
+                    <div class="label">Phone Number</div>
+                    <div class="value"
+                        th:text="${maskedPhone != null ? maskedPhone : (profileUser.phoneNumber != null ? profileUser.phoneNumber : '-')}">
+                        *********15</div>
+
+                    <div class="label">Gender</div>
+                    <div class="value" th:text="${profileUser.gender != null ? profileUser.gender : '-'}">Male</div>
+
+                    <div class="label">Birth Date</div>
+                    <div class="value"
+                        th:text="${maskedBirth != null ? maskedBirth : (profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'dd/MM/yyyy') : '-')}">
+                        **/**/2004</div>
                 </div>
-                <form id="logoutForm" method="post" action="/logout" style="display:none;">
-                </form>
+                
+                <div style="margin-top:20px;text-align:center;">
+                    <a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn primary"
+                       style="padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;">
+                        Edit Information
+                    </a>
+                </div>
             </div>
-            <div class="search">
-                <form method="GET" action="/customer/dashboard" style="display:flex;gap:4px;flex-wrap:nowrap;align-items:center;">
-                    <input type="search" name="search" placeholder="search" aria-label="Search" 
-                           th:value="${search}" style="height:34px;width:220px;padding:0 12px;border:1px solid var(--line);border-radius:8px;outline:none;">
-                    <button type="submit" style="padding:8px 12px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;">🔍</button>
-                    <a th:if="${search != null and !search.trim().isEmpty()}" 
-                       th:href="@{/customer/dashboard}" 
-                       style="padding:8px 12px;background:#6b7280;color:#fff;text-decoration:none;border-radius:8px;display:flex;align-items:center;">✕</a>
-                </form>
-            </div>
-            <a href="/cart" class="cart" title="Giỏ hàng" aria-label="Giỏ hàng">🛒<span class="badge" th:text="${cartCount}" th:if="${cartCount != null and cartCount > 0}">0</span></a>
-        </div>
+        </section>
     </div>
-
-    <section class="content">
-        <div class="profile-row">
-            <div class="profile-left">
-                <img class="avatar" th:if="${profileUser != null and profileUser.avatarUrl != null and !#strings.isEmpty(#strings.trim(profileUser.avatarUrl))}"
-                     th:src="${profileUser.avatarUrl}" src="/img/avatar_default.jpg"
-                     onerror="this.onerror=null;this.src='/img/avatar_default.jpg';" alt="Avatar"/>
-                <img class="avatar" th:unless="${profileUser != null and profileUser.avatarUrl != null and !#strings.isEmpty(#strings.trim(profileUser.avatarUrl))}"
-                     src="/img/avatar_default.jpg" alt="Avatar"/>
-            </div>
-            <div class="profile-right">
-                <div class="label">Username</div>
-                <div class="value" th:text="${profileUser.username}">username</div>
-                <div class="label">Email</div>
-                <div class="value" th:text="${profileUser.email}">email@example.com</div>
-                <div th:if="${param.error != null and param.error[0] == 'email_in_use'}" class="notice">Email đã tồn tại, vui lòng chọn email khác.</div>
-                <div th:if="${profileUser.isEmailVerified == null || !profileUser.isEmailVerified}" class="notice">
-                    Email chưa được xác thực
-                    <form method="post" action="/customer/profile/verify-email" style="margin:0">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <button type="submit" class="btn" style="padding:6px 10px;border:1px solid #fed7aa;background:#fff;border-radius:8px;margin-left:8px;">Verify now</button>
-                    </form>
-                </div>
-                <div class="label">Phone</div>
-                <div class="value" th:text="${profileUser.phoneNumber}">-</div>
-                <div class="label">Gender</div>
-                <div class="value" th:text="${profileUser.gender != null ? profileUser.gender : '-'}">-</div>
-                <div class="label">Birth date</div>
-                <div class="value" th:text="${profileUser.birthDate != null ? #temporals.format(profileUser.birthDate, 'dd/MM/yyyy') : '-'}">-</div>
-                <div class="label">Balance</div>
-                <div class="value" th:text="${profileUser.balance != null ? #numbers.formatDecimal(profileUser.balance,0,'COMMA',0,'POINT') + '₫' : '0₫'}">0₫</div>
-                <div style="margin-top:12px;">
-                    <a th:href="@{'/customer/profile/' + ${user.username} + '/edit'}" class="btn" style="padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;">Edit</a>
-                </div>
-            </div>
-        </div>
-    </section>
-</div>
-<script>
-(function(){
-    const btn = document.getElementById('userMenuBtn');
-    const menu = document.getElementById('userDropdown');
-    function close(){ if(menu) { menu.style.display='none'; btn && btn.setAttribute('aria-expanded','false'); } }
-    function toggle(){ if(!menu) return; const show = menu.style.display !== 'block'; menu.style.display = show ? 'block':'none'; btn && btn.setAttribute('aria-expanded', show?'true':'false'); }
-    if(btn){ btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); }); }
-    document.addEventListener('click', close);
-    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
-})();
-
-        // Unified modal like dashboard
-        function topupPrompt(e){
-            e.preventDefault();
-            var ask = document.getElementById('topupAsk');
-            var field = document.getElementById('topupAmountField');
-            var err = document.getElementById('topupErr');
-            window.__topupForm = e.target;
-            if(ask){ ask.style.display='flex'; setTimeout(function(){ try{ field.focus(); }catch(_){ } }, 0); }
-            function confirm(){
-                var v = field.value || '';
-                var clean = v.replace(/[^0-9]/g,'');
-                if(!clean){ err.textContent = 'Số tiền không hợp lệ'; return; }
-                document.getElementById('topupAmountInput').value = clean;
-                ask.style.display='none';
-                window.__topupForm.submit();
+    
+    <script th:inline="javascript">
+        (function() {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            const show = (msg, bg) => {
+                toast.textContent = msg;
+                toast.style.background = bg;
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 4500);
+            };
+            
+            // Hiển thị thông báo từ URL parameters
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.get('updated') === '1') {
+                /*[# th:if="${successMessage}"]*/
+                const successMsg = /*[[${successMessage}]]*/ '';
+                if (successMsg) {
+                    show(successMsg, '#065f46');
+                } else {
+                    show('Cập nhật thông tin thành công!', '#065f46');
+                }
+                /*[/]*/
             }
-            document.getElementById('topupConfirmBtn').onclick = confirm;
-            document.getElementById('topupCancelBtn').onclick = function(){ ask.style.display='none'; };
-            field.onkeydown = function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); confirm(); } };
-            return false;
-        }
-</script>
-<!-- Modal for top-up -->
-<div id="topupAsk" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
-    <div style="background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:320px;max-width:420px;padding:20px 18px;text-align:center">
-        <h3 style="margin:0 0 12px 0;color:#111827;font-size:18px">Nạp tiền VNPay</h3>
-        <div style="color:#6b7280;font-size:14px;margin-bottom:8px">Nhập số tiền muốn nạp (VND)</div>
-        <input id="topupAmountField" type="text" inputmode="numeric" placeholder="200000" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;font-weight:600" />
-        <div id="topupErr" style="color:#ef4444;font-size:12px;height:16px;margin-top:6px"></div>
-        <div style="margin-top:10px;display:flex;gap:8px;justify-content:center">
-            <button type="button" id="topupCancelBtn" class="btn" style="padding:8px 12px;border-radius:10px">Hủy</button>
-            <button type="button" id="topupConfirmBtn" class="btn" style="background:#0ea5e9;color:#fff;border:none;padding:8px 12px;border-radius:10px">Nạp</button>
-        </div>
-    </div>
-</div>
+            
+            if (params.get('passwordChanged') === '1') {
+                show('Đổi mật khẩu thành công!', '#065f46');
+            }
+            
+            if (params.get('verified') === '1') {
+                show('Email đã được xác thực thành công!', '#065f46');
+            }
+        })();
+    </script>
 </body>
+
 </html>
-
-

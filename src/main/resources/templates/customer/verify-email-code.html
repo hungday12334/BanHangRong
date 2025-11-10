@@ -1,70 +1,183 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/styles.min.css">
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title>Verify Email</title>
-    <link rel="stylesheet" href="/css/styles.min.css">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <style>
-        :root { --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#6b7280; --brand:#0ea5e9; --line:#eaeef4; }
-        body { margin:0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
-        .container { max-width:480px; margin:60px auto; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; }
-        .title { font-weight:700; font-size:20px; margin:0 0 12px; }
-        .desc { color:var(--muted); margin-bottom:16px; }
-        .notice { color:#dc2626; background:#fef2f2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; margin-bottom:12px; }
-        input[type=text] { width:100%; height:44px; border:1px solid var(--line); border-radius:8px; padding:0 12px; }
-        .actions { margin-top:14px; display:flex; gap:10px; justify-content:space-between; align-items:center; }
-        .btn { padding:10px 16px; border-radius:10px; border:1px solid var(--line); background:#fff; cursor:pointer; }
-        .btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #0ea5e9;
+            --line: #eaeef4;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 60px auto;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .title {
+            font-weight: 700;
+            font-size: 20px;
+            margin: 0 0 12px;
+        }
+
+        .desc {
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        .notice {
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        input[type=text] {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 0 12px;
+        }
+
+        .actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            background: var(--brand);
+            color: #fff;
+            border-color: var(--brand);
+        }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="title">Xác thực email</div>
-        <div class="desc">Nhập mã 6 chữ số đã được gửi đến email của bạn.</div>
-        <div th:if="${error != null}" class="notice" th:text="${error}">Mã không hợp lệ</div>
+<div class="wrapper">
+    <div th:replace="~{customer/fragments/header :: header}"></div>
+        <!-- Toast notification -->
+        <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.3)"></div>
+        
+        <div class="container">
+        <div class="title">Email Verification</div>
+        <div class="desc">
+            Enter the 6-digit code sent to your email: 
+            <strong th:if="${user != null and user.email != null}" th:text="${user.email}">your-email@example.com</strong>
+        </div>
+        
+        <!-- Success message khi đổi email -->
+        <div th:if="${successMessage != null}" 
+            style="color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:10px 12px;border-radius:8px;margin-bottom:12px;"
+            th:text="${successMessage}">Email đã được thay đổi thành công!</div>
+        
+        <div th:if="${error != null}" class="notice" th:text="${error}">Invalid code</div>
         <form method="post" action="/customer/verify-code">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <input type="text" name="code" placeholder="Nhập mã 6 số" maxlength="6" pattern="[0-9]{6}" required>
+            <input type="text" name="code" placeholder="Enter 6-digit code" maxlength="6" pattern="[0-9]{6}" required>
             <div class="actions">
                 <div>
-                    <button id="resendBtn" type="button" class="btn" th:disabled="${remainingSeconds != null and remainingSeconds > 0}" onclick="resendCode()">
-                        Gửi lại mã <span id="countdown" th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
+                    <button id="resendBtn" type="button" class="btn"
+                        th:disabled="${remainingSeconds != null and remainingSeconds > 0}" onclick="resendCode()">
+                        Resend Code <span id="countdown"
+                            th:text="${remainingSeconds > 0 ? '(' + remainingSeconds + 's)' : ''}"></span>
                     </button>
                 </div>
                 <div style="display:flex;gap:10px;">
-                    <button type="button" class="btn" onclick="history.back()">Hủy</button>
-                    <button type="submit" class="btn primary">Xác nhận</button>
+                    <button type="button" class="btn" onclick="history.back()">Cancel</button>
+                    <button type="submit" class="btn primary">Confirm</button>
                 </div>
             </div>
         </form>
+        
         <script>
-            (function(){
+            // Countdown timer cho resend button
+            (function () {
                 var rem = parseInt(new URLSearchParams(window.location.search).get('remaining') || '0');
-                if(!isNaN(rem) && rem>0){
+                if (!isNaN(rem) && rem > 0) {
                     var el = document.getElementById('countdown');
                     var btn = document.getElementById('resendBtn');
                     btn.disabled = true;
-                    var iv = setInterval(function(){
-                        rem--; el.textContent = '('+rem+'s)';
-                        if(rem<=0){ clearInterval(iv); btn.disabled = false; el.textContent=''; }
-                    },1000);
+                    var iv = setInterval(function () {
+                        rem--; el.textContent = '(' + rem + 's)';
+                        if (rem <= 0) { clearInterval(iv); btn.disabled = false; el.textContent = ''; }
+                    }, 1000);
                 }
             })();
 
-            function resendCode(){
-                var t = (function(){ var m=document.querySelector('meta[name="_csrf"]'); return m?m.getAttribute('content'):''; })();
-                var h = (function(){ var m=document.querySelector('meta[name="_csrf_header"]'); return m?m.getAttribute('content'):'X-XSRF-TOKEN'; })();
-                var headers = { 'Content-Type': 'application/x-www-form-urlencoded' }; headers[h] = t;
-                fetch('/customer/verify-code/resend', { method: 'POST', headers: headers })
-                    .then(function(){ window.location.search = '?remaining=60'; })
-                    .catch(function(){ window.location.href = '/customer/verify-code/resend'; });
+            function resendCode() {
+                fetch('/customer/verify-code/resend', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                    .then(function () { window.location.search = '?remaining=60'; })
+                    .catch(function () { window.location.href = '/customer/verify-code/resend'; });
             }
+        </script>
+        
+        <script th:inline="javascript">
+            // Toast notification cho email changed
+            (function() {
+                const toast = document.getElementById('toast');
+                if (!toast) return;
+                
+                const show = (msg, bg) => {
+                    toast.textContent = msg;
+                    toast.style.background = bg;
+                    toast.style.display = 'block';
+                    setTimeout(() => { toast.style.display = 'none'; }, 5000);
+                };
+                
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('emailChanged') === '1') {
+                    /*[# th:if="${successMessage}"]*/
+                    const successMsg = /*[[${successMessage}]]*/ '';
+                    if (successMsg) {
+                        show(successMsg, '#065f46');
+                    } else {
+                        show('Email đã được thay đổi! Vui lòng nhập mã xác thực đã được gửi về email mới.', '#065f46');
+                    }
+                    /*[/]*/
+                }
+                
+                if (params.get('sent') === '1') {
+                    show('Mã xác thực đã được gửi về email của bạn!', '#065f46');
+                }
+            })();
         </script>
     </div>
 </body>
+
 </html>
-
-
