@@ -417,18 +417,46 @@ public class CartService {
             }
         }
 
-        // 🔹 Tính tổng tiền chỉ cho sản phẩm Public
-        final BigDecimal totalAmount = validItems.stream()
-                .map(it -> {
-                    Products p = productsRepository.findById(it.getProductId()).orElse(null);
-                    if (p != null) {
-                        BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
-                        int qty = it.getQuantity() != null ? it.getQuantity() : 1;
-                        return unitPrice.multiply(BigDecimal.valueOf(qty));
+        // 🔹 Tính tổng tiền (có trừ voucher discount)
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (ShoppingCart it : validItems) {
+            Products p = productsRepository.findById(it.getProductId()).orElse(null);
+            if (p != null) {
+                BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+                
+                // Trừ voucher discount nếu có
+                BigDecimal discount = BigDecimal.ZERO;
+                if (session != null) {
+                    @SuppressWarnings("unchecked")
+                    Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+                    if (appliedVouchers != null && appliedVouchers.containsKey(p.getProductId())) {
+                        String voucherCode = appliedVouchers.get(p.getProductId());
+                        List<Vouchers> vouchers = vouchersRepository.findByProductIdAndStatusIgnoreCase(p.getProductId(), "active");
+                        for (Vouchers v : vouchers) {
+                            if (v.getCode().equalsIgnoreCase(voucherCode)) {
+                                // Validate voucher trước khi apply
+                                LocalDateTime now = LocalDateTime.now();
+                                boolean timeValid = (v.getStartAt() == null || !now.isBefore(v.getStartAt())) &&
+                                                  (v.getEndAt() == null || !now.isAfter(v.getEndAt()));
+                                if (timeValid && (v.getMinOrder() == null || lineTotal.compareTo(v.getMinOrder()) >= 0)) {
+                                    if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
+                                        discount = lineTotal.multiply(v.getDiscountValue().divide(new BigDecimal("100")));
+                                    } else {
+                                        discount = v.getDiscountValue();
+                                    }
+                                    if (discount.compareTo(lineTotal) > 0) discount = lineTotal;
+                                }
+                                break;
+                            }
+                        }
                     }
-                    return BigDecimal.ZERO;
-                })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                }
+                
+                totalAmount = totalAmount.add(lineTotal.subtract(discount));
+            }
+        }
 
         Users user = usersRepository.findById(uid).orElse(null);
         if (user == null) return "redirect:/cart?error=user_not_found";
