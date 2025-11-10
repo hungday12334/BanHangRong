@@ -132,7 +132,11 @@
                 <th data-sort="productId" class="sortable">ID <span class="sort-indicator"></span></th>
                 <th data-sort="name" class="sortable">Name <span class="sort-indicator"></span></th>
                 <th data-sort="price" class="sortable">Price <span class="sort-indicator"></span></th>
+                <th data-sort="salePrice" class="sortable">Sale Price <span class="sort-indicator"></span></th>
                 <th data-sort="quantity" class="hide-md sortable">Qty <span class="sort-indicator"></span></th>
+                <!-- downloadUrl -->
+                <th data-sort="downloadUrl" class="sortable">DownloadUrl <span class="sort-indicator"></span></th>
+                <!-- status -->
                 <th>Status</th>
               </tr>
             </thead>
@@ -152,7 +156,7 @@
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(myProducts)}">
-                <td colspan="5" class="footer-note">Không có sản phẩm.</td>
+                <td colspan="6" class="footer-note">Không có sản phẩm.</td>
               </tr>
             </tbody>
           </table>

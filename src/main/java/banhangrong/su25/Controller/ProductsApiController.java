@@ -25,9 +25,9 @@ public class ProductsApiController {
     private final ProductLicensesRepository productLicensesRepository;
 
     public ProductsApiController(ProductsRepository productsRepository,
-                                 ProductImagesRepository productImagesRepository,
-                                 VouchersRepository vouchersRepository,
-                                 ProductLicensesRepository productLicensesRepository) {
+            ProductImagesRepository productImagesRepository,
+            VouchersRepository vouchersRepository,
+            ProductLicensesRepository productLicensesRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.vouchersRepository = vouchersRepository;
@@ -42,10 +42,10 @@ public class ProductsApiController {
         public String description;
         public BigDecimal price;
         public BigDecimal salePrice;
-    public Integer quantity;
-    public String downloadUrl;
-    public String primaryImage;
-    public String status;
+        public Integer quantity;
+        public String downloadUrl;
+        public String primaryImage;
+        public String status;
     }
 
     // Lightweight remaining endpoint for dynamic low-stock refresh
@@ -56,10 +56,17 @@ public class ProductsApiController {
             int capacity = qty != null ? qty : 0;
             long sold = 0L;
             long pre = 0L;
-            try { sold = productLicensesRepository.countByProductViaOrders(p.getProductId()); } catch (Exception ignored) {}
-            try { pre = productLicensesRepository.countPreGeneratedForProduct(p.getProductId()); } catch (Exception ignored) {}
+            try {
+                sold = productLicensesRepository.countByProductViaOrders(p.getProductId());
+            } catch (Exception ignored) {
+            }
+            try {
+                pre = productLicensesRepository.countPreGeneratedForProduct(p.getProductId());
+            } catch (Exception ignored) {
+            }
             long remaining = Math.max(0L, (long) capacity - sold - pre);
-            return ResponseEntity.ok(java.util.Map.of("productId", p.getProductId(), "remaining", remaining, "status", p.getStatus()));
+            return ResponseEntity.ok(
+                    java.util.Map.of("productId", p.getProductId(), "remaining", remaining, "status", p.getStatus()));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -67,14 +74,18 @@ public class ProductsApiController {
     @GetMapping("/{id}/vouchers")
     public ResponseEntity<java.util.List<java.util.Map<String, Object>>> getVouchers(@PathVariable("id") Long id) {
         return productsRepository.findById(id).map(p -> {
-            java.util.List<Vouchers> list = vouchersRepository.findBySellerIdAndProductIdOrderByUpdatedAtDesc(p.getSellerId(), p.getProductId());
+            java.util.List<Vouchers> list = vouchersRepository
+                    .findBySellerIdAndProductIdOrderByUpdatedAtDesc(p.getSellerId(), p.getProductId());
             java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            java.util.List<java.util.Map<String,Object>> out = new java.util.ArrayList<>();
+            java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
             for (Vouchers v : list) {
-                if (!"active".equalsIgnoreCase(v.getStatus())) continue;
-                if (v.getStartAt() != null && now.isBefore(v.getStartAt())) continue;
-                if (v.getEndAt() != null && now.isAfter(v.getEndAt())) continue;
-                java.util.Map<String,Object> m = new java.util.LinkedHashMap<>();
+                if (!"active".equalsIgnoreCase(v.getStatus()))
+                    continue;
+                if (v.getStartAt() != null && now.isBefore(v.getStartAt()))
+                    continue;
+                if (v.getEndAt() != null && now.isAfter(v.getEndAt()))
+                    continue;
+                java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
                 m.put("code", v.getCode());
                 m.put("type", v.getDiscountType());
                 m.put("value", v.getDiscountValue());
@@ -99,15 +110,18 @@ public class ProductsApiController {
         // attempt to populate primaryImage from product_images if available
         try {
             if (this.productImagesRepository != null && p.getProductId() != null) {
-                var imgs = this.productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
+                var imgs = this.productImagesRepository
+                        .findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(p.getProductId());
                 if (imgs != null && !imgs.isEmpty()) {
                     d.primaryImage = imgs.get(0).getImageUrl();
                 } else {
                     var any = this.productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(p.getProductId());
-                    if (any != null && !any.isEmpty()) d.primaryImage = any.get(0).getImageUrl();
+                    if (any != null && !any.isEmpty())
+                        d.primaryImage = any.get(0).getImageUrl();
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         d.status = p.getStatus();
         return d;
     }
@@ -115,9 +129,11 @@ public class ProductsApiController {
     // GET /api/products?sellerId=123 -> list products by seller
     @GetMapping
     public List<ProductDto> list(@RequestParam(name = "sellerId", required = false) Long sellerId) {
-        List<Products> src = (sellerId != null) ? productsRepository.findBySellerId(sellerId) : productsRepository.findAll();
+        List<Products> src = (sellerId != null) ? productsRepository.findBySellerId(sellerId)
+                : productsRepository.findAll();
         List<ProductDto> dtos = src.stream().map(this::toDto).collect(Collectors.toList());
-        // Return DTOs with quantity as stored in DB (do not override with remaining keys)
+        // Return DTOs with quantity as stored in DB (do not override with remaining
+        // keys)
         return dtos;
     }
 
@@ -133,7 +149,8 @@ public class ProductsApiController {
     @GetMapping("/{id}/images")
     public ResponseEntity<java.util.List<String>> getImages(@PathVariable("id") Long id) {
         try {
-            if (this.productImagesRepository == null) return ResponseEntity.ok(java.util.List.of());
+            if (this.productImagesRepository == null)
+                return ResponseEntity.ok(java.util.List.of());
             var imgs = this.productImagesRepository.findTop1ByProductIdAndIsPrimaryTrueOrderByImageIdAsc(id);
             java.util.List<String> out = new java.util.ArrayList<>();
             if (imgs != null && !imgs.isEmpty()) {
@@ -143,7 +160,8 @@ public class ProductsApiController {
             var any = this.productImagesRepository.findTop1ByProductIdOrderByImageIdAsc(id);
             if (any != null && !any.isEmpty()) {
                 String u = any.get(0).getImageUrl();
-                if (out.isEmpty() || !out.get(0).equals(u)) out.add(u);
+                if (out.isEmpty() || !out.get(0).equals(u))
+                    out.add(u);
             }
             return ResponseEntity.ok(out);
         } catch (Exception e) {
@@ -154,7 +172,7 @@ public class ProductsApiController {
     // Create product (sellerId must be provided via body or query)
     @PostMapping
     public ResponseEntity<?> create(@RequestBody ProductDto body,
-                                    @RequestParam(name = "sellerId", required = false) Long sellerId) {
+            @RequestParam(name = "sellerId", required = false) Long sellerId) {
         Long sid = body.sellerId != null ? body.sellerId : sellerId;
         if (sid == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("sellerId is required");
@@ -163,8 +181,7 @@ public class ProductsApiController {
         if (body.name != null && productsRepository.existsBySellerIdAndNameIgnoreCase(sid, body.name.trim())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of(
                     "error", "duplicate_name",
-                    "message", "Product name already exists"
-            ));
+                    "message", "Product name already exists"));
         }
         Products p = new Products();
         p.setSellerId(sid);
@@ -172,21 +189,19 @@ public class ProductsApiController {
         p.setDescription(body.description);
         p.setPrice(body.price);
         p.setSalePrice(body.salePrice);
-    // Server side required enforcement
-    if (body.quantity == null || body.quantity <= 0) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
-            "error","invalid_quantity",
-            "message","Quantity must be > 0"
-        ));
-    }
-    p.setQuantity(body.quantity);
-    if (body.downloadUrl == null || body.downloadUrl.trim().isEmpty()) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
-            "error","download_url_required",
-            "message","Download URL is required"
-        ));
-    }
-    p.setDownloadUrl(body.downloadUrl.trim());
+        // Server side required enforcement
+        if (body.quantity == null || body.quantity <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
+                    "error", "invalid_quantity",
+                    "message", "Quantity must be > 0"));
+        }
+        p.setQuantity(body.quantity);
+        if (body.downloadUrl == null || body.downloadUrl.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
+                    "error", "download_url_required",
+                    "message", "Download URL is required"));
+        }
+        p.setDownloadUrl(body.downloadUrl.trim());
         // status normalized by entity callbacks
         p.setStatus(Objects.toString(body.status, "pending"));
         try {
@@ -196,8 +211,7 @@ public class ProductsApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(java.util.Map.of(
                             "error", "save_failed",
-                            "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"
-                    ));
+                            "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"));
         }
     }
 
@@ -213,48 +227,66 @@ public class ProductsApiController {
                         productsRepository.existsBySellerIdAndNameIgnoreCase(p.getSellerId(), nextName)) {
                     return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of(
                             "error", "duplicate_name",
-                            "message", "Product name already exists"
-                    ));
+                            "message", "Product name already exists"));
                 }
             }
-            // Detect changes against incoming body. We also track WHICH fields changed so we can
+            // Detect changes against incoming body. We also track WHICH fields changed so
+            // we can
             // decide whether status should be forced to hidden. Rule:
-            //  - If current status is public and ONLY price, salePrice, quantity change -> keep public.
-            //  - If name OR description OR downloadUrl changes while public -> hide (becomes hidden for re‑review).
-            //  - For non-public statuses (pending, etc.), retain existing behavior (force hidden on any change).
+            // - If current status is public and ONLY price, salePrice, quantity change ->
+            // keep public.
+            // - If name OR description OR downloadUrl changes while public -> hide (becomes
+            // hidden for re‑review).
+            // - For non-public statuses (pending, etc.), retain existing behavior (force
+            // hidden on any change).
             boolean changed = false;
             boolean nameChanged = false;
             boolean descriptionChanged = false;
-            // numeric-only changes (price, salePrice, quantity) are considered safe for public status
+            // numeric-only changes (price, salePrice, quantity) are considered safe for
+            // public status
             boolean downloadUrlChanged = false;
 
-            if (body.name != null && !Objects.equals(p.getName(), body.name)) { changed = true; nameChanged = true; }
-            if (!Objects.equals(p.getDescription(), body.description)) { changed = true; descriptionChanged = true; }
-            if (!eq(p.getPrice(), body.price)) { changed = true; }
-            if (!eq(p.getSalePrice(), body.salePrice)) { changed = true; }
-            if (body.quantity != null && !Objects.equals(p.getQuantity(), body.quantity)) { changed = true; }
-            if (!Objects.equals(p.getDownloadUrl(), body.downloadUrl)) { changed = true; downloadUrlChanged = true; }
+            if (body.name != null && !Objects.equals(p.getName(), body.name)) {
+                changed = true;
+                nameChanged = true;
+            }
+            if (!Objects.equals(p.getDescription(), body.description)) {
+                changed = true;
+                descriptionChanged = true;
+            }
+            if (!eq(p.getPrice(), body.price)) {
+                changed = true;
+            }
+            if (!eq(p.getSalePrice(), body.salePrice)) {
+                changed = true;
+            }
+            if (body.quantity != null && !Objects.equals(p.getQuantity(), body.quantity)) {
+                changed = true;
+            }
+            if (!Objects.equals(p.getDownloadUrl(), body.downloadUrl)) {
+                changed = true;
+                downloadUrlChanged = true;
+            }
 
             // Apply incoming values (allow clearing via nulls to persist user's intent)
-            if (body.name != null) p.setName(body.name);
+            if (body.name != null)
+                p.setName(body.name);
             p.setDescription(body.description);
             p.setPrice(body.price);
             p.setSalePrice(body.salePrice);
             if (body.quantity != null) {
                 if (body.quantity <= 0) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
-                            "error","invalid_quantity",
-                            "message","Quantity must be > 0"
-                    ));
+                            "error", "invalid_quantity",
+                            "message", "Quantity must be > 0"));
                 }
                 p.setQuantity(body.quantity);
             }
             if (body.downloadUrl != null) {
                 if (body.downloadUrl.trim().isEmpty()) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
-                            "error","download_url_required",
-                            "message","Download URL is required"
-                    ));
+                            "error", "download_url_required",
+                            "message", "Download URL is required"));
                 }
                 p.setDownloadUrl(body.downloadUrl.trim());
             }
@@ -266,7 +298,8 @@ public class ProductsApiController {
 
             // Selective status update logic
             String currentStatus = p.getStatus() == null ? null : p.getStatus().trim().toLowerCase();
-            boolean sensitiveChanged = nameChanged || descriptionChanged || downloadUrlChanged; // changes requiring re-review
+            boolean sensitiveChanged = nameChanged || descriptionChanged || downloadUrlChanged; // changes requiring
+                                                                                                // re-review
             if ("public".equals(currentStatus)) {
                 // If only numeric/price related changes, keep public
                 if (sensitiveChanged) {
@@ -283,8 +316,7 @@ public class ProductsApiController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(java.util.Map.of(
                                 "error", "save_failed",
-                                "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"
-                        ));
+                                "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"));
             }
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -292,9 +324,10 @@ public class ProductsApiController {
     // Optional: client-side async check endpoint
     @GetMapping("/validate-name")
     public ResponseEntity<?> validateName(@RequestParam("sellerId") Long sellerId, @RequestParam("name") String name,
-                                          @RequestParam(value = "excludeId", required = false) Long excludeId) {
+            @RequestParam(value = "excludeId", required = false) Long excludeId) {
         String n = name == null ? "" : name.trim();
-        if (n.isEmpty()) return ResponseEntity.ok(java.util.Map.of("valid", false, "message", "Name is required"));
+        if (n.isEmpty())
+            return ResponseEntity.ok(java.util.Map.of("valid", false, "message", "Name is required"));
         boolean exists = productsRepository.existsBySellerIdAndNameIgnoreCase(sellerId, n);
         if (exists && excludeId != null) {
             var p = productsRepository.findById(excludeId).orElse(null);
@@ -314,8 +347,7 @@ public class ProductsApiController {
             if (Boolean.TRUE.equals(everPublic) || "public".equals(status)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of(
                         "error", "cannot_delete_public_product",
-                        "message", "Product that has been public cannot be deleted. Please hide it instead."
-                ));
+                        "message", "Product that has been public cannot be deleted. Please hide it instead."));
             }
             productsRepository.deleteById(id);
             return ResponseEntity.noContent().build();
@@ -325,8 +357,8 @@ public class ProductsApiController {
     // Admin approval: publish/unpublish
     @PostMapping("/{id}/approval")
     public ResponseEntity<?> approve(@PathVariable Long id,
-                                     @RequestParam(name = "publish") boolean publish,
-                                     @RequestHeader(name = "X-User-Type", required = false) String userType) {
+            @RequestParam(name = "publish") boolean publish,
+            @RequestHeader(name = "X-User-Type", required = false) String userType) {
         // Only ADMIN can approve according to frontend contract
         if (userType == null || !userType.equalsIgnoreCase("ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden");
@@ -334,7 +366,8 @@ public class ProductsApiController {
         return productsRepository.findById(id).map(p -> {
             // When publishing, normalize status to public; otherwise hidden
             p.setStatus(publish ? "public" : "hidden");
-            if (publish) p.setWasPublic(Boolean.TRUE);
+            if (publish)
+                p.setWasPublic(Boolean.TRUE);
             Products saved = productsRepository.save(p);
             return ResponseEntity.ok(toDto(saved));
         }).orElse(ResponseEntity.notFound().build());
@@ -357,8 +390,10 @@ public class ProductsApiController {
     }
 
     private static boolean eq(BigDecimal a, BigDecimal b) {
-        if (a == b) return true;
-        if (a == null || b == null) return false;
+        if (a == b)
+            return true;
+        if (a == null || b == null)
+            return false;
         return a.compareTo(b) == 0;
     }
 }
