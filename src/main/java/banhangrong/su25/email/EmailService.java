@@ -170,12 +170,12 @@ public class EmailService {
                         <p>Click the button below to reset your password:</p>
                         
                         <div class="reset-button-container">
-                            <a href="%s" class="reset-button">Reset Password</a>
+                            <a href="{{RESET_LINK}}" class="reset-button">Reset Password</a>
                         </div>
                         
                         <div class="reset-link">
                             <strong>Or copy and paste this link into your browser:</strong><br>
-                            %s
+                            {{RESET_LINK}}
                         </div>
                         
                         <div class="security-notice">
@@ -192,7 +192,10 @@ public class EmailService {
                 </div>
             </body>
             </html>
-            """.formatted(resetLink, resetLink);
+            """;
+        
+        // Replace placeholder with actual reset link (safer than format string)
+        htmlBody = htmlBody.replace("{{RESET_LINK}}", resetLink);
 
         Email email = new Email(to, subject, htmlBody);
         sendHtmlEmail(email);
