@@ -24,8 +24,8 @@ public class ProductController {
     private final CategoriesProductsRepository categoriesProductsRepository;
 
     public ProductController(ProductsRepository productsRepository,
-                             ProductImagesRepository productImagesRepository,
-                             CategoriesProductsRepository categoriesProductsRepository) {
+            ProductImagesRepository productImagesRepository,
+            CategoriesProductsRepository categoriesProductsRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.categoriesProductsRepository = categoriesProductsRepository;
@@ -51,12 +51,13 @@ public class ProductController {
     // GET /api/products/{id} → Lấy product by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-    return productsRepository.findById(id)
-        .<ResponseEntity<?>>map(p -> ResponseEntity.ok(ensureStandardStatus(p)))
+        return productsRepository.findById(id)
+                .<ResponseEntity<?>>map(p -> ResponseEntity.ok(ensureStandardStatus(p)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // GET /api/products/seller/{sellerId}/active → Lấy ACTIVE products của seller (CHO SHOP DESIGNER)
+    // GET /api/products/seller/{sellerId}/active → Lấy ACTIVE products của seller
+    // (CHO SHOP DESIGNER)
     @GetMapping("/seller/{sellerId}/active")
     public ResponseEntity<?> getSellerActiveProducts(@PathVariable Long sellerId) {
         try {
@@ -93,35 +94,112 @@ public class ProductController {
         if (req.getSellerId() == null || req.getName() == null || req.getPrice() == null) {
             return ResponseEntity.badRequest().body("sellerId, name, price are required");
         }
+        if (req.getQuantity() == null || req.getQuantity() <= 0) {
+            return ResponseEntity.badRequest().body("quantity must be > 0");
+        }
+        if (req.getDownloadUrl() == null || req.getDownloadUrl().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("downloadUrl is required");
+        }
+        // Unique name per seller (case-insensitive)
+        String nm = req.getName().trim();
+        if (productsRepository.existsBySellerIdAndNameIgnoreCase(req.getSellerId(), nm)) {
+            return ResponseEntity.status(409).body(Map.of(
+                    "error", "duplicate_name",
+                    "message", "Product name already exists"));
+        }
+        req.setName(nm);
         req.setStatus("pending"); // pending approval
         req.setCreatedAt(LocalDateTime.now());
         req.setUpdatedAt(LocalDateTime.now());
-        Products saved = productsRepository.save(req);
-        return ResponseEntity.created(URI.create("/api/products/" + saved.getProductId())).body(saved);
+        try {
+            Products saved = productsRepository.save(req);
+            return ResponseEntity.created(URI.create("/api/products/" + saved.getProductId())).body(saved);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "save_failed",
+                    "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"));
+        }
     }
 
     // PUT /api/products/{id} → Seller cập nhật product
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Products req) {
         Optional<Products> opt = productsRepository.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        if (opt.isEmpty())
+            return ResponseEntity.notFound().build();
         Products p = opt.get();
         boolean changed = false;
-        if (req.getName() != null && !req.getName().equals(p.getName())) { p.setName(req.getName()); changed = true; }
-        if (req.getDescription() != null && !req.getDescription().equals(p.getDescription())) { p.setDescription(req.getDescription()); changed = true; }
-        if (req.getPrice() != null && (p.getPrice()==null || req.getPrice().compareTo(p.getPrice())!=0)) { p.setPrice(req.getPrice()); changed = true; }
-        if (req.getSalePrice() != null && (p.getSalePrice()==null || req.getSalePrice().compareTo(p.getSalePrice())!=0)) { p.setSalePrice(req.getSalePrice()); changed = true; }
-        if (req.getQuantity() != null && !req.getQuantity().equals(p.getQuantity())) { p.setQuantity(req.getQuantity()); changed = true; }
-        if (req.getDownloadUrl() != null && !req.getDownloadUrl().equals(p.getDownloadUrl())) { p.setDownloadUrl(req.getDownloadUrl()); changed = true; }
-
-        if (changed && !"hidden".equals(p.getStatus())) {
-            p.setStatus("hidden");
+        boolean nameChanged = false;
+        boolean descriptionChanged = false;
+        // numeric-only changes (price, salePrice, quantity) are considered safe for
+        // public status
+        boolean downloadUrlChanged = false;
+        if (req.getName() != null && !req.getName().equals(p.getName())) {
+            String nextName = req.getName().trim();
+            // Prevent name clash with other products of same seller
+            if (p.getSellerId() != null
+                    && productsRepository.existsBySellerIdAndNameIgnoreCase(p.getSellerId(), nextName)
+                    && !nextName.equalsIgnoreCase(p.getName())) {
+                return ResponseEntity.status(409).body(Map.of(
+                        "error", "duplicate_name",
+                        "message", "Product name already exists"));
+            }
+            p.setName(nextName);
+            changed = true;
+            nameChanged = true;
+        }
+        if (req.getDescription() != null && !req.getDescription().equals(p.getDescription())) {
+            p.setDescription(req.getDescription());
+            changed = true;
+            descriptionChanged = true;
+        }
+        if (req.getPrice() != null && (p.getPrice() == null || req.getPrice().compareTo(p.getPrice()) != 0)) {
+            p.setPrice(req.getPrice());
+            changed = true;
+        }
+        if (req.getSalePrice() != null
+                && (p.getSalePrice() == null || req.getSalePrice().compareTo(p.getSalePrice()) != 0)) {
+            p.setSalePrice(req.getSalePrice());
+            changed = true;
+        }
+        if (req.getQuantity() != null && !req.getQuantity().equals(p.getQuantity())) {
+            if (req.getQuantity() <= 0)
+                return ResponseEntity.badRequest().body("quantity must be > 0");
+            p.setQuantity(req.getQuantity());
+            changed = true;
+        }
+        if (req.getDownloadUrl() != null && !req.getDownloadUrl().equals(p.getDownloadUrl())) {
+            if (req.getDownloadUrl().trim().isEmpty())
+                return ResponseEntity.badRequest().body("downloadUrl is required");
+            p.setDownloadUrl(req.getDownloadUrl().trim());
+            changed = true;
+            downloadUrlChanged = true;
+        }
+        // Selective status change logic (mirror of ProductsApiController)
+        if (changed) {
+            String currentStatus = p.getStatus() == null ? null : p.getStatus().trim().toLowerCase();
+            boolean sensitiveChanged = nameChanged || descriptionChanged || downloadUrlChanged;
+            if ("public".equals(currentStatus)) {
+                if (sensitiveChanged) {
+                    p.setStatus("hidden");
+                } // else retain public
+            } else if (!"hidden".equals(currentStatus)) {
+                // For pending (or other non-hidden/non-public) states, keep existing behavior
+                // of forcing hidden
+                p.setStatus("hidden");
+            }
         }
         if (changed) {
             p.setUpdatedAt(LocalDateTime.now());
         }
-        Products saved = productsRepository.save(p);
-        return ResponseEntity.ok(saved);
+        try {
+            Products saved = productsRepository.save(p);
+            return ResponseEntity.ok(saved);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "save_failed",
+                    "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"));
+        }
     }
 
     // DELETE /api/products/{id} → Xóa product
@@ -129,7 +207,8 @@ public class ProductController {
     @Transactional
     public ResponseEntity<?> delete(@PathVariable Long id) {
         Optional<Products> opt = productsRepository.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        if (opt.isEmpty())
+            return ResponseEntity.notFound().build();
         Products p = opt.get();
         // Rule: only allow delete if product has NEVER been public
         Boolean everPublic = p.getWasPublic();
@@ -137,16 +216,17 @@ public class ProductController {
         if (Boolean.TRUE.equals(everPublic) || "public".equals(currentStatus)) {
             return ResponseEntity.status(409).body(Map.of(
                     "error", "cannot_delete_public_product",
-                    "message", "Product that has been public cannot be deleted. Please hide it instead."
-            ));
+                    "message", "Product that has been public cannot be deleted. Please hide it instead."));
         }
         // Cleanup dependencies to satisfy FK constraints
         try {
             categoriesProductsRepository.deleteByProductId(id);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         try {
             productImagesRepository.deleteByProductId(id);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         productsRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -158,7 +238,8 @@ public class ProductController {
             @RequestParam("publish") boolean publish,
             @RequestHeader(value = "X-User-Type", required = false) String userType) {
         Optional<Products> opt = productsRepository.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        if (opt.isEmpty())
+            return ResponseEntity.notFound().build();
         Products p = opt.get();
         if (userType != null && "ADMIN".equalsIgnoreCase(userType)) {
             if (publish) {
@@ -206,14 +287,20 @@ public class ProductController {
             // Derive from isActive/wasPublic when status is missing
             Boolean active = p.getIsActive();
             Boolean wasPub = p.getWasPublic();
-            if (Boolean.TRUE.equals(active)) st = "public";
-            else if (Boolean.TRUE.equals(wasPub)) st = "hidden"; // was public before but currently not active
-            else st = "pending";
+            if (Boolean.TRUE.equals(active))
+                st = "public";
+            else if (Boolean.TRUE.equals(wasPub))
+                st = "hidden"; // was public before but currently not active
+            else
+                st = "pending";
         } else {
             // Normalize synonyms that might exist in legacy data
-            if ("active".equals(st)) st = "public";
-            if ("inactive".equals(st)) st = "hidden";
-            if ("canceled".equals(st)) st = "cancelled"; // unify spelling
+            if ("active".equals(st))
+                st = "public";
+            if ("inactive".equals(st))
+                st = "hidden";
+            if ("canceled".equals(st))
+                st = "cancelled"; // unify spelling
         }
         p.setStatus(st);
         return p;

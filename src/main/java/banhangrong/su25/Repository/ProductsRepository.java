@@ -192,4 +192,7 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     // THÊM METHOD MỚI - Đếm số sản phẩm active
     @Query("SELECT COUNT(p) FROM Products p WHERE p.sellerId = :sellerId AND p.isActive = true")
     Long countActiveProductsBySellerId(@Param("sellerId") Long sellerId);
+
+    // ==== UNIQUE NAME CHECK (case-insensitive per seller) ====
+    boolean existsBySellerIdAndNameIgnoreCase(Long sellerId, String name);
 }
