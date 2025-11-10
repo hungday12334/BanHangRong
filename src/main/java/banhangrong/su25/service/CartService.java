@@ -112,22 +112,55 @@ public class CartService {
             String appliedVoucherCode = appliedVouchers.get(p.getProductId());
             if (appliedVoucherCode != null) {
                 List<Vouchers> vouchers = vouchersRepository.findByProductIdAndStatusIgnoreCase(p.getProductId(), "active");
+                boolean voucherValid = false;
+                
                 for (Vouchers v : vouchers) {
                     if (v.getCode().equalsIgnoreCase(appliedVoucherCode)) {
-                        if ((v.getStartAt() == null || !LocalDateTime.now().isBefore(v.getStartAt())) &&
-                            (v.getEndAt() == null || !LocalDateTime.now().isAfter(v.getEndAt()))) {
-                            if (v.getMinOrder() == null || line.compareTo(v.getMinOrder()) >= 0) {
-                                if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
-                                    discount = line.multiply(v.getDiscountValue().divide(new BigDecimal("100")));
-                                } else {
-                                    discount = v.getDiscountValue();
-                                }
-                                if (discount.compareTo(line) > 0) discount = line;
-                                appliedVoucherCode = v.getCode();
+                        // Check thời gian hiệu lực
+                        LocalDateTime now = LocalDateTime.now();
+                        boolean timeValid = (v.getStartAt() == null || !now.isBefore(v.getStartAt())) &&
+                                          (v.getEndAt() == null || !now.isAfter(v.getEndAt()));
+                        
+                        if (!timeValid) {
+                            appliedVoucherCode = null;
+                            break;
+                        }
+                        
+                        // Check maxUses
+                        if (v.getMaxUses() != null) {
+                            int usedCount = v.getUsedCount() != null ? v.getUsedCount() : 0;
+                            if (usedCount >= v.getMaxUses()) {
+                                appliedVoucherCode = null;
                                 break;
                             }
                         }
+                        
+                        // Check maxUsesPerUser
+                        if (v.getMaxUsesPerUser() != null) {
+                            long userUsedCount = voucherRedemptionsRepository.countByVoucherIdAndUserId(v.getVoucherId(), user.getUserId());
+                            if (userUsedCount >= v.getMaxUsesPerUser()) {
+                                appliedVoucherCode = null;
+                                break;
+                            }
+                        }
+                        
+                        // Check min order
+                        if (v.getMinOrder() == null || line.compareTo(v.getMinOrder()) >= 0) {
+                            if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
+                                discount = line.multiply(v.getDiscountValue().divide(new BigDecimal("100")));
+                            } else {
+                                discount = v.getDiscountValue();
+                            }
+                            if (discount.compareTo(line) > 0) discount = line;
+                            voucherValid = true;
+                            break;
+                        }
                     }
+                }
+                
+                // Nếu voucher không hợp lệ thì set null
+                if (!voucherValid) {
+                    appliedVoucherCode = null;
                 }
             }
 

@@ -1,6 +1,7 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Entity.Products;
 import banhangrong.su25.service.CartService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +36,22 @@ public class CartController {
         }
 
         Map<String, Object> view = cartService.buildCartView(user, appliedVouchers);
+
+        // Clear voucher không hợp lệ khỏi session
+        @SuppressWarnings("unchecked")
+        java.util.List<Map<String, Object>> items = (java.util.List<Map<String, Object>>) view.get("items");
+        if (items != null && appliedVouchers != null && !appliedVouchers.isEmpty()) {
+            Map<Long, String> validVouchers = new HashMap<>();
+            for (Map<String, Object> item : items) {
+                Products p = (Products) item.get("product");
+                String appliedVoucher = (String) item.get("appliedVoucher");
+                if (appliedVoucher != null && !appliedVoucher.isEmpty()) {
+                    validVouchers.put(p.getProductId(), appliedVoucher);
+                }
+            }
+            // Chỉ giữ lại voucher hợp lệ trong session
+            session.setAttribute("appliedVouchers", validVouchers);
+        }
 
         model.addAttribute("user", user);
         model.addAttribute("items", view.get("items"));
@@ -82,10 +99,19 @@ public class CartController {
 
     @PostMapping("/cart/remove")
     @ResponseBody
-    public Map<String, Object> removeFromCart(@RequestParam("productId") Long productId) {
+    public Map<String, Object> removeFromCart(@RequestParam("productId") Long productId, HttpSession session) {
         Map<String, Object> res = new HashMap<>();
         try {
             cartService.removeFromCart(productId);
+            
+            // Clear voucher khỏi session khi remove product
+            @SuppressWarnings("unchecked")
+            Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+            if (appliedVouchers != null) {
+                appliedVouchers.remove(productId);
+                session.setAttribute("appliedVouchers", appliedVouchers);
+            }
+            
             res.put("ok", true);
         } catch (Exception e) {
             res.put("ok", false);
@@ -95,9 +121,17 @@ public class CartController {
     }
 
     @GetMapping("/cart/remove")
-    public String removeFromCartGet(@RequestParam("productId") Long productId) {
+    public String removeFromCartGet(@RequestParam("productId") Long productId, HttpSession session) {
         try {
             cartService.removeFromCart(productId);
+            
+            // Clear voucher khỏi session khi remove product
+            @SuppressWarnings("unchecked")
+            Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+            if (appliedVouchers != null) {
+                appliedVouchers.remove(productId);
+                session.setAttribute("appliedVouchers", appliedVouchers);
+            }
         } catch (Exception ignored) {
         }
         return "redirect:/cart";
