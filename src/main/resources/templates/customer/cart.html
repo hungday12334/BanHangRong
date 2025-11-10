@@ -530,7 +530,7 @@
             <div style="display:flex;align-items:center;gap:12px">
                 <div class="total">Total: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
                 <a href="/customer/dashboard" class="btn">Continue Shopping</a>
-                <form method="post" action="/cart/checkout-demo" id="checkout-form" style="display:inline">
+                <form method="post" th:action="@{/cart/checkout-demo}" id="checkout-form" style="display:inline">
                     <button class="btn primary" type="submit" id="checkout-btn" onclick="return hasCheckedItemForCheckout();">Pay with Balance</button>
                 </form>
             </div>
