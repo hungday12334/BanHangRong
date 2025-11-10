@@ -142,16 +142,16 @@ function validateVoucherForm(formData, productPrice) {
     // D.10: maxUses >= 0
     if (formData.maxUses !== null && formData.maxUses !== undefined && formData.maxUses !== '') {
         const maxUses = parseInt(formData.maxUses);
-        if (maxUses < 0) {
-            errors.maxUses = "Số lần sử dụng tối đa phải >= 0 (0 = không giới hạn)";
+        if (maxUses <= 0) {
+            errors.maxUses = "Số lần sử dụng tối đa phải > 0";
         }
     }
 
     // D.10: limitPerUser >= 0
     if (formData.maxUsesPerUser !== null && formData.maxUsesPerUser !== undefined && formData.maxUsesPerUser !== '') {
         const limitPerUser = parseInt(formData.maxUsesPerUser);
-        if (limitPerUser < 0) {
-            errors.maxUsesPerUser = "Số lần sử dụng tối đa/người phải >= 0 (0 = không giới hạn)";
+        if (limitPerUser <= 0) {
+            errors.maxUsesPerUser = "Số lần sử dụng tối đa/người phải >0";
         }
 
         // D.11: limitPerUser <= maxUses (if maxUses > 0)

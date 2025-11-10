@@ -86,7 +86,7 @@ public class VoucherDTO {
      * Rule D (10): Max uses validation
      * - Must be >= 0 (0 means unlimited)
      */
-    @Min(value = 0, message = "Số lần sử dụng tối đa phải >= 0 (0 = không giới hạn)")
+    @Min(value = 1, message = "Số lần sử dụng tối đa phải > 0")
     private Integer maxUses;
 
     /**
@@ -94,7 +94,7 @@ public class VoucherDTO {
      * - Must be >= 0 (0 means unlimited)
      * - Must be <= maxUses (if maxUses > 0)
      */
-    @Min(value = 0, message = "Số lần sử dụng tối đa/người phải >= 0 (0 = không giới hạn)")
+    @Min(value = 1, message = "Số lần sử dụng tối đa/người phải > 0")
     private Integer maxUsesPerUser;
 
     /**
