@@ -12,16 +12,15 @@ public class ChatMessageDTO {
     private Boolean read;
     private String timestamp;
 
-    // File attachment fields
     private String fileUrl;
     private String fileName;
     private String fileType;
     private Long fileSize;
 
-    // Constructors
+
     public ChatMessageDTO() {}
 
-    // Getters and Setters
+
     public Long getMessageId() {
         return messageId;
     }

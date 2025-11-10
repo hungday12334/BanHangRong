@@ -119,7 +119,7 @@ public class AdminUserManagement {
         //Blance default 0
         user.setBalance(BigDecimal.ZERO);
         user.setIsEmailVerified(false);
-        user.setIsActive(true);
+        user.setIsActive(false); // ⚠️ Account inactive until email verification
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         userService.save(user);
@@ -138,7 +138,11 @@ public class AdminUserManagement {
                         <p><b>Mật khẩu:</b> %s</p>
                     </div>
                     <br>
-                    <p>Khi đăng nhập lần đầu, bạn sẽ cần <strong>Verify email</strong> để xác minh tài khoản.</p>
+                    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 6px; margin: 15px 0;">
+                        <p style="margin: 0; color: #856404;"><strong>⚠️ Quan trọng:</strong> Tài khoản của bạn hiện đang ở trạng thái <strong>TẠM THỜI</strong>.</p>
+                        <p style="margin: 8px 0 0; color: #856404;">Bạn cần <strong>xác minh email</strong> khi đăng nhập lần đầu để kích hoạt tài khoản chính thức.</p>
+                    </div>
+                    <p>Sau khi xác minh email thành công, tài khoản sẽ được chuyển sang trạng thái <strong>CHÍNH THỨC</strong> và bạn có thể sử dụng đầy đủ tính năng.</p>
                     <p>Hãy nhớ <strong>đổi mật khẩu</strong> sau khi đăng nhập để đảm bảo an toàn thông tin cá nhân.</p>
                     <hr>
                     <p style="font-size: 13px; color: #777;">Trân trọng,<br><em>Đội ngũ BanHangRong</em></p>

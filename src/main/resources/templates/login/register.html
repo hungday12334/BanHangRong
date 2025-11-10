@@ -587,12 +587,18 @@
 
                     if (response.ok) {
                         console.log('Registration successful!');
-                        showEmailVerificationMessage();
-                        showMessage('Registration successful! Verification email has been sent to your email address.', 'success');
+
+                        // ✅ Store JWT token for authenticated session
+                        if (result.token) {
+                            localStorage.setItem('jwtToken', result.token);
+                            console.log('JWT token stored');
+                        }
+
+                        showMessage('Registration successful! Redirecting to verification page...', 'success');
 
                         setTimeout(() => {
-                            window.location.href = '/login';
-                        }, 5000);
+                            window.location.href = '/verify-email-required';
+                        }, 1500);
                     } else {
                         const errorMessage = result.error || 'Registration failed!';
                         console.error('Registration error:', errorMessage);

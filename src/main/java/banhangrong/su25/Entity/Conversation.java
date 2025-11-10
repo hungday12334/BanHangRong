@@ -52,7 +52,7 @@ public class Conversation {
     @JsonProperty("lastMessage")
     private String lastMessage;
 
-    @Column(name = "last_message_time")
+    @Column(name = "last_message_time", nullable = true)
     @JsonProperty("lastMessageTime")
     private LocalDateTime lastMessageTime;
 

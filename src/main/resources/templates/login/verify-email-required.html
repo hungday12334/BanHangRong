@@ -510,14 +510,14 @@
     <div class="code-section">
         <label class="code-label">Mã xác thực</label>
         <div class="code-inputs">
-            <input type="text" class="code-input" maxlength="1" id="code1" autocomplete="off" inputmode="numeric">
-            <input type="text" class="code-input" maxlength="1" id="code2" autocomplete="off" inputmode="numeric">
-            <input type="text" class="code-input" maxlength="1" id="code3" autocomplete="off" inputmode="numeric">
-            <input type="text" class="code-input" maxlength="1" id="code4" autocomplete="off" inputmode="numeric">
-            <input type="text" class="code-input" maxlength="1" id="code5" autocomplete="off" inputmode="numeric">
-            <input type="text" class="code-input" maxlength="1" id="code6" autocomplete="off" inputmode="numeric">
+            <input type="text" class="code-input" maxlength="1" id="code1" autocomplete="off" inputmode="numeric" disabled>
+            <input type="text" class="code-input" maxlength="1" id="code2" autocomplete="off" inputmode="numeric" disabled>
+            <input type="text" class="code-input" maxlength="1" id="code3" autocomplete="off" inputmode="numeric" disabled>
+            <input type="text" class="code-input" maxlength="1" id="code4" autocomplete="off" inputmode="numeric" disabled>
+            <input type="text" class="code-input" maxlength="1" id="code5" autocomplete="off" inputmode="numeric" disabled>
+            <input type="text" class="code-input" maxlength="1" id="code6" autocomplete="off" inputmode="numeric" disabled>
         </div>
-        <div class="timer-row">
+        <div class="timer-row" id="timerRow" style="display: none;">
             <span>⏱️</span>
             <span>Hết hạn sau:</span>
             <span class="timer" id="timer">2:00</span>
@@ -526,16 +526,16 @@
 
     <!-- Actions -->
     <div class="actions">
-        <button class="btn btn-primary" id="verifyBtn" onclick="verifyCode()">
+        <button class="btn btn-primary" id="verifyBtn" onclick="verifyCode()" disabled>
             <span id="verifyBtnText">Xác thực ngay</span>
             <span id="verifyBtnLoading" class="loading-spinner" style="display: none;"></span>
         </button>
 
         <div class="divider">
-            <p class="resend-hint">Không nhận được mã?</p>
-            <button class="btn btn-secondary" id="resendBtn" onclick="resendCode()" disabled>
-                <span>🔄</span>
-                <span id="resendBtnText">Gửi lại (<span id="resendTimer">60</span>s)</span>
+            <p class="resend-hint" id="resendHint">Nhấn nút bên dưới để nhận mã xác thực qua email</p>
+            <button class="btn btn-secondary" id="resendBtn" onclick="sendFirstCode()">
+                <span>📧</span>
+                <span id="resendBtnText">Gửi mã xác thực</span>
                 <span id="resendBtnLoading" class="loading-spinner" style="display: none; border-color: rgba(14, 165, 233, 0.3); border-top-color: var(--primary);"></span>
             </button>
         </div>
@@ -550,16 +550,16 @@
     </div>
 </div>
 
-<!-- ... existing code ... -->
 <script>
     let expirySeconds = 120;
     let resendCooldown = 60;
     let timerInterval;
     let resendInterval;
-
-    document.getElementById('code1').focus();
+    let hasActiveCode = false;
 
     const inputs = document.querySelectorAll('.code-input');
+
+    // Setup input handlers
     inputs.forEach((input, index) => {
         input.addEventListener('input', (e) => {
             if (e.target.value.length === 1) {
@@ -588,8 +588,7 @@
         });
     });
 
-    startExpiryTimer();
-    startResendCooldown();
+    // Load status on page load
     loadStatus();
 
     function startExpiryTimer() {
@@ -614,39 +613,87 @@
     function startResendCooldown() {
         clearInterval(resendInterval);
         const resendBtn = document.getElementById('resendBtn');
-        const resendTimerEl = document.getElementById('resendTimer');
+        const resendBtnText = document.getElementById('resendBtnText');
         resendBtn.disabled = true;
+
         resendInterval = setInterval(() => {
             resendCooldown--;
-            resendTimerEl.textContent = resendCooldown;
+            resendBtnText.innerHTML = 'Gửi lại (<span id="resendTimer">' + resendCooldown + '</span>s)';
             if (resendCooldown <= 0) {
                 clearInterval(resendInterval);
                 resendBtn.disabled = false;
-                document.getElementById('resendBtnText').textContent = 'Gửi lại mã';
+                resendBtnText.textContent = 'Gửi lại mã';
             }
         }, 1000);
+
+        // Initial update
+        resendBtnText.innerHTML = 'Gửi lại (<span id="resendTimer">' + resendCooldown + '</span>s)';
     }
 
     async function loadStatus() {
         try {
             const response = await fetch('/api/email-verification/status');
+
+            // Check if response is HTML (redirect to login) instead of JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.warn('API returned non-JSON response, user may need to login');
+                // Show send button anyway - user is on the page
+                document.getElementById('resendBtn').disabled = false;
+                document.getElementById('resendBtnText').textContent = 'Gửi mã xác thực';
+                return;
+            }
+
             const data = await response.json();
+
             if (data.authenticated && data.isEmailVerified) {
                 window.location.href = '/customer/dashboard';
                 return;
             }
+
             if (data.hasActiveToken) {
+                // User already has an active code
+                hasActiveCode = true;
                 expirySeconds = data.expiresInSeconds;
                 resendCooldown = data.resendCooldownSeconds;
+
+                // Enable code inputs
+                inputs.forEach(input => input.disabled = false);
+                document.getElementById('code1').focus();
+
+                // Enable verify button
+                document.getElementById('verifyBtn').disabled = false;
+
+                // Show timer
+                document.getElementById('timerRow').style.display = 'flex';
+                startExpiryTimer();
+
+                // Update resend button
+                document.getElementById('resendHint').textContent = 'Không nhận được mã?';
+                const resendBtn = document.getElementById('resendBtn');
+                resendBtn.querySelector('span:first-child').textContent = '🔄';
+                resendBtn.onclick = resendCode;
+
                 if (!data.canResend) {
                     startResendCooldown();
                 } else {
-                    document.getElementById('resendBtn').disabled = false;
+                    resendBtn.disabled = false;
                     document.getElementById('resendBtnText').textContent = 'Gửi lại mã';
                 }
+
+                showMessage('Mã xác thực đã được gửi đến email của bạn', 'info');
+            } else {
+                // No active code yet - user needs to request one
+                hasActiveCode = false;
+                document.getElementById('resendBtn').disabled = false;
+                document.getElementById('resendBtnText').textContent = 'Gửi mã xác thực';
             }
         } catch (error) {
             console.error('Error loading status:', error);
+            // Enable send button anyway - allow user to try sending code
+            hasActiveCode = false;
+            document.getElementById('resendBtn').disabled = false;
+            document.getElementById('resendBtnText').textContent = 'Gửi mã xác thực';
         }
     }
 
@@ -669,6 +716,17 @@
                 },
                 body: JSON.stringify({ code: code })
             });
+
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                showMessage('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return;
+            }
+
             const data = await response.json();
             if (data.success) {
                 showMessage(data.message, 'success');
@@ -687,9 +745,76 @@
                 inputs[0].focus();
             }
         } catch (error) {
+            console.error('Verify code error:', error);
             showMessage('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function sendFirstCode() {
+        const resendBtn = document.getElementById('resendBtn');
+        if (resendBtn.disabled) return;
+
+        resendBtn.disabled = true;
+        document.getElementById('resendBtnText').style.display = 'none';
+        document.getElementById('resendBtnLoading').style.display = 'inline-block';
+
+        try {
+            const response = await fetch('/api/email-verification/resend-code', {
+                method: 'POST'
+            });
+
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                showMessage('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                hasActiveCode = true;
+                showMessage(data.message, 'success');
+                expirySeconds = data.expiresInMinutes * 60;
+                resendCooldown = 60;
+
+                // Enable code inputs
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    input.value = '';
+                });
+                document.getElementById('code1').focus();
+
+                // Enable verify button
+                document.getElementById('verifyBtn').disabled = false;
+
+                // Show and start timer
+                document.getElementById('timerRow').style.display = 'flex';
+                document.getElementById('timer').classList.remove('expired');
+                startExpiryTimer();
+                startResendCooldown();
+
+                // Update UI
+                document.getElementById('resendHint').textContent = 'Không nhận được mã?';
+                resendBtn.querySelector('span:first-child').textContent = '🔄';
+                resendBtn.onclick = resendCode;
+            } else {
+                showMessage(data.message, 'error');
+                if (data.remainingSeconds) {
+                    resendCooldown = data.remainingSeconds;
+                    startResendCooldown();
+                }
+            }
+        } catch (error) {
+            console.error('Send code error:', error);
+            showMessage('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+        } finally {
+            document.getElementById('resendBtnText').style.display = 'inline';
+            document.getElementById('resendBtnLoading').style.display = 'none';
         }
     }
 
@@ -703,6 +828,17 @@
             const response = await fetch('/api/email-verification/resend-code', {
                 method: 'POST'
             });
+
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                showMessage('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return;
+            }
+
             const data = await response.json();
             if (data.success) {
                 showMessage(data.message, 'success');
@@ -722,6 +858,7 @@
                 }
             }
         } catch (error) {
+            console.error('Resend code error:', error);
             showMessage('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
         } finally {
             document.getElementById('resendBtnText').style.display = 'inline';
