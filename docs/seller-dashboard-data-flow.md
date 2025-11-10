@@ -268,3 +268,96 @@ Tài liệu đã chuyển sang mô tả logic thay vì trích dẫn dòng cụ t
 - Hợp nhất `ProductsApiController` & `ProductController` tránh lặp logic status.
 - Thêm test đơn vị cho quy tắc chuyển trạng thái sản phẩm.
 - Unique composite index (seller_id + lower(name)).
+
+## Phụ lục: Vị trí mã (file & dòng)
+> Các số dòng lấy từ nhánh hiện tại thời điểm 2025-11-10. Có thể thay đổi khi refactor; dùng để tra cứu nhanh.
+
+### SellerDashboardController
+| Chức năng | Dòng bắt đầu annotation / phương thức |
+|-----------|----------------------------------------|
+| `@GetMapping("/seller/dashboard")` | `SellerDashboardController.java:40` |
+| `@GetMapping("/api/seller/{sellerId}/revenue-series")` | `SellerDashboardController.java:317-318` |
+
+### ProductsRepository (các KPI chính)
+| Phương thức | Dòng |
+|-------------|------|
+| `findBySellerId` | 36 |
+| `countBySellerIdAndStatus` | 46 |
+| `totalRevenueBySeller` | 49 |
+| `totalUnitsSoldBySeller` | 52 |
+| `dailyRevenueFrom` | 55 |
+| `totalOrdersBySeller` | 58 |
+| `averageRatingBySeller` | 61 |
+| `topProducts` | 64 |
+| `todayRevenue` | 70 |
+| `thisMonthRevenue` | 73 |
+| `topSellers` | 76 |
+| `sellerRevenueRank` | 88 |
+| `totalSellers` | 91 |
+
+### SellerOrderController & SellerOrderRepository
+| Chức năng | Dòng |
+|-----------|------|
+| `@RequestMapping("/api/seller/{sellerId}/orders")` | 25 |
+| Gọi `findSellerOrders` (trong list) | 51 |
+| `@GetMapping("/{orderId}")` | 66 |
+| Gọi `findSellerOrder` | 68 |
+| Repo `findSellerOrders` | `SellerOrderRepository.java:68` |
+| Repo `findSellerOrder` | `SellerOrderRepository.java:90` |
+
+### ProductsApiController
+| Annotation / endpoint | Dòng |
+|-----------------------|------|
+| `@RequestMapping("/api/products-lite")` | 19 |
+| `@GetMapping("/{id}/remaining")` | 52 |
+| `@GetMapping("/{id}/vouchers")` | 74 |
+| `@GetMapping("/validate-name")` | 325 |
+| `@PostMapping("/{id}/approval")` | 358 |
+| `@PostMapping("/{id}/pending")` | 377 |
+
+### ProductController
+| Endpoint | Dòng |
+|----------|------|
+| `@RequestMapping("/api/products")` | 20 |
+| `@GetMapping("/{id}")` | 52 |
+| `@GetMapping("/seller/{sellerId}/active")` | 61 |
+| `@GetMapping("/seller/{sellerId}/active/simple")` | 81 |
+| `@PutMapping("/{id}")` | 125 |
+| `@DeleteMapping("/{id}")` | 206 |
+| `@PostMapping("/{id}/approval")` | 235 |
+| `@GetMapping("/status/{status}")` | 266 |
+
+### UsersApiController
+| Endpoint | Dòng |
+|----------|------|
+| `@GetMapping("/api/users/search")` | 24 |
+
+### WithdrawalController
+| Endpoint | Dòng |
+|----------|------|
+| `@RequestMapping("/seller/withdraw")` | 24 |
+| `@GetMapping("/summary")` | 34 |
+| `@PostMapping("/bank-account")` | 77 |
+| `@GetMapping("/search")` | 99 |
+
+### SellerProfileController
+| Endpoint | Dòng |
+|----------|------|
+| `@RequestMapping("/seller")` | 30 |
+| `@GetMapping("/profile")` | 67 |
+| `@PostMapping("/profile/update")` | 96 |
+| `@PostMapping("/profile/upload-avatar")` | 225 |
+
+### ProductLicensesRepository
+| Thành phần | Dòng |
+|------------|------|
+| `interface LicenseView` | 17 |
+| `findSellerLicenses` | 70 |
+| `findByOrderId` | 115 |
+
+### JS seller-dashboard.js (gọi revenue dynamic)
+| Mô tả | Dòng |
+|-------|------|
+| fetch revenue series (`updateRevenueChart`) | 97 |
+
+> Ghi chú: Nếu chỉnh sửa đáng kể file, cập nhật lại bảng này để tránh nhầm lẫn.
