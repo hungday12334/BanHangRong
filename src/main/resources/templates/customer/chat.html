@@ -2710,8 +2710,9 @@
             }
         }
 
-        // Reload conversations để update unread counts
-        loadConversations();
+        // 🔧 FIX: Don't reload conversations here
+        // handleNewMessage already handles updating conversation list properly
+        console.log('✅ Message displayed for current conversation');
     }
 
     function sendMessage() {
@@ -2850,26 +2851,11 @@
             }
         }
 
-        // If this message belongs to current conversation, display it
+        // 🔧 FIX: Don't display message if it's for current conversation
+        // The /topic/conversation subscription (handleIncomingMessage) already handles that
         if (currentConversation && msg.conversationId === currentConversation.id) {
-            // Check if message already exists (to prevent duplicates)
-            const messageId = msg.id || msg.messageId;
-            const existingMessage = document.querySelector(`[data-message-id="${messageId}"]`);
-
-            if (existingMessage) {
-                console.log('⚠️ Message already displayed, skipping duplicate');
-                // If it's a temp message, update it with real data
-                if (messageId.toString().startsWith('temp_')) {
-                    existingMessage.setAttribute('data-message-id', msg.id);
-                    console.log('✅ Updated temp message with real ID:', msg.id);
-                }
-            } else {
-                // Display new message
-                console.log('💬 Displaying new message');
-                displayMessage(msg);
-            }
-
-            // Mark as read immediately if conversation is open
+            console.log('💬 Message for current conversation - already handled by handleIncomingMessage, skipping');
+            // Just mark as read, don't display again
             markAsRead();
         } else {
             // Message is for another conversation

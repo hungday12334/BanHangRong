@@ -2093,7 +2093,9 @@
 
         let totalUnread = 0;
 
-        console.log('🔄 Rendering conversations list, total:', conversations.length);
+        console.log('🔄 ==================== RENDER CONVERSATIONS ====================');
+        console.log('🔄 Total conversations:', conversations.length);
+        console.log('🔄 Current conversation ID:', currentConversation ? currentConversation.id : 'NONE');
 
         // Sort conversations: Pinned first, then by lastMessageTime (most recent first)
         const sortedConversations = [...conversations].sort((a, b) => {
@@ -2146,7 +2148,7 @@
             const unreadBadgeText = unreadCount > 9 ? '9+' : unreadCount;
             const shouldShowBadge = unreadCount > 0 && !isActiveConv;
 
-            console.log(`Conv ${conv.id} (${otherPartyName}): unread=${unreadCount}, isActive=${isActiveConv}, showBadge=${shouldShowBadge}`);
+            console.log(`📊 Conv ${conv.id} (${otherPartyName}): unread=${unreadCount}, isActive=${isActiveConv}, shouldShow=${shouldShowBadge}`);
 
             item.innerHTML = `
                 <span class="pin-indicator">📌</span>
@@ -2179,6 +2181,9 @@
 
         // Update dashboard unread badges
         updateDashboardUnreadBadge(totalUnread);
+        console.log('🔄 ==================== RENDER COMPLETE ====================');
+        console.log('🔄 Total unread messages across all conversations:', totalUnread);
+        console.log('🔄 =========================================================');
     }
 
     // Update unread count in dashboard
@@ -2474,8 +2479,13 @@
                 subscriptions.notifications = stompClient.subscribe(
                     '/topic/user/' + currentUser.userId + '/messages',
                     function(message) {
-                        console.log('📨 Received message notification');
+                        console.log('📨 ============================================');
+                        console.log('📨 Received message notification on /topic/user/' + currentUser.userId + '/messages');
+                        console.log('📨 Raw message:', message.body);
                         const msg = JSON.parse(message.body);
+                        console.log('📨 Parsed message:', msg);
+                        console.log('📨 Message ID:', msg.id, 'From:', msg.senderName, 'ConvID:', msg.conversationId);
+                        console.log('📨 ============================================');
                         handleNewMessage(msg);
                     }
                 );
@@ -2555,7 +2565,10 @@
             }
         }
 
-        loadConversations();
+        // 🔧 FIX: Don't call loadConversations() here
+        // handleNewMessage (from /topic/user subscription) already updates conversation list properly
+        // Calling loadConversations() here would overwrite the unread counts updated in memory
+        console.log('✅ Message displayed, conversation list will be updated by handleNewMessage');
     }
 
     function sendMessage() {
@@ -2612,6 +2625,9 @@
         currentConversation = conv;
         localStorage.setItem(LAST_CONVERSATION_KEY, conv.id);
 
+        // Reset unread count for this conversation
+        conv.unreadCount = 0;
+
         // Hide welcome screen and show chat area
         document.getElementById('welcomeScreen').style.display = 'none';
         const chatArea = document.getElementById('chatArea');
@@ -2635,20 +2651,8 @@
         // Mark as read and hide unread badge for this conversation
         markAsRead();
 
-        // Hide unread badge for this specific conversation
-        const badge = document.querySelector(`.unread-badge[data-conversation-id="${conv.id}"]`);
-        if (badge) {
-            badge.style.display = 'none';
-
-            // Update total unread count in sidebar
-            const currentUnread = parseInt(badge.textContent.replace('+', '')) || 0;
-            const sidebarBadge = document.getElementById('unreadChatCount');
-            if (sidebarBadge && sidebarBadge.style.display !== 'none') {
-                const totalUnread = parseInt(sidebarBadge.textContent.replace('+', '')) || 0;
-                const newTotal = Math.max(0, totalUnread - currentUnread);
-                updateDashboardUnreadBadge(newTotal);
-            }
-        }
+        // Re-render conversation list to update badges
+        renderConversationsList();
 
         setTimeout(() => {
             const messageInput = document.getElementById('messageInput');
@@ -2680,7 +2684,19 @@
         if (!conv) {
             // New conversation or not loaded yet - fetch from API
             console.log('⚠️ Conversation not found in memory, loading from API...');
-            loadConversations();
+            loadConversations().then(() => {
+                console.log('✅ Conversations reloaded, trying to handle message again');
+                // After loading, try to handle the message again
+                const reloadedConv = conversations.find(c => c.id === msg.conversationId);
+                if (reloadedConv) {
+                    reloadedConv.lastMessage = msg.content;
+                    reloadedConv.lastMessageTime = msg.timestamp;
+                    if (!currentConversation || msg.conversationId !== currentConversation.id) {
+                        reloadedConv.unreadCount = (reloadedConv.unreadCount || 0) + 1;
+                    }
+                    renderConversationsList();
+                }
+            });
             return;
         }
 
@@ -2694,33 +2710,17 @@
 
         if (isCurrentConversation) {
             // Message is for the open conversation
-            console.log('💬 Message is for current conversation - displaying...');
-
-            // Check if message already exists (to prevent duplicates)
-            const messageId = msg.id || msg.messageId;
-            const existingMessage = document.querySelector(`[data-message-id="${messageId}"]`);
-
-            if (existingMessage) {
-                console.log('⚠️ Message already displayed, skipping duplicate');
-                // If it's a temp message, update it with real data
-                if (messageId.toString().startsWith('temp_')) {
-                    existingMessage.setAttribute('data-message-id', msg.id);
-                    console.log('✅ Updated temp message with real ID:', msg.id);
-                }
-            } else {
-                // Display new message
-                displayMessage(msg);
-            }
-
+            console.log('💬 Message is for current conversation - will be handled by handleIncomingMessage');
+            // Don't display here - handleIncomingMessage already does that
             markAsRead();
-            // Don't increase unread count
         } else {
             // Message is for another conversation - increase unread count
             console.log('📨 Message is for another conversation - updating badge...');
+            console.log('📊 Current unread count:', conv.unreadCount);
             conv.unreadCount = (conv.unreadCount || 0) + 1;
-            console.log('✅ Updated unread count:', conv.unreadCount);
+            console.log('📊 New unread count:', conv.unreadCount);
 
-            // 🔔 THÊM: Add message to conversation.messages array để khi mở conversation sẽ thấy ngay
+            // 🔔 Add message to conversation.messages array
             if (!conv.messages) {
                 conv.messages = [];
             }
@@ -2733,7 +2733,9 @@
         }
 
         // Always re-render the sidebar to show updated badge/message
+        console.log('🔄 Re-rendering conversations list...');
         renderConversationsList();
+        console.log('✅ Conversations list re-rendered');
     }
 
     function scrollToBottom(forceInstant = false) {

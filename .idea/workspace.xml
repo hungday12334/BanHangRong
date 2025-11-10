@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(chat): improve unread message handling and conversation sorting">
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ChatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/ChatMessageDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/ChatMessageDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/MessageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/MessageRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="refactor(profile): improve code readability and update comments in SellerProfileController">
+      <change afterPath="$PROJECT_DIR$/docs/seller-profile-flow-analysis.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/seller-reviews-flow-analysis.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -189,7 +190,7 @@
       <workItem from="1762488348451" duration="3772000" />
       <workItem from="1762496710501" duration="5000" />
       <workItem from="1762502308301" duration="628000" />
-      <workItem from="1762703072720" duration="6503000" />
+      <workItem from="1762703072720" duration="14460000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -255,7 +256,23 @@
       <option name="project" value="LOCAL" />
       <updated>1762711398087</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="refactor(chat): clean up comments and improve readability in ChatController, ChatMessageDTO, ChatService, and MessageRepository">
+      <option name="closed" value="true" />
+      <created>1762711778572</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1762711778572</updated>
+    </task>
+    <task id="LOCAL-00010" summary="refactor(profile): improve code readability and update comments in SellerProfileController">
+      <option name="closed" value="true" />
+      <created>1762711975923</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1762711975924</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -303,6 +320,8 @@
     <MESSAGE value="update theme,logic in customer screen" />
     <MESSAGE value="feat(chat): update message bubble styling and add last message time to conversation" />
     <MESSAGE value="feat(chat): improve unread message handling and conversation sorting" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(chat): improve unread message handling and conversation sorting" />
+    <MESSAGE value="refactor(chat): clean up comments and improve readability in ChatController, ChatMessageDTO, ChatService, and MessageRepository" />
+    <MESSAGE value="refactor(profile): improve code readability and update comments in SellerProfileController" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(profile): improve code readability and update comments in SellerProfileController" />
   </component>
 </project>
