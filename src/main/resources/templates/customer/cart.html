@@ -4,6 +4,8 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -267,6 +269,17 @@
         </div>
         <script>
             (function () {
+                // Helper functions for CSRF token
+                function getCsrfToken() {
+                    const meta = document.querySelector('meta[name="_csrf"]');
+                    return meta ? meta.content : '';
+                }
+                
+                function getCsrfHeader() {
+                    const meta = document.querySelector('meta[name="_csrf_header"]');
+                    return meta ? meta.content : 'X-CSRF-TOKEN';
+                }
+                
                 function getCheckboxes() {
                     return document.querySelectorAll('.item-checkbox');
                 }
@@ -383,9 +396,18 @@
                         
                         if (!val || val < 0) val = 1;
                         
+                        const headers = {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        };
+                        const csrfToken = getCsrfToken();
+                        const csrfHeader = getCsrfHeader();
+                        if (csrfToken && csrfHeader) {
+                            headers[csrfHeader] = csrfToken;
+                        }
+                        
                         fetch('/cart/update', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: headers,
                             body: `productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
                         }).then(r => r.json()).then(d => {
                             if (!d.ok) {
@@ -411,9 +433,19 @@
                     a.addEventListener('click', (e) => {
                         e.preventDefault();
                         const pid = a.getAttribute('data-product-id');
+                        
+                        const headers = {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        };
+                        const csrfToken = getCsrfToken();
+                        const csrfHeader = getCsrfHeader();
+                        if (csrfToken && csrfHeader) {
+                            headers[csrfHeader] = csrfToken;
+                        }
+                        
                         fetch('/cart/remove', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: headers,
                             body: `productId=${encodeURIComponent(pid)}`
                         }).then(r => r.json()).then(() => {
                             a.closest('.cart-row')?.remove();
@@ -436,9 +468,20 @@
                     return;
                 }
                 
+                const headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                };
+                const meta = document.querySelector('meta[name="_csrf"]');
+                const metaHeader = document.querySelector('meta[name="_csrf_header"]');
+                const csrfToken = meta ? meta.content : '';
+                const csrfHeader = metaHeader ? metaHeader.content : 'X-CSRF-TOKEN';
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+                
                 fetch('/cart/apply-voucher', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: headers,
                     body: `productId=${encodeURIComponent(productId)}&code=${encodeURIComponent(code)}`
                 }).then(r => r.json()).then(d => {
                     if (d.ok) {
