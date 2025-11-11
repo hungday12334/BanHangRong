@@ -119,7 +119,7 @@ public class AdminUserManagement {
         //Blance default 0
         user.setBalance(BigDecimal.ZERO);
         user.setIsEmailVerified(false);
-        user.setIsActive(false); // ⚠️ Account inactive until email verification
+        user.setIsActive(true); // ⚠️ Account inactive until email verification
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         userService.save(user);
