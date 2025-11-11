@@ -185,44 +185,20 @@
 
         <div class="section-title">All Categories</div>
         <section class="categories-grid" id="categoriesGrid">
-            <a class="category-card" th:each="category : ${categories}"
-                th:href="@{'/category/' + ${category.categoryId}}">
-                <h3 th:text="${category.name}">Category Name</h3>
-                <p th:text="${category.description}">Category description goes here...</p>
-                <div class="category-stats">
-                    <span class="product-count" th:text="${productCountByCategory[category.categoryId]} + ' products'">0
-                        products</span>
+            <div th:if="${categories != null and !categories.empty}">
+                <div class="category-card" th:each="category : ${categories}">
+                    <a th:href="@{'/category/' + ${category.categoryId}}">
+                        <h3 th:text="${category.name}">Category Name</h3>
+                        <p th:text="${category.description}">Category description goes here...</p>
+                        <div class="category-stats">
+                <span class="product-count"
+                      th:text="${productCountByCategory[category.categoryId]} + ' products'">
+                    0 products
+                </span>
+                        </div>
+                    </a>
                 </div>
-            </a>
-
-            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
-                <h3>Software Licenses</h3>
-                <p>Microsoft Office, Adobe Creative Suite, and other professional software licenses</p>
-                <div class="category-stats">
-                    <span class="product-count">25 products</span>
-                </div>
-            </a>
-            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
-                <h3>Game Keys</h3>
-                <p>Steam keys, Origin keys, and other gaming platform activation codes</p>
-                <div class="category-stats">
-                    <span class="product-count">18 products</span>
-                </div>
-            </a>
-            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
-                <h3>Gaming Vouchers</h3>
-                <p>Gift cards and vouchers for popular gaming platforms and stores</p>
-                <div class="category-stats">
-                    <span class="product-count">12 products</span>
-                </div>
-            </a>
-            <a class="category-card" th:if="${categories == null or #lists.isEmpty(categories)}" href="#">
-                <h3>Security Software</h3>
-                <p>Antivirus, VPN, and other security-related software licenses</p>
-                <div class="category-stats">
-                    <span class="product-count">8 products</span>
-                </div>
-            </a>
+            </div>
         </section>
     </div>
 </body>
