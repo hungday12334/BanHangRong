@@ -232,7 +232,7 @@ public class ChatService {
             Conversation conversation = conversationRepository.findById(message.getConversationId())
                     .orElseGet(() -> {
                         System.err.println("❌ Conversation not found: " + message.getConversationId());
-                        // 🚨 TẠO CONVERSATION NẾU CHƯA CÓ
+                        // TẠO CONVERSATION NẾU CHƯA CÓ
                         return createConversationFromMessage(message);
                     });
 

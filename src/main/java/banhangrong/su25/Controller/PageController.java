@@ -150,7 +150,7 @@ public class PageController {
 
      @GetMapping("/verify-email-required")
      public String verifyEmailRequired(Model model) {
-         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Lấy thông tin người dùng đã đăng nhập
          if (auth != null && auth.isAuthenticated()) {
              Users user = usersRepository.findByUsername(auth.getName()).orElse(null);
              if (user != null) {

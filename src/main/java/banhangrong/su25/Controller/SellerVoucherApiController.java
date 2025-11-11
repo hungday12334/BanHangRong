@@ -352,7 +352,7 @@ public class SellerVoucherApiController {
 
             Vouchers saved = voucherService.createVoucher(voucher);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved); // Trả về đối tượng voucher đã lưu với mã trạng thái 201 Created.
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -710,11 +710,11 @@ public class SellerVoucherApiController {
                     map.put("quantity", p.getQuantity());
                     return map;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); // Thu thập các bản đồ sản phẩm đã lọc thành một danh sách.
 
             System.out.println("Returning " + result.size() + " products to frontend");
 
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(result); // Trả về danh sách sản phẩm đã lọc dưới dạng phản hồi HTTP.
 
         } catch (Exception e) {
             e.printStackTrace();
