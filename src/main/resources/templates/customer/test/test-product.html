@@ -13,7 +13,7 @@
     <div class="categories-grid">
         <!-- Thymeleaf loop qua danh sách categories, chỉ hiển thị category có sản phẩm public > 0 -->
         <div class="category-card" th:each="category : ${categories}" 
-             th:if="${numberProductInCate[category.name] != null and numberProductInCate[category.name] > 0}">
+             th:if="${numberProductInCate[category.name] != null and numberProductInCate[category.name] >= 0}">
             <a th:href="@{/category/{id}(id=${category.categoryId})}" 
                style="text-decoration: none; color: inherit; display: block;">
                 <div class="category-name" th:text="${category.name}">Graphics</div>
