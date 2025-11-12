@@ -164,10 +164,7 @@ public class AuthService {
 
         usersRepository.save(newUser);
 
-        // ✅ DO NOT send verification email automatically
-        // User will request the code manually on verification page
 
-        // ✅ Auto login user after registration to access verify page
         String jwtToken = jwtUtil.generateToken(newUser.getUsername());
 
         return new AuthResponse(

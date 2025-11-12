@@ -46,18 +46,36 @@ public class CartController {
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam("productId") Long productId,
                             @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity,
-                            @RequestHeader(value = "Referer", required = false) String referer) {
+                            @RequestHeader(value = "Referer", required = false) String referer,
+                            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         Users user = cartService.getCurrentUserOrNull();
         if (user == null) {
             return "redirect:/login?redirect=/product/" + productId;
         }
 
-        cartService.addToCart(productId, quantity);
-
-        // Nếu đến từ product detail page thì quay lại đó, không thì về cart
+        // Use addToCartWithResponse to get detailed result
+        Map<String, Object> result = cartService.addToCartWithResponse(productId, quantity);
+        
+        // Nếu đến từ product detail page thì quay lại đó với thông báo
         if (referer != null && referer.contains("/product/")) {
-            return "redirect:/product/" + productId + "?added=success";
+            if (Boolean.TRUE.equals(result.get("success"))) {
+                redirectAttributes.addFlashAttribute("cartSuccess", true);
+                redirectAttributes.addFlashAttribute("cartMessage", 
+                    "Add success " + result.get("productName") + " Quantity " + result.get("quantity") + " into cart");
+            } else {
+                redirectAttributes.addFlashAttribute("cartError", true);
+                if (result.get("error") != null && result.get("error").toString().contains("Max quantity")) {
+                    redirectAttributes.addFlashAttribute("cartMessage", 
+                        "Error max quantity is " + result.get("maxQuantity"));
+                } else {
+                    redirectAttributes.addFlashAttribute("cartMessage", 
+                        result.get("error") != null ? result.get("error").toString() : "Failed to add to cart");
+                }
+            }
+            return "redirect:/product/" + productId;
         }
+        
+        // Nếu không phải từ product detail, về cart
         return "redirect:/cart";
     }
 

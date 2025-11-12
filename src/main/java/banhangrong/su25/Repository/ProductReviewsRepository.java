@@ -97,4 +97,10 @@ public interface ProductReviewsRepository extends JpaRepository<ProductReviews, 
     // FIX SEC-03: Check if review belongs to this seller
     @Query("SELECT CASE WHEN COUNT(pr) > 0 THEN true ELSE false END FROM ProductReviews pr JOIN Products p ON pr.productId = p.productId WHERE pr.reviewId = :reviewId AND p.sellerId = :sellerId")
     boolean existsByReviewIdAndSellerId(@Param("reviewId") Long reviewId, @Param("sellerId") Long sellerId);
+
+    ProductReviews findAllByProductId(Long productId);
+
+    int countByProductId(Long productId);
+    @Query("SELECT pr.rating FROM ProductReviews pr WHERE pr.productId = :productId")
+    List<Integer> findAllRatingByProductId(Long productId);
 }

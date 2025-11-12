@@ -1,23 +1,4 @@
-/**
- * Frontend Validation for Voucher Form
- * Provides instant feedback before submitting to backend
- *
- * Usage:
- * const errors = validateVoucherForm(formData);
- * if (Object.keys(errors).length === 0) {
- *     // Submit form
- * } else {
- *     // Display errors
- * }
- */
-
-/**
- * Main validation function
- * @param {Object} formData - Form data to validate
- * @param {BigDecimal} productPrice - Product price for validation
- * @returns {Object} errors - Object containing field errors
- */
-function validateVoucherForm(formData, productPrice) {
+function validateVoucherForm(formData, productPrice, productSalePrice) {
     const errors = {};
 
     // ============================================================
@@ -77,34 +58,52 @@ function validateVoucherForm(formData, productPrice) {
     }
 
     // Validate discount value
-    if (formData.discountValue === null || formData.discountValue === undefined || formData.discountValue === '') {
+    // B.3: discountValue is REQUIRED and must be numeric
+    const discountValueInput = document.getElementById('discountValue');
+    const discountValueRaw = discountValueInput?.value || '';
+    const discountUserTyped = discountValueInput?.getAttribute('data-user-typed') === 'true';
+
+    // Check if user typed but field is empty (browser rejected text)
+    if (discountUserTyped && (!discountValueRaw || discountValueRaw.trim() === '')) {
+        errors.discountValue = "Giá trị giảm giá chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+    } else if (!discountValueRaw || discountValueRaw.trim() === '') {
         errors.discountValue = "Giá trị giảm giá không được để trống";
     } else {
-        const discountValue = parseFloat(formData.discountValue);
+        // Check if contains non-numeric characters (except dot for decimal)
+        if (/[^0-9.]/.test(discountValueRaw) || (discountValueRaw.match(/\./g) || []).length > 1) {
+            errors.discountValue = "Giá trị giảm giá chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+        } else {
+            const discountValue = parseFloat(discountValueRaw);
 
-        if (discountValue <= 0) {
-            errors.discountValue = "Giá trị giảm giá phải lớn hơn 0";
-        }
+            if (isNaN(discountValue) || discountValue <= 0) {
+                errors.discountValue = "Giá trị giảm giá phải lớn hơn 0";
+            } else {
 
-        // B.4: If PERCENT, must be <= 100
-        if (formData.discountType === 'PERCENT') {
-            if (discountValue > 100) {
-                errors.discountValue = "Giá trị giảm giá % phải từ 0.01 đến 100";
-            }
-        }
+                // B.4: If PERCENT, must be <= 100
+                if (formData.discountType === 'PERCENT') {
+                    if (discountValue > 99) {
+                        errors.discountValue = "Giá trị giảm giá % phải từ 0.01 đến 99";
+                    }
+                }
 
-        // B.5: If AMOUNT, must be <= product price
-        if (formData.discountType === 'AMOUNT' && productPrice) {
-            if (discountValue > productPrice) {
-                errors.discountValue = `Giá trị giảm giá không được vượt quá giá sản phẩm (${formatCurrency(productPrice)})`;
-            }
-        }
+                // B.5: If AMOUNT, must be <= product price (use sale price if available)
+                if (formData.discountType === 'AMOUNT') {
+                    // Use sale price if available, otherwise use regular price
+                    const effectivePrice = productSalePrice && productSalePrice > 0 ? productSalePrice : productPrice;
 
-        // B.6: Discount should not exceed minOrder
-        if (formData.minOrder !== null && formData.minOrder !== undefined && formData.minOrder !== '') {
-            const minOrder = parseFloat(formData.minOrder);
-            if (discountValue > minOrder) {
-                errors.discountValue = "Giá trị giảm giá không được vượt quá giá trị đơn hàng tối thiểu";
+                    if (effectivePrice && discountValue > effectivePrice) {
+                        const priceType = productSalePrice && productSalePrice > 0 ? 'giá sale' : 'giá sản phẩm';
+                        errors.discountValue = `Giá trị giảm giá không được vượt quá ${priceType} (${formatCurrency(effectivePrice)})`;
+                    }
+                }
+
+                // B.6: Discount should not exceed minOrder
+                if (formData.minOrder !== null && formData.minOrder !== undefined && formData.minOrder !== '') {
+                    const minOrder = parseFloat(formData.minOrder);
+                    if (discountValue > minOrder) {
+                        errors.discountValue = "Giá trị giảm giá không được vượt quá giá trị đơn hàng tối thiểu";
+                    }
+                }
             }
         }
     }
@@ -113,24 +112,45 @@ function validateVoucherForm(formData, productPrice) {
     // C. MINIMUM ORDER VALUE
     // ============================================================
 
-    if (formData.minOrder !== null && formData.minOrder !== undefined && formData.minOrder !== '') {
-        const minOrder = parseFloat(formData.minOrder);
+    // C.7-9: minOrder validation with non-numeric check
+    const minOrderInput = document.getElementById('minOrder');
+    const minOrderRaw = minOrderInput?.value || '';
+    const userTyped = minOrderInput?.getAttribute('data-user-typed') === 'true';
+    const hasInvalidInput = minOrderInput?.validity?.badInput === true;
 
-        // C.7: MinOrder >= 0
-        if (minOrder < 0) {
-            errors.minOrder = "Giá trị đơn hàng tối thiểu phải >= 0";
-        }
+    // Check if user typed something (even if browser rejected it)
+    if (userTyped && (!minOrderRaw || minOrderRaw.trim() === '' || hasInvalidInput)) {
+        // User typed but field is empty/invalid = browser rejected text input
+        errors.minOrder = "Giá trị đơn hàng tối thiểu chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+    } else if (minOrderRaw && minOrderRaw.trim() !== '') {
+        // Has value - validate it
+        // Check if contains non-numeric characters (except dot for decimal)
+        if (/[^0-9.]/.test(minOrderRaw) || (minOrderRaw.match(/\./g) || []).length > 1) {
+            errors.minOrder = "Giá trị đơn hàng tối thiểu chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+        } else {
+            const minOrder = parseFloat(minOrderRaw);
 
-        // C.8: MinOrder <= 10,000,000
-        if (minOrder > 10000000) {
-            errors.minOrder = "Giá trị đơn hàng tối thiểu không được vượt quá 10,000,000 VNĐ";
-        }
+            if (isNaN(minOrder)) {
+                errors.minOrder = "Giá trị đơn hàng tối thiểu phải là số hợp lệ";
+            } else {
+                // C.7: MinOrder >= 0
+                if (minOrder < 0) {
+                    errors.minOrder = "Giá trị đơn hàng tối thiểu phải >= 0";
+                }
 
-        // C.9: For AMOUNT type, minOrder must be >= discountValue
-        if (formData.discountType === 'AMOUNT' && formData.discountValue) {
-            const discountValue = parseFloat(formData.discountValue);
-            if (minOrder < discountValue) {
-                errors.minOrder = "Giá trị đơn hàng tối thiểu phải >= giá trị giảm giá (với loại AMOUNT)";
+
+                // C.8: MinOrder <= 1,000,000
+                if (minOrder > 1000000) {
+                    errors.minOrder = "Giá trị đơn hàng tối thiểu không được vượt quá 1,000,000 VNĐ";
+                }
+
+                // C.9: For AMOUNT type, minOrder must be >= discountValue
+                if (formData.discountType === 'AMOUNT' && formData.discountValue) {
+                    const discountValue = parseFloat(formData.discountValue);
+                    if (!isNaN(discountValue) && minOrder < discountValue) {
+                        errors.minOrder = "Giá trị đơn hàng tối thiểu phải >= giá trị giảm giá (với loại AMOUNT)";
+                    }
+                }
             }
         }
     }
@@ -139,26 +159,61 @@ function validateVoucherForm(formData, productPrice) {
     // D. USAGE LIMITS
     // ============================================================
 
-    // D.10: maxUses >= 0
-    if (formData.maxUses !== null && formData.maxUses !== undefined && formData.maxUses !== '') {
-        const maxUses = parseInt(formData.maxUses);
-        if (maxUses <= 0) {
-            errors.maxUses = "Số lần sử dụng tối đa phải > 0";
+    // D.10: maxUses is REQUIRED, must be integer from 1 to 1000
+    const maxUsesInput = document.getElementById('maxUses');
+    const maxUsesRawValue = maxUsesInput?.value || '';
+    const maxUsesUserTyped = maxUsesInput?.getAttribute('data-user-typed') === 'true';
+
+    // Check if user typed but field is empty (browser rejected text)
+    if (maxUsesUserTyped && (!maxUsesRawValue || maxUsesRawValue.trim() === '')) {
+        errors.maxUses = "Số lần sử dụng tối đa chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+    } else if (!maxUsesRawValue || maxUsesRawValue.trim() === '') {
+        errors.maxUses = "Số lần sử dụng tối đa không được để trống";
+    } else {
+        // Check if it contains non-numeric characters
+        if (/[^0-9]/.test(maxUsesRawValue)) {
+            errors.maxUses = "Số lần sử dụng tối đa chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+        } else {
+            const maxUses = parseInt(maxUsesRawValue, 10);
+
+            if (isNaN(maxUses)) {
+                errors.maxUses = "Số lần sử dụng tối đa phải là số nguyên hợp lệ";
+            } else if (!Number.isInteger(parseFloat(maxUsesRawValue))) {
+                errors.maxUses = "Số lần sử dụng tối đa phải là số nguyên, không được nhập số thập phân";
+            } else if (maxUses < 1 || maxUses > 1000) {
+                errors.maxUses = "Số lần sử dụng tối đa phải từ 1 đến 1000";
+            }
         }
     }
 
-    // D.10: limitPerUser >= 0
-    if (formData.maxUsesPerUser !== null && formData.maxUsesPerUser !== undefined && formData.maxUsesPerUser !== '') {
-        const limitPerUser = parseInt(formData.maxUsesPerUser);
-        if (limitPerUser <= 0) {
-            errors.maxUsesPerUser = "Số lần sử dụng tối đa/người phải >0";
-        }
+    // D.11: maxUsesPerUser is REQUIRED, must be integer from 1 to 1000
+    const maxUsesPerUserInput = document.getElementById('maxUsesPerUser');
+    const maxUsesPerUserRawValue = maxUsesPerUserInput?.value || '';
+    const maxUsesPerUserTyped = maxUsesPerUserInput?.getAttribute('data-user-typed') === 'true';
 
-        // D.11: limitPerUser <= maxUses (if maxUses > 0)
-        if (formData.maxUses && formData.maxUses > 0) {
-            const maxUses = parseInt(formData.maxUses);
-            if (limitPerUser > maxUses) {
-                errors.maxUsesPerUser = "Số lần sử dụng/người không được vượt quá tổng số lần sử dụng";
+    // Check if user typed but field is empty (browser rejected text)
+    if (maxUsesPerUserTyped && (!maxUsesPerUserRawValue || maxUsesPerUserRawValue.trim() === '')) {
+        errors.maxUsesPerUser = "Số lần sử dụng tối đa/người chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+    } else if (!maxUsesPerUserRawValue || maxUsesPerUserRawValue.trim() === '') {
+        errors.maxUsesPerUser = "Số lần sử dụng tối đa/người không được để trống";
+    } else {
+        // Check if it contains non-numeric characters
+        if (/[^0-9]/.test(maxUsesPerUserRawValue)) {
+            errors.maxUsesPerUser = "Số lần sử dụng tối đa/người chỉ được nhập số, không được nhập chữ hoặc ký tự đặc biệt";
+        } else {
+            const limitPerUser = parseInt(maxUsesPerUserRawValue, 10);
+
+            if (isNaN(limitPerUser)) {
+                errors.maxUsesPerUser = "Số lần sử dụng tối đa/người phải là số nguyên hợp lệ";
+            } else if (!Number.isInteger(parseFloat(maxUsesPerUserRawValue))) {
+                errors.maxUsesPerUser = "Số lần sử dụng tối đa/người phải là số nguyên, không được nhập số thập phân";
+            } else if (limitPerUser < 1 || limitPerUser > 1000) {
+                errors.maxUsesPerUser = "Số lần sử dụng tối đa/người phải từ 1 đến 1000";
+            } else if (formData.maxUses && !isNaN(parseInt(formData.maxUses, 10))) {
+                const maxUses = parseInt(formData.maxUses, 10);
+                if (maxUses > 0 && limitPerUser > maxUses) {
+                    errors.maxUsesPerUser = "Số lần sử dụng/người không được vượt quá tổng số lần sử dụng";
+                }
             }
         }
     }
@@ -232,9 +287,10 @@ function displayValidationErrors(errors) {
  * @param {string} fieldName - Field name to validate
  * @param {Object} formData - Current form data
  * @param {BigDecimal} productPrice - Product price
+ * @param {BigDecimal} productSalePrice - Product sale price (optional)
  */
-function validateField(fieldName, formData, productPrice) {
-    const errors = validateVoucherForm(formData, productPrice);
+function validateField(fieldName, formData, productPrice, productSalePrice) {
+    const errors = validateVoucherForm(formData, productPrice, productSalePrice);
 
     // Clear error for this field
     const input = document.getElementById(fieldName);
@@ -276,7 +332,7 @@ function handleVoucherFormSubmit(event) {
 
     // Get form data
     const formData = {
-        code: document.getElementById('voucherCode').value,
+        code: document.getElementById('code').value,
         discountType: document.getElementById('discountType').value,
         discountValue: document.getElementById('discountValue').value,
         minOrder: document.getElementById('minOrder').value,
@@ -287,11 +343,11 @@ function handleVoucherFormSubmit(event) {
         status: document.getElementById('status').value
     };
 
-    // Get product price (from hidden field or data attribute)
-    const productPrice = parseFloat(document.getElementById('selectedProductPrice').textContent.replace(/[^0-9]/g, ''));
+    // Get product prices (both regular and sale price)
+    const { price, salePrice } = getProductPrices();
 
     // Validate
-    const errors = validateVoucherForm(formData, productPrice);
+    const errors = validateVoucherForm(formData, price, salePrice);
 
     if (Object.keys(errors).length === 0) {
         // No errors - submit form
@@ -312,7 +368,7 @@ function handleVoucherFormSubmit(event) {
  */
 function setupRealtimeValidation() {
     const fields = [
-        'voucherCode', 'discountType', 'discountValue', 'minOrder',
+        'code', 'discountType', 'discountValue', 'minOrder',
         'startAt', 'endAt', 'maxUses', 'maxUsesPerUser', 'status'
     ];
 
@@ -324,17 +380,42 @@ function setupRealtimeValidation() {
                 validateSingleField(fieldName);
             });
 
-            // Also validate on input for immediate feedback
+            // Validate on input for immediate feedback
             input.addEventListener('input', function() {
-                // Clear error while typing
-                clearFieldError(fieldName);
+                // Mark that user has typed something (even if browser rejects it)
+                this.setAttribute('data-user-typed', 'true');
 
-                // Debounce validation
-                clearTimeout(input.validationTimeout);
-                input.validationTimeout = setTimeout(() => {
-                    validateSingleField(fieldName);
-                }, 500); // Wait 500ms after user stops typing
+                // Validate immediately for number inputs to catch invalid text
+                validateSingleField(fieldName);
             });
+
+            // Special event for number inputs to catch invalid input
+            if (input.type === 'number') {
+                // Catch keydown BEFORE browser rejects the input
+                input.addEventListener('keydown', function(e) {
+                    // Mark as typed when user presses any key (except Tab, Shift, Ctrl, etc.)
+                    if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
+                        this.setAttribute('data-user-typed', 'true');
+                    }
+                });
+
+                input.addEventListener('keyup', function(e) {
+                    // Mark as typed when user presses any key
+                    this.setAttribute('data-user-typed', 'true');
+
+                    // Check if browser rejected input (badInput)
+                    if (this.validity.badInput) {
+                        validateSingleField(fieldName);
+                    }
+                });
+
+                // Also check on change event
+                input.addEventListener('change', function() {
+                    if (this.validity.badInput || this.getAttribute('data-user-typed') === 'true') {
+                        validateSingleField(fieldName);
+                    }
+                });
+            }
 
             // Special handling for discountType change
             if (fieldName === 'discountType') {
@@ -355,8 +436,8 @@ function setupRealtimeValidation() {
  */
 function validateSingleField(fieldName) {
     const formData = getFormData();
-    const productPrice = getProductPrice();
-    const errors = validateVoucherForm(formData, productPrice);
+    const { price, salePrice } = getProductPrices();
+    const errors = validateVoucherForm(formData, price, salePrice);
 
     const input = document.getElementById(fieldName);
     if (!input) return;
@@ -408,7 +489,7 @@ function clearFieldError(fieldName) {
  */
 function clearAllValidation() {
     const fields = [
-        'voucherCode', 'discountType', 'discountValue', 'minOrder',
+        'code', 'discountType', 'discountValue', 'minOrder',
         'startAt', 'endAt', 'maxUses', 'maxUsesPerUser', 'status'
     ];
 
@@ -427,7 +508,7 @@ function clearAllValidation() {
  */
 function getFormData() {
     return {
-        code: document.getElementById('voucherCode')?.value || '',
+        code: document.getElementById('code')?.value || '',
         discountType: document.getElementById('discountType')?.value || '',
         discountValue: document.getElementById('discountValue')?.value || '',
         minOrder: document.getElementById('minOrder')?.value || '',
@@ -440,11 +521,29 @@ function getFormData() {
 }
 
 /**
- * Helper to get product price
+ * Helper to get product price and sale price
+ * @returns {Object} Object with price and salePrice properties
  */
-function getProductPrice() {
-    const priceText = document.getElementById('selectedProductPrice')?.textContent || '0';
-    return parseFloat(priceText.replace(/[^0-9]/g, ''));
+function getProductPrices() {
+    const priceElement = document.getElementById('selectedProductPrice');
+    if (!priceElement) {
+        return { price: 0, salePrice: 0 };
+    }
+
+    // Check if the element contains both sale price and original price
+    const salePriceElement = priceElement.querySelector('span[style*="color: #ef4444"]');
+    const originalPriceElement = priceElement.querySelector('span[style*="text-decoration: line-through"]');
+
+    if (salePriceElement && originalPriceElement) {
+        // Has both sale price and original price
+        const salePrice = parseFloat(salePriceElement.textContent.replace(/[^0-9]/g, ''));
+        const price = parseFloat(originalPriceElement.textContent.replace(/[^0-9]/g, ''));
+        return { price, salePrice };
+    } else {
+        // Only has regular price
+        const price = parseFloat(priceElement.textContent.replace(/[^0-9]/g, ''));
+        return { price, salePrice: 0 };
+    }
 }
 
 // Initialize on page load

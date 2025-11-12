@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${category.name} + ' - BanHangRong'">Category - BanHangRong</title>
-    <link rel="stylesheet" th:href="@{/css/custonmer/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/customer/dashboard.css}">
     <link rel="stylesheet" th:href="@{/css/customer/category-filter.css}">
 </head>
 <body>
@@ -53,7 +53,7 @@
                 <!-- Tìm và hiển thị ảnh của product này -->
                 <img th:each="img : ${productImages}"
                      th:if="${img.productId == p.productId}"
-                     th:src="${img.imageUrl}"
+                     th:src="${img.imageUrl != null ? img.imageUrl : '/img/avatar_default.jpg'}"
                      th:alt="${p.name}"
                      onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
                      loading="lazy">

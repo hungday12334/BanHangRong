@@ -2,7 +2,7 @@ package banhangrong.su25.DTO;
 
 public class AuthResponse {
     private String token;
-    private String type = "Bearer";
+    private String type = "Bearer"; // là một loại token xác thực được sử dụng trong các hệ thống xác thực dựa trên token, đặc biệt là trong giao thức OAuth 2.0.
     private Long userId;
     private String username;
     private String email;

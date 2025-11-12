@@ -81,31 +81,6 @@
                     </div>
                 </div>
 
-                <!-- Add category form -->
-                <div class="category-form-section">
-                    <h3>Add New Category</h3>
-                    <form th:action="@{/seller/categories}" th:object="${newCategory}" method="post" class="profile-form" id="addCategoryForm" onsubmit="return validateCategoryForm(this)">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <div class="form-group">
-                            <label for="newCategoryName">Category Name *</label>
-                            <input id="newCategoryName" type="text" th:field="*{name}" placeholder="e.g: Graphics - Design"
-                                   required minlength="2" maxlength="100"
-                                   pattern=".*\S+.*"
-                                   title="Category name must be 2-100 characters and cannot be only whitespace" />
-                            <div class="form-text">Category name must be 2-100 characters (not only whitespace)</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="newCategoryDescription">Description</label>
-                            <textarea id="newCategoryDescription" th:field="*{description}" placeholder="Short description about the category" maxlength="255" rows="3"></textarea>
-                            <div class="form-text"><span id="descCharCount">0</span>/255 characters</div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="ti ti-plus"></i> Add Category
-                            </button>
-                        </div>
-                    </form>
-                </div>
 
                 <!-- Categories list -->
                 <div class="category-list-section">
@@ -415,12 +390,12 @@
                                         <!-- Dropdown Menu -->
                                         <div class="dropdown-menu-icons">
                                             <!-- Duplicate -->
-                                            <button type="button"
-                                                    class="icon-item"
-                                                    onclick="duplicateCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
-                                                    title="Duplicate">
-                                                <i class="ti ti-copy"></i>
-                                            </button>
+<!--                                            <button type="button"-->
+<!--                                                    class="icon-item"-->
+<!--                                                    onclick="duplicateCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"-->
+<!--                                                    title="Duplicate">-->
+<!--                                                <i class="ti ti-copy"></i>-->
+<!--                                            </button>-->
 
                                             <!-- Export Products -->
                                             <button type="button"
@@ -431,12 +406,12 @@
                                             </button>
 
                                             <!-- Delete -->
-                                            <button type="button"
-                                                    class="icon-item text-danger"
-                                                    onclick="deleteCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"
-                                                    title="Delete">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
+<!--                                            <button type="button"-->
+<!--                                                    class="icon-item text-danger"-->
+<!--                                                    onclick="deleteCategory(this.closest('.action-buttons-wrapper')); event.stopPropagation();"-->
+<!--                                                    title="Delete">-->
+<!--                                                <i class="ti ti-trash"></i>-->
+<!--                                            </button>-->
                                         </div>
                                     </div>
                                 </td>

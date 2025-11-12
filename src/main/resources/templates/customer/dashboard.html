@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" th:href="@{/css/custonmer/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/customer/dashboard.css}">
 </head>
 <body>
 <div class="wrapper">
@@ -30,10 +30,11 @@
                 <!-- Tìm và hiển thị ảnh của product này -->
                 <img th:each="img : ${productImages}"
                      th:if="${img.productId == p.productId}"
-                     th:src="${img.imageUrl}"
+                     th:src="${img.imageUrl != null && !img.imageUrl.isEmpty() ? img.imageUrl : '/img/avatar_default.jpg'}"
                      th:alt="${p.name}"
                      onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
                      loading="lazy">
+
             </div>
 
             <div class="body">

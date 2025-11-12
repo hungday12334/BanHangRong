@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="refactor(chat): streamline message handling and improve logging in chat functionality">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomertProductDetailController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/PageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/ProductDetailController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/AuthResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/AuthResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/VoucherDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/VoucherDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/ProductReviewsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/Validation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Util/Validation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/WebSocket/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ChatService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductImageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductImageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/ProductReviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/custonmer/categories.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/customer/categories.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/custonmer/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/customer/dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/categories.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/category-products.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/product_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/homepage.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/homepage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="HTML File" />
+        <option value="CSS File" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;hungday12334&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
+    &quot;accountId&quot;: &quot;efd5b86f-5509-426a-a183-1d6d3c55d639&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="33VwQF5xNjK8G25Up2AO92hyo8L" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "Spring Boot.Su25Application.executor": "Run",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "Merging datdt__final",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/tpc/Desktop/BanHangRong2/su25/src/main/resources/static/img",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\tpc\Desktop\BanHangRong2\su25\src\main\resources\static\img" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\BanHangRong_12-11\src\main\resources\static\css\customer" />
+      <recent name="D:\BanHangRong_new_clone_seller\src\main\resources\static\css\custonmer" />
+      <recent name="D:\BanHangRong_new_clone_seller\src\main\resources\static\css" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.Su25Application">
+    <configuration name="data_v2.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/data_v2.sql" />
+      <script-mode>FILE</script-mode>
+      <method v="2" />
+    </configuration>
+    <configuration name="fix_old_constraint.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/fix_old_constraint.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fix_review_constraint.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/fix_review_constraint.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="quick_create_seller_test.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/quick_create_seller_test.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="review_system_complete.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/sql/review_system_complete.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="53b38385-a361-4b09-b3fc-e28dbd7b3e5c" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Su25Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="simple" />
+      <module name="su25" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="banhangrong.su25.Su25Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Database Script.data_v2.sql" />
+      <item itemvalue="Database Script.fix_old_constraint.sql" />
+      <item itemvalue="Database Script.fix_review_constraint.sql" />
+      <item itemvalue="Database Script.quick_create_seller_test.sql" />
+      <item itemvalue="Database Script.review_system_complete.sql" />
+      <item itemvalue="Spring Boot.Su25Application" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Database Script.review_system_complete.sql" />
+        <item itemvalue="Database Script.quick_create_seller_test.sql" />
+        <item itemvalue="Database Script.fix_review_constraint.sql" />
+        <item itemvalue="Database Script.fix_old_constraint.sql" />
+        <item itemvalue="Database Script.data_v2.sql" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="" />
+      <created>1759415528443</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759415528443</updated>
+      <workItem from="1759415529847" duration="973000" />
+      <workItem from="1759854439361" duration="7629000" />
+      <workItem from="1759887937257" duration="14526000" />
+      <workItem from="1759915487604" duration="32000" />
+      <workItem from="1759915643459" duration="4057000" />
+      <workItem from="1762361410330" duration="662000" />
+      <workItem from="1762374651312" duration="871000" />
+      <workItem from="1762412057838" duration="6060000" />
+      <workItem from="1762418586658" duration="21000" />
+      <workItem from="1762442234715" duration="4563000" />
+      <workItem from="1762488348451" duration="3772000" />
+      <workItem from="1762496710501" duration="5000" />
+      <workItem from="1762502308301" duration="628000" />
+      <workItem from="1762703072720" duration="25894000" />
+    </task>
+    <task id="LOCAL-00001" summary="AdminIndex_Final1">
+      <option name="closed" value="true" />
+      <created>1759416475096</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1759416475096</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Admin UserManagement Create">
+      <option name="closed" value="true" />
+      <created>1759892863475</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1759892863475</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Admin User Update&amp;Delete">
+      <option name="closed" value="true" />
+      <created>1759911171115</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1759911171115</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Admin Product Approve||Cancel">
+      <option name="closed" value="true" />
+      <created>1760004702614</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1760004702615</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix: fix error approve Products.">
+      <option name="closed" value="true" />
+      <created>1760059391483</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1760059391483</updated>
+    </task>
+    <task id="LOCAL-00006" summary="update theme,logic in customer screen">
+      <option name="closed" value="true" />
+      <created>1762491474973</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1762491474973</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat(chat): update message bubble styling and add last message time to conversation">
+      <option name="closed" value="true" />
+      <created>1762707316822</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1762707316822</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat(chat): improve unread message handling and conversation sorting">
+      <option name="closed" value="true" />
+      <created>1762711398087</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1762711398087</updated>
+    </task>
+    <task id="LOCAL-00009" summary="refactor(chat): clean up comments and improve readability in ChatController, ChatMessageDTO, ChatService, and MessageRepository">
+      <option name="closed" value="true" />
+      <created>1762711778572</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1762711778572</updated>
+    </task>
+    <task id="LOCAL-00010" summary="refactor(profile): improve code readability and update comments in SellerProfileController">
+      <option name="closed" value="true" />
+      <created>1762711975923</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1762711975924</updated>
+    </task>
+    <task id="LOCAL-00011" summary="refactor(chat): streamline message handling and improve logging in chat functionality">
+      <option name="closed" value="true" />
+      <created>1762743634766</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1762743634766</updated>
+    </task>
+    <task id="LOCAL-00012" summary="refactor(chat): streamline message handling and improve logging in chat functionality">
+      <option name="closed" value="true" />
+      <created>1762753068890</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1762753068890</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="63ffc40e-db80-490a-abac-868a868bfa4b" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="63ffc40e-db80-490a-abac-868a868bfa4b">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/hungnt" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="AdminIndex_Final1" />
+    <MESSAGE value="Admin UserManagement Create" />
+    <MESSAGE value="Admin User Update&amp;Delete" />
+    <MESSAGE value="Admin Product Approve||Cancel" />
+    <MESSAGE value="fix: fix error approve Products." />
+    <MESSAGE value="update theme,logic in customer screen" />
+    <MESSAGE value="feat(chat): update message bubble styling and add last message time to conversation" />
+    <MESSAGE value="feat(chat): improve unread message handling and conversation sorting" />
+    <MESSAGE value="refactor(chat): clean up comments and improve readability in ChatController, ChatMessageDTO, ChatService, and MessageRepository" />
+    <MESSAGE value="refactor(profile): improve code readability and update comments in SellerProfileController" />
+    <MESSAGE value="refactor(chat): streamline message handling and improve logging in chat functionality" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(chat): streamline message handling and improve logging in chat functionality" />
+  </component>
+</project>

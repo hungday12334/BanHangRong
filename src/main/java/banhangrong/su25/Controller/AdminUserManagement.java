@@ -59,7 +59,19 @@ public class AdminUserManagement {
         user.setUsername(request.getParameter("username"));
         user.setEmail(request.getParameter("email"));
         user.setPassword(request.getParameter("password"));
-        user.setFullName(request.getParameter("fullName"));
+        String fullName = request.getParameter("fullName");
+        if(fullName!=null && !fullName.isEmpty()){
+            if(fullName.trim().length()==0){
+                model.addAttribute("error", "Full name can not be empty");
+                return "admin/user-creation";
+            }
+            if(valid.isValidFullName(fullName.trim())){
+                user.setFullName(fullName.trim());
+            }else{
+                model.addAttribute("error", "Invalid full name");
+                return "admin/user-creation";
+            }
+        }
         user.setUserType(request.getParameter("userType"));
         user.setPhoneNumber(request.getParameter("phoneNumber"));
         user.setAvatarUrl("");//Default null, if having image --> solving below

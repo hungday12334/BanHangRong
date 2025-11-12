@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,332 +7,165 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/styles.min.css">
+	<link rel="stylesheet" th:href="@{/css/customer/product-detail.css}">
 	<title th:text="${product != null ? product.name : 'Product'}">Product</title>
-	<style>
-		:root {
-			--bg: #f5f7fb;
-			--card: #ffffff;
-			--ink: #0f172a;
-			--muted: #6b7280;
-			--brand: #0ea5e9;
-			--chip: #e5e7eb;
-			--line: #eaeef4;
-		}
-
-		* {
-			box-sizing: border-box;
-		}
-
-		html,
-		body {
-			height: 100%;
-		}
-
-		body {
-			margin: 0;
-			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-			color: var(--ink);
-			background: var(--bg);
-		}
-
-		.wrapper {
-			min-height: 100%;
-			display: flex;
-			flex-direction: column;
-		}
-
-	</style>
-	<style>
-		.container {
-			max-width: 1100px;
-			margin: 20px auto;
-			padding: 0 10px
-		}
-
-		.breadcrumb {
-			font-size: 14px;
-			color: #6b7280;
-			margin-bottom: 10px
-		}
-
-		.detail {
-			display: grid;
-			grid-template-columns: 1.2fr 1.8fr;
-			gap: 20px
-		}
-
-		.gallery {
-			background: #fff;
-			border: 1px solid #eaeef4;
-			border-radius: 12px;
-			display: grid;
-			place-items: center;
-			min-height: 360px
-		}
-
-		.gallery img {
-			max-width: 100%;
-			max-height: 100%;
-			object-fit: cover;
-			border-radius: 10px
-		}
-
-		.info {
-			background: #fff;
-			border: 1px solid #eaeef4;
-			border-radius: 12px;
-			padding: 16px
-		}
-
-		.title {
-			font-size: 22px;
-			font-weight: 700;
-			margin: 0 0 6px
-		}
-
-		.price {
-			font-size: 24px;
-			color: #0ea5e9;
-			font-weight: 800
-		}
-
-		.price-old {
-			margin-left: 8px;
-			color: #9ca3af;
-			text-decoration: line-through
-		}
-
-		.btn {
-			display: inline-block;
-			padding: 10px 14px;
-			border-radius: 10px;
-			text-decoration: none
-		}
-
-		.btn.primary {
-			background: #0ea5e9;
-			color: #fff
-		}
-
-		.section {
-			margin-top: 18px
-		}
-
-		.review {
-			border-top: 1px solid #eaeef4;
-			padding: 12px 0
-		}
-	</style>
 </head>
 
 <body>
 	<div class="wrapper">
+		<!-- Header -->
 		<div th:replace="~{customer/fragments/header :: header}"></div>
 		
 		<div class="container">
-		<div class="breadcrumb"><a href="/customer/dashboard">← Back to List</a></div>
-		<div class="detail">
-			<div class="gallery">
-				<img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images.get(0).imageUrl}"
-					alt="Image" onerror="this.onerror=null;this.src='/img/avatar_default.jpg'">
-				<img th:unless="${images != null and !#lists.isEmpty(images)}" src="/img/avatar_default.jpg"
-					alt="Image">
+			<!-- Breadcrumb Navigation -->
+			<div class="breadcrumb">
+				<a href="/customer/dashboard" style="color: #00a8ff">← Back to List</a>
 			</div>
-			<div class="info">
-				<div class="title" th:text="${product.name}">Tên sản phẩm</div>
-				<div style="color:#6b7280">Sold: <b th:text="${product.totalSales}">0</b> • ⭐ <b
-					th:text="${#numbers.formatDecimal(product.averageRating,1,'COMMA',1,'POINT')}">0</b></div>
-				<div style="color:#374151;margin-top:4px">
-					Stock: <b th:text="${product.quantity}">0</b>
-					<span th:if="${product.quantity != null and product.quantity <= 0}"
-						style="background:#6b7280;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px;font-size:12px;">Out of
-						Stock</span>
-				</div>
-				<div class="section">
-					<span class="price" th:if="${product.salePrice != null}"
-						th:text="${#numbers.formatDecimal(product.salePrice,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
-					<span class="price-old" th:if="${product.salePrice != null}"
-						th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
-					<span class="price" th:if="${product.salePrice == null}"
-						th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
-				</div>
-                <div style="color: red">Each product is only valid for 30 days</div>
-                <br>
-                <br>
-                <br>
-                <h3>Product description</h3>
-				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Product
-					description...</div>
-				<div class="section">
-					<form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-						<input type="hidden" name="productId" th:value="${product.productId}" />
-						<input type="number" name="quantity" min="1" value="1" th:attr="max=${product.quantity}"
-							style="width:80px;padding:8px;border:1px solid #eaeef4;border-radius:8px">
-					<button class="btn primary" type="submit"
-						th:disabled="${product.quantity == null or product.quantity <= 0 or product.status == null or (!#strings.equalsIgnoreCase(product.status, 'Public'))}">Add to Cart</button>
-					<a th:if="${product.sellerId != null}"
-					   th:href="@{/customer/chat(sellerId=${product.sellerId},productId=${product.productId},productName=${product.name},productPrice=${product.salePrice != null ? product.salePrice : product.price})}"
-					   class="btn"
-					   style="background:#10b981;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px"
-					   title="Chat with seller">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-						</svg>
-						💬 Chat với Shop
-					</a>
-					<span th:if="${product.sellerId == null}"
-					      style="padding:10px 14px;background:#f3f4f6;color:#6b7280;border-radius:10px;font-size:14px;">
-						⚠️ Seller not available
-					</span>
-					</form>
-				</div>
-			</div>
-		</div>
 
-		<div class="section" style="margin-top:24px">
-		<h3 style="margin:0 0 8px">Customer Reviews</h3>
-		
-		<div id="ratingStats" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-bottom:16px;">
-			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-				<div>
-					<span style="font-size:24px;font-weight:700;color:#111827" id="averageRatingDisplay">0.0</span>
-					<span style="color:#6b7280;margin-left:8px">out of 5</span>
-				</div>
-				<div style="text-align:right;">
-					<div style="font-size:14px;color:#6b7280">Based on</div>
-					<div style="font-size:18px;font-weight:600;color:#111827" id="totalReviewsDisplay">0</div>
-					<div style="font-size:14px;color:#6b7280">reviews</div>
-				</div>
+			<!-- Product Not Found Message -->
+			<div th:if="${product == null}" class="product-not-found">
+				<h2>Product not found</h2>
+				<p>The product you are looking for does not exist.</p>
+				<a href="/customer/dashboard">← Back to List</a>
 			</div>
-			<div id="ratingDistribution" style="display:flex;flex-direction:column;gap:4px;">
-			</div>
-		</div>
-		
-		<div th:if="${reviews != null and !#lists.isEmpty(reviews)}">
-			<div class="review" th:each="rv : ${reviews}">
-				<div style="font-weight:600">⭐ <span th:text="${rv.rating}">5</span> • <span style="color:#6b7280"
-						th:text="${#temporals.format(rv.createdAt,'dd/MM/yyyy HH:mm')}">-</span></div>
-				<div th:text="${rv.comment}">Nội dung bình luận...</div>
-				<div th:if="${rv.mediaUrls != null and !rv.mediaUrls.isEmpty()}" style="margin-top:8px;">
-					<div style="display:flex;gap:8px;flex-wrap:wrap;">
-						<div th:each="mediaUrl : ${#strings.arraySplit(rv.mediaUrls, ',')}" style="width:60px;height:60px;border-radius:4px;overflow:hidden;border:1px solid #e5e7eb;">
-							<img th:if="${!#strings.contains(mediaUrl, '.mp4') and !#strings.contains(mediaUrl, '.avi') and !#strings.contains(mediaUrl, '.mov')}" 
-								 th:src="${mediaUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Review image">
-							<video th:if="${#strings.contains(mediaUrl, '.mp4') or #strings.contains(mediaUrl, '.avi') or #strings.contains(mediaUrl, '.mov')}" 
-								   style="width:100%;height:100%;object-fit:cover;" controls>
-								<source th:src="${mediaUrl}" type="video/mp4">
-							</video>
-						</div>
+
+			<!-- Product Detail Main Section -->
+			<div class="detail" th:if="${product != null}">
+				<!-- Product Image Gallery -->
+                <div class="gallery" id="productGallery">
+                    <img th:src="${imgUrl != null && !imgUrl.isEmpty() ? imgUrl : '/img/avatar_default.jpg'}"
+                         th:alt="${product.name}"
+                         src="/img/avatar_default.jpg"
+                         onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
+                         loading="lazy">
+                    <div class="badge" th:if="${product.salePrice != null and product.price != null and product.price != 0}">
+                        <span th:text="'-' + ${#numbers.formatDecimal((product.price - product.salePrice) / product.price * 100,0,'COMMA',0,'POINT')} + '%'"></span>
+                    </div>
+                </div>
+
+				<!-- Product Information -->
+				<div class="info" id="productInfo">
+					<!-- Product Name -->
+					<div class="title" id="productName">
+						<h1 th:text="${product.name}">Product Name</h1>
+					</div>
+
+					<!-- Product Statistics -->
+					<div class="product-stats" id="productStats">
+                        <div class="rating">
+                            <span>⭐ <span th:text="${product.averageRating != null ? #numbers.formatDecimal(product.averageRating, 0, 'POINT', 1, 'POINT') : '0.0'}"></span></span>
+                        </div>
+                        <div class="stock" th:if="${product.quantity != null and product.quantity > 0}">
+                            In stock: <span th:text="${product.quantity}"></span>
+                        </div>
+                        <div class="sold-count">
+                            Sold: <span th:text="${product.totalSales != null ? product.totalSales : 0}"></span>
+                        </div>
+					</div>
+
+					<!-- Display Price -->
+					<div class="section" id="productPrice">
+						<div th:if="${product.salePrice != null and product.price != null and product.price != 0}" class="price-sale">
+                            <div class="price-main-row">
+                                <div class="sale-price">
+                                    <span class="currency">₫</span>
+                                    <span th:text="${#numbers.formatDecimal(product.salePrice,0,'COMMA',0,'NONE')}"></span>
+                                </div>
+                                <div class="original-price">
+                                    <span class="currency">₫</span>
+                                    <span th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'NONE')}"></span>
+                                </div>
+                                <div class="discount-badge">
+                                    Save <span th:text="${#numbers.formatDecimal((product.price - product.salePrice) / product.price * 100,0,'COMMA',0,'POINT')}"></span>%
+                                </div>
+                            </div>
+                        </div>
+                        <div th:unless="${product.salePrice != null and product.price != null and product.price != 0}" class="price-normal">
+                            <div class="sale-price" th:if="${product.price != null}">
+                                <span class="currency">₫</span>
+                                <span th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'NONE')}"></span>
+                            </div>
+                        </div>
+					</div>
+
+
+					<div class="divider"></div>
+
+					<!-- Product Description -->
+					<h2 class="description-title">Product description</h2>
+					<p class="description-text" th:text="${product.description != null ? product.description : 'No description available.'}"></p>
+
+					<!-- Add to Cart Section -->
+					<div class="purchase-section" id="addToCartSection">
+                        <form th:action="@{/cart/add}" method="post" th:if="${product != null and product.quantity != null and product.quantity > 0 and product.status == 'public'}" class="purchase-form">
+                            <input type="hidden" name="productId" th:value="${product.productId}">
+                            <label class="quantity-label" for="quantity">Quantity:</label>
+                            <input type="number"
+                                   id="quantity"
+                                   name="quantity"
+                                   class="quantity-input"
+                                   min="1"
+                                   th:max="${product.quantity}"
+                                   value="1"
+                                   required>
+                            <button class="add-to-cart" type="submit" th:disabled="${product.quantity == null or product.quantity <= 0}">Add to Cart</button>
+                        </form>
+                        <!-- this product is out of stock -->
+                        <div th:if="${product == null or product.quantity == null or product.quantity <= 0 or product.status != 'public'}"
+                             class="unavailable-message">
+                            <p>This product is currently unavailable.</p>
+                        </div>
+                        <!-- Success notification -->
+                        <div th:if="${cartSuccess}" class="cart-notification cart-notification-success">
+                            <span class="notification-icon">✓</span>
+                            <span th:text="${cartMessage}">Add success</span>
+                        </div>
+                        <!-- Error notification -->
+                        <div th:if="${cartError}" class="cart-notification cart-notification-error">
+                            <span class="notification-icon">✕</span>
+                            <span th:text="${cartMessage}">Error</span>
+                        </div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div th:if="${reviews == null or #lists.isEmpty(reviews)}" style="color:#6b7280;text-align:center;padding:20px">
-			No reviews yet
-		</div>
-		</div>
-	</div>
 
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			const productId = window.location.pathname.split('/').pop();
-			loadRatingStats(productId);
-		});
 
-		function loadRatingStats(productId) {
-			fetch(`/api/rating/stats/${productId}`)
-				.then(response => response.json())
-				.then(data => {
-					if (data.success) {
-						updateRatingDisplay(data);
-					}
-				})
-				.catch(error => {
-					console.error('Error loading rating stats:', error);
-				});
-		}
-
-	function updateRatingDisplay(data) {
-		document.getElementById('averageRatingDisplay').textContent = data.averageRating;
-		
-		document.getElementById('totalReviewsDisplay').textContent = data.totalReviews;
-		
-		const distribution = data.ratingDistribution;
-			const container = document.getElementById('ratingDistribution');
-			
-			let html = '';
-			for (let i = 4; i >= 0; i--) {
-				const rating = i + 1;
-				const count = distribution[i] || 0;
-				const percentage = data.totalReviews > 0 ? (count / data.totalReviews) * 100 : 0;
+			<!-- Customer Reviews Section -->
+			<div class="reviews-section" id="reviewsSection">
+				<h2 class="reviews-title">Customer Reviews</h2>
 				
-				html += `
-					<div style="display:flex;align-items:center;gap:8px;">
-						<span style="font-size:12px;color:#6b7280;min-width:20px;">${rating}</span>
-						<span style="color:#fbbf24;">★</span>
-						<div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
-							<div style="height:100%;background:#fbbf24;width:${percentage}%;transition:width 0.3s;"></div>
+				<!-- Rating Statistics Display -->
+				<div id="ratingStats" class="rating-stats">
+					<div class="reviews-summary">
+						<div class="rating-overview">
+							<div class="average-rating" id="averageRatingDisplay" th:text="${avgRating != null ? #numbers.formatDecimal(avgRating, 0, 'POINT', 1, 'POINT') : '0.0'}">0.0</div>
+							<div class="rating-stars">★★★★★</div>
+							<div class="reviews-count" id="totalReviewsDisplay" th:text="'Based on ' + ${totalReview != null ? totalReview : 0} + ' reviews'">Based on 0 reviews</div>
 						</div>
-						<span style="font-size:12px;color:#6b7280;min-width:30px;">${count}</span>
+						<div id="ratingDistribution" class="rating-distribution"></div>
 					</div>
-				`;
-			}
-			
-			container.innerHTML = html;
-		}
-	</script>
-	
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			const userMenuBtn = document.getElementById('userMenuBtn');
-			const userDropdown = document.getElementById('userDropdown');
-			
-			if (userMenuBtn && userDropdown) {
-				userMenuBtn.addEventListener('click', function(e) {
-					e.stopPropagation();
-					userDropdown.classList.toggle('show');
-				});
+				</div>
 				
-				document.addEventListener('click', function(e) {
-					if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-						userDropdown.classList.remove('show');
-					}
-				});
-			}
-		});
-
-
-		function updateChatUnreadCount() {
-			const userIdElement = document.querySelector('[th\\:text="${user.userId}"]');
-			const userId = userIdElement ? userIdElement.textContent.trim() : null;
-
-			if (userId) {
-				fetch(`/api/conversations/${userId}`)
-					.then(res => res.json())
-					.then(conversations => {
-						let totalUnread = 0;
-						conversations.forEach(conv => {
-							totalUnread += (conv.unreadCount || 0);
-						});
-
-						const badge = document.getElementById('chatUnreadBadge');
-						if (badge && totalUnread > 0) {
-							badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
-							badge.style.display = 'block';
-						} else if (badge) {
-							badge.style.display = 'none';
-						}
-					})
-					.catch(err => console.error('Error loading chat unread count:', err));
-			}
-		}
-
-		document.addEventListener('DOMContentLoaded', function() {
-			updateChatUnreadCount();
-			setInterval(updateChatUnreadCount, 30000);
-		});
-	</script>
+				<!-- Reviews List -->
+				<div id="reviewsList" class="reviews-list" th:if="${reviews != null and !reviews.isEmpty()}">
+                    <div th:each="review : ${reviews}" class="review-item" th:data-stars="${review.rating != null ? review.rating : 0}">
+                        <div class="review-header">
+                            <span class="review-author" th:text="${review.username != null ? review.username : 'Anonymous'}">Anonymous</span>
+                            <span class="review-date" th:if="${review.createdAt != null}" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">Date</span>
+                        </div>
+                        <p class="review-text" th:text="${review.comment != null ? review.comment : 'No comment'}"></p>
+                    </div>
+				</div>
+				
+				<!-- No Reviews Message -->
+				<div id="noReviewsMessage" class="no-reviews" th:if="${reviews == null or reviews.isEmpty()}">
+					No reviews yet
+				</div>
+			</div>
+		</div>
 	</div>
+
+	<!-- JavaScript -->
+	<script th:src="@{/js/customer/product-detail.js}"></script>
 </body>
-
 </html>

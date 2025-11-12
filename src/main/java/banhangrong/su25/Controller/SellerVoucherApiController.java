@@ -113,6 +113,7 @@ public class SellerVoucherApiController {
                     vouchers = vouchersRepository.findBySellerIdAndProductIdAndCodeContainingIgnoreCaseOrderByCreatedAtDesc(
                         seller.getUserId(), productId, search.trim());
                 } else {
+                    // Get all vouchers for specific product
                     vouchers = vouchersRepository.findBySellerIdAndProductIdOrderByCreatedAtDesc(
                         seller.getUserId(), productId);
                 }
@@ -122,9 +123,9 @@ public class SellerVoucherApiController {
 
                 if (search != null && !search.trim().isEmpty()) {
                     String searchLower = search.trim().toLowerCase();
-                    vouchers = vouchers.stream()
-                        .filter(v -> v.getCode().toLowerCase().contains(searchLower))
-                        .collect(Collectors.toList());
+                    vouchers = vouchers.stream() //.stream() biến vouchers thành luồng dữ liệu để xử lý.
+                        .filter(v -> v.getCode().toLowerCase().contains(searchLower)) //lọc các voucher có mã chứa chuỗi tìm kiếm (không phân biệt chữ hoa/thường).
+                        .collect(Collectors.toList()); //thu thập các voucher đã lọc thành một danh sách mới.
                 }
             }
 
@@ -135,7 +136,7 @@ public class SellerVoucherApiController {
                     .collect(Collectors.toList());
             }
 
-            // Convert to DTO with product info
+            // Map vouchers to DTOs with product info
             List<VoucherWithProductDto> result = vouchers.stream().map(v -> {
                 VoucherWithProductDto dto = new VoucherWithProductDto();
                 dto.voucherId = v.getVoucherId();
@@ -152,15 +153,15 @@ public class SellerVoucherApiController {
                 dto.createdAt = v.getCreatedAt();
                 dto.updatedAt = v.getUpdatedAt();
 
-                // Calculate remaining uses
+                // Tính toán lượng sử dụng còn lại
                 if (v.getMaxUses() != null) {
                     int used = v.getUsedCount() != null ? v.getUsedCount() : 0;
                     dto.remainingUses = Math.max(0, v.getMaxUses() - used);
                 }
 
                 // Get product info
-                productsRepository.findById(v.getProductId()).ifPresent(p -> {
-                    VoucherWithProductDto.ProductInfo pInfo = new VoucherWithProductDto.ProductInfo();
+                productsRepository.findById(v.getProductId()).ifPresent(p -> { // Tìm sản phẩm theo productId của voucher.
+                    VoucherWithProductDto.ProductInfo pInfo = new VoucherWithProductDto.ProductInfo(); // Tạo một đối tượng ProductInfo mới để lưu trữ thông tin sản phẩm.
                     pInfo.productId = p.getProductId();
                     pInfo.name = p.getName();
                     // Get product image would go here
@@ -270,29 +271,55 @@ public class SellerVoucherApiController {
 
             // Validate product ownership
             Products product = productsRepository.findById(request.productId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại")); // Tìm sản phẩm theo productId từ yêu cầu.
 
-            if (!product.getSellerId().equals(seller.getUserId())) {
+            if (!product.getSellerId().equals(seller.getUserId())) { // Kiểm tra xem người bán hiện tại có phải là chủ sở hữu sản phẩm không.
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Bạn không có quyền tạo voucher cho sản phẩm này");
             }
 
-            // Validate maxUses and maxUsesPerUser
-            if (request.maxUses != null && request.maxUses < 1) {
+            // Validate maxUses: REQUIRED, must be integer from 1-1000
+            if (request.maxUses == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Maximum Total Uses phải lớn hơn hoặc bằng 1");
+                    .body("Số lần sử dụng tối đa không được để trống");
+            }
+            if (request.maxUses < 1 || request.maxUses > 1000) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Số lần sử dụng tối đa phải từ 1 đến 1000");
             }
 
-            if (request.maxUsesPerUser != null && request.maxUsesPerUser < 1) {
+            // Validate maxUsesPerUser: REQUIRED, must be integer from 1-1000
+            if (request.maxUsesPerUser == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Limit per User phải lớn hơn hoặc bằng 1");
+                    .body("Số lần sử dụng tối đa/người không được để trống");
+            }
+            if (request.maxUsesPerUser < 1 || request.maxUsesPerUser > 1000) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Số lần sử dụng tối đa/người phải từ 1 đến 1000");
             }
 
-            // Validate relationship between maxUses and maxUsesPerUser
-            if (request.maxUses != null && request.maxUsesPerUser != null) {
-                if (request.maxUses > 0 && request.maxUsesPerUser > request.maxUses) {
+            // Validate relationship: maxUsesPerUser <= maxUses
+            if (request.maxUsesPerUser > request.maxUses) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Số lần sử dụng/người không được vượt quá tổng số lần sử dụng");
+            }
+
+            // Validate minOrder: optional but if provided, must be >= 0 and <= 1,000,000
+            if (request.minOrder != null) {
+                if (request.minOrder.compareTo(BigDecimal.ZERO) < 0) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("Limit per User không thể lớn hơn Maximum Total Uses");
+                        .body("Giá trị đơn hàng tối thiểu phải >= 0");
+                }
+                if (request.minOrder.compareTo(new BigDecimal("1000000")) > 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Giá trị đơn hàng tối thiểu không được vượt quá 1,000,000 VNĐ");
+                }
+                // For AMOUNT type, minOrder must be >= discountValue
+                if ("AMOUNT".equalsIgnoreCase(request.discountType) && request.discountValue != null) {
+                    if (request.minOrder.compareTo(request.discountValue) < 0) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Giá trị đơn hàng tối thiểu phải >= giá trị giảm giá (với loại AMOUNT)");
+                    }
                 }
             }
 
@@ -304,7 +331,7 @@ public class SellerVoucherApiController {
             }
 
             // Check if already expired
-            String initialStatus = request.status != null ? request.status : "inactive";
+            String initialStatus = request.status != null ? request.status : "inactive"; //request nó ở đâu?
             if (request.endAt != null && LocalDateTime.now().isAfter(request.endAt)) {
                 initialStatus = "expired";
             }
@@ -325,7 +352,7 @@ public class SellerVoucherApiController {
 
             Vouchers saved = voucherService.createVoucher(voucher);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved); // Trả về đối tượng voucher đã lưu với mã trạng thái 201 Created.
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -355,25 +382,51 @@ public class SellerVoucherApiController {
                     .body("Bạn không có quyền chỉnh sửa voucher này");
             }
 
-            // Validate maxUses and maxUsesPerUser
-            if (request.maxUses != null && request.maxUses < 1) {
+            // ✅ BACKEND VALIDATION - BẮT BUỘC (Security layer)
+            // Validate maxUses: REQUIRED, must be integer from 1-1000
+            if (request.maxUses == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Maximum Total Uses phải lớn hơn hoặc bằng 1");
+                    .body("Số lần sử dụng tối đa không được để trống");
+            }
+            if (request.maxUses < 1 || request.maxUses > 1000) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Số lần sử dụng tối đa phải từ 1 đến 1000");
             }
 
-            if (request.maxUsesPerUser != null && request.maxUsesPerUser < 1) {
+            // Validate maxUsesPerUser: REQUIRED, must be integer from 1-1000
+            if (request.maxUsesPerUser == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Limit per User phải lớn hơn hoặc bằng 1");
+                    .body("Số lần sử dụng tối đa/người không được để trống");
+            }
+            if (request.maxUsesPerUser < 1 || request.maxUsesPerUser > 1000) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Số lần sử dụng tối đa/người phải từ 1 đến 1000");
             }
 
-            // Validate relationship between maxUses and maxUsesPerUser
-            if (request.maxUses != null && request.maxUsesPerUser != null) {
-                if (request.maxUses > 0 && request.maxUsesPerUser > request.maxUses) {
+            // Validate relationship: maxUsesPerUser <= maxUses
+            if (request.maxUsesPerUser > request.maxUses) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Số lần sử dụng/người không được vượt quá tổng số lần sử dụng");
+            }
+
+            // Validate minOrder: optional but if provided, must be >= 0 and <= 1,000,000
+            if (request.minOrder != null) {
+                if (request.minOrder.compareTo(BigDecimal.ZERO) < 0) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("Limit per User không thể lớn hơn Maximum Total Uses");
+                        .body("Giá trị đơn hàng tối thiểu phải >= 0");
+                }
+                if (request.minOrder.compareTo(new BigDecimal("1000000")) > 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Giá trị đơn hàng tối thiểu không được vượt quá 1,000,000 VNĐ");
+                }
+                // For AMOUNT type, minOrder must be >= discountValue
+                if ("AMOUNT".equalsIgnoreCase(request.discountType) && request.discountValue != null) {
+                    if (request.minOrder.compareTo(request.discountValue) < 0) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Giá trị đơn hàng tối thiểu phải >= giá trị giảm giá (với loại AMOUNT)");
+                    }
                 }
             }
-
 
             // Validate date range
             if (request.startAt != null && request.endAt != null &&
@@ -652,15 +705,16 @@ public class SellerVoucherApiController {
                     map.put("productId", p.getProductId());
                     map.put("name", p.getName());
                     map.put("price", p.getPrice());
+                    map.put("salePrice", p.getSalePrice());
                     map.put("status", p.getStatus());
                     map.put("quantity", p.getQuantity());
                     return map;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); // Thu thập các bản đồ sản phẩm đã lọc thành một danh sách.
 
             System.out.println("Returning " + result.size() + " products to frontend");
 
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(result); // Trả về danh sách sản phẩm đã lọc dưới dạng phản hồi HTTP.
 
         } catch (Exception e) {
             e.printStackTrace();
