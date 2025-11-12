@@ -5,6 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,6 +22,8 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     // Gửi email chung
+    //Dung Async de khong phai cho no gui mail xong moi chay nua
+    @Async
     public void sendEmail(Email email) {
         System.out.println("=== EMAIL SERVICE: Starting to send email ===");
         System.out.println("To: " + email.getToEmail());
