@@ -18,10 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.Entity.Users;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -253,9 +250,28 @@ public class ProductLicenseController {
                 return ResponseEntity.badRequest().body("invalid expireDate");
             }
         } else {
-            expStr = java.time.LocalDate.now().plusDays(30).format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+            LocalDateTime time= LocalDateTime.now();
+//            List<ProductLicenses> listProductLicense = licensesRepository.findByUserIdAndProductId(userId, productId);
+//            System.out.println("helloooooo"+listProductLicense.size());
+//            if(!listProductLicense.isEmpty()){
+//                String key = listProductLicense.get(0).getLicenseKey();
+//                //Lấy thơi gian ở giữa.
+//                String[] listS = key.split("-");
+//                if(listS.length >= 2){
+//                    //Thoi gian ma key nay het han
+//                    String lastTime = listS[1];
+//                    System.out.println(lastTime);
+//                    try{
+//                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+//                        LocalDate date = LocalDate.parse(lastTime, formatter);
+//                        time = date.atStartOfDay();
+//                    }catch (Exception e){
+//
+//                    }
+//                }
+//            }
+            expStr = time.plusDays(30).format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
         }
-
         LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < requestQty; i++) {
             String random = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12).toUpperCase();

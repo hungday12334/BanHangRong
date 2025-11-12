@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface ProductLicensesRepository extends JpaRepository<ProductLicenses, Long> {
 
@@ -113,4 +114,17 @@ public interface ProductLicensesRepository extends JpaRepository<ProductLicenses
             """,
             nativeQuery = true)
   Page<LicenseView> findByOrderId(@Param("orderId") Long orderId, Pageable pageable);
+
+
+    @Query(value = "SELECT pl.* " +
+            "FROM smiledev_wap.product_licenses pl " +
+            "JOIN smiledev_wap.order_items oi " +
+            "ON pl.order_item_id = oi.order_item_id "+
+            "WHERE pl.user_id = :userId " +
+            "AND oi.product_id = :productId " +
+            "ORDER BY pl.created_at DESC",
+            nativeQuery = true)
+    List<ProductLicenses> findByUserIdAndProductId(@Param("userId") Long userId,
+                                                   @Param("productId") Long productId);
+
 }

@@ -72,13 +72,11 @@ public class AdminProductManagement {
         }
         Long id = Long.parseLong(sId);
         Products product = adminProductService.findById(id);
-        if (product == null || product.getStatus() == null) {
+        if (product != null || product.getStatus() != null) {
             if (!product.getStatus().equalsIgnoreCase("pending")) {
                 redirectAttributes.addFlashAttribute("error", "Only Pending product can be Approved");
                 return "redirect:/admin/products";
             }
-            redirectAttributes.addFlashAttribute("error", "Product not found");
-            return "redirect:/admin/products";
         }
         Users seller = userService.findById(product.getSellerId());
         if(seller !=null && !seller.getIsActive()){

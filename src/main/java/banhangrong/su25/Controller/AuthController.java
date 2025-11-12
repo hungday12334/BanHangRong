@@ -1,11 +1,13 @@
 package banhangrong.su25.Controller;
 
 import banhangrong.su25.DTO.AuthResponse;
+import banhangrong.su25.DTO.ForgotPasswordRequest;
 import banhangrong.su25.DTO.LoginRequest;
 import banhangrong.su25.DTO.RegisterRequest;
 import banhangrong.su25.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -40,12 +42,43 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         try {
-            authService.forgotPassword(email);
-            return ResponseEntity.ok(Map.of("message", "Email đặt lại mật khẩu đã được gửi đến " + email));
+            // Log để debug
+            System.out.println("=== FORGOT PASSWORD REQUEST ===");
+            System.out.println("Request: " + request);
+            
+            // Validate request
+            if (request == null || request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                System.err.println("Email is null or empty");
+                return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
+            }
+            
+            String emailTrimmed = request.getEmail().trim();
+            
+            // Basic email format validation
+            if (!emailTrimmed.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                System.err.println("Invalid email format: " + emailTrimmed);
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid email format"));
+            }
+            
+            System.out.println("Processing forgot password for: " + emailTrimmed);
+            authService.forgotPassword(emailTrimmed);
+            return ResponseEntity.ok(Map.of("message", "Password reset email has been sent to " + emailTrimmed));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            String errorMessage = e.getMessage();
+            if (errorMessage == null || errorMessage.isEmpty()) {
+                errorMessage = "An error occurred. Please try again later.";
+            }
+            // Log error for debugging
+            System.err.println("Forgot password RuntimeException: " + errorMessage);
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", errorMessage));
+        } catch (Exception e) {
+            // Log unexpected errors
+            System.err.println("Unexpected error in forgot-password: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", "An unexpected error occurred. Please try again later."));
         }
     }
 
@@ -79,5 +112,21 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // Exception handler để catch lỗi parse JSON
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        System.err.println("JSON parse error: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.badRequest().body(Map.of("error", "Invalid request format. Please send valid JSON with email field."));
+    }
+    
+    // Exception handler để catch lỗi method argument
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
+        System.err.println("Illegal argument error: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
 }

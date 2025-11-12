@@ -774,10 +774,174 @@
                 });
             })();
 
+            // Helpers: validation utilities for product form
+            function __isValidHttpUrl(str){
+                if (!str) return true; // empty is allowed for optional fields
+                try {
+                    const u = new URL(str);
+                    return u.protocol === 'http:' || u.protocol === 'https:';
+                } catch { return false; }
+            }
+            function __clearCustomValidity(ids){
+                ids.forEach(id => { const el = document.getElementById(id); if (el) el.setCustomValidity(''); });
+            }
+            function __validateProductForm(){
+                const ids = ['pm_name','pm_price','pm_salePrice','pm_quantity','pm_downloadUrl','pm_imageUrl'];
+                __clearCustomValidity(ids);
+                const nameEl = document.getElementById('pm_name');
+                const productIdEl = document.getElementById('pm_productId');
+                const priceEl = document.getElementById('pm_price');
+                const saleEl = document.getElementById('pm_salePrice');
+                const qtyEl = document.getElementById('pm_quantity');
+                const dUrlEl = document.getElementById('pm_downloadUrl');
+                const iUrlEl = document.getElementById('pm_imageUrl');
+
+                if (nameEl) nameEl.value = (nameEl.value || '').trim();
+                if (dUrlEl) dUrlEl.value = (dUrlEl.value || '').trim();
+                if (iUrlEl) iUrlEl.value = (iUrlEl.value || '').trim();
+
+                let ok = true;
+                // Price >= 0
+                if (priceEl) {
+                    const v = priceEl.value === '' ? NaN : Number(priceEl.value);
+                    if (isNaN(v) || v < 0) { priceEl.setCustomValidity('Price must be a non-negative number'); ok = false; }
+                }
+                // Sale price >= 0 and <= price
+                if (saleEl && saleEl.value !== '') {
+                    const sp = Number(saleEl.value);
+                    if (isNaN(sp) || sp < 0) { saleEl.setCustomValidity('Sale price must be a non-negative number'); ok = false; }
+                    else if (priceEl && priceEl.value !== '' && !isNaN(Number(priceEl.value)) && sp > Number(priceEl.value)) {
+                        saleEl.setCustomValidity('Sale price cannot exceed price'); ok = false;
+                    }
+                }
+                // Quantity required: integer > 0
+                if (qtyEl) {
+                    const q = qtyEl.value === '' ? NaN : Number(qtyEl.value);
+                    if (!Number.isInteger(q) || q <= 0) { qtyEl.setCustomValidity('Quantity must be an integer > 0'); ok = false; }
+                }
+                // Download URL required & valid
+                if (dUrlEl) {
+                    if (!dUrlEl.value) { dUrlEl.setCustomValidity('Download URL is required'); ok = false; }
+                    else if (!__isValidHttpUrl(dUrlEl.value)) { dUrlEl.setCustomValidity('Enter a valid URL (http/https)'); ok = false; }
+                }
+                if (iUrlEl && iUrlEl.value && !__isValidHttpUrl(iUrlEl.value)) { iUrlEl.setCustomValidity('Enter a valid URL (http/https)'); ok = false; }
+
+                // Unique name (case-insensitive) check among current seller products
+                try {
+                    const currentId = productIdEl ? (productIdEl.value || '').trim() : '';
+                    // We rely on existing table rows in #tbMyProducts for names
+                    const rows = Array.from(document.querySelectorAll('#tbMyProducts [data-product-id]'));
+                    const enteredName = (nameEl ? nameEl.value.trim().toLowerCase() : '');
+                    if (enteredName) {
+                        for (const r of rows) {
+                            const rid = (r.getAttribute('data-product-id') || '').trim();
+                            // Extract product name text from first cell (assuming structure) or a data attribute if present
+                            let existingName = '';
+                            // Prefer data-name attribute if exists
+                            existingName = (r.getAttribute('data-name') || '').trim();
+                            if (!existingName) {
+                                const firstCell = r.querySelector('td');
+                                if (firstCell) existingName = (firstCell.textContent || '').trim();
+                            }
+                            if (!existingName) continue;
+                            if (rid !== currentId && existingName.toLowerCase() === enteredName) {
+                                nameEl.setCustomValidity('Product name already exists'); ok = false; break;
+                            }
+                        }
+                    }
+                } catch (_) { /* non-blocking */ }
+                return ok;
+            }
+
+            // Realtime validation for price / salePrice relationship
+            (function bindRealtimePriceValidation(){
+                const priceEl = document.getElementById('pm_price');
+                const saleEl = document.getElementById('pm_salePrice');
+                if (!priceEl || !saleEl) return;
+                function check(){
+                    // Clear previous custom validity only for these two fields
+                    priceEl.setCustomValidity('');
+                    saleEl.setCustomValidity('');
+                    const priceVal = priceEl.value === '' ? NaN : Number(priceEl.value);
+                    const saleVal = saleEl.value === '' ? NaN : Number(saleEl.value);
+                    if (!isNaN(priceVal) && priceVal < 0) {
+                        priceEl.setCustomValidity('Price must be a non-negative number');
+                    }
+                    if (!isNaN(saleVal) && saleVal < 0) {
+                        saleEl.setCustomValidity('Sale price must be a non-negative number');
+                    }
+                    // Only flag if sale price strictly greater than price
+                    if (!isNaN(priceVal) && !isNaN(saleVal) && saleVal > priceVal) {
+                        saleEl.setCustomValidity('Sale price cannot exceed price');
+                    }
+                    // Report validity quietly (avoid intrusive popup) if field currently invalid & user interacted
+                    // Use requestAnimationFrame to avoid flicker
+                    requestAnimationFrame(() => {
+                        if (!priceEl.checkValidity()) priceEl.reportValidity();
+                        if (!saleEl.checkValidity()) saleEl.reportValidity();
+                    });
+                }
+                ['input','blur','change'].forEach(ev => { priceEl.addEventListener(ev, check); saleEl.addEventListener(ev, check); });
+            })();
+
+            // Clear sticky duplicate-name error as user edits the field
+            (function bindNameValidityReset(){
+                const nameEl = document.getElementById('pm_name');
+                if (!nameEl) return;
+                const clear = () => { try { nameEl.setCustomValidity(''); } catch(_) {} };
+                ['input','change','keyup','paste','blur'].forEach(ev => nameEl.addEventListener(ev, clear));
+            })();
+
+            async function __extractErrorMessage(res){
+                try {
+                    const ct = res.headers && res.headers.get ? (res.headers.get('content-type') || '') : '';
+                    if (ct.includes('application/json')) {
+                        const j = await res.json();
+                        if (j) {
+                            if (typeof j.message === 'string' && j.message.trim()) return j.message;
+                            if (typeof j.error === 'string' && j.error.trim()) return j.error;
+                            if (Array.isArray(j.errors) && j.errors.length) return j.errors.join('\n');
+                        }
+                    }
+                } catch(_) { /* ignore */ }
+                try {
+                    const t = await res.text();
+                    if (t && t.trim()) {
+                        return t.trim().slice(0, 500);
+                    }
+                } catch(_) { /* ignore */ }
+                return `Request failed (HTTP ${res.status})`;
+            }
+
             // Save product (create/update)
             document.getElementById('productForm')?.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = document.getElementById('pm_productId').value;
+                // HTML5 + custom validation
+                if (!__validateProductForm()) {
+                    e.target.reportValidity?.();
+                    return;
+                }
+                // Async server-side duplicate name check before send
+                try {
+                    const nameEl = document.getElementById('pm_name');
+                    const sellerIdEl = document.getElementById('userId') || document.getElementById('sellerId');
+                    const sellerId = sellerIdEl ? sellerIdEl.textContent.trim() : '';
+                    const nm = nameEl ? nameEl.value.trim() : '';
+                    if (sellerId && nm) {
+                        const params = new URLSearchParams({ sellerId, name: nm });
+                        if (id) params.append('excludeId', id);
+                        const dupRes = await fetch('/api/products-lite/validate-name?' + params.toString());
+                        if (dupRes.ok) {
+                            const dupJson = await dupRes.json().catch(()=>({}));
+                            if (dupJson && dupJson.valid === false) {
+                                nameEl.setCustomValidity('Product name already exists');
+                                nameEl.reportValidity();
+                                return;
+                            }
+                        }
+                    }
+                } catch (_) { /* non-blocking */ }
                 // If editing & no changes, skip API call to avoid backend switching status to Hidden
                 if (id && !productChanged()) {
                     showToast('No changes to save', 'info');
@@ -789,8 +953,8 @@
                     name: document.getElementById('pm_name').value,
                     price: document.getElementById('pm_price').value ? Number(document.getElementById('pm_price').value) : null,
                     salePrice: document.getElementById('pm_salePrice').value ? Number(document.getElementById('pm_salePrice').value) : null,
-                    quantity: document.getElementById('pm_quantity').value ? Number(document.getElementById('pm_quantity').value) : 0,
-                    downloadUrl: document.getElementById('pm_downloadUrl').value || null,
+                    quantity: Number(document.getElementById('pm_quantity').value),
+                    downloadUrl: document.getElementById('pm_downloadUrl').value,
                     description: document.getElementById('pm_description').value || null,
                     status: document.getElementById('pm_status').dataset.status
                 };
@@ -800,9 +964,11 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
+                    // Read saved product once (needed for low-stock refresh and image set)
+                    let saved = null;
+                    try { saved = await res.json().catch(() => null); } catch(_) {}
                     // Try to set primary image if URL present
                     try {
-                        const saved = await res.json().catch(() => null);
                         const pid = id || (saved && (saved.productId || saved.id));
                         const url = (document.getElementById('pm_imageUrl').value || '').trim();
                         if (pid && url) {
@@ -812,12 +978,56 @@
                                 body: JSON.stringify({ url })
                             });
                         }
-                    } catch (_) { /* non-blocking */ }
+                    } catch (_) { /* ignore */ }
                     closeModal(productModal);
                     showToast(id ? 'Product saved' : 'Product created', 'success');
+
+                    // Low-stock dynamic refresh (only if product still public)
+                    (function refreshLowStockForProduct(p){
+                        // New logic: Remaining column mirrors product quantity directly
+                        if (!p || !p.productId) return;
+                        const status = (p.status || '').toLowerCase();
+                        const qty = typeof p.quantity === 'number' ? p.quantity : 0;
+                        const tbody = document.getElementById('tbLowStock');
+                        const pager = document.getElementById('pgLowStock');
+                        if (!tbody) return;
+                        function repaginate(){ if (tbody && pager) paginateTable(tbody, pager, 5); }
+                        // If not public remove any existing low-stock row
+                        if (status !== 'public') {
+                            const existing = tbody.querySelector(`tr[data-product-id='${p.productId}']`);
+                            if (existing) { existing.remove(); repaginate(); }
+                            return;
+                        }
+                        let row = tbody.querySelector(`tr[data-product-id='${p.productId}']`);
+                        if (qty > 5) { // no longer low stock
+                            if (row) { row.remove(); repaginate(); }
+                            return;
+                        }
+                        const pillClass = qty <= 2 ? 'pill warn' : 'pill good';
+                        const pillText = qty <= 2 ? 'Restock needed' : 'Low stock';
+                        if (!row) {
+                            row = document.createElement('tr');
+                            row.className = 'clickable';
+                            row.setAttribute('data-product-id', p.productId);
+                            tbody.appendChild(row);
+                            row.addEventListener('click', () => { loadProduct(p.productId).then(()=> openModal(productModal)); });
+                        }
+                        row.innerHTML = `<td>${p.name || ''}</td><td class='hide-md'>${qty}</td><td><span class='${pillClass}'>${pillText}</span></td>`;
+                        repaginate();
+                    })(saved);
+
                     setTimeout(() => refreshMyProducts(), 350);
                 } else {
-                    showToast('Failed to save product', 'error');
+                    if (res.status === 409) {
+                        try {
+                            const body = await res.json().catch(()=>({}));
+                            const msg = (body && (body.message || body.error)) ? (body.message || body.error) : 'Duplicate name';
+                            showToast(msg, 'error', { duration: 5000 });
+                        } catch(_) { showToast('Duplicate name', 'error', { duration: 5000 }); }
+                    } else {
+                        const msg = await __extractErrorMessage(res);
+                        showToast(msg || 'Failed to save product', 'error', { duration: 6000 });
+                    }
                 }
             });
 
@@ -833,6 +1043,24 @@
                     closeModal(productModal);
                     return; // No-op
                 }
+                // Prevent publishing duplicate name attempt (edge case if renamed then publish without save?)
+                try {
+                    const nameEl = document.getElementById('pm_name');
+                    const sellerIdEl = document.getElementById('userId') || document.getElementById('sellerId');
+                    const sellerId = sellerIdEl ? sellerIdEl.textContent.trim() : '';
+                    const nm = nameEl ? nameEl.value.trim() : '';
+                    if (sellerId && nm) {
+                        const params = new URLSearchParams({ sellerId, name: nm, excludeId: id });
+                        const dupRes = await fetch('/api/products-lite/validate-name?' + params.toString());
+                        if (dupRes.ok) {
+                            const dupJson = await dupRes.json().catch(()=>({}));
+                            if (dupJson && dupJson.valid === false) {
+                                showToast('Duplicate name: choose another name before publish', 'error');
+                                return;
+                            }
+                        }
+                    }
+                } catch(_) { /* ignore */ }
                 // Seller-only: gửi publish=false để tránh tự public
                 const res = await fetch(`/api/products/${id}/approval?publish=${statusText !== 'Public'}`, {
                     method: 'POST',

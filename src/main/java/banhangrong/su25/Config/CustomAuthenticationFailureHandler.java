@@ -16,7 +16,14 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     public void onAuthenticationFailure(HttpServletRequest request, 
                                       HttpServletResponse response, 
                                       AuthenticationException exception) throws IOException, ServletException {
-        // Redirect back to login with error
-        response.sendRedirect("/login?error=true");
+        // Check if the exception message indicates account is deactivated
+        String exceptionMessage = exception.getMessage();
+        if (exceptionMessage != null && exceptionMessage.contains("is not active")) {
+            // Account is deactivated
+            response.sendRedirect("/login?error=account_deactivated");
+        } else {
+            // Other authentication errors (invalid credentials, etc.)
+            response.sendRedirect("/login?error=true");
+        }
     }
 }

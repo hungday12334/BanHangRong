@@ -4,6 +4,7 @@ import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.ProductsRepository;
 import banhangrong.su25.Repository.ProductImagesRepository;
 import banhangrong.su25.Repository.VouchersRepository;
+import banhangrong.su25.Repository.ProductLicensesRepository;
 import banhangrong.su25.Entity.Vouchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +22,16 @@ public class ProductsApiController {
     private final ProductsRepository productsRepository;
     private final ProductImagesRepository productImagesRepository;
     private final VouchersRepository vouchersRepository;
+    private final ProductLicensesRepository productLicensesRepository;
 
     public ProductsApiController(ProductsRepository productsRepository,
                                  ProductImagesRepository productImagesRepository,
-                                 VouchersRepository vouchersRepository) {
+                                 VouchersRepository vouchersRepository,
+                                 ProductLicensesRepository productLicensesRepository) {
         this.productsRepository = productsRepository;
         this.productImagesRepository = productImagesRepository;
         this.vouchersRepository = vouchersRepository;
+        this.productLicensesRepository = productLicensesRepository;
     }
 
     // Lightweight DTO to avoid lazy recursion and reduce payload
@@ -42,6 +46,21 @@ public class ProductsApiController {
     public String downloadUrl;
     public String primaryImage;
     public String status;
+    }
+
+    // Lightweight remaining endpoint for dynamic low-stock refresh
+    @GetMapping("/{id}/remaining")
+    public ResponseEntity<?> getRemaining(@PathVariable("id") Long id) {
+        return productsRepository.findById(id).map(p -> {
+            Integer qty = p.getQuantity();
+            int capacity = qty != null ? qty : 0;
+            long sold = 0L;
+            long pre = 0L;
+            try { sold = productLicensesRepository.countByProductViaOrders(p.getProductId()); } catch (Exception ignored) {}
+            try { pre = productLicensesRepository.countPreGeneratedForProduct(p.getProductId()); } catch (Exception ignored) {}
+            long remaining = Math.max(0L, (long) capacity - sold - pre);
+            return ResponseEntity.ok(java.util.Map.of("productId", p.getProductId(), "remaining", remaining, "status", p.getStatus()));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // Public vouchers for product
@@ -140,51 +159,151 @@ public class ProductsApiController {
         if (sid == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("sellerId is required");
         }
+        // server-side unique name check (case-insensitive per seller)
+        if (body.name != null && productsRepository.existsBySellerIdAndNameIgnoreCase(sid, body.name.trim())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of(
+                    "error", "duplicate_name",
+                    "message", "Product name already exists"
+            ));
+        }
         Products p = new Products();
         p.setSellerId(sid);
         p.setName(body.name);
         p.setDescription(body.description);
         p.setPrice(body.price);
         p.setSalePrice(body.salePrice);
-        p.setQuantity(body.quantity != null ? body.quantity : 0);
-        p.setDownloadUrl(body.downloadUrl);
+    // Server side required enforcement
+    if (body.quantity == null || body.quantity <= 0) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
+            "error","invalid_quantity",
+            "message","Quantity must be > 0"
+        ));
+    }
+    p.setQuantity(body.quantity);
+    if (body.downloadUrl == null || body.downloadUrl.trim().isEmpty()) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
+            "error","download_url_required",
+            "message","Download URL is required"
+        ));
+    }
+    p.setDownloadUrl(body.downloadUrl.trim());
         // status normalized by entity callbacks
         p.setStatus(Objects.toString(body.status, "pending"));
-        Products saved = productsRepository.save(p);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved));
+        try {
+            Products saved = productsRepository.save(p);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of(
+                            "error", "save_failed",
+                            "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"
+                    ));
+        }
     }
 
     // Update product
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody ProductDto body) {
         return productsRepository.findById(id).map(p -> {
-            // Detect changes against incoming body
+            // Unique name check when changing name
+            if (body.name != null) {
+                String nextName = body.name.trim();
+                if (!nextName.equalsIgnoreCase(Objects.toString(p.getName(), "")) &&
+                        p.getSellerId() != null &&
+                        productsRepository.existsBySellerIdAndNameIgnoreCase(p.getSellerId(), nextName)) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of(
+                            "error", "duplicate_name",
+                            "message", "Product name already exists"
+                    ));
+                }
+            }
+            // Detect changes against incoming body. We also track WHICH fields changed so we can
+            // decide whether status should be forced to hidden. Rule:
+            //  - If current status is public and ONLY price, salePrice, quantity change -> keep public.
+            //  - If name OR description OR downloadUrl changes while public -> hide (becomes hidden for re‑review).
+            //  - For non-public statuses (pending, etc.), retain existing behavior (force hidden on any change).
             boolean changed = false;
-            if (body.name != null && !Objects.equals(p.getName(), body.name)) changed = true;
-            if (!Objects.equals(p.getDescription(), body.description)) changed = true;
-            if (!eq(p.getPrice(), body.price)) changed = true;
-            if (!eq(p.getSalePrice(), body.salePrice)) changed = true;
-            if (body.quantity != null && !Objects.equals(p.getQuantity(), body.quantity)) changed = true;
-            if (!Objects.equals(p.getDownloadUrl(), body.downloadUrl)) changed = true;
+            boolean nameChanged = false;
+            boolean descriptionChanged = false;
+            // numeric-only changes (price, salePrice, quantity) are considered safe for public status
+            boolean downloadUrlChanged = false;
+
+            if (body.name != null && !Objects.equals(p.getName(), body.name)) { changed = true; nameChanged = true; }
+            if (!Objects.equals(p.getDescription(), body.description)) { changed = true; descriptionChanged = true; }
+            if (!eq(p.getPrice(), body.price)) { changed = true; }
+            if (!eq(p.getSalePrice(), body.salePrice)) { changed = true; }
+            if (body.quantity != null && !Objects.equals(p.getQuantity(), body.quantity)) { changed = true; }
+            if (!Objects.equals(p.getDownloadUrl(), body.downloadUrl)) { changed = true; downloadUrlChanged = true; }
 
             // Apply incoming values (allow clearing via nulls to persist user's intent)
             if (body.name != null) p.setName(body.name);
             p.setDescription(body.description);
             p.setPrice(body.price);
             p.setSalePrice(body.salePrice);
-            if (body.quantity != null) p.setQuantity(body.quantity);
-            p.setDownloadUrl(body.downloadUrl);
+            if (body.quantity != null) {
+                if (body.quantity <= 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
+                            "error","invalid_quantity",
+                            "message","Quantity must be > 0"
+                    ));
+                }
+                p.setQuantity(body.quantity);
+            }
+            if (body.downloadUrl != null) {
+                if (body.downloadUrl.trim().isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
+                            "error","download_url_required",
+                            "message","Download URL is required"
+                    ));
+                }
+                p.setDownloadUrl(body.downloadUrl.trim());
+            }
 
             if (!changed) {
                 // No change -> do not alter status, do not save
                 return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
             }
 
-            // Any change via modal forces status to hidden
-            p.setStatus("hidden");
-            Products saved = productsRepository.save(p);
-            return ResponseEntity.ok(toDto(saved));
+            // Selective status update logic
+            String currentStatus = p.getStatus() == null ? null : p.getStatus().trim().toLowerCase();
+            boolean sensitiveChanged = nameChanged || descriptionChanged || downloadUrlChanged; // changes requiring re-review
+            if ("public".equals(currentStatus)) {
+                // If only numeric/price related changes, keep public
+                if (sensitiveChanged) {
+                    p.setStatus("hidden");
+                } // else keep as public
+            } else if (!"hidden".equals(currentStatus)) {
+                // Preserve prior behavior: any change on non-hidden & non-public -> hidden
+                p.setStatus("hidden");
+            }
+            try {
+                Products saved = productsRepository.save(p);
+                return ResponseEntity.ok(toDto(saved));
+            } catch (Exception ex) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(java.util.Map.of(
+                                "error", "save_failed",
+                                "message", ex.getMessage() != null ? ex.getMessage() : "Failed to save product"
+                        ));
+            }
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Optional: client-side async check endpoint
+    @GetMapping("/validate-name")
+    public ResponseEntity<?> validateName(@RequestParam("sellerId") Long sellerId, @RequestParam("name") String name,
+                                          @RequestParam(value = "excludeId", required = false) Long excludeId) {
+        String n = name == null ? "" : name.trim();
+        if (n.isEmpty()) return ResponseEntity.ok(java.util.Map.of("valid", false, "message", "Name is required"));
+        boolean exists = productsRepository.existsBySellerIdAndNameIgnoreCase(sellerId, n);
+        if (exists && excludeId != null) {
+            var p = productsRepository.findById(excludeId).orElse(null);
+            if (p != null && p.getSellerId() != null && p.getSellerId().equals(sellerId) &&
+                    p.getName() != null && p.getName().equalsIgnoreCase(n)) {
+                exists = false; // same product, allow
+            }
+        }
+        return ResponseEntity.ok(java.util.Map.of("valid", !exists));
     }
 
     @DeleteMapping("/{id}")

@@ -4,13 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(voucher): add validation for minOrder and enhance discount value checks in voucher forms">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="refactor(chat): streamline message handling and improve logging in chat functionality">
+      <change afterPath="$PROJECT_DIR$/docs/seller-profile-flow-analysis.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/seller-reviews-flow-analysis.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/seller-voucher-flow-analysis.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/VoucherDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/VoucherDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomUserDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomUserDetailsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,12 +44,12 @@
     &quot;assignee&quot;: &quot;hungday12334&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
-    &quot;accountId&quot;: &quot;efd5b86f-5509-426a-a183-1d6d3c55d639&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/hungday12334/BanHangRong.git",
+    "accountId": "efd5b86f-5509-426a-a183-1d6d3c55d639"
   }
-}</component>
+}]]></component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -83,7 +86,7 @@
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "Spring Boot.Su25Application.executor": "Run",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "#12 on MinhHQFinal",
+    "git-widget-placeholder": "MinhHQFinal",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
@@ -191,10 +194,7 @@
       <workItem from="1762488348451" duration="3772000" />
       <workItem from="1762496710501" duration="5000" />
       <workItem from="1762502308301" duration="628000" />
-      <workItem from="1762703072720" duration="53011000" />
-      <workItem from="1762795594361" duration="3006000" />
-      <workItem from="1762801068548" duration="4123000" />
-      <workItem from="1762821683183" duration="22759000" />
+      <workItem from="1762703072720" duration="25894000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -292,31 +292,7 @@
       <option name="project" value="LOCAL" />
       <updated>1762753068890</updated>
     </task>
-    <task id="LOCAL-00013" summary="feat(auth): enhance email verification and password reset emails with HTML formatting; allow login for unverified accounts">
-      <option name="closed" value="true" />
-      <created>1762756315652</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1762756315652</updated>
-    </task>
-    <task id="LOCAL-00014" summary="feat(voucher): enhance validation and UI for maxUses and maxUsesPerUser; improve price display logic">
-      <option name="closed" value="true" />
-      <created>1762788591340</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1762788591340</updated>
-    </task>
-    <task id="LOCAL-00015" summary="feat(voucher): add validation for minOrder and enhance discount value checks in voucher forms">
-      <option name="closed" value="true" />
-      <created>1762792049540</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1762792049540</updated>
-    </task>
-    <option name="localTasksCounter" value="16" />
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -367,9 +343,6 @@
     <MESSAGE value="refactor(chat): clean up comments and improve readability in ChatController, ChatMessageDTO, ChatService, and MessageRepository" />
     <MESSAGE value="refactor(profile): improve code readability and update comments in SellerProfileController" />
     <MESSAGE value="refactor(chat): streamline message handling and improve logging in chat functionality" />
-    <MESSAGE value="feat(auth): enhance email verification and password reset emails with HTML formatting; allow login for unverified accounts" />
-    <MESSAGE value="feat(voucher): enhance validation and UI for maxUses and maxUsesPerUser; improve price display logic" />
-    <MESSAGE value="feat(voucher): add validation for minOrder and enhance discount value checks in voucher forms" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(voucher): add validation for minOrder and enhance discount value checks in voucher forms" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(chat): streamline message handling and improve logging in chat functionality" />
   </component>
 </project>

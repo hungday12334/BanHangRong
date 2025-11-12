@@ -136,7 +136,7 @@
             transition: all 0.2s ease;
         }
         #actionBtn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        #resetFormBtn:hover { transform: translateY(-1px);
+        #resetFormBtn:hover { transform: translateY(-1px);}
     </style>
 </head>
 <body>
@@ -215,7 +215,6 @@
             <div class="card-body">
                 <form th:action="@{/admin/category/save}" method="post" id="categoryForm">
                     <input type="hidden" id="categoryId" name="categoryId">
-                    <!-- ✅ Thêm input ẩn để xác định hành động -->
                     <input type="hidden" id="actionType" name="actionType" value="create">
                     <!-- Form group căn giữa, độ rộng cố định -->
                     <div class="row justify-content-center">

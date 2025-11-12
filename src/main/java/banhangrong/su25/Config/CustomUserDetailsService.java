@@ -25,9 +25,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         Users user = usersRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // ⚠️ CHANGED: Allow login even if account is not active (unverified email)
-        // CustomAuthenticationSuccessHandler will redirect to verify page if needed
-        // Only block if account is explicitly disabled by admin (could add a separate field for this)
+        // Kiểm tra user có active không
+        if (user.getIsActive() == null || !user.getIsActive()) {
+            throw new UsernameNotFoundException("User is not active: " + username);
+        }
 
         // Tạo authorities dựa trên userType
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -56,9 +57,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .password(user.getPassword()) // Password sẽ được hash bằng BCrypt
                 .authorities(authorities)
                 .accountExpired(false)
-                .accountLocked(false) // ✅ Don't lock account for unverified email
+                .accountLocked(!user.getIsActive())
                 .credentialsExpired(false)
-                .disabled(false) // ✅ Don't disable account for unverified email
+                .disabled(!user.getIsActive())
                 .build();
     }
 

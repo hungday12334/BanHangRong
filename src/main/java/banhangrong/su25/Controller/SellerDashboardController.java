@@ -223,25 +223,21 @@ public class SellerDashboardController {
             m.put("items", s.getSellerItems());
             recentOrders.add(m);
         }
-        // Low stock products (remaining <= 5)
+        // Low stock products based on product quantity directly (quantity <= 5)
         List<Products> sellerProducts = productsRepository.findBySellerId(sellerId);
         List<Map<String, Object>> lowStock = new ArrayList<>();
         for (var prod : sellerProducts) {
-            if (prod == null)
-                continue;
+            if (prod == null) continue;
             String st = prod.getStatus();
-            if (st == null || !"public".equalsIgnoreCase(st.trim()))
-                continue;
+            if (st == null || !"public".equalsIgnoreCase(st.trim())) continue;
             Long pid = prod.getProductId();
-            int capacity = prod.getQuantity() != null ? prod.getQuantity() : 0;
-            long sold = productLicensesRepository.countByProductViaOrders(pid);
-            long pre = productLicensesRepository.countPreGeneratedForProduct(pid);
-            long remaining = Math.max(0L, (long) capacity - sold - pre);
-            if (remaining <= 5) {
+            int quantity = prod.getQuantity() != null ? prod.getQuantity() : 0;
+            if (quantity <= 5) {
                 Map<String, Object> m = new HashMap<>();
                 m.put("productId", pid);
                 m.put("name", prod.getName());
-                m.put("remaining", remaining);
+                // Show quantity directly in the Remaining column
+                m.put("remaining", quantity);
                 m.put("status", prod.getStatus());
                 lowStock.add(m);
             }
