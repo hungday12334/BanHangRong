@@ -362,7 +362,27 @@ public class CartService {
                     OrderItems savedItem = savedItemsByProduct.get(p.getProductId());
                     if (savedItem != null) {
                         LocalDateTime nowTs = LocalDateTime.now();
-                        String expStr = LocalDate.now().plusDays(30).format(DateTimeFormatter.BASIC_ISO_DATE);
+                        LocalDateTime time= LocalDateTime.now();
+//                        List<ProductLicenses> listProductLicense = productLicensesRepository.findByUserIdAndProductId(it.getUserId(), p.getProductId());
+//                        System.out.println("helloooooo"+listProductLicense.size());
+//                        if(!listProductLicense.isEmpty()){
+//                            String key = listProductLicense.get(0).getLicenseKey();
+//                            //Lấy thơi gian ở giữa.
+//                            String[] listS = key.split("-");
+//                            if(listS.length >= 2){
+//                                //Thoi gian ma key nay het han
+//                                String lastTime = listS[1];
+//                                System.out.println(lastTime);
+//                                try{
+//                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+//                                    LocalDate date = LocalDate.parse(lastTime, formatter);
+//                                    time = date.atStartOfDay();
+//                                }catch (Exception e){
+//
+//                                }
+//                            }
+//                        }
+                        String expStr = time.plusDays(30).format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
                         for (int i = 0; i < buy; i++) {
                             String random = java.util.UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12).toUpperCase();
                             String key = "PRD" + p.getProductId() + '-' + expStr + '-' + random;
