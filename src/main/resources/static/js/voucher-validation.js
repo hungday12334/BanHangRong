@@ -81,8 +81,8 @@ function validateVoucherForm(formData, productPrice, productSalePrice) {
 
                 // B.4: If PERCENT, must be <= 100
                 if (formData.discountType === 'PERCENT') {
-                    if (discountValue > 100) {
-                        errors.discountValue = "Giá trị giảm giá % phải từ 0.01 đến 100";
+                    if (discountValue > 99) {
+                        errors.discountValue = "Giá trị giảm giá % phải từ 0.01 đến 99";
                     }
                 }
 

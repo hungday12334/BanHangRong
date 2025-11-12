@@ -94,14 +94,14 @@ public class VoucherDTO {
     /**
      * Rule B.4: If discountType is PERCENT, discountValue must be <= 100
      */
-    @AssertTrue(message = "Giá trị giảm giá % phải từ 0.01 đến 100")
+    @AssertTrue(message = "Giá trị giảm giá % phải từ 0.01 đến 99")
     public boolean isPercentageValueValid() {
         if (discountType == null || discountValue == null) {
             return true; // Let @NotNull handle this
         }
         if ("PERCENT".equalsIgnoreCase(discountType)) {
             return discountValue.compareTo(BigDecimal.ZERO) > 0
-                && discountValue.compareTo(BigDecimal.valueOf(100)) <= 0;
+                && discountValue.compareTo(BigDecimal.valueOf(99)) <= 0;
         }
         return true;
     }

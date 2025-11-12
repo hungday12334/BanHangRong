@@ -288,8 +288,8 @@ public class VoucherService {
         }
 
         if ("PERCENT".equalsIgnoreCase(voucher.getDiscountType()) &&
-            voucher.getDiscountValue().compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new IllegalArgumentException("Phần trăm giảm giá không được vượt quá 100%");
+            voucher.getDiscountValue().compareTo(BigDecimal.valueOf(99)) > 0) {
+            throw new IllegalArgumentException("Phần trăm giảm giá không được vượt quá 99%");
         }
 
         // Validate dates
