@@ -115,16 +115,7 @@
                              class="unavailable-message">
                             <p>This product is currently unavailable.</p>
                         </div>
-                        <!-- Success notification -->
-                        <div th:if="${cartSuccess}" class="cart-notification cart-notification-success">
-                            <span class="notification-icon">✓</span>
-                            <span th:text="${cartMessage}">Add success</span>
-                        </div>
-                        <!-- Error notification -->
-                        <div th:if="${cartError}" class="cart-notification cart-notification-error">
-                            <span class="notification-icon">✕</span>
-                            <span th:text="${cartMessage}">Error</span>
-                        </div>
+                        <p style="color: red">Note: Each license is available for 30 days</p>
 					</div>
 				</div>
 			</div>
