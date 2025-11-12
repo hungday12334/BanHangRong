@@ -1,0 +1,191 @@
+/* ============================================
+   Category Filter Styles
+   ============================================ */
+
+.filters {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    flex: 1;
+    min-width: 150px;
+}
+
+.filters label:first-child {
+    flex: 2;
+    min-width: 200px;
+}
+
+.filters input[type="text"],
+.filters input[type="number"],
+.filters select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333333;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.filters input[type="text"]:focus,
+.filters input[type="number"]:focus,
+.filters select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.filters input[type="text"]:hover,
+.filters input[type="number"]:hover,
+.filters select:hover {
+    border-color: #b0b0b0;
+}
+
+.filters input[type="text"]::placeholder {
+    color: #999999;
+}
+
+.filters select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+.filters button[type="submit"] {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #ffffff;
+    border: 1.5px solid transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+    white-space: nowrap;
+    box-sizing: border-box;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filters button[type="submit"]:hover {
+    background: linear-gradient(135deg, #357abd 0%, #2a5f8f 100%);
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+    transform: translateY(-1px);
+}
+
+.filters button[type="submit"]:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+}
+
+.filters a {
+    padding: 10px 24px;
+    background: #f5f5f5;
+    color: #666666;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid transparent;
+    box-sizing: border-box;
+    height: 40px;
+}
+
+.filters a:hover {
+    background: #e8e8e8;
+    color: #333333;
+    border-color: #d0d0d0;
+}
+
+.filters a:active {
+    background: #dddddd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filters label {
+        min-width: 100%;
+    }
+    
+    .filters label:first-child {
+        min-width: 100%;
+    }
+    
+    .filters button[type="submit"],
+    .filters a {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .filters {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .filters label {
+        font-size: 13px;
+    }
+    
+    .filters input[type="text"],
+    .filters input[type="number"],
+    .filters select,
+    .filters button[type="submit"],
+    .filters a {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}
+
+/* Animation for filter section */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filters {
+    animation: fadeIn 0.4s ease-out;
+}
+

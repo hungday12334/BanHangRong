@@ -25,4 +25,7 @@ public class ProductService {
     }
 
     public void delete(Long id){}
+    public List<Products> getAllProductByCategory(Long id){
+        return productsRepository.findByCategoryId(id);
+    }
 }

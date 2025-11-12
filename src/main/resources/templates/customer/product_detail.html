@@ -157,6 +157,11 @@
 					<span class="price" th:if="${product.salePrice == null}"
 						th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
 				</div>
+                <div style="color: red">Each product is only valid for 30 days</div>
+                <br>
+                <br>
+                <br>
+                <h3>Product description</h3>
 				<div class="section" style="white-space:pre-line;color:#374151" th:text="${product.description}">Product
 					description...</div>
 				<div class="section">

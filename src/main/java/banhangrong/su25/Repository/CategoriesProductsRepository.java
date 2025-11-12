@@ -3,6 +3,7 @@ package banhangrong.su25.Repository;
 import banhangrong.su25.Entity.Categories;
 import banhangrong.su25.Entity.CategoriesProducts;
 import banhangrong.su25.Entity.CategoriesProductsId;
+import banhangrong.su25.Entity.Products;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,7 @@ public interface CategoriesProductsRepository extends JpaRepository<CategoriesPr
 
     @Query("SELECT COUNT(cp) FROM CategoriesProducts cp WHERE cp.product.productId = :productId")
     int countByProductId(@Param("productId") Long productId);
+
+
+
 }

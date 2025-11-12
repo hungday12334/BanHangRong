@@ -4,16 +4,41 @@
     <meta charset="UTF-8">
     <title th:text="${category.name} + ' - BanHangRong'">Category - BanHangRong</title>
     <link rel="stylesheet" th:href="@{/css/custonmer/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/customer/category-filter.css}">
 </head>
 <body>
 <div th:replace="~{customer/fragments/header :: header}"></div>
 <div class="container">
     <h2 class="title" th:text="${category.name}">Category Name</h2>
 
-    <section class="grid" id="productGrid">
+    <form class="filters" th:action="@{/category/{id}(id=${category.categoryId})}" method="get">
+        <label>
+            Product name
+            <input type="text" name="keyword" th:value="${param.keyword}" placeholder="Search by name">
+        </label>
+        <label>
+            Min price
+            <input type="number" name="minPrice" th:value="${param.minPrice}" min="0" step="0">
+        </label>
+        <label>
+            Max price
+            <input type="number" name="maxPrice" th:value="${param.maxPrice}" min="0" step="0">
+        </label>
+        <label>
+            Sort by
+            <select name="sort">
+                <option value="priceAsc" th:selected="${param.sort == 'priceAsc'}">Price: Low to High</option>
+                <option value="priceDesc" th:selected="${param.sort == 'priceDesc'}">Price: High to Low</option>
+            </select>
+        </label>
+        <button type="submit">Filter</button>
+        <a th:href="@{/category/{id}(id=${category.categoryId})}">Reset</a>
+    </form>
+    <section class="grid" id="productGrid" >
         <!-- Loop qua danh sách products -->
         <a class="card clickable"
            th:each="p : ${products}"
+           th:if="${p.status == 'public' and !products.isEmpty()}"
            th:href="@{'/product/' + ${p.productId}}">
 
             <div class="thumb">
@@ -52,19 +77,20 @@
                 <div class="price">
                     <!-- Nếu có giá sale -->
                     <span th:if="${p.salePrice != null}">
-                    <span th:text="${p.salePrice}">0</span>₫
+                    <span th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                     <span class="price-original">
-                        <span th:text="${p.price}">0</span>₫
+                        <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                     </span>
                 </span>
                     <!-- Nếu không có giá sale -->
                     <span th:if="${p.salePrice == null}">
-                    <span th:text="${p.price}">0</span>₫
+                    <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                 </span>
                 </div>
             </div>
         </a>
     </section>
 </div>
+<script th:src="@{/js/customer/category-filter.js}"></script>
 </body>
 </html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Danh sách sản phẩm</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body>
+<h1>Danh sách sản phẩm</h1>
+
+<form th:action="@{/products}" method="get" class="filters">
+    <div>
+        <label for="category">Danh mục:</label>
+        <select id="category" name="category">
+            <option value="">-- Tất cả --</option>
+            <option th:each="cat : ${categories}"
+                    th:value="${cat}"
+                    th:selected="${cat == category}"
+                    th:text="${cat}">
+            </option>
+        </select>
+    </div>
+
+    <div>
+        <label for="minPrice">Giá từ:</label>
+        <input id="minPrice" name="minPrice" type="number" step="1000"
+               th:value="${minPrice}" placeholder="0"/>
+    </div>
+
+    <div>
+        <label for="maxPrice">Đến:</label>
+        <input id="maxPrice" name="maxPrice" type="number" step="1000"
+               th:value="${maxPrice}" placeholder="1000000"/>
+    </div>
+
+    <div>
+        <label for="sort">Sắp xếp:</label>
+        <select id="sort" name="sort">
+            <option value="asc" th:selected="${sort == 'asc'}">Giá tăng dần</option>
+            <option value="desc" th:selected="${sort == 'desc'}">Giá giảm dần</option>
+        </select>
+    </div>
+
+    <button type="submit">Lọc</button>
+    <a th:href="@{/products}">Reset</a>
+</form>
+
+<section class="product-list">
+    <div th:if="${#lists.isEmpty(products)}">
+        Không có sản phẩm phù hợp.
+    </div>
+
+    <div th:each="product : ${products}" class="product-card">
+        <h3 th:text="${product.name}">Tên sản phẩm</h3>
+        <p>
+            <span>Giá: </span>
+            <span th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + ' ₫'">0 ₫</span>
+        </p>
+        <p th:text="${product.category}">Danh mục</p>
+        <p th:text="${product.description}">Mô tả sản phẩm</p>
+        <a th:href="@{/products/{id}(id=${product.id})}">Xem chi tiết</a>
+    </div>
+</section>
+</body>
+</html>

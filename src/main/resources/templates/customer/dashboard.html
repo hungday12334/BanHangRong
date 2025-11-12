@@ -54,14 +54,14 @@
                 <div class="price">
                     <!-- Nếu có giá sale -->
                     <span th:if="${p.salePrice != null}">
-                    <span th:text="${p.salePrice}">0</span>₫
+                    <span th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                     <span class="price-original">
-                        <span th:text="${p.price}">0</span>₫
+                        <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                     </span>
                 </span>
                     <!-- Nếu không có giá sale -->
                     <span th:if="${p.salePrice == null}">
-                    <span th:text="${p.price}">0</span>₫
+                    <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                 </span>
                 </div>
             </div>

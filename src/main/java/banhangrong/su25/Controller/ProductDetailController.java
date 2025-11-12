@@ -20,7 +20,7 @@ public class ProductDetailController {
     @GetMapping("/product/{id}")
     public String productDetail(@PathVariable("id") Long id, Model model) {
 
-        Users currentUser = productDetailService.getCurrentUserOrNull();
+
         
         Products product = productDetailService.getProductById(id);
         if (product == null) {
@@ -32,14 +32,7 @@ public class ProductDetailController {
         model.addAttribute("images", productDetailService.getPrimaryImages(id));
         
         model.addAttribute("reviews", productDetailService.getReviewsByProduct(id));
-        
-        if (currentUser != null) {
-            model.addAttribute("user", currentUser);
-            try {
-                Long cartCount = productDetailService.getCartCount(currentUser.getUserId());
-                model.addAttribute("cartCount", cartCount);
-            } catch (Exception ignored) {}
-        }
+
         
         return "customer/product_detail";
     }
