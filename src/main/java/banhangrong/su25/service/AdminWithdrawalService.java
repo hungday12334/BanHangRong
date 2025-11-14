@@ -10,4 +10,5 @@ public interface AdminWithdrawalService {
     public WithdrawalRequest save(WithdrawalRequest withdrawalRequest);
     public void delete(Long id);
     public long countByStatus(String status);
+    public List<WithdrawalRequest> fiilter(String status, String sortBy, String sortOrder);
 }

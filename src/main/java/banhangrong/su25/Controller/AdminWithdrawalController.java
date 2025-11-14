@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/withdrawal")
@@ -40,10 +41,19 @@ public class AdminWithdrawalController {
     private EmailService emailService;
 
     @GetMapping()
-    public String index(Model model) {
-        model.addAttribute("withdrawals", withdrawalService.findAll());
+    public String index(
+            Model model,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "sortBy", required = false) String sortBy,
+            @RequestParam(value = "sortOrder", required = false) String sortOrder
+    ) {
+        List<WithdrawalRequest> withdrawals;
+        withdrawals = withdrawalService.fiilter(status, sortBy, sortOrder);
+        model.addAttribute("withdrawals", withdrawals);
+        model.addAttribute("status", status);
         return "admin/withdrawal-management";
     }
+
 
     @GetMapping("/detail")
     public String showCreateScreen(Model model, @RequestParam("id") String withdrawalId, RedirectAttributes redirectAttributes) {
@@ -166,7 +176,7 @@ public class AdminWithdrawalController {
                 redirectAttributes.addFlashAttribute("error", "Reason is required for cancellation.");
                 return "redirect:/admin/withdrawal/detail?id=" + id;
             }
-
+            withdrawalRequest.setNote(reason);
             withdrawalRequest.setStatus("Cancelled");
             actionResult = "cancelled";
             emailSubject = "Withdrawal Request Cancelled";
@@ -210,5 +220,4 @@ public class AdminWithdrawalController {
 
         return "redirect:/admin/withdrawal";
     }
-
 }

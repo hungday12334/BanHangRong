@@ -173,99 +173,26 @@
     <div class="content-wrapper">
 
         <!-- ==================== FILTER SECTION ==================== -->
-        <form th:action="@{/admin/withdrawal/filter}" method="get" class="form-user-filter">
+        <form th:action="@{/admin/withdrawal}" method="get" class="form-user-filter">
             <div class="user-header">
                 <!--  FILTER) -->
                 <div id="advancedFilter" class="advanced-filter mt-3 border rounded p-3 bg-light">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <label class="form-label">ID</label>
-                            <input min="0" type="number" class="form-control" name="id" placeholder="e.g. 1">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="" th:selected="${status == null or status == ''}">All</option>
+                                <option value="APPROVED" th:selected="${status == 'APPROVED'}">Approved</option>
+                                <option value="PENDING" th:selected="${status == 'PENDING'}">Pending</option>
+                                <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Cancelled</option>
+                            </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Seller ID</label>
-                            <input min="0" type="number" class="form-control" name="sellerId" placeholder="e.g. 101">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name" placeholder="Product name">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Price (Min)</label>
-                            <input min="0" type="number" step="0.01" class="form-control" name="minPrice"
-                                   placeholder="0">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Price (Max)</label>
-                            <input min="0" type="number" step="0.01" class="form-control" name="maxPrice"
-                                   placeholder="10000">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Sale Price (Min)</label>
-                            <input min="0" type="number" step="0.01" class="form-control" name="minSalePrice">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Sale Price (Max)</label>
-                            <input min="0" type="number" step="0.01" class="form-control" name="maxSalePrice">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Quantity (Min)</label>
-                            <input type="number" min="0" class="form-control" name="minQuantity">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Quantity (Max)</label>
-                            <input type="number" min="0" class="form-control" name="maxQuantity">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Total Sales (Min)</label>
-                            <input type="number" min="0" class="form-control" name="minTotalSales">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Total Sales (Max)</label>
-                            <input type="number" min="0" class="form-control" name="maxTotalSales">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Avg Rating (Min)</label>
-                            <input type="number" min="0" step="0.1" class="form-control" name="minAvgRating">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Avg Rating (Max)</label>
-                            <input type="number" min="0" step="0.1" class="form-control" name="maxAvgRating">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Created (From)</label>
-                            <input type="date" class="form-control" name="createdFrom">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Created (To)</label>
-                            <input type="date" class="form-control" name="createdTo">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Updated (From)</label>
-                            <input type="date" class="form-control" name="updatedFrom">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Updated (To)</label>
-                            <input type="date" class="form-control" name="updatedTo">
-                        </div>
-
                         <div class="col-md-3">
                             <label class="form-label">Sort By</label>
                             <select class="form-select" name="sortBy">
-                                <option value="productId">Product ID</option>
-                                <option value="sellerId">Seller ID</option>
-                                <option value="name">Name</option>
-                                <option value="price">Price</option>
-                                <option value="salePrice">Sale Price</option>
-                                <option value="quantity">Quantity</option>
-                                <option value="totalSales">Total Sales</option>
-                                <option value="averageRating">Avg Rating</option>
+                                <option value="withdrawalId">ID</option>
+                                <option value="userId">User ID</option>
+                                <option value="netAmount">Net Amount</option>
                                 <option value="createdAt">Created At</option>
                                 <option value="updatedAt">Updated At</option>
                             </select>
