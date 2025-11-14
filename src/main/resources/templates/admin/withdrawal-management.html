@@ -342,7 +342,7 @@
                     <td>
                         <span th:text="${w.status}"
                               th:class="'status-badge ' +
-                                  (${w.status.equalsIgnoreCase('success')} ? 'status-public' :
+                                  (${w.status.equalsIgnoreCase('approved')} ? 'status-public' :
                                   (${w.status.equalsIgnoreCase('pending')} ? 'status-pending' :
                                   (${w.status.equalsIgnoreCase('cancelled')} ? 'status-cancelled' : '')))">
                         </span>

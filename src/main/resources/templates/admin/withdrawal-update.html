@@ -272,13 +272,15 @@
         <div class="form-container">
             <!-- Approve Form -->
             <form id="approveForm" th:action="@{/admin/withdrawal/update}" method="post" style="display:inline;">
-                <input type="hidden" name="productId" th:value="${withdrawalRequest.withdrawalId}">
+                <input type="hidden" name="id" th:value="${withdrawalRequest.withdrawalId}">
+                <input type="hidden" name="status" value="Approved">
                 <button type="button" class="submit-btn btn-approve">Approve</button>
             </form>
 
             <!-- Cancel Form -->
-            <form id="cancelForm" th:action="@{/admin/withdrawal/cancel}" method="post" style="display:inline;">
-                <input type="hidden" name="productId" th:value="${withdrawalRequest.withdrawalId}">
+            <form id="cancelForm" th:action="@{/admin/withdrawal/update}" method="post" style="display:inline;">
+                <input type="hidden" name="id" th:value="${withdrawalRequest.withdrawalId}">
+                <input type="hidden" name="status" value="Cancelled">
                 <button type="button" class="cancel-btn btn-cancel">Cancel</button>
             </form>
         </div>
@@ -298,8 +300,8 @@
                 <p class="fs-5 mb-2">Do you want to approve this withdrawal?</p>
             </div>
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No</button>
                 <button type="button" class="btn btn-success px-4" id="confirmApproveBtn">Yes, Approve</button>
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No</button>
             </div>
         </div>
     </div>
@@ -328,8 +330,8 @@
                 </div>
             </div>
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No, Keep</button>
                 <button type="button" class="btn btn-danger px-4" id="confirmCancelBtn">Yes, Cancel</button>
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No, Keep</button>
             </div>
         </div>
     </div>
