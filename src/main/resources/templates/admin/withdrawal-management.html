@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Withdrawal Manage</title>
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}"/>
+    <link rel="stylesheet" th:href="@{/css/styles.min.css}"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Căn chỉnh phần nội dung chính để không bị sidebar che */
+        .content-wrapper {
+            margin-left: 260px;
+            padding: 30px;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* Header & filter bar */
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        table {
+            background-color: white;
+        }
+
+        th {
+            background-color: #6c8cff;
+            color: white;
+            text-align: center;
+        }
+
+        td, th {
+            padding: 10px;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f4ff;
+        }
+
+        tr:hover {
+            background-color: #e5e8ff;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+
+        /* Nút hành động */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .action-btns a,
+        .action-btns button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .action-btns a {
+            background-color: #4e73df;
+        }
+
+        .action-btns a i,
+        .action-btns button i {
+            color: white;
+            font-size: 16px;
+        }
+
+        .action-btns button {
+            background-color: #e74a3b;
+        }
+
+        .action-btns a:hover,
+        .action-btns button:hover {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .status-public {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .status-hidden {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .status-cancelled {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            min-width: 160px;
+        }
+
+        .advanced-filter label {
+            font-weight: 500;
+        }
+
+        .badge {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .form-user-filter {
+            display: contents;
+        }
+    </style>
+</head>
+
+<body>
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
+    <!-- Sidebar -->
+    <div th:replace="~{admin/sidebar::sidebar}"></div>
+
+    <div class="content-wrapper">
+
+        <!-- ==================== FILTER SECTION ==================== -->
+        <form th:action="@{/admin/withdrawal/filter}" method="get" class="form-user-filter">
+            <div class="user-header">
+                <!--  FILTER) -->
+                <div id="advancedFilter" class="advanced-filter mt-3 border rounded p-3 bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">ID</label>
+                            <input min="0" type="number" class="form-control" name="id" placeholder="e.g. 1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Seller ID</label>
+                            <input min="0" type="number" class="form-control" name="sellerId" placeholder="e.g. 101">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" placeholder="Product name">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Price (Min)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="minPrice"
+                                   placeholder="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Price (Max)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="maxPrice"
+                                   placeholder="10000">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sale Price (Min)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="minSalePrice">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sale Price (Max)</label>
+                            <input min="0" type="number" step="0.01" class="form-control" name="maxSalePrice">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity (Min)</label>
+                            <input type="number" min="0" class="form-control" name="minQuantity">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity (Max)</label>
+                            <input type="number" min="0" class="form-control" name="maxQuantity">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Total Sales (Min)</label>
+                            <input type="number" min="0" class="form-control" name="minTotalSales">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Total Sales (Max)</label>
+                            <input type="number" min="0" class="form-control" name="maxTotalSales">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Avg Rating (Min)</label>
+                            <input type="number" min="0" step="0.1" class="form-control" name="minAvgRating">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Avg Rating (Max)</label>
+                            <input type="number" min="0" step="0.1" class="form-control" name="maxAvgRating">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Created (From)</label>
+                            <input type="date" class="form-control" name="createdFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Created (To)</label>
+                            <input type="date" class="form-control" name="createdTo">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Updated (From)</label>
+                            <input type="date" class="form-control" name="updatedFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Updated (To)</label>
+                            <input type="date" class="form-control" name="updatedTo">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Sort By</label>
+                            <select class="form-select" name="sortBy">
+                                <option value="productId">Product ID</option>
+                                <option value="sellerId">Seller ID</option>
+                                <option value="name">Name</option>
+                                <option value="price">Price</option>
+                                <option value="salePrice">Sale Price</option>
+                                <option value="quantity">Quantity</option>
+                                <option value="totalSales">Total Sales</option>
+                                <option value="averageRating">Avg Rating</option>
+                                <option value="createdAt">Created At</option>
+                                <option value="updatedAt">Updated At</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Sort Order</label>
+                            <select class="form-select" name="sortOrder">
+                                <option value="ASC">Ascending</option>
+                                <option value="DESC">Descending</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-secondary me-2" id="resetFilter">Reset</button>
+                            <button type="submit" class="btn btn-primary" id="applyFilter">Apply Filter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- ==================== END FILTER ==================== -->
+
+        <!-- Product Table -->
+        <div class="table-responsive">
+            <!-- Thông báo lỗi -->
+            <div th:if="${error}"
+                 class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Thông báo thành công -->
+            <div th:if="${success}"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <table id="productTable" class="table table-bordered text-center align-middle shadow-sm">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>Seller ID</th>
+                    <th>Back Account</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Create At</th>
+                    <th>Update At</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="w : ${withdrawals}">
+                    <td>
+                        <div class="action-btns">
+                            <a th:href="@{'/admin/withdrawal/detail?id=' + ${w.withdrawalId}}">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        </div>
+                    </td>
+                    <td th:text="${w.withdrawalId}"></td>
+                    <td th:text="${w.userId}"></td>
+                    <!--                    <td >-->
+                    <!--                        <img th:src="@{${p.}}"-->
+                    <!--                             alt="Avatar"-->
+                    <!--                             class="rounded-circle"-->
+                    <!--                             style="width: 150px; height: 150px; object-fit: cover;">-->
+                    <!--                    </td>-->
+                    <td th:text="${w.bankAccountId}"></td>
+                    <td th:text="${w.netAmount}"></td>
+                    <td>
+                        <span th:text="${w.status}"
+                              th:class="'status-badge ' +
+                                  (${w.status.equalsIgnoreCase('success')} ? 'status-public' :
+                                  (${w.status.equalsIgnoreCase('pending')} ? 'status-pending' :
+                                  (${w.status.equalsIgnoreCase('cancelled')} ? 'status-cancelled' : '')))">
+                        </span>
+                    </td>
+                    <td th:text="${#temporals.format(w.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${#temporals.format(w.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let selectedForm = null;
+
+        // --- Cancel modal với lý do ---
+        const cancelModal = new bootstrap.Modal(document.getElementById('confirmCancelModal'));
+        const confirmBtn = document.getElementById('confirmCancelBtn');
+        const reasonInput = document.getElementById('cancelReason'); // Lấy textarea
+
+        // Khi bấm nút .btn-cancel → hiện modal + reset lý do
+        document.querySelectorAll('.btn-cancel').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault(); // QUAN TRỌNG: chặn submit form ngay
+                selectedForm = this.closest('form');
+                reasonInput.value = ''; // Xóa lý do cũ
+                cancelModal.show();
+            });
+        });
+
+        // Khi nhấn "Yes, Cancel" → kiểm tra lý do → submit
+        confirmBtn.addEventListener('click', function () {
+            if (!selectedForm) return;
+
+            const reason = reasonInput.value.trim();
+            if (!reason) {
+                alert('Please enter a reason for cancellation.');
+                return;
+            }
+
+            // Tạo input ẩn để gửi lý do về backend
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'reason'; // Backend sẽ nhận: @RequestParam("reason")
+            hiddenInput.value = reason;
+
+            selectedForm.appendChild(hiddenInput);
+            selectedForm.submit(); // Gửi form + id + reason
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const advancedFilter = document.getElementById("advancedFilter");
+        const toggleAdvanced = document.getElementById("toggleAdvanced");
+        const resetFilter = document.getElementById("resetFilter");
+        const statusSelect = document.getElementById("status");
+
+        // Toggle Advanced Filter
+        toggleAdvanced.addEventListener("click", function () {
+            if (advancedFilter.style.display === "none") {
+                advancedFilter.style.display = "block";
+                toggleAdvanced.innerHTML = '<i class="bi bi-x-circle"></i> Hide Advanced';
+            } else {
+                advancedFilter.style.display = "none";
+                toggleAdvanced.innerHTML = '<i class="bi bi-funnel"></i> Advanced Filter';
+            }
+        });
+
+        // Reset Advanced Inputs
+        resetFilter.addEventListener("click", function () {
+            document.querySelectorAll("#advancedFilter input, #advancedFilter select")
+                .forEach(el => el.value = "");
+        });
+
+        // QUICK FILTER: Status (client-side)
+        function filterByStatus() {
+            const status = statusSelect.value.toUpperCase();
+            document.querySelectorAll("#productTable tbody tr").forEach(row => {
+                const rowStatus = row.children[9].textContent.trim().toUpperCase();
+                row.style.display = (status === "" || rowStatus === status) ? "" : "none";
+            });
+        }
+
+        statusSelect.addEventListener("change", filterByStatus);
+        statusSelect.addEventListener("input", filterByStatus);
+    });
+</script>
+
+<!-- Scripts -->
+<script th:src="@{/assets/libs/jquery/dist/jquery.min.js}"></script>
+<script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+<script src="../assets/libs/simplebar/dist/simplebar.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
