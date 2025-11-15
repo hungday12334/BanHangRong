@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Professional Voucher Service for E-commerce Platform
@@ -164,10 +165,28 @@ public class VoucherService {
      */
     @Transactional
     public VoucherRedemptions redeemVoucher(Long voucherId, Long userId, Long orderId, BigDecimal discountAmount) {
-        // Update voucher usage count
+        // Get voucher
         Vouchers voucher = vouchersRepository.findById(voucherId)
             .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
 
+        // Check max uses per user before redeeming
+        if (voucher.getMaxUsesPerUser() != null && userId != null) {
+            long userUsageCount = redemptionsRepository.countByVoucherIdAndUserId(voucherId, userId);
+            if (userUsageCount >= voucher.getMaxUsesPerUser()) {
+                throw new IllegalArgumentException("Bạn đã sử dụng hết lượt cho voucher này (tối đa " + voucher.getMaxUsesPerUser() + " lần)");
+            }
+        }
+
+        // Check if order already has redemption for this voucher (prevent duplicate)
+        if (orderId != null && redemptionsRepository.existsByOrderId(orderId)) {
+            // Order already has a redemption, might be duplicate call
+            Optional<VoucherRedemptions> existing = redemptionsRepository.findByOrderId(orderId);
+            if (existing.isPresent() && existing.get().getVoucherId().equals(voucherId)) {
+                return existing.get(); // Return existing redemption
+            }
+        }
+
+        // Update voucher usage count
         int currentCount = voucher.getUsedCount() != null ? voucher.getUsedCount() : 0;
         voucher.setUsedCount(currentCount + 1);
 

@@ -196,6 +196,17 @@ public class CartService {
             return res;
         }
 
+        // Check max uses per user
+        Long userId = getCurrentUserIdOrFallback();
+        if (voucher.getMaxUsesPerUser() != null && userId != null) {
+            long userUsageCount = voucherRedemptionsRepository.countByVoucherIdAndUserId(voucher.getVoucherId(), userId);
+            if (userUsageCount >= voucher.getMaxUsesPerUser()) {
+                res.put("ok", false);
+                res.put("error", "Bạn đã sử dụng hết lượt cho voucher này (tối đa " + voucher.getMaxUsesPerUser() + " lần)");
+                return res;
+            }
+        }
+
         res.put("ok", true);
         res.put("code", voucher.getCode());
         return res;
