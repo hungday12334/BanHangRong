@@ -428,8 +428,13 @@ public class CartService {
                         }
                     }
                 }
-                
-                totalAmount = totalAmount.add(lineTotal.subtract(discount));
+                //Cong them tien vao cho seller
+                BigDecimal totalEachItem = lineTotal.subtract(discount);
+                Users sellerAccount = usersRepository.findById(p.getSellerId()).orElse(null);
+                if (sellerAccount != null) {
+                    sellerAccount.setBalance(sellerAccount.getBalance() != null ? sellerAccount.getBalance().add(totalEachItem) : totalEachItem);
+                }
+                totalAmount = totalAmount.add(totalEachItem);
             }
         }
 
