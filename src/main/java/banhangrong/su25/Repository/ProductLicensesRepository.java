@@ -115,6 +115,36 @@ public interface ProductLicensesRepository extends JpaRepository<ProductLicenses
             nativeQuery = true)
   Page<LicenseView> findByOrderId(@Param("orderId") Long orderId, Pageable pageable);
 
+  // Find licenses by orderItemId with pagination - only licenses from this specific order item
+  @Query(value = """
+            SELECT DISTINCT l.license_id AS licenseId,
+                   l.license_key AS licenseKey,
+                   l.is_active AS isActive,
+                   l.activation_date AS activationDate,
+                   l.last_used_date AS lastUsedDate,
+                   l.device_identifier AS deviceIdentifier,
+                   l.created_at AS createdAt,
+                   l.order_item_id AS orderItemId,
+                   oi.order_id AS orderId,
+                   oi.product_id AS productId,
+                   p.name AS productName
+            FROM product_licenses l
+            INNER JOIN order_items oi ON l.order_item_id = oi.order_item_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            WHERE l.order_item_id = :orderItemId
+              AND l.order_item_id IS NOT NULL
+            ORDER BY l.created_at DESC, l.license_id DESC
+            """,
+            countQuery = """
+            SELECT COUNT(DISTINCT l.license_id)
+            FROM product_licenses l
+            INNER JOIN order_items oi ON l.order_item_id = oi.order_item_id
+            WHERE l.order_item_id = :orderItemId
+              AND l.order_item_id IS NOT NULL
+            """,
+            nativeQuery = true)
+  Page<LicenseView> findByOrderItemId(@Param("orderItemId") Long orderItemId, Pageable pageable);
+
 
     @Query(value = "SELECT pl.* " +
             "FROM smiledev_wap.product_licenses pl " +

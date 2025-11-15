@@ -446,4 +446,65 @@ public class ProductLicenseController {
         
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * Get license keys for a specific order item (customer only)
+     * Example: GET /api/order-items/{orderItemId}/licenses?page=0&size=10
+     */
+    @GetMapping("/api/order-items/{orderItemId}/licenses")
+    public ResponseEntity<?> getOrderItemLicenses(@PathVariable Long orderItemId,
+                                                 @RequestParam(name = "page", defaultValue = "0") int page,
+                                                 @RequestParam(name = "size", defaultValue = "10") int size) {
+        // Get current user
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        
+        String username = auth.getName();
+        Optional<Users> userOpt = usersRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).body("User not found");
+        }
+        Long userId = userOpt.get().getUserId();
+        
+        // Verify order item belongs to current user
+        Optional<OrderItems> orderItemOpt = orderItemsRepository.findById(orderItemId);
+        if (orderItemOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Order item not found");
+        }
+        
+        OrderItems orderItem = orderItemOpt.get();
+        Long orderId = orderItem.getOrderId();
+        if (orderId == null) {
+            return ResponseEntity.status(404).body("Order not found for this order item");
+        }
+        
+        Optional<Orders> orderOpt = ordersRepository.findById(orderId);
+        if (orderOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Order not found");
+        }
+        
+        Orders order = orderOpt.get();
+        if (order.getUserId() == null || !order.getUserId().equals(userId)) {
+            return ResponseEntity.status(403).body("You don't have permission to view this order item's licenses");
+        }
+        
+        // Get licenses with pagination
+        if (size > 100) size = 100;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductLicensesRepository.LicenseView> licensesPage = licensesRepository.findByOrderItemId(orderItemId, pageable);
+        
+        // Log for debugging
+        System.out.println("[ProductLicenseController] Getting licenses for orderItemId: " + orderItemId + ", found: " + licensesPage.getTotalElements());
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", licensesPage.getContent());
+        response.put("page", licensesPage.getNumber());
+        response.put("size", licensesPage.getSize());
+        response.put("totalPages", licensesPage.getTotalPages());
+        response.put("totalElements", licensesPage.getTotalElements());
+        
+        return ResponseEntity.ok(response);
+    }
 }
