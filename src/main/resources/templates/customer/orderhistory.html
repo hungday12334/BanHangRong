@@ -774,7 +774,7 @@ body {
                         <div class="seller-info">
             <span>Seller:</span>
             <input type="text" th:value="${order.sellerId}" readonly>
-                            <button class="action-btn chat-btn">Chat</button>
+<!--                            <button class="action-btn chat-btn">Chat</button>-->
                             <button class="action-btn view-seller-btn" th:attr="data-seller-id=${order.sellerId}">View seller</button>
                         </div>
           <div class="status" th:class="${'status ' + (orderLicenseStatusMap != null and orderLicenseStatusMap[order.orderId] != null ? orderLicenseStatusMap[order.orderId].toLowerCase() : 'expired')}" th:text="'Status: ' + ${orderLicenseStatusMap != null and orderLicenseStatusMap[order.orderId] != null ? orderLicenseStatusMap[order.orderId] : 'Expired'}">Status: Active</div>

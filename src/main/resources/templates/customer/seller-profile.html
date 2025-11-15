@@ -359,9 +359,51 @@
 					</div>
 
 					<!-- Actions row -->
-					<div class="seller-actions">
-						<button class="btn btn-primary" onclick="alert('Chat feature coming soon!')">💬 Chat with Seller</button>
-					</div>
+<!--					<div class="seller-actions">-->
+<!--						<button class="btn btn-primary" onclick="alert('Chat feature coming soon!')">💬 Chat with Seller</button>-->
+<!--					</div>-->
+                    <!-- Chat with Seller Section -->
+                    <div class="chat-seller-section"
+                         th:if="${seller != null and sellerId != null}"
+                         style="
+        margin-top: 24px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        flex-direction: row;     /* đổi từ column → row */
+        gap: 20px;               /* tạo khoảng cách giữa text và nút */
+     ">
+
+                        <div style="display: flex; align-items: center; gap: 12px; margin: 0;">
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">
+                                💬 Chat with Seller
+                            </h3>
+                        </div>
+
+                        <a th:href="@{'/customer/chat'(sellerId=${seller.userId})}"
+                           style="
+            padding: 12px 24px;
+            background: #0ea5e9;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+            display: inline-block;
+       "
+                           onmouseover="this.style.background='#0284c7'"
+                           onmouseout="this.style.background='#0ea5e9'">
+                            Start Chat
+                        </a>
+                    </div>
+
 				</div>
 			</div>
 
