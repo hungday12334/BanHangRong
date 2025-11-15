@@ -466,3 +466,88 @@ img {
         font-weight: 700;
     }
 }
+
+/* ============================================
+   TOPUP NOTIFICATION STYLES
+   ============================================ */
+.topup-notification {
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topup-notification-success {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+}
+
+.topup-notification-error {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+}
+
+.topup-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.topup-notification-icon {
+    font-size: 24px;
+}
+
+.topup-notification-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.topup-notification-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.topup-notification-success .topup-notification-title {
+    color: #065f46;
+}
+
+.topup-notification-error .topup-notification-title {
+    color: #991b1b;
+}
+
+.topup-notification-message {
+    margin: 4px 0 0;
+    font-size: 14px;
+}
+
+.topup-notification-success .topup-notification-message {
+    color: #047857;
+}
+
+.topup-notification-error .topup-notification-message {
+    color: #b91c1c;
+}
+
+.topup-notification-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 8px;
+    line-height: 1;
+}
+
+.topup-notification-success .topup-notification-close {
+    color: #065f46;
+}
+
+.topup-notification-error .topup-notification-close {
+    color: #991b1b;
+}
+
+.topup-notification-close:hover {
+    opacity: 0.7;
+}

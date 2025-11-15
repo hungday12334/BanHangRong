@@ -4,11 +4,40 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" th:href="@{/css/customer/dashboard.css}">
+    <script th:src="@{/js/customer/dashboard.js}" defer></script>
 </head>
 <body>
 <div class="wrapper">
 <div th:replace="~{customer/fragments/header :: header}"></div>
 <div class="container">
+    <!-- Thông báo nạp tiền thành công -->
+    <div th:if="${topupStatus == 'success' and topupAmount != null}" 
+         class="topup-notification topup-notification-success">
+        <div class="topup-notification-content">
+            <span class="topup-notification-icon">✅</span>
+            <div class="topup-notification-text">
+                <strong class="topup-notification-title">Nạp tiền thành công!</strong>
+                <p class="topup-notification-message">
+                    Bạn đã nạp thành công <strong th:text="${#numbers.formatDecimal(topupAmount, 0, 'COMMA', 0, 'NONE')} + ' VND'">0 VND</strong> vào ví.
+                </p>
+            </div>
+        </div>
+        <button class="topup-notification-close" type="button">&times;</button>
+    </div>
+    
+    <!-- Thông báo lỗi nạp tiền -->
+    <div th:if="${topupStatus == 'error' and topupErrorMessage != null}" 
+         class="topup-notification topup-notification-error">
+        <div class="topup-notification-content">
+            <span class="topup-notification-icon">❌</span>
+            <div class="topup-notification-text">
+                <strong class="topup-notification-title">Lỗi nạp tiền</strong>
+                <p class="topup-notification-message" th:text="${topupErrorMessage}">Có lỗi xảy ra</p>
+            </div>
+        </div>
+        <button class="topup-notification-close" type="button">&times;</button>
+    </div>
+    
     <h2 class="title">Feature License</h2>
 
     <section class="grid" id="productGrid" >
@@ -32,8 +61,8 @@
                      th:if="${img.productId == p.productId}"
                      th:src="${img.imageUrl != null && !img.imageUrl.isEmpty() ? img.imageUrl : '/img/avatar_default.jpg'}"
                      th:alt="${p.name}"
-                     onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
-                     loading="lazy">
+                     loading="lazy"
+                     data-fallback="/img/avatar_default.jpg">
 
             </div>
 

@@ -114,6 +114,7 @@ public class VnPayController {
                         u.setBalance(current.add(inc));
                         usersRepository.save(u);
                     });
+                    return "redirect:/customer/dashboard?topup=success&amount=" + creditedAmountVnd;
                 } catch (Exception ignored) {}
             }
             return "redirect:/customer/dashboard?topup=success";
@@ -139,6 +140,14 @@ public class VnPayController {
             return "redirect:/login";
         }
         
+        String amountParam = req.getParameter("amount");
+        long amountVnd = normalizeAmountVnd(amountParam);
+        
+        // Validate: amount must be numeric and at least 20,000 VND
+        if (amountVnd == 0L || amountVnd < 20000L) {
+            return "redirect:/customer/dashboard?topup=error&message=Số tiền nạp tối thiểu là 20.000 VND";
+        }
+        
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String vnp_OrderInfo = "TOPUP:" + uid; // Special prefix for topup
@@ -146,10 +155,6 @@ public class VnPayController {
         String vnp_TxnRef = VnPayConfig.getRandomNumber(8);
         String vnp_IpAddr = VnPayConfig.getIpAddress(req);
         String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
-
-        long amountVnd = normalizeAmountVnd(req.getParameter("amount"));
-        // Enforce business minimum topup of 20,000 VND (higher than VNPay's 5,000)
-        if (amountVnd < 20000L) amountVnd = 20000L;
 
         // VNPay expects smallest unit: VND * 100
         long amount = amountVnd * 100L;
