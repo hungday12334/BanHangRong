@@ -363,9 +363,50 @@ public class CartService {
     }
 
     @Transactional
-    public String checkoutDemoAndReturnRedirect(jakarta.servlet.http.HttpSession session) {
+    public String checkoutDemoAndReturnRedirect(jakarta.servlet.http.HttpSession session, String selectedProductIdsStr) {
         Long uid = getCurrentUserIdOrFallback();
         List<ShoppingCart> items = cartRepository.findByUserId(uid);
+
+        // 🔹 Parse selected product IDs
+        Set<Long> selectedProductIds = new HashSet<>();
+        boolean hasSelectedProducts = false;
+        System.out.println("[CartService] Received selectedProductIdsStr: '" + selectedProductIdsStr + "'");
+        
+        if (selectedProductIdsStr != null && !selectedProductIdsStr.trim().isEmpty()) {
+            try {
+                String[] ids = selectedProductIdsStr.split(",");
+                System.out.println("[CartService] Split into " + ids.length + " IDs");
+                for (String id : ids) {
+                    String trimmedId = id.trim();
+                    if (!trimmedId.isEmpty()) {
+                        try {
+                            Long productId = Long.parseLong(trimmedId);
+                            selectedProductIds.add(productId);
+                            hasSelectedProducts = true;
+                            System.out.println("[CartService] Added productId: " + productId);
+                        } catch (NumberFormatException e) {
+                            System.err.println("[CartService] Failed to parse productId: '" + trimmedId + "' - " + e.getMessage());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("[CartService] Error parsing selectedProductIds: " + e.getMessage());
+            }
+        }
+        
+        System.out.println("[CartService] hasSelectedProducts: " + hasSelectedProducts + ", selectedProductIds size: " + selectedProductIds.size());
+
+        // 🔹 Nếu có selectedProductIds nhưng không có sản phẩm nào hợp lệ, trả về lỗi
+        if (selectedProductIdsStr != null && !selectedProductIdsStr.trim().isEmpty() && !hasSelectedProducts) {
+            System.err.println("[CartService] Invalid selection - string provided but no valid IDs parsed");
+            return "redirect:/customer/dashboard?purchase=failure&reason=invalid_selection";
+        }
+        
+        // 🔹 Nếu không có selectedProductIds (null hoặc empty), yêu cầu phải có selection
+        if (!hasSelectedProducts) {
+            System.err.println("[CartService] No products selected - selectedProductIdsStr is null or empty");
+            return "redirect:/customer/dashboard?purchase=failure&reason=no_selection";
+        }
 
         // 🔹 Lấy applied vouchers từ session
         @SuppressWarnings("unchecked")
@@ -374,9 +415,18 @@ public class CartService {
             appliedVouchers = new HashMap<>();
         }
 
-        // 🔹 Chỉ lấy các sản phẩm có status là "Public" và quantity > 0
+        // 🔹 Chỉ lấy các sản phẩm được chọn, có status là "Public" và quantity > 0
         List<ShoppingCart> validItems = new ArrayList<>();
+        System.out.println("[CartService] Processing " + items.size() + " cart items, looking for " + selectedProductIds.size() + " selected products");
+        
         for (ShoppingCart it : items) {
+            // CHỈ xử lý các sản phẩm được chọn (hasSelectedProducts đã được kiểm tra ở trên)
+            if (!selectedProductIds.contains(it.getProductId())) {
+                System.out.println("[CartService] Skipping productId " + it.getProductId() + " (not in selected list)");
+                continue; // Bỏ qua sản phẩm không được chọn
+            }
+            
+            System.out.println("[CartService] Processing selected productId: " + it.getProductId());
             Optional<Products> productOpt = productsRepository.findById(it.getProductId());
             if (productOpt.isPresent()) {
                 Products p = productOpt.get();
@@ -385,13 +435,22 @@ public class CartService {
                     int qty = it.getQuantity() != null ? it.getQuantity() : 0;
                     if (qty > 0) {
                         validItems.add(it);
+                        System.out.println("[CartService] Added to validItems: productId=" + it.getProductId() + ", qty=" + qty);
+                    } else {
+                        System.out.println("[CartService] Skipping productId " + it.getProductId() + " (quantity is 0)");
                     }
+                } else {
+                    System.out.println("[CartService] Skipping productId " + it.getProductId() + " (status is not Public: " + p.getStatus() + ")");
                 }
+            } else {
+                System.out.println("[CartService] Product not found for productId: " + it.getProductId());
             }
         }
+        
+        System.out.println("[CartService] Found " + validItems.size() + " valid items to checkout");
 
         if (validItems.isEmpty()) {
-            return "redirect:/cart?pay=empty";
+            return "redirect:/customer/dashboard?purchase=failure&reason=empty_cart";
         }
 
         // 🔹 Tính tổng tiền với voucher discount
@@ -439,7 +498,7 @@ public class CartService {
         }
 
         Users user = usersRepository.findById(uid).orElse(null);
-        if (user == null) return "redirect:/cart?error=user_not_found";
+        if (user == null) return "redirect:/customer/dashboard?purchase=failure&reason=user_not_found";
 
         BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
         if (currentBalance.compareTo(totalAmount) < 0) {
@@ -448,7 +507,7 @@ public class CartService {
                 session.setAttribute("currentBalance", currentBalance);
                 session.setAttribute("requiredAmount", totalAmount);
             }
-            return "redirect:/cart?error=insufficient_balance";
+            return "redirect:/customer/dashboard?purchase=failure&reason=insufficient_balance";
         }
 
         user.setBalance(currentBalance.subtract(totalAmount));
@@ -546,9 +605,30 @@ public class CartService {
             } catch (Exception ignored) {}
         }
 
-        // 🔹 Xóa tất cả cart (Public & non-Public)
-        for (ShoppingCart it : items) {
-            try { cartRepository.delete(it); } catch (Exception ignored) {}
+        // 🔹 Xóa chỉ các sản phẩm đã thanh toán (validItems) khỏi cart
+        // Lưu ý: Các sản phẩm không được chọn sẽ vẫn được giữ lại trong cart
+        System.out.println("[CartService] Deleting " + validItems.size() + " items from cart out of " + items.size() + " total items");
+        for (ShoppingCart it : validItems) {
+            try { 
+                System.out.println("[CartService] Deleting cart item: productId=" + it.getProductId() + ", quantity=" + it.getQuantity());
+                cartRepository.delete(it); 
+            } catch (Exception e) {
+                System.err.println("[CartService] Failed to delete cart item: " + e.getMessage());
+            }
+        }
+        System.out.println("[CartService] Cart cleanup completed. Remaining items should be: " + (items.size() - validItems.size()));
+        
+        // 🔹 Xóa vouchers đã sử dụng cho các sản phẩm đã thanh toán
+        // Lưu ý: Vouchers của các sản phẩm không được chọn sẽ vẫn được giữ lại trong session
+        if (session != null && appliedVouchers != null) {
+            for (ShoppingCart it : validItems) {
+                appliedVouchers.remove(it.getProductId());
+            }
+            if (appliedVouchers.isEmpty()) {
+                session.removeAttribute("appliedVouchers");
+            } else {
+                session.setAttribute("appliedVouchers", appliedVouchers);
+            }
         }
 
         // 🔹 Gửi thông báo đặt hàng thành công
@@ -623,11 +703,22 @@ public class CartService {
             e.printStackTrace();
         }
 
-        // 🔹 Xử lý voucher nếu có và lưu redemption records
+        // 🔹 Xử lý voucher nếu có và lưu redemption records (chỉ cho các sản phẩm đã thanh toán)
         try {
             if (session != null && appliedVouchers != null && !appliedVouchers.isEmpty()) {
+                // Create a set of product IDs that were actually checked out
+                Set<Long> checkedOutProductIds = new HashSet<>();
+                for (ShoppingCart it : validItems) {
+                    checkedOutProductIds.add(it.getProductId());
+                }
+                
                 for (Map.Entry<Long, String> entry : appliedVouchers.entrySet()) {
                     Long productId = entry.getKey();
+                    // Only process vouchers for products that were actually checked out
+                    if (!checkedOutProductIds.contains(productId)) {
+                        continue;
+                    }
+                    
                     String code = entry.getValue();
                     if (code != null) {
                         var candidates = vouchersRepository.findByCodeIgnoreCaseOrderByUpdatedAtDesc(code);
@@ -681,8 +772,6 @@ public class CartService {
                         }
                     }
                 }
-                // Clear applied vouchers after successful checkout
-                session.removeAttribute("appliedVouchers");
             }
         } catch (Exception ignored) {}
 

@@ -16,9 +16,9 @@
         <div class="topup-notification-content">
             <span class="topup-notification-icon">✅</span>
             <div class="topup-notification-text">
-                <strong class="topup-notification-title">Nạp tiền thành công!</strong>
+                <strong class="topup-notification-title">Top up successfully</strong>
                 <p class="topup-notification-message">
-                    Bạn đã nạp thành công <strong th:text="${#numbers.formatDecimal(topupAmount, 0, 'COMMA', 0, 'NONE')} + ' VND'">0 VND</strong> vào ví.
+                You top up successful <strong th:text="${#numbers.formatDecimal(topupAmount, 0, 'COMMA', 0, 'NONE')} + ' VND'">0 VND</strong>to your wallet.
                 </p>
             </div>
         </div>
@@ -31,8 +31,34 @@
         <div class="topup-notification-content">
             <span class="topup-notification-icon">❌</span>
             <div class="topup-notification-text">
-                <strong class="topup-notification-title">Lỗi nạp tiền</strong>
-                <p class="topup-notification-message" th:text="${topupErrorMessage}">Có lỗi xảy ra</p>
+                <strong class="topup-notification-title">Top up error</strong>
+                <p class="topup-notification-message" th:text="${topupErrorMessage}">Have an error</p>
+            </div>
+        </div>
+        <button class="topup-notification-close" type="button">&times;</button>
+    </div>
+    
+    <!-- Purchase success notification -->
+    <div th:if="${purchaseStatus == 'success' and purchaseMessage != null}" 
+         class="topup-notification topup-notification-success">
+        <div class="topup-notification-content">
+            <span class="topup-notification-icon">✅</span>
+            <div class="topup-notification-text">
+                <strong class="topup-notification-title">Purchase Successful</strong>
+                <p class="topup-notification-message" th:text="${purchaseMessage}">Purchase completed successfully!</p>
+            </div>
+        </div>
+        <button class="topup-notification-close" type="button">&times;</button>
+    </div>
+    
+    <!-- Purchase failure notification -->
+    <div th:if="${purchaseStatus == 'failure' and purchaseErrorMessage != null}" 
+         class="topup-notification topup-notification-error">
+        <div class="topup-notification-content">
+            <span class="topup-notification-icon">❌</span>
+            <div class="topup-notification-text">
+                <strong class="topup-notification-title">Purchase Failed</strong>
+                <p class="topup-notification-message" th:text="${purchaseErrorMessage}">Purchase failed</p>
             </div>
         </div>
         <button class="topup-notification-close" type="button">&times;</button>

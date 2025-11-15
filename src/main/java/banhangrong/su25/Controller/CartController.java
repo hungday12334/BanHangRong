@@ -157,7 +157,8 @@ public class CartController {
     }
 
     @PostMapping("/cart/checkout-demo")
-    public String checkoutDemo(HttpSession session) {
-        return cartService.checkoutDemoAndReturnRedirect(session);
+    public String checkoutDemo(@RequestParam(name = "selectedProductIds", required = false) String selectedProductIds,
+                                HttpSession session) {
+        return cartService.checkoutDemoAndReturnRedirect(session, selectedProductIds);
     }
 }
