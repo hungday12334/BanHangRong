@@ -111,42 +111,27 @@ public class SellerCategoryController {
             long totalProducts = 0;
             long categoriesWithProducts = 0;
 
-            // Filter categories: only show if seller has products OR if seller created it
-            List<Categories> relevantCategories = new ArrayList<>();
-
+            // Show ALL categories for seller (not filtered by products)
+            // Calculate product counts for each category
             for (Categories category : allCategories) {
                 // Count seller's products in this category
                 Long count = productsRepository.countByCategoryIdAndSellerId(category.getCategoryId(), sellerId);
                 productCountByCategory.put(category.getCategoryId(), count);
 
-                // Only include category if seller has products in it
-                // OR if it's a recently created category (last 7 days) to allow sellers to add products
-                LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-                boolean isRecentCategory = category.getCreatedAt() != null && category.getCreatedAt().isAfter(sevenDaysAgo);
-
-                if (count > 0 || isRecentCategory) {
-                    relevantCategories.add(category);
-                    totalProducts += count;
-                    if (count > 0) {
-                        categoriesWithProducts++;
-                    }
+                totalProducts += count;
+                if (count > 0) {
+                    categoriesWithProducts++;
                 }
             }
 
-            // Count recent categories that seller is using
+            // Count recent categories (last 7 days)
             LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-            long recentCategories = relevantCategories.stream()
+            long recentCategories = allCategories.stream()
                     .filter(c -> c.getCreatedAt() != null && c.getCreatedAt().isAfter(sevenDaysAgo))
                     .count();
 
-            // If seller has no products at all, show empty state with all categories
-            // so they can start adding products
-            if (totalProducts == 0) {
-                relevantCategories = allCategories; // Show all to let them choose
-            }
-
             // ===== APPLY ADVANCED FILTERS =====
-            List<Categories> filteredCategories = relevantCategories;
+            List<Categories> filteredCategories = allCategories;
 
             // Filter by Category ID
             if (categoryId != null) {
@@ -209,7 +194,7 @@ public class SellerCategoryController {
 
             model.addAttribute("categories", filteredCategories);
             model.addAttribute("productCountByCategory", productCountByCategory);
-            model.addAttribute("totalCategories", relevantCategories.size());
+            model.addAttribute("totalCategories", allCategories.size());
             model.addAttribute("categoriesWithProducts", categoriesWithProducts);
             model.addAttribute("totalProducts", totalProducts);
             model.addAttribute("recentCategories", recentCategories);
