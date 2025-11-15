@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" th:href="@{/css/customer/dashboard.css}">
+    <script th:src="@{/js/customer/dashboard.js}" defer></script>
 </head>
 <body>
 <div class="wrapper">
@@ -11,32 +12,30 @@
 <div class="container">
     <!-- Thông báo nạp tiền thành công -->
     <div th:if="${topupStatus == 'success' and topupAmount != null}" 
-         style="background: #d1fae5; border: 1px solid #10b981; border-radius: 8px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 24px;">✅</span>
-            <div>
-                <strong style="color: #065f46; font-size: 16px;">Nạp tiền thành công!</strong>
-                <p style="margin: 4px 0 0; color: #047857; font-size: 14px;">
+         class="topup-notification topup-notification-success">
+        <div class="topup-notification-content">
+            <span class="topup-notification-icon">✅</span>
+            <div class="topup-notification-text">
+                <strong class="topup-notification-title">Nạp tiền thành công!</strong>
+                <p class="topup-notification-message">
                     Bạn đã nạp thành công <strong th:text="${#numbers.formatDecimal(topupAmount, 0, 'COMMA', 0, 'NONE')} + ' VND'">0 VND</strong> vào ví.
                 </p>
             </div>
         </div>
-        <button onclick="this.parentElement.style.display='none'" 
-                style="background: none; border: none; font-size: 20px; cursor: pointer; color: #065f46; padding: 0 8px;">&times;</button>
+        <button class="topup-notification-close" type="button">&times;</button>
     </div>
     
     <!-- Thông báo lỗi nạp tiền -->
     <div th:if="${topupStatus == 'error' and topupErrorMessage != null}" 
-         style="background: #fee2e2; border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 24px;">❌</span>
-            <div>
-                <strong style="color: #991b1b; font-size: 16px;">Lỗi nạp tiền</strong>
-                <p style="margin: 4px 0 0; color: #b91c1c; font-size: 14px;" th:text="${topupErrorMessage}">Có lỗi xảy ra</p>
+         class="topup-notification topup-notification-error">
+        <div class="topup-notification-content">
+            <span class="topup-notification-icon">❌</span>
+            <div class="topup-notification-text">
+                <strong class="topup-notification-title">Lỗi nạp tiền</strong>
+                <p class="topup-notification-message" th:text="${topupErrorMessage}">Có lỗi xảy ra</p>
             </div>
         </div>
-        <button onclick="this.parentElement.style.display='none'" 
-                style="background: none; border: none; font-size: 20px; cursor: pointer; color: #991b1b; padding: 0 8px;">&times;</button>
+        <button class="topup-notification-close" type="button">&times;</button>
     </div>
     
     <h2 class="title">Feature License</h2>
@@ -62,8 +61,8 @@
                      th:if="${img.productId == p.productId}"
                      th:src="${img.imageUrl != null && !img.imageUrl.isEmpty() ? img.imageUrl : '/img/avatar_default.jpg'}"
                      th:alt="${p.name}"
-                     onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
-                     loading="lazy">
+                     loading="lazy"
+                     data-fallback="/img/avatar_default.jpg">
 
             </div>
 
