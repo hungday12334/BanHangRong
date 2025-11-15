@@ -117,6 +117,22 @@
                         </div>
                         <p style="color: red">Note: Each license is available for 30 days</p>
 					</div>
+<!--                    Chat with seller -->
+                    <a th:if="${product.sellerId != null}"
+                       th:href="@{/customer/chat(sellerId=${product.sellerId},productId=${product.productId},productName=${product.name},productPrice=${product.salePrice != null ? product.salePrice : product.price})}"
+                       class="btn"
+                       style="background:#10b981;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px"
+                       title="Chat with seller">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        💬 Chat với Shop
+                    </a>
+                    <span th:if="${product.sellerId == null}"
+                          style="padding:10px 14px;background:#f3f4f6;color:#6b7280;border-radius:10px;font-size:14px;">
+						⚠️ Seller not available
+					</span>
+<!--                    ENd chat with seller-->
 				</div>
 			</div>
 
