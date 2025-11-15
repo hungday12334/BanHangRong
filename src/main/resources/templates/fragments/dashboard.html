@@ -8,6 +8,12 @@
         Seller
       </span>!
     </h1>
+      <h1 style="margin-bottom:0;">Balance:
+          <span class="chip you" id="balance"
+                th:text="${user.balance != null ? #numbers.formatDecimal(user.balance, 1, 'COMMA', 2, 'POINT') : '0.00'}">
+    0.00
+  </span>
+      </h1>
     <!-- Keep sellerId hidden for client-side scripts that depend on it -->
     <span style="display:none"><b id="sellerId" th:text="${sellerId}"></b></span>
     <!-- Expose userId explicitly for client-side code to prefer (falls back to sellerId) -->

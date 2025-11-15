@@ -3,6 +3,7 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.BankAccount;
 import banhangrong.su25.Entity.Users;
 import banhangrong.su25.Entity.WithdrawalRequest;
+import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.email.Email;
 import banhangrong.su25.email.EmailService;
 import banhangrong.su25.service.AdminWithdrawalService;
@@ -34,7 +35,8 @@ public class AdminWithdrawalController {
     private AdminWithdrawalService withdrawalService;
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private UsersRepository usersRepository;
     @Autowired
     private BankAccountService bankAccountService;
     @Autowired
@@ -172,6 +174,8 @@ public class AdminWithdrawalController {
             );
 
         } else if ("Cancelled".equalsIgnoreCase(status)) {
+            user.setBalance(user.getBalance().add(withdrawalRequest.getNetAmount()));
+            userService.save(user);
             if (reason == null || reason.trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Reason is required for cancellation.");
                 return "redirect:/admin/withdrawal/detail?id=" + id;
@@ -180,7 +184,6 @@ public class AdminWithdrawalController {
             withdrawalRequest.setStatus("Cancelled");
             actionResult = "cancelled";
             emailSubject = "Withdrawal Request Cancelled";
-
             emailMessage = """
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden;">
             <div style="background: linear-gradient(135deg, #d32f2f, #f44336); padding: 20px; text-align: center; color: white;">
@@ -190,6 +193,7 @@ public class AdminWithdrawalController {
                 <p>Hi <strong>%s</strong>,</p>
                 <p>Your withdrawal request has been <strong>CANCELLED</strong>.</p>
                 <div style="background-color: #fdecea; border-left: 4px solid #d32f2f; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0;">
                     <p style="margin: 0;"><strong>Amount:</strong> %s VND</p>
                     <p style="margin: 8px 0 0;"><strong>Bank:</strong> %s - %s - %s</p>
                     <p style="margin: 8px 0 0;"><strong>Cancelled At:</strong> %s</p>
