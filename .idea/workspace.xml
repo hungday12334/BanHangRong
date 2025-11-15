@@ -4,14 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(category-management): remove bulk selection functionality and show all categories for seller">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(voucher): enhance voucher code uniqueness validation across all products for sellers">
       <change afterPath="$PROJECT_DIR$/VOUCHER_CODE_VALIDATION_SUMMARY.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/docs/manual-testing-voucher-uniqueness.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/docs/voucher-code-uniqueness-validation.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/sql/test_voucher_code_uniqueness.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/voucher-validation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/voucher.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,7 +198,7 @@
       <workItem from="1762502308301" duration="628000" />
       <workItem from="1762703072720" duration="25894000" />
       <workItem from="1763204160120" duration="863000" />
-      <workItem from="1763215462888" duration="3253000" />
+      <workItem from="1763215462888" duration="5748000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -304,7 +304,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763217387315</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="feat(voucher): enhance voucher code uniqueness validation across all products for sellers">
+      <option name="closed" value="true" />
+      <created>1763218805207</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1763218805207</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -356,7 +364,8 @@
     <MESSAGE value="refactor(profile): improve code readability and update comments in SellerProfileController" />
     <MESSAGE value="refactor(chat): streamline message handling and improve logging in chat functionality" />
     <MESSAGE value="feat(category-management): remove bulk selection functionality and show all categories for seller" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(category-management): remove bulk selection functionality and show all categories for seller" />
+    <MESSAGE value="feat(voucher): enhance voucher code uniqueness validation across all products for sellers" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(voucher): enhance voucher code uniqueness validation across all products for sellers" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

@@ -91,7 +91,7 @@ function validateVoucherForm(formData, productPrice, productSalePrice) {
                     // Use sale price if available, otherwise use regular price
                     const effectivePrice = productSalePrice && productSalePrice > 0 ? productSalePrice : productPrice;
 
-                    if (effectivePrice && discountValue > effectivePrice) {
+                    if (effectivePrice && discountValue >= effectivePrice) {
                         const priceType = productSalePrice && productSalePrice > 0 ? 'giá sale' : 'giá sản phẩm';
                         errors.discountValue = `Giá trị giảm giá không được vượt quá ${priceType} (${formatCurrency(effectivePrice)})`;
                     }
