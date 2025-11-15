@@ -48,5 +48,11 @@ public interface VouchersRepository extends JpaRepository<Vouchers, Long> {
     // Count vouchers by seller
     long countBySellerId(Long sellerId);
     long countBySellerIdAndStatusIgnoreCase(Long sellerId, String status);
+
+    // Check if voucher code exists for a seller (regardless of product, status, or expiration)
+    boolean existsBySellerIdAndCodeIgnoreCase(Long sellerId, String code);
+
+    // Find vouchers by seller and code (regardless of product, status, or expiration)
+    List<Vouchers> findBySellerIdAndCodeIgnoreCase(Long sellerId, String code);
 }
 

@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="refactor(chat): streamline message handling and improve logging in chat functionality">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="feat(category-management): remove bulk selection functionality and show all categories for seller">
+      <change afterPath="$PROJECT_DIR$/VOUCHER_CODE_VALIDATION_SUMMARY.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/manual-testing-voucher-uniqueness.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/voucher-code-uniqueness-validation.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/test_voucher_code_uniqueness.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Repository/VouchersRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/VoucherService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -194,7 +198,7 @@
       <workItem from="1762502308301" duration="628000" />
       <workItem from="1762703072720" duration="25894000" />
       <workItem from="1763204160120" duration="863000" />
-      <workItem from="1763215462888" duration="1761000" />
+      <workItem from="1763215462888" duration="3253000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -292,7 +296,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762753068890</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="feat(category-management): remove bulk selection functionality and show all categories for seller">
+      <option name="closed" value="true" />
+      <created>1763217387315</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1763217387315</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,7 +355,8 @@
     <MESSAGE value="refactor(chat): clean up comments and improve readability in ChatController, ChatMessageDTO, ChatService, and MessageRepository" />
     <MESSAGE value="refactor(profile): improve code readability and update comments in SellerProfileController" />
     <MESSAGE value="refactor(chat): streamline message handling and improve logging in chat functionality" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor(chat): streamline message handling and improve logging in chat functionality" />
+    <MESSAGE value="feat(category-management): remove bulk selection functionality and show all categories for seller" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(category-management): remove bulk selection functionality and show all categories for seller" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
