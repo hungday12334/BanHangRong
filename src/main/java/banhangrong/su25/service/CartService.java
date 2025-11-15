@@ -106,7 +106,9 @@ public class CartService {
             }
 
             String img = getPrimaryOrAnyImageUrl(p.getProductId());
+            //check price
             BigDecimal unit = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+            //check quantity in the cart
             BigDecimal line = unit.multiply(BigDecimal.valueOf(it.getQuantity() != null ? it.getQuantity() : 1));
 
             BigDecimal discount = BigDecimal.ZERO;
@@ -115,11 +117,13 @@ public class CartService {
                 List<Vouchers> vouchers = vouchersRepository.findByProductIdAndStatusIgnoreCase(p.getProductId(), "active");
                 for (Vouchers v : vouchers) {
                     if (v.getCode().equalsIgnoreCase(appliedVoucherCode)) {
+                        //check date
                         if ((v.getStartAt() == null || !LocalDateTime.now().isBefore(v.getStartAt())) &&
                             (v.getEndAt() == null || !LocalDateTime.now().isAfter(v.getEndAt()))) {
+                            //check min order
                             if (v.getMinOrder() == null || line.compareTo(v.getMinOrder()) >= 0) {
+                                //check discount type and value
                                 if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
-                                    // Voucher phần trăm chỉ áp dụng cho 1 license
                                     BigDecimal oneLicensePrice = unit;
                                     discount = oneLicensePrice.multiply(v.getDiscountValue().divide(new BigDecimal("100")));
                                 } else {
@@ -219,13 +223,15 @@ public class CartService {
         }
 
         Products product = productOpt.get();
-        // Chỉ cho phép thêm sản phẩm có status là "Public"
+        //check if product is public
         if (product.getStatus() == null || !"Public".equalsIgnoreCase(product.getStatus())) {
             return;
         }
-
+        //set quantity of cart
         int qty = (quantity != null && quantity > 0) ? quantity : 1;
+        //check quantity of product
         int stock = product.getQuantity() != null ? product.getQuantity() : 0;
+        //set cart
         Optional<ShoppingCart> existing = cartRepository.findByUserIdAndProductId(getCurrentUserIdOrFallback(), productId);
         
         if (existing.isPresent()) {
