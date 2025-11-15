@@ -24,7 +24,7 @@
                       class="badge-out">Out of Stock</span>
 
                 <!-- Badge Sale -->
-                <span th:if="${p.salePrice != null}"
+                <span th:if="${p.salePrice != null and p.salePrice < p.price}"
                       class="badge-sale">SALE</span>
 
                 <!-- Tìm và hiển thị ảnh của product này -->
@@ -54,14 +54,14 @@
                 <!-- Giá -->
                 <div class="price">
                     <!-- Nếu có giá sale -->
-                    <span th:if="${p.salePrice != null}">
+                    <span th:if="${p.salePrice != null and p.salePrice < p.price}">
                     <span th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                     <span class="price-original">
                         <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                     </span>
                 </span>
                     <!-- Nếu không có giá sale -->
-                    <span th:if="${p.salePrice == null}">
+                    <span th:unless="${p.salePrice != null and p.salePrice < p.price}">
                     <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'NONE')} + ' đ'"></span>
                 </span>
                 </div>

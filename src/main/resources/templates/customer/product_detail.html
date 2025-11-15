@@ -38,7 +38,7 @@
                          src="/img/avatar_default.jpg"
                          onerror="this.onerror=null;this.src='/img/avatar_default.jpg';"
                          loading="lazy">
-                    <div class="badge" th:if="${product.salePrice != null and product.price != null and product.price != 0}">
+                    <div class="badge" th:if="${product.salePrice != null and product.price != null and product.price != 0 and product.salePrice < product.price}">
                         <span th:text="'-' + ${#numbers.formatDecimal((product.price - product.salePrice) / product.price * 100,0,'COMMA',0,'POINT')} + '%'"></span>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
 
 					<!-- Display Price -->
 					<div class="section" id="productPrice">
-						<div th:if="${product.salePrice != null and product.price != null and product.price != 0}" class="price-sale">
+						<div th:if="${product.salePrice != null and product.price != null and product.price != 0 and product.salePrice < product.price}" class="price-sale">
                             <div class="price-main-row">
                                 <div class="sale-price">
                                     <span class="currency">₫</span>
@@ -80,7 +80,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div th:unless="${product.salePrice != null and product.price != null and product.price != 0}" class="price-normal">
+                        <div th:unless="${product.salePrice != null and product.price != null and product.price != 0 and product.salePrice < product.price}" class="price-normal">
                             <div class="sale-price" th:if="${product.price != null}">
                                 <span class="currency">₫</span>
                                 <span th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'NONE')}"></span>
