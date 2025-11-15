@@ -804,7 +804,7 @@ body {
             <!-- Action buttons for each product -->
             <div class="order-actions" style="margin-top: 12px;">
               <button class="rate-btn" th:attr="data-order-item-id=${orderItem.orderItemId}" onclick="openRateModal(this)">Rate</button>
-              <button class="license-key-btn" th:attr="data-order-id=${order.orderId}">License Key</button>
+              <button class="license-key-btn" th:attr="data-order-item-id=${orderItem.orderItemId}">License Key</button>
               <button class="buy-again-btn" th:attr="data-product-id=${orderItem.productId}">Buy again</button>
             </div>
           </div>
@@ -1557,25 +1557,25 @@ body {
         });
 
         // License Keys Modal Functions
-        let currentOrderId = null;
+        let currentOrderItemId = null;
         let licenseKeysPage = 0;
         const licenseKeysPageSize = 10;
 
         function openLicenseKeysModal(button) {
-            const orderId = button.getAttribute('data-order-id');
-            if (!orderId) {
-                showNotification('Error', 'Order ID not found', 'error');
+            const orderItemId = button.getAttribute('data-order-item-id');
+            if (!orderItemId) {
+                showNotification('Error', 'Order Item ID not found', 'error');
                 return;
             }
-            currentOrderId = orderId;
+            currentOrderItemId = orderItemId;
             licenseKeysPage = 0;
             document.getElementById('licenseKeysModal').style.display = 'flex';
-            loadLicenseKeys(orderId, 0);
+            loadLicenseKeys(orderItemId, 0);
         }
 
         function closeLicenseKeysModal() {
             document.getElementById('licenseKeysModal').style.display = 'none';
-            currentOrderId = null;
+            currentOrderItemId = null;
             licenseKeysPage = 0;
             document.getElementById('licenseKeysContent').style.display = 'none';
             document.getElementById('licenseKeysLoading').style.display = 'none';
@@ -1583,7 +1583,7 @@ body {
             document.getElementById('licenseKeysError').style.display = 'none';
         }
 
-        function loadLicenseKeys(orderId, page) {
+        function loadLicenseKeys(orderItemId, page) {
             const loadingEl = document.getElementById('licenseKeysLoading');
             const contentEl = document.getElementById('licenseKeysContent');
             const emptyEl = document.getElementById('licenseKeysEmpty');
@@ -1597,7 +1597,7 @@ body {
             emptyEl.style.display = 'none';
             errorEl.style.display = 'none';
 
-            fetch(`/api/orders/${orderId}/licenses?page=${page}&size=${licenseKeysPageSize}`)
+            fetch(`/api/order-items/${orderItemId}/licenses?page=${page}&size=${licenseKeysPageSize}`)
                 .then(response => {
                     if (!response.ok) {
                         return response.text().then(text => {
@@ -1614,10 +1614,30 @@ body {
                         return;
                     }
 
+                    // Function to parse and format expire date from license key
+                    function parseExpireDate(licenseKey) {
+                        try {
+                            const parts = (licenseKey || '').split('-');
+                            if (parts.length >= 3) {
+                                const dateStr = parts[1]; // Format: yyyyMMdd
+                                if (/^\d{8}$/.test(dateStr)) {
+                                    const year = dateStr.substring(0, 4);
+                                    const month = dateStr.substring(4, 6);
+                                    const day = dateStr.substring(6, 8);
+                                    return `${day}/${month}/${year}`;
+                                }
+                            }
+                        } catch (e) {
+                            // Ignore parsing errors
+                        }
+                        return null;
+                    }
+
                     // Render license keys
                     listEl.innerHTML = '';
                     data.content.forEach((license, index) => {
                         const sequenceNumber = page * licenseKeysPageSize + index + 1;
+                        const expireDate = parseExpireDate(license.licenseKey);
                         const keyItem = document.createElement('div');
                         keyItem.style.cssText = 'padding: 12px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 8px; background: #f9fafb;';
                         keyItem.innerHTML = `
@@ -1629,6 +1649,11 @@ body {
                                     <div style="font-family: monospace; font-size: 14px; color: #374151; word-break: break-all;">
                                         ${license.licenseKey}
                                     </div>
+                                    ${expireDate ? `
+                                    <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                                        Expire Date: <span style="font-weight: 500; color: #111827;">${expireDate}</span>
+                                    </div>
+                                    ` : ''}
                                     <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
                                         Status: <span style="color: ${license.isActive ? '#059669' : '#dc2626'}; font-weight: 600;">
                                             ${license.isActive ? 'Active' : 'Inactive'}
@@ -1655,7 +1680,7 @@ body {
                         prevBtn.onclick = () => {
                             if (page > 0) {
                                 licenseKeysPage = page - 1;
-                                loadLicenseKeys(orderId, licenseKeysPage);
+                                loadLicenseKeys(orderItemId, licenseKeysPage);
                             }
                         };
                         paginationEl.appendChild(prevBtn);
@@ -1669,7 +1694,7 @@ body {
                             pageBtn.textContent = i + 1;
                             pageBtn.onclick = () => {
                                 licenseKeysPage = i;
-                                loadLicenseKeys(orderId, licenseKeysPage);
+                                loadLicenseKeys(orderItemId, licenseKeysPage);
                             };
                             pageNumbers.appendChild(pageBtn);
                         }
@@ -1683,7 +1708,7 @@ body {
                         nextBtn.onclick = () => {
                             if (page < totalPages - 1) {
                                 licenseKeysPage = page + 1;
-                                loadLicenseKeys(orderId, licenseKeysPage);
+                                loadLicenseKeys(orderItemId, licenseKeysPage);
                             }
                         };
                         paginationEl.appendChild(nextBtn);
