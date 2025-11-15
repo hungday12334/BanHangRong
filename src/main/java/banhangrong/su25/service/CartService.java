@@ -23,6 +23,7 @@ public class CartService {
     private final OrderItemsRepository orderItemsRepository;
     private final VouchersRepository vouchersRepository;
     private final VoucherRedemptionsRepository voucherRedemptionsRepository;
+    private final VoucherService voucherService;
     private final NotificationService notificationService;
     private final EmailService emailService;
     private final ProductLicensesRepository productLicensesRepository;
@@ -36,6 +37,7 @@ public class CartService {
                        OrderItemsRepository orderItemsRepository,
                        VouchersRepository vouchersRepository,
                        VoucherRedemptionsRepository voucherRedemptionsRepository,
+                       VoucherService voucherService,
                        NotificationService notificationService,
                        EmailService emailService, ProductLicensesRepository productLicensesRepository, LicenseUsageLogService licenseUsageLogService) {
         this.cartRepository = cartRepository;
@@ -46,6 +48,7 @@ public class CartService {
         this.orderItemsRepository = orderItemsRepository;
         this.vouchersRepository = vouchersRepository;
         this.voucherRedemptionsRepository = voucherRedemptionsRepository;
+        this.voucherService = voucherService;
         this.notificationService = notificationService;
         this.emailService = emailService;
         this.productLicensesRepository = productLicensesRepository;
@@ -636,14 +639,29 @@ public class CartService {
                                 }
                             }
                             
-                            VoucherRedemptions rec = new VoucherRedemptions();
-                            rec.setVoucherId(v.getVoucherId());
-                            rec.setOrderId(savedOrder.getOrderId());
-                            rec.setUserId(uid);
-                            rec.setDiscountAmount(discountAmount);
-                            voucherRedemptionsRepository.save(rec);
-                            v.setUsedCount((v.getUsedCount() == null ? 0 : v.getUsedCount()) + 1);
-                            vouchersRepository.save(v);
+                            // Use VoucherService.redeemVoucher to properly update usedCount and remaining uses
+                            // This will automatically increment usedCount and expire voucher if max uses reached
+                            try {
+                                voucherService.redeemVoucher(v.getVoucherId(), uid, savedOrder.getOrderId(), discountAmount);
+                            } catch (Exception e) {
+                                // Fallback: manually update if voucherService fails
+                                VoucherRedemptions rec = new VoucherRedemptions();
+                                rec.setVoucherId(v.getVoucherId());
+                                rec.setOrderId(savedOrder.getOrderId());
+                                rec.setUserId(uid);
+                                rec.setDiscountAmount(discountAmount);
+                                voucherRedemptionsRepository.save(rec);
+                                
+                                int currentUsedCount = v.getUsedCount() != null ? v.getUsedCount() : 0;
+                                v.setUsedCount(currentUsedCount + 1);
+                                
+                                // Auto-expire if max uses reached
+                                if (v.getMaxUses() != null && v.getUsedCount() >= v.getMaxUses()) {
+                                    v.setStatus("expired");
+                                }
+                                
+                                vouchersRepository.save(v);
+                            }
                         }
                     }
                 }
