@@ -369,9 +369,17 @@
                 const v = field.value || '';
                 const clean = v.replace(/[^0-9]/g, '');
                 if (!clean) {
-                    err.textContent = 'Invalid amount';
+                    err.textContent = 'Vui lòng nhập số tiền hợp lệ';
+                    err.style.display = 'block';
                     return;
                 }
+                const amount = parseInt(clean, 10);
+                if (isNaN(amount) || amount < 20000) {
+                    err.textContent = 'Số tiền nạp tối thiểu là 20.000 VND';
+                    err.style.display = 'block';
+                    return;
+                }
+                err.style.display = 'none';
                 document.getElementById('topupAmountInput').value = clean;
                 ask.style.display = 'none';
                 __topupForm.submit();

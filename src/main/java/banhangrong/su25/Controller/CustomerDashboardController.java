@@ -71,13 +71,32 @@ public class CustomerDashboardController {
 
 
     @GetMapping("/customer/dashboard")
-    public String customerDashboard(Model model){
+    public String customerDashboard(@RequestParam(name = "topup", required = false) String topup,
+                                     @RequestParam(name = "amount", required = false) String amount,
+                                     @RequestParam(name = "message", required = false) String message,
+                                     Model model){
         List<Products> productsList = productService.getAllProducts();
         List<ProductImages> productImagesList = productImageService.getAllProductImages();
         //send product to view
         model.addAttribute("products", productsList);
         //send product images to view
         model.addAttribute("productImages", productImagesList);
+        
+        // Handle topup success/error messages
+        if (topup != null) {
+            model.addAttribute("topupStatus", topup);
+            if ("success".equals(topup) && amount != null) {
+                try {
+                    long amountValue = Long.parseLong(amount);
+                    model.addAttribute("topupAmount", amountValue);
+                } catch (NumberFormatException e) {
+                    // Ignore invalid amount
+                }
+            } else if ("error".equals(topup) && message != null) {
+                model.addAttribute("topupErrorMessage", message);
+            }
+        }
+        
         return "customer/dashboard";
     }
 
