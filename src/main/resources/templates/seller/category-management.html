@@ -197,14 +197,6 @@
                             <option value="products-desc">Most Products</option>
                             <option value="products-asc">Least Products</option>
                         </select>
-
-                        <button onclick="toggleBulkMode()" id="bulkModeBtn" class="btn btn-secondary" title="Select multiple">
-                            <i class="ti ti-checkbox"></i> Select Multiple
-                        </button>
-
-                        <button onclick="deleteSelected()" id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">
-                            <i class="ti ti-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
-                        </button>
                     </div>
 
                     <!-- Filter Status Display -->
@@ -243,10 +235,6 @@
                         <table class="category-table" id="categoryTable">
                             <thead>
                             <tr>
-                                <th class="bulk-select-col" data-bulk-only>
-                                    <label for="selectAll" style="display:none;">Select all</label>
-                                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
-                                </th>
                                 <th style="width:50px;">ID</th>
                                 <th style="width:40px;text-align:center;" title="Icon">📌</th>
                                 <th>Category Name</th>
@@ -272,9 +260,6 @@
                                          data-sort-order=${category.sortOrder ?: 0},
                                          data-status=${category.status ?: 'ACTIVE'},
                                          data-featured=${category.featured ?: false}">
-                                <td class="bulk-select-col" data-bulk-only>
-                                    <input type="checkbox" class="category-checkbox" th:value="${category.categoryId}" onchange="updateSelectedCount()" th:attr="aria-label='Select ' + ${category.name}" />
-                                </td>
                                 <td th:text="${category.categoryId}"></td>
 
                                 <!-- Icon Column -->
@@ -780,11 +765,10 @@
 
 <!-- Page-specific scripts -->
 <script>
-    let bulkModeActive = false;
     let currentFilter = 'all';
     // Pagination variables for category list
     let currentCategoryPage = 1;
-    const categoriesPerPage = 10;
+    const categoriesPerPage = 10; // Display all categories without pagination
 
     // Store filtered rows globally
     let cachedFilteredRows = [];
@@ -1079,10 +1063,6 @@
             });
         }, 5000);
 
-        // Initialize bulk columns as hidden
-        document.querySelectorAll('[data-bulk-only]').forEach(el => {
-            el.style.display = 'none';
-        });
 
         // Reset form after successful submission (only if there's success message)
         const successAlert = document.querySelector('.alert');
@@ -1556,131 +1536,6 @@
         refreshCategoryDisplay();
     }
 
-    // Toggle bulk selection mode
-    function toggleBulkMode() {
-        bulkModeActive = !bulkModeActive;
-        const bulkCols = document.querySelectorAll('[data-bulk-only]');
-        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-        const bulkModeBtn = document.getElementById('bulkModeBtn');
-
-        if (bulkModeActive) {
-            bulkCols.forEach(el => el.style.display = '');
-            bulkDeleteBtn.style.display = 'inline-flex';
-            bulkModeBtn.innerHTML = '<i class="ti ti-x"></i> Cancel Select';
-            bulkModeBtn.classList.add('active');
-        } else {
-            bulkCols.forEach(el => el.style.display = 'none');
-            bulkDeleteBtn.style.display = 'none';
-            bulkModeBtn.innerHTML = '<i class="ti ti-checkbox"></i> Select Multiple';
-            bulkModeBtn.classList.remove('active');
-
-            // Uncheck all
-            document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
-            const selectAllCb = document.getElementById('selectAll');
-            if (selectAllCb) selectAllCb.checked = false;
-            updateSelectedCount();
-        }
-    }
-
-    // Update select all checkbox state based on visible items
-    function updateSelectAllState() {
-        const selectAllCb = document.getElementById('selectAll');
-        if (!selectAllCb) return;
-
-        const visibleCheckboxes = Array.from(document.querySelectorAll('.category-checkbox')).filter(cb => {
-            const row = cb.closest('.category-row');
-            return row && row.style.display !== 'none';
-        });
-
-        if (visibleCheckboxes.length === 0) {
-            selectAllCb.checked = false;
-            selectAllCb.indeterminate = false;
-            return;
-        }
-
-        const checkedCount = visibleCheckboxes.filter(cb => cb.checked).length;
-
-        if (checkedCount === 0) {
-            selectAllCb.checked = false;
-            selectAllCb.indeterminate = false;
-        } else if (checkedCount === visibleCheckboxes.length) {
-            selectAllCb.checked = true;
-            selectAllCb.indeterminate = false;
-        } else {
-            selectAllCb.checked = false;
-            selectAllCb.indeterminate = true;
-        }
-    }
-
-    // Toggle select all checkboxes
-    function toggleSelectAll() {
-        const selectAll = document.getElementById('selectAll');
-        const checkboxes = document.querySelectorAll('.category-checkbox');
-
-        checkboxes.forEach(cb => {
-            const row = cb.closest('.category-row');
-            if (row && row.style.display !== 'none') {
-                cb.checked = selectAll.checked;
-            }
-        });
-
-        updateSelectedCount();
-    }
-
-    // Update selected count
-    function updateSelectedCount() {
-        const selectedCount = document.querySelectorAll('.category-checkbox:checked').length;
-        const countEl = document.getElementById('selectedCount');
-        if (countEl) {
-            countEl.textContent = selectedCount;
-        }
-        updateSelectAllState();
-    }
-
-    // Delete selected categories
-    function deleteSelected() {
-        const selected = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
-
-        if (selected.length === 0) {
-            alert('⚠️ Please select at least one category to delete.');
-            return;
-        }
-
-        const confirmMsg = selected.length === 1
-            ? `⚠️ Are you sure you want to delete 1 selected category?\n\n⚠️ Note: Categories with products cannot be deleted.`
-            : `⚠️ Are you sure you want to delete ${selected.length} selected categories?\n\n⚠️ Note: Categories with products cannot be deleted.`;
-
-        if (!confirm(confirmMsg)) {
-            return;
-        }
-
-        // Create and submit form
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/seller/categories/actions/bulk-delete';
-
-        // Add CSRF token
-        const csrfInput = document.querySelector('input[name="_csrf"]');
-        if (csrfInput) {
-            const csrf = document.createElement('input');
-            csrf.type = 'hidden';
-            csrf.name = '_csrf';
-            csrf.value = csrfInput.value;
-            form.appendChild(csrf);
-        }
-
-        // Add selected category IDs
-        selected.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'categoryIds';
-            input.value = id;
-            form.appendChild(input);
-        });
-
-        document.body.appendChild(form);
-        form.submit();
-    }
 
     // Export categories to CSV
     function exportCategories() {

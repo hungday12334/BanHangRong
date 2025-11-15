@@ -283,8 +283,17 @@ public class VoucherService {
     }
 
     /**
-     * Check if a voucher code already exists for a seller and product
+     * Check if a voucher code already exists for a seller (across all products and statuses)
      */
+    public boolean isVoucherCodeExists(Long sellerId, String code) {
+        return vouchersRepository.existsBySellerIdAndCodeIgnoreCase(sellerId, code);
+    }
+
+    /**
+     * Check if a voucher code already exists for a seller and product
+     * @deprecated Use isVoucherCodeExists(Long sellerId, String code) instead for global uniqueness
+     */
+    @Deprecated
     public boolean isVoucherCodeExists(Long sellerId, Long productId, String code) {
         return vouchersRepository.existsBySellerIdAndProductIdAndCodeIgnoreCase(sellerId, productId, code);
     }
@@ -317,9 +326,9 @@ public class VoucherService {
             throw new IllegalArgumentException("Ngày kết thúc phải sau ngày bắt đầu");
         }
 
-        // Check duplicate code
-        if (isVoucherCodeExists(voucher.getSellerId(), voucher.getProductId(), voucher.getCode())) {
-            throw new IllegalArgumentException("Mã voucher đã tồn tại");
+        // Check duplicate code across all seller's vouchers (regardless of product, status, or expiration)
+        if (isVoucherCodeExists(voucher.getSellerId(), voucher.getCode())) {
+            throw new IllegalArgumentException("Mã voucher đã tồn tại cho người bán này");
         }
 
         return vouchersRepository.save(voucher);
@@ -336,10 +345,10 @@ public class VoucherService {
         // Check if changing code would create duplicate (exclude current voucher)
         if (!existing.getCode().equalsIgnoreCase(updatedVoucher.getCode())) {
             // Only check if code is actually changing
+            // Check across all seller's vouchers (regardless of product, status, or expiration)
             List<Vouchers> existingWithCode = vouchersRepository
-                .findBySellerIdAndProductIdAndCodeIgnoreCase(
+                .findBySellerIdAndCodeIgnoreCase(
                     existing.getSellerId(),
-                    existing.getProductId(),
                     updatedVoucher.getCode()
                 );
 
@@ -348,7 +357,7 @@ public class VoucherService {
                 .anyMatch(v -> !v.getVoucherId().equals(voucherId));
 
             if (duplicateExists) {
-                throw new IllegalArgumentException("Mã voucher đã tồn tại");
+                throw new IllegalArgumentException("Mã voucher đã tồn tại cho người bán này");
             }
         }
 

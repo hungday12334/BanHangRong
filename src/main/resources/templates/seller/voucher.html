@@ -1530,6 +1530,7 @@
   <script>
     // Global variables
     let selectedProductId = null;
+    let selectedProductSalePrice = null;
     let currentPage = 0;
     let currentStatus = null;
     let vouchers = [];
@@ -1882,6 +1883,7 @@
 
     function selectProduct(productId, productName, displayPrice, originalPrice, salePrice) {
       selectedProductId = productId;
+      selectedProductSalePrice = salePrice;
 
       document.getElementById('selectedProductName').textContent = productName;
       document.getElementById('selectedProductId').textContent = productId;
@@ -1915,6 +1917,7 @@
 
     function clearProductSelection() {
       selectedProductId = null;
+      selectedProductSalePrice = null;
       document.getElementById('selectedProductDisplay').classList.remove('active');
       document.getElementById('productSearchInput').value = '';
 
@@ -2380,6 +2383,15 @@
 
         const voucher = await response.json();
 
+        // Find product info from cache to get salePrice
+        if (voucher.product && voucher.product.productId) {
+          const product = productsCache.find(p => p.productId === voucher.product.productId);
+          if (product) {
+            selectedProductId = product.productId;
+            selectedProductSalePrice = product.salePrice;
+          }
+        }
+
         document.getElementById('voucherId').value = voucher.voucherId;
         document.getElementById('voucherCode').value = voucher.code;
         document.getElementById('discountType').value = voucher.discountType;
@@ -2447,6 +2459,15 @@
       if (isNaN(discountValue) || discountValue <= 0) {
         showAlert('Discount value must be greater than 0', 'error');
         return;
+      }
+
+      // Validate discount value against sale price for AMOUNT type
+      const discountType = formData.get('discountType');
+      if (discountType === 'AMOUNT' && selectedProductSalePrice && selectedProductSalePrice > 0) {
+        if (discountValue >= selectedProductSalePrice) {
+          showAlert('Giá trị giảm giá phải nhỏ hơn giá sale của sản phẩm (' + formatCurrency(selectedProductSalePrice) + ')', 'error');
+          return;
+        }
       }
 
       const maxUsesValue = formData.get('maxUses');
