@@ -76,6 +76,8 @@ public class WithdrawalService {
         b.setAccountHolderName(accountHolderName);
         b.setBranch(branch);
         b.setIsDefault(makeDefault);
+        b.setCreatedAt(LocalDateTime.now());
+        b.setUpdatedAt(LocalDateTime.now());
         return bankRepo.save(b);
     }
 
