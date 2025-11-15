@@ -61,6 +61,21 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    @PostMapping("/api/cart/add")
+    @ResponseBody
+    public Map<String, Object> addToCartApi(@RequestParam("productId") Long productId,
+                                            @RequestParam(name = "quantity", required = false, defaultValue = "1") Integer quantity) {
+        Map<String, Object> result = new HashMap<>();
+        Users user = cartService.getCurrentUserOrNull();
+        if (user == null) {
+            result.put("success", false);
+            result.put("error", "Please login to add items to cart");
+            return result;
+        }
+
+        return cartService.addToCartWithResponse(productId, quantity);
+    }
+
 
     @PostMapping("/cart/update")
     @ResponseBody
@@ -71,10 +86,17 @@ public class CartController {
 
     @PostMapping("/cart/remove")
     @ResponseBody
-    public Map<String, Object> removeFromCart(@RequestParam("productId") Long productId) {
+    public Map<String, Object> removeFromCart(@RequestParam("productId") Long productId, HttpSession session) {
         Map<String, Object> res = new HashMap<>();
         try {
             cartService.removeFromCart(productId);
+            // Remove voucher for this product when product is removed from cart
+            @SuppressWarnings("unchecked")
+            Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+            if (appliedVouchers != null) {
+                appliedVouchers.remove(productId);
+                session.setAttribute("appliedVouchers", appliedVouchers);
+            }
             res.put("ok", true);
         } catch (Exception e) {
             res.put("ok", false);
@@ -84,9 +106,16 @@ public class CartController {
     }
 
     @GetMapping("/cart/remove")
-    public String removeFromCartGet(@RequestParam("productId") Long productId) {
+    public String removeFromCartGet(@RequestParam("productId") Long productId, HttpSession session) {
         try {
             cartService.removeFromCart(productId);
+            // Remove voucher for this product when product is removed from cart
+            @SuppressWarnings("unchecked")
+            Map<Long, String> appliedVouchers = (Map<Long, String>) session.getAttribute("appliedVouchers");
+            if (appliedVouchers != null) {
+                appliedVouchers.remove(productId);
+                session.setAttribute("appliedVouchers", appliedVouchers);
+            }
         } catch (Exception ignored) {
         }
         return "redirect:/cart";

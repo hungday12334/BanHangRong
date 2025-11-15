@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -118,7 +116,9 @@ public class CartService {
                             (v.getEndAt() == null || !LocalDateTime.now().isAfter(v.getEndAt()))) {
                             if (v.getMinOrder() == null || line.compareTo(v.getMinOrder()) >= 0) {
                                 if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
-                                    discount = line.multiply(v.getDiscountValue().divide(new BigDecimal("100")));
+                                    // Voucher phần trăm chỉ áp dụng cho 1 license
+                                    BigDecimal oneLicensePrice = unit;
+                                    discount = oneLicensePrice.multiply(v.getDiscountValue().divide(new BigDecimal("100")));
                                 } else {
                                     discount = v.getDiscountValue();
                                 }
@@ -268,9 +268,11 @@ public class CartService {
         // Check if total quantity exceeds max
         if (totalRequested > maxQuantity) {
             res.put("success", false);
-            res.put("error", "Max quantity is " + maxQuantity);
+            res.put("error", "Max quantity");
+            res.put("errorCode", "MAX_QUANTITY");
             res.put("maxQuantity", maxQuantity);
             res.put("productName", product.getName());
+            res.put("currentCartQty", currentCartQty);
             return res;
         }
         
@@ -316,7 +318,14 @@ public class CartService {
             return res;
         }
 
-        int requested = quantity != null && quantity > 0 ? quantity : 1;
+        // Validate quantity > 0
+        if (quantity == null || quantity <= 0) {
+            res.put("ok", false);
+            res.put("error", "Quantity must be greater than 0");
+            return res;
+        }
+
+        int requested = quantity;
         int stock = product.getQuantity() != null ? product.getQuantity() : 0;
         int applied = Math.min(requested, stock);
         Optional<ShoppingCart> existing = cartRepository.findByUserIdAndProductId(getCurrentUserIdOrFallback(), productId);
@@ -344,14 +353,25 @@ public class CartService {
         Long uid = getCurrentUserIdOrFallback();
         List<ShoppingCart> items = cartRepository.findByUserId(uid);
 
-        // 🔹 Chỉ lấy các sản phẩm có status là "Public"
+        // 🔹 Lấy applied vouchers từ session
+        @SuppressWarnings("unchecked")
+        Map<Long, String> appliedVouchers = (Map<Long, String>) (session != null ? session.getAttribute("appliedVouchers") : null);
+        if (appliedVouchers == null) {
+            appliedVouchers = new HashMap<>();
+        }
+
+        // 🔹 Chỉ lấy các sản phẩm có status là "Public" và quantity > 0
         List<ShoppingCart> validItems = new ArrayList<>();
         for (ShoppingCart it : items) {
             Optional<Products> productOpt = productsRepository.findById(it.getProductId());
             if (productOpt.isPresent()) {
                 Products p = productOpt.get();
                 if (p.getStatus() != null && "Public".equalsIgnoreCase(p.getStatus())) {
-                    validItems.add(it);
+                    // Kiểm tra quantity > 0
+                    int qty = it.getQuantity() != null ? it.getQuantity() : 0;
+                    if (qty > 0) {
+                        validItems.add(it);
+                    }
                 }
             }
         }
@@ -360,18 +380,44 @@ public class CartService {
             return "redirect:/cart?pay=empty";
         }
 
-        // 🔹 Tính tổng tiền chỉ cho sản phẩm Public
-        final BigDecimal totalAmount = validItems.stream()
-                .map(it -> {
-                    Products p = productsRepository.findById(it.getProductId()).orElse(null);
-                    if (p != null) {
-                        BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
-                        int qty = it.getQuantity() != null ? it.getQuantity() : 1;
-                        return unitPrice.multiply(BigDecimal.valueOf(qty));
+        // 🔹 Tính tổng tiền với voucher discount
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (ShoppingCart it : validItems) {
+            Products p = productsRepository.findById(it.getProductId()).orElse(null);
+            if (p != null) {
+                BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+                
+                // Tính discount nếu có voucher
+                BigDecimal discount = BigDecimal.ZERO;
+                String appliedVoucherCode = appliedVouchers.get(p.getProductId());
+                if (appliedVoucherCode != null) {
+                    List<Vouchers> vouchers = vouchersRepository.findByProductIdAndStatusIgnoreCase(p.getProductId(), "active");
+                    for (Vouchers v : vouchers) {
+                        if (v.getCode().equalsIgnoreCase(appliedVoucherCode)) {
+                            LocalDateTime now = LocalDateTime.now();
+                            if ((v.getStartAt() == null || !now.isBefore(v.getStartAt())) &&
+                                (v.getEndAt() == null || !now.isAfter(v.getEndAt()))) {
+                                if (v.getMinOrder() == null || lineTotal.compareTo(v.getMinOrder()) >= 0) {
+                                    if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
+                                        // Voucher phần trăm chỉ áp dụng cho 1 license
+                                        BigDecimal oneLicensePrice = unitPrice;
+                                        discount = oneLicensePrice.multiply(v.getDiscountValue().divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP));
+                                    } else {
+                                        discount = v.getDiscountValue();
+                                    }
+                                    if (discount.compareTo(lineTotal) > 0) discount = lineTotal;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                    return BigDecimal.ZERO;
-                })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                }
+                
+                totalAmount = totalAmount.add(lineTotal.subtract(discount));
+            }
+        }
 
         Users user = usersRepository.findById(uid).orElse(null);
         if (user == null) return "redirect:/cart?error=user_not_found";
@@ -558,28 +604,51 @@ public class CartService {
             e.printStackTrace();
         }
 
-        // 🔹 Xử lý voucher nếu có
+        // 🔹 Xử lý voucher nếu có và lưu redemption records
         try {
-            if (session != null) {
-                Map<String, Object> applied = (Map<String, Object>) session.getAttribute("appliedVoucher");
-                if (applied != null) {
-                    String code = Objects.toString(applied.get("code"), null);
+            if (session != null && appliedVouchers != null && !appliedVouchers.isEmpty()) {
+                for (Map.Entry<Long, String> entry : appliedVouchers.entrySet()) {
+                    Long productId = entry.getKey();
+                    String code = entry.getValue();
                     if (code != null) {
                         var candidates = vouchersRepository.findByCodeIgnoreCaseOrderByUpdatedAtDesc(code);
-                        Vouchers v = candidates.isEmpty() ? null : candidates.get(0);
-                        if (v != null) {
+                        if (!candidates.isEmpty()) {
+                            Vouchers v = candidates.get(0);
+                            // Calculate actual discount for this product
+                            BigDecimal discountAmount = BigDecimal.ZERO;
+                            for (ShoppingCart it : validItems) {
+                                if (it.getProductId().equals(productId)) {
+                                    Products p = productsRepository.findById(productId).orElse(null);
+                                    if (p != null) {
+                                        BigDecimal unitPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+                                        int qty = it.getQuantity() != null ? it.getQuantity() : 1;
+                                        BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+                                        
+                                        if ("PERCENT".equalsIgnoreCase(v.getDiscountType())) {
+                                            BigDecimal oneLicensePrice = unitPrice;
+                                            discountAmount = oneLicensePrice.multiply(v.getDiscountValue().divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP));
+                                        } else {
+                                            discountAmount = v.getDiscountValue();
+                                        }
+                                        if (discountAmount.compareTo(lineTotal) > 0) discountAmount = lineTotal;
+                                    }
+                                    break;
+                                }
+                            }
+                            
                             VoucherRedemptions rec = new VoucherRedemptions();
                             rec.setVoucherId(v.getVoucherId());
                             rec.setOrderId(savedOrder.getOrderId());
                             rec.setUserId(uid);
-                            rec.setDiscountAmount(java.math.BigDecimal.ZERO);
+                            rec.setDiscountAmount(discountAmount);
                             voucherRedemptionsRepository.save(rec);
                             v.setUsedCount((v.getUsedCount() == null ? 0 : v.getUsedCount()) + 1);
                             vouchersRepository.save(v);
-                            session.removeAttribute("appliedVoucher");
                         }
                     }
                 }
+                // Clear applied vouchers after successful checkout
+                session.removeAttribute("appliedVouchers");
             }
         } catch (Exception ignored) {}
 

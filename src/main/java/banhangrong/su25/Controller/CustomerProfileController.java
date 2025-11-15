@@ -89,12 +89,9 @@ public class CustomerProfileController {
                 model.addAttribute("emailError", "Email đã tồn tại, vui lòng chọn email khác.");
                 return "customer/profile-edit";
             }
-            // Persist the new email immediately using update query to avoid stale entity issues
             profileService.updateEmailAndUnverify(currentUser.getUserId(), newEmail);
-            // Refresh in-memory user for the same request
             currentUser.setEmail(newEmail);
             currentUser.setIsEmailVerified(false);
-            // invalidate previous token
             profileService.findUnusedTokenByUser(currentUser.getUserId())
                     .ifPresent(profileService::deleteToken);
             // create new verify token
@@ -122,111 +119,6 @@ public class CustomerProfileController {
         return "redirect:/customer/profile/" + currentUser.getUsername() + "?updated=1";
     }
 
-    @GetMapping("/customer/verify-code")
-    public String showVerifyCodeForm(Model model) {
-        Users currentUser = profileService.getCurrentUserOrNull();
-        if (currentUser == null) return "redirect:/login";
-        addHeader(model, currentUser);
-        long remaining = 0;
-        var existingOpt = profileService.findUnusedTokenByUser(currentUser.getUserId());
-        if (existingOpt.isPresent()) {
-            var evt = existingOpt.get();
-            long seconds = java.time.Duration.between(evt.getCreatedAt(), java.time.LocalDateTime.now()).getSeconds();
-            if (seconds < VERIFY_CODE_COOLDOWN_SECONDS) remaining = VERIFY_CODE_COOLDOWN_SECONDS - seconds;
-        }
-        model.addAttribute("remainingSeconds", remaining);
-        model.addAttribute("user", currentUser);
-        return "customer/verify-email-code";
-    }
-
-    @PostMapping("/customer/verify-code")
-    public String submitVerifyCode(@RequestParam("code") String code, Model model) {
-        Users currentUser = profileService.getCurrentUserOrNull();
-        if (currentUser == null) return "redirect:/login";
-        var opt = profileService.findUnusedTokenByUser(currentUser.getUserId());
-        if (opt.isEmpty()) {
-            model.addAttribute("error", "Không tìm thấy mã xác thực. Hãy đổi email hoặc yêu cầu gửi lại mã.");
-            addHeader(model, currentUser);
-            model.addAttribute("remainingSeconds", 0);
-            model.addAttribute("user", currentUser);
-            return "customer/verify-email-code";
-        }
-        EmailVerificationToken evt = opt.get();
-        if (evt.getExpiresAt() != null && evt.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
-            model.addAttribute("error", "Mã đã hết hạn. Vui lòng yêu cầu mã mới.");
-            addHeader(model, currentUser);
-            model.addAttribute("remainingSeconds", 0);
-            model.addAttribute("user", currentUser);
-            return "customer/verify-email-code";
-        }
-        if (!evt.getToken().equals(code.trim())) {
-            model.addAttribute("error", "Mã không đúng. Vui lòng thử lại.");
-            addHeader(model, currentUser);
-            long remaining = 0;
-            long seconds = java.time.Duration.between(evt.getCreatedAt(), java.time.LocalDateTime.now()).getSeconds();
-            if (seconds < VERIFY_CODE_COOLDOWN_SECONDS) remaining = VERIFY_CODE_COOLDOWN_SECONDS - seconds;
-            model.addAttribute("remainingSeconds", remaining);
-            model.addAttribute("user", currentUser);
-            return "customer/verify-email-code";
-        }
-        currentUser.setIsEmailVerified(true);
-        profileService.saveAndFlushUser(currentUser);
-        evt.setIsUsed(true);
-        // reuse saveUser as simple persist
-        profileService.createAndSaveToken(evt.getUserId(), evt.getToken()); // not ideal, but keep persistence simple
-        return "redirect:/customer/profile/" + currentUser.getUsername() + "?verified=1";
-    }
-
-    @GetMapping("/customer/verify-email")
-    public String verifyEmail(@RequestParam("token") String token) {
-        EmailVerificationToken evt = profileService.findByToken(token).orElse(null);
-        if (evt == null || Boolean.TRUE.equals(evt.getIsUsed()) || evt.getExpiresAt() == null || evt.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
-            return "redirect:/verify-email-required"; // simple fallback
-        }
-        Users user = profileService.findByIdOrNull(evt.getUserId());
-        if (user == null) return "redirect:/verify-email-required";
-        user.setIsEmailVerified(true);
-        profileService.saveAndFlushUser(user);
-        evt.setIsUsed(true);
-        profileService.createAndSaveToken(evt.getUserId(), evt.getToken());
-        return "redirect:/customer/dashboard";
-    }
-
-    // Request a new verification code from profile page
-    @PostMapping("/customer/profile/verify-email")
-    public String sendVerifyCodeFromProfile() {
-        Users currentUser = profileService.getCurrentUserOrNull();
-        if (currentUser == null) return "redirect:/login";
-
-        // Cooldown: if existing unused token within cooldown, do not send new
-        var existingOpt = profileService.findUnusedTokenByUser(currentUser.getUserId());
-        if (existingOpt.isPresent()) {
-            var evt = existingOpt.get();
-            long seconds = java.time.Duration.between(evt.getCreatedAt(), java.time.LocalDateTime.now()).getSeconds();
-            if (seconds < VERIFY_CODE_COOLDOWN_SECONDS) {
-                long remaining = VERIFY_CODE_COOLDOWN_SECONDS - seconds;
-                return "redirect:/customer/verify-code?sent=1&remaining=" + remaining;
-            }
-        }
-
-        // Create or overwrite 6-digit code
-        try {
-            String token = String.format("%06d", new java.util.Random().nextInt(1_000_000));
-            EmailVerificationToken evt = existingOpt.orElseGet(() -> profileService.createAndSaveToken(currentUser.getUserId(), token));
-            if (existingOpt.isPresent()) {
-                evt.setToken(token);
-                evt.setExpiresAt(java.time.LocalDateTime.now().plusDays(1));
-                evt.setIsUsed(false);
-                evt.setCreatedAt(java.time.LocalDateTime.now());
-                profileService.createAndSaveToken(evt.getUserId(), evt.getToken());
-            }
-            profileService.sendEmailSafe(currentUser.getEmail(), "Your verification code", "Your code is: " + token + " (valid 24 hours)");
-        } catch (Exception ignored) {}
-
-        return "redirect:/customer/verify-code?sent=1&remaining=" + VERIFY_CODE_COOLDOWN_SECONDS;
-    }
-
-    // === THÊM METHODS XỬ LÝ ĐỔI MẬT KHẨU ===
     @GetMapping("/customer/profile/{username}/change-password")
     public String showChangePasswordForm(@PathVariable("username") String username, Model model) {
         Users currentUser = profileService.getCurrentUserOrNull();

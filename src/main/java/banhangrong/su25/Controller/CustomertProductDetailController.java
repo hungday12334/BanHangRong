@@ -3,6 +3,8 @@ package banhangrong.su25.Controller;
 import banhangrong.su25.Entity.ProductImages;
 import banhangrong.su25.Entity.ProductReviews;
 import banhangrong.su25.Entity.Products;
+import banhangrong.su25.Entity.Users;
+import banhangrong.su25.Repository.UsersRepository;
 import banhangrong.su25.service.ProductImageService;
 import banhangrong.su25.service.ProductReviewService;
 import banhangrong.su25.service.ProductService;
@@ -12,17 +14,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class CustomertProductDetailController {
     private ProductService proService;
     private ProductImageService productImageService;
     private ProductReviewService productReviewService;
+    private UsersRepository usersRepository;
 
-    public CustomertProductDetailController(ProductService proService, ProductImageService productImageService, ProductReviewService productReviewService) {
+    public CustomertProductDetailController(ProductService proService, ProductImageService productImageService, ProductReviewService productReviewService, UsersRepository usersRepository) {
         this.proService = proService;
         this.productImageService = productImageService;
         this.productReviewService = productReviewService;
+        this.usersRepository = usersRepository;
     }
 
     @GetMapping("product/{id}")
@@ -41,6 +46,15 @@ public class CustomertProductDetailController {
         model.addAttribute("totalReview", productReviewService.countByPid(id));
         model.addAttribute("avgRating", productReviewService.getAvgRatingByPid(id));
         
+        // Get seller info for chat
+        if (product != null && product.getSellerId() != null) {
+            Optional<Users> sellerOpt = usersRepository.findById(product.getSellerId());
+            if (sellerOpt.isPresent()) {
+                Users seller = sellerOpt.get();
+                model.addAttribute("seller", seller);
+                model.addAttribute("sellerId", seller.getUserId());
+            }
+        }
 
         List<ProductReviews> reviews = productReviewService.getReviewsByProductId(id);
         model.addAttribute("reviews", reviews);

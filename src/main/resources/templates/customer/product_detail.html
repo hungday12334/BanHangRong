@@ -97,8 +97,9 @@
 
 					<!-- Add to Cart Section -->
 					<div class="purchase-section" id="addToCartSection">
-                        <form th:action="@{/cart/add}" method="post" th:if="${product != null and product.quantity != null and product.quantity > 0 and product.status == 'public'}" class="purchase-form">
-                            <input type="hidden" name="productId" th:value="${product.productId}">
+                        <form id="addToCartForm" th:if="${product != null and product.quantity != null and product.quantity > 0 and product.status == 'public'}" class="purchase-form">
+                            <input type="hidden" name="productId" id="productId" th:value="${product.productId}">
+                            <input type="hidden" id="productName" th:value="${product.name != null ? product.name : ''}" th:attr="data-product-name=${product.name != null ? product.name : ''}">
                             <label class="quantity-label" for="quantity">Quantity:</label>
                             <input type="number"
                                    id="quantity"
@@ -116,6 +117,26 @@
                             <p>This product is currently unavailable.</p>
                         </div>
                         <p style="color: red">Note: Each license is available for 30 days</p>
+					</div>
+					
+					<!-- Chat with Seller Section -->
+					<div class="chat-seller-section" th:if="${seller != null and sellerId != null}" style="margin-top: 24px; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e5e7eb;">
+						<div style="display: flex; align-items: center; gap: 16px;">
+							<div style="flex: 1;">
+								<h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #111827;">
+									💬 Chat with Seller
+								</h3>
+								<p style="margin: 0; color: #6b7280; font-size: 14px;">
+
+								</p>
+							</div>
+							<a th:href="@{'/customer/chat'(sellerId=${sellerId})}" 
+							   style="padding: 12px 24px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; transition: background 0.2s; display: inline-block;"
+							   onmouseover="this.style.background='#0284c7'"
+							   onmouseout="this.style.background='#0ea5e9'">
+								Start Chat
+							</a>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -156,7 +177,176 @@
 		</div>
 	</div>
 
+	<!-- Toast Notification -->
+	<div id="toast" style="display: none; position: fixed; bottom: 20px; right: 20px; background: #111827; color: #fff; padding: 16px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; min-width: 300px; max-width: 400px; animation: slideIn 0.3s ease-out;">
+		<div id="toast-message" style="font-size: 14px; line-height: 1.5;"></div>
+	</div>
+
+	<style>
+		@keyframes slideIn {
+			from {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+		
+		@keyframes slideOut {
+			from {
+				transform: translateX(0);
+				opacity: 1;
+			}
+			to {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+		}
+		
+		.toast-success {
+			background: #10b981 !important;
+		}
+		
+		.toast-error {
+			background: #ef4444 !important;
+		}
+		
+		.toast-warning {
+			background: #f59e0b !important;
+		}
+	</style>
+
 	<!-- JavaScript -->
 	<script th:src="@{/js/customer/product-detail.js}"></script>
+	<script>
+		(function() {
+			// Toast notification function
+			function showToast(message, type) {
+				const toast = document.getElementById('toast');
+				const toastMessage = document.getElementById('toast-message');
+				
+				if (!toast || !toastMessage) return;
+				
+				// Remove previous type classes
+				toast.classList.remove('toast-success', 'toast-error', 'toast-warning');
+				
+				// Add new type class
+				if (type) {
+					toast.classList.add('toast-' + type);
+				}
+				
+				toastMessage.textContent = message;
+				toast.style.display = 'block';
+				toast.style.animation = 'slideIn 0.3s ease-out';
+				
+				// Auto hide after 3 seconds
+				setTimeout(() => {
+					toast.style.animation = 'slideOut 0.3s ease-out';
+					setTimeout(() => {
+						toast.style.display = 'none';
+					}, 300);
+				}, 3000);
+			}
+			
+			// Handle add to cart form submission
+			const addToCartForm = document.getElementById('addToCartForm');
+			if (addToCartForm) {
+				addToCartForm.addEventListener('submit', function(e) {
+					e.preventDefault();
+					
+					const productIdEl = document.getElementById('productId');
+					const productNameEl = document.getElementById('productName');
+					const quantityEl = document.getElementById('quantity');
+					
+					if (!productIdEl || !productNameEl || !quantityEl) {
+						showToast('Form elements not found', 'error');
+						return;
+					}
+					
+					const productId = productIdEl.value;
+					// Try multiple ways to get product name
+					const productName = productNameEl.value || 
+					                    productNameEl.getAttribute('value') || 
+					                    productNameEl.getAttribute('data-product-name') || 
+					                    productNameEl.dataset.productName || 
+					                    '';
+					const quantity = quantityEl.value || '1';
+					const submitButton = addToCartForm.querySelector('.add-to-cart');
+					
+					// Disable button during request
+					if (submitButton) {
+						submitButton.disabled = true;
+						submitButton.textContent = 'Adding...';
+					}
+					
+					// Create form data
+					const formData = new URLSearchParams();
+					formData.append('productId', productId);
+					formData.append('quantity', quantity);
+					
+					// Send AJAX request
+					fetch('/api/cart/add', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						body: formData.toString()
+					})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+						return response.json();
+					})
+					.then(data => {
+						// Debug log (remove in production)
+						console.log('Response data:', data);
+						console.log('Product name from form:', productName);
+						
+						// Re-enable button
+						if (submitButton) {
+							submitButton.disabled = false;
+							submitButton.textContent = 'Add to Cart';
+						}
+						
+						// Get product name from response or fallback to hidden input
+						const productNameToShow = (data && data.productName) ? data.productName : (productName || 'product');
+						const quantityToShow = (data && data.quantity !== undefined && data.quantity !== null) ? String(data.quantity) : (quantity || '1');
+						
+						if (data && data.success) {
+							// Success message: "Add [product name] with [quantity] successfully"
+							const message = `Add ${productNameToShow} with ${quantityToShow} successfully`;
+							showToast(message, 'success');
+							
+							// Update cart count if needed (you can add this if you have a cart count element)
+							// Optionally reload page or update UI
+						} else {
+							// Error message
+							let message = '';
+							if (data && (data.errorCode === 'MAX_QUANTITY' || (data.error && data.error.includes('Max quantity')))) {
+								// "Max quantity of [product name] in the cart"
+								message = `Max quantity of ${productNameToShow} in the cart`;
+							} else {
+								message = (data && data.error) ? data.error : `Failed to add ${productNameToShow} to cart`;
+							}
+							showToast(message, 'error');
+						}
+					})
+					.catch(error => {
+						// Re-enable button
+						if (submitButton) {
+							submitButton.disabled = false;
+							submitButton.textContent = 'Add to Cart';
+						}
+						
+						showToast('An error occurred. Please try again.', 'error');
+						console.error('Error:', error);
+					});
+				});
+			}
+		})();
+	</script>
 </body>
 </html>
