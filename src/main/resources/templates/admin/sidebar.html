@@ -103,10 +103,11 @@
 
 
                 <li class="sidebar-item">
-                    <a class="sidebar-link justify-content-between" href="#">
+                    <a class="sidebar-link justify-content-between" th:href="@{/admin/withdrawal}">
                         <div class="d-flex align-items-center gap-3">
-                            <span class="d-flex"><i class="bi bi-gear-fill"></i></span>
-                            <span class="hide-menu">SETTING</span>
+                            <span class="d-flex"><i class="bi bi-cash"></i></span>
+                            <span class="hide-menu">WITHDRAWALS</span>
+                            <span class="badge" th:text="${pendingWithdrawalCount}">0</span>
                         </div>
                     </a>
                 </li>
