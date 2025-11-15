@@ -14,4 +14,13 @@ public class ProductImageService {
    public List<ProductImages> getAllProductImages(){
         return productImagesRepository.findAll();
    }
+   public ProductImages getProductImagesById(Long id){
+        return productImagesRepository.findById(id).orElse(null);
+   }
+   public ProductImages save(ProductImages productImages){
+        return productImagesRepository.save(productImages);
+   }
+   public void delete(Long id){
+        productImagesRepository.deleteById(id);
+   }
 }

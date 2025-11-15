@@ -90,15 +90,34 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     @Query(value = "SELECT COUNT(DISTINCT seller_id) FROM products", nativeQuery = true)
     Long totalSellers();
 
-    @Query("SELECT COUNT(p) FROM Products p WHERE LOWER(p.status) = LOWER(:status) AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    @Query("""
+       SELECT COUNT(p)
+       FROM Products p
+       JOIN CategoriesProducts cp
+         ON cp.id.productId = p.productId
+       WHERE LOWER(p.status) = LOWER(:status)
+         AND cp.id.categoryId = :categoryId
+""")
     Long countByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status);
 
     // Count all products by category (any status)
-    @Query("SELECT COUNT(p) FROM Products p WHERE EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
-    Long countByCategoryId(@Param("categoryId") Long categoryId);
+    @Query("""
+       SELECT COUNT(p)
+       FROM Products p
+       JOIN CategoriesProducts cp
+         ON cp.id.productId = p.productId
+       WHERE cp.id.categoryId = :categoryId
+""")
+    Long countProductByCategoryId(@Param("categoryId") Long categoryId);
 
     // Find all products by category (any status)
-    @Query("SELECT p FROM Products p WHERE EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = :categoryId)")
+    @Query("""
+       SELECT p
+       FROM Products p
+       JOIN CategoriesProducts cp
+         ON cp.id.productId = p.productId
+       WHERE cp.id.categoryId = :categoryId
+""")
     List<Products> findByCategoryId(@Param("categoryId") Long categoryId);
 
     // ========================= SELLER-SPECIFIC QUERIES FOR CATEGORY MANAGEMENT =========================

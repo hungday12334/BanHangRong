@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,14 +65,26 @@ public class CategoryViewService {
         return categoriesRepository.findById(categoryId).orElse(null);
     }
 
+    public List<Products> getAllProductInCate(Long cid){
+        return productsRepository.findByCategoryId(cid);
+    }
+
     public long countPublicProductsInCategory(Long categoryId) {
         return productsRepository.countByCategoryIdAndStatus(categoryId, "Public");
     }
 
-    public Map<String, Long> countPublicProductsInCategories(List<Categories> categories) {
-        Map<String, Long> result = new HashMap<>();
-        for (Categories c : categories) {
-            result.put(c.getName(), productsRepository.countByCategoryIdAndStatus(c.getCategoryId(), "Public"));
+    public Map<Long, Long> countPublicProductsInCategories(List<Categories> categories) {
+        Map<Long, Long> result = new LinkedHashMap<>();
+        if (categories == null || categories.isEmpty()) {
+            return result;
+        }
+
+        for (Categories category : categories) {
+            Long categoryId = category.getCategoryId();
+            if (categoryId == null) {
+                continue;
+            }
+            result.put(categoryId, countPublicProductsInCategory(categoryId));
         }
         return result;
     }

@@ -1,6 +1,7 @@
 package banhangrong.su25.service;
 
 import banhangrong.su25.Entity.Categories;
+import banhangrong.su25.Entity.Products;
 import banhangrong.su25.Repository.CategoriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class CategoryService {
             throw new RuntimeException("Lỗi khi lấy danh sách categories: " + e.getMessage());
         }
     }
+
     public Categories createCategory(Categories category) {
         try {
             // Trim and validate name

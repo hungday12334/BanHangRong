@@ -230,6 +230,75 @@ public class CartService {
         }
     }
 
+    /**
+     * Add to cart with detailed response for API
+     * Returns Map with success status, product info, quantity, and max quantity
+     */
+    public Map<String, Object> addToCartWithResponse(Long productId, Integer quantity) {
+        Map<String, Object> res = new HashMap<>();
+        
+        Optional<Products> productOpt = productsRepository.findById(productId);
+        if (productOpt.isEmpty()) {
+            res.put("success", false);
+            res.put("error", "Product not found");
+            return res;
+        }
+
+        Products product = productOpt.get();
+        // Chỉ cho phép thêm sản phẩm có status là "Public"
+        if (product.getStatus() == null || !"Public".equalsIgnoreCase(product.getStatus())) {
+            res.put("success", false);
+            res.put("error", "Product is not available");
+            return res;
+        }
+
+        int qty = (quantity != null && quantity > 0) ? quantity : 1;
+        int stock = product.getQuantity() != null ? product.getQuantity() : 0;
+        Optional<ShoppingCart> existing = cartRepository.findByUserIdAndProductId(getCurrentUserIdOrFallback(), productId);
+        
+        int currentCartQty = 0;
+        if (existing.isPresent()) {
+            ShoppingCart it = existing.get();
+            currentCartQty = it.getQuantity() != null ? it.getQuantity() : 0;
+        }
+        
+        int totalRequested = currentCartQty + qty;
+        int maxQuantity = stock;
+        
+        // Check if total quantity exceeds max
+        if (totalRequested > maxQuantity) {
+            res.put("success", false);
+            res.put("error", "Max quantity is " + maxQuantity);
+            res.put("maxQuantity", maxQuantity);
+            res.put("productName", product.getName());
+            return res;
+        }
+        
+        // Add to cart
+        int finalQuantity = 0;
+        if (existing.isPresent()) {
+            ShoppingCart it = existing.get();
+            finalQuantity = Math.min(currentCartQty + qty, stock);
+            it.setQuantity(finalQuantity);
+            cartRepository.save(it);
+        } else {
+            ShoppingCart item = new ShoppingCart();
+            item.setUserId(getCurrentUserIdOrFallback());
+            item.setProductId(productId);
+            finalQuantity = Math.min(qty, stock);
+            item.setQuantity(finalQuantity);
+            cartRepository.save(item);
+        }
+        
+        res.put("success", true);
+        res.put("productName", product.getName());
+        res.put("quantity", qty); // Quantity that was requested to add
+        res.put("finalQuantity", finalQuantity); // Final quantity in cart
+        res.put("maxQuantity", maxQuantity);
+        
+        return res;
+    }
+
     public Map<String, Object> updateQuantity(Long productId, Integer quantity) {
         Map<String, Object> res = new HashMap<>();
         Optional<Products> productOpt = productsRepository.findById(productId);

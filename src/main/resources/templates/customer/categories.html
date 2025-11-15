@@ -1,206 +1,28 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.min.css">
-    <title>Categories - BanHangRong</title>
-    <style>
-        :root {
-            --bg: #f5f7fb;
-            --card: #ffffff;
-            --ink: #0f172a;
-            --muted: #6b7280;
-            --brand: #0ea5e9;
-            --chip: #e5e7eb;
-            --line: #eaeef4;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            height: 100%;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-            color: var(--ink);
-            background: var(--bg);
-        }
-
-        .wrapper {
-            min-height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-
-        .hero {
-            margin: 18px auto 12px;
-            max-width: 1200px;
-            background: linear-gradient(180deg, #f8fbff, #eef6ff);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 24px;
-        }
-
-        .hero h1 {
-            margin: 0 0 8px;
-            font-size: 26px;
-        }
-
-        .hero p {
-            margin: 0 0 16px;
-            color: var(--muted);
-            max-width: 720px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 16px;
-            background: var(--brand);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            box-shadow: 0 6px 18px rgba(14, 165, 233, .25);
-        }
-
-        .btn:hover {
-            filter: brightness(.98);
-        }
-
-        .section-title {
-            max-width: 1200px;
-            margin: 10px auto;
-            color: #6b7280;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .categories-grid {
-            max-width: 1200px;
-            margin: 0 auto 40px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 0 10px;
-        }
-
-        .category-card {
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 24px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.2s ease;
-        }
-
-        .category-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, .1);
-        }
-
-        .category-card h3 {
-            margin: 0 0 8px;
-            font-size: 20px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .category-card p {
-            margin: 0 0 12px;
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .category-stats {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .product-count {
-            background: #f0f9ff;
-            color: #0369a1;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .breadcrumb {
-            max-width: 1200px;
-            margin: 10px auto;
-            padding: 0 10px;
-        }
-
-        .breadcrumb a {
-            color: var(--brand);
-            text-decoration: none;
-        }
-
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/customer/categories.css}">
 </head>
-
 <body>
-    <div class="wrapper">
-        <div th:replace="~{customer/fragments/header :: header}"></div>
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const navLinks = document.querySelectorAll('.nav a');
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    const href = link.getAttribute('href');
-                    if (href === '/categories') {
-                        link.classList.add('active');
-                    }
-                });
-            });
-        </script>
+<div th:replace="~{customer/fragments/header :: header}"></div>
+<div class="container">
+    <h1>All Categories</h1>
 
-
-
-        <section class="hero">
-            <h1>Browse by Categories</h1>
-            <p>Explore our wide range of software licenses, game keys, and vouchers organized by category. Find exactly
-                what you're looking for.</p>
-        </section>
-
-        <div class="section-title">All Categories</div>
-        <section class="categories-grid" id="categoriesGrid">
-            <div th:if="${categories != null and !categories.empty}">
-                <div class="category-card" th:each="category : ${categories}">
-                    <a th:href="@{'/category/' + ${category.categoryId}}">
-                        <h3 th:text="${category.name}">Category Name</h3>
-                        <p th:text="${category.description}">Category description goes here...</p>
-                        <div class="category-stats">
-                <span class="product-count"
-                      th:text="${productCountByCategory[category.categoryId]} + ' products'">
-                    0 products
-                </span>
-                        </div>
-                    </a>
+    <div class="categories-grid">
+        <div class="category-card" th:each="category : ${categories}"
+             th:if="${numberProductInCate[category.categoryId] != null and numberProductInCate[category.categoryId] > 0}">
+            <a th:href="@{/category/{id}(id=${category.categoryId})}"
+               style="text-decoration: none; color: inherit; display: block;">
+                <div class="category-name" th:text="${category.name}">Graphics</div>
+                <div class="category-description" th:text="${category.description}">Stock graphics, icons and vector art</div>
+                <div class="product-count">
+                    <span th:text="${numberProductInCate[category.categoryId]}">3</span>
                 </div>
-            </div>
-        </section>
+            </a>
+        </div>
     </div>
+</div>
 </body>
-
 </html>

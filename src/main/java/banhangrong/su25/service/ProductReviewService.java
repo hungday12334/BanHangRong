@@ -25,6 +25,32 @@ public class ProductReviewService {
     public List<ProductReviews> getSellerReviews(Long sellerId) {
         return productReviewsRepository.findBySellerId(sellerId);
     }
+    public int countByPid(Long pid){
+        return productReviewsRepository.countByProductId(pid);
+    }
+
+    public List<ProductReviews> getAllReviews(){
+        return productReviewsRepository.findAll();
+    }
+    public Double getAvgRatingByPid(Long pid){
+        List<Integer> ratings = productReviewsRepository.findAllRatingByProductId(pid);
+        if (ratings == null || ratings.isEmpty()) {
+            return 0.0;
+        }
+        Double sum = 0.0;
+        for (Integer rating : ratings) {
+            if (rating != null) {
+                sum += rating;
+            }
+        }
+        return sum / ratings.size();
+    }
+
+    public List<ProductReviews> getReviewsByProductId(Long productId) {
+        List<ProductReviews> reviews = productReviewsRepository.findByProductIdOrderByCreatedAtDesc(productId);
+        reviews.forEach(this::populateUserFullName);
+        return reviews;
+    }
 
     // PERF-01: Pagination support cho all reviews
     public Page<ProductReviews> getSellerReviews(Long sellerId, Pageable pageable) {
@@ -99,5 +125,9 @@ public class ProductReviewService {
      */
     public boolean isReviewOwnedBySeller(Long reviewId, Long sellerId) {
         return productReviewsRepository.existsByReviewIdAndSellerId(reviewId, sellerId);
+    }
+
+    public ProductReviews getProductReviewByPid(Long pid){
+        return productReviewsRepository.findAllByProductId(pid);
     }
 }

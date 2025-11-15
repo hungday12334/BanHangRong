@@ -1,6 +1,7 @@
 package banhangrong.su25.Repository;
 
 import banhangrong.su25.Entity.Categories;
+import banhangrong.su25.Entity.Products;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,7 @@ public interface CategoriesRepository extends JpaRepository<Categories, Long> {
 
     @Query("SELECT c FROM Categories c WHERE EXISTS (SELECT 1 FROM Products p WHERE LOWER(p.status) = LOWER('Public') AND EXISTS (SELECT 1 FROM CategoriesProducts cp WHERE cp.id.productId = p.productId AND cp.id.categoryId = c.categoryId)) ORDER BY c.name ASC")
     List<Categories> findCategoriesWithPublicProducts();
+
+
+
 }

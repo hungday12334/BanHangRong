@@ -56,7 +56,7 @@ public class CartController {
 
         // Nếu đến từ product detail page thì quay lại đó, không thì về cart
         if (referer != null && referer.contains("/product/")) {
-            return "redirect:/product/" + productId + "?added=success";
+            return "redirect:/product/" + productId;
         }
         return "redirect:/cart";
     }
