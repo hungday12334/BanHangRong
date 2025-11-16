@@ -259,8 +259,8 @@
                     </div>
                 </div>
                 <div class="col center">
-                    <a class="btn danger remove-btn" th:href="@{'/cart/remove'(productId=${it.product.productId})}"
-                        th:attr="data-product-id=${it.product.productId}">Remove</a>
+                    <button type="button" class="btn danger remove-btn" 
+                        th:attr="data-product-id=${it.product.productId}">Remove</button>
                 </div>
             </div>
             <div th:if="${items == null or #lists.isEmpty(items)}" class="col" style="color:#6b7280;text-align:center">

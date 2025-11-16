@@ -83,7 +83,7 @@
 							<tr th:each="t: ${transactions}">
 								<td style="padding:8px" th:text="${#temporals.format(t.createdAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</td>
 								<td style="padding:8px" th:text="${t.code}">CODE</td>
-								<td style="padding:8px"><span th:text="${t.productName}">Product</span> <span style="color:#6b7280" th:text="${t.productId}">#</span></td>
+								<td style="padding:8px"><span th:text="${t.productName}">Product</span> <span style="color:#6b7280" ></span></td>
                             <td style="padding:8px;text-align:right">
                                 <span th:if="${t.discountType == 'PERCENT'}" th:text="${#numbers.formatDecimal(t.voucherValue,0,'COMMA',0,'POINT') + '%'}">0%</span>
                                 <span th:if="${t.discountType != 'PERCENT'}" th:text="${#numbers.formatDecimal(t.voucherValue,0,'COMMA',0,'POINT')}">0</span><span th:if="${t.discountType != 'PERCENT'}">₫</span>
