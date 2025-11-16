@@ -459,7 +459,7 @@ public class CartService {
             return "redirect:/customer/dashboard?purchase=failure&reason=empty_cart";
         }
 
-        // 🔹 Tính tổng tiền với voucher discount
+        //set default balance
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (ShoppingCart it : validItems) {
             Products p = productsRepository.findById(it.getProductId()).orElse(null);

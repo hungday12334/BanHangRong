@@ -29,13 +29,12 @@ public class CustomerProfileController {
 
         Users profileUser = profileService.findByUsernameOrNull(username);
         if (profileUser == null) {
-            System.out.println("❌ Profile user not found: " + username);
+
             // Try to create a default user if none exists
             if (profileService.countUsers() == 0) {
                 System.out.println("No users in database, creating default user...");
                 profileUser = profileService.createDefaultUser(username);
                 if (profileUser == null) {
-                    System.out.println("❌ Failed to create default user");
                     return "redirect:/customer/dashboard";
                 }
             } else {

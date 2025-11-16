@@ -57,9 +57,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .password(user.getPassword()) // Password sẽ được hash bằng BCrypt
                 .authorities(authorities)
                 .accountExpired(false)
-                .accountLocked(!user.getIsActive())
+                .accountLocked(false)
                 .credentialsExpired(false)
-                .disabled(!user.getIsActive())
+                .disabled(false)
                 .build();
     }
 

@@ -4,10 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="fix some bug in cart">
+    <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="add ui voucher">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CartController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/cart.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomUserDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomUserDetailsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -194,7 +202,7 @@
       <workItem from="1762502308301" duration="628000" />
       <workItem from="1762703072720" duration="25894000" />
       <workItem from="1763204160120" duration="863000" />
-      <workItem from="1763248374147" duration="2676000" />
+      <workItem from="1763248374147" duration="6862000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -308,7 +316,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763250469414</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="add ui voucher">
+      <option name="closed" value="true" />
+      <created>1763252446165</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1763252446165</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -361,6 +377,7 @@
     <MESSAGE value="refactor(chat): streamline message handling and improve logging in chat functionality" />
     <MESSAGE value="notification after pay cart" />
     <MESSAGE value="fix some bug in cart" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix some bug in cart" />
+    <MESSAGE value="add ui voucher" />
+    <option name="LAST_COMMIT_MESSAGE" value="add ui voucher" />
   </component>
 </project>

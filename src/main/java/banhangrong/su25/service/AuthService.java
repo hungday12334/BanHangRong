@@ -157,7 +157,7 @@ public class AuthService {
         newUser.setBirthDate(registerRequest.getBirthDate());
         newUser.setUserType("CUSTOMER");
         newUser.setBalance(new BigDecimal("0.00")); // Khởi tạo balance = 0
-        newUser.setIsActive(false); // ⚠️ Account is inactive until email verification
+        newUser.setIsActive(true); // ⚠️ Account is inactive until email verification
         newUser.setIsEmailVerified(false);
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setUpdatedAt(LocalDateTime.now());

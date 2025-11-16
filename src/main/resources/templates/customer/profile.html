@@ -129,7 +129,7 @@
                     <div class="value" th:text="${profileUser.username}">datbautroi11</div>
 
                     <div class="label">Full Name</div>
-                    <div class="value" th:text="'-'">-</div>
+                    <div class="value" th:text="${profileUser.fullName}">-</div>
 
                     <div class="label">Email</div>
                     <div class="value" th:text="${maskedEmail != null ? maskedEmail : profileUser.email}">

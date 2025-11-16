@@ -218,7 +218,10 @@ public class AdminUserManagement {
             return "redirect:/admin/user";
         }
         //Check id valid  end
-
+        if(!"Admin".equalsIgnoreCase(user.getUserType())){
+            redirectAttributes.addFlashAttribute("error", "You only have permission to update admin account");
+            return "redirect:/admin/user";
+        }
         // Update fields (chỉ update những field được phép)
         try {
             //Delare
