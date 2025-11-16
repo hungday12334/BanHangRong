@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/user")
+@RequestMapping("admin/user")
 public class AdminUserManagement {
 
     @Autowired
@@ -72,7 +72,7 @@ public class AdminUserManagement {
                 return "admin/user-creation";
             }
         }
-        user.setUserType(request.getParameter("userType"));
+        user.setUserType("Admin");
         user.setPhoneNumber(request.getParameter("phoneNumber"));
         user.setAvatarUrl("");//Default null, if having image --> solving below
         user.setGender(request.getParameter("gender"));
@@ -215,6 +215,10 @@ public class AdminUserManagement {
         Users user = userService.findById(id);
         if (user == null) {
             redirectAttributes.addFlashAttribute("error", "User not found");
+            return "redirect:/admin/user";
+        }
+        if(!"Admin".equalsIgnoreCase(user.getUserType())){
+            redirectAttributes.addFlashAttribute("error", "You only have permission to update admin");
             return "redirect:/admin/user";
         }
         //Check id valid  end
