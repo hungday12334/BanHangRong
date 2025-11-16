@@ -74,6 +74,8 @@ public class CustomerDashboardController {
     public String customerDashboard(@RequestParam(name = "topup", required = false) String topup,
                                      @RequestParam(name = "amount", required = false) String amount,
                                      @RequestParam(name = "message", required = false) String message,
+                                     @RequestParam(name = "purchase", required = false) String purchase,
+                                     @RequestParam(name = "reason", required = false) String reason,
                                      Model model){
         List<Products> productsList = productService.getAllProducts();
         List<ProductImages> productImagesList = productImageService.getAllProductImages();
@@ -94,6 +96,38 @@ public class CustomerDashboardController {
                 }
             } else if ("error".equals(topup) && message != null) {
                 model.addAttribute("topupErrorMessage", message);
+            }
+        }
+        
+        // Handle purchase success/failure messages
+        if (purchase != null) {
+            model.addAttribute("purchaseStatus", purchase);
+            if ("success".equals(purchase)) {
+                model.addAttribute("purchaseMessage", "Purchase completed successfully!");
+            } else if ("failure".equals(purchase)) {
+                String errorMessage = "Purchase failed";
+                if (reason != null) {
+                    switch (reason) {
+                        case "insufficient_balance":
+                            errorMessage = "Purchase failed: Insufficient balance";
+                            break;
+                        case "user_not_found":
+                            errorMessage = "Purchase failed: User not found";
+                            break;
+                        case "empty_cart":
+                            errorMessage = "Purchase failed: No items selected";
+                            break;
+                        case "invalid_selection":
+                            errorMessage = "Purchase failed: Invalid product selection";
+                            break;
+                        case "no_selection":
+                            errorMessage = "Purchase failed: No items selected";
+                            break;
+                        default:
+                            errorMessage = "Purchase failed: " + reason;
+                    }
+                }
+                model.addAttribute("purchaseErrorMessage", errorMessage);
             }
         }
         

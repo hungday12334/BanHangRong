@@ -8,6 +8,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/styles.min.css">
+    <script th:src="@{/js/customer/cart.js}" defer></script>
     <title>Shopping Cart</title>
     <style>
         :root {
@@ -258,225 +259,26 @@
                     </div>
                 </div>
                 <div class="col center">
-                    <a class="btn danger remove-btn" th:href="@{'/cart/remove'(productId=${it.product.productId})}"
-                        th:attr="data-product-id=${it.product.productId}">Remove</a>
+                    <button type="button" class="btn danger remove-btn" 
+                        th:attr="data-product-id=${it.product.productId}">Remove</button>
                 </div>
             </div>
             <div th:if="${items == null or #lists.isEmpty(items)}" class="col" style="color:#6b7280;text-align:center">
                 Cart is empty.</div>
         </div>
-        <script>
-            (function () {
-                function getCheckboxes() {
-                    return document.querySelectorAll('.item-checkbox');
-                }
-                
-                function hasCheckedItem() {
-                    const checkboxes = getCheckboxes();
-                    return Array.from(checkboxes).some(cb => cb.checked);
-                }
-                
-                const inputs = document.querySelectorAll('.qty-input');
-                const totalEl = document.querySelector('.total span');
-                const checkoutBtn = document.getElementById('checkout-btn');
-                
-                function updateCheckoutButton() {
-                    const hasChecked = hasCheckedItem();
-                    if (checkoutBtn) {
-                        checkoutBtn.disabled = !hasChecked;
-                        if (!hasChecked) {
-                            checkoutBtn.style.opacity = '0.5';
-                            checkoutBtn.style.cursor = 'not-allowed';
-                            checkoutBtn.style.pointerEvents = 'none';
-                        } else {
-                            checkoutBtn.style.opacity = '1';
-                            checkoutBtn.style.cursor = 'pointer';
-                            checkoutBtn.style.pointerEvents = 'auto';
-                        }
-                    }
-                }
-                
-                function validateCheckout() {
-                    if (!hasCheckedItem()) {
-                        alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
-                        return false;
-                    }
-                    
-                    // Validate all quantities > 0
-                    let hasInvalidQty = false;
-                    document.querySelectorAll('.qty-input').forEach(inp => {
-                        const val = parseInt(inp.value || '0', 10);
-                        if (val <= 0) {
-                            hasInvalidQty = true;
-                            const pid = inp.getAttribute('data-product-id');
-                            const err = document.getElementById('err-' + pid);
-                            if (err) err.textContent = 'Quantity must be greater than 0';
-                        }
-                    });
-                    
-                    if (hasInvalidQty) {
-                        alert('Vui lòng nhập số lượng lớn hơn 0 cho tất cả sản phẩm');
-                        return false;
-                    }
-                    
-                    return true;
-                }
-                
-                window.hasCheckedItemForCheckout = validateCheckout;
-                
-                const checkoutForm = document.getElementById('checkout-form');
-                if (checkoutForm) {
-                    checkoutForm.addEventListener('submit', function(e) {
-                        if (!hasCheckedItem()) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
-                            return false;
-                        }
-                    });
-                }
-                
-                const checkboxes = getCheckboxes();
-                checkboxes.forEach(cb => {
-                    cb.addEventListener('change', () => {
-                        recomputeTotals();
-                    });
-                });
-                
-                function recomputeTotals() {
-                    let sum = 0;
-                    document.querySelectorAll('.cart-row').forEach(function (row) {
-                        const checkbox = row.querySelector('.item-checkbox');
-                        if (!checkbox || !checkbox.checked) return;
-                        
-                        const priceText = row.querySelector('.col.center span')?.textContent?.replace(/\D/g, '') || '0';
-                        const qtyInput = row.querySelector('.qty-input');
-                        const price = parseInt(priceText || '0', 10);
-                        const qty = parseInt(qtyInput?.value || '1', 10);
-                        sum += (price * qty);
-                        const lineEl = row.querySelector('.col.right span');
-                        if (lineEl) {
-                            lineEl.textContent = new Intl.NumberFormat('vi-VN').format(price * qty);
-                        }
-                    });
-                    if (totalEl) {
-                        totalEl.textContent = new Intl.NumberFormat('vi-VN').format(sum);
-                    }
-                    updateCheckoutButton();
-                }
-                
-                inputs.forEach(inp => {
-                    inp.addEventListener('change', () => {
-                        const pid = inp.getAttribute('data-product-id');
-                        let val = parseInt(inp.value || '0', 10);
-                        const err = document.getElementById('err-' + pid);
-                        
-                        // Validate quantity > 0
-                        if (!val || val <= 0) {
-                            err.textContent = 'Quantity must be greater than 0';
-                            inp.value = 1;
-                            val = 1;
-                        } else {
-                            err.textContent = '';
-                        }
-                        
-                        fetch('/cart/update', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `productId=${encodeURIComponent(pid)}&quantity=${encodeURIComponent(val)}`
-                        }).then(r => r.json()).then(d => {
-                            if (!d.ok) {
-                                err.textContent = d.error || 'Error updating quantity';
-                                if (d.error && d.error.includes('greater than 0')) {
-                                    inp.value = 1;
-                                }
-                            } else {
-                                if (d.over) {
-                                    err.textContent = `Exceeds stock (${d.stock}). Set to ${d.appliedQty}.`;
-                                } else {
-                                    err.textContent = '';
-                                }
-                                inp.value = d.appliedQty;
-                                const pill = inp.closest('.cart-row')?.querySelector('.qty-pill');
-                                if (pill) pill.textContent = 'x' + d.appliedQty;
-                                recomputeTotals();
-                            }
-                        }).catch(() => {
-                            err.textContent = 'Error updating quantity';
-                        });
-                    });
-                });
-
-                document.querySelectorAll('.remove-btn').forEach(a => {
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const pid = a.getAttribute('data-product-id');
-                        fetch('/cart/remove', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `productId=${encodeURIComponent(pid)}`
-                        }).then(r => r.json()).then(() => {
-                            a.closest('.cart-row')?.remove();
-                            recomputeTotals();
-                        }).catch(() => {
-                            window.location.href = '/cart/remove?productId=' + encodeURIComponent(pid);
-                        });
-                    });
-                });
-                
-                recomputeTotals();
-                updateCheckoutButton();
-            })();
-            
-            function applyVoucher(productId) {
-                const input = document.getElementById('voucher-input-' + productId);
-                const code = input?.value?.trim();
-                if (!code) {
-                    alert('Vui lòng nhập mã voucher');
-                    return;
-                }
-                
-                fetch('/cart/apply-voucher', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `productId=${encodeURIComponent(productId)}&code=${encodeURIComponent(code)}`
-                }).then(r => r.json()).then(d => {
-                    if (d.ok) {
-                        window.location.reload();
-                    } else {
-                        alert(d.error || 'Voucher không hợp lệ');
-                    }
-                }).catch(() => {
-                    alert('Có lỗi xảy ra');
-                });
-            }
-        </script>
         <div class="summary" style="flex-wrap:wrap;gap:10px;justify-content:flex-end">
             <div style="display:flex;align-items:center;gap:12px">
                 <div class="total">Total: <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">0</span>₫</div>
+                <button type="button" class="btn danger" id="delete-selected-btn" onclick="deleteSelected();" style="display:none;">Delete Selected</button>
                 <a href="/customer/dashboard" class="btn">Continue Shopping</a>
                 <form method="post" action="/cart/checkout-demo" id="checkout-form" style="display:inline">
-                    <button class="btn primary" type="submit" id="checkout-btn" onclick="return validateCheckout();">Pay with Balance</button>
+                    <input type="hidden" name="selectedProductIds" id="selected-product-ids" value="">
+                    <button class="btn primary" type="submit" id="checkout-btn">Pay with Balance</button>
                 </form>
             </div>
         </div>
         </div>
     </div>
-    
-    <script>
-        (function () {
-            const params = new URLSearchParams(window.location.search);
-            const pay = params.get('pay');
-            if (!pay) return;
-            const toast = document.getElementById('toast');
-            if (!toast) return;
-            const show = (msg, bg) => { toast.textContent = msg; toast.style.background = bg; toast.style.display = 'block'; setTimeout(() => { toast.style.display = 'none'; }, 3500); };
-            if (pay === 'success') show('Payment successful with balance.', '#065f46');
-            else if (pay === 'insufficient') show('Insufficient balance. Please top up.', '#991b1b');
-            else if (pay === 'empty') show('Cart is empty or invalid.', '#b45309');
-            else if (pay === 'auth') show('Please login again.', '#1f2937');
-        })();
-    </script>
 </body>
 
 </html>
