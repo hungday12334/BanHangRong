@@ -270,14 +270,8 @@
             <div class="form-group">
                 <label>User Type (Role):</label>
                 <select readonly name="userType" disabled>
-                    <option value="CUSTOMER"
-                            th:selected="${user != null and user.userType.toUpperCase() == 'CUSTOMER'}">CUSTOMER
-                    </option>
                     <option value="ADMIN"
                             th:selected="${user != null and user.userType.toUpperCase() == 'ADMIN'}">ADMIN
-                    </option>
-                    <option value="SELLER"
-                            th:selected="${user != null and user.userType.toUpperCase() == 'SELLER'}">SELLER
                     </option>
                 </select>
             </div>
