@@ -53,6 +53,16 @@ public class CustomerCategoryController {
 
         // --- KEYWORD FILTER ---
         String keywordValue = keyword != null ? keyword.trim() : "";
+        String[] newKeyword = keywordValue.split(" ");
+        String kw = "";
+        for (String k : newKeyword){
+            k = k.trim();
+            if (!k.isEmpty()){
+                kw = kw.concat(k.trim() + " ");
+            }
+        }
+        keywordValue = kw;
+
         if (!keywordValue.isEmpty()) {
             String keywordLower = keywordValue.toLowerCase();
             List<Products> keywordFiltered = new ArrayList<>();
