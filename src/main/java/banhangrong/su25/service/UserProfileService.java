@@ -17,12 +17,12 @@ public class UserProfileService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Users getUserById(Long userId) {
+    public Users getUserById(Long userId) { // Lấy thông tin user theo ID
         return usersRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
     }
 
-    public Users getSellerProfile(Long sellerId) {
+    public Users getSellerProfile(Long sellerId) { // Lấy thông tin profile của seller
         Users user = getUserById(sellerId);
         if (!user.isSeller()) {
             throw new RuntimeException("User is not a seller");
@@ -100,7 +100,7 @@ public class UserProfileService {
             String encryptedPassword = passwordEncoder.encode(newPassword);
             existingUser.setPassword(encryptedPassword);
 
-            Users savedUser = usersRepository.save(existingUser);
+            Users savedUser = usersRepository.save(existingUser); // Lưu user với mật khẩu mới
             System.out.println("✅ Password changed successfully");
 
         } catch (Exception e) {
@@ -109,8 +109,8 @@ public class UserProfileService {
         }
     }
 
-    public boolean verifyPassword(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
+    public boolean verifyPassword(String rawPassword, String encodedPassword) { // Kiểm tra mật khẩu
+        return passwordEncoder.matches(rawPassword, encodedPassword); // So sánh mật khẩu chưa mã hóa với mật khẩu đã mã hóa
     }
 
     public Optional<Users> getUserByEmail(String email) {

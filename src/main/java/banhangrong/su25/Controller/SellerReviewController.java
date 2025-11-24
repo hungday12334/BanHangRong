@@ -46,14 +46,14 @@ public class SellerReviewController {
             HttpSession session) {
 
         // SEC-01: Get authenticated user from Spring Security
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Lấy thông tin xác thực hiện tại
         Users currentUser = null;
         Long sellerId = null;
         String userRole = null;
 
-        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) { // Kiểm tra nếu người dùng đã xác thực
             String username = auth.getName();
-            currentUser = usersRepository.findByUsername(username).orElse(null);
+            currentUser = usersRepository.findByUsername(username).orElse(null); // Tìm người dùng trong cơ sở dữ liệu dựa trên tên đăng nhập
 
             if (currentUser != null) {
                 sellerId = currentUser.getUserId();
@@ -63,18 +63,18 @@ public class SellerReviewController {
 
         // SEC-02: Enforce authentication - redirect to login if not authenticated
         if (sellerId == null || userRole == null) {
-            return "redirect:/login?error=notAuthenticated";
+            return "redirect:/login?error=notAuthenticated"; // Chuyển hướng đến trang đăng nhập nếu không xác thực
         }
 
         // SEC-03: Enforce authorization - only SELLER role can access
         if (!"SELLER".equals(userRole)) {
-            return "redirect:/login?error=unauthorized";
+            return "redirect:/login?error=unauthorized"; // Chuyển hướng đến trang đăng nhập nếu không có quyền
         }
 
         // Pagination
         Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        // Filter reviews based on parameters (with new rating range and customer name)
+        // Lọc đánh giá dựa trên các thông số (với phạm vi đánh giá mới và tên khách hàng)
         Page<ProductReviews> reviewsPage = productReviewService.getFilteredReviews(
             sellerId, status, ratingFrom, ratingTo, fromDate, toDate, productId, customerName, pageable
         );
@@ -84,6 +84,7 @@ public class SellerReviewController {
         Long unansweredCount = productReviewService.getUnansweredReviewCount(sellerId);
         Long answeredCount = totalCount - unansweredCount;
 
+        // Add attributes to model for Thymeleaf
         model.addAttribute("reviews", reviewsPage.getContent());
         model.addAttribute("reviewsPage", reviewsPage);
         model.addAttribute("totalCount", totalCount);
@@ -92,7 +93,7 @@ public class SellerReviewController {
         model.addAttribute("sellerId", sellerId);
         model.addAttribute("currentPage", page);
 
-        // Pass filter params back to view (updated with new parameters)
+        // Truyền tham số bộ lọc trở lại chế độ xem (đã cập nhật với các tham số mới)
         model.addAttribute("filterStatus", status);
         model.addAttribute("filterRatingFrom", ratingFrom);
         model.addAttribute("filterRatingTo", ratingTo);

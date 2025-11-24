@@ -401,7 +401,9 @@ public class SellerCategoryController {
                 Map<String, Object> data = new HashMap<>();
                 data.put("productId", product.getProductId());
                 data.put("name", product.getName());
-                data.put("sku", "P" + product.getProductId()); // Generate SKU from ID
+                data.put("sku", "P" + product.getProductId()); // SKU là mã nội bộ dùng để quản lý sản phẩm trong kho.
+                                                                //Trong hệ thống của em, SKU được tạo tự động từ productId bằng format ‘P + ID’.
+                                                                //SKU giúp admin dễ quản lý tồn kho, phân biệt sản phẩm và thống kê số liệu.
                 data.put("price", product.getPrice());
                 data.put("salePrice", product.getSalePrice());
                 data.put("stockQuantity", product.getQuantity()); // Use quantity field
@@ -449,7 +451,9 @@ public class SellerCategoryController {
                 Map<String, Object> data = new HashMap<>();
                 data.put("productId", product.getProductId());
                 data.put("name", product.getName());
-                data.put("sku", "P" + product.getProductId());
+                data.put("sku", "P" + product.getProductId()); //SKU là mã nội bộ dùng để quản lý sản phẩm trong kho.
+                                                                //Trong hệ thống của, SKU được tạo tự động từ productId bằng format ‘P + ID’.
+                                                                //SKU giúp admin dễ quản lý tồn kho, phân biệt sản phẩm và thống kê số liệu.
                 data.put("price", product.getPrice());
                 data.put("salePrice", product.getSalePrice());
                 data.put("stockQuantity", product.getQuantity());
@@ -508,7 +512,7 @@ public class SellerCategoryController {
         try {
             Users currentUser = (Users) session.getAttribute("user");
             if (currentUser == null) {
-                return ResponseEntity.status(401).body(Map.of("success", false, "error", "Not logged in"));
+                return ResponseEntity.status(401).body(Map.of("success", false, "error", "Not logged in")); // 401 Unauthorized
             }
             Long sellerId = currentUser.getUserId();
 
@@ -517,7 +521,7 @@ public class SellerCategoryController {
                     .orElseThrow(() -> new RuntimeException("Product does not exist"));
 
             if (!product.getSellerId().equals(sellerId)) {
-                return ResponseEntity.status(403).body(Map.of("success", false, "error", "No access permission"));
+                return ResponseEntity.status(403).body(Map.of("success", false, "error", "No access permission")); // 403 Forbidden
             }
 
             // Verify category exists
@@ -530,7 +534,7 @@ public class SellerCategoryController {
                 return ResponseEntity.ok(Map.of(
                         "success", true,
                         "message", "Product already exists in this category"
-                ));
+                )); //  200 OK with message
             }
 
             // Create new relationship
@@ -540,9 +544,9 @@ public class SellerCategoryController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Product assigned to category successfully"
-            ));
+            )); // 200 OK
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage())); // 500 Internal Server Error
         }
     }
 
@@ -556,9 +560,9 @@ public class SellerCategoryController {
         try {
             Users currentUser = (Users) session.getAttribute("user");
             if (currentUser == null) {
-                return ResponseEntity.status(401).body(Map.of("success", false, "error", "Not logged in"));
+                return ResponseEntity.status(401).body(Map.of("success", false, "error", "Not logged in")); // 401 Unauthorized
             }
-            Long sellerId = currentUser.getUserId();
+            Long sellerId = currentUser.getUserId(); // Get current seller ID
 
             // Verify product belongs to seller
             Products product = productsRepository.findById(productId)
@@ -595,6 +599,7 @@ public class SellerCategoryController {
     /**
      * Get all licenses for seller with assignment status for a specific category
      */
+    // API để lấy tất cả giấy phép cho người bán, tùy chọn với trạng thái chuyển nhượng cho một danh mục cụ thể
     @GetMapping("/api/licenses")
     @ResponseBody
     public ResponseEntity<?> getAllLicenses(
@@ -627,7 +632,7 @@ public class SellerCategoryController {
     }
 
     /**
-     * Get licenses assigned to a category
+     * Nhận giấy phép được chỉ định cho một danh mục
      */
     @GetMapping("/api/licenses/assigned")
     @ResponseBody

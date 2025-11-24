@@ -35,9 +35,9 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         try {
             AuthResponse response = authService.register(registerRequest);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response); // http 200 ok + Json responnse
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); // http 400 + Json error message
         }
     }
 

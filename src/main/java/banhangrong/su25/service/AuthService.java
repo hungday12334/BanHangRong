@@ -147,17 +147,18 @@ public class AuthService {
             throw new RuntimeException("Username already exists");
         }
 
+        // Tạo user mới
         Users newUser = new Users();
         newUser.setUsername(registerRequest.getUsername());
         newUser.setFullName(registerRequest.getFullName().trim());
         newUser.setEmail(registerRequest.getEmail());
-        newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword())); // Mã hoá mật khẩu
         newUser.setPhoneNumber(registerRequest.getPhoneNumber());
         newUser.setGender(gender);
         newUser.setBirthDate(registerRequest.getBirthDate());
         newUser.setUserType("CUSTOMER");
         newUser.setBalance(new BigDecimal("0.00")); // Khởi tạo balance = 0
-        newUser.setIsActive(true); // ⚠️ Account is inactive until email verification
+        newUser.setIsActive(true); //
         newUser.setIsEmailVerified(false);
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setUpdatedAt(LocalDateTime.now());
@@ -165,9 +166,9 @@ public class AuthService {
         usersRepository.save(newUser);
 
 
-        String jwtToken = jwtUtil.generateToken(newUser.getUsername());
+        String jwtToken = jwtUtil.generateToken(newUser.getUsername());  // thẻ ra vào hệ thống của user
 
-        return new AuthResponse(
+        return new AuthResponse( // trả về cho client
                 jwtToken,
                 newUser.getUserId(),
                 newUser.getUsername(),

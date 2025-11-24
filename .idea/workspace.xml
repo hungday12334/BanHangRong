@@ -5,17 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f415c2ee-1e4e-44b0-8ddd-d4c2a922092f" name="Changes" comment="add ui voucher">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomUserDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Config/CustomUserDetailsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AdminUserManagement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/CustomerProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/EmailVerificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerCategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerReviewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/Controller/SellerVoucherApiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/RegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/DTO/RegisterRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/CartService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/admin/user-creation.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/admin/user-creation.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/fragments/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile-edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/customer/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/UserProfileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/banhangrong/su25/service/UserProfileService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/login/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/category-management.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/seller/profile.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +51,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/hungday12334/BanHangRong.git&quot;,
-    &quot;accountId&quot;: &quot;43a70439-d014-4c57-b4ae-bf792be7baff&quot;
+    &quot;accountId&quot;: &quot;efd5b86f-5509-426a-a183-1d6d3c55d639&quot;
   }
 }</component>
   <component name="KubernetesApiPersistence">{}</component>
@@ -175,8 +177,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
       </set>
     </attachedChunks>
   </component>
@@ -203,6 +205,9 @@
       <workItem from="1762703072720" duration="25894000" />
       <workItem from="1763204160120" duration="863000" />
       <workItem from="1763248374147" duration="6862000" />
+      <workItem from="1763838547270" duration="2220000" />
+      <workItem from="1763869980119" duration="22953000" />
+      <workItem from="1763954969167" duration="763000" />
     </task>
     <task id="LOCAL-00001" summary="AdminIndex_Final1">
       <option name="closed" value="true" />
@@ -379,5 +384,13 @@
     <MESSAGE value="fix some bug in cart" />
     <MESSAGE value="add ui voucher" />
     <option name="LAST_COMMIT_MESSAGE" value="add ui voucher" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

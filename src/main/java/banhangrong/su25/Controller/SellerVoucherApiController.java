@@ -331,7 +331,7 @@ public class SellerVoucherApiController {
             }
 
             // Check if already expired
-            String initialStatus = request.status != null ? request.status : "inactive"; //request nó ở đâu?
+            String initialStatus = request.status != null ? request.status : "inactive"; // Use status from request or default to inactive
             if (request.endAt != null && LocalDateTime.now().isAfter(request.endAt)) {
                 initialStatus = "expired";
             }
@@ -508,7 +508,7 @@ public class SellerVoucherApiController {
     }
 
     /**
-     * Quick update voucher status (inline editing)
+     * Cập nhật nhanh trạng thái chứng từ (chỉnh sửa nội tuyến)
      */
     @PatchMapping("/{voucherId}/status")
     public ResponseEntity<?> updateVoucherStatus(@PathVariable Long voucherId,
@@ -648,7 +648,7 @@ public class SellerVoucherApiController {
     }
 
     /**
-     * Get voucher statistics
+     * Nhận số liệu thống kê phiếu giảm giá
      */
     @GetMapping("/{voucherId}/statistics")
     public ResponseEntity<?> getStatistics(@PathVariable Long voucherId) {

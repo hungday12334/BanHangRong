@@ -43,8 +43,8 @@ public class SellerProfileController {
     private String uploadDir;
 
     private Long getCurrentSellerId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Lấy thông tin người dùng đã xác thực
+        String username = auth.getName(); // Lấy tên đăng nhập của người dùng
 
         System.out.println("=== GETTING CURRENT SELLER ===");
         System.out.println("Authenticated username: " + username);
@@ -68,8 +68,8 @@ public class SellerProfileController {
     public String viewSellerProfile(Model model) {
         try {
             Long sellerId = getCurrentSellerId();
-            Users user = userProfileService.getSellerProfile(sellerId);
-            model.addAttribute("user", user);
+            Users user = userProfileService.getSellerProfile(sellerId); // Lấy thông tin người bán từ service
+            model.addAttribute("user", user); // Truyền thông tin người bán vào model
             model.addAttribute("sellerId", sellerId);
 
             System.out.println("=== PROFILE PAGE DATA ===");
@@ -120,7 +120,7 @@ public class SellerProfileController {
                 return "redirect:/seller/profile";
             }
 
-            // ===== VALIDATION: XSS Protection - Sanitize inputs =====
+            // ===== làm sạch dữ liệu đầu vào để ngăn chặn tấn công XSS (Cross-Site Scripting). =====
             String sanitizedPhone = sanitizeInput(phoneNumber);
             String sanitizedGender = sanitizeInput(gender);
 
@@ -195,7 +195,7 @@ public class SellerProfileController {
         return "redirect:/seller/profile";
     }
 
-    // ===== HELPER METHODS: VALIDATION & SANITIZATION =====
+    // ===== Hàm này dùng để làm sạch dữ liệu đầu vào, tránh tấn công XSS (Cross-Site Scripting) bằng cách thay thế hoặc vô hiệu hóa các ký tự có thể gây nguy hiểm. =====
 
     private String sanitizeInput(String input) {
         if (input == null) return "";
@@ -412,10 +412,10 @@ public class SellerProfileController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Current password is incorrect"));
             }
 
-            // ===== VALIDATION 3: Check password length =====
-            if (newPassword.length() < 6) {
-                return ResponseEntity.badRequest().body(Map.of("error", "New password must be at least 6 characters"));
-            }
+//            // ===== VALIDATION 3: Check password length =====
+//            if (newPassword.length() < 6) {
+//                return ResponseEntity.badRequest().body(Map.of("error", "New password must be at least 6 characters"));
+//            }
 
             // ===== VALIDATION 4: Check password maximum length =====
             if (newPassword.length() < 8) {

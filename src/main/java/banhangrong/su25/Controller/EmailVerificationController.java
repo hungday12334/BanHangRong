@@ -39,19 +39,19 @@ public class EmailVerificationController {
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
         String code = request.get("code");
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current authentication
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Please login first"));
-        }
+        } // Ensure user is authenticated
 
         Users user = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("success", false, "message", "User not found"));
-        }
+        } // Fetch user from database
 
         if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
             return ResponseEntity.ok(Map.of("success", false, "message", "Email is already verified"));
-        }
+        } // Check if email is already verified
 
         // Find valid token
         var tokenOpt = emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(user.getUserId());
@@ -59,7 +59,7 @@ public class EmailVerificationController {
             return ResponseEntity.ok(Map.of("success", false, "message", "No verification code found. Please request a new code."));
         }
 
-        EmailVerificationToken token = tokenOpt.get();
+        EmailVerificationToken token = tokenOpt.get(); // Get the token
 
         // Check if expired
         if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -73,7 +73,7 @@ public class EmailVerificationController {
 
         // Verify email and activate account
         user.setIsEmailVerified(true);
-        user.setIsActive(true); // ✅ Activate account - convert from temporary to permanent
+        user.setIsActive(true); //  Activate account - convert from temporary to permanent
         usersRepository.save(user);
 
         token.setIsUsed(true);
@@ -97,25 +97,25 @@ public class EmailVerificationController {
 
     @PostMapping("/resend-code")
     public ResponseEntity<?> resendCode() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current authentication
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Please login first"));
-        }
+        } // Ensure user is authenticated
 
         Users user = usersRepository.findByUsername(auth.getName()).orElse(null);
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("success", false, "message", "User not found"));
-        }
+        } // Fetch user from database
 
         if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
             return ResponseEntity.ok(Map.of("success", false, "message", "Email is already verified"));
-        }
+        } // Check if email is already verified
 
         // Check cooldown
         var existingTokenOpt = emailVerificationTokenRepository.findByUserIdAndIsUsedFalse(user.getUserId());
         if (existingTokenOpt.isPresent()) {
             EmailVerificationToken existingToken = existingTokenOpt.get();
-            long secondsSinceCreation = Duration.between(existingToken.getCreatedAt(), LocalDateTime.now()).getSeconds();
+            long secondsSinceCreation = Duration.between(existingToken.getCreatedAt(), LocalDateTime.now()).getSeconds(); // Kiểm tra thời gian kể từ khi tạo
 
             if (secondsSinceCreation < RESEND_COOLDOWN_SECONDS) {
                 long remainingSeconds = RESEND_COOLDOWN_SECONDS - secondsSinceCreation;

@@ -2,7 +2,7 @@ package banhangrong.su25.DTO;
 
 import java.time.LocalDate;
 
-public class RegisterRequest {
+public class RegisterRequest { // Đối tượng DTO cho yêu cầu đăng ký người dùng
     private String username;
     private String fullName;
     private String email;
