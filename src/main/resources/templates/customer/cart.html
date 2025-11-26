@@ -4,6 +4,9 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- CSRF tokens for AJAX -->
+	<meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -245,7 +248,7 @@
                 <div class="col center">
                     <div class="qty">
                         <input type="number" min="1" th:value="${it.quantity}"
-                            th:attr="data-product-id=${it.product.productId}" class="qty-input">
+                            th:attr="data-product-id=${it.product.productId}" th:max="${it.stock}" class="qty-input">
                     </div>
                     <div class="errmsg" th:attr="id=${'err-' + it.product.productId}"></div>
                 </div>
@@ -273,6 +276,7 @@
                 <a href="/customer/dashboard" class="btn">Continue Shopping</a>
                 <form method="post" action="/cart/checkout-demo" id="checkout-form" style="display:inline">
                     <input type="hidden" name="selectedProductIds" id="selected-product-ids" value="">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button class="btn primary" type="submit" id="checkout-btn">Pay with Balance</button>
                 </form>
             </div>
@@ -280,5 +284,6 @@
         </div>
     </div>
 </body>
+
 
 </html>
